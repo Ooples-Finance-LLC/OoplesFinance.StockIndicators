@@ -15,18 +15,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="30.0.1" />
-    <PackageReference Include="FluentAssertions" Version="6.8.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
-    <PackageReference Include="NSubstitute" Version="4.4.0" />
-    <PackageReference Include="coverlet.collector" Version="3.2.0">
+    <PackageReference Include="CsvHelper" Version="31.0.2" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.50" />
+    <PackageReference Include="OoplesFinance.StockIndicators" Version="1.0.53" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7">
+    <PackageReference Include="xunit" Version="2.7.0" />
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

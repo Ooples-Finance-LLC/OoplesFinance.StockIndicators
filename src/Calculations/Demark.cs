@@ -26,41 +26,41 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double high = highList[i];
-            double prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            double prevHigh5 = i >= 5 ? highList[i - 5] : 0;
-            double prevHigh6 = i >= 6 ? highList[i - 6] : 0;
-            double low = lowList[i];
-            double prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-            double prevLow5 = i >= 5 ? lowList[i - 5] : 0;
-            double prevLow6 = i >= 6 ? lowList[i - 6] : 0;
-            double prevClose7 = i >= 7 ? inputList[i - 7] : 0;
-            double prevClose8 = i >= 8 ? inputList[i - 8] : 0;
-            double prevRei1 = i >= 1 ? reiList[i - 1] : 0;
-            double prevRei2 = i >= 2 ? reiList[i - 2] : 0;
+            var high = highList[i];
+            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
+            var prevHigh5 = i >= 5 ? highList[i - 5] : 0;
+            var prevHigh6 = i >= 6 ? highList[i - 6] : 0;
+            var low = lowList[i];
+            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
+            var prevLow5 = i >= 5 ? lowList[i - 5] : 0;
+            var prevLow6 = i >= 6 ? lowList[i - 6] : 0;
+            var prevClose7 = i >= 7 ? inputList[i - 7] : 0;
+            var prevClose8 = i >= 8 ? inputList[i - 8] : 0;
+            var prevRei1 = i >= 1 ? reiList[i - 1] : 0;
+            var prevRei2 = i >= 2 ? reiList[i - 2] : 0;
             double n = (high >= prevLow5 || high >= prevLow6) && (low <= prevHigh5 || low <= prevHigh6) ? 0 : 1;
             double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
-            double s = high - prevHigh2 + (low - prevLow2);
+            var s = high - prevHigh2 + (low - prevLow2);
 
-            double s1 = n * m * s;
+            var s1 = n * m * s;
             s1List.AddRounded(s1);
 
-            double s2 = Math.Abs(s);
+            var s2 = Math.Abs(s);
             s2List.AddRounded(s2);
 
-            double s1Sum = s1List.TakeLastExt(length).Sum();
-            double s2Sum = s2List.TakeLastExt(length).Sum();
+            var s1Sum = s1List.TakeLastExt(length).Sum();
+            var s2Sum = s2List.TakeLastExt(length).Sum();
 
-            double rei = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
+            var rei = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
             reiList.AddRounded(rei);
 
             var signal = GetRsiSignal(rei - prevRei1, prevRei1 - prevRei2, rei, prevRei1, 100, -100);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Drei", reiList }
         };
@@ -85,38 +85,38 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentHigh = highList[i];
-            double currentLow = lowList[i];
-            double currentOpen = openList[i];
-            double currentClose = inputList[i];
-            double currentVolume = volumeList[i];
-            double prevClose = i >= 1 ? inputList[i - 1] : 0;
-            double prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
-            double prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
-            double gapup = prevClose != 0 ? (currentOpen - prevClose) / prevClose : 0;
-            double gapdown = currentOpen != 0 ? (prevClose - currentOpen) / currentOpen : 0;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var currentOpen = openList[i];
+            var currentClose = inputList[i];
+            var currentVolume = volumeList[i];
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
+            var prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
+            var gapup = prevClose != 0 ? (currentOpen - prevClose) / prevClose : 0;
+            var gapdown = currentOpen != 0 ? (prevClose - currentOpen) / currentOpen : 0;
 
-            double bp = gapup > 0.15 ? (currentHigh - prevClose + currentClose - currentLow) * currentVolume :
+            var bp = gapup > 0.15 ? (currentHigh - prevClose + currentClose - currentLow) * currentVolume :
                 currentClose > currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
             bpList.AddRounded(bp);
 
-            double sp = gapdown > 0.15 ? (prevClose - currentLow + currentHigh - currentClose) * currentVolume :
+            var sp = gapdown > 0.15 ? (prevClose - currentLow + currentHigh - currentClose) * currentVolume :
                 currentClose < currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
             spList.AddRounded(sp);
 
-            double bpSum = bpList.TakeLastExt(length).Sum();
-            double spSum = spList.TakeLastExt(length).Sum();
+            var bpSum = bpList.TakeLastExt(length).Sum();
+            var spSum = spList.TakeLastExt(length).Sum();
 
-            double pressureRatio = bpSum - spSum != 0 ? MinOrMax(100 * bpSum / (bpSum - spSum), 100, 0) : 0;
+            var pressureRatio = bpSum - spSum != 0 ? MinOrMax(100 * bpSum / (bpSum - spSum), 100, 0) : 0;
             pressureRatioList.AddRounded(pressureRatio);
 
             var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Dpr", pressureRatioList }
         };
@@ -141,37 +141,37 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentHigh = highList[i];
-            double currentLow = lowList[i];
-            double currentOpen = openList[i];
-            double currentClose = inputList[i];
-            double currentVolume = volumeList[i];
-            double delta = currentClose - currentOpen;
-            double trueRange = currentHigh - currentLow;
-            double ratio = trueRange != 0 ? delta / trueRange : 0;
-            double prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
-            double prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var currentOpen = openList[i];
+            var currentClose = inputList[i];
+            var currentVolume = volumeList[i];
+            var delta = currentClose - currentOpen;
+            var trueRange = currentHigh - currentLow;
+            var ratio = trueRange != 0 ? delta / trueRange : 0;
+            var prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
+            var prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
 
-            double buyingPressure = delta > 0 ? ratio * currentVolume : 0;
+            var buyingPressure = delta > 0 ? ratio * currentVolume : 0;
             bpList.AddRounded(buyingPressure);
 
-            double sellingPressure = delta < 0 ? ratio * currentVolume : 0;
+            var sellingPressure = delta < 0 ? ratio * currentVolume : 0;
             spList.AddRounded(sellingPressure);
 
-            double bpSum = bpList.TakeLastExt(length).Sum();
-            double spSum = spList.TakeLastExt(length).Sum();
-            double denom = bpSum + Math.Abs(spSum);
+            var bpSum = bpList.TakeLastExt(length).Sum();
+            var spSum = spList.TakeLastExt(length).Sum();
+            var denom = bpSum + Math.Abs(spSum);
 
-            double pressureRatio = denom != 0 ? MinOrMax(100 * bpSum / denom, 100, 0) : 50;
+            var pressureRatio = denom != 0 ? MinOrMax(100 * bpSum / denom, 100, 0) : 50;
             pressureRatioList.AddRounded(pressureRatio);
 
             var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Dpr", pressureRatioList }
         };
@@ -195,29 +195,29 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
+            var currentValue = inputList[i];
 
             double uCount = 0, dCount = 0;
-            for (int j = 0; j < length1; j++)
+            for (var j = 0; j < length1; j++)
             {
-                double value = i >= j ? inputList[i - j] : 0;
-                double prevValue = i >= j + length2 ? inputList[i - (j + length2)] : 0;
+                var value = i >= j ? inputList[i - j] : 0;
+                var prevValue = i >= j + length2 ? inputList[i - (j + length2)] : 0;
 
                 uCount += value > prevValue ? 1 : 0;
                 dCount += value < prevValue ? 1 : 0;
             }
 
             double drp = dCount == length1 ? 1 : uCount == length1 ? -1 : 0;
-            double drpPrice = drp != 0 ? currentValue : 0;
+            var drpPrice = drp != 0 ? currentValue : 0;
             drpPriceList.AddRounded(drpPrice);
 
             var signal = GetConditionSignal(drp > 0 || uCount > dCount, drp < 0 || dCount > uCount);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Drp", drpPriceList }
         };
@@ -240,29 +240,29 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
+            var currentValue = inputList[i];
 
             double uCount = 0, dCount = 0;
-            for (int j = 0; j < length; j++)
+            for (var j = 0; j < length; j++)
             {
-                double value = i >= j ? inputList[i - j] : 0;
-                double prevValue = i >= j + length ? inputList[i - (j + length)] : 0;
+                var value = i >= j ? inputList[i - j] : 0;
+                var prevValue = i >= j + length ? inputList[i - (j + length)] : 0;
 
                 uCount += value > prevValue ? 1 : 0;
                 dCount += value < prevValue ? 1 : 0;
             }
 
             double drp = dCount == length ? 1 : uCount == length ? -1 : 0;
-            double drpPrice = drp != 0 ? currentValue : 0;
+            var drpPrice = drp != 0 ? currentValue : 0;
             drpPriceList.AddRounded(drpPrice);
 
             var signal = GetConditionSignal(drp > 0 || uCount > dCount, drp < 0 || dCount > uCount);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Dsi", drpPriceList }
         };
@@ -288,37 +288,37 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentLow = lowList[i];
-            double currentHigh = highList[i];
-            double prevHigh = i >= 1 ? highList[i - 1] : 0;
-            double prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var currentLow = lowList[i];
+            var currentHigh = highList[i];
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
 
-            double dMax = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
+            var dMax = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
             dMaxList.AddRounded(dMax);
 
-            double dMin = currentLow < prevLow ? prevLow - currentLow : 0;
+            var dMin = currentLow < prevLow ? prevLow - currentLow : 0;
             dMinList.AddRounded(dMin);
         }
 
         var maxMaList = GetMovingAverageList(stockData, maType, length, dMaxList);
         var minMaList = GetMovingAverageList(stockData, maType, length, dMinList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double maxMa = maxMaList[i];
-            double minMa = minMaList[i];
-            double prevDemarker1 = i >= 1 ? demarkerList[i - 1] : 0;
-            double prevDemarker2 = i >= 2 ? demarkerList[i - 2] : 0;
+            var maxMa = maxMaList[i];
+            var minMa = minMaList[i];
+            var prevDemarker1 = i >= 1 ? demarkerList[i - 1] : 0;
+            var prevDemarker2 = i >= 2 ? demarkerList[i - 2] : 0;
 
-            double demarker = maxMa + minMa != 0 ? MinOrMax(maxMa / (maxMa + minMa) * 100, 100, 0) : 0;
+            var demarker = maxMa + minMa != 0 ? MinOrMax(maxMa / (maxMa + minMa) * 100, 100, 0) : 0;
             demarkerList.AddRounded(demarker);
 
             var signal = GetRsiSignal(demarker - prevDemarker1, prevDemarker1 - prevDemarker2, demarker, prevDemarker1, 70, 30);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Dm", demarkerList }
         };

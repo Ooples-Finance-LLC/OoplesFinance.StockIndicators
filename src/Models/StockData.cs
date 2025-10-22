@@ -55,7 +55,7 @@ public class StockData : IStockData
         Count = (OpenPrices.Count + HighPrices.Count + LowPrices.Count + ClosePrices.Count + Volumes.Count + Dates.Count) / 6 == ClosePrices.Count ? ClosePrices.Count : 0;
 
         TickerDataList = new List<TickerData>();
-        for (int i = 0; i < Count; i++)
+        for (var i = 0; i < Count; i++)
         {
             var open = OpenPrices[i];
             var high = HighPrices[i];
@@ -94,7 +94,7 @@ public class StockData : IStockData
         SignalsList = new List<Signal>();
         InputName = inputName;
 
-        for (int i = 0; i < tickerDataList.Count(); i++)
+        for (var i = 0; i < tickerDataList.Count(); i++)
         {
             var ticker = tickerDataList.ElementAt(i);
 

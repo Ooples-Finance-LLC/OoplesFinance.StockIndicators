@@ -14,7 +14,7 @@ public class GlobalTestData
         if (typeof(T) == typeof(TickerData))
         {
             csvReader.Context.TypeConverterCache.AddConverter<DateTime>(new CustomDateConverter());
-            result = new(csvReader.GetRecords<T>());
+            result = new List<T>(csvReader.GetRecords<T>());
         }
         else
         {
@@ -23,7 +23,7 @@ public class GlobalTestData
                 csvReader.Context.TypeConverterCache.AddConverter<double>(new CustomDoubleConverter());
             }
             
-            result = new();
+            result = new List<T>();
             var count = 0;
             while (csvReader.Read())
             {

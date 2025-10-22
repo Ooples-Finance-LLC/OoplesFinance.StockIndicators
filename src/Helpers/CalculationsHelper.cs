@@ -536,7 +536,7 @@ public static class CalculationsHelper
         List<double> openList;
         List<double> closeList;
         List<double> volumeList;
-        List<double> inputList = inputName switch
+        var inputList = inputName switch
         {
             InputName.Close => stockData.ClosePrices,
             InputName.Low => stockData.LowPrices,
@@ -556,7 +556,7 @@ public static class CalculationsHelper
 
         if (inputList.Count > 0)
         {
-            double sum = inputList.Sum();
+            var sum = inputList.Sum();
 
             if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
             {
@@ -615,7 +615,7 @@ public static class CalculationsHelper
 
         if (inputList.Count > 0)
         {
-            double sum = inputList.Sum();
+            var sum = inputList.Sum();
 
             if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
             {
@@ -658,7 +658,7 @@ public static class CalculationsHelper
         List<double> volumeList = new();
 
         var groupedDatesParent = stockData.TickerDataList.GroupBy(x => x.Date.Date);
-        for (int i = 0; i < groupedDatesParent.Count(); i++)
+        for (var i = 0; i < groupedDatesParent.Count(); i++)
         {
             var parent = groupedDatesParent.ElementAt(i);
 
@@ -673,7 +673,7 @@ public static class CalculationsHelper
                 _ => parent.GroupBy(x => x.Date.Day),
             };
 
-            for (int j = 0; j < groupedDatesChild.Count(); j++)
+            for (var j = 0; j < groupedDatesChild.Count(); j++)
             {
                 var groupedDates = groupedDatesChild.ElementAt(j);
 
@@ -709,8 +709,8 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static double CalculateEMA(double currentValue, double prevEma, int length = 14)
     {
-        double k = MinOrMax((double)2 / (length + 1), 0.99, 0.01);
-        double ema = (currentValue * k) + (prevEma * (1 - k));
+        var k = MinOrMax((double)2 / (length + 1), 0.99, 0.01);
+        var ema = (currentValue * k) + (prevEma * (1 - k));
 
         return ema;
     }
@@ -750,17 +750,17 @@ public static class CalculationsHelper
         List<double> lowestValuesList = new();
         List<double> inputList = new();
 
-        for (int i = 0; i < inputs.Count; i++)
+        for (var i = 0; i < inputs.Count; i++)
         {
-            double input = inputs[i];
+            var input = inputs[i];
             inputList.AddRounded(input);
 
             var list = inputList.TakeLastExt(Math.Max(length, 2)).ToList();
 
-            double highestValue = list.Max();
+            var highestValue = list.Max();
             highestValuesList.AddRounded(highestValue);
 
-            double lowestValue = list.Min();
+            var lowestValue = list.Min();
             lowestValuesList.AddRounded(lowestValue);
         }
 
@@ -782,18 +782,18 @@ public static class CalculationsHelper
         List<double> tempLowList = new();
         var count = highList.Count == lowList.Count ? highList.Count : 0;
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
-            double high = highList[i];
+            var high = highList[i];
             tempHighList.AddRounded(high);
 
-            double low = lowList[i];
+            var low = lowList[i];
             tempLowList.AddRounded(low);
 
-            double highest = tempHighList.TakeLastExt(length).Max();
+            var highest = tempHighList.TakeLastExt(length).Max();
             highestList.AddRounded(highest);
 
-            double lowest = tempLowList.TakeLastExt(length).Min();
+            var lowest = tempLowList.TakeLastExt(length).Min();
             lowestList.AddRounded(lowest);
         }
 
@@ -841,7 +841,7 @@ public static class CalculationsHelper
 
         if (source is ICollection<T> collection)
         {
-            foreach (T item in source.Skip(Math.Max(0, collection.Count - count)))
+            foreach (var item in source.Skip(Math.Max(0, collection.Count - count)))
                 yield return item;
 
             yield break;
@@ -849,7 +849,7 @@ public static class CalculationsHelper
 
         if (source is IReadOnlyCollection<T> collection1)
         {
-            foreach (T item in source.Skip(Math.Max(0, collection1.Count - count)))
+            foreach (var item in source.Skip(Math.Max(0, collection1.Count - count)))
                 yield return item;
 
             yield break;
@@ -857,7 +857,7 @@ public static class CalculationsHelper
 
         Queue<T> result = new();
 
-        foreach (T item in source)
+        foreach (var item in source)
         {
             if (result.Count == count)
                 result.Dequeue();
@@ -879,7 +879,7 @@ public static class CalculationsHelper
     {
         var list = sequence.OrderBy(i => i).ToList();
         var n = list.Count;
-        int rank = n > 0 ? (int)Math.Ceiling(percentile / 100 * n) : 0;
+        var rank = n > 0 ? (int)Math.Ceiling(percentile / 100 * n) : 0;
 
         return list[Math.Max(rank - 1, 0)];
     }
@@ -896,8 +896,8 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static double RescaleValue(double value, double oldMax, double oldMin, double newMax, double newMin, bool isReversed = false)
     {
-        double d = isReversed ? (oldMax - value) : (value - oldMin);
-        double dRatio = oldMax - oldMin != 0 ? d / (oldMax - oldMin) : 0;
+        var d = isReversed ? (oldMax - value) : (value - oldMin);
+        var dRatio = oldMax - oldMin != 0 ? d / (oldMax - oldMin) : 0;
 
         return (dRatio * (newMax - newMin)) + newMin;
     }

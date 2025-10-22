@@ -23,22 +23,22 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentHigh = highList[i];
-            double currentLow = lowList[i];
-            double currentClose = inputList[i];
-            double prevTypicalPrice1 = i >= 1 ? tpList[i - 1] : 0;
-            double prevTypicalPrice2 = i >= 2 ? tpList[i - 2] : 0;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var currentClose = inputList[i];
+            var prevTypicalPrice1 = i >= 1 ? tpList[i - 1] : 0;
+            var prevTypicalPrice2 = i >= 2 ? tpList[i - 2] : 0;
 
-            double typicalPrice = (currentHigh + currentLow + currentClose) / 3;
+            var typicalPrice = (currentHigh + currentLow + currentClose) / 3;
             tpList.AddRounded(typicalPrice);
 
-            Signal signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
+            var signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tp", tpList }
         };
@@ -60,21 +60,21 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentLow = lowList[i];
-            double currentHigh = highList[i];
-            double prevMedianPrice1 = i >= 1 ? medianPriceList[i - 1] : 0;
-            double prevMedianPrice2 = i >= 2 ? medianPriceList[i - 2] : 0;
+            var currentLow = lowList[i];
+            var currentHigh = highList[i];
+            var prevMedianPrice1 = i >= 1 ? medianPriceList[i - 1] : 0;
+            var prevMedianPrice2 = i >= 2 ? medianPriceList[i - 2] : 0;
 
-            double medianPrice = (currentHigh + currentLow) / 2;
+            var medianPrice = (currentHigh + currentLow) / 2;
             medianPriceList.AddRounded(medianPrice);
 
-            Signal signal = GetCompareSignal(medianPrice - prevMedianPrice1, prevMedianPrice1 - prevMedianPrice2);
+            var signal = GetCompareSignal(medianPrice - prevMedianPrice1, prevMedianPrice1 - prevMedianPrice2);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "MedianPrice", medianPriceList }
         };
@@ -96,21 +96,21 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (closeList, _, _, openList, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentOpen = openList[i];
-            double currentClose = closeList[i];
-            double prevAvgPrice1 = i >= 1 ? avgPriceList[i - 1] : 0;
-            double prevAvgPrice2 = i >= 2 ? avgPriceList[i - 2] : 0;
+            var currentOpen = openList[i];
+            var currentClose = closeList[i];
+            var prevAvgPrice1 = i >= 1 ? avgPriceList[i - 1] : 0;
+            var prevAvgPrice2 = i >= 2 ? avgPriceList[i - 2] : 0;
 
-            double avgPrice = (currentOpen + currentClose) / 2;
+            var avgPrice = (currentOpen + currentClose) / 2;
             avgPriceList.AddRounded(avgPrice);
 
-            Signal signal = GetCompareSignal(avgPrice - prevAvgPrice1, prevAvgPrice1 - prevAvgPrice2);
+            var signal = GetCompareSignal(avgPrice - prevAvgPrice1, prevAvgPrice1 - prevAvgPrice2);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "AveragePrice", avgPriceList }
         };
@@ -132,23 +132,23 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentHigh = highList[i];
-            double currentLow = lowList[i];
-            double currentClose = inputList[i];
-            double currentOpen = openList[i];
-            double prevTypicalPrice1 = i >= 1 ? fullTpList[i - 1] : 0;
-            double prevTypicalPrice2 = i >= 2 ? fullTpList[i - 2] : 0;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var currentClose = inputList[i];
+            var currentOpen = openList[i];
+            var prevTypicalPrice1 = i >= 1 ? fullTpList[i - 1] : 0;
+            var prevTypicalPrice2 = i >= 2 ? fullTpList[i - 2] : 0;
 
-            double typicalPrice = (currentHigh + currentLow + currentClose + currentOpen) / 4;
+            var typicalPrice = (currentHigh + currentLow + currentClose + currentOpen) / 4;
             fullTpList.AddRounded(typicalPrice);
 
-            Signal signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
+            var signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "FullTp", fullTpList }
         };
@@ -170,22 +170,22 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentHigh = highList[i];
-            double currentLow = lowList[i];
-            double currentClose = inputList[i];
-            double prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var currentClose = inputList[i];
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
-            double prevWeightedClose = weightedCloseList.LastOrDefault();
-            double weightedClose = (currentHigh + currentLow + (currentClose * 2)) / 4;
+            var prevWeightedClose = weightedCloseList.LastOrDefault();
+            var weightedClose = (currentHigh + currentLow + (currentClose * 2)) / 4;
             weightedCloseList.AddRounded(weightedClose);
 
-            Signal signal = GetCompareSignal(currentClose - weightedClose, prevClose - prevWeightedClose);
+            var signal = GetCompareSignal(currentClose - weightedClose, prevClose - prevWeightedClose);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "WeightedClose", weightedCloseList }
         };
@@ -209,22 +209,22 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double highest = highestList[i];
-            double lowest = lowestList[i];
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var highest = highestList[i];
+            var lowest = lowestList[i];
 
-            double prevMidPoint = midpointList.LastOrDefault();
-            double midpoint = (highest + lowest) / 2;
+            var prevMidPoint = midpointList.LastOrDefault();
+            var midpoint = (highest + lowest) / 2;
             midpointList.AddRounded(midpoint);
 
             var signal = GetCompareSignal(currentValue - midpoint, prevValue - prevMidPoint);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "HCLC2", midpointList }
         };
@@ -248,22 +248,22 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double highest = highestList[i];
-            double lowest = lowestList[i];
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var highest = highestList[i];
+            var lowest = lowestList[i];
 
-            double prevMidPrice = midpriceList.LastOrDefault();
-            double midPrice = (highest + lowest) / 2;
+            var prevMidPrice = midpriceList.LastOrDefault();
+            var midPrice = (highest + lowest) / 2;
             midpriceList.AddRounded(midPrice);
 
             var signal = GetCompareSignal(currentValue - midPrice, prevValue - prevMidPrice);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "HHLL2", midpriceList }
         };

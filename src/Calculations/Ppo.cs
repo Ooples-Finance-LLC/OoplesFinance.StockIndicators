@@ -32,30 +32,30 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double fastEma = fastEmaList[i];
-            double slowEma = slowEmaList[i];
+            var fastEma = fastEmaList[i];
+            var slowEma = slowEmaList[i];
 
-            double ppo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
+            var ppo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
             ppoList.AddRounded(ppo);
         }
 
         var ppoSignalList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo = ppoList[i];
-            double ppoSignalLine = ppoSignalList[i];
+            var ppo = ppoList[i];
+            var ppoSignalLine = ppoSignalList[i];
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalList },
@@ -88,30 +88,30 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, volumeList);
         var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, volumeList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double fastEma = fastEmaList[i];
-            double slowEma = slowEmaList[i];
+            var fastEma = fastEmaList[i];
+            var slowEma = slowEmaList[i];
 
-            double pvo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
+            var pvo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
             pvoList.AddRounded(pvo);
         }
 
         var pvoSignalList = GetMovingAverageList(stockData, maType, signalLength, pvoList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double pvo = pvoList[i];
-            double pvoSignalLine = pvoSignalList[i];
+            var pvo = pvoList[i];
+            var pvoSignalLine = pvoSignalList[i];
 
-            double prevPvoHistogram = pvoHistogramList.LastOrDefault();
-            double pvoHistogram = pvo - pvoSignalLine;
+            var prevPvoHistogram = pvoHistogramList.LastOrDefault();
+            var pvoHistogram = pvo - pvoSignalLine;
             pvoHistogramList.AddRounded(pvoHistogram);
 
             var signal = GetCompareSignal(pvoHistogram, prevPvoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Pvo", pvoList },
             { "Signal", pvoSignalList },
@@ -158,29 +158,29 @@ public static partial class Calculations
         var ema14List = GetMovingAverageList(stockData, maType, length5, inputList);
         var ema16List = GetMovingAverageList(stockData, maType, length6, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema5 = ema5List[i];
-            double ema8 = ema8List[i];
-            double ema10 = ema10List[i];
-            double ema14 = ema14List[i];
-            double ema16 = ema16List[i];
-            double ema17 = ema17List[i];
-            double macd1 = ema17 - ema14;
-            double macd2 = ema17 - ema8;
-            double macd3 = ema10 - ema16;
-            double macd4 = ema5 - ema10;
+            var ema5 = ema5List[i];
+            var ema8 = ema8List[i];
+            var ema10 = ema10List[i];
+            var ema14 = ema14List[i];
+            var ema16 = ema16List[i];
+            var ema17 = ema17List[i];
+            var macd1 = ema17 - ema14;
+            var macd2 = ema17 - ema8;
+            var macd3 = ema10 - ema16;
+            var macd4 = ema5 - ema10;
 
-            double ppo1 = ema14 != 0 ? macd1 / ema14 * 100 : 0;
+            var ppo1 = ema14 != 0 ? macd1 / ema14 * 100 : 0;
             ppo1List.AddRounded(ppo1);
 
-            double ppo2 = ema8 != 0 ? macd2 / ema8 * 100 : 0;
+            var ppo2 = ema8 != 0 ? macd2 / ema8 * 100 : 0;
             ppo2List.AddRounded(ppo2);
 
-            double ppo3 = ema16 != 0 ? macd3 / ema16 * 100 : 0;
+            var ppo3 = ema16 != 0 ? macd3 / ema16 * 100 : 0;
             ppo3List.AddRounded(ppo3);
 
-            double ppo4 = ema10 != 0 ? macd4 / ema10 * 100 : 0;
+            var ppo4 = ema10 != 0 ? macd4 / ema10 * 100 : 0;
             ppo4List.AddRounded(ppo4);
         }
 
@@ -188,40 +188,40 @@ public static partial class Calculations
         var ppo2SignalLineList = GetMovingAverageList(stockData, maType, length1, ppo2List); //-V3056
         var ppo3SignalLineList = GetMovingAverageList(stockData, maType, length1, ppo3List);
         var ppo4SignalLineList = GetMovingAverageList(stockData, maType, length1, ppo4List);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo1 = ppo1List[i];
-            double ppo1SignalLine = ppo1SignalLineList[i];
-            double ppo2 = ppo2List[i];
-            double ppo2SignalLine = ppo2SignalLineList[i];
-            double ppo3 = ppo3List[i];
-            double ppo3SignalLine = ppo3SignalLineList[i];
-            double ppo4 = ppo4List[i];
-            double ppo4SignalLine = ppo4SignalLineList[i];
-            double ppo1Histogram = ppo1 - ppo1SignalLine;
-            double ppoBlue = blueMult * ppo1Histogram;
+            var ppo1 = ppo1List[i];
+            var ppo1SignalLine = ppo1SignalLineList[i];
+            var ppo2 = ppo2List[i];
+            var ppo2SignalLine = ppo2SignalLineList[i];
+            var ppo3 = ppo3List[i];
+            var ppo3SignalLine = ppo3SignalLineList[i];
+            var ppo4 = ppo4List[i];
+            var ppo4SignalLine = ppo4SignalLineList[i];
+            var ppo1Histogram = ppo1 - ppo1SignalLine;
+            var ppoBlue = blueMult * ppo1Histogram;
 
-            double prevPpo2Histogram = ppo2HistogramList.LastOrDefault();
-            double ppo2Histogram = ppo2 - ppo2SignalLine;
+            var prevPpo2Histogram = ppo2HistogramList.LastOrDefault();
+            var ppo2Histogram = ppo2 - ppo2SignalLine;
             ppo2HistogramList.AddRounded(ppo2Histogram);
 
-            double ppo3Histogram = ppo3 - ppo3SignalLine;
-            double ppoYellow = yellowMult * ppo3Histogram;
+            var ppo3Histogram = ppo3 - ppo3SignalLine;
+            var ppoYellow = yellowMult * ppo3Histogram;
 
-            double prevPpo4Histogram = ppo4HistogramList.LastOrDefault();
-            double ppo4Histogram = ppo4 - ppo4SignalLine;
+            var prevPpo4Histogram = ppo4HistogramList.LastOrDefault();
+            var ppo4Histogram = ppo4 - ppo4SignalLine;
             ppo4HistogramList.AddRounded(ppo4Histogram);
 
-            double maxPpo = Math.Max(ppoBlue, Math.Max(ppoYellow, Math.Max(ppo2Histogram, ppo4Histogram)));
-            double minPpo = Math.Min(ppoBlue, Math.Min(ppoYellow, Math.Min(ppo2Histogram, ppo4Histogram)));
-            double currentPpo = (ppoBlue + ppoYellow + ppo2Histogram + ppo4Histogram) / 4;
-            double ppoStochastic = maxPpo - minPpo != 0 ? MinOrMax((currentPpo - minPpo) / (maxPpo - minPpo) * 100, 100, 0) : 0;
+            var maxPpo = Math.Max(ppoBlue, Math.Max(ppoYellow, Math.Max(ppo2Histogram, ppo4Histogram)));
+            var minPpo = Math.Min(ppoBlue, Math.Min(ppoYellow, Math.Min(ppo2Histogram, ppo4Histogram)));
+            var currentPpo = (ppoBlue + ppoYellow + ppo2Histogram + ppo4Histogram) / 4;
+            var ppoStochastic = maxPpo - minPpo != 0 ? MinOrMax((currentPpo - minPpo) / (maxPpo - minPpo) * 100, 100, 0) : 0;
 
             var signal = GetCompareSignal(ppo4Histogram - ppo2Histogram, prevPpo4Histogram - prevPpo2Histogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo1", ppo4List },
             { "Signal1", ppo4SignalLineList },
@@ -259,28 +259,28 @@ public static partial class Calculations
         var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);
         var wellesWilderLowMovingAvgList = GetMovingAverageList(stockData, maType, length, lowList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double hi = wellesWilderHighMovingAvgList[i];
-            double lo = wellesWilderLowMovingAvgList[i];
-            double mi = typicalPriceZeroLagEmaList[i];
-            double macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
+            var hi = wellesWilderHighMovingAvgList[i];
+            var lo = wellesWilderLowMovingAvgList[i];
+            var mi = typicalPriceZeroLagEmaList[i];
+            var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
 
-            double ppo = mi > hi && hi != 0 ? macd / hi * 100 : mi < lo && lo != 0 ? macd / lo * 100 : 0;
+            var ppo = mi > hi && hi != 0 ? macd / hi * 100 : mi < lo && lo != 0 ? macd / lo * 100 : 0;
             ppoList.AddRounded(ppo);
 
-            double ppoSignalLine = ppoList.TakeLastExt(signalLength).Average();
+            var ppoSignalLine = ppoList.TakeLastExt(signalLength).Average();
             ppoSignalLineList.AddRounded(ppoSignalLine);
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalLineList },
@@ -313,31 +313,31 @@ public static partial class Calculations
         var i1List = macdLeaderList.OutputValues["I1"];
         var i2List = macdLeaderList.OutputValues["I2"];
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double i1 = i1List[i];
-            double i2 = i2List[i];
-            double macd = i1 - i2;
+            var i1 = i1List[i];
+            var i2 = i2List[i];
+            var macd = i1 - i2;
 
-            double ppo = i2 != 0 ? macd / i2 * 100 : 0;
+            var ppo = i2 != 0 ? macd / i2 * 100 : 0;
             ppoList.AddRounded(ppo);
         }
 
         var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo = ppoList[i];
-            double ppoSignalLine = ppoSignalLineList[i];
+            var ppo = ppoList[i];
+            var ppoSignalLine = ppoSignalLineList[i];
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalLineList },
@@ -370,31 +370,31 @@ public static partial class Calculations
         var mob1List = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var mob2List = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double mob1 = mob1List[i];
-            double mob2 = mob2List[i];
-            double tfsMob = mob1 - mob2;
+            var mob1 = mob1List[i];
+            var mob2 = mob2List[i];
+            var tfsMob = mob1 - mob2;
 
-            double ppo = mob2 != 0 ? tfsMob / mob2 * 100 : 0;
+            var ppo = mob2 != 0 ? tfsMob / mob2 * 100 : 0;
             ppoList.AddRounded(ppo);
         }
 
         var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo = ppoList[i];
-            double ppoSignalLine = ppoSignalLineList[i];
+            var ppo = ppoList[i];
+            var ppoSignalLine = ppoSignalLineList[i];
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalLineList },
@@ -428,41 +428,41 @@ public static partial class Calculations
         var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
         var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double mao = emaOpenList[i];
-            double mac = emaCloseList[i];
-            double macd = mac - mao;
-            double macdMirror = mao - mac;
+            var mao = emaOpenList[i];
+            var mac = emaCloseList[i];
+            var macd = mac - mao;
+            var macdMirror = mao - mac;
 
-            double ppo = mao != 0 ? macd / mao * 100 : 0;
+            var ppo = mao != 0 ? macd / mao * 100 : 0;
             ppoList.AddRounded(ppo);
 
-            double ppoMirror = mac != 0 ? macdMirror / mac * 100 : 0;
+            var ppoMirror = mac != 0 ? macdMirror / mac * 100 : 0;
             ppoMirrorList.AddRounded(ppoMirror);
         }
 
         var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
         var ppoMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoMirrorList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo = ppoList[i];
-            double ppoSignalLine = ppoSignalLineList[i];
-            double ppoMirror = ppoMirrorList[i];
-            double ppoMirrorSignalLine = ppoMirrorSignalLineList[i];
+            var ppo = ppoList[i];
+            var ppoSignalLine = ppoSignalLineList[i];
+            var ppoMirror = ppoMirrorList[i];
+            var ppoMirrorSignalLine = ppoMirrorSignalLineList[i];
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
-            double ppoMirrorHistogram = ppoMirror - ppoMirrorSignalLine;
+            var ppoMirrorHistogram = ppoMirror - ppoMirrorSignalLine;
             ppoMirrorHistogramList.AddRounded(ppoMirrorHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalLineList },
@@ -498,29 +498,29 @@ public static partial class Calculations
         var ssList = dinapoliMacdList.OutputValues["SlowS"];
         var rList = dinapoliMacdList.OutputValues["Macd"];
 
-        double spAlpha = 2 / (1 + sp);
+        var spAlpha = 2 / (1 + sp);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ss = ssList[i];
-            double r = rList[i];
+            var ss = ssList[i];
+            var r = rList[i];
 
-            double ppo = ss != 0 ? 100 * r / ss : 0;
+            var ppo = ss != 0 ? 100 * r / ss : 0;
             ppoList.AddRounded(ppo);
 
-            double prevS = sList.LastOrDefault();
-            double s = prevS + (spAlpha * (ppo - prevS));
+            var prevS = sList.LastOrDefault();
+            var s = prevS + (spAlpha * (ppo - prevS));
             sList.AddRounded(s);
 
-            double prevH = hList.LastOrDefault();
-            double h = ppo - s;
+            var prevH = hList.LastOrDefault();
+            var h = ppo - s;
             hList.AddRounded(h);
 
             var signal = GetCompareSignal(h, prevH);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", sList },
@@ -553,31 +553,31 @@ public static partial class Calculations
         var period1EmaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var period2EmaList = GetMovingAverageList(stockData, maType, length2, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema1 = period1EmaList[i];
-            double ema2 = period2EmaList[i];
-            double macd = ema1 - ema2;
+            var ema1 = period1EmaList[i];
+            var ema2 = period2EmaList[i];
+            var macd = ema1 - ema2;
 
-            double ppo = ema2 != 0 ? macd / ema2 * 100 : 0;
+            var ppo = ema2 != 0 ? macd / ema2 * 100 : 0;
             ppoList.AddRounded(ppo);
         }
 
         var ppoSignalLineList = GetMovingAverageList(stockData, maType, length3, ppoList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ppo = ppoList[i];
-            double ppoSignalLine = ppoSignalLineList[i];
+            var ppo = ppoList[i];
+            var ppoSignalLine = ppoSignalLineList[i];
 
-            double prevPpoHistogram = ppoHistogramList.LastOrDefault();
-            double ppoHistogram = ppo - ppoSignalLine;
+            var prevPpoHistogram = ppoHistogramList.LastOrDefault();
+            var ppoHistogram = ppo - ppoSignalLine;
             ppoHistogramList.AddRounded(ppoHistogram);
 
             var signal = GetCompareSignal(ppoHistogram, prevPpoHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ppo", ppoList },
             { "Signal", ppoSignalLineList },

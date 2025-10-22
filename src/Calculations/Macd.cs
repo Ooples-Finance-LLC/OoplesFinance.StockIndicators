@@ -32,30 +32,30 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, movingAvgType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, movingAvgType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double fastEma = fastEmaList[i];
-            double slowEma = slowEmaList[i];
+            var fastEma = fastEmaList[i];
+            var slowEma = slowEmaList[i];
 
-            double macd = fastEma - slowEma;
+            var macd = fastEma - slowEma;
             macdList.AddRounded(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, macdList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macd = macdList[i];
-            double macdSignalLine = macdSignalLineList[i];
+            var macd = macdList[i];
+            var macdSignalLine = macdSignalLineList[i];
 
-            double prevMacdHistogram = macdHistogramList.LastOrDefault();
-            double macdHistogram = macd - macdSignalLine;
+            var prevMacdHistogram = macdHistogramList.LastOrDefault();
+            var macdHistogram = macd - macdSignalLine;
             macdHistogramList.AddRounded(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdList },
             { "Signal", macdSignalLineList },
@@ -102,25 +102,25 @@ public static partial class Calculations
         var ema14List = GetMovingAverageList(stockData, maType, length5, inputList);
         var ema16List = GetMovingAverageList(stockData, maType, length6, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema5 = ema5List[i];
-            double ema8 = ema8List[i];
-            double ema10 = ema10List[i];
-            double ema14 = ema14List[i];
-            double ema16 = ema16List[i];
-            double ema17 = ema17List[i];
+            var ema5 = ema5List[i];
+            var ema8 = ema8List[i];
+            var ema10 = ema10List[i];
+            var ema14 = ema14List[i];
+            var ema16 = ema16List[i];
+            var ema17 = ema17List[i];
 
-            double macd1 = ema17 - ema14;
+            var macd1 = ema17 - ema14;
             macd1List.AddRounded(macd1);
 
-            double macd2 = ema17 - ema8;
+            var macd2 = ema17 - ema8;
             macd2List.AddRounded(macd2);
 
-            double macd3 = ema10 - ema16;
+            var macd3 = ema10 - ema16;
             macd3List.AddRounded(macd3);
 
-            double macd4 = ema5 - ema10;
+            var macd4 = ema5 - ema10;
             macd4List.AddRounded(macd4);
         }
 
@@ -128,35 +128,35 @@ public static partial class Calculations
         var macd2SignalLineList = GetMovingAverageList(stockData, maType, length1, macd2List); //-V3056
         var macd3SignalLineList = GetMovingAverageList(stockData, maType, length1, macd3List);
         var macd4SignalLineList = GetMovingAverageList(stockData, maType, length1, macd4List);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macd1 = macd1List[i];
-            double macd1SignalLine = macd1SignalLineList[i];
-            double macd2 = macd2List[i];
-            double macd2SignalLine = macd2SignalLineList[i];
-            double macd3 = macd3List[i];
-            double macd3SignalLine = macd3SignalLineList[i];
-            double macd4 = macd4List[i];
-            double macd4SignalLine = macd4SignalLineList[i];
-            double macd1Histogram = macd1 - macd1SignalLine;
-            double macdBlue = blueMult * macd1Histogram;
+            var macd1 = macd1List[i];
+            var macd1SignalLine = macd1SignalLineList[i];
+            var macd2 = macd2List[i];
+            var macd2SignalLine = macd2SignalLineList[i];
+            var macd3 = macd3List[i];
+            var macd3SignalLine = macd3SignalLineList[i];
+            var macd4 = macd4List[i];
+            var macd4SignalLine = macd4SignalLineList[i];
+            var macd1Histogram = macd1 - macd1SignalLine;
+            var macdBlue = blueMult * macd1Histogram;
 
-            double prevMacd2Histogram = macd2HistogramList.LastOrDefault();
-            double macd2Histogram = macd2 - macd2SignalLine;
+            var prevMacd2Histogram = macd2HistogramList.LastOrDefault();
+            var macd2Histogram = macd2 - macd2SignalLine;
             macd2HistogramList.AddRounded(macd2Histogram);
 
-            double macd3Histogram = macd3 - macd3SignalLine;
-            double macdYellow = yellowMult * macd3Histogram;
+            var macd3Histogram = macd3 - macd3SignalLine;
+            var macdYellow = yellowMult * macd3Histogram;
 
-            double prevMacd4Histogram = macd4HistogramList.LastOrDefault();
-            double macd4Histogram = macd4 - macd4SignalLine;
+            var prevMacd4Histogram = macd4HistogramList.LastOrDefault();
+            var macd4Histogram = macd4 - macd4SignalLine;
             macd4HistogramList.AddRounded(macd4Histogram);
 
             var signal = GetCompareSignal(macd4Histogram - macd2Histogram, prevMacd4Histogram - prevMacd2Histogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd1", macd4List },
             { "Signal1", macd4SignalLineList },
@@ -194,27 +194,27 @@ public static partial class Calculations
         var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);
         var wellesWilderLowMovingAvgList = GetMovingAverageList(stockData, maType, length, lowList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double hi = wellesWilderHighMovingAvgList[i];
-            double lo = wellesWilderLowMovingAvgList[i];
-            double mi = typicalPriceZeroLagEmaList[i];
+            var hi = wellesWilderHighMovingAvgList[i];
+            var lo = wellesWilderLowMovingAvgList[i];
+            var mi = typicalPriceZeroLagEmaList[i];
 
-            double macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
+            var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
             macdList.AddRounded(macd);
 
-            double macdSignalLine = macdList.TakeLastExt(signalLength).Average();
+            var macdSignalLine = macdList.TakeLastExt(signalLength).Average();
             macdSignalLineList.AddRounded(macdSignalLine);
 
-            double prevMacdHistogram = macdHistogramList.LastOrDefault();
-            double macdHistogram = macd - macdSignalLine;
+            var prevMacdHistogram = macdHistogramList.LastOrDefault();
+            var macdHistogram = macd - macdSignalLine;
             macdHistogramList.AddRounded(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdList },
             { "Signal", macdSignalLineList },
@@ -245,20 +245,20 @@ public static partial class Calculations
         var pkList = CalculateKasePeakOscillatorV1(stockData, length1, length2).OutputValues["Pk"];
         var pkSignalList = GetMovingAverageList(stockData, maType, length3, pkList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double pk = pkList[i];
-            double pkSma = pkSignalList[i];
+            var pk = pkList[i];
+            var pkSma = pkSignalList[i];
 
-            double prevKcd = kcdList.LastOrDefault();
-            double kcd = pk - pkSma;
+            var prevKcd = kcdList.LastOrDefault();
+            var kcd = pk - pkSma;
             kcdList.AddRounded(kcd);
 
             var signal = GetCompareSignal(kcd, prevKcd);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Kcd", kcdList }
         };
@@ -293,53 +293,53 @@ public static partial class Calculations
         var emaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var ema26List = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double ema12 = emaList[i];
-            double ema26 = ema26List[i];
+            var currentValue = inputList[i];
+            var ema12 = emaList[i];
+            var ema26 = ema26List[i];
 
-            double diff12 = currentValue - ema12;
+            var diff12 = currentValue - ema12;
             diff12List.AddRounded(diff12);
 
-            double diff26 = currentValue - ema26;
+            var diff26 = currentValue - ema26;
             diff26List.AddRounded(diff26);
         }
 
         var diff12EmaList = GetMovingAverageList(stockData, maType, fastLength, diff12List);
         var diff26EmaList = GetMovingAverageList(stockData, maType, slowLength, diff26List);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema12 = emaList[i];
-            double ema26 = ema26List[i];
-            double diff12Ema = diff12EmaList[i];
-            double diff26Ema = diff26EmaList[i];
+            var ema12 = emaList[i];
+            var ema26 = ema26List[i];
+            var diff12Ema = diff12EmaList[i];
+            var diff26Ema = diff26EmaList[i];
 
-            double i1 = ema12 + diff12Ema;
+            var i1 = ema12 + diff12Ema;
             i1List.AddRounded(i1);
 
-            double i2 = ema26 + diff26Ema;
+            var i2 = ema26 + diff26Ema;
             i2List.AddRounded(i2);
 
-            double macd = i1 - i2;
+            var macd = i1 - i2;
             macdList.AddRounded(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macd = macdList[i];
-            double macdSignalLine = macdSignalLineList[i];
+            var macd = macdList[i];
+            var macdSignalLine = macdSignalLineList[i];
 
-            double prevMacdHistogram = macdHistogramList.LastOrDefault();
-            double macdHistogram = macd - macdSignalLine;
+            var prevMacdHistogram = macdHistogramList.LastOrDefault();
+            var macdHistogram = macd - macdSignalLine;
             macdHistogramList.AddRounded(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdList },
             { "I1", i1List },
@@ -372,30 +372,30 @@ public static partial class Calculations
         var mob1List = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var mob2List = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double mob1 = mob1List[i];
-            double mob2 = mob2List[i];
+            var mob1 = mob1List[i];
+            var mob2 = mob2List[i];
 
-            double tfsMob = mob1 - mob2;
+            var tfsMob = mob1 - mob2;
             tfsMobList.AddRounded(tfsMob);
         }
 
         var tfsMobSignalLineList = GetMovingAverageList(stockData, maType, signalLength, tfsMobList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double tfsMob = tfsMobList[i];
-            double tfsMobSignalLine = tfsMobSignalLineList[i];
+            var tfsMob = tfsMobList[i];
+            var tfsMobSignalLine = tfsMobSignalLineList[i];
 
-            double prevTfsMobHistogram = tfsMobHistogramList.LastOrDefault();
-            double tfsMobHistogram = tfsMob - tfsMobSignalLine;
+            var prevTfsMobHistogram = tfsMobHistogramList.LastOrDefault();
+            var tfsMobHistogram = tfsMob - tfsMobSignalLine;
             tfsMobHistogramList.AddRounded(tfsMobHistogram);
 
             var signal = GetCompareSignal(tfsMobHistogram, prevTfsMobHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "TfsMob", tfsMobList },
             { "Signal", tfsMobSignalLineList },
@@ -438,52 +438,52 @@ public static partial class Calculations
         var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
         var zScoreList = CalculateZDistanceFromVwapIndicator(stockData, length: length1).CustomValuesList;
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double stdev = stdDevList[i];
-            double fastMa = fastSmaList[i];
-            double slowMa = slowSmaList[i];
-            double zscore = zScoreList[i];
+            var stdev = stdDevList[i];
+            var fastMa = fastSmaList[i];
+            var slowMa = slowSmaList[i];
+            var zscore = zScoreList[i];
 
-            double macd = fastMa - slowMa;
-            double maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
+            var macd = fastMa - slowMa;
+            var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
             macztList.AddRounded(maczt);
 
-            double prevL0 = i >= 1 ? l0List.LastOrDefault() : maczt;
-            double l0 = ((1 - gamma) * maczt) + (gamma * prevL0);
+            var prevL0 = i >= 1 ? l0List.LastOrDefault() : maczt;
+            var l0 = ((1 - gamma) * maczt) + (gamma * prevL0);
             l0List.AddRounded(l0);
 
-            double prevL1 = i >= 1 ? l1List.LastOrDefault() : maczt;
-            double l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
+            var prevL1 = i >= 1 ? l1List.LastOrDefault() : maczt;
+            var l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
             l1List.AddRounded(l1);
 
-            double prevL2 = i >= 1 ? l2List.LastOrDefault() : maczt;
-            double l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
+            var prevL2 = i >= 1 ? l2List.LastOrDefault() : maczt;
+            var l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
             l2List.AddRounded(l2);
 
-            double prevL3 = i >= 1 ? l3List.LastOrDefault() : maczt;
-            double l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
+            var prevL3 = i >= 1 ? l3List.LastOrDefault() : maczt;
+            var l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
             l3List.AddRounded(l3);
 
-            double macz = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
+            var macz = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
             maczList.AddRounded(macz);
         }
 
         var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macz = maczList[i];
-            double maczSignal = maczSignalList[i];
+            var macz = maczList[i];
+            var maczSignal = maczSignalList[i];
 
-            double prevHist = histList.LastOrDefault();
-            double hist = macz - maczSignal;
+            var prevHist = histList.LastOrDefault();
+            var hist = macz - maczSignal;
             histList.AddRounded(hist);
 
             var signal = GetCompareSignal(hist, prevHist);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macz", maczList },
             { "Signal", maczSignalList },
@@ -521,35 +521,35 @@ public static partial class Calculations
         var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
         var wilderMovingAvgList = GetMovingAverageList(stockData, MovingAvgType.WildersSmoothingMethod, length, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double stdev = stdDevList[i];
-            double wima = wilderMovingAvgList[i];
-            double fastMa = fastSmaList[i];
-            double slowMa = slowSmaList[i];
-            double zscore = stdev != 0 ? (currentValue - wima) / stdev : 0;
+            var currentValue = inputList[i];
+            var stdev = stdDevList[i];
+            var wima = wilderMovingAvgList[i];
+            var fastMa = fastSmaList[i];
+            var slowMa = slowSmaList[i];
+            var zscore = stdev != 0 ? (currentValue - wima) / stdev : 0;
 
-            double macd = fastMa - slowMa;
-            double macz = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
+            var macd = fastMa - slowMa;
+            var macz = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
             maczList.AddRounded(macz);
         }
 
         var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macz = maczList[i];
-            double maczSignal = maczSignalList[i];
+            var macz = maczList[i];
+            var maczSignal = maczSignalList[i];
 
-            double prevHist = histList.LastOrDefault();
-            double hist = macz - maczSignal;
+            var prevHist = histList.LastOrDefault();
+            var hist = macz - maczSignal;
             histList.AddRounded(hist);
 
             var signal = GetCompareSignal(hist, prevHist);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macz", maczList },
             { "Signal", maczSignalList },
@@ -583,39 +583,39 @@ public static partial class Calculations
         var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
         var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double mao = emaOpenList[i];
-            double mac = emaCloseList[i];
+            var mao = emaOpenList[i];
+            var mac = emaCloseList[i];
 
-            double macd = mac - mao;
+            var macd = mac - mao;
             macdList.AddRounded(macd);
 
-            double macdMirror = mao - mac;
+            var macdMirror = mao - mac;
             macdMirrorList.AddRounded(macdMirror);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
         var macdMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdMirrorList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macd = macdList[i];
-            double macdMirror = macdMirrorList[i];
-            double macdSignalLine = macdSignalLineList[i];
-            double macdMirrorSignalLine = macdMirrorSignalLineList[i];
+            var macd = macdList[i];
+            var macdMirror = macdMirrorList[i];
+            var macdSignalLine = macdSignalLineList[i];
+            var macdMirrorSignalLine = macdMirrorSignalLineList[i];
 
-            double prevMacdHistogram = macdHistogramList.LastOrDefault();
-            double macdHistogram = macd - macdSignalLine;
+            var prevMacdHistogram = macdHistogramList.LastOrDefault();
+            var macdHistogram = macd - macdSignalLine;
             macdHistogramList.AddRounded(macdHistogram);
 
-            double macdMirrorHistogram = macdMirror - macdMirrorSignalLine;
+            var macdMirrorHistogram = macdMirror - macdMirrorSignalLine;
             macdMirrorHistogramList.AddRounded(macdMirrorHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdList },
             { "Signal", macdSignalLineList },
@@ -650,38 +650,38 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        double scAlpha = 2 / (1 + sc);
-        double lcAlpha = 2 / (1 + lc);
-        double spAlpha = 2 / (1 + sp);
+        var scAlpha = 2 / (1 + sc);
+        var lcAlpha = 2 / (1 + lc);
+        var spAlpha = 2 / (1 + sp);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
+            var currentValue = inputList[i];
 
-            double prevFs = fsList.LastOrDefault();
-            double fs = prevFs + (scAlpha * (currentValue - prevFs));
+            var prevFs = fsList.LastOrDefault();
+            var fs = prevFs + (scAlpha * (currentValue - prevFs));
             fsList.AddRounded(fs);
 
-            double prevSs = ssList.LastOrDefault();
-            double ss = prevSs + (lcAlpha * (currentValue - prevSs));
+            var prevSs = ssList.LastOrDefault();
+            var ss = prevSs + (lcAlpha * (currentValue - prevSs));
             ssList.AddRounded(ss);
 
-            double r = fs - ss;
+            var r = fs - ss;
             rList.AddRounded(r);
 
-            double prevS = sList.LastOrDefault();
-            double s = prevS + (spAlpha * (r - prevS));
+            var prevS = sList.LastOrDefault();
+            var s = prevS + (spAlpha * (r - prevS));
             sList.AddRounded(s);
 
-            double prevH = hList.LastOrDefault();
-            double h = r - s;
+            var prevH = hList.LastOrDefault();
+            var h = r - s;
             hList.AddRounded(h);
 
             var signal = GetCompareSignal(h, prevH);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "FastS", fsList },
             { "SlowS", ssList },
@@ -720,39 +720,39 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double fastEma = fastEmaList[i];
-            double slowEma = slowEmaList[i];
-            double hh = highestList[i];
-            double ll = lowestList[i];
-            double range = hh - ll;
+            var fastEma = fastEmaList[i];
+            var slowEma = slowEmaList[i];
+            var hh = highestList[i];
+            var ll = lowestList[i];
+            var range = hh - ll;
 
-            double fastStochastic = range != 0 ? (fastEma - ll) / range : 0;
+            var fastStochastic = range != 0 ? (fastEma - ll) / range : 0;
             fastStochasticList.AddRounded(fastStochastic);
 
-            double slowStochastic = range != 0 ? (slowEma - ll) / range : 0;
+            var slowStochastic = range != 0 ? (slowEma - ll) / range : 0;
             slowStochasticList.AddRounded(slowStochastic);
 
-            double macdStochastic = 10 * (fastStochastic - slowStochastic);
+            var macdStochastic = 10 * (fastStochastic - slowStochastic);
             macdStochasticList.AddRounded(macdStochastic);
         }
 
         var macdStochasticSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdStochasticList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macdStochastic = macdStochasticList[i];
-            double macdStochasticSignalLine = macdStochasticSignalLineList[i];
+            var macdStochastic = macdStochasticList[i];
+            var macdStochasticSignalLine = macdStochasticSignalLineList[i];
 
-            double prevMacdHistogram = macdStochasticHistogramList.LastOrDefault();
-            double macdHistogram = macdStochastic - macdStochasticSignalLine;
+            var prevMacdHistogram = macdStochasticHistogramList.LastOrDefault();
+            var macdHistogram = macdStochastic - macdStochasticSignalLine;
             macdStochasticHistogramList.AddRounded(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdStochasticList },
             { "Signal", macdStochasticSignalLineList },
@@ -785,30 +785,30 @@ public static partial class Calculations
         var period1EmaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var period2EmaList = GetMovingAverageList(stockData, maType, length2, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema1 = period1EmaList[i];
-            double ema2 = period2EmaList[i];
+            var ema1 = period1EmaList[i];
+            var ema2 = period2EmaList[i];
 
-            double macd = ema1 - ema2;
+            var macd = ema1 - ema2;
             macdList.AddRounded(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, macdList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double macd = macdList[i];
-            double macdSignalLine = macdSignalLineList[i];
+            var macd = macdList[i];
+            var macdSignalLine = macdSignalLineList[i];
 
-            double prevMacdHistogram = macdHistogramList.LastOrDefault();
-            double macdHistogram = macd - macdSignalLine;
+            var prevMacdHistogram = macdHistogramList.LastOrDefault();
+            var macdHistogram = macd - macdSignalLine;
             macdHistogramList.AddRounded(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Macd", macdList },
             { "Signal", macdSignalLineList },

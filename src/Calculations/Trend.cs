@@ -25,25 +25,25 @@ public static partial class Calculations
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double highest = highestList[i];
-            double lowest = lowestList[i];
-            double prevHighest = i >= length ? highestList[i - length] : 0;
-            double prevLowest = i >= length ? lowestList[i - length] : 0;
-            double buyPower = highest - prevLowest;
-            double sellPower = prevHighest - lowest;
-            double prevTtf1 = i >= 1 ? ttfList[i - 1] : 0;
-            double prevTtf2 = i >= 2 ? ttfList[i - 2] : 0;
+            var highest = highestList[i];
+            var lowest = lowestList[i];
+            var prevHighest = i >= length ? highestList[i - length] : 0;
+            var prevLowest = i >= length ? lowestList[i - length] : 0;
+            var buyPower = highest - prevLowest;
+            var sellPower = prevHighest - lowest;
+            var prevTtf1 = i >= 1 ? ttfList[i - 1] : 0;
+            var prevTtf2 = i >= 2 ? ttfList[i - 2] : 0;
 
-            double ttf = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
+            var ttf = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
             ttfList.AddRounded(ttf);
 
             var signal = GetRsiSignal(ttf - prevTtf1, prevTtf1 - prevTtf2, ttf, prevTtf1, 100, -100);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ttf", ttfList }
         };
@@ -75,11 +75,11 @@ public static partial class Calculations
 
         var maList = GetMovingAverageList(stockData, maType, smoothLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double prevMa1 = i >= 1 ? maList[i - 1] : 0;
-            double prevMa2 = i >= 2 ? maList[i - 2] : 0;
-            double diff = (prevMa1 - prevMa2) / mult;
+            var prevMa1 = i >= 1 ? maList[i - 1] : 0;
+            var prevMa2 = i >= 2 ? maList[i - 2] : 0;
+            var diff = (prevMa1 - prevMa2) / mult;
 
             double ctrP = diff > threshold ? 1 : 0;
             ctrPList.AddRounded(ctrP);
@@ -87,26 +87,26 @@ public static partial class Calculations
             double ctrM = diff < -threshold ? 1 : 0;
             ctrMList.AddRounded(ctrM);
 
-            double ctrPSum = ctrPList.TakeLastExt(length).Sum();
-            double ctrMSum = ctrMList.TakeLastExt(length).Sum();
+            var ctrPSum = ctrPList.TakeLastExt(length).Sum();
+            var ctrMSum = ctrMList.TakeLastExt(length).Sum();
 
-            double tpr = length != 0 ? Math.Abs(100 * (ctrPSum - ctrMSum) / length) : 0;
+            var tpr = length != 0 ? Math.Abs(100 * (ctrPSum - ctrMSum) / length) : 0;
             tprList.AddRounded(tpr);
         }
 
         var tprMaList = GetMovingAverageList(stockData, maType, smoothLength, tprList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double tpr = tprList[i];
-            double tprMa = tprMaList[i];
-            double prevTpr = i >= 1 ? tprList[i - 1] : 0;
-            double prevTprMa = i >= 1 ? tprMaList[i - 1] : 0;
+            var tpr = tprList[i];
+            var tprMa = tprMaList[i];
+            var prevTpr = i >= 1 ? tprList[i - 1] : 0;
+            var prevTprMa = i >= 1 ? tprMaList[i - 1] : 0;
 
             var signal = GetCompareSignal(tpr - tprMa, prevTpr - prevTprMa);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tpr", tprList }
         };
@@ -131,21 +131,21 @@ public static partial class Calculations
 
         var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double dev = stdDevList[i] * 2;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var dev = stdDevList[i] * 2;
 
-            double prevA = i >= 1 ? aList[i - 1] : currentValue;
-            double a = i < length ? currentValue : currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
+            var prevA = i >= 1 ? aList[i - 1] : currentValue;
+            var a = i < length ? currentValue : currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
             aList.AddRounded(a);
 
             var signal = GetCompareSignal(currentValue - a, prevValue - prevA);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ts", aList }
         };
@@ -175,14 +175,14 @@ public static partial class Calculations
         var (inputList, highList, _, _, _) = GetInputValuesList(stockData);
         var (highestList, _) = GetMaxAndMinValuesList(highList, length);
 
-        double sc = (double)2 / (length + 1);
+        var sc = (double)2 / (length + 1);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double prevHighest = i >= 1 ? highestList[i - 1] : 0;
-            double currentHigh = highList[i];
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevHighest = i >= 1 ? highestList[i - 1] : 0;
+            var currentHigh = highList[i];
 
             double a = currentValue > prevValue ? 1 : 0;
             aList.AddRounded(a);
@@ -190,31 +190,31 @@ public static partial class Calculations
             double h = currentHigh > prevHighest ? 1 : 0;
             hList.AddRounded(h);
 
-            double aCount = aList.Sum();
+            var aCount = aList.Sum();
             aCountList.AddRounded(aCount);
 
-            double hCount = hList.Sum();
+            var hCount = hList.Sum();
             hCountList.AddRounded(hCount);
 
-            double haRatio = aCount != 0 ? hCount / aCount : 0;
-            double prevTei = teiList.LastOrDefault();
-            double tei = prevTei + (sc * (haRatio - prevTei));
+            var haRatio = aCount != 0 ? hCount / aCount : 0;
+            var prevTei = teiList.LastOrDefault();
+            var tei = prevTei + (sc * (haRatio - prevTei));
             teiList.AddRounded(tei);
         }
 
         var teiSignalList = GetMovingAverageList(stockData, maType, length, teiList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double tei = teiList[i];
-            double teiSignal = teiSignalList[i];
-            double prevTei = i >= 1 ? teiList[i - 1] : 0;
-            double prevTeiSignal = i >= 1 ? teiSignalList[i - 1] : 0;
+            var tei = teiList[i];
+            var teiSignal = teiSignalList[i];
+            var prevTei = i >= 1 ? teiList[i - 1] : 0;
+            var prevTeiSignal = i >= 1 ? teiSignalList[i - 1] : 0;
 
             var signal = GetCompareSignal(tei - teiSignal, prevTei - prevTeiSignal);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tei", teiList },
             { "Signal", teiSignalList }
@@ -242,31 +242,31 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length1);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevB = i >= 1 ? bList[i - 1] : currentValue;
-            double highest = i >= 1 ? highestList[i - 1] : 0;
-            double lowest = i >= 1 ? lowestList[i - 1] : 0;
+            var currentValue = inputList[i];
+            var prevB = i >= 1 ? bList[i - 1] : currentValue;
+            var highest = i >= 1 ? highestList[i - 1] : 0;
+            var lowest = i >= 1 ? lowestList[i - 1] : 0;
             double a = currentValue > highest || currentValue < lowest ? 1 : 0;
 
-            double b = (a * currentValue) + ((1 - a) * prevB);
+            var b = (a * currentValue) + ((1 - a) * prevB);
             bList.AddRounded(b);
         }
 
         var bEmaList = GetMovingAverageList(stockData, maType, length2, bList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double bEma = bEmaList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double prevBEma = i >= 1 ? bEmaList[i - 1] : 0;
+            var currentValue = inputList[i];
+            var bEma = bEmaList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevBEma = i >= 1 ? bEmaList[i - 1] : 0;
 
             var signal = GetCompareSignal(currentValue - bEma, prevValue - prevBEma);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tif", bEmaList }
         };
@@ -295,31 +295,31 @@ public static partial class Calculations
         var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var (highestList, lowestList) = GetMaxAndMinValuesList(smaList, length2);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double highest = highestList[i];
-            double lowest = lowestList[i];
+            var currentValue = inputList[i];
+            var highest = highestList[i];
+            var lowest = lowestList[i];
 
-            double tai = currentValue != 0 ? (highest - lowest) * 100 / currentValue : 0;
+            var tai = currentValue != 0 ? (highest - lowest) * 100 / currentValue : 0;
             taiList.AddRounded(tai);
         }
 
         var taiMaList = GetMovingAverageList(stockData, maType, length2, taiList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double currentSma = smaList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double prevSma = i >= 1 ? smaList[i - 1] : 0;
-            double tai = taiList[i];
-            double taiSma = taiMaList[i];
+            var currentValue = inputList[i];
+            var currentSma = smaList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevSma = i >= 1 ? smaList[i - 1] : 0;
+            var tai = taiList[i];
+            var taiSma = taiMaList[i];
 
             var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, tai, taiSma);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tai", taiList },
             { "Signal", taiMaList }
@@ -351,20 +351,20 @@ public static partial class Calculations
         var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
         var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double tai = taiList[i];
-            double fastMa = fastMaList[i];
-            double slowMa = slowMaList[i];
-            double taiMa = taiSmaList[i];
-            double prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
-            double prevSlowMa = i >= 1 ? slowMaList[i - 1] : 0;
+            var tai = taiList[i];
+            var fastMa = fastMaList[i];
+            var slowMa = slowMaList[i];
+            var taiMa = taiSmaList[i];
+            var prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
+            var prevSlowMa = i >= 1 ? slowMaList[i - 1] : 0;
 
             var signal = GetVolatilitySignal(fastMa - slowMa, prevFastMa - prevSlowMa, tai, taiMa);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tai", taiList },
             { "Signal", taiSmaList }
@@ -399,47 +399,47 @@ public static partial class Calculations
         stockData.CustomValuesList = atrList;
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double mpEma = emaList[i];
-            double trEma = atrList[i];
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var mpEma = emaList[i];
+            var trEma = atrList[i];
 
-            double ad = currentValue > prevValue ? mpEma + (trEma / 2) : currentValue < prevValue ? mpEma - (trEma / 2) : mpEma;
+            var ad = currentValue > prevValue ? mpEma + (trEma / 2) : currentValue < prevValue ? mpEma - (trEma / 2) : mpEma;
             adList.AddRounded(ad);
         }
 
         var admList = GetMovingAverageList(stockData, maType, length, adList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double adm = admList[i];
-            double prevAdm = i >= 1 ? admList[i - 1] : 0;
-            double mpEma = emaList[i];
-            double prevMpEma = i >= 1 ? emaList[i - 1] : 0;
-            double prevHigh = i >= 2 ? highList[i - 2] : 0;
-            double prevLow = i >= 2 ? lowList[i - 2] : 0;
-            double stdDev = stdDevList[i];
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var adm = admList[i];
+            var prevAdm = i >= 1 ? admList[i - 1] : 0;
+            var mpEma = emaList[i];
+            var prevMpEma = i >= 1 ? emaList[i - 1] : 0;
+            var prevHigh = i >= 2 ? highList[i - 2] : 0;
+            var prevLow = i >= 2 ? lowList[i - 2] : 0;
+            var stdDev = stdDevList[i];
 
-            double prevTrndDn = trndDnList.LastOrDefault();
-            double trndDn = adm < mpEma && prevAdm > prevMpEma ? prevHigh : currentValue < prevValue ? currentValue + (stdDev * atrMult) : prevTrndDn;
+            var prevTrndDn = trndDnList.LastOrDefault();
+            var trndDn = adm < mpEma && prevAdm > prevMpEma ? prevHigh : currentValue < prevValue ? currentValue + (stdDev * atrMult) : prevTrndDn;
             trndDnList.AddRounded(trndDn);
 
-            double prevTrndUp = trndUpList.LastOrDefault();
-            double trndUp = adm > mpEma && prevAdm < prevMpEma ? prevLow : currentValue > prevValue ? currentValue - (stdDev * atrMult) : prevTrndUp;
+            var prevTrndUp = trndUpList.LastOrDefault();
+            var trndUp = adm > mpEma && prevAdm < prevMpEma ? prevLow : currentValue > prevValue ? currentValue - (stdDev * atrMult) : prevTrndUp;
             trndUpList.AddRounded(trndUp);
 
-            double prevTrndr = trndrList.LastOrDefault();
-            double trndr = adm < mpEma ? trndDn : adm > mpEma ? trndUp : prevTrndr;
+            var prevTrndr = trndrList.LastOrDefault();
+            var trndr = adm < mpEma ? trndDn : adm > mpEma ? trndUp : prevTrndr;
             trndrList.AddRounded(trndr);
 
             var signal = GetCompareSignal(currentValue - trndr, prevValue - prevTrndr);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "TrendUp", trndUpList },
             { "TrendDn", trndDnList },
@@ -469,25 +469,25 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        int halfLength = MinOrMax((int)Math.Ceiling((double)length1 / 2));
+        var halfLength = MinOrMax((int)Math.Ceiling((double)length1 / 2));
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i] * 1000;
+            var currentValue = inputList[i] * 1000;
             srcList.AddRounded(currentValue);
         }
 
         var ema1List = GetMovingAverageList(stockData, maType, halfLength, srcList);
         var ema2List = GetMovingAverageList(stockData, maType, halfLength, ema1List);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ema1 = ema1List[i];
-            double ema2 = ema2List[i];
-            double prevEma1 = i >= 1 ? ema1List[i - 1] : 0;
-            double prevEma2 = i >= 1 ? ema2List[i - 1] : 0;
-            double ema1Diff = ema1 - prevEma1;
-            double ema2Diff = ema2 - prevEma2;
-            double emaDiffAvg = (ema1Diff + ema2Diff) / 2;
+            var ema1 = ema1List[i];
+            var ema2 = ema2List[i];
+            var prevEma1 = i >= 1 ? ema1List[i - 1] : 0;
+            var prevEma2 = i >= 1 ? ema2List[i - 1] : 0;
+            var ema1Diff = ema1 - prevEma1;
+            var ema2Diff = ema2 - prevEma2;
+            var emaDiffAvg = (ema1Diff + ema2Diff) / 2;
 
             double tdf;
             try
@@ -499,19 +499,19 @@ public static partial class Calculations
                 tdf = double.MaxValue;
             }
 
-            double absTdf = Math.Abs(tdf);
+            var absTdf = Math.Abs(tdf);
             absTdfList.AddRounded(absTdf);
 
-            double tdfh = absTdfList.TakeLastExt(length2).Max();
-            double prevTdfi = tdfiList.LastOrDefault();
-            double tdfi = tdfh != 0 ? tdf / tdfh : 0;
+            var tdfh = absTdfList.TakeLastExt(length2).Max();
+            var prevTdfi = tdfiList.LastOrDefault();
+            var tdfi = tdfh != 0 ? tdf / tdfh : 0;
             tdfiList.AddRounded(tdfi);
 
             var signal = GetCompareSignal(tdfi, prevTdfi);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tdfi", tdfiList }
         };
@@ -541,29 +541,29 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double currentSma = smaList[i];
-            double prevTii1 = i >= 1 ? tiiList[i - 1] : 0;
-            double prevTii2 = i >= 2 ? tiiList[i - 2] : 0;
+            var currentValue = inputList[i];
+            var currentSma = smaList[i];
+            var prevTii1 = i >= 1 ? tiiList[i - 1] : 0;
+            var prevTii2 = i >= 2 ? tiiList[i - 2] : 0;
 
-            double deviationUp = currentValue > currentSma ? currentValue - currentSma : 0;
+            var deviationUp = currentValue > currentSma ? currentValue - currentSma : 0;
             deviationUpList.AddRounded(deviationUp);
 
-            double deviationDown = currentValue < currentSma ? currentSma - currentValue : 0;
+            var deviationDown = currentValue < currentSma ? currentSma - currentValue : 0;
             deviationDownList.AddRounded(deviationDown);
 
-            double sdPlus = deviationUpList.TakeLastExt(fastLength).Sum();
-            double sdMinus = deviationDownList.TakeLastExt(fastLength).Sum();
-            double tii = sdPlus + sdMinus != 0 ? sdPlus / (sdPlus + sdMinus) * 100 : 0;
+            var sdPlus = deviationUpList.TakeLastExt(fastLength).Sum();
+            var sdMinus = deviationDownList.TakeLastExt(fastLength).Sum();
+            var tii = sdPlus + sdMinus != 0 ? sdPlus / (sdPlus + sdMinus) * 100 : 0;
             tiiList.AddRounded(tii);
 
             var signal = GetRsiSignal(tii - prevTii1, prevTii1 - prevTii2, tii, prevTii1, 80, 20);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tii", tiiList }
         };
@@ -594,43 +594,43 @@ public static partial class Calculations
         var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
         var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double ema = emaList[i];
-            double prevEma = i >= 1 ? emaList[i - 1] : 0;
-            double highest = i >= 1 ? highestList[i - 1] : 0;
-            double lowest = i >= 1 ? lowestList[i - 1] : 0;
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentValue = inputList[i];
+            var ema = emaList[i];
+            var prevEma = i >= 1 ? emaList[i - 1] : 0;
+            var highest = i >= 1 ? highestList[i - 1] : 0;
+            var lowest = i >= 1 ? lowestList[i - 1] : 0;
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            double prevA = aList.LastOrDefault();
+            var prevA = aList.LastOrDefault();
             double a = currentValue > highest ? 1 : 0;
             aList.AddRounded(a);
 
-            double prevB = bList.LastOrDefault();
+            var prevB = bList.LastOrDefault();
             double b = currentValue < lowest ? 1 : 0;
             bList.AddRounded(b);
 
-            double prevC = cList.LastOrDefault();
-            double c = a == 1 ? prevC + 1 : b - prevB == 1 ? 0 : prevC;
+            var prevC = cList.LastOrDefault();
+            var c = a == 1 ? prevC + 1 : b - prevB == 1 ? 0 : prevC;
             cList.AddRounded(c);
 
-            double prevD = dList.LastOrDefault();
-            double d = b == 1 ? prevD + 1 : a - prevA == 1 ? 0 : prevD;
+            var prevD = dList.LastOrDefault();
+            var d = b == 1 ? prevD + 1 : a - prevA == 1 ? 0 : prevD;
             dList.AddRounded(d);
 
-            double avg = (c + d) / 2;
+            var avg = (c + d) / 2;
             avgList.AddRounded(avg);
 
-            double rmean = i != 0 ? avgList.Sum() / i : 0;
-            double osc = avg - rmean;
+            var rmean = i != 0 ? avgList.Sum() / i : 0;
+            var osc = avg - rmean;
             oscList.AddRounded(osc);
 
             var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, osc, 0);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tfh", oscList }
         };
@@ -657,33 +657,33 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= length1 ? inputList[i - length1] : 0;
+            var currentValue = inputList[i];
+            var prevValue = i >= length1 ? inputList[i - length1] : 0;
 
-            double mom = MinPastValues(i, length1, currentValue - prevValue);
+            var mom = MinPastValues(i, length1, currentValue - prevValue);
             momList.AddRounded(mom);
 
-            double momAbs = Math.Abs(mom);
+            var momAbs = Math.Abs(mom);
             momAbsList.AddRounded(momAbs);
 
-            double prevTdiDirection = tdiDirectionList.LastOrDefault();
-            double tdiDirection = momList.TakeLastExt(length1).Sum();
+            var prevTdiDirection = tdiDirectionList.LastOrDefault();
+            var tdiDirection = momList.TakeLastExt(length1).Sum();
             tdiDirectionList.AddRounded(tdiDirection);
 
-            double momAbsSum1 = momAbsList.TakeLastExt(length1).Sum();
-            double momAbsSum2 = momAbsList.TakeLastExt(length2).Sum();
+            var momAbsSum1 = momAbsList.TakeLastExt(length1).Sum();
+            var momAbsSum2 = momAbsList.TakeLastExt(length2).Sum();
 
-            double prevTdi = tdiList.LastOrDefault();
-            double tdi = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
+            var prevTdi = tdiList.LastOrDefault();
+            var tdi = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
             tdiList.AddRounded(tdi);
 
             var signal = GetCompareSignal(tdiDirection - tdi, prevTdiDirection - prevTdi);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Tdi", tdiList },
             { "TdiDirection", tdiDirectionList }
@@ -712,41 +712,41 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double priceChg = MinPastValues(i, 1, currentValue - prevValue);
-            double chgPlus = priceChg > 0 ? priceChg : 0;
-            double chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var priceChg = MinPastValues(i, 1, currentValue - prevValue);
+            var chgPlus = priceChg > 0 ? priceChg : 0;
+            var chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
 
-            double prevCfPlus = cfPlusList.LastOrDefault();
-            double cfPlus = chgPlus == 0 ? 0 : chgPlus + prevCfPlus;
+            var prevCfPlus = cfPlusList.LastOrDefault();
+            var cfPlus = chgPlus == 0 ? 0 : chgPlus + prevCfPlus;
             cfPlusList.AddRounded(cfPlus);
 
-            double prevCfMinus = cfMinusList.LastOrDefault();
-            double cfMinus = chgMinus == 0 ? 0 : chgMinus + prevCfMinus;
+            var prevCfMinus = cfMinusList.LastOrDefault();
+            var cfMinus = chgMinus == 0 ? 0 : chgMinus + prevCfMinus;
             cfMinusList.AddRounded(cfMinus);
 
-            double diffPlus = chgPlus - cfMinus;
+            var diffPlus = chgPlus - cfMinus;
             diffPlusList.AddRounded(diffPlus);
 
-            double diffMinus = chgMinus - cfPlus;
+            var diffMinus = chgMinus - cfPlus;
             diffMinusList.AddRounded(diffMinus);
 
-            double prevTcfPlus = tcfPlusList.LastOrDefault();
-            double tcfPlus = diffPlusList.TakeLastExt(length).Sum();
+            var prevTcfPlus = tcfPlusList.LastOrDefault();
+            var tcfPlus = diffPlusList.TakeLastExt(length).Sum();
             tcfPlusList.AddRounded(tcfPlus);
 
-            double prevTcfMinus = tcfMinusList.LastOrDefault();
-            double tcfMinus = diffMinusList.TakeLastExt(length).Sum();
+            var prevTcfMinus = tcfMinusList.LastOrDefault();
+            var tcfMinus = diffMinusList.TakeLastExt(length).Sum();
             tcfMinusList.AddRounded(tcfMinus);
 
             var signal = GetCompareSignal(tcfPlus - tcfMinus, prevTcfPlus - prevTcfMinus);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "TcfPlus", tcfPlusList },
             { "TcfMinus", tcfMinusList }
@@ -778,36 +778,36 @@ public static partial class Calculations
 
         var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double currentAtr = atrList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double atrValue = atrMult * currentAtr;
-            double tempLongStop = currentValue - atrValue;
-            double tempShortStop = currentValue + atrValue;
+            var currentValue = inputList[i];
+            var currentAtr = atrList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var atrValue = atrMult * currentAtr;
+            var tempLongStop = currentValue - atrValue;
+            var tempShortStop = currentValue + atrValue;
 
-            double prevLongStop = i >= 1 ? longStopList.LastOrDefault() : tempLongStop;
-            double longStop = prevValue > prevLongStop ? Math.Max(tempLongStop, prevLongStop) : tempLongStop;
+            var prevLongStop = i >= 1 ? longStopList.LastOrDefault() : tempLongStop;
+            var longStop = prevValue > prevLongStop ? Math.Max(tempLongStop, prevLongStop) : tempLongStop;
             longStopList.AddRounded(longStop);
 
-            double prevShortStop = i >= 1 ? shortStopList.LastOrDefault() : tempShortStop;
-            double shortStop = prevValue < prevShortStop ? Math.Min(tempShortStop, prevShortStop) : tempShortStop;
+            var prevShortStop = i >= 1 ? shortStopList.LastOrDefault() : tempShortStop;
+            var shortStop = prevValue < prevShortStop ? Math.Min(tempShortStop, prevShortStop) : tempShortStop;
             shortStopList.AddRounded(shortStop);
 
-            double prevDir = i >= 1 ? dirList.LastOrDefault() : 1;
-            double dir = prevDir == -1 && currentValue > prevShortStop ? 1 : prevDir == 1 && currentValue < prevLongStop ? -1 : prevDir;
+            var prevDir = i >= 1 ? dirList.LastOrDefault() : 1;
+            var dir = prevDir == -1 && currentValue > prevShortStop ? 1 : prevDir == 1 && currentValue < prevLongStop ? -1 : prevDir;
             dirList.AddRounded(dir);
 
-            double prevTrend = trendList.LastOrDefault();
-            double trend = dir > 0 ? longStop : shortStop;
+            var prevTrend = trendList.LastOrDefault();
+            var trend = dir > 0 ? longStop : shortStop;
             trendList.AddRounded(trend);
 
             var signal = GetCompareSignal(currentValue - trend, prevValue - prevTrend);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Trend", trendList }
         };
@@ -837,28 +837,28 @@ public static partial class Calculations
         var ema23List = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var ema50List = GetMovingAverageList(stockData, maType, slowLength, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentEma23 = ema23List[i];
-            double currentEma50 = ema50List[i];
+            var currentEma23 = ema23List[i];
+            var currentEma50 = ema50List[i];
 
-            double macd = currentEma23 - currentEma50;
+            var macd = currentEma23 - currentEma50;
             macdList.AddRounded(macd);
         }
 
         stockData.CustomValuesList = macdList;
         var stcList = CalculateStochasticOscillator(stockData, maType, length: cycleLength).CustomValuesList;
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double stc = stcList[i];
-            double prevStc1 = i >= 1 ? stcList[i - 1] : 0;
-            double prevStc2 = i >= 2 ? stcList[i - 2] : 0;
+            var stc = stcList[i];
+            var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
+            var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
 
             var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Stc", stcList }
         };
@@ -885,43 +885,43 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double currentVolume = volumeList[i];
-            double prevUti1 = i >= 1 ? utiList[i - 1] : 0;
-            double prevUti2 = i >= 2 ? utiList[i - 2] : 0;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentVolume = volumeList[i];
+            var prevUti1 = i >= 1 ? utiList[i - 1] : 0;
+            var prevUti2 = i >= 2 ? utiList[i - 2] : 0;
 
-            double adv = i >= 1 && currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
+            var adv = i >= 1 && currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
             advList.AddRounded(adv);
 
-            double dec = i >= 1 && currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
+            var dec = i >= 1 && currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
             decList.AddRounded(dec);
 
-            double advSum = advList.TakeLastExt(length).Sum();
-            double decSum = decList.TakeLastExt(length).Sum();
+            var advSum = advList.TakeLastExt(length).Sum();
+            var decSum = decList.TakeLastExt(length).Sum();
 
-            double advVol = i >= 1 && currentValue > prevValue && advSum != 0 ? currentVolume / advSum : 0;
+            var advVol = i >= 1 && currentValue > prevValue && advSum != 0 ? currentVolume / advSum : 0;
             advVolList.AddRounded(advVol);
 
-            double decVol = i >= 1 && currentValue < prevValue && decSum != 0 ? currentVolume / decSum : 0;
+            var decVol = i >= 1 && currentValue < prevValue && decSum != 0 ? currentVolume / decSum : 0;
             decVolList.AddRounded(decVol);
 
-            double advVolSum = advVolList.TakeLastExt(length).Sum();
-            double decVolSum = decVolList.TakeLastExt(length).Sum();
-            double top = decSum != 0 ? advSum / decSum : 0;
-            double bot = decVolSum != 0 ? advVolSum / decVolSum : 0;
-            double ut = bot != 0 ? top / bot : 0;
+            var advVolSum = advVolList.TakeLastExt(length).Sum();
+            var decVolSum = decVolList.TakeLastExt(length).Sum();
+            var top = decSum != 0 ? advSum / decSum : 0;
+            var bot = decVolSum != 0 ? advVolSum / decVolSum : 0;
+            var ut = bot != 0 ? top / bot : 0;
 
-            double uti = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
+            var uti = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
             utiList.AddRounded(uti);
 
             var signal = GetCompareSignal(uti - prevUti1, prevUti1 - prevUti2);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Uti", utiList }
         };
@@ -952,40 +952,40 @@ public static partial class Calculations
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ap = inputList[i];
-            double esa = emaList[i];
+            var ap = inputList[i];
+            var esa = emaList[i];
 
-            double absApEsa = Math.Abs(ap - esa);
+            var absApEsa = Math.Abs(ap - esa);
             absApEsaList.AddRounded(absApEsa);
         }
 
         var dList = GetMovingAverageList(stockData, maType, length1, absApEsaList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double ap = inputList[i];
-            double esa = emaList[i];
-            double d = dList[i];
+            var ap = inputList[i];
+            var esa = emaList[i];
+            var d = dList[i];
 
-            double ci = d != 0 ? (ap - esa) / (0.015 * d) : 0;
+            var ci = d != 0 ? (ap - esa) / (0.015 * d) : 0;
             ciList.AddRounded(ci);
         }
 
         var tciList = GetMovingAverageList(stockData, maType, length2, ciList);
         var wt2List = GetMovingAverageList(stockData, maType, smoothLength, tciList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double tci = tciList[i];
-            double wt2 = wt2List[i];
-            double prevTci = i >= 1 ? tciList[i - 1] : 0;
-            double prevWt2 = i >= 1 ? wt2List[i - 1] : 0;
+            var tci = tciList[i];
+            var wt2 = wt2List[i];
+            var prevTci = i >= 1 ? tciList[i - 1] : 0;
+            var prevWt2 = i >= 1 ? wt2List[i - 1] : 0;
 
             var signal = GetRsiSignal(tci - wt2, prevTci - prevWt2, tci, prevTci, 53, -53);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Wto", tciList },
             { "Signal", wt2List }
@@ -1016,32 +1016,32 @@ public static partial class Calculations
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double ma = maList[i];
-            double fark = ma * percent * 0.01;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var ma = maList[i];
+            var fark = ma * percent * 0.01;
 
-            double prevLongStop = longStopList.LastOrDefault();
-            double longStop = ma - fark;
+            var prevLongStop = longStopList.LastOrDefault();
+            var longStop = ma - fark;
             longStop = ma > prevLongStop ? Math.Max(longStop, prevLongStop) : longStop;
             longStopList.AddRounded(longStop);
 
-            double prevShortStop = shortStopList.LastOrDefault();
-            double shortStop = ma + fark;
+            var prevShortStop = shortStopList.LastOrDefault();
+            var shortStop = ma + fark;
             shortStopList.AddRounded(shortStop);
 
-            double prevOtt = ottList.LastOrDefault();
-            double mt = ma > prevShortStop ? longStop : ma < prevLongStop ? shortStop : 0;
-            double ott = ma > mt ? mt * (200 + percent) / 200 : mt * (200 - percent) / 200;
+            var prevOtt = ottList.LastOrDefault();
+            var mt = ma > prevShortStop ? longStop : ma < prevLongStop ? shortStop : 0;
+            var ott = ma > mt ? mt * (200 + percent) / 200 : mt * (200 - percent) / 200;
             ottList.AddRounded(ott);
 
             var signal = GetCompareSignal(currentValue - ott, prevValue - prevOtt);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Ott", ottList }
         };
@@ -1065,24 +1065,24 @@ public static partial class Calculations
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double highestHigh = highestList[i];
-            double lowestLow = lowestList[i];
-            double prevHighest1 = i >= 1 ? highestList[i - 1] : 0;
-            double prevLowest1 = i >= 1 ? lowestList[i - 1] : 0;
-            double prevHighest2 = i >= 2 ? highestList[i - 2] : 0;
-            double prevLowest2 = i >= 2 ? lowestList[i - 2] : 0;
+            var highestHigh = highestList[i];
+            var lowestLow = lowestList[i];
+            var prevHighest1 = i >= 1 ? highestList[i - 1] : 0;
+            var prevLowest1 = i >= 1 ? lowestList[i - 1] : 0;
+            var prevHighest2 = i >= 2 ? highestList[i - 2] : 0;
+            var prevLowest2 = i >= 2 ? lowestList[i - 2] : 0;
 
-            double prevGto = gannTrendOscillatorList.LastOrDefault();
-            double gto = prevHighest2 > prevHighest1 && highestHigh > prevHighest1 ? 1 : prevLowest2 < prevLowest1 && lowestLow < prevLowest1 ? -1 : prevGto;
+            var prevGto = gannTrendOscillatorList.LastOrDefault();
+            var gto = prevHighest2 > prevHighest1 && highestHigh > prevHighest1 ? 1 : prevLowest2 < prevLowest1 && lowestLow < prevLowest1 ? -1 : prevGto;
             gannTrendOscillatorList.AddRounded(gto);
 
             var signal = GetCompareSignal(gto, prevGto);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Gto", gannTrendOscillatorList }
         };
@@ -1115,51 +1115,51 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevT = i >= length ? tList[i - length] : currentValue;
-            double priorT = i >= forecastLength ? tList[i - forecastLength] : 0;
-            double prevFcast = i >= forecastLength ? fcastList[i - forecastLength] : 0;
-            double prevChg = i >= length ? chgList[i - length] : currentValue;
+            var currentValue = inputList[i];
+            var prevT = i >= length ? tList[i - length] : currentValue;
+            var priorT = i >= forecastLength ? tList[i - forecastLength] : 0;
+            var prevFcast = i >= forecastLength ? fcastList[i - forecastLength] : 0;
+            var prevChg = i >= length ? chgList[i - length] : currentValue;
 
-            double chg = 0.9 * prevT;
+            var chg = 0.9 * prevT;
             chgList.AddRounded(chg);
 
-            double t = (0.9 * prevT) + (0.1 * currentValue) + (chg - prevChg);
+            var t = (0.9 * prevT) + (0.1 * currentValue) + (chg - prevChg);
             tList.AddRounded(t);
 
-            double trend = tList.TakeLastExt(length).Average();
+            var trend = tList.TakeLastExt(length).Average();
             trendList.AddRounded(trend);
 
-            double fcast = t + (t - priorT);
+            var fcast = t + (t - priorT);
             fcastList.AddRounded(fcast);
 
-            double diff = Math.Abs(currentValue - prevFcast);
+            var diff = Math.Abs(currentValue - prevFcast);
             diffList.AddRounded(diff);
 
-            double diffSma = diffList.TakeLastExt(forecastLength).Average();
-            double dev = diffSma * mult;
+            var diffSma = diffList.TakeLastExt(forecastLength).Average();
+            var dev = diffSma * mult;
 
-            double upper = fcast + dev;
+            var upper = fcast + dev;
             upperList.AddRounded(upper);
 
-            double lower = fcast - dev;
+            var lower = fcast - dev;
             lowerList.AddRounded(lower);
 
-            double prevBullSlope = bullSlopeList.LastOrDefault();
-            double bullSlope = currentValue - Math.Max(fcast, Math.Max(t, trend));
+            var prevBullSlope = bullSlopeList.LastOrDefault();
+            var bullSlope = currentValue - Math.Max(fcast, Math.Max(t, trend));
             bullSlopeList.AddRounded(bullSlope);
 
-            double prevBearSlope = bearSlopeList.LastOrDefault();
-            double bearSlope = currentValue - Math.Min(fcast, Math.Min(t, trend));
+            var prevBearSlope = bearSlopeList.LastOrDefault();
+            var bearSlope = currentValue - Math.Min(fcast, Math.Min(t, trend));
             bearSlopeList.AddRounded(bearSlope);
 
             var signal = GetBullishBearishSignal(bullSlope, prevBullSlope, bearSlope, prevBearSlope);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Gtf", trendList },
             { "UpperBand", upperList },
@@ -1192,51 +1192,51 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        double di = ((double)(length - 1) / 2) + 1;
-        double c1 = 2 / (di + 1);
-        double c2 = 1 - c1;
-        double c3 = 3 * ((cd * cd) + (cd * cd * cd));
-        double c4 = -3 * ((2 * cd * cd) + cd + (cd * cd * cd));
-        double c5 = (3 * cd) + 1 + (cd * cd * cd) + (3 * cd * cd);
+        var di = ((double)(length - 1) / 2) + 1;
+        var c1 = 2 / (di + 1);
+        var c2 = 1 - c1;
+        var c3 = 3 * ((cd * cd) + (cd * cd * cd));
+        var c4 = -3 * ((2 * cd * cd) + cd + (cd * cd * cd));
+        var c5 = (3 * cd) + 1 + (cd * cd * cd) + (3 * cd * cd);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            double prevI1 = i1List.LastOrDefault();
-            double i1 = (c1 * currentValue) + (c2 * prevI1);
+            var prevI1 = i1List.LastOrDefault();
+            var i1 = (c1 * currentValue) + (c2 * prevI1);
             i1List.AddRounded(i1);
 
-            double prevI2 = i2List.LastOrDefault();
-            double i2 = (c1 * i1) + (c2 * prevI2);
+            var prevI2 = i2List.LastOrDefault();
+            var i2 = (c1 * i1) + (c2 * prevI2);
             i2List.AddRounded(i2);
 
-            double prevI3 = i3List.LastOrDefault();
-            double i3 = (c1 * i2) + (c2 * prevI3);
+            var prevI3 = i3List.LastOrDefault();
+            var i3 = (c1 * i2) + (c2 * prevI3);
             i3List.AddRounded(i3);
 
-            double prevI4 = i4List.LastOrDefault();
-            double i4 = (c1 * i3) + (c2 * prevI4);
+            var prevI4 = i4List.LastOrDefault();
+            var i4 = (c1 * i3) + (c2 * prevI4);
             i4List.AddRounded(i4);
 
-            double prevI5 = i5List.LastOrDefault();
-            double i5 = (c1 * i4) + (c2 * prevI5);
+            var prevI5 = i5List.LastOrDefault();
+            var i5 = (c1 * i4) + (c2 * prevI5);
             i5List.AddRounded(i5);
 
-            double prevI6 = i6List.LastOrDefault();
-            double i6 = (c1 * i5) + (c2 * prevI6);
+            var prevI6 = i6List.LastOrDefault();
+            var i6 = (c1 * i5) + (c2 * prevI6);
             i6List.AddRounded(i6);
 
-            double prevBfr = bfrList.LastOrDefault();
-            double bfr = (-1 * cd * cd * cd * i6) + (c3 * i5) + (c4 * i4) + (c5 * i3);
+            var prevBfr = bfrList.LastOrDefault();
+            var bfr = (-1 * cd * cd * cd * i6) + (c3 * i5) + (c4 * i4) + (c5 * i3);
             bfrList.AddRounded(bfr);
 
             var signal = GetCompareSignal(currentValue - bfr, prevValue - prevBfr);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Cti", bfrList }
         };
@@ -1261,30 +1261,30 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double currentVolume = volumeList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentValue = inputList[i];
+            var currentVolume = volumeList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            double prevPvt = priceVolumeTrendList.LastOrDefault();
-            double pvt = prevValue != 0 ? prevPvt + (currentVolume * (MinPastValues(i, 1, currentValue - prevValue) / prevValue)) : prevPvt;
+            var prevPvt = priceVolumeTrendList.LastOrDefault();
+            var pvt = prevValue != 0 ? prevPvt + (currentVolume * (MinPastValues(i, 1, currentValue - prevValue) / prevValue)) : prevPvt;
             priceVolumeTrendList.AddRounded(pvt);
         }
 
         var pvtEmaList = GetMovingAverageList(stockData, maType, length, priceVolumeTrendList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double pvt = priceVolumeTrendList[i];
-            double pvtEma = pvtEmaList[i];
-            double prevPvt = i >= 1 ? priceVolumeTrendList[i - 1] : 0;
-            double prevPvtEma = i >= 1 ? pvtEmaList[i - 1] : 0;
+            var pvt = priceVolumeTrendList[i];
+            var pvtEma = pvtEmaList[i];
+            var prevPvt = i >= 1 ? priceVolumeTrendList[i - 1] : 0;
+            var prevPvtEma = i >= 1 ? pvtEmaList[i - 1] : 0;
 
             var signal = GetCompareSignal(pvt - pvtEma, prevPvt - prevPvtEma);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Pvt", priceVolumeTrendList },
             { "Signal", pvtEmaList }
@@ -1309,32 +1309,32 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentValue = inputList[i];
 
-            int period = 0;
-            double prevTrend = trendList.LastOrDefault();
-            double trend = currentValue;
-            for (int j = 1; j <= length; j++)
+            var period = 0;
+            var prevTrend = trendList.LastOrDefault();
+            var trend = currentValue;
+            for (var j = 1; j <= length; j++)
             {
-                double prevC = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                double currC = i >= j ? inputList[i - j] : 0;
+                var prevC = i >= j - 1 ? inputList[i - (j - 1)] : 0;
+                var currC = i >= j ? inputList[i - j] : 0;
                 period = (prevC <= trend && currC > trend) || (prevC >= trend && currC < trend) ? 0 : period;
 
                 double highest1 = currC, lowest1 = currC;
-                for (int k = j - period; k <= j; k++)
+                for (var k = j - period; k <= j; k++)
                 {
-                    double c = i >= j - k ? inputList[i - (j - k)] : 0;
+                    var c = i >= j - k ? inputList[i - (j - k)] : 0;
                     highest1 = Math.Max(highest1, c);
                     lowest1 = Math.Min(lowest1, c);
                 }
 
                 double highest2 = currC, lowest2 = currC;
-                for (int k = i - length; k <= j; k++)
+                for (var k = i - length; k <= j; k++)
                 {
-                    double c = i >= j - k ? inputList[i - (j - k)] : 0;
+                    var c = i >= j - k ? inputList[i - (j - k)] : 0;
                     highest2 = Math.Max(highest2, c);
                     lowest2 = Math.Min(lowest2, c);
                 }
@@ -1355,7 +1355,7 @@ public static partial class Calculations
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Pti", trendList }
         };
@@ -1380,31 +1380,31 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double currentValue = inputList[i];
-            double prevValue = i >= 1 ? inputList[i - 1] : 0;
-            double currentVolume = volumeList[i];
-            double rv = currentVolume / 50000;
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var currentVolume = volumeList[i];
+            var rv = currentVolume / 50000;
 
-            double prevMpvt = mpvtList.LastOrDefault();
-            double mpvt = prevValue != 0 ? prevMpvt + (rv * MinPastValues(i, 1, currentValue - prevValue) / prevValue) : 0;
+            var prevMpvt = mpvtList.LastOrDefault();
+            var mpvt = prevValue != 0 ? prevMpvt + (rv * MinPastValues(i, 1, currentValue - prevValue) / prevValue) : 0;
             mpvtList.AddRounded(mpvt);
         }
 
         var mpvtSignalList = GetMovingAverageList(stockData, maType, length, mpvtList);
-        for (int i = 0; i < stockData.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            double mpvt = mpvtList[i];
-            double mpvtSignal = mpvtSignalList[i];
-            double prevMpvt = i >= 1 ? mpvtList[i - 1] : 0;
-            double prevMpvtSignal = i >= 1 ? mpvtSignalList[i - 1] : 0;
+            var mpvt = mpvtList[i];
+            var mpvtSignal = mpvtSignalList[i];
+            var prevMpvt = i >= 1 ? mpvtList[i - 1] : 0;
+            var prevMpvtSignal = i >= 1 ? mpvtSignalList[i - 1] : 0;
 
             var signal = GetCompareSignal(mpvt - mpvtSignal, prevMpvt - prevMpvtSignal);
             signalsList.Add(signal);
         }
 
-        stockData.OutputValues = new()
+        stockData.OutputValues = new Dictionary<string, List<double>>
         {
             { "Mpvt", mpvtList },
             { "Signal", mpvtSignalList }

@@ -130,7 +130,7 @@ public static class MathHelper
     /// <returns></returns>
     public static int MinOrMax(int value)
     {
-        int result = double.IsNaN(value) ? 0 : double.IsPositiveInfinity(value) ? int.MaxValue : double.IsNegativeInfinity(value) ? int.MinValue : value;
+        var result = double.IsNaN(value) ? 0 : double.IsPositiveInfinity(value) ? int.MaxValue : double.IsNegativeInfinity(value) ? int.MinValue : value;
         return Math.Min(Math.Max(result, 2), 530);
     }
 }
