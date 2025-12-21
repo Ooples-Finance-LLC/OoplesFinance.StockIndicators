@@ -35,7 +35,7 @@ public static partial class Calculations
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
             var currentTrueRange = CalculateTrueRange(currentHigh, currentLow, prevClose);
-            trList.AddRounded(currentTrueRange);
+            trList.Add(currentTrueRange);
         }
 
         var atrList = GetMovingAverageList(stockData, maType, length, trList);
@@ -93,13 +93,13 @@ public static partial class Calculations
             var lowDiff = prevLow - currentLow;
 
             var dmPlus = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
-            dmPlusList.AddRounded(dmPlus);
+            dmPlusList.Add(dmPlus);
 
             var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
-            dmMinusList.AddRounded(dmMinus);
+            dmMinusList.Add(dmMinus);
 
             var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
-            trList.AddRounded(tr);
+            trList.Add(tr);
         }
 
         var dmPlus14List = GetMovingAverageList(stockData, maType, length, dmPlusList);
@@ -112,16 +112,16 @@ public static partial class Calculations
             var trueRange14 = tr14List[i];
 
             var diPlus = trueRange14 != 0 ? MinOrMax(100 * dmPlus14 / trueRange14, 100, 0) : 0;
-            diPlusList.AddRounded(diPlus);
+            diPlusList.Add(diPlus);
 
             var diMinus = trueRange14 != 0 ? MinOrMax(100 * dmMinus14 / trueRange14, 100, 0) : 0;
-            diMinusList.AddRounded(diMinus);
+            diMinusList.Add(diMinus);
 
             var diDiff = Math.Abs(diPlus - diMinus);
             var diSum = diPlus + diMinus;
 
             var di = diSum != 0 ? MinOrMax(100 * diDiff / diSum, 100, 0) : 0;
-            diList.AddRounded(di);
+            diList.Add(di);
         }
 
         var adxList = GetMovingAverageList(stockData, maType, length, diList);
@@ -181,7 +181,7 @@ public static partial class Calculations
             var prevVStop = vstopList.LastOrDefault();
             var sic = currentValue > currentEma ? highest : lowest;
             var vstop = currentValue > currentEma ? sic - (factor * currentAtr) : sic + (factor * currentAtr);
-            vstopList.AddRounded(vstop);
+            vstopList.Add(vstop);
 
             var signal = GetCompareSignal(currentValue - vstop, prevValue - prevVStop);
             signalsList.Add(signal);

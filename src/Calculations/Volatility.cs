@@ -36,7 +36,7 @@ public static partial class Calculations
             var currentDeviation = currentValue - currentSma;
 
             var deviationSquared = Pow(currentDeviation, 2);
-            deviationSquaredList.AddRounded(deviationSquared);
+            deviationSquaredList.Add(deviationSquared);
         }
 
         var divisionOfSumList = GetMovingAverageList(stockData, maType, length, deviationSquaredList);
@@ -45,7 +45,7 @@ public static partial class Calculations
             var divisionOfSum = divisionOfSumList[i];
 
             var stdDevVolatility = Sqrt(divisionOfSum);
-            stdDevVolatilityList.AddRounded(stdDevVolatility);
+            stdDevVolatilityList.Add(stdDevVolatility);
         }
 
         var stdDevSmaList = GetMovingAverageList(stockData, maType, length, stdDevVolatilityList);
@@ -100,7 +100,7 @@ public static partial class Calculations
             var temp = prevValue != 0 ? currentValue / prevValue : 0;
 
             var tempLog = temp > 0 ? Math.Log(temp) : 0;
-            tempLogList.AddRounded(tempLog);
+            tempLogList.Add(tempLog);
         }
 
         stockData.CustomValuesList = tempLogList;
@@ -115,7 +115,7 @@ public static partial class Calculations
 
             var prevHv = hvList.LastOrDefault();
             var hv = 100 * stdDevLog * annualSqrt;
-            hvList.AddRounded(hv);
+            hvList.Add(hv);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, hv, prevHv);
             signalsList.Add(signal);
@@ -165,7 +165,7 @@ public static partial class Calculations
             var prevLb = i >= 1 ? lbList[i - 1] : 0;
 
             var mabw = mb != 0 ? (ub - lb) / mb * 100 : 0;
-            mabwList.AddRounded(mabw);
+            mabwList.Add(mabw);
 
             var signal = GetBollingerBandsSignal(currentValue - mb, prevValue - prevMb, currentValue, prevValue, ub, prevUb, lb, prevLb);
             signalsList.Add(signal);
@@ -211,10 +211,10 @@ public static partial class Calculations
             var sm = Pow((er * (fastAlpha - slowAlpha)) + slowAlpha, 2);
 
             var ama = prevAma + (sm * (currentValue - prevAma));
-            amaList.AddRounded(ama);
+            amaList.Add(ama);
 
             var amaDiff = ama - prevAma;
-            amaDiffList.AddRounded(amaDiff);
+            amaDiffList.Add(amaDiff);
         }
 
         stockData.CustomValuesList = amaDiffList;
@@ -229,7 +229,7 @@ public static partial class Calculations
 
             var prevMaaf = maafList.LastOrDefault();
             var maaf = stdDev * filter;
-            maafList.AddRounded(maaf);
+            maafList.Add(maaf);
 
             var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, maaf, prevMaaf);
             signalsList.Add(signal);
@@ -284,10 +284,10 @@ public static partial class Calculations
                 var zsp = spStdDev != 0 ? sp / spStdDev : 0;
 
                 var absZsrc = Math.Abs(zsrc);
-                absZsrcList.AddRounded(absZsrc);
+                absZsrcList.Add(absZsrc);
 
                 var absZsp = Math.Abs(zsp);
-                absZspList.AddRounded(absZsp);
+                absZspList.Add(absZsp);
             }
 
             var absZsrcSmaList = GetMovingAverageList(stockData, maType, length, absZsrcList);
@@ -302,7 +302,7 @@ public static partial class Calculations
                 var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
                 var r = absZspSma != 0 ? absZsrcSma / absZspSma : 0;
-                rList.AddRounded(r);
+                rList.Add(r);
 
                 var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, r, 1);
                 signalsList.Add(signal);
@@ -349,7 +349,7 @@ public static partial class Calculations
             var min = Math.Min(currentValue, prevValue);
 
             var a = max - min;
-            aList.AddRounded(a);
+            aList.Add(a);
         }
 
         var aEma1List = GetMovingAverageList(stockData, maType, length1, aList);
@@ -364,10 +364,10 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
             var b = aEma2 != 0 ? aEma1 / aEma2 : 0;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var bSum = bList.TakeLastExt(length).Sum();
-            bSumList.AddRounded(bSum);
+            bSumList.Add(bSum);
 
             var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, bSum, c);
             signalsList.Add(signal);
@@ -409,7 +409,7 @@ public static partial class Calculations
             var prevSma = i >= 1 ? smaList[i - 1] : 0;
 
             var mm = currentSma != 0 ? currentValue / currentSma : 0;
-            mmList.AddRounded(mm);
+            mmList.Add(mm);
 
             var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, mm, threshold);
             signalsList.Add(signal);
@@ -448,7 +448,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var chg = MinPastValues(i, 1, currentValue - prevValue);
-            chgList.AddRounded(chg);
+            chgList.Add(chg);
         }
 
         stockData.CustomValuesList = chgList;
@@ -463,7 +463,7 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
             var b = stdDev != 0 ? aChgStdDev / stdDev : 0;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, b, 0.5);
             signalsList.Add(signal);
@@ -499,7 +499,7 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             var median = tempList.TakeLastExt(length).Median();
             int nl = 0, nh = 0;
@@ -519,7 +519,7 @@ public static partial class Calculations
             }
 
             double mmi = length != 1 ? 100 * (nl + nh) / (length - 1) : 0;
-            mmiList.AddRounded(mmi);
+            mmiList.Add(mmi);
         }
 
         var mmiFilterList = GetMovingAverageList(stockData, maType, length, mmiList);
@@ -578,11 +578,11 @@ public static partial class Calculations
             var range = highestHigh - lowestLow;
 
             var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
-            trList.AddRounded(tr);
+            trList.Add(tr);
 
             var trSum = trList.TakeLastExt(length).Sum();
             var ci = range > 0 ? 100 * Math.Log10(trSum / range) / Math.Log10(length) : 0;
-            ciList.AddRounded(ci);
+            ciList.Add(ci);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, ci, 38.2);
             signalsList.Add(signal);
@@ -625,10 +625,10 @@ public static partial class Calculations
             var prevMa = i >= 1 ? maList[i - 1] : 0;
 
             var abs = Math.Abs(currentClose - currentOpen);
-            absList.AddRounded(abs);
+            absList.Add(abs);
 
             var uvi = (double)1 / length * absList.TakeLastExt(length).Sum();
-            uviList.AddRounded(uvi);
+            uviList.Add(uvi);
 
             var signal = GetVolatilitySignal(currentClose - currentMa, prevClose - prevMa, uvi, 1);
             signalsList.Add(signal);
@@ -672,7 +672,7 @@ public static partial class Calculations
 
             var prevC = cList.LastOrDefault();
             var c = qma - sma;
-            cList.AddRounded(c);
+            cList.Add(c);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, c, prevC);
             signalsList.Add(signal);
@@ -717,11 +717,11 @@ public static partial class Calculations
             var logCo = currentOpen != 0 ? Math.Log(currentClose / currentOpen) : 0;
 
             var log = (0.5 * Pow(logHl, 2)) - (((2 * Math.Log(2)) - 1) * Pow(logCo, 2));
-            logList.AddRounded(log);
+            logList.Add(log);
 
             var logSum = logList.TakeLastExt(length).Sum();
             var gcv = length != 0 && logSum != 0 ? Sqrt((double)i / length * logSum) : 0;
-            gcvList.AddRounded(gcv);
+            gcvList.Add(gcv);
         }
 
         var gcvWmaList = GetMovingAverageList(stockData, maType, signalLength, gcvList);
@@ -776,7 +776,7 @@ public static partial class Calculations
             var rangeLog = range > 0 ? Math.Log(range) : 0;
 
             var gapo = rangeLog / Math.Log(length);
-            gapoList.AddRounded(gapo);
+            gapoList.Add(gapo);
         }
 
         var gapoWmaList = GetMovingAverageList(stockData, maType, length, gapoList);
@@ -836,21 +836,21 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
             var tempLog = temp > 0 ? Math.Log(temp) : 0;
-            tempLogList.AddRounded(tempLog);
+            tempLogList.Add(tempLog);
 
             var avgLog = tempLogList.TakeLastExt(length).Average();
             var devLogSq = Pow(tempLog - avgLog, 2);
-            devLogSqList.AddRounded(devLogSq);
+            devLogSqList.Add(devLogSq);
 
             var devLogSqAvg = devLogSqList.TakeLastExt(length).Sum() / (length - 1);
             var stdDevLog = devLogSqAvg >= 0 ? Sqrt(devLogSqAvg) : 0;
 
             var hv = stdDevLog * Sqrt(annualLength);
-            hvList.AddRounded(hv);
+            hvList.Add(hv);
 
             double count = hvList.TakeLastExt(annualLength).Where(i => i < hv).Count();
             var hvp = count / annualLength * 100;
-            hvpList.AddRounded(hvp);
+            hvpList.Add(hvp);
         }
 
         var hvpEmaList = GetMovingAverageList(stockData, maType, length, hvpList);
@@ -913,7 +913,7 @@ public static partial class Calculations
             var prevSma = i >= 1 ? smaList[i - 1] : 0;
 
             var gs = stdDev != 0 ? (linreg2 - linreg) / stdDev / 2 : 0;
-            gsList.AddRounded(gs);
+            gsList.Add(gs);
 
             var signal = GetVolatilitySignal(currentValue - sma, prevValue - prevSma, gs, 0);
             signalsList.Add(signal);
@@ -951,7 +951,7 @@ public static partial class Calculations
 
             var rocSma = (currentValue + prevValue) / 2;
             var dr = rocSma != 0 ? MinPastValues(i, 1, currentValue - prevValue) / rocSma : 0;
-            drList.AddRounded(dr);
+            drList.Add(dr);
         }
 
         stockData.CustomValuesList = drList;
@@ -1009,11 +1009,11 @@ public static partial class Calculations
             var numerator = Math.Abs(highestPrice - lowestPrice);
 
             var priceChange = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-            changeList.AddRounded(priceChange);
+            changeList.Add(priceChange);
 
             var denominator = changeList.TakeLastExt(length).Sum();
             var vhf = denominator != 0 ? numerator / denominator : 0;
-            vhfList.AddRounded(vhf);
+            vhfList.Add(vhf);
         }
 
         var vhfWmaList = GetMovingAverageList(stockData, maType, signalLength, vhfList);
@@ -1068,10 +1068,10 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
             var currentHigh = highList[i];
-            tempHighList.AddRounded(currentHigh);
+            tempHighList.Add(currentHigh);
 
             var currentLow = lowList[i];
-            tempLowList.AddRounded(currentLow);
+            tempLowList.Add(currentLow);
 
             var a = tempHighList.TakeLastExt(length).Sum();
             var b = tempLowList.TakeLastExt(length).Sum();
@@ -1079,7 +1079,7 @@ public static partial class Calculations
 
             var prevHv = hvList.LastOrDefault();
             var hv = abAvg != 0 && a != b ? Sqrt(1 - (Pow(a, 0.25) * Pow(b, 0.25) / Pow(abAvg, 0.5))) : 0;
-            hvList.AddRounded(hv);
+            hvList.Add(hv);
 
             var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, hv, prevHv);
             signalsList.Add(signal);
@@ -1123,7 +1123,7 @@ public static partial class Calculations
             var pu = puList[i];
 
             var pbo = pu - pl != 0 ? 100 * (currentValue - pl) / (pu - pl) : 0;
-            pboList.AddRounded(pbo);
+            pboList.Add(pbo);
         }
 
         var pboSignalList = GetMovingAverageList(stockData, maType, smoothLength, pboList);
@@ -1177,7 +1177,7 @@ public static partial class Calculations
             var pl = plList[i];
 
             var pbw = pu + pl != 0 ? 200 * (pu - pl) / (pu + pl) : 0;
-            pbwList.AddRounded(pbw);
+            pbwList.Add(pbw);
         }
 
         var pbwSignalList = GetMovingAverageList(stockData, maType, length, pbwList);
@@ -1230,7 +1230,7 @@ public static partial class Calculations
             var lower = lowestList[i];
 
             var donchianWidth = upper - lower;
-            donchianWidthList.AddRounded(donchianWidth);
+            donchianWidthList.Add(donchianWidth);
         }
 
         var donchianWidthSmaList = GetMovingAverageList(stockData, maType, smoothLength, donchianWidthList);
@@ -1290,7 +1290,7 @@ public static partial class Calculations
             var hlLog = minL != 0 ? Math.Log(maxH / minL) : 0;
 
             var vol = MinOrMax(((0.6 * cLog * annualSqrt) + (0.6 * hlLog * annualSqrt)) * 0.5, 2.99, 0);
-            volList.AddRounded(vol);
+            volList.Add(vol);
         }
 
         var volEmaList = GetMovingAverageList(stockData, maType, length1, volList);
@@ -1340,14 +1340,14 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             var sum = tempList.TakeLastExt(length).Sum();
             var sumPow = Pow(sum, 2);
-            sumList.AddRounded(sumPow);
+            sumList.Add(sumPow);
 
             var pow = Pow(currentValue, 2);
-            powList.AddRounded(pow);
+            powList.Add(pow);
         }
 
         var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
@@ -1358,7 +1358,7 @@ public static partial class Calculations
             var b = sum / Pow(length, 2);
 
             var c = a - b >= 0 ? Sqrt(a - b) : 0;
-            cList.AddRounded(c);
+            cList.Add(c);
         }
 
         var cSmaList = GetMovingAverageList(stockData, maType, length, cList);
@@ -1412,7 +1412,7 @@ public static partial class Calculations
             var rateOfChange = MinPastValues(i, length1, currentValue - prevValue);
 
             var vbm = currentAtr != 0 ? rateOfChange / currentAtr : 0;
-            vbmList.AddRounded(vbm);
+            vbmList.Add(vbm);
         }
 
         var vbmEmaList = GetMovingAverageList(stockData, maType, length1, vbmList);
@@ -1468,13 +1468,13 @@ public static partial class Calculations
             var prevVqiT = vqiTList.LastOrDefault();
             var vqiT = trueRange != 0 && currentHigh - currentLow != 0 ?
                 (((currentClose - prevClose) / trueRange) + ((currentClose - currentOpen) / (currentHigh - currentLow))) * 0.5 : prevVqiT;
-            vqiTList.AddRounded(vqiT);
+            vqiTList.Add(vqiT);
 
             var vqi = Math.Abs(vqiT) * ((currentClose - prevClose + (currentClose - currentOpen)) * 0.5);
-            vqiList.AddRounded(vqi);
+            vqiList.Add(vqi);
 
             var vqiSum = vqiList.Sum();
-            vqiSumList.AddRounded(vqiSum);
+            vqiSumList.Add(vqiSum);
         }
 
         var vqiSumFastSmaList = GetMovingAverageList(stockData, maType, fastLength, vqiSumList);
@@ -1523,7 +1523,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.AddRounded(ret);
+            retList.Add(ret);
         }
 
         stockData.CustomValuesList = retList;
@@ -1534,7 +1534,7 @@ public static partial class Calculations
             var ret = retList[i];
 
             var sigma = prevStd != 0 ? ret / prevStd : 0;
-            sigmaList.AddRounded(sigma);
+            sigmaList.Add(sigma);
         }
 
         var ssList = GetMovingAverageList(stockData, maType, length, sigmaList);
@@ -1581,15 +1581,15 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            prevList.AddRounded(prevValue);
+            prevList.Add(prevValue);
 
             var corr = GoodnessOfFit.R(prevList.TakeLastExt(length).Select(x => (double)x), tempList.TakeLastExt(length).Select(x => (double)x));
             corr = IsValueNullOrInfinity(corr) ? 0 : corr;
             var a = 1 - (((double)corr + 1) / 2);
-            aList.AddRounded(a);
+            aList.Add(a);
         }
 
         var aEmaList = GetMovingAverageList(stockData, maType, length, aList);

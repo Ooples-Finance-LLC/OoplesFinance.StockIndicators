@@ -1,7 +1,7 @@
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
-//     Copyright © Franklin Moormann, 2020-2022
+//     Copyright Â© Franklin Moormann, 2020-2022
 //     cheatcountry@gmail.com
 //
 //     This library is free software and it uses the Apache 2.0 license
@@ -21,6 +21,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersRoofingFilterV2(this StockData stockData, int upperLength = 80, int lowerLength = 40)
     {
+        upperLength = Math.Max(upperLength, 1);
+        lowerLength = Math.Max(lowerLength, 1);
         List<double> highPassList = new();
         List<double> roofingFilterList = new();
         List<Signal> signalsList = new();
@@ -51,12 +53,12 @@ public static partial class Calculations
             var v3 = Pow(1 - alpha1, 2) * prevHp2;
 
             var highPass = v1 + v2 - v3;
-            highPassList.AddRounded(highPass);
+            highPassList.Add(highPass);
 
             var prevRoofingFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
             var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
             var roofingFilter = (c1 * ((highPass + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            roofingFilterList.AddRounded(roofingFilter);
+            roofingFilterList.Add(roofingFilter);
 
             var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
             signalsList.Add(signal);
@@ -83,6 +85,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersPhaseCalculation(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 15)
     {
+        length = Math.Max(length, 1);
         List<double> phaseList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -102,7 +105,7 @@ public static partial class Calculations
             phase += 90;
             phase = phase < 0 ? phase + 360 : phase;
             phase = phase > 360 ? phase - 360 : phase;
-            phaseList.AddRounded(phase);
+            phaseList.Add(phase);
         }
 
         var phaseEmaList = GetMovingAverageList(stockData, maType, length, phaseList);
@@ -138,6 +141,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAdaptiveCyberCycle(this StockData stockData, int length = 5, double alpha = 0.07)
     {
+        length = Math.Max(length, 1);
         List<double> ipList = new();
         List<double> q1List = new();
         List<double> i1List = new();
@@ -170,34 +174,34 @@ public static partial class Calculations
             var prevCycle6 = i >= 6 ? cycleList[i - 6] : 0;
 
             var smooth = (currentValue + (2 * prevValue) + (2 * prevValue2) + prevValue3) / 6;
-            smoothList.AddRounded(smooth);
+            smoothList.Add(smooth);
 
             var cycle = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 : (Pow(1 - (0.5 * alpha), 2) * (smooth - (2 * prevSmooth) + prevSmooth2)) +
             (2 * (1 - alpha) * prevCycle) - (Pow(1 - alpha, 2) * prevCycle2);
-            cycleList.AddRounded(cycle);
+            cycleList.Add(cycle);
 
             var q1 = ((0.0962 * cycle) + (0.5769 * prevCycle2) - (0.5769 * prevCycle4) - (0.0962 * prevCycle6)) * (0.5 + (0.08 * prevIp));
-            q1List.AddRounded(q1);
+            q1List.Add(q1);
 
             var i1 = prevCycle3;
-            i1List.AddRounded(i1);
+            i1List.Add(i1);
 
             var dp = MinOrMax(q1 != 0 && prevQ1 != 0 ? ((i1 / q1) - (prevI1 / prevQ1)) / (1 + (i1 * prevI1 / (q1 * prevQ1))) : 0, 1.1, 0.1);
-            dpList.AddRounded(dp);
+            dpList.Add(dp);
 
             var medianDelta = dpList.TakeLastExt(length).Median();
             var dc = medianDelta != 0 ? (6.28318 / medianDelta) + 0.5 : 15;
 
             var ip = (0.33 * dc) + (0.67 * prevIp);
-            ipList.AddRounded(ip);
+            ipList.Add(ip);
 
             var p = (0.15 * ip) + (0.85 * prevP);
-            pList.AddRounded(p);
+            pList.Add(p);
 
             var a1 = 2 / (p + 1);
             var ac = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
                 (Pow(1 - (0.5 * a1), 2) * (smooth - (2 * prevSmooth) + prevSmooth2)) + (2 * (1 - a1) * prevAc1) - (Pow(1 - a1, 2) * prevAc2);
-            acList.AddRounded(ac);
+            acList.Add(ac);
 
             var signal = GetCompareSignal(ac - prevAc1, prevAc1 - prevAc2);
             signalsList.Add(signal);
@@ -225,6 +229,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSimpleDecycler(this StockData stockData, int length = 125, double upperPct = 0.5, double lowerPct = 0.5)
     {
+        length = Math.Max(length, 1);
         List<double> decyclerList = new();
         List<double> upperBandList = new();
         List<double> lowerBandList = new();
@@ -241,13 +246,13 @@ public static partial class Calculations
 
             var prevDecycler = decyclerList.LastOrDefault();
             var decycler = currentValue - hp;
-            decyclerList.AddRounded(decycler);
+            decyclerList.Add(decycler);
 
             var upperBand = (1 + (upperPct / 100)) * decycler;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var lowerBand = (1 - (lowerPct / 100)) * decycler;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetCompareSignal(currentValue - decycler, prevValue - prevDecycler);
             signalsList.Add(signal);
@@ -275,6 +280,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHighPassFilterV1(this StockData stockData, int length = 125, double mult = 1)
     {
+        length = Math.Max(length, 1);
         List<double> highPassList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -294,7 +300,7 @@ public static partial class Calculations
             var pow2 = Pow(1 - alpha, 2);
 
             var highPass = (pow1 * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) - (pow2 * prevHp2);
-            highPassList.AddRounded(highPass);
+            highPassList.Add(highPass);
 
             var signal = GetCompareSignal(highPass, prevHp1);
             signalsList.Add(signal);
@@ -324,6 +330,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersRocketRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, 
         int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> momList = new();
         List<double> argList = new();
         List<double> ssf2PoleRocketRsiList = new();
@@ -343,10 +351,10 @@ public static partial class Calculations
 
             var prevMom = momList.LastOrDefault();
             var mom = MinPastValues(i, length1 - 1, currentValue - prevValue);
-            momList.AddRounded(mom);
+            momList.Add(mom);
 
             var arg = (mom + prevMom) / 2;
-            argList.AddRounded(arg);
+            argList.Add(arg);
         }
 
         var argSsf2PoleList = GetMovingAverageList(stockData, maType, length2, argList);
@@ -359,10 +367,10 @@ public static partial class Calculations
             var ssf2PoleMom = ssf2Pole - prevSsf2Pole;
 
             var up2PoleChg = ssf2PoleMom > 0 ? ssf2PoleMom : 0;
-            ssf2PoleUpChgList.AddRounded(up2PoleChg);
+            ssf2PoleUpChgList.Add(up2PoleChg);
 
             var down2PoleChg = ssf2PoleMom < 0 ? Math.Abs(ssf2PoleMom) : 0;
-            ssf2PoleDownChgList.AddRounded(down2PoleChg);
+            ssf2PoleDownChgList.Add(down2PoleChg);
 
             var up2PoleChgSum = ssf2PoleUpChgList.TakeLastExt(length1).Sum();
             var down2PoleChgSum = ssf2PoleDownChgList.TakeLastExt(length1).Sum();
@@ -370,12 +378,12 @@ public static partial class Calculations
             var prevTmp2Pole = ssf2PoleTmpList.LastOrDefault();
             var tmp2Pole = up2PoleChgSum + down2PoleChgSum != 0 ?
                 MinOrMax((up2PoleChgSum - down2PoleChgSum) / (up2PoleChgSum + down2PoleChgSum), 0.999, -0.999) : prevTmp2Pole;
-            ssf2PoleTmpList.AddRounded(tmp2Pole);
+            ssf2PoleTmpList.Add(tmp2Pole);
 
             var ssf2PoleTempLog = 1 - tmp2Pole != 0 ? (1 + tmp2Pole) / (1 - tmp2Pole) : 0;
             var ssf2PoleLog = Math.Log(ssf2PoleTempLog);
             var ssf2PoleRocketRsi = 0.5 * ssf2PoleLog * mult;
-            ssf2PoleRocketRsiList.AddRounded(ssf2PoleRocketRsi);
+            ssf2PoleRocketRsiList.Add(ssf2PoleRocketRsi);
 
             var signal = GetRsiSignal(ssf2PoleRocketRsi - prevRocketRsi1, prevRocketRsi1 - prevRocketRsi2, ssf2PoleRocketRsi, prevRocketRsi1, obLevel, osLevel);
             signalsList.Add(signal);
@@ -400,6 +408,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCorrelationTrendIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> corrList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -424,7 +433,7 @@ public static partial class Calculations
 
             var corr = (length * sxx) - (sx * sx) > 0 && (length * syy) - (sy * sy) > 0 ? ((length * sxy) - (sx * sy)) /
                 Sqrt(((length * sxx) - (sx * sx)) * ((length * syy) - (sy * sy))) : 0;
-            corrList.AddRounded(corr);
+            corrList.Add(corr);
 
             var signal = GetRsiSignal(corr - prevCorr1, prevCorr1 - prevCorr2, corr, prevCorr1, 0.5, -0.5);
             signalsList.Add(signal);
@@ -452,6 +461,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersRelativeVigorIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10,
         int signalLength = 4)
     {
+        length = Math.Max(length, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> rviList = new();
         List<Signal> signalsList = new();
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
@@ -464,7 +475,7 @@ public static partial class Calculations
             var currentLow = lowList[i];
 
             var rvi = currentHigh - currentLow != 0 ? (currentClose - currentOpen) / (currentHigh - currentLow) : 0;
-            rviList.AddRounded(rvi);
+            rviList.Add(rvi);
         }
 
         var rviSmaList = GetMovingAverageList(stockData, maType, length, rviList);
@@ -500,6 +511,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCenterofGravityOscillator(this StockData stockData, int length = 10)
     {
+        length = Math.Max(length, 1);
         List<double> cgList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -516,7 +528,7 @@ public static partial class Calculations
 
             var prevCg = cgList.LastOrDefault();
             var cg = denom != 0 ? (-num / denom) + ((double)(length + 1) / 2) : 0;
-            cgList.AddRounded(cg);
+            cgList.Add(cg);
 
             var signal = GetCompareSignal(cg, prevCg);
             signalsList.Add(signal);
@@ -541,6 +553,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAdaptiveCenterOfGravityOscillator(this StockData stockData, int length = 5)
     {
+        length = Math.Max(length, 1);
         List<double> cgList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -563,7 +576,7 @@ public static partial class Calculations
             }
 
             var cg = denom != 0 ? (-num / denom) + ((intPeriod + 1) / 2) : 0;
-            cgList.AddRounded(cg);
+            cgList.Add(cg);
 
             var signal = GetCompareSignal(cg - prevCg1, prevCg1 - prevCg2);
             signalsList.Add(signal);
@@ -591,6 +604,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersSmoothedAdaptiveMomentum(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 5, int length2 = 8)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> f3List = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -617,7 +632,7 @@ public static partial class Calculations
             var v1 = MinPastValues(i, pr, currentValue - prevValue);
 
             var f3 = (coef1 * v1) + (coef2 * prevF3_1) + (coef3 * prevF3_2) + (coef4 * prevF3_3);
-            f3List.AddRounded(f3);
+            f3List.Add(f3);
         }
 
         var f3EmaList = GetMovingAverageList(stockData, maType, length2, f3List);
@@ -652,6 +667,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersStochasticCenterOfGravityOscillator(this StockData stockData, int length = 8)
     {
+        length = Math.Max(length, 1);
         List<double> v1List = new();
         List<double> v2List = new();
         List<double> tList = new();
@@ -673,14 +689,14 @@ public static partial class Calculations
             var prevT2 = i >= 2 ? tList[i - 2] : 0;
 
             var v1 = maxc - minc != 0 ? (cg - minc) / (maxc - minc) : 0;
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
 
             var v2_ = ((4 * v1) + (3 * prevV1_1) + (2 * prevV1_2) + prevV1_3) / 10;
             var v2 = 2 * (v2_ - 0.5);
-            v2List.AddRounded(v2);
+            v2List.Add(v2);
 
             var t = MinOrMax(0.96 * (prevV2_1 + 0.02), 1, 0);
-            tList.AddRounded(t);
+            tList.Add(t);
 
             var signal = GetRsiSignal(t - prevT1, prevT1 - prevT2, t, prevT1, 0.8, 0.2);
             signalsList.Add(signal);
@@ -725,14 +741,14 @@ public static partial class Calculations
             var prevCyc2 = i >= 2 ? cycleList[i - 2] : 0;
 
             var smooth = (currentMedianPrice + (2 * prevMedianPrice1) + (2 * prevMedianPrice2) + prevMedianPrice3) / 6;
-            smoothList.AddRounded(smooth);
+            smoothList.Add(smooth);
 
             var cycle_ = ((1 - (0.5 * alpha)) * (1 - (0.5 * alpha)) * (smooth - (2 * prevSmooth1) + prevSmooth2)) + (2 * (1 - alpha) * prevCycle1) -
                          ((1 - alpha) * (1 - alpha) * prevCycle2);
-            cycle_List.AddRounded(cycle_);
+            cycle_List.Add(cycle_);
 
             var cycle = i < 7 ? (currentMedianPrice - (2 * prevMedianPrice1) + prevMedianPrice2) / 4 : cycle_;
-            cycleList.AddRounded(cycle);
+            cycleList.Add(cycle);
 
             var signal = GetCompareSignal(cycle - prevCyc1, prevCyc1 - prevCyc2);
             signalsList.Add(signal);
@@ -761,6 +777,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV1(this StockData stockData, int fastLength = 100, int slowLength = 125, 
         double fastMult = 1.2, double slowMult = 1)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
         List<double> decycler1OscillatorList = new();
         List<double> decycler2OscillatorList = new();
         List<Signal> signalsList = new();
@@ -781,11 +799,11 @@ public static partial class Calculations
 
             var prevDecyclerOsc1 = decycler1OscillatorList.LastOrDefault();
             var decyclerOscillator1 = currentValue != 0 ? 100 * fastMult * decycler1Filtered / currentValue : 0;
-            decycler1OscillatorList.AddRounded(decyclerOscillator1);
+            decycler1OscillatorList.Add(decyclerOscillator1);
 
             var prevDecyclerOsc2 = decycler2OscillatorList.LastOrDefault();
             var decyclerOscillator2 = currentValue != 0 ? 100 * slowMult * decycler2Filtered / currentValue : 0;
-            decycler2OscillatorList.AddRounded(decyclerOscillator2);
+            decycler2OscillatorList.Add(decyclerOscillator2);
 
             var signal = GetCompareSignal(decyclerOscillator2 - decyclerOscillator1, prevDecyclerOsc2 - prevDecyclerOsc1);
             signalsList.Add(signal);
@@ -812,6 +830,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHighPassFilterV2(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> hpList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -831,7 +850,7 @@ public static partial class Calculations
             var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
 
             var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
         }
 
         var hpMa1List = GetMovingAverageList(stockData, maType, length, hpList);
@@ -868,6 +887,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int fastLength = 10, int slowLength = 20)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
         List<double> decList = new();
         List<Signal> signalsList = new();
 
@@ -881,7 +902,7 @@ public static partial class Calculations
 
             var prevDec = decList.LastOrDefault();
             var dec = hp2 - hp1;
-            decList.AddRounded(dec);
+            decList.Add(dec);
 
             var signal = GetCompareSignal(dec, prevDec);
             signalsList.Add(signal);
@@ -910,6 +931,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersModifiedStochasticIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
         int length1 = 48, int length2 = 10, int length3 = 20)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> stocList = new();
         List<double> modStocList = new();
         List<Signal> signalsList = new();
@@ -933,10 +957,10 @@ public static partial class Calculations
 
             var prevStoc = stocList.LastOrDefault();
             var stoc = highest - lowest != 0 ? (roofingFilter - lowest) / (highest - lowest) * 100 : 0;
-            stocList.AddRounded(stoc);
+            stocList.Add(stoc);
 
             var modStoc = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevModStoc1) + (c3 * prevModStoc2);
-            modStocList.AddRounded(modStoc);
+            modStocList.Add(modStoc);
 
             var signal = GetRsiSignal(modStoc - prevModStoc1, prevModStoc1 - prevModStoc2, modStoc, prevModStoc1, 70, 30);
             signalsList.Add(signal);
@@ -963,6 +987,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersModifiedRelativeStrengthIndex(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> upChgList = new();
         List<double> upChgSumList = new();
         List<double> denomList = new();
@@ -988,22 +1015,22 @@ public static partial class Calculations
             var prevMrsiSig2 = i >= 2 ? mrsiSigList[i - 2] : 0;
 
             var upChg = roofingFilter > prevRoofingFilter ? roofingFilter - prevRoofingFilter : 0;
-            upChgList.AddRounded(upChg);
+            upChgList.Add(upChg);
 
             var dnChg = roofingFilter < prevRoofingFilter ? prevRoofingFilter - roofingFilter : 0;
             var prevUpChgSum = upChgSumList.LastOrDefault();
             var upChgSum = upChgList.TakeLastExt(length3).Sum();
-            upChgSumList.AddRounded(upChgSum);
+            upChgSumList.Add(upChgSum);
 
             var prevDenom = denomList.LastOrDefault();
             var denom = upChg + dnChg;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
 
             var mrsi = denom != 0 && prevDenom != 0 ? (c1 * (((upChgSum / denom) + (prevUpChgSum / prevDenom)) / 2)) + (c2 * prevMrsi1) + (c3 * prevMrsi2) : 0;
-            mrsiList.AddRounded(mrsi);
+            mrsiList.Add(mrsi);
 
             var mrsiSig = (c1 * ((mrsi + prevMrsi1) / 2)) + (c2 * prevMrsiSig1) + (c3 * prevMrsiSig2);
-            mrsiSigList.AddRounded(mrsiSig);
+            mrsiSigList.Add(mrsiSig);
 
             var signal = GetRsiSignal(mrsi - mrsiSig, prevMrsi1 - prevMrsiSig1, mrsi, prevMrsi1, 0.7, 0.3);
             signalsList.Add(signal);
@@ -1030,6 +1057,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHpLpRoofingFilter(this StockData stockData, int length1 = 48, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> highPassList = new();
         List<double> roofingFilterList = new();
         List<Signal> signalsList = new();
@@ -1053,10 +1082,10 @@ public static partial class Calculations
             var prevHp1 = i >= 1 ? highPassList[i - 1] : 0;
 
             var hp = ((1 - (alpha1 / 2)) * MinPastValues(i, 1, currentValue - prevValue)) + ((1 - alpha1) * prevHp1);
-            highPassList.AddRounded(hp);
+            highPassList.Add(hp);
 
             var filter = (c1 * ((hp + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            roofingFilterList.AddRounded(filter);
+            roofingFilterList.Add(filter);
 
             var signal = GetCompareSignal(filter - prevFilter1, prevFilter1 - prevFilter2);
             signalsList.Add(signal);
@@ -1081,6 +1110,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersDecycler(this StockData stockData, int length = 60)
     {
+        length = Math.Max(length, 1);
         List<double> decList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1096,7 +1126,7 @@ public static partial class Calculations
 
             var prevDec = decList.LastOrDefault();
             var dec = (alpha1 / 2 * (currentValue + prevValue1)) + ((1 - alpha1) * prevDec);
-            decList.AddRounded(dec);
+            decList.Add(dec);
 
             var signal = GetCompareSignal(currentValue - dec, prevValue1 - prevDec);
             signalsList.Add(signal);
@@ -1122,6 +1152,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersZeroMeanRoofingFilter(this StockData stockData, int length1 = 48, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> zmrFilterList = new();
         List<Signal> signalsList = new();
 
@@ -1139,7 +1171,7 @@ public static partial class Calculations
             var prevZmrFilt2 = i >= 2 ? zmrFilterList[i - 2] : 0;
 
             var zmrFilt = ((1 - (alpha1 / 2)) * (currentRf - prevRf)) + ((1 - alpha1) * prevZmrFilt1);
-            zmrFilterList.AddRounded(zmrFilt);
+            zmrFilterList.Add(zmrFilt);
 
             var signal = GetCompareSignal(zmrFilt - prevZmrFilt1, prevZmrFilt1 - prevZmrFilt2);
             signalsList.Add(signal);
@@ -1165,6 +1197,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersRoofingFilterIndicator(this StockData stockData, int length1 = 80, int length2 = 40)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> highPassList = new();
         List<double> roofingFilterList = new();
         List<Signal> signalsList = new();
@@ -1190,10 +1224,10 @@ public static partial class Calculations
             var prevHp2 = i >= 2 ? highPassList[i - 2] : 0;
 
             var hp = (Pow(1 - (a1 / 2), 2) * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - a1) * prevHp1) - (Pow(1 - a1, 2) * prevHp2);
-            highPassList.AddRounded(hp);
+            highPassList.Add(hp);
 
             var filter = (c1 * ((hp + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            roofingFilterList.AddRounded(filter);
+            roofingFilterList.Add(filter);
 
             var signal = GetCompareSignal(filter - prevFilter1, prevFilter1 - prevFilter2);
             signalsList.Add(signal);
@@ -1219,6 +1253,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHurstCoefficient(this StockData stockData, int length1 = 30, int length2 = 20)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> dimenList = new();
         List<double> hurstList = new();
         List<double> smoothHurstList = new();
@@ -1260,14 +1296,14 @@ public static partial class Calculations
 
             var prevDimen = dimenList.LastOrDefault();
             var dimen = 0.5 * (((Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2)) + prevDimen);
-            dimenList.AddRounded(dimen);
+            dimenList.Add(dimen);
 
             var prevHurst = hurstList.LastOrDefault();
             var hurst = 2 - dimen;
-            hurstList.AddRounded(hurst);
+            hurstList.Add(hurst);
 
             var smoothHurst = (c1 * ((hurst + prevHurst) / 2)) + (c2 * prevSmoothHurst1) + (c3 * prevSmoothHurst2);
-            smoothHurstList.AddRounded(smoothHurst);
+            smoothHurstList.Add(smoothHurst);
 
             var signal = GetCompareSignal(smoothHurst - prevSmoothHurst1, prevSmoothHurst1 - prevSmoothHurst2);
             signalsList.Add(signal);
@@ -1292,6 +1328,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersReflexIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> filterList = new();
         List<double> msList = new();
         List<double> reflexList = new();
@@ -1315,7 +1352,7 @@ public static partial class Calculations
             var prevReflex2 = i >= 2 ? reflexList[i - 2] : 0;
 
             var filter = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filterList.AddRounded(filter);
+            filterList.Add(filter);
 
             var slope = length != 0 ? (priorFilter - filter) / length : 0;
             double sum = 0;
@@ -1328,10 +1365,10 @@ public static partial class Calculations
 
             var prevMs = msList.LastOrDefault();
             var ms = (0.04 * sum * sum) + (0.96 * prevMs);
-            msList.AddRounded(ms);
+            msList.Add(ms);
 
             var reflex = ms > 0 ? sum / Sqrt(ms) : 0;
-            reflexList.AddRounded(reflex);
+            reflexList.Add(reflex);
 
             var signal = GetCompareSignal(reflex - prevReflex1, prevReflex1 - prevReflex2);
             signalsList.Add(signal);
@@ -1360,6 +1397,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersSpectrumDerivedFilterBank(this StockData stockData, int minLength = 8, int maxLength = 50, 
         int length1 = 40, int length2 = 10)
     {
+        minLength = Math.Max(minLength, 1);
+        maxLength = Math.Max(maxLength, minLength);
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> dcList = new();
         List<double> domCycList = new();
         List<double> realList = new();
@@ -1385,11 +1426,11 @@ public static partial class Calculations
             var prevHp5 = i >= 5 ? hpList[i - 5] : 0;
 
             var hp = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var prevSmoothHp = smoothHpList.LastOrDefault();
             var smoothHp = i < 7 ? currentValue - prevValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-            smoothHpList.AddRounded(smoothHp);
+            smoothHpList.Add(smoothHp);
 
             double num = 0, denom = 0, dc = 0, real = 0, imag = 0, q1 = 0, maxAmpl = 0;
             for (var j = minLength; j <= maxLength; j++)
@@ -1415,13 +1456,13 @@ public static partial class Calculations
                 denom += db <= 3 ? maxLength - db : 0;
                 dc = denom != 0 ? num / denom : 0;
             }
-            q1List.AddRounded(q1);
-            realList.AddRounded(real);
-            imagList.AddRounded(imag);
-            dcList.AddRounded(dc);
+            q1List.Add(q1);
+            realList.Add(real);
+            imagList.Add(imag);
+            dcList.Add(dc);
 
             var domCyc = dcList.TakeLastExt(length2).Median();
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(smoothHp, prevSmoothHp);
             signalsList.Add(signal);
@@ -1450,6 +1491,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersDominantCycleTunedBypassFilter(this StockData stockData, int minLength = 8, int maxLength = 50, 
         int length1 = 40, int length2 = 10)
     {
+        minLength = Math.Max(minLength, 1);
+        maxLength = Math.Max(maxLength, minLength);
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> v1List = new();
         List<double> v2List = new();
         List<double> hpList = new();
@@ -1478,19 +1523,19 @@ public static partial class Calculations
             var prevHp5 = i >= 5 ? hpList[i - 5] : 0;
 
             var hp = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var prevSmoothHp = smoothHpList.LastOrDefault();
             var smoothHp = i < 7 ? currentValue - prevValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-            smoothHpList.AddRounded(smoothHp);
+            smoothHpList.Add(smoothHp);
 
             var prevV1 = i >= 1 ? v1List[i - 1] : 0;
             var prevV1_2 = i >= 2 ? v1List[i - 2] : 0;
             var v1 = (0.5 * (1 - alpha) * (smoothHp - prevSmoothHp)) + (beta * (1 + alpha) * prevV1) - (alpha * prevV1_2);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
 
             var v2 = domCyc / Math.PI * 2 * (v1 - prevV1);
-            v2List.AddRounded(v2);
+            v2List.Add(v2);
 
             var signal = GetConditionSignal(v2 > v1 && v2 >= 0, v2 < v1 || v2 < 0);
             signalsList.Add(signal);
@@ -1521,6 +1566,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersRestoringPullIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
     {
+        minLength = Math.Max(minLength, 1);
+        maxLength = Math.Max(maxLength, minLength);
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> rpiList = new();
         List<Signal> signalsList = new();
         var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
@@ -1533,7 +1582,7 @@ public static partial class Calculations
             var volume = volumeList[i];
 
             var rpi = volume * Pow(MinOrMax(2 * Math.PI / domCyc, 0.99, 0.01), 2);
-            rpiList.AddRounded(rpi);
+            rpiList.Add(rpi);
         }
 
         var rpiEmaList = GetMovingAverageList(stockData, maType, minLength, rpiList);
@@ -1568,6 +1617,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersTrendflexIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> filterList = new();
         List<double> msList = new();
         List<double> trendflexList = new();
@@ -1588,7 +1638,7 @@ public static partial class Calculations
             var prevFilter2 = i >= 2 ? filterList[i - 2] : 0;
 
             var filter = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filterList.AddRounded(filter);
+            filterList.Add(filter);
 
             double sum = 0;
             for (var j = 1; j <= length; j++)
@@ -1600,11 +1650,11 @@ public static partial class Calculations
 
             var prevMs = msList.LastOrDefault();
             var ms = (0.04 * Pow(sum, 2)) + (0.96 * prevMs);
-            msList.AddRounded(ms);
+            msList.Add(ms);
 
             var prevTrendflex = trendflexList.LastOrDefault();
             var trendflex = ms > 0 ? sum / Sqrt(ms) : 0;
-            trendflexList.AddRounded(trendflex);
+            trendflexList.Add(trendflex);
 
             var signal = GetCompareSignal(trendflex, prevTrendflex);
             signalsList.Add(signal);
@@ -1629,6 +1679,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCorrelationCycleIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> realList = new();
         List<double> imagList = new();
         List<Signal> signalsList = new();
@@ -1656,12 +1707,12 @@ public static partial class Calculations
             var prevReal = realList.LastOrDefault();
             var real = (length * sxx) - (sx * sx) > 0 && (length * syy) - (sy * sy) > 0 ? ((length * sxy) - (sx * sy)) /
                    Sqrt(((length * sxx) - (sx * sx)) * ((length * syy) - (sy * sy))) : 0;
-            realList.AddRounded(real);
+            realList.Add(real);
 
             var prevImag = imagList.LastOrDefault();
             var imag = (length * sxx) - (sx * sx) > 0 && (length * nsyy) - (nsy * nsy) > 0 ? ((length * nsxy) - (sx * nsy)) /
                    Sqrt(((length * sxx) - (sx * sx)) * ((length * nsyy) - (nsy * nsy))) : 0;
-            imagList.AddRounded(imag);
+            imagList.Add(imag);
 
             var signal = GetCompareSignal(real - imag, prevReal - prevImag);
             signalsList.Add(signal);
@@ -1687,6 +1738,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCorrelationAngleIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> angleList = new();
         List<Signal> signalsList = new();
 
@@ -1703,7 +1755,7 @@ public static partial class Calculations
             var angle = imag != 0 ? 90 + Math.Atan(real / imag).ToDegrees() : 90;
             angle = imag > 0 ? angle - 180 : angle;
             angle = prevAngle - angle < 270 && angle < prevAngle ? prevAngle : angle;
-            angleList.AddRounded(angle);
+            angleList.Add(angle);
 
             var signal = GetCompareSignal(angle, prevAngle);
             signalsList.Add(signal);
@@ -1728,6 +1780,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersMarketStateIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> stateList = new();
         List<Signal> signalsList = new();
 
@@ -1740,7 +1793,7 @@ public static partial class Calculations
 
             var prevState = stateList.LastOrDefault();
             double state = Math.Abs(angle - prevAngle) < 9 && angle < 0 ? -1 : Math.Abs(angle - prevAngle) < 9 && angle >= 0 ? 1 : 0;
-            stateList.AddRounded(state);
+            stateList.Add(state);
 
             var signal = GetCompareSignal(state, prevState);
             signalsList.Add(signal);
@@ -1768,6 +1821,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersTrendExtraction(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, double delta = 0.1)
     {
+        length = Math.Max(length, 1);
         List<double> bpList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1784,7 +1838,7 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var bp = (0.5 * (1 - alpha) * MinPastValues(i, 2, currentValue - prevValue)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
         }
 
         var trendList = GetMovingAverageList(stockData, maType, length * 2, bpList);
@@ -1822,6 +1876,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersEmpiricalModeDecomposition(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 50, double delta = 0.5, double fraction = 0.1)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> peakList = new();
         List<double> valleyList = new();
         List<double> peakAvgFracList = new();
@@ -1840,11 +1896,11 @@ public static partial class Calculations
 
             var prevPeak = peakList.LastOrDefault();
             var peak = prevBp1 > bp && prevBp1 > prevBp2 ? prevBp1 : prevPeak;
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var prevValley = valleyList.LastOrDefault();
             var valley = prevBp1 < bp && prevBp1 < prevBp2 ? prevBp1 : prevValley;
-            valleyList.AddRounded(valley);
+            valleyList.Add(valley);
         }
 
         var peakAvgList = GetMovingAverageList(stockData, maType, length2, peakList);
@@ -1858,11 +1914,11 @@ public static partial class Calculations
 
             var prevPeakAvgFrac = peakAvgFracList.LastOrDefault();
             var peakAvgFrac = fraction * peakAvg;
-            peakAvgFracList.AddRounded(peakAvgFrac);
+            peakAvgFracList.Add(peakAvgFrac);
 
             var prevValleyAvgFrac = valleyAvgFracList.LastOrDefault();
             var valleyAvgFrac = fraction * valleyAvg;
-            valleyAvgFracList.AddRounded(valleyAvgFrac);
+            valleyAvgFracList.Add(valleyAvgFrac);
 
             var signal = GetBullishBearishSignal(trend - Math.Max(peakAvgFrac, valleyAvgFrac), prevTrend - Math.Max(prevPeakAvgFrac, prevValleyAvgFrac),
                 trend - Math.Min(peakAvgFrac, valleyAvgFrac), prevTrend - Math.Min(prevPeakAvgFrac, prevValleyAvgFrac));
@@ -1892,6 +1948,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersEarlyOnsetTrendIndicator(this StockData stockData, int length1 = 30, int length2 = 100, double k = 0.85)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> peakList = new();
         List<double> quotientList = new();
         List<Signal> signalsList = new();
@@ -1906,12 +1964,12 @@ public static partial class Calculations
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var ratio = peak != 0 ? filter / peak : 0;
             var prevQuotient = quotientList.LastOrDefault();
             var quotient = (k * ratio) + 1 != 0 ? (ratio + k) / ((k * ratio) + 1) : 0;
-            quotientList.AddRounded(quotient);
+            quotientList.Add(quotient);
 
             var signal = GetCompareSignal(quotient, prevQuotient);
             signalsList.Add(signal);
@@ -1939,6 +1997,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersRoofingFilterV1(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, 
         int length1 = 48, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> argList = new();
         List<Signal> signalsList = new();
 
@@ -1950,7 +2010,7 @@ public static partial class Calculations
             var prevHp1 = i >= 1 ? hpFilterList[i - 1] : 0;
 
             var arg = (highPass + prevHp1) / 2;
-            argList.AddRounded(arg);
+            argList.Add(arg);
         }
 
         var roofingFilter2PoleList = GetMovingAverageList(stockData, maType, length2, argList);
@@ -1986,6 +2046,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersSnakeUniversalTradingFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 23, int length2 = 50, double bw = 1.4)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> bpList = new();
         List<double> negRmsList = new();
         List<double> filtPowList = new();
@@ -2005,7 +2067,7 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length1, bpList);
@@ -2016,14 +2078,14 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
             var filtPow = Pow(filt, 2);
-            filtPowList.AddRounded(filtPow);
+            filtPowList.Add(filtPow);
 
             var filtPowMa = filtPowList.TakeLastExt(length2).Average();
             var rms = Sqrt(filtPowMa);
-            rmsList.AddRounded(rms);
+            rmsList.Add(rms);
 
             var negRms = -rms;
-            negRmsList.AddRounded(negRms);
+            negRmsList.Add(negRms);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -2053,6 +2115,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersImpulseResponse(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length = 20, double bw = 1)
     {
+        length = Math.Max(length, 1);
         List<double> bpList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -2070,7 +2133,7 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, hannLength, bpList);
@@ -2108,6 +2171,11 @@ public static partial class Calculations
     public static StockData CalculateEhlersMesaPredictIndicatorV1(this StockData stockData, int length1 = 5, int length2 = 4, int length3 = 10, 
         int lowerLength = 12, int upperLength = 54)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        lowerLength = Math.Max(lowerLength, 1);
+        upperLength = Math.Max(upperLength, 1);
         List<double> ssfList = new();
         List<double> hpList = new();
         List<double> prePredictList = new();
@@ -2146,10 +2214,10 @@ public static partial class Calculations
             var hCoefArray = new double[520];
 
             var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var ssf = i < 3 ? hp : (coef1 * ((hp + prevHp1) / 2)) + (coef2 * prevSsf1) + (coef3 * prevSsf2);
-            ssfList.AddRounded(ssf);
+            ssfList.Add(ssf);
 
             double pwrSum = 0;
             for (var j = 0; j < upperLength; j++)
@@ -2245,10 +2313,10 @@ public static partial class Calculations
 
             var prevPrePredict = prePredictList.LastOrDefault();
             var prePredict = xxArray[upperLength + length1];
-            prePredictList.AddRounded(prePredict);
+            prePredictList.Add(prePredict);
 
             var predict = (prePredict + prevPrePredict) / 2;
-            predictList.AddRounded(predict);
+            predictList.Add(predict);
 
             var signal = GetCompareSignal(ssf - predict, prevSsf1 - prevPredict1);
             signalsList.Add(signal);
@@ -2280,6 +2348,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersMesaPredictIndicatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        length4 = Math.Max(length4, 1);
         List<double> ssfList = new();
         List<double> hpList = new();
         List<double> predictList = new();
@@ -2316,10 +2388,10 @@ public static partial class Calculations
             var prevSsf2 = i >= 2 ? ssfList[i - 2] : 0;
 
             var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var ssf = i < 3 ? hp : (coef1 * ((hp + prevHp1) / 2)) + (coef2 * prevSsf1) + (coef3 * prevSsf2);
-            ssfList.AddRounded(ssf);
+            ssfList.Add(ssf);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length3, ssfList);
@@ -2352,10 +2424,10 @@ public static partial class Calculations
             }
 
             var predict = xxArray[length1 + length4];
-            predictList.AddRounded(predict);
+            predictList.Add(predict);
 
             var extrap = yyArray[length1 + length4];
-            extrapList.AddRounded(extrap);
+            extrapList.Add(extrap);
 
             var signal = GetCompareSignal(predict - prevPredict1, prevPredict1 - prevPredict2);
             signalsList.Add(signal);
@@ -2385,6 +2457,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersAnticipateIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length = 14, double bw = 1)
     {
+        length = Math.Max(length, 1);
         List<double> predictList = new();
         List<Signal> signalsList = new();
 
@@ -2414,7 +2487,7 @@ public static partial class Calculations
 
             var prevPredict = predictList.LastOrDefault();
             var predict = Math.Sin(MinOrMax(2 * Math.PI * start / length, 0.99, 0.01));
-            predictList.AddRounded(predict);
+            predictList.Add(predict);
 
             var signal = GetCompareSignal(predict, prevPredict);
             signalsList.Add(signal);
@@ -2441,6 +2514,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersImpulseReaction(this StockData stockData, int length1 = 2, int length2 = 20, double qq = 0.9)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> reactionList = new();
         List<double> ireactList = new();
         List<Signal> signalsList = new();
@@ -2460,10 +2535,10 @@ public static partial class Calculations
             var prevIReact2 = i >= 2 ? ireactList[i - 2] : 0;
 
             var reaction = (c1 * (currentValue - priorValue)) + (c2 * prevReaction1) + (c3 * prevReaction2);
-            reactionList.AddRounded(reaction);
+            reactionList.Add(reaction);
 
             var ireact = currentValue != 0 ? 100 * reaction / currentValue : 0;
-            ireactList.AddRounded(ireact);
+            ireactList.Add(ireact);
 
             var signal = GetCompareSignal(ireact - prevIReact1, prevIReact1 - prevIReact2);
             signalsList.Add(signal);
@@ -2492,6 +2567,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersUniversalTradingFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 16, int length2 = 50, double mult = 2)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> momList = new();
         List<double> negRmsList = new();
         List<double> filtPowList = new();
@@ -2507,7 +2584,7 @@ public static partial class Calculations
             var priorValue = i >= hannLength ? inputList[i - hannLength] : 0;
 
             var mom = currentValue - priorValue;
-            momList.AddRounded(mom);
+            momList.Add(mom);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length1, momList);
@@ -2518,14 +2595,14 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
             var filtPow = Pow(filt, 2);
-            filtPowList.AddRounded(filtPow);
+            filtPowList.Add(filtPow);
 
             var filtPowMa = filtPowList.TakeLastExt(length2).Average();
             var rms = filtPowMa > 0 ? Sqrt(filtPowMa) : 0;
-            rmsList.AddRounded(rms);
+            rmsList.Add(rms);
 
             var negRms = -rms;
-            negRmsList.AddRounded(negRms);
+            negRmsList.Add(negRms);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -2554,6 +2631,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersRecursiveMedianOscillator(this StockData stockData, int length1 = 5, int length2 = 12, int length3 = 30)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> rmList = new();
         List<double> tempList = new();
         List<double> rmoList = new();
@@ -2570,7 +2650,7 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             var median = tempList.TakeLastExt(length1).Median();
             var prevRm1 = i >= 1 ? rmList[i - 1] : 0;
@@ -2579,10 +2659,10 @@ public static partial class Calculations
             var prevRmo2 = i >= 2 ? rmoList[i - 2] : 0;
 
             var rm = (alpha1 * median) + ((1 - alpha1) * prevRm1);
-            rmList.AddRounded(rm);
+            rmList.Add(rm);
 
             var rmo = (Pow(1 - (alpha2 / 2), 2) * (rm - (2 * prevRm1) + prevRm2)) + (2 * (1 - alpha2) * prevRmo1) - (Pow(1 - alpha2, 2) * prevRmo2);
-            rmoList.AddRounded(rmo);
+            rmoList.Add(rmo);
 
             var signal = GetCompareSignal(rmo, prevRmo1);
             signalsList.Add(signal);
@@ -2610,6 +2690,10 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSuperPassbandFilter(this StockData stockData, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> espfList = new();
         List<double> squareList = new();
         List<double> rmsList = new();
@@ -2629,19 +2713,19 @@ public static partial class Calculations
 
             var espf = ((a1 - a2) * currentValue) + (((a2 * (1 - a1)) - (a1 * (1 - a2))) * prevValue1) + ((1 - a1 + (1 - a2)) * prevEspf1) - 
                        ((1 - a1) * (1 - a2) * prevEspf2);
-            espfList.AddRounded(espf);
+            espfList.Add(espf);
 
             var espfPow = Pow(espf, 2);
-            squareList.AddRounded(espfPow);
+            squareList.Add(espfPow);
 
             var squareAvg = squareList.TakeLastExt(length2).Average();
             var prevRms = rmsList.LastOrDefault();
             var rms = Sqrt(squareAvg);
-            rmsList.AddRounded(rms);
+            rmsList.Add(rms);
 
             var prevNegRms = negRmsList.LastOrDefault();
             var negRms = -rms;
-            negRmsList.AddRounded(negRms);
+            negRmsList.Add(negRms);
 
             var signal = GetBullishBearishSignal(espf - rms, prevEspf1 - prevRms, espf - negRms, prevEspf1 - prevNegRms);
             signalsList.Add(signal);
@@ -2671,6 +2755,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersSimpleDerivIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 2, int signalLength = 8)
     {
+        length = Math.Max(length, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> derivList = new();
         List<double> z3List = new();
         List<Signal> signalsList = new();
@@ -2685,10 +2771,10 @@ public static partial class Calculations
             var prevDeriv3 = i >= 3 ? derivList[i - 3] : 0;
 
             var deriv = MinPastValues(i, length, currentValue - prevValue);
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
 
             var z3 = deriv + prevDeriv1 + prevDeriv2 + prevDeriv3;
-            z3List.AddRounded(z3);
+            z3List.Add(z3);
         }
 
         var z3EmaList = GetMovingAverageList(stockData, maType, signalLength, z3List);
@@ -2726,6 +2812,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersSimpleClipIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> derivList = new();
         List<double> clipList = new();
         List<double> z3List = new();
@@ -2741,7 +2831,7 @@ public static partial class Calculations
             var prevClip3 = i >= 3 ? clipList[i - 3] : 0;
 
             var deriv = MinPastValues(i, length1, currentValue - prevValue);
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
 
             double rms = 0;
             for (var j = 0; j < length3; j++)
@@ -2751,10 +2841,10 @@ public static partial class Calculations
             }
 
             var clip = rms != 0 ? MinOrMax(2 * deriv / Sqrt(rms / length3), 1, -1) : 0;
-            clipList.AddRounded(clip);
+            clipList.Add(clip);
 
             var z3 = clip + prevClip1 + prevClip2 + prevClip3;
-            z3List.AddRounded(z3);
+            z3List.Add(z3);
         }
 
         var z3EmaList = GetMovingAverageList(stockData, maType, signalLength, z3List);
@@ -2787,6 +2877,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSpearmanRankIndicator(this StockData stockData, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> sriList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -2831,7 +2922,7 @@ public static partial class Calculations
 
             var prevSri = sriList.LastOrDefault();
             var sri = 2 * (0.5 - (1 - (6 * sum / (length * (Pow(length, 2) - 1)))));
-            sriList.AddRounded(sri);
+            sriList.Add(sri);
 
             var signal = GetCompareSignal(sri, prevSri);
             signalsList.Add(signal);
@@ -2856,6 +2947,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersNoiseEliminationTechnology(this StockData stockData, int length = 14)
     {
+        length = Math.Max(length, 1);
         List<double> netList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -2882,7 +2974,7 @@ public static partial class Calculations
 
             var prevNet = netList.LastOrDefault();
             var net = denom != 0 ? num / denom : 0;
-            netList.AddRounded(net);
+            netList.Add(net);
 
             var signal = GetCompareSignal(net, prevNet);
             signalsList.Add(signal);
@@ -2909,6 +3001,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersTruncatedBandPassFilter(this StockData stockData, int length1 = 20, int length2 = 10, double bw = 0.1)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> bptList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -2929,7 +3023,7 @@ public static partial class Calculations
 
             var prevBpt = bptList.LastOrDefault();
             var bpt = trunArray[1];
-            bptList.AddRounded(bpt);
+            bptList.Add(bpt);
 
             var signal = GetCompareSignal(bpt, prevBpt);
             signalsList.Add(signal);
@@ -2955,6 +3049,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAutoCorrelationIndicator(this StockData stockData, int length1 = 48, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> corrList = new();
         List<double> xList = new();
         List<double> yList = new();
@@ -2971,29 +3067,30 @@ public static partial class Calculations
             var prevCorr2 = i >= 2 ? corrList[i - 2] : 0;
 
             var x = roofingFilterList[i];
-            xList.AddRounded(x);
+            xList.Add(x);
 
             var y = i >= length1 ? roofingFilterList[i - length1] : 0;
-            yList.AddRounded(y);
+            yList.Add(y);
 
             var xx = Pow(x, 2);
-            xxList.AddRounded(xx);
+            xxList.Add(xx);
 
             var yy = Pow(y, 2);
-            yyList.AddRounded(yy);
+            yyList.Add(yy);
 
             var xy = x * y;
-            xyList.AddRounded(xy);
+            xyList.Add(xy);
 
             var sx = xList.TakeLastExt(length1).Sum();
             var sy = yList.TakeLastExt(length1).Sum();
             var sxx = xxList.TakeLastExt(length1).Sum();
             var syy = yyList.TakeLastExt(length1).Sum();
             var sxy = xyList.TakeLastExt(length1).Sum();
+            var count = Math.Min(i + 1, length1);
 
-            var corr = ((i * sxx) - (sx * sx)) * ((i * syy) - (sy * sy)) > 0 ? 0.5 * ((((i * sxy) - (sx * sy)) / 
-                Sqrt(((i * sxx) - (sx * sx)) * ((i * syy) - (sy * sy)))) + 1) : 0;
-            corrList.AddRounded(corr);
+            var corr = ((count * sxx) - (sx * sx)) * ((count * syy) - (sy * sy)) > 0 ? 0.5 * ((((count * sxy) - (sx * sy)) / 
+                Sqrt(((count * sxx) - (sx * sx)) * ((count * syy) - (sy * sy)))) + 1) : 0;
+            corrList.Add(corr);
 
             var signal = GetCompareSignal(corr - prevCorr1, prevCorr1 - prevCorr2);
             signalsList.Add(signal);
@@ -3020,9 +3117,12 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAutoCorrelationPeriodogram(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 0);
         List<double> domCycList = new();
-        List<double> rList = new();
         List<Signal> signalsList = new();
+        var rArray = new double[length1 + 1];
 
         var corrList = CalculateEhlersAutoCorrelationIndicator(stockData, length1, length2).CustomValuesList;
 
@@ -3032,7 +3132,7 @@ public static partial class Calculations
             var prevCorr1 = i >= 1 ? corrList[i - 1] : 0;
             var prevCorr2 = i >= 2 ? corrList[i - 2] : 0;
 
-            double maxPwr = 0, spx = 0, sp = 0;
+            double maxPwr = 0;
             for (var j = length2; j <= length1; j++)
             {
                 double cosPart = 0, sinPart = 0;
@@ -3044,11 +3144,15 @@ public static partial class Calculations
                 }
 
                 var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
-                var prevR = i >= j - 1 ? rList[i - (j - 1)] : 0;
-                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * prevR);
+                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * rArray[j]);
+                rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
-                var pwr = maxPwr != 0 ? r / maxPwr : 0;
+            }
 
+            double spx = 0, sp = 0;
+            for (var j = length2; j <= length1; j++)
+            {
+                var pwr = maxPwr != 0 ? rArray[j] / maxPwr : 0;
                 if (pwr >= 0.5)
                 {
                     spx += j * pwr;
@@ -3057,7 +3161,7 @@ public static partial class Calculations
             }
 
             var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(corr - prevCorr1, prevCorr1 - prevCorr2);
             signalsList.Add(signal);
@@ -3086,6 +3190,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveRelativeStrengthIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> upChgList = new();
         List<double> denomList = new();
         List<double> arsiList = new();
@@ -3115,14 +3222,14 @@ public static partial class Calculations
                 upChg += filt > prevFilt ? filt - prevFilt : 0;
                 dnChg += filt < prevFilt ? prevFilt - filt : 0;
             }
-            upChgList.AddRounded(upChg);
+            upChgList.Add(upChg);
 
             var prevDenom = denomList.LastOrDefault();
             var denom = upChg + dnChg;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
 
             var arsi = denom != 0 && prevDenom != 0 ? (c1 * ((upChg / denom) + (prevUpChg / prevDenom)) / 2) + (c2 * prevArsi1) + (c3 * prevArsi2) : 0;
-            arsiList.AddRounded(arsi);
+            arsiList.Add(arsi);
         }
 
         var arsiEmaList = GetMovingAverageList(stockData, maType, length2, arsiList);
@@ -3161,6 +3268,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveRsiFisherTransformV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> fishList = new();
         List<Signal> signalsList = new();
 
@@ -3175,7 +3285,7 @@ public static partial class Calculations
             var ampRsi = MinOrMax(1.5 * tranRsi, 0.999, -0.999);
 
             var fish = 0.5 * Math.Log((1 + ampRsi) / (1 - ampRsi));
-            fishList.AddRounded(fish);
+            fishList.Add(fish);
 
             var signal = GetRsiSignal(fish - prevFish1, prevFish1 - prevFish2, fish, prevFish1, 2, -2);
             signalsList.Add(signal);
@@ -3204,6 +3314,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveStochasticIndicatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> stocList = new();
         List<double> astocList = new();
         List<Signal> signalsList = new();
@@ -3234,10 +3347,10 @@ public static partial class Calculations
 
             var prevStoc = stocList.LastOrDefault();
             var stoc = highest != lowest ? (roofingFilter - lowest) / (highest - lowest) : 0;
-            stocList.AddRounded(stoc);
+            stocList.Add(stoc);
 
             var astoc = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevAstoc1) + (c3 * prevAstoc2);
-            astocList.AddRounded(astoc);
+            astocList.Add(astoc);
         }
 
         var astocEmaList = GetMovingAverageList(stockData, maType, length2, astocList);
@@ -3276,6 +3389,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveStochasticInverseFisherTransform(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> fishList = new();
         List<double> triggerList = new();
         List<Signal> signalsList = new();
@@ -3289,11 +3405,11 @@ public static partial class Calculations
 
             var prevFish = fishList.LastOrDefault();
             var fish = (Exp(6 * v1) - 1) / (Exp(6 * v1) + 1);
-            fishList.AddRounded(fish);
+            fishList.Add(fish);
 
             var prevTrigger = triggerList.LastOrDefault();
             var trigger = 0.9 * prevFish;
-            triggerList.AddRounded(trigger);
+            triggerList.Add(trigger);
 
             var signal = GetCompareSignal(fish - trigger, prevFish - prevTrigger);
             signalsList.Add(signal);
@@ -3323,6 +3439,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> acciList = new();
         List<double> tempList = new();
         List<double> mdList = new();
@@ -3346,11 +3465,11 @@ public static partial class Calculations
             var cycLength = (int)Math.Ceiling(domCyc);
 
             var roofingFilter = roofingFilterList[i];
-            tempList.AddRounded(roofingFilter);
+            tempList.Add(roofingFilter);
 
             var avg = tempList.TakeLastExt(cycLength).Average();
             var md = Pow(roofingFilter - avg, 2);
-            mdList.AddRounded(md);
+            mdList.Add(md);
 
             var mdAvg = mdList.TakeLastExt(cycLength).Average();
             var rms = cycLength >= 0 ? Sqrt(mdAvg) : 0;
@@ -3359,10 +3478,10 @@ public static partial class Calculations
 
             var prevRatio = ratioList.LastOrDefault();
             var ratio = denom != 0 ? num / denom : 0;
-            ratioList.AddRounded(ratio);
+            ratioList.Add(ratio);
 
             var acci = (c1 * ((ratio + prevRatio) / 2)) + (c2 * prevAcci1) + (c3 * prevAcci2);
-            acciList.AddRounded(acci);
+            acciList.Add(acci);
         }
 
         var acciEmaList = GetMovingAverageList(stockData, maType, length2, acciList);
@@ -3398,9 +3517,11 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersDiscreteFourierTransformSpectralEstimate(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        List<double> rList = new();
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> domCycList = new();
         List<Signal> signalsList = new();
+        var rArray = new double[length1 + 1];
 
         var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
 
@@ -3422,8 +3543,9 @@ public static partial class Calculations
                 }
 
                 var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
-                var prevR = i >= j - 1 ? rList[i - (j - 1)] : 0;
+                var prevR = rArray[j];
                 var r = (0.2 * Pow(sqSum, 2)) + (0.8 * prevR);
+                rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
                 var pwr = maxPwr != 0 ? r / maxPwr : 0;
 
@@ -3435,7 +3557,7 @@ public static partial class Calculations
             }
 
             var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
             signalsList.Add(signal);
@@ -3462,6 +3584,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCombFilterSpectralEstimate(this StockData stockData, int length1 = 48, int length2 = 10, double bw = 0.3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> domCycList = new();
         List<double> bpList = new();
         List<Signal> signalsList = new();
@@ -3500,10 +3624,10 @@ public static partial class Calculations
                     sp += pwr;
                 }
             }
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
             signalsList.Add(signal);
@@ -3532,6 +3656,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAutoCorrelationReversals(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 0);
         List<double> reversalList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -3553,7 +3680,7 @@ public static partial class Calculations
             }
 
             double reversal = delta > (double)length1 / 2 ? 1 : 0;
-            reversalList.AddRounded(reversal);
+            reversalList.Add(reversal);
 
             var signal = GetConditionSignal(currentValue < ema && reversal == 1, currentValue > ema && reversal == 1);
             signalsList.Add(signal);
@@ -3598,40 +3725,40 @@ public static partial class Calculations
 
             var prevEma = emaList.LastOrDefault();
             var ema = (alpha * currentValue) + (cc * prevEma);
-            emaList.AddRounded(ema);
+            emaList.Add(ema);
 
             var prevRe1 = re1List.LastOrDefault();
             var re1 = (cc * ema) + prevEma;
-            re1List.AddRounded(re1);
+            re1List.Add(re1);
 
             var prevRe2 = re2List.LastOrDefault();
             var re2 = (Pow(cc, 2) * re1) + prevRe1;
-            re2List.AddRounded(re2);
+            re2List.Add(re2);
 
             var prevRe3 = re3List.LastOrDefault();
             var re3 = (Pow(cc, 4) * re2) + prevRe2;
-            re3List.AddRounded(re3);
+            re3List.Add(re3);
 
             var prevRe4 = re4List.LastOrDefault();
             var re4 = (Pow(cc, 8) * re3) + prevRe3;
-            re4List.AddRounded(re4);
+            re4List.Add(re4);
 
             var prevRe5 = re5List.LastOrDefault();
             var re5 = (Pow(cc, 16) * re4) + prevRe4;
-            re5List.AddRounded(re5);
+            re5List.Add(re5);
 
             var prevRe6 = re6List.LastOrDefault();
             var re6 = (Pow(cc, 32) * re5) + prevRe5;
-            re6List.AddRounded(re6);
+            re6List.Add(re6);
 
             var prevRe7 = re7List.LastOrDefault();
             var re7 = (Pow(cc, 64) * re6) + prevRe6;
-            re7List.AddRounded(re7);
+            re7List.Add(re7);
 
             var re8 = (Pow(cc, 128) * re7) + prevRe7;
             var prevWave = waveList.LastOrDefault();
             var wave = ema - (alpha * re8);
-            waveList.AddRounded(wave);
+            waveList.Add(wave);
 
             var signal = GetCompareSignal(wave, prevWave);
             signalsList.Add(signal);
@@ -3696,6 +3823,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersMovingAverageDifferenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int fastLength = 8, int slowLength = 23)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
         List<double> madList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -3711,7 +3840,7 @@ public static partial class Calculations
             var prevMad2 = i >= 2 ? madList[i - 2] : 0;
 
             var mad = longMa != 0 ? 100 * (shortMa - longMa) / longMa : 0;
-            madList.AddRounded(mad);
+            madList.Add(mad);
 
             var signal = GetCompareSignal(mad - prevMad1, prevMad1 - prevMad2);
             signalsList.Add(signal);
@@ -3739,6 +3868,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersFisherizedDeviationScaledOscillator(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.EhlersDeviationScaledMovingAverage, int fastLength = 20, int slowLength = 40)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
         List<double> efdso2PoleList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -3753,7 +3884,7 @@ public static partial class Calculations
 
             var efdso2Pole = Math.Abs(currentScaledFilter2Pole) < 2 ? 0.5 * Math.Log((1 + (currentScaledFilter2Pole / 2)) / 
                 (1 - (currentScaledFilter2Pole / 2))) : prevEfdsoPole1;
-            efdso2PoleList.AddRounded(efdso2Pole);
+            efdso2PoleList.Add(efdso2Pole);
 
             var signal = GetRsiSignal(efdso2Pole - prevEfdsoPole1, prevEfdsoPole1 - prevEfdsoPole2, efdso2Pole, prevEfdsoPole1, 2, -2);
             signalsList.Add(signal);
@@ -3780,6 +3911,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHilbertTransformIndicator(this StockData stockData, int length = 7, double iMult = 0.635, double qMult = 0.338)
     {
+        length = Math.Max(length, 1);
         List<double> v1List = new();
         List<double> inPhaseList = new();
         List<double> quadList = new();
@@ -3796,15 +3928,15 @@ public static partial class Calculations
             var quad2 = i >= 2 ? quadList[i - 2] : 0;
 
             var v1 = MinPastValues(i, length, currentValue - prevValue);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
 
             var prevInPhase = inPhaseList.LastOrDefault();
             var inPhase = (1.25 * (v4 - (iMult * v2))) + (iMult * inPhase3);
-            inPhaseList.AddRounded(inPhase);
+            inPhaseList.Add(inPhase);
 
             var prevQuad = quadList.LastOrDefault();
             var quad = v2 - (qMult * v1) + (qMult * quad2);
-            quadList.AddRounded(quad);
+            quadList.Add(quad);
 
             var signal = GetCompareSignal(quad - (-1 * inPhase), prevQuad - (-1 * prevInPhase));
             signalsList.Add(signal);
@@ -3831,6 +3963,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersInstantaneousPhaseIndicator(this StockData stockData, int length1 = 7, int length2 = 50)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> phaseList = new();
         List<double> dPhaseList = new();
         List<double> dcPeriodList = new();
@@ -3852,12 +3986,12 @@ public static partial class Calculations
             phase = ip < 0 && qu > 0 ? 180 - phase : phase;
             phase = ip < 0 && qu < 0 ? 180 + phase : phase;
             phase = ip > 0 && qu < 0 ? 360 - phase : phase;
-            phaseList.AddRounded(phase);
+            phaseList.Add(phase);
 
             var dPhase = prevPhase - phase;
             dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
             dPhase = MinOrMax(dPhase, 60, 1);
-            dPhaseList.AddRounded(dPhase);
+            dPhaseList.Add(dPhase);
 
             double instPeriod = 0, v4 = 0;
             for (var j = 0; j <= length2; j++)
@@ -3869,7 +4003,7 @@ public static partial class Calculations
 
             var prevDcPeriod = dcPeriodList.LastOrDefault();
             var dcPeriod = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
-            dcPeriodList.AddRounded(dcPeriod);
+            dcPeriodList.Add(dcPeriod);
 
             var signal = GetCompareSignal(qu - (-1 * ip), prevQu - (-1 * prevIp));
             signalsList.Add(signal);
@@ -3896,6 +4030,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSquelchIndicator(this StockData stockData, int length1 = 6, int length2 = 20, int length3 = 40)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> phaseList = new();
         List<double> dPhaseList = new();
         List<double> dcPeriodList = new();
@@ -3915,29 +4052,29 @@ public static partial class Calculations
             var prevV14 = i >= 4 ? v1List[i - 4] : 0;
 
             var v1 = MinPastValues(i, length1, currentValue - prevValue);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
 
             var v2 = i >= 3 ? v1List[i - 3] : 0;
             var v3 = (0.75 * (v1 - priorV1)) + (0.25 * (prevV12 - prevV14));
             var prevIp = ipList.LastOrDefault();
             var ip = (0.33 * v2) + (0.67 * prevIp);
-            ipList.AddRounded(ip);
+            ipList.Add(ip);
 
             var prevQu = quList.LastOrDefault();
             var qu = (0.2 * v3) + (0.8 * prevQu);
-            quList.AddRounded(qu);
+            quList.Add(qu);
 
             var prevPhase = phaseList.LastOrDefault();
             var phase = Math.Abs(ip + prevIp) > 0 ? Math.Atan(Math.Abs((qu + prevQu) / (ip + prevIp))).ToDegrees() : 0;
             phase = ip < 0 && qu > 0 ? 180 - phase : phase;
             phase = ip < 0 && qu < 0 ? 180 + phase : phase;
             phase = ip > 0 && qu < 0 ? 360 - phase : phase;
-            phaseList.AddRounded(phase);
+            phaseList.Add(phase);
 
             var dPhase = prevPhase - phase;
             dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
             dPhase = MinOrMax(dPhase, 60, 1);
-            dPhaseList.AddRounded(dPhase);
+            dPhaseList.Add(dPhase);
 
             double instPeriod = 0, v4 = 0;
             for (var j = 0; j <= length3; j++)
@@ -3949,10 +4086,10 @@ public static partial class Calculations
 
             var prevDcPeriod = dcPeriodList.LastOrDefault();
             var dcPeriod = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
-            dcPeriodList.AddRounded(dcPeriod);
+            dcPeriodList.Add(dcPeriod);
 
             double si = dcPeriod < length2 ? 0 : 1;
-            siList.AddRounded(si);
+            siList.Add(si);
 
             var signal = GetCompareSignal(qu - (-1 * ip), prevQu - (-1 * prevIp));
             signalsList.Add(signal);
@@ -3978,6 +4115,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersClassicHilbertTransformer(this StockData stockData, int length1 = 48, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> peakList = new();
         List<double> realList = new();
         List<double> imagList = new();
@@ -4003,14 +4142,14 @@ public static partial class Calculations
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.AddRounded(real);
+            realList.Add(real);
 
             var imag = ((0.091 * real) + (0.111 * prevReal2) + (0.143 * prevReal4) + (0.2 * prevReal6) + (0.333 * prevReal8) + prevReal10 -
                         prevReal12 - (0.333 * prevReal14) - (0.2 * prevReal16) - (0.143 * prevReal18) - (0.111 * prevReal20) - (0.091 * prevReal22)) / 1.865;
-            imagList.AddRounded(imag);
+            imagList.Add(imag);
 
             var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
             signalsList.Add(signal);
@@ -4037,6 +4176,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHilbertTransformer(this StockData stockData, int length1 = 48, int length2 = 20)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> peakList = new();
         List<double> realList = new();
         List<double> imagList = new();
@@ -4053,19 +4194,19 @@ public static partial class Calculations
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var prevReal = realList.LastOrDefault();
             var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.AddRounded(real);
+            realList.Add(real);
 
             var qFilt = real - prevReal;
             var prevQPeak = qPeakList.LastOrDefault();
             var qPeak = Math.Max(0.991 * prevQPeak, Math.Abs(qFilt));
-            qPeakList.AddRounded(qPeak);
+            qPeakList.Add(qPeak);
 
             var imag = qPeak != 0 ? qFilt / qPeak : 0;
-            imagList.AddRounded(imag);
+            imagList.Add(imag);
 
             var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
             signalsList.Add(signal);
@@ -4093,6 +4234,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHilbertTransformerIndicator(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> peakList = new();
         List<double> realList = new();
         List<double> imagList = new();
@@ -4117,22 +4261,22 @@ public static partial class Calculations
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var prevReal = realList.LastOrDefault();
             var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.AddRounded(real);
+            realList.Add(real);
 
             var qFilt = real - prevReal;
             var prevQPeak = qPeakList.LastOrDefault();
             var qPeak = Math.Max(0.991 * prevQPeak, Math.Abs(qFilt));
-            qPeakList.AddRounded(qPeak);
+            qPeakList.Add(qPeak);
 
             qFilt = qPeak != 0 ? qFilt / qPeak : 0;
-            qFiltList.AddRounded(qFilt);
+            qFiltList.Add(qFilt);
 
             var imag = (c1 * ((qFilt + prevQFilt) / 2)) + (c2 * prevImag1) + (c3 * prevImag2);
-            imagList.AddRounded(imag);
+            imagList.Add(imag);
 
             var signal = GetCompareSignal(imag - qFilt, prevImag1 - prevQFilt);
             signalsList.Add(signal);
@@ -4160,6 +4304,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersDualDifferentiatorDominantCycle(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 8)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> periodList = new();
         List<double> domCycList = new();
         List<Signal> signalsList = new();
@@ -4189,10 +4336,10 @@ public static partial class Calculations
             var prevPeriod = periodList.LastOrDefault();
             var period = (real * qDot) - (imag * iDot) != 0 ? 2 * Math.PI * ((real * real) + (imag * imag)) / ((-real * qDot) + (imag * iDot)) : 0;
             period = MinOrMax(period, length1, length3);
-            periodList.AddRounded(period);
+            periodList.Add(period);
 
             var domCyc = (c1 * ((period + prevPeriod) / 2)) + (c2 * prevDomCyc1) + (c3 * prevDomCyc2);
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
             signalsList.Add(signal);
@@ -4221,6 +4368,10 @@ public static partial class Calculations
     public static StockData CalculateEhlersPhaseAccumulationDominantCycle(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 10, 
         int length4 = 40)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        length4 = Math.Max(length4, 1);
         List<double> phaseList = new();
         List<double> dPhaseList = new();
         List<double> instPeriodList = new();
@@ -4251,12 +4402,12 @@ public static partial class Calculations
             phase = real < 0 && imag > 0 ? 180 - phase : phase;
             phase = real < 0 && imag < 0 ? 180 + phase : phase;
             phase = real > 0 && imag < 0 ? 360 - phase : phase;
-            phaseList.AddRounded(phase);
+            phaseList.Add(phase);
 
             var dPhase = prevPhase - phase;
             dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
             dPhase = MinOrMax(dPhase, length1, length3);
-            dPhaseList.AddRounded(dPhase);
+            dPhaseList.Add(dPhase);
 
             var prevInstPeriod = instPeriodList.LastOrDefault();
             double instPeriod = 0, phaseSum = 0;
@@ -4271,10 +4422,10 @@ public static partial class Calculations
                 }
             }
             instPeriod = instPeriod == 0 ? prevInstPeriod : instPeriod;
-            instPeriodList.AddRounded(instPeriod);
+            instPeriodList.Add(instPeriod);
 
             var domCyc = (c1 * ((instPeriod + prevInstPeriod) / 2)) + (c2 * prevDomCyc1) + (c3 * prevDomCyc2);
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
             signalsList.Add(signal);
@@ -4301,6 +4452,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHomodyneDominantCycle(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> periodList = new();
         List<double> domCycList = new();
         List<Signal> signalsList = new();
@@ -4330,10 +4484,10 @@ public static partial class Calculations
             var prevPeriod = periodList.LastOrDefault();
             var period = im != 0 && re != 0 ? 2 * Math.PI / Math.Abs(im / re) : 0;
             period = MinOrMax(period, length1, length3);
-            periodList.AddRounded(period);
+            periodList.Add(period);
 
             var domCyc = (c1 * ((period + prevPeriod) / 2)) + (c2 * prevDomCyc1) + (c3 * prevDomCyc2);
-            domCycList.AddRounded(domCyc);
+            domCycList.Add(domCyc);
 
             var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
             signalsList.Add(signal);
@@ -4360,6 +4514,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersSignalToNoiseRatioV1(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 7)
     {
+        length = Math.Max(length, 1);
         List<double> ampList = new();
         List<double> v2List = new();
         List<double> rangeList = new();
@@ -4384,15 +4539,15 @@ public static partial class Calculations
 
             var prevV2 = v2List.LastOrDefault();
             var v2 = (0.2 * ((inPhase * inPhase) + (quad * quad))) + (0.8 * prevV2);
-            v2List.AddRounded(v2);
+            v2List.Add(v2);
 
             var prevRange = rangeList.LastOrDefault();
             var range = (0.2 * (currentHigh - currentLow)) + (0.8 * prevRange);
-            rangeList.AddRounded(range);
+            rangeList.Add(range);
 
             var prevAmp = ampList.LastOrDefault();
             var amp = range != 0 ? (0.25 * ((10 * Math.Log(v2 / (range * range)) / Math.Log(10)) + 1.9)) + (0.75 * prevAmp) : 0;
-            ampList.AddRounded(amp);
+            ampList.Add(amp);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, amp, 1.9);
             signalsList.Add(signal);
@@ -4418,6 +4573,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHannWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> rocList = new();
         List<double> derivList = new();
         List<Signal> signalsList = new();
@@ -4429,7 +4585,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             
             var deriv = currentValue - currentOpen;
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length, derivList);
@@ -4440,7 +4596,7 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
             var roc = length / 2 * Math.PI * (filt - prevFilt1);
-            rocList.AddRounded(roc);
+            rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -4469,6 +4625,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersHammingWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHammingMovingAverage,
         int length = 20, double pedestal = 10)
     {
+        length = Math.Max(length, 1);
         List<double> rocList = new();
         List<double> derivList = new();
         List<Signal> signalsList = new();
@@ -4481,7 +4638,7 @@ public static partial class Calculations
             
 
             var deriv = currentValue - currentOpen;
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length, derivList);
@@ -4492,7 +4649,7 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
             var roc = length / 2 * Math.PI * (filt - prevFilt1);
-            rocList.AddRounded(roc);
+            rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -4520,6 +4677,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersTriangleWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersTriangleMovingAverage,
         int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> rocList = new();
         List<double> derivList = new();
         List<Signal> signalsList = new();
@@ -4531,7 +4689,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             
             var deriv = currentValue - currentOpen;
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length, derivList);
@@ -4542,7 +4700,7 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
             var roc = length / 2 * Math.PI * (filt - prevFilt1);
-            rocList.AddRounded(roc);
+            rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -4569,6 +4727,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSimpleWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
+        length = Math.Max(length, 1);
         List<double> rocList = new();
         List<double> derivList = new();
         List<Signal> signalsList = new();
@@ -4580,7 +4739,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
 
             var deriv = currentValue - currentOpen;
-            derivList.AddRounded(deriv);
+            derivList.Add(deriv);
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length, derivList);
@@ -4593,7 +4752,7 @@ public static partial class Calculations
             var prevFilt2 = i >= 2 ? filtMa2List[i - 2] : 0;
 
             var roc = length / 2 * Math.PI * (filt - prevFilt1);
-            rocList.AddRounded(roc);
+            rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
             signalsList.Add(signal);
@@ -4619,6 +4778,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSignalToNoiseRatioV2(this StockData stockData, int length = 6)
     {
+        length = Math.Max(length, 1);
         List<double> snrList = new();
         List<double> rangeList = new();
         List<Signal> signalsList = new();
@@ -4642,12 +4802,12 @@ public static partial class Calculations
 
             var prevRange = rangeList.LastOrDefault();
             var range = (0.1 * (currentHigh - currentLow)) + (0.9 * prevRange);
-            rangeList.AddRounded(range);
+            rangeList.Add(range);
 
             var temp = range != 0 ? ((i1 * i1) + (q1 * q1)) / (range * range) : 0;
             var prevSnr = snrList.LastOrDefault();
             var snr = range > 0 ? (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + length)) + (0.75 * prevSnr) : 0;
-            snrList.AddRounded(snr);
+            snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - mama, prevValue - prevMama, snr, length);
             signalsList.Add(signal);
@@ -4672,6 +4832,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersEnhancedSignalToNoiseRatio(this StockData stockData, int length = 6)
     {
+        length = Math.Max(length, 1);
         List<double> q3List = new();
         List<double> i3List = new();
         List<double> noiseList = new();
@@ -4695,7 +4856,7 @@ public static partial class Calculations
             var prevSmooth = i >= 1 ? smoothList[i - 1] : 0;
 
             var q3 = 0.5 * (smooth - prevSmooth2) * ((0.1759 * smoothPeriod) + 0.4607);
-            q3List.AddRounded(q3);
+            q3List.Add(q3);
 
             var sp = (int)Math.Ceiling(smoothPeriod / 2);
             double i3 = 0;
@@ -4705,17 +4866,17 @@ public static partial class Calculations
                 i3 += prevQ3;
             }
             i3 = sp != 0 ? 1.57 * i3 / sp : i3;
-            i3List.AddRounded(i3);
+            i3List.Add(i3);
 
             var signalValue = (i3 * i3) + (q3 * q3);
             var prevNoise = noiseList.LastOrDefault();
             var noise = (0.1 * (currentHigh - currentLow) * (currentHigh - currentLow) * 0.25) + (0.9 * prevNoise);
-            noiseList.AddRounded(noise);
+            noiseList.Add(noise);
 
             var temp = noise != 0 ? signalValue / noise : 0;
             var prevSnr = snrList.LastOrDefault();
             var snr = (0.33 * (10 * Math.Log(temp) / Math.Log(10))) + (0.67 * prevSnr);
-            snrList.AddRounded(snr);
+            snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - smooth, prevValue - prevSmooth, snr, length);
             signalsList.Add(signal);
@@ -4743,6 +4904,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersHilbertOscillator(this StockData stockData, int length = 7)
     {
+        length = Math.Max(length, 1);
         List<double> iqList = new();
         List<Signal> signalsList = new();
 
@@ -4766,7 +4928,7 @@ public static partial class Calculations
                 iq += prevQ3;
             }
             iq = maxCount != 0 ? 1.25 * iq / maxCount : iq;
-            iqList.AddRounded(iq);
+            iqList.Add(iq);
 
             var signal = GetCompareSignal(iq - i3, prevIq - prevI3);
             signalsList.Add(signal);
@@ -4792,6 +4954,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAlternateSignalToNoiseRatio(this StockData stockData, int length = 6)
     {
+        length = Math.Max(length, 1);
         List<double> snrList = new();
         List<double> rangeList = new();
         List<Signal> signalsList = new();
@@ -4815,12 +4978,12 @@ public static partial class Calculations
 
             var prevRange = rangeList.LastOrDefault();
             var range = (0.1 * (currentHigh - currentLow)) + (0.9 * prevRange);
-            rangeList.AddRounded(range);
+            rangeList.Add(range);
 
             var temp = range != 0 ? (re + im) / (range * range) : 0;
             var prevSnr = snrList.LastOrDefault();
             var snr = (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + length)) + (0.75 * prevSnr);
-            snrList.AddRounded(snr);
+            snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - mama, prevValue - prevMama, snr, length);
             signalsList.Add(signal);
@@ -4847,6 +5010,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersDiscreteFourierTransform(this StockData stockData, int minLength = 8, int maxLength = 50, int length = 40)
     {
+        minLength = Math.Max(minLength, 1);
+        maxLength = Math.Max(maxLength, minLength);
+        length = Math.Max(length, 1);
         List<double> cleanedDataList = new();
         List<double> hpList = new();
         List<double> powerList = new();
@@ -4927,6 +5093,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersFourierSeriesAnalysis(this StockData stockData, int length = 20, double bw = 0.1)
     {
+        length = Math.Max(length, 1);
         List<double> bp1List = new();
         List<double> bp2List = new();
         List<double> bp3List = new();
@@ -5026,6 +5193,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersVossPredictiveFilter(this StockData stockData, int length = 20, double predict = 3, double bw = 0.25)
     {
+        length = Math.Max(length, 1);
         List<double> filtList = new();
         List<double> vossList = new();
         List<Signal> signalsList = new();
@@ -5082,6 +5250,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSwissArmyKnifeIndicator(this StockData stockData, int length = 20, double delta = 0.1)
     {
+        length = Math.Max(length, 1);
         List<double> emaFilterList = new();
         List<double> smaFilterList = new();
         List<double> gaussFilterList = new();
@@ -5207,6 +5376,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersUniversalOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 20, int signalLength = 9)
     {
+        length = Math.Max(length, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> euoList = new();
         List<double> whitenoiseList = new();
         List<double> filtList = new();
@@ -5276,6 +5447,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersDetrendedLeadingIndicator(this StockData stockData, int length = 14)
     {
+        length = Math.Max(length, 1);
         List<double> deliList = new();
         List<double> ema1List = new();
         List<double> ema2List = new();
@@ -5339,6 +5511,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersBandPassFilterV1(this StockData stockData, int length = 20, double bw = 0.3)
     {
+        length = Math.Max(length, 1);
         List<double> hpList = new();
         List<double> bpList = new();
         List<double> peakList = new();
@@ -5407,6 +5580,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersBandPassFilterV2(this StockData stockData, int length = 20, double bw = 0.3)
     {
+        length = Math.Max(length, 1);
         List<double> bpList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -5449,6 +5623,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCycleBandPassFilter(this StockData stockData, int length = 20, double delta = 0.1)
     {
+        length = Math.Max(length, 1);
         List<double> bpList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -5491,6 +5666,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersCycleAmplitude(this StockData stockData, int length = 20, double delta = 0.1)
     {
+        length = Math.Max(length, 1);
         List<double> ptopList = new();
         List<Signal> signalsList = new();
 
@@ -5538,6 +5714,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersZeroCrossingsDominantCycle(this StockData stockData, int length = 20, double bw = 0.7)
     {
+        length = Math.Max(length, 1);
         List<double> dcList = new();
         List<Signal> signalsList = new();
 
@@ -5590,6 +5767,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersAdaptiveBandPassFilter(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 3, double bw = 0.3)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> bpList = new();
         List<double> peakList = new();
         List<double> signalList = new();
@@ -5704,6 +5884,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersStochasticCyberCycle(this StockData stockData, int length = 14, double alpha = 0.7)
     {
+        length = Math.Max(length, 1);
         List<double> stochList = new();
         List<double> stochCCList = new();
         List<double> triggerList = new();
@@ -5759,6 +5940,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersFMDemodulatorIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, 
         int fastLength = 10, int slowLength = 30)
     {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
         List<double> hlList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
@@ -5807,6 +5990,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersStochastic(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, 
         int length1 = 48, int length2 = 20, int length3 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> stoch2PoleList = new();
         List<double> arg2PoleList = new();
         List<Signal> signalsList = new();
@@ -5860,6 +6046,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersTripleDelayLineDetrender(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter, 
         int length = 14)
     {
+        length = Math.Max(length, 1);
         List<double> tmp1List = new();
         List<double> tmp2List = new();
         List<double> detrenderList = new();
@@ -5922,6 +6109,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersAMDetector(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 4, 
         int length2 = 8)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> absDerList = new();
         List<double> envList = new();
         List<Signal> signalsList = new();
@@ -6038,6 +6227,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersSineWaveIndicatorV2(this StockData stockData, int length = 5, double alpha = 0.07)
     {
+        length = Math.Max(length, 1);
         List<double> sineList = new();
         List<double> leadSineList = new();
         List<double> dcPhaseList = new();
@@ -6098,6 +6288,8 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersEvenBetterSineWaveIndicator(this StockData stockData, int length1 = 40, int length2 = 10)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> hpList = new();
         List<double> filtList = new();
         List<double> ebsiList = new();
@@ -6157,6 +6349,9 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersConvolutionIndicator(this StockData stockData, int length1 = 80, int length2 = 40, int length3 = 48)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
         List<double> convList = new();
         List<double> hpList = new();
         List<double> roofingFilterList = new();
@@ -6235,6 +6430,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersFisherTransform(this StockData stockData, int length = 10)
     {
+        length = Math.Max(length, 1);
         List<double> fisherTransformList = new();
         List<double> nValueList = new();
         List<Signal> signalsList = new();
@@ -6283,6 +6479,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersInverseFisherTransform(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length1 = 5, int length2 = 9)
     {
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
         List<double> v1List = new();
         List<double> inverseFisherTransformList = new();
         List<Signal> signalsList = new();
@@ -6494,6 +6692,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha(this StockData stockData, int length = 13)
     {
+        length = Math.Max(length, 1);
         List<double> laguerreRsiList = new();
         List<double> ratioList = new();
         List<double> l0List = new();
@@ -6786,6 +6985,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersCommodityChannelIndexInverseFisherTransform(this StockData stockData, InputName inputName = InputName.TypicalPrice,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20, int signalLength = 9, double constant = 0.015)
     {
+        length = Math.Max(length, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> v1List = new();
         List<double> iFishList = new();
         List<Signal> signalsList = new();
@@ -6837,6 +7038,8 @@ public static partial class Calculations
     public static StockData CalculateEhlersRelativeStrengthIndexInverseFisherTransform(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14, int signalLength = 9)
     {
+        length = Math.Max(length, 1);
+        signalLength = Math.Max(signalLength, 1);
         List<double> v1List = new();
         List<double> iFishList = new();
         List<Signal> signalsList = new();

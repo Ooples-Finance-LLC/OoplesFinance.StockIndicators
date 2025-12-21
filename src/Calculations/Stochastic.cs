@@ -36,7 +36,7 @@ public static partial class Calculations
             var lowestLow = lowestList[i];
 
             var fastK = highestHigh - lowestLow != 0 ? MinOrMax((currentValue - lowestLow) / (highestHigh - lowestLow) * 100, 100, 0) : 0;
-            fastKList.AddRounded(fastK);
+            fastKList.Add(fastK);
         }
 
         var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, fastKList);
@@ -97,7 +97,7 @@ public static partial class Calculations
             var b = (er * lowest1) + ((1 - er) * lowest2);
 
             var stc = a - b != 0 ? MinOrMax((src - b) / (a - b), 1, 0) : 0;
-            stcList.AddRounded(stc);
+            stcList.Add(stc);
 
             var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 0.8, 0.2);
             signalsList.Add(signal);
@@ -141,7 +141,7 @@ public static partial class Calculations
             var lowest = lowestList[i];
 
             var range = highest - lowest;
-            rangeList.AddRounded(range);
+            rangeList.Add(range);
         }
 
         var rangeSmaList = GetMovingAverageList(stockData, maType, length, rangeList);
@@ -153,13 +153,13 @@ public static partial class Calculations
             var rangeSma = rangeSmaList[i];
 
             var bull = rangeSma != 0 ? (sma / rangeSma) - (lowest / rangeSma) : 0;
-            bullList.AddRounded(bull);
+            bullList.Add(bull);
 
             var bear = rangeSma != 0 ? Math.Abs((sma / rangeSma) - (highest / rangeSma)) : 0;
-            bearList.AddRounded(bear);
+            bearList.Add(bear);
 
             var max = Math.Max(bull, bear);
-            maxList.AddRounded(max);
+            maxList.Add(max);
         }
 
         var signalList = GetMovingAverageList(stockData, maType, signalLength, maxList);
@@ -219,7 +219,7 @@ public static partial class Calculations
             }
 
             var rawNst = denomSum != 0 ? (200 * weightSum / denomSum) - 100 : 0;
-            rawNstList.AddRounded(rawNst);
+            rawNstList.Add(rawNst);
         }
 
         var nstList = GetMovingAverageList(stockData, maType, smoothLength, rawNstList);
@@ -288,7 +288,7 @@ public static partial class Calculations
             var wma10 = wma10List[i];
 
             var rbw = ((wma1 * 5) + (wma2 * 4) + (wma3 * 3) + (wma4 * 2) + wma5 + wma6 + wma7 + wma8 + wma9 + wma10) / 20;
-            rbwList.AddRounded(rbw);
+            rbwList.Add(rbw);
         }
 
         var (highestList, lowestList) = GetMaxAndMinValuesList(rbwList, stochLength);
@@ -301,10 +301,10 @@ public static partial class Calculations
             var prevFtso2 = i >= 2 ? ftsoList[i - 2] : 0;
 
             var num = rbw - lowest;
-            numList.AddRounded(num);
+            numList.Add(num);
 
             var denom = highest - lowest;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
 
             var numSum = numList.TakeLastExt(smoothLength).Sum();
             var denomSum = denomList.TakeLastExt(smoothLength).Sum();
@@ -312,7 +312,7 @@ public static partial class Calculations
             var x = 0.1 * (rbws - 50);
 
             var ftso = MinOrMax((((Exp(2 * x) - 1) / (Exp(2 * x) + 1)) + 1) * 50, 100, 0);
-            ftsoList.AddRounded(ftso);
+            ftsoList.Add(ftso);
 
             var signal = GetRsiSignal(ftso - prevFtso1, prevFtso1 - prevFtso2, ftso, prevFtso1, 70, 30);
             signalsList.Add(signal);
@@ -356,7 +356,7 @@ public static partial class Calculations
             var slowK = slowKList[i];
 
             var fsst = (500 * v4) + slowK;
-            fsstList.AddRounded(fsst);
+            fsstList.Add(fsst);
         }
 
         var wfsstList = GetMovingAverageList(stockData, maType, length4, fsstList);
@@ -407,7 +407,7 @@ public static partial class Calculations
             var sk = stochasticRsiList[i];
 
             var nsk = 0.1 * (sk - 50);
-            nskList.AddRounded(nsk);
+            nskList.Add(nsk);
         }
 
         var nskEmaList = GetMovingAverageList(stockData, maType, len, nskList);
@@ -420,7 +420,7 @@ public static partial class Calculations
             var expss = Exp(ss);
 
             var pso = expss + 1 != 0 ? MinOrMax((expss - 1) / (expss + 1), 1, -1) : 0;
-            psoList.AddRounded(pso);
+            psoList.Add(pso);
 
             var signal = GetRsiSignal(pso - prevPso1, prevPso1 - prevPso2, pso, prevPso1, 0.9, -0.9);
             signalsList.Add(signal);
@@ -557,14 +557,14 @@ public static partial class Calculations
             var prevK2 = i >= 2 ? kList[i - 2] : 0;
 
             var ma = (alpha * stoch) + ((1 - alpha) * prevK1);
-            maList.AddRounded(ma);
+            maList.Add(ma);
 
             var lbList = maList.TakeLastExt(length).ToList();
             var highestMa = lbList.Max();
             var lowestMa = lbList.Min();
 
             var k = highestMa - lowestMa != 0 ? MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0) : 0;
-            kList.AddRounded(k);
+            kList.Add(k);
 
             var signal = GetRsiSignal(k - prevK1, prevK1 - prevK2, k, prevK1, 80, 20);
             signalsList.Add(signal);
@@ -606,11 +606,11 @@ public static partial class Calculations
 
             var prevR = rList.LastOrDefault();
             var r = prevR + ((fast - prevR) / length2);
-            rList.AddRounded(r);
+            rList.Add(r);
 
             var prevS = sList.LastOrDefault();
             var s = prevS + ((r - prevS) / length3);
-            sList.AddRounded(s);
+            sList.Add(s);
 
             var signal = GetRsiSignal(r - s, prevR - prevS, r, prevR, 70, 30);
             signalsList.Add(signal);
@@ -655,10 +655,10 @@ public static partial class Calculations
             var lowestLow = lowestList[i];
 
             var num = currentValue - lowestLow;
-            numList.AddRounded(num);
+            numList.Add(num);
 
             var denom = highestHigh - lowestLow;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
         }
 
         var ssNumList = GetMovingAverageList(stockData, maType, length2, numList);
@@ -671,7 +671,7 @@ public static partial class Calculations
             var dsDenom = dsDenomList[i];
 
             var dss = dsDenom != 0 ? MinOrMax(100 * dsNum / dsDenom, 100, 0) : 0;
-            dssList.AddRounded(dss);
+            dssList.Add(dss);
         }
 
         var sdssList = GetMovingAverageList(stockData, maType, length4, dssList);
@@ -722,7 +722,7 @@ public static partial class Calculations
             var lowestSlowK = lowestList[i];
 
             var doubleK = highestSlowK - lowestSlowK != 0 ? MinOrMax((slowK - lowestSlowK) / (highestSlowK - lowestSlowK) * 100, 100, 0) : 0;
-            doubleKList.AddRounded(doubleK);
+            doubleKList.Add(doubleK);
         }
 
         var doubleSlowKList = GetMovingAverageList(stockData, maType, smoothLength, doubleKList);
@@ -777,7 +777,7 @@ public static partial class Calculations
             var ndi = diMinusList[i];
 
             var dmiOscillator = ndi - pdi;
-            dmiOscillatorList.AddRounded(dmiOscillator);
+            dmiOscillatorList.Add(dmiOscillator);
         }
 
         var (highestList, lowestList) = GetMaxAndMinValuesList(dmiOscillatorList, length2);
@@ -788,7 +788,7 @@ public static partial class Calculations
             var dmiOscillator = dmiOscillatorList[i];
 
             var fastK = highest - lowest != 0 ? MinOrMax((dmiOscillator - lowest) / (highest - lowest) * 100, 100, 0) : 0;
-            fastKList.AddRounded(fastK);
+            fastKList.Add(fastK);
         }
 
         var slowKList = GetMovingAverageList(stockData, maType, length3, fastKList);
@@ -842,10 +842,10 @@ public static partial class Calculations
             var median = (highestHigh + lowestLow) / 2;
 
             var diff = currentValue - median;
-            dList.AddRounded(diff);
+            dList.Add(diff);
 
             var highLow = highestHigh - lowestLow;
-            hlList.AddRounded(highLow);
+            hlList.Add(highLow);
         }
 
         var dEmaList = GetMovingAverageList(stockData, maType, length2, dList);
@@ -859,7 +859,7 @@ public static partial class Calculations
             var hl2 = hlSmoothEma / 2;
 
             var smi = hl2 != 0 ? MinOrMax(100 * dSmoothEma / hl2, 100, -100) : 0;
-            smiList.AddRounded(smi);
+            smiList.Add(smi);
         }
 
         var smiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, smiList);
@@ -953,10 +953,10 @@ public static partial class Calculations
             var lowestLow = lowestList[i];
 
             var num = currentValue - lowestLow;
-            numList.AddRounded(num);
+            numList.Add(num);
 
             var denom = highestHigh - lowestLow;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
         }
 
         var numSmaList = GetMovingAverageList(stockData, maType, length2, numList);
@@ -967,7 +967,7 @@ public static partial class Calculations
             var denomSma = denomSmaList[i];
 
             var sck = denomSma != 0 ? MinOrMax(numSma / denomSma * 100, 100, 0) : 0;
-            sckList.AddRounded(sck);
+            sckList.Add(sck);
         }
 
         var scdList = GetMovingAverageList(stockData, maType, length3, sckList);
@@ -1060,14 +1060,14 @@ public static partial class Calculations
 
             var pNum = numList.LastOrDefault();
             var num = (currentValue - lowest + pNum) / 2;
-            numList.AddRounded(num);
+            numList.Add(num);
 
             var pDenom = denomList.LastOrDefault();
             var denom = (highest - lowest + pDenom) / 2;
-            denomList.AddRounded(denom);
+            denomList.Add(denom);
 
             var stoch = denom != 0 ? MinOrMax((0.2 * num / denom) + (0.8 * prevStoch1), 1, 0) : 0;
-            stochList.AddRounded(stoch);
+            stochList.Add(stoch);
 
             var signal = GetRsiSignal(stoch - prevStoch1, prevStoch1 - prevStoch2, stoch, prevStoch1, 0.8, 0.2);
             signalsList.Add(signal);
