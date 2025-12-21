@@ -396,10 +396,10 @@ public static partial class Calculations
             smoothList.Add(smooth);
 
             var det = ((HilbertTransformCoeff1 * smooth) + (HilbertTransformCoeff2 * prevs2) - (HilbertTransformCoeff2 * prevs4) - (HilbertTransformCoeff1 * prevs6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
-            detList.Add(det);
+            detList.AddRounded(det);
 
             var q1 = ((HilbertTransformCoeff1 * det) + (HilbertTransformCoeff2 * prevd2) - (HilbertTransformCoeff2 * prevd4) - (HilbertTransformCoeff1 * prevd6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
-            q1List.Add(q1);
+            q1List.AddRounded(q1);
 
             var i1 = prevd3;
             i1List.Add(i1);
