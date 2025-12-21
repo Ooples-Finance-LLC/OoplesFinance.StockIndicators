@@ -1,7 +1,7 @@
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
-//     Copyright © Franklin Moormann, 2020-2022
+//     Copyright ï¿½ Franklin Moormann, 2020-2022
 //     cheatcountry@gmail.com
 //
 //     This library is free software and it uses the Apache 2.0 license
@@ -807,7 +807,7 @@ public static class CalculationsHelper
     /// <param name="value">The value.</param>
     public static void AddRounded(this List<double> list, double value)
     {
-        list.Add(Math.Round(value, 4));
+        list.Add(value);
     }
 
     /// <summary>

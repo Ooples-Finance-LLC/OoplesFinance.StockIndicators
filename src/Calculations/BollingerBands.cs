@@ -225,7 +225,7 @@ public static partial class Calculations
     /// <param name="fibRatio3"></param>
     /// <returns></returns>
     public static StockData CalculateBollingerBandsFibonacciRatios(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 20, double fibRatio1 = 1.618, double fibRatio2 = 2.618, double fibRatio3 = 4.236)
+        int length = 20, double fibRatio1 = MathHelper.Phi, double fibRatio2 = MathHelper.Phi + 1, double fibRatio3 = (2 * MathHelper.Phi) + 1)
     {
         List<double> fibTop3List = new();
         List<double> fibBottom3List = new();

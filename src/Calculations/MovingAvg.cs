@@ -426,6 +426,11 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersMotherOfAdaptiveMovingAverages(this StockData stockData, double fastAlpha = 0.5, double slowAlpha = 0.05)
     {
+        const double HilbertTransformCoeff1 = 0.0962;
+        const double HilbertTransformCoeff2 = 0.5769;
+        const double PeriodCorrectionFactor = 0.075;
+        const double PeriodCorrectionOffset = 0.54;
+
         List<double> famaList = new();
         List<double> mamaList = new();
         List<double> i2List = new();
@@ -474,17 +479,17 @@ public static partial class Calculations
             var smooth = ((4 * currentValue) + (3 * prevPrice1) + (2 * prevPrice2) + prevPrice3) / 10;
             smoothList.AddRounded(smooth);
 
-            var det = ((0.0962 * smooth) + (0.5769 * prevs2) - (0.5769 * prevs4) - (0.0962 * prevs6)) * ((0.075 * prevPeriod) + 0.54);
+            var det = ((HilbertTransformCoeff1 * smooth) + (HilbertTransformCoeff2 * prevs2) - (HilbertTransformCoeff2 * prevs4) - (HilbertTransformCoeff1 * prevs6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
             detList.AddRounded(det);
 
-            var q1 = ((0.0962 * det) + (0.5769 * prevd2) - (0.5769 * prevd4) - (0.0962 * prevd6)) * ((0.075 * prevPeriod) + 0.54);
+            var q1 = ((HilbertTransformCoeff1 * det) + (HilbertTransformCoeff2 * prevd2) - (HilbertTransformCoeff2 * prevd4) - (HilbertTransformCoeff1 * prevd6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
             q1List.AddRounded(q1);
 
             var i1 = prevd3;
             i1List.AddRounded(i1);
 
-            var j1 = ((0.0962 * i1) + (0.5769 * previ1x2) - (0.5769 * previ1x4) - (0.0962 * previ1x6)) * ((0.075 * prevPeriod) + 0.54);
-            var jq = ((0.0962 * q1) + (0.5769 * prevq1x2) - (0.5769 * prevq1x4) - (0.0962 * prevq1x6)) * ((0.075 * prevPeriod) + 0.54);
+            var j1 = ((HilbertTransformCoeff1 * i1) + (HilbertTransformCoeff2 * previ1x2) - (HilbertTransformCoeff2 * previ1x4) - (HilbertTransformCoeff1 * previ1x6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
+            var jq = ((HilbertTransformCoeff1 * q1) + (HilbertTransformCoeff2 * prevq1x2) - (HilbertTransformCoeff2 * prevq1x4) - (HilbertTransformCoeff1 * prevq1x6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
 
             var i2 = i1 - jq;
             i2 = (0.2 * i2) + (0.8 * previ2);
@@ -504,7 +509,12 @@ public static partial class Calculations
 
             var atan = re != 0 ? Math.Atan(im / re) : 0;
             var period = atan != 0 ? 2 * Math.PI / atan : 0;
-            period = MinOrMax(period, 1.5 * prevPeriod, 0.67 * prevPeriod);
+
+            if (prevPeriod != 0)
+            {
+                period = MinOrMax(period, 1.5 * prevPeriod, 0.67 * prevPeriod);
+            }
+
             period = MinOrMax(period, 50, 6);
             period = (0.2 * period) + (0.8 * prevPeriod);
             periodList.AddRounded(period);

@@ -10,7 +10,6 @@
 
 namespace OoplesFinance.StockIndicators.Exceptions;
 
-[Serializable]
 public sealed class CalculationException : Exception
 {
     public CalculationException()
@@ -28,8 +27,4 @@ public sealed class CalculationException : Exception
 
     }
 
-    private CalculationException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-
-    }
 }
