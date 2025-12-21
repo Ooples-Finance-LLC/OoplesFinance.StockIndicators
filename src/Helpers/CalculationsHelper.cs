@@ -801,16 +801,6 @@ public static class CalculationsHelper
     }
 
     /// <summary>
-    /// Adds the value without rounding.
-    /// </summary>
-    /// <param name="list">The list.</param>
-    /// <param name="value">The value.</param>
-    public static void AddRounded(this List<double> list, double value)
-    {
-        list.Add(value);
-    }
-
-    /// <summary>
     /// Ensures that there are enough past values to be able to perform calculations on the data
     /// </summary>
     /// <param name="currentIndex"></param>
