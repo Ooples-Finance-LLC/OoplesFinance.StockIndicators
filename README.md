@@ -1,5 +1,7 @@
 # OoplesFinance.StockIndicators (High-Precision Fork)
 
+## [List of Available indicators](INDICATORS.md)
+
 > "Approximation is the enemy of alpha. In finance, 3.14 is not Pi. It is an error."
 
 This release marks the divergence of the **High-Precision Fork** from the original [OoplesFinance.StockIndicators](https://github.com/Ooples/OoplesFinance.StockIndicators).
