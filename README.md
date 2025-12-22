@@ -21,21 +21,4 @@ Magic numbers are gone.
 - PI is `Math.PI`, not `3.14`.
 - Sqrt(2) is `Math.Sqrt(2)`, not `1.414`.
 
-### 3. Logic: Preserved
-
-We changed the physics, not the rules. The algorithms remain identical to the upstream source; they just run with the full fidelity of the .NET `double` type.
-The API surface remains identical to the original. If you know how to use Ooples, you know how to use thisΓÇöyou will just get different (correct) numbers.
-
-## Artifacts
-
-This release includes the raw binaries for those who prefer to manage their own dependencies:
-
-- **`.nupkg`**: The standard package.
-- **`.dll`**: The assembly. For when you trust the file system more than NuGet.
-- **`.pdb`**: The symbols. Step through the code and witness the absence of rounding errors yourself.
-
-## Philosophy
-
-This fork aligns with the architectural strictness of [QuanTAlib](https://github.com/mihakralj/QuanTAlib) and exists only for cross-validation of QuanTAlib indicators and Ooples indicators.
-
-In financial computing, approximation is an error. If you are the sort of person who thinks `3.14` is close enough, you probably also think "ish" is a valid unit of measurement. We wish you the best of luck with your "money-ish".
+The API surface remains identical to the original. If you know how to use Ooples, you know how to use this—you will just get different (correct) numbers.
