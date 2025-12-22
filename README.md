@@ -1,42 +1,82 @@
 # OoplesFinance.StockIndicators (High-Precision Fork)
 
-## [List of Available indicators](INDICATORS.md)
-
 > "Approximation is the enemy of alpha. In finance, 3.14 is not Pi. It is an error."
 
-This release marks the divergence of the **High-Precision Fork** from the original [OoplesFinance.StockIndicators](https://github.com/Ooples/OoplesFinance.StockIndicators).
+**Original Library:** [OoplesFinance.StockIndicators](https://github.com/Ooples/OoplesFinance.StockIndicators)
 
-## The Change Log
+This library is a strict, high-precision fork of the original codebase.
 
-The original library treats floating-point precision with the sort of casual disdain usually reserved for airline safety demonstrations. It rounds inputs, intermediates, and outputs as if extra decimal places were a tax liability. It approximates constants (using `3.14` for PI), which is perfectly adequate for government work, but terrifying for finance. It treats trading numbers as a fun game, like Monopoly, but with real consequences.
+## The Architecture of Rigor
 
-I reject such violence. We chose rigor.
+The original library offers an impressive catalog of 700+ indicators. It also suffers from a catastrophic architectural decision: aggressive, pervasive rounding.
 
-### 1. Rounding: Deleted
+The upstream implementation rounds inputs. It rounds intermediate calculations. It rounds outputs. It truncates mathematical constants (using `3.14` for $\pi$). For visualization, this is acceptable. For algorithmic trading, backtesting, or any system where error propagation matters, it is disqualifying.
 
-Every instance of `Math.Round` has been excised. If the market gives you data with 8 decimal places, and the indicator math produces 28, you get 28. We do not truncate your alpha.
+This fork exists to correct the math so it can be used for cross-validation of resuts in testing of [QuanTAlib](https://github.com/mihakralj/QuanTAlib) indicators.
 
-### 2. Constants: Restored
+### The Intervention
 
-Magic numbers are gone.
+1. **Rounding Removal**: Every instance of `Math.Round` was excised. The code now respects the full precision of the `decimal` type.
+2. **Constant Restoration**: Truncated literals were replaced with their full-precision `System.Math` equivalents. $\pi$ is now $\pi$, not a rough guess.
+3. **Logic Preservation**: No algorithmic logic was altered. No features were added. No features were removed. This is the original code, stripped of its plague of rounding inaccuracies.
 
-- PI is `Math.PI`, not `3.14`.
-- Sqrt(2) is `Math.Sqrt(2)`, not `1.414`.
+## Usage
 
-### 3. Logic: Preserved
+The API surface remains identical to the original. If you know how to use Ooples, you know how to use thisΓÇöyou will just get different (correct) numbers.
 
-We changed the physics, not the rules. The algorithms remain identical to the upstream source; they just run with the full fidelity of the .NET `double` type.
+### Basic Calculation
 
-## Artifacts
+```csharp
+var stockData = new StockData(openPrices, highPrices, lowPrices, closePrices, volumes);
+var results = stockData.CalculateRelativeStrengthIndex().CalculateMovingAverageConvergenceDivergence();
+```
 
-This release includes the raw binaries for those who prefer to manage their own dependencies:
+### Alpaca Integration Example
 
-- **`.nupkg`**: The standard package.
-- **`.dll`**: The assembly. For when you trust the file system more than NuGet.
-- **`.pdb`**: The symbols. Step through the code and witness the absence of rounding errors yourself.
+```csharp
+using Alpaca.Markets;
+using OoplesFinance.StockIndicators.Models;
+using static OoplesFinance.StockIndicators.Calculations;
 
-## Philosophy
+const string paperApiKey = "REPLACEME";
+const string paperApiSecret = "REPLACEME";
+const string symbol = "AAPL";
+var startDate = new DateTime(2021, 01, 01);
+var endDate = new DateTime(2021, 12, 31);
 
-This fork aligns with the architectural strictness of [QuanTAlib](https://github.com/mihakralj/QuanTAlib). In financial computing, approximation is an error.
+var client = Environments.Paper.GetAlpacaDataClient(new SecretKey(paperApiKey, paperApiSecret));
+var bars = (await client.ListHistoricalBarsAsync(new HistoricalBarsRequest(symbol, startDate, endDate, BarTimeFrame.Day)).ConfigureAwait(false)).Items;
 
-If you are the sort of person who thinks `3.14` is close enough, you probably also think "ish" is a valid unit of measurement. We wish you the best of luck with your "money-ish".
+// Data is loaded without pre-rounding
+var stockData = new StockData(
+    bars.Select(x => x.Open), 
+    bars.Select(x => x.High), 
+    bars.Select(x => x.Low), 
+    bars.Select(x => x.Close), 
+    bars.Select(x => x.Volume), 
+    bars.Select(x => x.TimeUtc)
+);
+
+var results = stockData.CalculateBollingerBands();
+```
+
+### State Management Warning
+
+The library maintains internal state when chaining. If reusing the `stockData` object for disjoint calculations, state must be cleared.
+
+```csharp
+var stockData = new StockData(bars.Select(x => x.Open), ...);
+
+var sma = stockData.CalculateSimpleMovingAverage(14);
+
+// Failure to clear results in contamination of subsequent calculations
+stockData.Clear();
+
+var ema = stockData.CalculateExponentialMovingAverage(14);
+```
+
+## License
+
+Open source under the Apache 2.0 license.
+
+![GitHub](https://img.shields.io/github/license/ooples/OoplesFinance.StockIndicators?style=plastic)
