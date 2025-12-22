@@ -8,11 +8,11 @@ This release marks the divergence of the **High-Precision Fork** from the origin
 
 The original library treats floating-point precision with the sort of casual disdain usually reserved for airline safety demonstrations. It rounds inputs, intermediates, and outputs as if extra decimal places were a tax liability. It approximates constants (using `3.14` for PI), which is perfectly adequate for government work, but terrifying for finance. It treats trading numbers as a fun game, like Monopoly, but with real consequences.
 
-I reject such violence. I chose rigor.
+I reject such violence. We chose rigor.
 
 ### 1. Rounding: Deleted
 
-Every instance of `Math.Round` has been excised. If the market gives you data with 8 decimal places, and the indicator math produces 28, you get 28. I promise to never truncate your alpha.
+Every instance of `Math.Round` has been excised. If the market gives you data with 8 decimal places, and the indicator math produces 28, you get 28. We do not truncate your alpha.
 
 ### 2. Constants: Restored
 
@@ -35,6 +35,6 @@ This release includes the raw binaries for those who prefer to manage their own 
 
 ## Philosophy
 
-This fork aligns with the architectural strictness of [QuanTAlib](https://github.com/mihakralj/QuanTAlib) and exists only for cross-validation of QuanTAlib indicators and Ooples indicators.
+This fork aligns with the architectural strictness of [QuanTAlib](https://github.com/mihakralj/QuanTAlib). In financial computing, approximation is an error.
 
-In financial computing, approximation is an error. If you are the sort of person who thinks `3.14` is close enough, you probably also think "ish" is a valid unit of measurement. We wish you the best of luck with your "money-ish".
+If you are the sort of person who thinks `3.14` is close enough, you probably also think "ish" is a valid unit of measurement. We wish you the best of luck with your "money-ish".
