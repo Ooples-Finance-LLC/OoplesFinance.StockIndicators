@@ -13,7 +13,9 @@ namespace OoplesFinance.StockIndicators.Helpers;
 public static class MathHelper
 {
     public const double Phi = 1.61803398874989484820458683436;
+    public const double InversePhi = 0.61803398874989484820458683436;
     public const double Sqrt2 = 1.4142135623730950488016887242;
+    public const double InverseSqrt2 = 0.7071067811865475244008443621;
 
     /// <summary>
     /// Logs the specified value.

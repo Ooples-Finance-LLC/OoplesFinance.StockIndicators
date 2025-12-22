@@ -28,11 +28,11 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var alphaArg = Math.Min(0.707 * 2 * Math.PI / upperLength, 0.99);
+        var alphaArg = Math.Min(MathHelper.Sqrt2 * Math.PI / upperLength, 0.99);
         var alphaCos = Math.Cos(alphaArg);
         var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a1 = Exp(-1.414 * Math.PI / lowerLength);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / lowerLength, 0.99));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / lowerLength);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / lowerLength, 0.99));
         var c2 = b1;
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -835,8 +835,8 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-1.414 * Math.PI / length);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = (1 + c2 - c3) / 4;
@@ -938,8 +938,8 @@ public static partial class Calculations
         List<double> modStocList = new();
         List<Signal> signalsList = new();
 
-        var a1 = Exp(-1.414 * Math.PI / length1);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length1, 0.99));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length1);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99));
         var c2 = b1;
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -997,8 +997,8 @@ public static partial class Calculations
         List<double> mrsiSigList = new();
         List<Signal> signalsList = new();
 
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
         var c2 = b1;
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -1067,8 +1067,8 @@ public static partial class Calculations
         var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
         var alphaCos = Math.Cos(alphaArg);
         var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
         var c2 = b1;
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -1204,11 +1204,11 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var alphaArg = Math.Min(0.707 * 2 * Math.PI / length1, 0.99);
+        var alphaArg = Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99);
         var alphaCos = Math.Cos(alphaArg);
         var a1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a2 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a2 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var a2 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
+        var b1 = 2 * a2 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
         var c2 = b1;
         var c3 = -a2 * a2;
         var c1 = 1 - c2 - c3;
@@ -1262,8 +1262,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var hLength = (int)Math.Ceiling((double)length1 / 2);
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -1335,8 +1335,8 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-1.414 * Math.PI / 0.5 * length);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / 0.5 * length);
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * length);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * length);
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -1624,8 +1624,8 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-1.414 * Math.PI / 0.5 * length);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / 0.5 * length);
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * length);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * length);
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -2183,13 +2183,13 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(MinOrMax(-1.414 * Math.PI / upperLength, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MinOrMax(1.414 * Math.PI / upperLength, 0.99, 0.01));
+        var a1 = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / upperLength, -0.01, -0.99));
+        var b1 = 2 * a1 * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / upperLength, 0.99, 0.01));
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = (1 + c2 - c3) / 4;
-        var a = Exp(MinOrMax(-1.414 * Math.PI / lowerLength, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MinOrMax(1.414 * Math.PI / lowerLength, 0.99, 0.01));
+        var a = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / lowerLength, -0.01, -0.99));
+        var b = 2 * a * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / lowerLength, 0.99, 0.01));
         var coef2 = b;
         var coef3 = -a * a;
         var coef1 = 1 - coef2 - coef3;
@@ -5034,10 +5034,10 @@ public static partial class Calculations
             var prevHp5 = i >= 5 ? hpList[i - 5] : 0;
 
             var hp = i <= 5 ? currentValue : (0.5 * (1 + alpha) * (currentValue - prevValue1)) + (alpha * prevHp1);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var cleanedData = i <= 5 ? currentValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-            cleanedDataList.AddRounded(cleanedData);
+            cleanedDataList.Add(cleanedData);
 
             double pwr = 0, cosPart = 0, sinPart = 0;
             for (var j = minLength; j <= maxLength; j++)
@@ -5051,7 +5051,7 @@ public static partial class Calculations
 
                 pwr = (cosPart * cosPart) + (sinPart * sinPart);
             }
-            powerList.AddRounded(pwr);
+            powerList.Add(pwr);
 
             var maxPwr = i >= minLength ? powerList[i - minLength] : 0;
             double num = 0, denom = 0;
@@ -5067,7 +5067,7 @@ public static partial class Calculations
             }
 
             var dominantCycle = denom != 0 ? num / denom : 0;
-            dominantCycleList.AddRounded(dominantCycle);
+            dominantCycleList.Add(dominantCycle);
 
             var signal = GetCompareSignal(hp, prevHp1);
             signalsList.Add(signal);
@@ -5128,22 +5128,22 @@ public static partial class Calculations
             var prevWave2 = i >= 2 ? waveList[i - 2] : 0;
 
             var bp1 = i <= 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1_1) - (s1 * prevBp1_2);
-            bp1List.AddRounded(bp1);
+            bp1List.Add(bp1);
 
             var q1 = i <= 4 ? 0 : length / 2 * Math.PI * (bp1 - prevBp1_1);
-            q1List.AddRounded(q1);
+            q1List.Add(q1);
 
             var bp2 = i <= 3 ? 0 : (0.5 * (1 - s2) * (currentValue - prevValue)) + (l2 * (1 + s2) * prevBp2_1) - (s2 * prevBp2_2);
-            bp2List.AddRounded(bp2);
+            bp2List.Add(bp2);
 
             var q2 = i <= 4 ? 0 : length / 2 * Math.PI * (bp2 - prevBp2_1);
-            q2List.AddRounded(q2);
+            q2List.Add(q2);
 
             var bp3 = i <= 3 ? 0 : (0.5 * (1 - s3) * (currentValue - prevValue)) + (l3 * (1 + s3) * prevBp3_1) - (s3 * prevBp3_2);
-            bp3List.AddRounded(bp3);
+            bp3List.Add(bp3);
 
             var q3 = i <= 4 ? 0 : length / 2 * Math.PI * (bp3 - prevBp3_1);
-            q3List.AddRounded(q3);
+            q3List.Add(q3);
 
             double p1 = 0, p2 = 0, p3 = 0;
             for (var j = 0; j <= length - 1; j++)
@@ -5162,10 +5162,10 @@ public static partial class Calculations
 
             var prevWave = waveList.LastOrDefault();
             var wave = p1 != 0 ? bp1 + (Sqrt(p2 / p1) * bp2) + (Sqrt(p3 / p1) * bp3) : 0;
-            waveList.AddRounded(wave);
+            waveList.Add(wave);
 
             var roc = length / Math.PI * 4 * (wave - prevWave2);
-            rocList.AddRounded(roc);
+            rocList.Add(roc);
 
             var signal = GetCompareSignal(wave, prevWave);
             signalsList.Add(signal);
@@ -5212,7 +5212,7 @@ public static partial class Calculations
             var prevValue = i >= 2 ? inputList[i - 2] : 0;
 
             var filt = i <= 5 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (f1 * (1 + s1) * prevFilt1) - (s1 * prevFilt2);
-            filtList.AddRounded(filt);
+            filtList.Add(filt);
 
             double sumC = 0;
             for (var j = 0; j <= order - 1; j++)
@@ -5223,7 +5223,7 @@ public static partial class Calculations
 
             var prevvoss = vossList.LastOrDefault();
             var voss = ((double)(3 + order) / 2 * filt) - sumC;
-            vossList.AddRounded(voss);
+            vossList.Add(voss);
 
             var signal = GetCompareSignal(voss - filt, prevvoss - prevFilt1);
             signalsList.Add(signal);
@@ -5295,52 +5295,52 @@ public static partial class Calculations
 
             var emaFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevEmaFilter1) + (a2 * prevEmaFilter2) - (c1 * prevPrice);
-            emaFilterList.AddRounded(emaFilter);
+            emaFilterList.Add(emaFilter);
 
             var n = length; c0 = 1; c1 = (double)1 / n; b0 = (double)1 / n; b1 = 0; b2 = 0; a1 = 1; a2 = 0;
             var smaFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevSmaFilter1) + (a2 * prevSmaFilter2) - (c1 * prevPrice);
-            smaFilterList.AddRounded(smaFilter);
+            smaFilterList.Add(smaFilter);
 
             double beta = 2.415 * (1 - Math.Cos(twoPiPrd)), sqrtData = Pow(beta, 2) + (2 * beta), sqrt = Sqrt(sqrtData); alpha = (-1 * beta) + sqrt;
             c0 = Pow(alpha, 2); c1 = 0; b0 = 1; b1 = 0; b2 = 0; a1 = 2 * (1 - alpha); a2 = -(1 - alpha) * (1 - alpha);
             var gaussFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevGaussFilter1) + (a2 * prevGaussFilter2) - (c1 * prevPrice);
-            gaussFilterList.AddRounded(gaussFilter);
+            gaussFilterList.Add(gaussFilter);
 
             beta = 2.415 * (1 - Math.Cos(twoPiPrd)); sqrtData = (beta * beta) + (2 * beta); sqrt = sqrtData >= 0 ? Sqrt(sqrtData) : 0; alpha = (-1 * beta) + sqrt;
             c0 = Pow(alpha, 2) / 4; c1 = 0; b0 = 1; b1 = 2; b2 = 1; a1 = 2 * (1 - alpha); a2 = -(1 - alpha) * (1 - alpha);
             var butterFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevButterFilter1) + (a2 * prevButterFilter2) - (c1 * prevPrice);
-            butterFilterList.AddRounded(butterFilter);
+            butterFilterList.Add(butterFilter);
 
             c0 = (double)1 / 4; c1 = 0; b0 = 1; b1 = 2; b2 = 1; a1 = 0; a2 = 0;
             var smoothFilter = (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevSmoothFilter1) + 
                 (a2 * prevSmoothFilter2) - (c1 * prevPrice);
-            smoothFilterList.AddRounded(smoothFilter);
+            smoothFilterList.Add(smoothFilter);
 
             alpha = (Math.Cos(twoPiPrd) + Math.Sin(twoPiPrd) - 1) / Math.Cos(twoPiPrd); c0 = 1 - (alpha / 2); c1 = 0; b0 = 1; b1 = -1; b2 = 0; a1 = 1 - alpha; a2 = 0;
             var hpFilter = i <= length ? 0 :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevHpFilter1) + (a2 * prevHpFilter2) - (c1 * prevPrice);
-            hpFilterList.AddRounded(hpFilter);
+            hpFilterList.Add(hpFilter);
 
             beta = 2.415 * (1 - Math.Cos(twoPiPrd)); sqrtData = Pow(beta, 2) + (2 * beta); sqrt = sqrtData >= 0 ? Sqrt(sqrtData) : 0; alpha = (-1 * beta) + sqrt; 
             c0 = (1 - (alpha / 2)) * (1 - (alpha / 2)); c1 = 0; b0 = 1; b1 = -2; b2 = 1; a1 = 2 * (1 - alpha); a2 = -(1 - alpha) * (1 - alpha);
             var php2Filter = i <= length ? 0 :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevPhp2Filter1) + (a2 * prevPhp2Filter2) - (c1 * prevPrice);
-            php2FilterList.AddRounded(php2Filter);
+            php2FilterList.Add(php2Filter);
 
             beta = Math.Cos(twoPiPrd); var gamma = 1 / Math.Cos(deltaPrd); sqrtData = Pow(gamma, 2) - 1; sqrt = Sqrt(sqrtData);
             alpha = gamma - sqrt; c0 = (1 - alpha) / 2; c1 = 0; b0 = 1; b1 = 0; b2 = -1; a1 = beta * (1 + alpha); a2 = alpha * -1;
             var bpFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevBpFilter1) + (a2 * prevBpFilter2) - (c1 * prevPrice);
-            bpFilterList.AddRounded(bpFilter);
+            bpFilterList.Add(bpFilter);
 
             beta = Math.Cos(twoPiPrd); gamma = 1 / Math.Cos(deltaPrd); sqrtData = Pow(gamma, 2) - 1; sqrt = sqrtData >= 0 ? Sqrt(sqrtData) : 0;
             alpha = gamma - sqrt; c0 = (1 + alpha) / 2; c1 = 0; b0 = 1; b1 = -2 * beta; b2 = 1; a1 = beta * (1 + alpha); a2 = alpha * -1;
             var bsFilter = i <= length ? currentValue :
                 (c0 * ((b0 * currentValue) + (b1 * prevPrice1) + (b2 * prevPrice2))) + (a1 * prevBsFilter1) + (a2 * prevBsFilter2) - (c1 * prevPrice);
-            bsFilterList.AddRounded(bsFilter);
+            bsFilterList.Add(bsFilter);
 
             var signal = GetCompareSignal(smaFilter - prevSmaFilter1, prevSmaFilter1 - prevSmaFilter2);
             signalsList.Add(signal);
@@ -5399,20 +5399,20 @@ public static partial class Calculations
 
             var prevWhitenoise = whitenoiseList.LastOrDefault();
             var whitenoise = MinPastValues(i, 2, currentValue - prevValue) / 2;
-            whitenoiseList.AddRounded(whitenoise);
+            whitenoiseList.Add(whitenoise);
 
             var prevFilt1 = filtList.LastOrDefault();
             var filt = (c1 * ((whitenoise + prevWhitenoise) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
-            filtList.AddRounded(filt);
+            filtList.Add(filt);
 
             var prevPk = pkList.LastOrDefault();
             var pk = Math.Abs(filt) > prevPk ? Math.Abs(filt) : 0.991 * prevPk;
-            pkList.AddRounded(pk);
+            pkList.Add(pk);
 
             var denom = pk == 0 ? -1 : pk;
             var prevEuo = euoList.LastOrDefault();
             var euo = denom == -1 ? prevEuo : pk != 0 ? filt / pk : 0;
-            euoList.AddRounded(euo);
+            euoList.Add(euo);
         }
 
         var euoMaList = GetMovingAverageList(stockData, maType, signalLength, euoList);
@@ -5470,21 +5470,21 @@ public static partial class Calculations
             var prevEma2 = i >= 1 ? ema2List.LastOrDefault() : currentPrice;
 
             var ema1 = (alpha * currentPrice) + ((1 - alpha) * prevEma1);
-            ema1List.AddRounded(ema1);
+            ema1List.Add(ema1);
 
             var ema2 = (alpha2 * currentPrice) + ((1 - alpha2) * prevEma2);
-            ema2List.AddRounded(ema2);
+            ema2List.Add(ema2);
 
             var dsp = ema1 - ema2;
-            dspList.AddRounded(dsp);
+            dspList.Add(dsp);
 
             var prevTemp = tempList.LastOrDefault();
             var temp = (alpha * dsp) + ((1 - alpha) * prevTemp);
-            tempList.AddRounded(temp);
+            tempList.Add(temp);
 
             var prevDeli = deliList.LastOrDefault();
             var deli = dsp - temp;
-            deliList.AddRounded(deli);
+            deliList.Add(deli);
 
             var signal = GetCompareSignal(deli, prevDeli);
             signalsList.Add(signal);
@@ -5538,22 +5538,22 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var hp = ((1 + (alpha2 / 2)) * MinPastValues(i, 1, currentValue - prevValue)) + ((1 - alpha2) * prevHp1);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var bp = i > 2 ? (0.5 * (1 - alpha1) * (hp - prevHp2)) + (beta * (1 + alpha1) * prevBp1) - (alpha1 * prevBp2) : 0;
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Max(0.991 * prevPeak, Math.Abs(bp));
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var prevSig = signalList.LastOrDefault();
             var sig = peak != 0 ? bp / peak : 0;
-            signalList.AddRounded(sig);
+            signalList.Add(sig);
 
             var prevTrigger = triggerList.LastOrDefault();
             var trigger = ((1 + (alpha3 / 2)) * (sig - prevSig)) + ((1 - alpha3) * prevTrigger);
-            triggerList.AddRounded(trigger);
+            triggerList.Add(trigger);
 
             var signal = GetCompareSignal(sig - trigger, prevSig - prevTrigger);
             signalsList.Add(signal);
@@ -5597,7 +5597,7 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var signal = GetCompareSignal(bp - prevBp1, prevBp1 - prevBp2);
             signalsList.Add(signal);
@@ -5640,7 +5640,7 @@ public static partial class Calculations
             var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
 
             var bp = (0.5 * (1 - alpha) * MinPastValues(i, 2, currentValue - prevValue)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var signal = GetCompareSignal(bp - prevBp1, prevBp1 - prevBp2);
             signalsList.Add(signal);
@@ -5688,7 +5688,7 @@ public static partial class Calculations
             }
 
             var ptop = 2 * 1.414 * Sqrt(power / length);
-            ptopList.AddRounded(ptop);
+            ptopList.Add(ptop);
 
             var signal = GetCompareSignal(ptop - prevPtop1, prevPtop1 - prevPtop2);
             signalsList.Add(signal);
@@ -5739,7 +5739,7 @@ public static partial class Calculations
                 dc = MinOrMax(2 * counter, 1.25 * prevDc, 0.8 * prevDc);
                 counter = 0;
             }
-            dcList.AddRounded(dc);
+            dcList.Add(dc);
 
             var signal = GetCompareSignal(real - trigger, prevReal - prevTrigger);
             signalsList.Add(signal);
@@ -5795,25 +5795,25 @@ public static partial class Calculations
             var prevSignal3 = i >= 3 ? signalList[i - 3] : 0;
 
             var bp = i > 2 ? (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2) : 0;
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var prevPeak = peakList.LastOrDefault();
             var peak = Math.Max(0.991 * prevPeak, Math.Abs(bp));
-            peakList.AddRounded(peak);
+            peakList.Add(peak);
 
             var sig = peak != 0 ? bp / peak : 0;
-            signalList.AddRounded(sig);
+            signalList.Add(sig);
 
             var lead = 1.3 * (sig + prevSignal1 - prevSignal2 - prevSignal3) / 4;
             var prevLeadPeak = leadPeakList.LastOrDefault();
             var leadPeak = Math.Max(0.93 * prevLeadPeak, Math.Abs(lead));
-            leadPeakList.AddRounded(leadPeak);
+            leadPeakList.Add(leadPeak);
 
             var prevTrigger = triggerList.LastOrDefault();
             var trigger = 0.9 * prevSignal1;
-            triggerList.AddRounded(trigger);
+            triggerList.Add(trigger);
 
-            var signal = GetRsiSignal(sig - trigger, prevSignal1 - prevTrigger, sig, prevSignal1, 0.707, -0.707);
+            var signal = GetRsiSignal(sig - trigger, prevSignal1 - prevTrigger, sig, prevSignal1, MathHelper.InverseSqrt2, -MathHelper.InverseSqrt2);
             signalsList.Add(signal);
         }
 
@@ -5854,11 +5854,11 @@ public static partial class Calculations
             var prevCycle2 = i >= 2 ? cycleList[i - 2] : 0;
 
             var smooth = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-            smoothList.AddRounded(smooth);
+            smoothList.Add(smooth);
 
             var cycle = i < 7 ? (currentValue - (2 * prevValue1) + prevValue2) / 4 : (Pow(1 - (0.5 * alpha), 2) * (smooth - (2 * prevSmooth1) + prevSmooth2)) +
                 (2 * (1 - alpha) * prevCycle1) - (Pow(1 - alpha, 2) * prevCycle2);
-            cycleList.AddRounded(cycle);
+            cycleList.Add(cycle);
 
             var signal = GetCompareSignal(cycle - prevCycle1, prevCycle1 - prevCycle2);
             signalsList.Add(signal);
@@ -5903,15 +5903,15 @@ public static partial class Calculations
             var minCycle = minCycleList[i];
 
             var stoch = maxCycle - minCycle != 0 ? MinOrMax((cycle - minCycle) / (maxCycle - minCycle), 1, 0) : 0;
-            stochList.AddRounded(stoch);
+            stochList.Add(stoch);
 
             var prevStochCC = stochCCList.LastOrDefault();
             var stochCC = MinOrMax(2 * ((((4 * stoch) + (3 * prevStoch1) + (2 * prevStoch2) + prevStoch3) / 10) - 0.5), 1, -1);
-            stochCCList.AddRounded(stochCC);
+            stochCCList.Add(stochCC);
 
             var prevTrigger = triggerList.LastOrDefault();
             var trigger = MinOrMax(0.96 * (prevStochCC + 0.02), 1, -1);
-            triggerList.AddRounded(trigger);
+            triggerList.Add(trigger);
 
             var signal = GetRsiSignal(stochCC - trigger, prevStochCC - prevTrigger, stochCC, prevStochCC, 0.5, -0.5);
             signalsList.Add(signal);
@@ -5954,7 +5954,7 @@ public static partial class Calculations
             var hlRaw = fastLength * der;
 
             var hl = MinOrMax(hlRaw, 1, -1);
-            hlList.AddRounded(hl);
+            hlList.Add(hl);
         }
 
         var ssList = GetMovingAverageList(stockData, maType, slowLength, hlList);
@@ -6008,10 +6008,10 @@ public static partial class Calculations
 
             var prevStoch2Pole = stoch2PoleList.LastOrDefault();
             var stoch2Pole = max2Pole - min2Pole != 0 ? MinOrMax((rf2Pole - min2Pole) / (max2Pole - min2Pole), 1, 0) : 0;
-            stoch2PoleList.AddRounded(stoch2Pole);
+            stoch2PoleList.Add(stoch2Pole);
 
             var arg2Pole = (stoch2Pole + prevStoch2Pole) / 2;
-            arg2PoleList.AddRounded(arg2Pole);
+            arg2PoleList.Add(arg2Pole);
         }
 
         var estoch2PoleList = GetMovingAverageList(stockData, maType, length2, arg2PoleList);
@@ -6062,13 +6062,13 @@ public static partial class Calculations
             var prevTmp2_12 = i >= 12 ? tmp2List[i - 12] : 0;
 
             var tmp1 = currentValue + (0.088 * prevTmp1_6);
-            tmp1List.AddRounded(tmp1);
+            tmp1List.Add(tmp1);
 
             var tmp2 = tmp1 - prevTmp1_6 + (1.2 * prevTmp2_6) - (0.7 * prevTmp2_12);
-            tmp2List.AddRounded(tmp2);
+            tmp2List.Add(tmp2);
 
             var detrender = prevTmp2_12 - (2 * prevTmp2_6) + tmp2;
-            detrenderList.AddRounded(detrender);
+            detrenderList.Add(detrender);
         }
 
         var tdldList = GetMovingAverageList(stockData, maType, length, detrenderList);
@@ -6080,7 +6080,7 @@ public static partial class Calculations
 
             var prevHist = histList.LastOrDefault();
             var hist = tdld - tdldSignal;
-            histList.AddRounded(hist);
+            histList.Add(hist);
 
             var signal = GetCompareSignal(hist, prevHist);
             signalsList.Add(signal);
@@ -6125,10 +6125,10 @@ public static partial class Calculations
             var der = currentClose - currentOpen;
 
             var absDer = Math.Abs(der);
-            absDerList.AddRounded(absDer);
+            absDerList.Add(absDer);
 
             var env = absDerList.TakeLastExt(length1).Max();
-            envList.AddRounded(env);
+            envList.Add(env);
         }
 
         var volList = GetMovingAverageList(stockData, maType, length2, envList);
@@ -6192,15 +6192,15 @@ public static partial class Calculations
             dcPhase += sp != 0 ? 360 / sp : 0;
             dcPhase += imagPart < 0 ? 180 : 0;
             dcPhase -= dcPhase > 315 ? 360 : 0;
-            dcPhaseList.AddRounded(dcPhase);
+            dcPhaseList.Add(dcPhase);
 
             var prevSine = sineList.LastOrDefault();
             var sine = Math.Sin(dcPhase.ToRadians());
-            sineList.AddRounded(sine);
+            sineList.Add(sine);
 
             var prevLeadSine = leadSineList.LastOrDefault();
             var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-            leadSineList.AddRounded(leadSine);
+            leadSineList.Add(leadSine);
 
             var signal = GetCompareSignal(sine - leadSine, prevSine - prevLeadSine);
             signalsList.Add(signal);
@@ -6253,15 +6253,15 @@ public static partial class Calculations
             dcPhase += 90;
             dcPhase += imagPart < 0 ? 180 : 0;
             dcPhase -= dcPhase > 315 ? 360 : 0;
-            dcPhaseList.AddRounded(dcPhase);
+            dcPhaseList.Add(dcPhase);
 
             var prevSine = sineList.LastOrDefault();
             var sine = Math.Sin(dcPhase.ToRadians());
-            sineList.AddRounded(sine);
+            sineList.Add(sine);
 
             var prevLeadSine = leadSineList.LastOrDefault();
             var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-            leadSineList.AddRounded(leadSine);
+            leadSineList.Add(leadSine);
 
             var signal = GetCompareSignal(sine - leadSine, prevSine - prevLeadSine);
             signalsList.Add(signal);
@@ -6313,16 +6313,16 @@ public static partial class Calculations
 
             var prevHp = hpList.LastOrDefault();
             var hp = ((0.5 * (1 + a1)) * MinPastValues(i, 1, currentValue - prevValue)) + (a1 * prevHp);
-            hpList.AddRounded(hp);
+            hpList.Add(hp);
 
             var filt = (c1 * ((hp + prevHp) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
-            filtList.AddRounded(filt);
+            filtList.Add(filt);
 
             var wave = (filt + prevFilt1 + prevFilt2) / 3;
             var pwr = (Pow(filt, 2) + Pow(prevFilt1, 2) + Pow(prevFilt2, 2)) / 3;
             var prevEbsi = ebsiList.LastOrDefault();
             var ebsi = pwr > 0 ? wave / Sqrt(pwr) : 0;
-            ebsiList.AddRounded(ebsi);
+            ebsiList.Add(ebsi);
 
             var signal = GetCompareSignal(ebsi, prevEbsi);
             signalsList.Add(signal);
@@ -6359,10 +6359,10 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var piPrd = 0.707 * 2 * Math.PI / length1;
+        var piPrd = MathHelper.Sqrt2 * Math.PI / length1;
         var alpha = (Math.Cos(piPrd) + Math.Sin(piPrd) - 1) / Math.Cos(piPrd);
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length2);
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length2);
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -6379,10 +6379,10 @@ public static partial class Calculations
 
             var highPass = (Pow(1 - (alpha / 2), 2) * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) -
                            (Pow(1 - alpha, 2) * prevHp2);
-            hpList.AddRounded(highPass);
+            hpList.Add(highPass);
 
             var roofingFilter = (c1 * ((highPass + prevHp1) / 2)) + (c2 * prevRoofingFilter1) + (c3 * prevRoofingFilter2);
-            roofingFilterList.AddRounded(roofingFilter);
+            roofingFilterList.Add(roofingFilter);
 
             var n = i + 1;
             double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, corr = 0, conv = 0, slope = 0;
@@ -6403,8 +6403,8 @@ public static partial class Calculations
                 var prevFilt = i >= filtLength ? roofingFilterList[i - filtLength] : 0;
                 slope = prevFilt < roofingFilter ? -1 : 1;
             }
-            convList.AddRounded(conv);
-            slopeList.AddRounded(slope);
+            convList.Add(conv);
+            slopeList.Add(slope);
 
             var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
             signalsList.Add(signal);
@@ -6448,10 +6448,10 @@ public static partial class Calculations
 
             var prevNValue = nValueList.LastOrDefault();
             var nValue = MinOrMax((0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue), 0.999, -0.999);
-            nValueList.AddRounded(nValue);
+            nValueList.Add(nValue);
 
             var fisherTransform = (0.5 * Math.Log((1 + nValue) / (1 - nValue))) + (0.5 * prevFisherTransform1);
-            fisherTransformList.AddRounded(fisherTransform);
+            fisherTransformList.Add(fisherTransform);
 
             var signal = GetCompareSignal(fisherTransform - prevFisherTransform1, prevFisherTransform1 - prevFisherTransform2);
             signalsList.Add(signal);
@@ -6492,7 +6492,7 @@ public static partial class Calculations
             var currentRsi = rsiList[i];
 
             var v1 = 0.1 * (currentRsi - 50);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
         }
 
         var v2List = GetMovingAverageList(stockData, maType, length2, v1List);
@@ -6504,7 +6504,7 @@ public static partial class Calculations
             var bottom = Exp(2 * v2) + 1;
 
             var inverseFisherTransform = bottom != 0 ? MinOrMax((Exp(2 * v2) - 1) / bottom, 1, -1) : 0;
-            inverseFisherTransformList.AddRounded(inverseFisherTransform);
+            inverseFisherTransformList.Add(inverseFisherTransform);
 
             var signal = GetRsiSignal(inverseFisherTransform - prevIft1, prevIft1 - prevIft2, inverseFisherTransform, prevIft1, 0.5, -0.5);
             signalsList.Add(signal);
@@ -6544,11 +6544,11 @@ public static partial class Calculations
 
             var it = i < 7 ? (currentValue + (2 * prevValue1) + prevValue2) / 4 : ((alpha - (Pow(alpha, 2) / 4)) * currentValue) + 
                 (0.5 * Pow(alpha, 2) * prevValue1) - ((alpha - (0.75 * Pow(alpha, 2))) * prevValue2) + (2 * (1 - alpha) * prevIt1) - (Pow(1 - alpha, 2) * prevIt2);
-            itList.AddRounded(it);
+            itList.Add(it);
 
             var prevLag = lagList.LastOrDefault();
             var lag = (2 * it) - prevIt2;
-            lagList.AddRounded(lag);
+            lagList.Add(lag);
 
             var signal = GetCompareSignal(lag - it, prevLag - prevIt1);
             signalsList.Add(signal);
@@ -6598,11 +6598,11 @@ public static partial class Calculations
                 iTrend += prevValue;
             }
             iTrend = dcPeriod != 0 ? iTrend / dcPeriod : iTrend;
-            itList.AddRounded(iTrend);
+            itList.Add(iTrend);
 
             var prevTrendLine = trendLineList.LastOrDefault();
             var trendLine = ((4 * iTrend) + (3 * prevIt1) + (2 * prevIt2) + prevIt3) / 10;
-            trendLineList.AddRounded(trendLine);
+            trendLineList.Add(trendLine);
 
             var signal = GetCompareSignal(currentValue - trendLine, prevVal - prevTrendLine);
             signalsList.Add(signal);
@@ -6649,25 +6649,25 @@ public static partial class Calculations
             var prevRsi2 = i >= 2 ? laguerreRsiList[i - 2] : 0;
 
             var l0 = ((1 - gamma) * currentValue) + (gamma * prevL0);
-            l0List.AddRounded(l0);
+            l0List.Add(l0);
 
             var l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
-            l1List.AddRounded(l1);
+            l1List.Add(l1);
 
             var l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
-            l2List.AddRounded(l2);
+            l2List.Add(l2);
 
             var l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
-            l3List.AddRounded(l3);
+            l3List.Add(l3);
 
             var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
-            cuList.AddRounded(cu);
+            cuList.Add(cu);
 
             var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
-            cdList.AddRounded(cd);
+            cdList.Add(cd);
 
             var laguerreRsi = cu + cd != 0 ? MinOrMax(cu / (cu + cd), 1, 0) : 0;
-            laguerreRsiList.AddRounded(laguerreRsi);
+            laguerreRsiList.Add(laguerreRsi);
 
             var signal = GetRsiSignal(laguerreRsi - prevRsi1, prevRsi1 - prevRsi2, laguerreRsi, prevRsi1, 0.8, 0.2);
             signalsList.Add(signal);
@@ -6720,30 +6720,30 @@ public static partial class Calculations
             var feValue = (oc + hc + lc + currentValue) / 4;
 
             var ratio = highestHigh - lowestLow != 0 ? (hc - lc) / (highestHigh - lowestLow) : 0;
-            ratioList.AddRounded(ratio);
+            ratioList.Add(ratio);
 
             var ratioSum = ratioList.TakeLastExt(length).Sum();
             var alpha = ratioSum > 0 ? MinOrMax(Math.Log(ratioSum) / Math.Log(length), 0.99, 0.01) : 0.01;
             var prevL0 = l0List.LastOrDefault();
             var l0 = (alpha * feValue) + ((1 - alpha) * prevL0);
-            l0List.AddRounded(l0);
+            l0List.Add(l0);
 
             var prevL1 = l1List.LastOrDefault();
             var l1 = (-(1 - alpha) * l0) + prevL0 + ((1 - alpha) * prevL1);
-            l1List.AddRounded(l1);
+            l1List.Add(l1);
 
             var prevL2 = l2List.LastOrDefault();
             var l2 = (-(1 - alpha) * l1) + prevL1 + ((1 - alpha) * prevL2);
-            l2List.AddRounded(l2);
+            l2List.Add(l2);
 
             var prevL3 = l3List.LastOrDefault();
             var l3 = (-(1 - alpha) * l2) + prevL2 + ((1 - alpha) * prevL3);
-            l3List.AddRounded(l3);
+            l3List.Add(l3);
 
             var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
             var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
             var laguerreRsi = cu + cd != 0 ? MinOrMax(cu / (cu + cd), 1, 0) : 0;
-            laguerreRsiList.AddRounded(laguerreRsi);
+            laguerreRsiList.Add(laguerreRsi);
 
             var signal = GetRsiSignal(laguerreRsi - prevRsi1, prevRsi1 - prevRsi2, laguerreRsi, prevRsi1, 0.8, 0.2);
             signalsList.Add(signal);
@@ -6792,10 +6792,10 @@ public static partial class Calculations
             }
 
             var arsi = cu + cd != 0 ? 100 * cu / (cu + cd) : 0;
-            arsiList.AddRounded(arsi);
+            arsiList.Add(arsi);
 
             var arsiEma = CalculateEMA(arsi, prevArsi1, (int)Math.Ceiling(sp));
-            arsiEmaList.AddRounded(arsiEma);
+            arsiEmaList.Add(arsiEma);
 
             var signal = GetRsiSignal(arsiEma - prevArsi1, prevArsi1 - prevArsi2, arsiEma, prevArsi1, 70, 30);
             signalsList.Add(signal);
@@ -6834,7 +6834,7 @@ public static partial class Calculations
             var ampRsi = MinOrMax(1.5 * tranRsi, 0.999, -0.999);
 
             var fish = 0.5 * Math.Log((1 + ampRsi) / (1 - ampRsi));
-            fishList.AddRounded(fish);
+            fishList.Add(fish);
 
             var signal = GetCompareSignal(fish - prevFish1, prevFish1 - prevFish2);
             signalsList.Add(signal);
@@ -6887,10 +6887,10 @@ public static partial class Calculations
             }
 
             var astoc = hh - ll != 0 ? 100 * (close - ll) / (hh - ll) : 0;
-            astocList.AddRounded(astoc);
+            astocList.Add(astoc);
 
             var astocEma = CalculateEMA(astoc, prevAstoc1, length);
-            astocEmaList.AddRounded(astocEma);
+            astocEmaList.Add(astocEma);
 
             var signal = GetRsiSignal(astocEma - prevAstoc1, prevAstoc1 - prevAstoc2, astocEma, prevAstoc1, 70, 30);
             signalsList.Add(signal);
@@ -6951,10 +6951,10 @@ public static partial class Calculations
             md /= length;
 
             var acci = md != 0 ? (tp - avg) / (constant * md) : 0;
-            acciList.AddRounded(acci);
+            acciList.Add(acci);
 
             var acciEma = CalculateEMA(acci, prevAcci1, (int)Math.Ceiling(sp));
-            acciEmaList.AddRounded(acciEma);
+            acciEmaList.Add(acciEma);
 
             var signal = GetRsiSignal(acciEma - prevAcci1, prevAcci1 - prevAcci2, acciEma, prevAcci1, 100, -100);
             signalsList.Add(signal);
@@ -6998,7 +6998,7 @@ public static partial class Calculations
             var cci = cciList[i];
 
             var v1 = 0.1 * (cci - 50);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
         }
 
         var v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
@@ -7010,7 +7010,7 @@ public static partial class Calculations
             var prevIFish2 = i >= 2 ? iFishList[i - 2] : 0;
 
             var iFish = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
-            iFishList.AddRounded(iFish);
+            iFishList.Add(iFish);
 
             var signal = GetRsiSignal(iFish - prevIFish1, prevIFish1 - prevIFish2, iFish, prevIFish1, 0.5, -0.5);
             signalsList.Add(signal);
@@ -7051,7 +7051,7 @@ public static partial class Calculations
             var rsi = rsiList[i];
 
             var v1 = 0.1 * (rsi - 50);
-            v1List.AddRounded(v1);
+            v1List.Add(v1);
         }
 
         var v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
@@ -7063,7 +7063,7 @@ public static partial class Calculations
             var prevIfish2 = i >= 2 ? iFishList[i - 2] : 0;
 
             var iFish = expValue + 1 != 0 ? MinOrMax((expValue - 1) / (expValue + 1), 1, -1) : 0;
-            iFishList.AddRounded(iFish);
+            iFishList.Add(iFish);
 
             var signal = GetRsiSignal(iFish - prevIfish1, prevIfish1 - prevIfish2, iFish, prevIfish1, 0.5, -0.5);
             signalsList.Add(signal);

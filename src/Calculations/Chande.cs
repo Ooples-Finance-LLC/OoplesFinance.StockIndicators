@@ -31,7 +31,7 @@ public static partial class Calculations
             var currentClose = inputList[i];
 
             var openClose = currentClose - currentOpen;
-            openCloseList.AddRounded(openClose);
+            openCloseList.Add(openClose);
         }
 
         var smaList = GetMovingAverageList(stockData, maType, length, openCloseList);
@@ -83,14 +83,14 @@ public static partial class Calculations
             {
                 diff = 0; absDiff = 0;
             }
-            diffList.AddRounded(diff);
-            absDiffList.AddRounded(absDiff);
+            diffList.Add(diff);
+            absDiffList.Add(absDiff);
 
             var diffSum = diffList.TakeLastExt(length).Sum();
             var absDiffSum = absDiffList.TakeLastExt(length).Sum();
 
             var cmo = absDiffSum != 0 ? MinOrMax(100 * diffSum / absDiffSum, 100, -100) : 0;
-            cmoList.AddRounded(cmo);
+            cmoList.Add(cmo);
         }
 
         var cmoSignalList = GetMovingAverageList(stockData, maType, length, cmoList);
@@ -139,13 +139,13 @@ public static partial class Calculations
             var prevCmoAbs2 = i >= 2 ? cmoAbsList[i - 2] : 0;
 
             var absDiff = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-            absDiffList.AddRounded(absDiff);
+            absDiffList.Add(absDiff);
 
             var num = Math.Abs(100 * MinPastValues(i, length, currentValue - priorValue));
             var denom = absDiffList.TakeLastExt(length).Sum();
 
             var cmoAbs = denom != 0 ? MinOrMax(num / denom, 100, 0) : 0;
-            cmoAbsList.AddRounded(cmoAbs);
+            cmoAbsList.Add(cmoAbs);
 
             var signal = GetRsiSignal(cmoAbs - prevCmoAbs1, prevCmoAbs1 - prevCmoAbs2, cmoAbs, prevCmoAbs1, 70, 30);
             signalsList.Add(signal);
@@ -186,10 +186,10 @@ public static partial class Calculations
             var prevCmoAvg2 = i >= 2 ? cmoAvgList[i - 2] : 0;
 
             var diff = currentPrice - prevPrice;
-            diffList.AddRounded(diff);
+            diffList.Add(diff);
 
             var absDiff = Math.Abs(diff);
-            absDiffList.AddRounded(absDiff);
+            absDiffList.Add(absDiff);
 
             var diffSum1 = diffList.TakeLastExt(length1).Sum();
             var absSum1 = absDiffList.TakeLastExt(length1).Sum();
@@ -202,7 +202,7 @@ public static partial class Calculations
             var temp3 = absSum3 != 0 ? MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
 
             var cmoAvg = 100 * ((temp1 + temp2 + temp3) / 3);
-            cmoAvgList.AddRounded(cmoAvg);
+            cmoAvgList.Add(cmoAvg);
 
             var signal = GetRsiSignal(cmoAvg - prevCmoAvg1, prevCmoAvg1 - prevCmoAvg2, cmoAvg, prevCmoAvg1, 50, -50);
             signalsList.Add(signal);
@@ -243,10 +243,10 @@ public static partial class Calculations
             var prevCmoAbsAvg2 = i >= 2 ? cmoAbsAvgList[i - 2] : 0;
 
             var diff = currentPrice - prevPrice;
-            diffList.AddRounded(diff);
+            diffList.Add(diff);
 
             var absDiff = Math.Abs(diff);
-            absDiffList.AddRounded(absDiff);
+            absDiffList.Add(absDiff);
 
             var diffSum1 = diffList.TakeLastExt(length1).Sum();
             var absSum1 = absDiffList.TakeLastExt(length1).Sum();
@@ -259,7 +259,7 @@ public static partial class Calculations
             var temp3 = absSum3 != 0 ? MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
 
             var cmoAbsAvg = Math.Abs(100 * ((temp1 + temp2 + temp3) / 3));
-            cmoAbsAvgList.AddRounded(cmoAbsAvg);
+            cmoAbsAvgList.Add(cmoAbsAvg);
 
             var signal = GetRsiSignal(cmoAbsAvg - prevCmoAbsAvg1, prevCmoAbsAvg1 - prevCmoAbsAvg2, cmoAbsAvg, prevCmoAbsAvg1, 70, 30);
             signalsList.Add(signal);
@@ -310,10 +310,10 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var valueDiff1 = currentValue > prevValue ? MinPastValues(i, 1, currentValue - prevValue) : 0;
-            valueDiff1List.AddRounded(valueDiff1);
+            valueDiff1List.Add(valueDiff1);
 
             var valueDiff2 = currentValue < prevValue ? MinPastValues(i, 1, prevValue - currentValue) : 0;
-            valueDiff2List.AddRounded(valueDiff2);
+            valueDiff2List.Add(valueDiff2);
 
             var cmo51 = valueDiff1List.TakeLastExt(length1).Sum();
             var cmo52 = valueDiff2List.TakeLastExt(length1).Sum();
@@ -323,13 +323,13 @@ public static partial class Calculations
             var cmo202 = valueDiff2List.TakeLastExt(length3).Sum();
 
             var cmo5Ratio = cmo51 + cmo52 != 0 ? MinOrMax(100 * (cmo51 - cmo52) / (cmo51 + cmo52), 100, -100) : 0;
-            cmo5RatioList.AddRounded(cmo5Ratio);
+            cmo5RatioList.Add(cmo5Ratio);
 
             var cmo10Ratio = cmo101 + cmo102 != 0 ? MinOrMax(100 * (cmo101 - cmo102) / (cmo101 + cmo102), 100, -100) : 0;
-            cmo10RatioList.AddRounded(cmo10Ratio);
+            cmo10RatioList.Add(cmo10Ratio);
 
             var cmo20Ratio = cmo201 + cmo202 != 0 ? MinOrMax(100 * (cmo201 - cmo202) / (cmo201 + cmo202), 100, -100) : 0;
-            cmo20RatioList.AddRounded(cmo20Ratio);
+            cmo20RatioList.Add(cmo20Ratio);
         }
 
         var cmo5List = GetMovingAverageList(stockData, maType, smoothLength, cmo5RatioList);
@@ -346,15 +346,15 @@ public static partial class Calculations
 
             var dmi = stdDev5 + stdDev10 + stdDev20 != 0 ?
                 MinOrMax(((stdDev5 * cmo5) + (stdDev10 * cmo10) + (stdDev20 * cmo20)) / (stdDev5 + stdDev10 + stdDev20), 100, -100) : 0;
-            dmiList.AddRounded(dmi);
+            dmiList.Add(dmi);
 
             var prevS = sList.LastOrDefault();
             var s = dmiList.TakeLastExt(length1).Average();
-            sList.AddRounded(s);
+            sList.Add(s);
 
             var prevE = eList.LastOrDefault();
             var e = CalculateEMA(dmi, prevE, smoothLength);
-            eList.AddRounded(e);
+            eList.Add(e);
 
             var signal = GetRsiSignal(e - s, prevE - prevS, e, prevE, 70, -70);
             signalsList.Add(signal);
@@ -404,7 +404,7 @@ public static partial class Calculations
 
             var prevAvgDisparityIndex = avgDisparityIndexList.LastOrDefault();
             var avgDisparityIndex = (firstDisparityIndex + secondDisparityIndex + thirdDisparityIndex) / 3;
-            avgDisparityIndexList.AddRounded(avgDisparityIndex);
+            avgDisparityIndexList.Add(avgDisparityIndex);
 
             var signal = GetCompareSignal(avgDisparityIndex, prevAvgDisparityIndex);
             signalsList.Add(signal);
@@ -441,15 +441,15 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             double index = i;
-            indexList.AddRounded(index);
+            indexList.Add(index);
 
             var currentValue = inputList[i];
-            tempValueList.AddRounded(currentValue);
+            tempValueList.Add(currentValue);
 
             var r2 = GoodnessOfFit.RSquared(indexList.TakeLastExt(length).Select(x => (double)x),
                 tempValueList.TakeLastExt(length).Select(x => (double)x));
             r2 = IsValueNullOrInfinity(r2) ? 0 : r2;
-            r2RawList.AddRounded((double)r2);
+            r2RawList.Add((double)r2);
         }
 
         var r2SmoothedList = GetMovingAverageList(stockData, maType, smoothLength, r2RawList);
@@ -505,10 +505,10 @@ public static partial class Calculations
             var ratio = currentStdDevEma != 0 ? currentStdDev / currentStdDevEma : 0;
 
             var vidya1 = (alpha1 * ratio * currentValue) + ((1 - (alpha1 * ratio)) * prevVidya1);
-            vidya1List.AddRounded(vidya1);
+            vidya1List.Add(vidya1);
 
             var vidya2 = (alpha2 * ratio * currentValue) + ((1 - (alpha2 * ratio)) * prevVidya2);
-            vidya2List.AddRounded(vidya2);
+            vidya2List.Add(vidya2);
 
             var signal = GetBullishBearishSignal(currentValue - Math.Max(vidya1, vidya2), prevValue - Math.Max(prevVidya1, prevVidya2),
                 currentValue - Math.Min(vidya1, vidya2), prevValue - Math.Min(prevVidya1, prevVidya2));
@@ -551,7 +551,7 @@ public static partial class Calculations
                 var prevValue = i >= j ? inputList[i - j] : 0;
                 ts += currentValue >= prevValue ? 1 : -1;
             }
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(ts, prevTs);
             signalsList.Add(signal);
@@ -589,7 +589,7 @@ public static partial class Calculations
 
             var prevPf = pfList.LastOrDefault();
             var pf = currentValue != 0 ? (currentValue - currentLinReg) * 100 / currentValue : 0;
-            pfList.AddRounded(pf);
+            pfList.Add(pf);
 
             var signal = GetCompareSignal(pf, prevPf);
             signalsList.Add(signal);
@@ -629,17 +629,17 @@ public static partial class Calculations
 
             var prevGains = gainsList.LastOrDefault();
             var gains = currentClose > currentOpen ? prevGains + (currentClose - currentOpen) : 0;
-            gainsList.AddRounded(gains);
+            gainsList.Add(gains);
 
             var prevLosses = lossesList.LastOrDefault();
             var losses = currentClose < currentOpen ? prevLosses + (currentOpen - currentClose) : 0;
-            lossesList.AddRounded(losses);
+            lossesList.Add(losses);
 
             var upt = gainsList.TakeLastExt(length).Sum();
             var dnt = lossesList.TakeLastExt(length).Sum();
 
             var imiUnfiltered = upt + dnt != 0 ? MinOrMax(100 * upt / (upt + dnt), 100, 0) : 0;
-            imiUnfilteredList.AddRounded(imiUnfiltered);
+            imiUnfilteredList.Add(imiUnfiltered);
 
             var signal = GetRsiSignal(imiUnfiltered - prevImi1, prevImi1 - prevImi2, imiUnfiltered, prevImi1, 70, 30);
             signalsList.Add(signal);
@@ -680,16 +680,16 @@ public static partial class Calculations
             var diff = MinPastValues(i, 1, currentValue - prevValue);
 
             var negChg = i >= 1 && diff < 0 ? Math.Abs(diff) : 0;
-            cmoNegChgList.AddRounded(negChg);
+            cmoNegChgList.Add(negChg);
 
             var posChg = i >= 1 && diff > 0 ? diff : 0;
-            cmoPosChgList.AddRounded(posChg);
+            cmoPosChgList.Add(posChg);
 
             var negSum = cmoNegChgList.TakeLastExt(length).Sum();
             var posSum = cmoPosChgList.TakeLastExt(length).Sum();
 
             var cmo = posSum + negSum != 0 ? MinOrMax((posSum - negSum) / (posSum + negSum) * 100, 100, -100) : 0;
-            cmoList.AddRounded(cmo);
+            cmoList.Add(cmo);
         }
 
         var cmoSignalList = GetMovingAverageList(stockData, maType, signalLength, cmoList);

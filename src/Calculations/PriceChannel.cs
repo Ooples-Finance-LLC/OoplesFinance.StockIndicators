@@ -38,14 +38,14 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var upperPriceChannel = currentEma * (1 + pct);
-            upperPriceChannelList.AddRounded(upperPriceChannel);
+            upperPriceChannelList.Add(upperPriceChannel);
 
             var lowerPriceChannel = currentEma * (1 - pct);
-            lowerPriceChannelList.AddRounded(lowerPriceChannel);
+            lowerPriceChannelList.Add(lowerPriceChannel);
 
             var prevMidPriceChannel = midPriceChannelList.LastOrDefault();
             var midPriceChannel = (upperPriceChannel + lowerPriceChannel) / 2;
-            midPriceChannelList.AddRounded(midPriceChannel);
+            midPriceChannelList.Add(midPriceChannel);
 
             var signal = GetCompareSignal(currentValue - midPriceChannel, prevValue - prevMidPriceChannel);
             signalsList.Add(signal);
@@ -85,14 +85,14 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var upperChannel = highestList[i];
-            upperChannelList.AddRounded(upperChannel);
+            upperChannelList.Add(upperChannel);
 
             var lowerChannel = lowestList[i];
-            lowerChannelList.AddRounded(lowerChannel);
+            lowerChannelList.Add(lowerChannel);
 
             var prevMiddleChannel = middleChannelList.LastOrDefault();
             var middleChannel = (upperChannel + lowerChannel) / 2;
-            middleChannelList.AddRounded(middleChannel);
+            middleChannelList.Add(middleChannel);
 
             var signal = GetCompareSignal(currentValue - middleChannel, prevValue - prevMiddleChannel);
             signalsList.Add(signal);
@@ -138,11 +138,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (currentStdDev * stdDevMult);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (currentStdDev * stdDevMult);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand, prevUpperBand, lowerBand, prevLowerBand);
             signalsList.Add(signal);
@@ -190,11 +190,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (currentAtr * atrMult);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (currentAtr * atrMult);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand, prevUpperBand, lowerBand, prevLowerBand);
             signalsList.Add(signal);
@@ -238,7 +238,7 @@ public static partial class Calculations
 
             var prevMidChannel = midChannelList.LastOrDefault();
             var midChannel = (upperChannel + lowerChannel) / 2;
-            midChannelList.AddRounded(midChannel);
+            midChannelList.Add(midChannel);
 
             var signal = GetCompareSignal(currentValue - midChannel, prevValue - prevMidChannel);
             signalsList.Add(signal);
@@ -284,10 +284,10 @@ public static partial class Calculations
             var factor = currentSma20 * mult;
 
             var upperEnvelope = currentSma20 + factor;
-            upperEnvelopeList.AddRounded(upperEnvelope);
+            upperEnvelopeList.Add(upperEnvelope);
 
             var lowerEnvelope = currentSma20 - factor;
-            lowerEnvelopeList.AddRounded(lowerEnvelope);
+            lowerEnvelopeList.Add(lowerEnvelope);
 
             var signal = GetCompareSignal(currentValue - currentSma20, prevValue - prevSma20);
             signalsList.Add(signal);
@@ -336,15 +336,15 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : prevUpperBand;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = oklLower == 1 && okrLower == 1 ? prevLow2 : prevLowerBand;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetBollingerBandsSignal(currentClose - middleBand, prevClose - prevMiddleBand, currentClose, prevClose, upperBand, prevUpperBand, lowerBand, prevLowerBand);
             signalsList.Add(signal);
@@ -392,11 +392,11 @@ public static partial class Calculations
 
             var prevTopInner = innerTopAtrChannelList.LastOrDefault();
             var topInner = Math.Round(currentValue + (atr * mult));
-            innerTopAtrChannelList.AddRounded(topInner);
+            innerTopAtrChannelList.Add(topInner);
 
             var prevBottomInner = innerBottomAtrChannelList.LastOrDefault();
             var bottomInner = Math.Round(currentValue - (atr * mult));
-            innerBottomAtrChannelList.AddRounded(bottomInner);
+            innerBottomAtrChannelList.Add(bottomInner);
 
             var signal = GetBollingerBandsSignal(currentValue - sma, prevValue - prevSma, currentValue, prevValue, topInner,
                 prevTopInner, bottomInner, prevBottomInner);
@@ -446,11 +446,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = uma + (stdDevMult * stdev);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = uma - (stdDevMult * stdev);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - uma, prevVal - prevUma, currentValue, prevVal, upperBand, prevUpperBand,
                 lowerBand, prevLowerBand);
@@ -499,11 +499,11 @@ public static partial class Calculations
 
             var prevUb = upperBandList.LastOrDefault();
             var ub = type1 ? currentSma + ubFac : currentSma + (currentSma * ubFac);
-            upperBandList.AddRounded(ub);
+            upperBandList.Add(ub);
 
             var prevLb = lowerBandList.LastOrDefault();
             var lb = type1 ? currentSma - lbFac : currentSma - (currentSma * lbFac);
-            lowerBandList.AddRounded(lb);
+            lowerBandList.Add(lb);
 
             var signal = GetBollingerBandsSignal(currentValue - currentSma, prevValue - prevSma, currentValue, prevValue, ub, prevUb, lb, prevLb);
             signalsList.Add(signal);
@@ -555,16 +555,16 @@ public static partial class Calculations
             var rsi = rsiList[i];
 
             var rsiOverbought = rsi - overbought;
-            rsiOverboughtList.AddRounded(rsiOverbought);
+            rsiOverboughtList.Add(rsiOverbought);
 
             var rsiOversold = rsi - oversold;
-            rsiOversoldList.AddRounded(rsiOversold);
+            rsiOversoldList.Add(rsiOversold);
 
             var rsiUpperNeutralZone = rsi - upperNeutralZone;
-            rsiUpperNeutralZoneList.AddRounded(rsiUpperNeutralZone);
+            rsiUpperNeutralZoneList.Add(rsiUpperNeutralZone);
 
             var rsiLowerNeutralZone = rsi - lowerNeutralZone;
-            rsiLowerNeutralZoneList.AddRounded(rsiLowerNeutralZone);
+            rsiLowerNeutralZoneList.Add(rsiLowerNeutralZone);
         }
 
         var obList = GetMovingAverageList(stockData, maType, smoothLength, rsiOverboughtList);
@@ -582,19 +582,19 @@ public static partial class Calculations
 
             var prevS1 = s1List.LastOrDefault();
             var s1 = currentValue - (currentValue * os / 100);
-            s1List.AddRounded(s1);
+            s1List.Add(s1);
 
             var prevU1 = u1List.LastOrDefault();
             var u1 = currentValue - (currentValue * ob / 100);
-            u1List.AddRounded(u1);
+            u1List.Add(u1);
 
             var prevU2 = u2List.LastOrDefault();
             var u2 = currentValue - (currentValue * nzu / 100);
-            u2List.AddRounded(u2);
+            u2List.Add(u2);
 
             var prevS2 = s2List.LastOrDefault();
             var s2 = currentValue - (currentValue * nzl / 100);
-            s2List.AddRounded(s2);
+            s2List.Add(s2);
 
             var signal = GetBullishBearishSignal(currentValue - Math.Min(u1, u2), prevValue - Math.Min(prevU1, prevU2),
                 currentValue - Math.Max(s1, s2), prevValue - Math.Max(prevS1, prevS2));
@@ -641,18 +641,18 @@ public static partial class Calculations
             var x = currentValue + ((prevA - prevA2) * mult);
 
             var a = x > prevA + s ? prevA + s : x < prevA - s ? prevA - s : prevA;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var up = a + (Math.Abs(a - prevA) * mult);
             var dn = a - (Math.Abs(a - prevA) * mult);
 
             var prevUpper = upperList.LastOrDefault();
             var upper = up == a ? prevUpper : up;
-            upperList.AddRounded(upper);
+            upperList.Add(upper);
 
             var prevLower = lowerList.LastOrDefault();
             var lower = dn == a ? prevLower : dn;
-            lowerList.AddRounded(lower);
+            lowerList.Add(lower);
 
             var signal = GetBollingerBandsSignal(currentValue - a, prevValue - prevA, currentValue, prevValue, upper, prevUpper, lower, prevLower);
             signalsList.Add(signal);
@@ -698,14 +698,14 @@ public static partial class Calculations
             var iqr = q3 - q1;
 
             var upperBand = q3 + (mult * iqr);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var lowerBand = q1 - (mult * iqr);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetCompareSignal(currentValue - middleBand, prevValue - prevMiddleBand);
             signalsList.Add(signal);
@@ -777,14 +777,14 @@ public static partial class Calculations
             var factor = length != 0 ? (prevA - prevB) / length : 0;
 
             var a = Math.Max(currentValue, prevA) - factor;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var b = Math.Min(currentValue, prevB) + factor;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevMid = midList.LastOrDefault();
             var mid = (a + b) / 2;
-            midList.AddRounded(mid);
+            midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
             signalsList.Add(signal);
@@ -830,7 +830,7 @@ public static partial class Calculations
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetCompareSignal(currentValue - middleBand, prevValue - prevMiddleBand);
             signalsList.Add(signal);
@@ -877,11 +877,11 @@ public static partial class Calculations
 
             var prevHighBand = highBandList.LastOrDefault();
             var highBand = tma + (tma * pctShift / 100);
-            highBandList.AddRounded(highBand);
+            highBandList.Add(highBand);
 
             var prevLowBand = lowBandList.LastOrDefault();
             var lowBand = tma - (tma * pctShift / 100);
-            lowBandList.AddRounded(lowBand);
+            lowBandList.Add(lowBand);
 
             var signal = GetBollingerBandsSignal(currentValue - tma, prevValue - prevTma, currentValue, prevValue, highBand, prevHighBand,
                 lowBand, prevLowBand);
@@ -948,29 +948,29 @@ public static partial class Calculations
 
             var prevSct = sctList.LastOrDefault();
             var sct = prevSclRma + scm_off;
-            sctList.AddRounded(sct);
+            sctList.Add(sct);
 
             var prevScb = scbList.LastOrDefault();
             var scb = prevSclRma - scm_off;
-            scbList.AddRounded(scb);
+            scbList.Add(scb);
 
             var mct = prevMclRma + mcm_off;
-            mctList.AddRounded(mct);
+            mctList.Add(mct);
 
             var mcb = prevMclRma - mcm_off;
-            mcbList.AddRounded(mcb);
+            mcbList.Add(mcb);
 
             var scmm = (sct + scb) / 2;
-            scmmList.AddRounded(scmm);
+            scmmList.Add(scmm);
 
             var mcmm = (mct + mcb) / 2;
-            mcmmList.AddRounded(mcmm);
+            mcmmList.Add(mcmm);
 
             var omed = mct - mcb != 0 ? (scmm - mcb) / (mct - mcb) : 0;
-            omedList.AddRounded(omed);
+            omedList.Add(omed);
 
             var oshort = mct - mcb != 0 ? (currentValue - mcb) / (mct - mcb) : 0;
-            oshortList.AddRounded(oshort);
+            oshortList.Add(oshort);
 
             var signal = GetBullishBearishSignal(currentValue - sct, prevValue - prevSct, currentValue - scb, prevValue - prevScb);
             signalsList.Add(signal);
@@ -1027,32 +1027,32 @@ public static partial class Calculations
             var prevCma2 = i >= 2 ? cmaList[i - 2] : 0;
 
             var dPrice = i >= displacement ? inputList[i - displacement] : 0;
-            dPriceList.AddRounded(dPrice);
+            dPriceList.Add(dPrice);
 
             var cma = dPrice == 0 ? prevCma1 + (prevCma1 - prevCma2) : dPriceList.TakeLastExt(length).Average();
-            cmaList.AddRounded(cma);
+            cmaList.Add(cma);
 
             var extremeBand = cma * extremeMult / 100;
             var outerBand = cma * outerMult / 100;
             var innerBand = cma * innerMult / 100;
 
             var upperExtremeBand = cma + extremeBand;
-            upperExtremeBandList.AddRounded(upperExtremeBand);
+            upperExtremeBandList.Add(upperExtremeBand);
 
             var lowerExtremeBand = cma - extremeBand;
-            lowerExtremeBandList.AddRounded(lowerExtremeBand);
+            lowerExtremeBandList.Add(lowerExtremeBand);
 
             var upperInnerBand = cma + innerBand;
-            upperInnerBandList.AddRounded(upperInnerBand);
+            upperInnerBandList.Add(upperInnerBand);
 
             var lowerInnerBand = cma - innerBand;
-            lowerInnerBandList.AddRounded(lowerInnerBand);
+            lowerInnerBandList.Add(lowerInnerBand);
 
             var upperOuterBand = cma + outerBand;
-            upperOuterBandList.AddRounded(upperOuterBand);
+            upperOuterBandList.Add(upperOuterBand);
 
             var lowerOuterBand = cma - outerBand;
-            lowerOuterBandList.AddRounded(lowerOuterBand);
+            lowerOuterBandList.Add(lowerOuterBand);
 
             var signal = GetCompareSignal(currentValue - cma, prevValue - prevCma1);
             signalsList.Add(signal);
@@ -1104,10 +1104,10 @@ public static partial class Calculations
             var ema = emaList[i];
 
             var d1 = currentValue - ema;
-            d1List.AddRounded(d1);
+            d1List.Add(d1);
 
             var absD1 = Math.Abs(d1);
-            absD1List.AddRounded(absD1);
+            absD1List.Add(absD1);
         }
 
         var wmaList = GetMovingAverageList(stockData, maType, length, absD1List);
@@ -1121,7 +1121,7 @@ public static partial class Calculations
             var x = ema + s1;
 
             var d2 = currentValue - x;
-            d2List.AddRounded(d2);
+            d2List.Add(d2);
         }
 
         stockData.CustomValuesList = d2List;
@@ -1138,19 +1138,19 @@ public static partial class Calculations
 
             var prevBasis = basisList.LastOrDefault();
             var basis = ema + s1 + (s2 - prevS2);
-            basisList.AddRounded(basis);
+            basisList.Add(basis);
 
             var upper1 = basis + wma;
-            upper1List.AddRounded(upper1);
+            upper1List.Add(upper1);
 
             var lower1 = basis - wma;
-            lower1List.AddRounded(lower1);
+            lower1List.Add(lower1);
 
             var upper2 = upper1 + wma;
-            upper2List.AddRounded(upper2);
+            upper2List.Add(upper2);
 
             var lower2 = lower1 - wma;
-            lower2List.AddRounded(lower2);
+            lower2List.Add(lower2);
 
             var signal = GetCompareSignal(currentValue - basis, prevValue - prevBasis);
             signalsList.Add(signal);
@@ -1203,22 +1203,22 @@ public static partial class Calculations
             var l = stdDev != 0 ? (double)1 / length * stdDev : 0;
 
             var a = currentValue > prevA1 ? prevA1 + (currentValue - prevA1) : prevA2 == prevA3 ? prevA2 - l : prevA2;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var b = currentValue < prevB1 ? prevB1 + (currentValue - prevB1) : prevB2 == prevB3 ? prevB2 + l : prevB2;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevTos = tosList.LastOrDefault();
             var tos = currentValue > prevA2 ? 1 : currentValue < prevB2 ? 0 : prevTos;
-            tosList.AddRounded(tos);
+            tosList.Add(tos);
 
             var prevTavg = tavgList.LastOrDefault();
             var avg = (a + b) / 2;
             var tavg = tos == 1 ? (a + avg) / 2 : (b + avg) / 2;
-            tavgList.AddRounded(tavg);
+            tavgList.Add(tavg);
 
             var ts = (tos * b) + ((1 - tos) * a);
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(currentValue - tavg, prevValue - prevTavg);
             signalsList.Add(signal);
@@ -1266,10 +1266,10 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var currentValue = inputList[i];
-            tempInputList.AddRounded(currentValue);
+            tempInputList.Add(currentValue);
 
             var currentLinReg = linRegList[i];
-            tempLinRegList.AddRounded(currentLinReg);
+            tempLinRegList.Add(currentLinReg);
 
             var stdError = GoodnessOfFit.PopulationStandardError(tempLinRegList.TakeLastExt(length2).Select(x => (double)x),
                 tempInputList.TakeLastExt(length2).Select(x => (double)x));
@@ -1278,11 +1278,11 @@ public static partial class Calculations
 
             var prevTop = topList.LastOrDefault();
             var top = currentEma + ratio;
-            topList.AddRounded(top);
+            topList.Add(top);
 
             var prevBottom = bottomList.LastOrDefault();
             var bottom = currentEma - ratio;
-            bottomList.AddRounded(bottom);
+            bottomList.Add(bottom);
 
             var signal = GetBullishBearishSignal(currentValue - top, prevValue - prevTop, currentValue - bottom, prevValue - prevBottom);
             signalsList.Add(signal);
@@ -1327,20 +1327,20 @@ public static partial class Calculations
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (currentValue * er) + ((1 - er) * prevMiddleBand);
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var prevPowMa = powMaList.LastOrDefault();
             var powMa = (Pow(currentValue, 2) * er) + ((1 - er) * prevPowMa);
-            powMaList.AddRounded(powMa);
+            powMaList.Add(powMa);
 
             var kaufmanDev = powMa - Pow(middleBand, 2) >= 0 ? Sqrt(powMa - Pow(middleBand, 2)) : 0;
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + kaufmanDev;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - kaufmanDev;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand,
                 prevUpperBand, lowerBand, prevLowerBand);
@@ -1389,14 +1389,14 @@ public static partial class Calculations
             var currentAtr10Day = atrList[i];
 
             var upperChannel = currentEma20Day + (multFactor * currentAtr10Day);
-            upperChannelList.AddRounded(upperChannel);
+            upperChannelList.Add(upperChannel);
 
             var lowerChannel = currentEma20Day - (multFactor * currentAtr10Day);
-            lowerChannelList.AddRounded(lowerChannel);
+            lowerChannelList.Add(lowerChannel);
 
             var prevMidChannel = midChannelList.LastOrDefault();
             var midChannel = (upperChannel + lowerChannel) / 2;
-            midChannelList.AddRounded(midChannel);
+            midChannelList.Add(midChannel);
 
             var signal = GetCompareSignal(currentValue - midChannel, prevValue - prevMidChannel);
             signalsList.Add(signal);
@@ -1439,7 +1439,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
 
             var diff = currentValue - basis;
-            diffList.AddRounded(diff);
+            diffList.Add(diff);
         }
 
         var diffMaList = GetMovingAverageList(stockData, maType, length, diffList);
@@ -1450,10 +1450,10 @@ public static partial class Calculations
             var dev = 2 * diffMa;
 
             var upper = basis + dev;
-            upperList.AddRounded(upper);
+            upperList.Add(upper);
 
             var lower = basis - dev;
-            lowerList.AddRounded(lower);
+            lowerList.Add(lower);
 
             var signal = GetConditionSignal(upper > lower && upper > basis, lower > upper && lower > basis);
             signalsList.Add(signal);
@@ -1498,11 +1498,11 @@ public static partial class Calculations
 
             var prevUp = i >= 1 ? upList[i - 1] : currentValue;
             var up = a != 0 ? (prevUp + (currentValue * a)) / a : 0;
-            upList.AddRounded(up);
+            upList.Add(up);
 
             var prevDn = i >= 1 ? dnList[i - 1] : currentValue;
             var dn = b != 0 ? (prevDn + (currentValue * b)) / b : 0;
-            dnList.AddRounded(dn);
+            dnList.Add(dn);
         }
 
         var upSmaList = GetMovingAverageList(stockData, maType, length, upList);
@@ -1516,7 +1516,7 @@ public static partial class Calculations
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetCompareSignal(currentValue - middleBand, prevValue - prevMiddleBand);
             signalsList.Add(signal);
@@ -1565,11 +1565,11 @@ public static partial class Calculations
 
             var prevUband = ubandList.LastOrDefault();
             var uband = vma + o;
-            ubandList.AddRounded(uband);
+            ubandList.Add(uband);
 
             var prevLband = lbandList.LastOrDefault();
             var lband = vma - o;
-            lbandList.AddRounded(lband);
+            lbandList.Add(lband);
 
             var signal = GetBollingerBandsSignal(currentValue - vma, prevValue - prevVma, currentValue, prevValue, uband, prevUband, lband, prevLband);
             signalsList.Add(signal);
@@ -1616,7 +1616,7 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var medianAvg = medianAvgList[i];
-            tempList.AddRounded(medianAvg);
+            tempList.Add(medianAvg);
 
             var currentValue = inputList[i];
             var currentLow = lowList[i];
@@ -1624,14 +1624,14 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var typical = currentValue >= prevValue ? currentValue - prevLow : prevValue - currentLow;
-            typicalList.AddRounded(typical);
+            typicalList.Add(typical);
 
             var typicalSma = typicalList.TakeLastExt(length2).Average();
             var deviation = devMult * typicalSma;
-            deviationList.AddRounded(deviation);
+            deviationList.Add(deviation);
 
             var medianAvgSma = tempList.TakeLastExt(length1).Average();
-            medianAvgSmaList.AddRounded(medianAvgSma);
+            medianAvgSmaList.Add(medianAvgSma);
         }
 
         var devHighList = GetMovingAverageList(stockData, maType, length1, deviationList);
@@ -1647,11 +1647,11 @@ public static partial class Calculations
 
             var prevUb = ubList.LastOrDefault();
             var ub = medianAvgEma + devHigh;
-            ubList.AddRounded(ub);
+            ubList.Add(ub);
 
             var prevLb = lbList.LastOrDefault();
             var lb = medianAvgEma - devLow;
-            lbList.AddRounded(lb);
+            lbList.Add(lb);
 
             var signal = GetBollingerBandsSignal(currentValue - midline, prevValue - prevMidline, currentValue, prevValue, ub, prevUb, lb, prevLb);
             signalsList.Add(signal);
@@ -1695,10 +1695,10 @@ public static partial class Calculations
             var mult = currentHigh + currentLow != 0 ? 4 * factor * 1000 * (currentHigh - currentLow) / (currentHigh + currentLow) : 0;
 
             var outerUb = currentHigh * (1 + mult);
-            ubList.AddRounded(outerUb);
+            ubList.Add(outerUb);
 
             var outerLb = currentLow * (1 - mult);
-            lbList.AddRounded(outerLb);
+            lbList.Add(outerLb);
         }
 
         var suList = GetMovingAverageList(stockData, maType, length, ubList);
@@ -1763,10 +1763,10 @@ public static partial class Calculations
             var ky2 = (morph * prevK2) + ((1 - morph) * y);
 
             double index = i;
-            indexList.AddRounded(i);
+            indexList.Add(i);
 
             var k = prevIndex2 - prevIndex != 0 ? ky + ((index - prevIndex) / (prevIndex2 - prevIndex) * (ky2 - ky)) : 0;
-            kList.AddRounded(k);
+            kList.Add(k);
         }
 
         var k1List = GetMovingAverageList(stockData, maType, length, kList);
@@ -1777,20 +1777,20 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var yk1 = Math.Abs(currentValue - k1);
-            yK1List.AddRounded(yk1);
+            yK1List.Add(yk1);
 
             var er = i != 0 ? yK1List.Sum() / i : 0;
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = k1 + er;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = k1 - er;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -1836,20 +1836,20 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var support1 = lowestLow - (0.25 * range);
-            support1List.AddRounded(support1);
+            support1List.Add(support1);
 
             var support2 = lowestLow - (0.5 * range);
-            support2List.AddRounded(support2);
+            support2List.Add(support2);
 
             var resistance1 = highestHigh + (0.25 * range);
-            resistance1List.AddRounded(resistance1);
+            resistance1List.Add(resistance1);
 
             var resistance2 = highestHigh + (0.5 * range);
-            resistance2List.AddRounded(resistance2);
+            resistance2List.Add(resistance2);
 
             var prevMiddle = middleList.LastOrDefault();
             var middle = (support1 + support2 + resistance1 + resistance2) / 4;
-            middleList.AddRounded(middle);
+            middleList.Add(middle);
 
             var signal = GetCompareSignal(currentValue - middle, prevValue - prevMiddle);
             signalsList.Add(signal);
@@ -1947,29 +1947,29 @@ public static partial class Calculations
         {
             var prevValue = tempList.LastOrDefault();
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             double index = i;
-            indexList.AddRounded(index);
+            indexList.Add(index);
 
             var indexCum = i != 0 ? indexList.Sum() / i : 0;
             var indexCumDiff = i - indexCum;
             var absIndexCumDiff = Math.Abs(i - indexCum);
-            absIndexCumDiffList.AddRounded(absIndexCumDiff);
+            absIndexCumDiffList.Add(absIndexCumDiff);
 
             var absIndexCum = i != 0 ? absIndexCumDiffList.Sum() / i : 0;
             var z = absIndexCum != 0 ? indexCumDiff / absIndexCum : 0;
 
             var corr = GoodnessOfFit.R(indexList.TakeLastExt(length2).Select(x => (double)x), tempList.TakeLastExt(length2).Select(x => (double)x));
             corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.AddRounded((double)corr);
+            corrList.Add((double)corr);
 
             double s = i * Math.Sign(corrList.Sum());
             var sin = Math.Sin(s / length1);
-            sinList.AddRounded(sin);
+            sinList.Add(sin);
 
             var inSin = Math.Sin(s / length1) * -1;
-            inSinList.AddRounded(inSin);
+            inSinList.Add(inSin);
 
             var sinCum = i != 0 ? sinList.Sum() / i : 0;
             var inSinCum = i != 0 ? inSinList.Sum() / i : 0;
@@ -1977,11 +1977,11 @@ public static partial class Calculations
             var inSinCumDiff = inSin - inSinCum;
 
             var absSinCumDiff = Math.Abs(sin - sinCum);
-            absSinCumDiffList.AddRounded(absSinCumDiff);
+            absSinCumDiffList.Add(absSinCumDiff);
 
             var absSinCum = i != 0 ? absSinCumDiffList.Sum() / i : 0;
             var absInSinCumDiff = Math.Abs(inSin - inSinCum);
-            absInSinCumDiffList.AddRounded(absInSinCumDiff);
+            absInSinCumDiffList.Add(absInSinCumDiff);
 
             var absInSinCum = i != 0 ? absInSinCumDiffList.Sum() / i : 0;
             var zs = absSinCum != 0 ? sinCumDiff / absSinCum : 0;
@@ -1989,38 +1989,38 @@ public static partial class Calculations
             var cum = i != 0 ? tempList.Sum() / i : 0;
 
             var absDiff = Math.Abs(currentValue - cum);
-            absDiffList.AddRounded(absDiff);
+            absDiffList.Add(absDiff);
 
             var absDiffCum = i != 0 ? absDiffList.Sum() / i : 0;
             var prevK = kList.LastOrDefault();
             var k = cum + ((z + zs) * absDiffCum);
-            kList.AddRounded(k);
+            kList.Add(k);
 
             var inK = cum + ((z + inZs) * absDiffCum);
             var absKDiff = Math.Abs(currentValue - k);
-            absKDiffList.AddRounded(absKDiff);
+            absKDiffList.Add(absKDiff);
 
             var absInKDiff = Math.Abs(currentValue - inK);
             var os = i != 0 ? absKDiffList.Sum() / i : 0;
-            osList.AddRounded(os);
+            osList.Add(os);
 
             var ap = k + os;
-            apList.AddRounded(ap);
+            apList.Add(ap);
 
             var bp = ap + os;
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var cp = bp + os;
-            cpList.AddRounded(cp);
+            cpList.Add(cp);
 
             var al = k - os;
-            alList.AddRounded(al);
+            alList.Add(al);
 
             var bl = al - os;
-            blList.AddRounded(bl);
+            blList.Add(bl);
 
             var cl = bl - os;
-            clList.AddRounded(cl);
+            clList.Add(cl);
 
             var signal = GetCompareSignal(currentValue - k, prevValue - prevK);
             signalsList.Add(signal);
@@ -2079,23 +2079,23 @@ public static partial class Calculations
             var prevSizeC = i >= 1 ? sizeCList[i - 1] : atr / length;
 
             var sizeA = prevA1 - prevA2 > 0 ? atr : prevSizeA;
-            sizeAList.AddRounded(sizeA);
+            sizeAList.Add(sizeA);
 
             var sizeB = prevB1 - prevB2 < 0 ? atr : prevSizeB;
-            sizeBList.AddRounded(sizeB);
+            sizeBList.Add(sizeB);
 
             var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
-            sizeCList.AddRounded(sizeC);
+            sizeCList.Add(sizeC);
 
             var a = Math.Max(currentValue, prevA1) - (sizeA / length);
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var b = Math.Min(currentValue, prevB1) + (sizeB / length);
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevMid = midList.LastOrDefault();
             var mid = (a + b) / 2;
-            midList.AddRounded(mid);
+            midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
             signalsList.Add(signal);
@@ -2147,13 +2147,13 @@ public static partial class Calculations
             var prevSize = i >= 1 ? sizeList[i - 1] : atr / length;
 
             var size = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSize;
-            sizeList.AddRounded(size);
+            sizeList.Add(size);
 
             double aChg = prevA1 > prevA2 ? 1 : 0;
-            aChgList.AddRounded(aChg);
+            aChgList.Add(aChg);
 
             double bChg = prevB1 < prevB2 ? 1 : 0;
-            bChgList.AddRounded(bChg);
+            bChgList.Add(bChg);
 
             var maxIndexA = aChgList.LastIndexOf(1);
             var maxIndexB = bChgList.LastIndexOf(1);
@@ -2161,14 +2161,14 @@ public static partial class Calculations
             var barsSinceB = bChgList.Count - 1 - maxIndexB;
 
             var a = Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1));
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var b = Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1));
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevMid = midList.LastOrDefault();
             var mid = (a + b) / 2;
-            midList.AddRounded(mid);
+            midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
             signalsList.Add(signal);
@@ -2227,12 +2227,12 @@ public static partial class Calculations
                 pu = Math.Max(pu, vHigh);
                 pl = Math.Min(pl, vLow);
             }
-            puList.AddRounded(pu);
-            plList.AddRounded(pl);
+            puList.Add(pu);
+            plList.Add(pl);
 
             var prevMiddleBand = middleBandList.LastOrDefault();
             var middleBand = (pu + pl) / 2;
-            middleBandList.AddRounded(middleBand);
+            middleBandList.Add(middleBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, pu, prevPu, pl, prevPl);
             signalsList.Add(signal);
@@ -2283,7 +2283,7 @@ public static partial class Calculations
             var lowLimit = prevLowest + atrMult;
 
             var ret = close > highLimit && close > lowLimit ? highLimit : close < lowLimit && close < highLimit ? lowLimit : retList.LastOrDefault();
-            retList.AddRounded(ret);
+            retList.Add(ret);
         }
 
         var retEmaList = GetMovingAverageList(stockData, maType, length, retList);
@@ -2296,11 +2296,11 @@ public static partial class Calculations
 
             var prevOuterUpperBand = outerUpperBandList.LastOrDefault();
             var outerUpperBand = retEma + bandStep;
-            outerUpperBandList.AddRounded(outerUpperBand);
+            outerUpperBandList.Add(outerUpperBand);
 
             var prevOuterLowerBand = outerLowerBandList.LastOrDefault();
             var outerLowerBand = retEma - bandStep;
-            outerLowerBandList.AddRounded(outerLowerBand);
+            outerLowerBandList.Add(outerLowerBand);
 
             var signal = GetBollingerBandsSignal(close - retEma, prevClose - prevRetEma, close, prevClose, outerUpperBand, 
                 prevOuterUpperBand, outerLowerBand, prevOuterLowerBand);
@@ -2354,10 +2354,10 @@ public static partial class Calculations
             var prevBasis = i >= halfLength ? smaList[i - halfLength] : 0;
 
             var yom = prevBasis != 0 ? 100 * (currentValue - prevBasis) / prevBasis : 0;
-            yomList.AddRounded(yom);
+            yomList.Add(yom);
 
             var yomSquared = Pow(yom, 2);
-            yomSquaredList.AddRounded(yomSquared);
+            yomSquaredList.Add(yomSquared);
         }
 
         var avyomList = GetMovingAverageList(stockData, maType, length2, yomList);
@@ -2369,10 +2369,10 @@ public static partial class Calculations
             var yomSquaredSma = yomSquaredSmaList[i];
 
             var varyom = yomSquaredSma - (avyom * avyom);
-            varyomList.AddRounded(varyom);
+            varyomList.Add(varyom);
 
             var som = prevVaryom >= 0 ? Sqrt(prevVaryom) : 0;
-            somList.AddRounded(som);
+            somList.Add(som);
         }
 
         var sigomList = GetMovingAverageList(stockData, maType, length1, somList);
@@ -2385,22 +2385,22 @@ public static partial class Calculations
             var basis = smaList[i];
 
             var chPlus1 = basis * (1 + (0.01 * sigom));
-            chPlus1List.AddRounded(chPlus1);
+            chPlus1List.Add(chPlus1);
 
             var chMinus1 = basis * (1 - (0.01 * sigom));
-            chMinus1List.AddRounded(chMinus1);
+            chMinus1List.Add(chMinus1);
 
             var chPlus2 = basis * (1 + (0.02 * sigom));
-            chPlus2List.AddRounded(chPlus2);
+            chPlus2List.Add(chPlus2);
 
             var chMinus2 = basis * (1 - (0.02 * sigom));
-            chMinus2List.AddRounded(chMinus2);
+            chMinus2List.Add(chMinus2);
 
             var chPlus3 = basis * (1 + (0.03 * sigom));
-            chPlus3List.AddRounded(chPlus3);
+            chPlus3List.Add(chPlus3);
 
             var chMinus3 = basis * (1 - (0.03 * sigom));
-            chMinus3List.AddRounded(chMinus3);
+            chMinus3List.Add(chMinus3);
 
             var signal = GetCompareSignal(som - sigom, prevSom - prevSigom);
             signalsList.Add(signal);
@@ -2451,29 +2451,29 @@ public static partial class Calculations
             var ll = lowestList[i];
 
             var tlh = hh - ((hh - ll) / 3);
-            tlhList.AddRounded(tlh);
+            tlhList.Add(tlh);
 
             var clh = ll + ((hh - ll) / 2);
-            clhList.AddRounded(clh);
+            clhList.Add(clh);
 
             var blh = ll + ((hh - ll) / 3);
-            blhList.AddRounded(blh);
+            blhList.Add(blh);
 
             var prevAm = amList.LastOrDefault();
             var am = (hh + ll + currentValue) / 3;
-            amList.AddRounded(am);
+            amList.Add(am);
 
             var eh = am + (hh - ll);
-            ehList.AddRounded(eh);
+            ehList.Add(eh);
 
             var el = am - (hh - ll);
-            elList.AddRounded(el);
+            elList.Add(el);
 
             var rh = (2 * am) - ll;
-            rhList.AddRounded(rh);
+            rhList.Add(rh);
 
             var rl = (2 * am) - hh;
-            rlList.AddRounded(rl);
+            rlList.Add(rl);
 
             var signal = GetCompareSignal(currentValue - am, prevValue - prevAm);
             signalsList.Add(signal);
@@ -2521,16 +2521,16 @@ public static partial class Calculations
             var prevTs = i >= 1 ? tsList[i - 1] : 0;
 
             var absDiff = Math.Abs(currentValue - ts);
-            absDiffList.AddRounded(absDiff);
+            absDiffList.Add(absDiff);
 
             var e = i != 0 ? absDiffList.Sum() / i : 0;
             var prevA = aList.LastOrDefault();
             var a = ts + e;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var prevB = bList.LastOrDefault();
             var b = ts - e;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var signal = GetBollingerBandsSignal(currentValue - ts, prevValue - prevTs, currentValue, prevValue, a, prevA, b, prevB);
             signalsList.Add(signal);
@@ -2580,11 +2580,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (rangeDev * stdDevFactor);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (rangeDev * stdDevFactor);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -2628,14 +2628,14 @@ public static partial class Calculations
             var prevDown = downList.LastOrDefault();
 
             var up = currentValue < prevUp && currentValue > prevDown ? prevUp : currentHigh;
-            upList.AddRounded(up);
+            upList.Add(up);
 
             var down = currentValue < prevUp && currentValue > prevDown ? prevDown : currentLow;
-            downList.AddRounded(down);
+            downList.Add(down);
 
             var prevMid = midList.LastOrDefault();
             var mid = (up + down) / 2;
-            midList.AddRounded(mid);
+            midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
             signalsList.Add(signal);
@@ -2681,16 +2681,16 @@ public static partial class Calculations
             var prevMiddleBand2 = i >= 2 ? middleBandList[i - 2] : 0;
 
             var rocSquared = Pow(roc, 2);
-            rocSquaredList.AddRounded(rocSquared);
+            rocSquaredList.Add(rocSquared);
 
             var squaredAvg = rocSquaredList.TakeLastExt(length).Average();
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = Sqrt(squaredAvg);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = -upperBand;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(middleBand - prevMiddleBand1, prevMiddleBand1 - prevMiddleBand2, middleBand, prevMiddleBand1, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -2735,7 +2735,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
 
             var pow = Pow(currentValue - sma, 2);
-            powList.AddRounded(pow);
+            powList.Add(pow);
         }
 
         var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
@@ -2750,11 +2750,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (rmaseDev * stdDevFactor);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (rmaseDev * stdDevFactor);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -2804,16 +2804,16 @@ public static partial class Calculations
             var prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
 
             var sq = Pow(slowMa - fastMa, 2);
-            sqList.AddRounded(sq);
+            sqList.Add(sq);
 
             var dev = Sqrt(sqList.TakeLastExt(fastLength).Average()) * mult;
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = slowMa + dev;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = slowMa - dev;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - fastMa, prevValue - prevFastMa, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -2861,10 +2861,10 @@ public static partial class Calculations
             var prevSma = i >= 1 ? smaList[i - 1] : 0;
 
             var top = currentSma * supportLevel;
-            topList.AddRounded(top);
+            topList.Add(top);
 
             var bottom = supportLevel != 0 ? currentSma / supportLevel : 0;
-            bottomList.AddRounded(bottom);
+            bottomList.Add(bottom);
 
             var signal = GetCompareSignal(currentValue - currentSma, prevValue - prevSma);
             signalsList.Add(signal);
@@ -2912,30 +2912,30 @@ public static partial class Calculations
 
             var prevA = i >= 1 ? aList[i - 1] : currentValue;
             var a = currentValue > prevAMa ? currentValue : prevA;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var prevB = i >= 1 ? bList[i - 1] : currentValue;
             var b = currentValue < prevBMa ? currentValue : prevB;
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevC = cList.LastOrDefault();
             var c = b - prevB != 0 ? prevC + alpha : a - prevA != 0 ? 0 : prevC;
-            cList.AddRounded(c);
+            cList.Add(c);
 
             var prevD = dList.LastOrDefault();
             var d = a - prevA != 0 ? prevD + alpha : b - prevB != 0 ? 0 : prevD;
-            dList.AddRounded(d);
+            dList.Add(d);
 
             var avg = (a + b) / 2;
             var aMa = (c * avg) + ((1 - c) * a);
-            aMaList.AddRounded(aMa);
+            aMaList.Add(aMa);
 
             var bMa = (d * avg) + ((1 - d) * b);
-            bMaList.AddRounded(bMa);
+            bMaList.Add(bMa);
 
             var prevAvgMa = avgMaList.LastOrDefault();
             var avgMa = (aMa + bMa) / 2;
-            avgMaList.AddRounded(avgMa);
+            avgMaList.Add(avgMa);
 
             var signal = GetCompareSignal(currentValue - avgMa, prevValue - prevAvgMa);
             signalsList.Add(signal);
@@ -2981,16 +2981,16 @@ public static partial class Calculations
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
             var dev = Math.Abs(currentValue - middleBand);
-            devList.AddRounded(dev);
+            devList.Add(dev);
 
             var maeDev = i != 0 ? devList.Sum() / i : 0;
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (maeDev * stdDevFactor);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (maeDev * stdDevFactor);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -3039,11 +3039,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = middleBand + (currentStdDeviation * stdDevFactor);
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = middleBand - (currentStdDeviation * stdDevFactor);
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -3091,15 +3091,15 @@ public static partial class Calculations
 
             var prevUpperEnvelope = upperEnvelopeList.LastOrDefault();
             var upperEnvelope = prevEma * ((100 + pct) / 100);
-            upperEnvelopeList.AddRounded(upperEnvelope);
+            upperEnvelopeList.Add(upperEnvelope);
 
             var prevLowerEnvelope = lowerEnvelopeList.LastOrDefault();
             var lowerEnvelope = prevEma * ((100 - pct) / 100);
-            lowerEnvelopeList.AddRounded(lowerEnvelope);
+            lowerEnvelopeList.Add(lowerEnvelope);
 
             var prevMiddleEnvelope = middleEnvelopeList.LastOrDefault();
             var middleEnvelope = (upperEnvelope + lowerEnvelope) / 2;
-            middleEnvelopeList.AddRounded(middleEnvelope);
+            middleEnvelopeList.Add(middleEnvelope);
 
             var signal = GetBollingerBandsSignal(currentValue - middleEnvelope, prevValue - prevMiddleEnvelope, currentValue, prevValue,
                 upperEnvelope, prevUpperEnvelope, lowerEnvelope, prevLowerEnvelope);
@@ -3191,14 +3191,14 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var support = highestHigh - (currentAvgTrueRange * mult);
-            supportList.AddRounded(support);
+            supportList.Add(support);
 
             var resistance = lowestLow + (currentAvgTrueRange * mult);
-            resistanceList.AddRounded(resistance);
+            resistanceList.Add(resistance);
 
             var prevMiddle = middleList.LastOrDefault();
             var middle = (support + resistance) / 2;
-            middleList.AddRounded(middle);
+            middleList.Add(middle);
 
             var signal = GetCompareSignal(currentValue - middle, prevValue - prevMiddle);
             signalsList.Add(signal);
@@ -3244,11 +3244,11 @@ public static partial class Calculations
 
             var prevTop = topList.LastOrDefault();
             var top = high + dapd;
-            topList.AddRounded(top);
+            topList.Add(top);
 
             var prevBottom = bottomList.LastOrDefault();
             var bottom = low - dapd;
-            bottomList.AddRounded(bottom);
+            bottomList.Add(bottom);
 
             var signal = GetConditionSignal(high > prevTop, low < prevBottom);
             signalsList.Add(signal);
@@ -3294,32 +3294,32 @@ public static partial class Calculations
 
             var prevMt = mtList.LastOrDefault();
             var mt = (alp * currentValue) + ((1 - alp) * prevMt);
-            mtList.AddRounded(mt);
+            mtList.Add(mt);
 
             var prevUt = utList.LastOrDefault();
             var ut = (alp * mt) + ((1 - alp) * prevUt);
-            utList.AddRounded(ut);
+            utList.Add(ut);
 
             var prevDt = dtList.LastOrDefault();
             var dt = (2 - alp) * (mt - ut) / (1 - alp);
-            dtList.AddRounded(dt);
+            dtList.Add(dt);
 
             var prevMt2 = mt2List.LastOrDefault();
             var mt2 = (alp * Math.Abs(currentValue - dt)) + ((1 - alp) * prevMt2);
-            mt2List.AddRounded(mt2);
+            mt2List.Add(mt2);
 
             var prevUt2 = ut2List.LastOrDefault();
             var ut2 = (alp * mt2) + ((1 - alp) * prevUt2);
-            ut2List.AddRounded(ut2);
+            ut2List.Add(ut2);
 
             var dt2 = (2 - alp) * (mt2 - ut2) / (1 - alp);
             var prevBut = butList.LastOrDefault();
             var but = dt + (devFactor * dt2);
-            butList.AddRounded(but);
+            butList.Add(but);
 
             var prevBlt = bltList.LastOrDefault();
             var blt = dt - (devFactor * dt2);
-            bltList.AddRounded(blt);
+            bltList.Add(blt);
 
             var signal = GetBollingerBandsSignal(currentValue - dt, prevValue - prevDt, currentValue, prevValue, but, prevBut, blt, prevBlt);
             signalsList.Add(signal);
@@ -3366,20 +3366,20 @@ public static partial class Calculations
             var diff = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
 
             var a = Math.Max(currentValue, prevA) - (Math.Min(Math.Abs(currentValue - prevA), diff) / length * prevASignal);
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var b = Math.Min(currentValue, prevB) + (Math.Min(Math.Abs(currentValue - prevB), diff) / length * prevBSignal);
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var aSignal = b < prevB ? -factor : factor;
-            aSignalList.AddRounded(aSignal);
+            aSignalList.Add(aSignal);
 
             var bSignal = a > prevA ? -factor : factor;
-            bSignalList.AddRounded(bSignal);
+            bSignalList.Add(bSignal);
 
             var prevAvg = avgList.LastOrDefault();
             var avg = (a + b) / 2;
-            avgList.AddRounded(avg);
+            avgList.Add(avg);
 
             var signal = GetCompareSignal(currentValue - avg, prevValue - prevAvg);
             signalsList.Add(signal);
@@ -3427,11 +3427,11 @@ public static partial class Calculations
 
             var prevRes = resList.LastOrDefault();
             var res = crossBelow ? highest : i >= 1 ? prevRes : highest;
-            resList.AddRounded(res);
+            resList.Add(res);
 
             var prevSupp = suppList.LastOrDefault();
             var supp = crossAbove ? lowest : i >= 1 ? prevSupp : lowest;
-            suppList.AddRounded(supp);
+            suppList.Add(supp);
 
             var signal = GetBullishBearishSignal(currentValue - res, prevValue - prevRes, currentValue - supp, prevValue - prevSupp);
             signalsList.Add(signal);
@@ -3476,13 +3476,13 @@ public static partial class Calculations
             var priorX2 = i >= length * 2 ? xList[i - (length * 2)] : 0;
 
             double x = i;
-            xList.AddRounded(i);
+            xList.Add(i);
 
             var y = currentValue - sma;
-            yList.AddRounded(y);
+            yList.Add(y);
 
             var ext = priorX2 - priorX != 0 && priorY2 - priorY != 0 ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2 : 0;
-            extList.AddRounded(ext);
+            extList.Add(ext);
         }
 
         var (highestList1, lowestList1) = GetMaxAndMinValuesList(extList, length);
@@ -3539,7 +3539,7 @@ public static partial class Calculations
 
             var prevScalper = scalperList.LastOrDefault();
             var scalper = Math.PI * currentAtr > 0 ? currentSma - Math.Log(Math.PI * currentAtr) : currentSma;
-            scalperList.AddRounded(scalper);
+            scalperList.Add(scalper);
 
             var signal = GetCompareSignal(currentValue - scalper, prevValue - prevScalper);
             signalsList.Add(signal);
@@ -3594,11 +3594,11 @@ public static partial class Calculations
 
             var prevUpperBand = upperBandList.LastOrDefault();
             var upperBand = currentValue != 0 ? ma + (ma * atrBuf / currentValue) : ma;
-            upperBandList.AddRounded(upperBand);
+            upperBandList.Add(upperBand);
 
             var prevLowerBand = lowerBandList.LastOrDefault();
             var lowerBand = currentValue != 0 ? ma - (ma * atrBuf * bandAdjust / currentValue) : ma;
-            lowerBandList.AddRounded(lowerBand);
+            lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue,
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -3642,14 +3642,14 @@ public static partial class Calculations
             var prevBClassic = i >= 1 ? bClassicList[i - 1] : currentValue;
 
             var aClassic = Math.Max(prevAClassic, currentValue) - (sc * Math.Abs(currentValue - prevAClassic));
-            aClassicList.AddRounded(aClassic);
+            aClassicList.Add(aClassic);
 
             var bClassic = Math.Min(prevBClassic, currentValue) + (sc * Math.Abs(currentValue - prevBClassic));
-            bClassicList.AddRounded(bClassic);
+            bClassicList.Add(bClassic);
 
             var prevCClassic = cClassicList.LastOrDefault();
             var cClassic = (aClassic + bClassic) / 2;
-            cClassicList.AddRounded(cClassic);
+            cClassicList.Add(cClassic);
 
             var signal = GetCompareSignal(currentValue - cClassic, prevValue - prevCClassic);
             signalsList.Add(signal);
@@ -3692,7 +3692,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
 
             var val2 = currentValue * 2;
-            val2List.AddRounded(val2);
+            val2List.Add(val2);
         }
 
         stockData.CustomValuesList = val2List;
@@ -3710,15 +3710,15 @@ public static partial class Calculations
             var dev = (er * fastStdDev) + ((1 - er) * slowStdDev);
 
             var a = currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var prevUpper = upperList.LastOrDefault();
             var upper = a + dev;
-            upperList.AddRounded(upper);
+            upperList.Add(upper);
 
             var prevLower = lowerList.LastOrDefault();
             var lower = a - dev;
-            lowerList.AddRounded(lower);
+            lowerList.Add(lower);
 
             var signal = GetBollingerBandsSignal(currentValue - a, prevValue - prevA, currentValue, prevValue, upper, prevUpper, lower, prevLower);
             signalsList.Add(signal);
