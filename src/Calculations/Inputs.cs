@@ -32,7 +32,7 @@ public static partial class Calculations
             var prevTypicalPrice2 = i >= 2 ? tpList[i - 2] : 0;
 
             var typicalPrice = (currentHigh + currentLow + currentClose) / 3;
-            tpList.AddRounded(typicalPrice);
+            tpList.Add(typicalPrice);
 
             var signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
             signalsList.Add(signal);
@@ -68,7 +68,7 @@ public static partial class Calculations
             var prevMedianPrice2 = i >= 2 ? medianPriceList[i - 2] : 0;
 
             var medianPrice = (currentHigh + currentLow) / 2;
-            medianPriceList.AddRounded(medianPrice);
+            medianPriceList.Add(medianPrice);
 
             var signal = GetCompareSignal(medianPrice - prevMedianPrice1, prevMedianPrice1 - prevMedianPrice2);
             signalsList.Add(signal);
@@ -104,7 +104,7 @@ public static partial class Calculations
             var prevAvgPrice2 = i >= 2 ? avgPriceList[i - 2] : 0;
 
             var avgPrice = (currentOpen + currentClose) / 2;
-            avgPriceList.AddRounded(avgPrice);
+            avgPriceList.Add(avgPrice);
 
             var signal = GetCompareSignal(avgPrice - prevAvgPrice1, prevAvgPrice1 - prevAvgPrice2);
             signalsList.Add(signal);
@@ -142,7 +142,7 @@ public static partial class Calculations
             var prevTypicalPrice2 = i >= 2 ? fullTpList[i - 2] : 0;
 
             var typicalPrice = (currentHigh + currentLow + currentClose + currentOpen) / 4;
-            fullTpList.AddRounded(typicalPrice);
+            fullTpList.Add(typicalPrice);
 
             var signal = GetCompareSignal(typicalPrice - prevTypicalPrice1, prevTypicalPrice1 - prevTypicalPrice2);
             signalsList.Add(signal);
@@ -179,7 +179,7 @@ public static partial class Calculations
 
             var prevWeightedClose = weightedCloseList.LastOrDefault();
             var weightedClose = (currentHigh + currentLow + (currentClose * 2)) / 4;
-            weightedCloseList.AddRounded(weightedClose);
+            weightedCloseList.Add(weightedClose);
 
             var signal = GetCompareSignal(currentClose - weightedClose, prevClose - prevWeightedClose);
             signalsList.Add(signal);
@@ -218,7 +218,7 @@ public static partial class Calculations
 
             var prevMidPoint = midpointList.LastOrDefault();
             var midpoint = (highest + lowest) / 2;
-            midpointList.AddRounded(midpoint);
+            midpointList.Add(midpoint);
 
             var signal = GetCompareSignal(currentValue - midpoint, prevValue - prevMidPoint);
             signalsList.Add(signal);
@@ -257,7 +257,7 @@ public static partial class Calculations
 
             var prevMidPrice = midpriceList.LastOrDefault();
             var midPrice = (highest + lowest) / 2;
-            midpriceList.AddRounded(midPrice);
+            midpriceList.Add(midPrice);
 
             var signal = GetCompareSignal(currentValue - midPrice, prevValue - prevMidPrice);
             signalsList.Add(signal);

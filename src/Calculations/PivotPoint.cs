@@ -47,44 +47,44 @@ public static partial class Calculations
             var prevPivot = pivotList.LastOrDefault();
             var range = prevHigh - prevLow;
             var pivot = (prevHigh + prevLow + prevClose + prevOpen) / 4;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var supportLevel1 = (pivot * 2) - prevHigh;
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var resistanceLevel1 = (pivot * 2) - prevLow;
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var range2 = resistanceLevel1 - supportLevel1;
             var supportLevel2 = pivot - range;
-            supportLevel2List.AddRounded(supportLevel2);
+            supportLevel2List.Add(supportLevel2);
 
             var resistanceLevel2 = pivot + range;
-            resistanceLevel2List.AddRounded(resistanceLevel2);
+            resistanceLevel2List.Add(resistanceLevel2);
 
             var supportLevel3 = pivot - range2;
-            supportLevel3List.AddRounded(supportLevel3);
+            supportLevel3List.Add(supportLevel3);
 
             var resistanceLevel3 = pivot + range2;
-            resistanceLevel3List.AddRounded(resistanceLevel3);
+            resistanceLevel3List.Add(resistanceLevel3);
 
             var midpoint1 = (supportLevel3 + supportLevel2) / 2;
-            midpoint1List.AddRounded(midpoint1);
+            midpoint1List.Add(midpoint1);
 
             var midpoint2 = (supportLevel2 + supportLevel1) / 2;
-            midpoint2List.AddRounded(midpoint2);
+            midpoint2List.Add(midpoint2);
 
             var midpoint3 = (supportLevel1 + pivot) / 2;
-            midpoint3List.AddRounded(midpoint3);
+            midpoint3List.Add(midpoint3);
 
             var midpoint4 = (resistanceLevel1 + pivot) / 2;
-            midpoint4List.AddRounded(midpoint4);
+            midpoint4List.Add(midpoint4);
 
             var midpoint5 = (resistanceLevel2 + resistanceLevel1) / 2;
-            midpoint5List.AddRounded(midpoint5);
+            midpoint5List.Add(midpoint5);
 
             var midpoint6 = (resistanceLevel3 + resistanceLevel2) / 2;
-            midpoint6List.AddRounded(midpoint6);
+            midpoint6List.Add(midpoint6);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);
             signalsList.Add(signal);
@@ -147,43 +147,43 @@ public static partial class Calculations
             var prevPivot = pivotList.LastOrDefault();
             var range = prevHigh - prevLow;
             var pivot = (prevHigh + prevLow + (prevClose * 2)) / 4;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var supportLevel1 = (pivot * 2) - prevHigh;
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var resistanceLevel1 = (pivot * 2) - prevLow;
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var supportLevel2 = pivot - range;
-            supportLevel2List.AddRounded(supportLevel2);
+            supportLevel2List.Add(supportLevel2);
 
             var resistanceLevel2 = pivot + range;
-            resistanceLevel2List.AddRounded(resistanceLevel2);
+            resistanceLevel2List.Add(resistanceLevel2);
 
             var supportLevel3 = prevLow - (2 * (prevHigh - pivot));
-            supportLevel3List.AddRounded(supportLevel3);
+            supportLevel3List.Add(supportLevel3);
 
             var resistanceLevel3 = prevHigh + (2 * (pivot - prevLow));
-            resistanceLevel3List.AddRounded(resistanceLevel3);
+            resistanceLevel3List.Add(resistanceLevel3);
 
             var supportLevel4 = supportLevel3 - range;
-            supportLevel4List.AddRounded(supportLevel4);
+            supportLevel4List.Add(supportLevel4);
 
             var resistanceLevel4 = resistanceLevel3 + range;
-            resistanceLevel4List.AddRounded(resistanceLevel4);
+            resistanceLevel4List.Add(resistanceLevel4);
 
             var midpoint1 = (supportLevel1 + supportLevel2) / 2;
-            midpoint1List.AddRounded(midpoint1);
+            midpoint1List.Add(midpoint1);
 
             var midpoint2 = (pivot + supportLevel1) / 2;
-            midpoint2List.AddRounded(midpoint2);
+            midpoint2List.Add(midpoint2);
 
             var midpoint3 = (resistanceLevel1 + pivot) / 2;
-            midpoint3List.AddRounded(midpoint3);
+            midpoint3List.Add(midpoint3);
 
             var midpoint4 = (resistanceLevel1 + resistanceLevel2) / 2;
-            midpoint4List.AddRounded(midpoint4);
+            midpoint4List.Add(midpoint4);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);
             signalsList.Add(signal);
@@ -245,45 +245,45 @@ public static partial class Calculations
 
             var range = prevHigh - prevLow;
             var pivot = (prevHigh + prevLow + prevClose) / 3;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var prevSupportLevel1 = supportLevel1List.LastOrDefault();
             var supportLevel1 = (pivot * 2) - prevHigh;
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var prevResistanceLevel1 = resistanceLevel1List.LastOrDefault();
             var resistanceLevel1 = (pivot * 2) - prevLow;
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var supportLevel2 = pivot - range;
-            supportLevel2List.AddRounded(supportLevel2);
+            supportLevel2List.Add(supportLevel2);
 
             var resistanceLevel2 = pivot + range;
-            resistanceLevel2List.AddRounded(resistanceLevel2);
+            resistanceLevel2List.Add(resistanceLevel2);
 
             var supportLevel3 = supportLevel1 - range;
-            supportLevel3List.AddRounded(supportLevel3);
+            supportLevel3List.Add(supportLevel3);
 
             var resistanceLevel3 = resistanceLevel1 + range;
-            resistanceLevel3List.AddRounded(resistanceLevel3);
+            resistanceLevel3List.Add(resistanceLevel3);
 
             var midpoint1 = (supportLevel3 + supportLevel2) / 2;
-            midpoint1List.AddRounded(midpoint1);
+            midpoint1List.Add(midpoint1);
 
             var midpoint2 = (supportLevel2 + supportLevel1) / 2;
-            midpoint2List.AddRounded(midpoint2);
+            midpoint2List.Add(midpoint2);
 
             var midpoint3 = (supportLevel1 + pivot) / 2;
-            midpoint3List.AddRounded(midpoint3);
+            midpoint3List.Add(midpoint3);
 
             var midpoint4 = (resistanceLevel1 + pivot) / 2;
-            midpoint4List.AddRounded(midpoint4);
+            midpoint4List.Add(midpoint4);
 
             var midpoint5 = (resistanceLevel2 + resistanceLevel1) / 2;
-            midpoint5List.AddRounded(midpoint5);
+            midpoint5List.Add(midpoint5);
 
             var midpoint6 = (resistanceLevel3 + resistanceLevel2) / 2;
-            midpoint6List.AddRounded(midpoint6);
+            midpoint6List.Add(midpoint6);
 
             var signal = GetBullishBearishSignal(currentClose - resistanceLevel1, prevClose - prevResistanceLevel1,
                 currentClose - supportLevel1, prevClose - prevSupportLevel1);
@@ -347,43 +347,43 @@ public static partial class Calculations
             var prevPivot = pivotList.LastOrDefault();
             var range = prevHigh - prevLow;
             var pivot = (prevHigh + prevLow + prevClose) / 3;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var supportLevel1 = pivot - (range * 0.382);
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
-            var supportLevel2 = pivot - (range * 0.618);
-            supportLevel2List.AddRounded(supportLevel2);
+            var supportLevel2 = pivot - (range * MathHelper.InversePhi);
+            supportLevel2List.Add(supportLevel2);
 
             var supportLevel3 = pivot - (range * 1);
-            supportLevel3List.AddRounded(supportLevel3);
+            supportLevel3List.Add(supportLevel3);
 
             var resistanceLevel1 = pivot + (range * 0.382);
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
-            var resistanceLevel2 = pivot + (range * 0.618);
-            resistanceLevel2List.AddRounded(resistanceLevel2);
+            var resistanceLevel2 = pivot + (range * MathHelper.InversePhi);
+            resistanceLevel2List.Add(resistanceLevel2);
 
             var resistanceLevel3 = pivot + (range * 1);
-            resistanceLevel3List.AddRounded(resistanceLevel3);
+            resistanceLevel3List.Add(resistanceLevel3);
 
             var midpoint1 = (supportLevel3 + supportLevel2) / 2;
-            midpoint1List.AddRounded(midpoint1);
+            midpoint1List.Add(midpoint1);
 
             var midpoint2 = (supportLevel2 + supportLevel1) / 2;
-            midpoint2List.AddRounded(midpoint2);
+            midpoint2List.Add(midpoint2);
 
             var midpoint3 = (supportLevel1 + pivot) / 2;
-            midpoint3List.AddRounded(midpoint3);
+            midpoint3List.Add(midpoint3);
 
             var midpoint4 = (resistanceLevel1 + pivot) / 2;
-            midpoint4List.AddRounded(midpoint4);
+            midpoint4List.Add(midpoint4);
 
             var midpoint5 = (resistanceLevel2 + resistanceLevel1) / 2;
-            midpoint5List.AddRounded(midpoint5);
+            midpoint5List.Add(midpoint5);
 
             var midpoint6 = (resistanceLevel3 + resistanceLevel2) / 2;
-            midpoint6List.AddRounded(midpoint6);
+            midpoint6List.Add(midpoint6);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);
             signalsList.Add(signal);
@@ -451,57 +451,57 @@ public static partial class Calculations
             var range = currentHigh - currentLow;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var prevSupportLevel1 = supportLevel1List.LastOrDefault();
             var supportLevel1 = currentClose - (0.0916 * range);
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var supportLevel2 = currentClose - (0.183 * range);
-            supportLevel2List.AddRounded(supportLevel2);
+            supportLevel2List.Add(supportLevel2);
 
             var supportLevel3 = currentClose - (0.275 * range);
-            supportLevel3List.AddRounded(supportLevel3);
+            supportLevel3List.Add(supportLevel3);
 
             var supportLevel4 = currentClose - (0.55 * range);
-            supportLevel4List.AddRounded(supportLevel4);
+            supportLevel4List.Add(supportLevel4);
 
             var prevResistanceLevel1 = resistanceLevel1List.LastOrDefault();
             var resistanceLevel1 = currentClose + (0.0916 * range);
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var resistanceLevel2 = currentClose + (0.183 * range);
-            resistanceLevel2List.AddRounded(resistanceLevel2);
+            resistanceLevel2List.Add(resistanceLevel2);
 
             var resistanceLevel3 = currentClose + (0.275 * range);
-            resistanceLevel3List.AddRounded(resistanceLevel3);
+            resistanceLevel3List.Add(resistanceLevel3);
 
             var resistanceLevel4 = currentClose + (0.55 * range);
-            resistanceLevel4List.AddRounded(resistanceLevel4);
+            resistanceLevel4List.Add(resistanceLevel4);
 
             var resistanceLevel5 = currentLow != 0 ? currentHigh / currentLow * currentClose : 0;
-            resistanceLevel5List.AddRounded(resistanceLevel5);
+            resistanceLevel5List.Add(resistanceLevel5);
 
             var supportLevel5 = currentClose - (resistanceLevel5 - currentClose);
-            supportLevel5List.AddRounded(supportLevel5);
+            supportLevel5List.Add(supportLevel5);
 
             var midpoint1 = (supportLevel3 + supportLevel2) / 2;
-            midpoint1List.AddRounded(midpoint1);
+            midpoint1List.Add(midpoint1);
 
             var midpoint2 = (supportLevel2 + supportLevel1) / 2;
-            midpoint2List.AddRounded(midpoint2);
+            midpoint2List.Add(midpoint2);
 
             var midpoint3 = (resistanceLevel2 + resistanceLevel1) / 2;
-            midpoint3List.AddRounded(midpoint3);
+            midpoint3List.Add(midpoint3);
 
             var midpoint4 = (resistanceLevel3 + resistanceLevel2) / 2;
-            midpoint4List.AddRounded(midpoint4);
+            midpoint4List.Add(midpoint4);
 
             var midpoint5 = (resistanceLevel3 + resistanceLevel4) / 2;
-            midpoint5List.AddRounded(midpoint5);
+            midpoint5List.Add(midpoint5);
 
             var midpoint6 = (supportLevel4 + supportLevel3) / 2;
-            midpoint6List.AddRounded(midpoint6);
+            midpoint6List.Add(midpoint6);
 
             var signal = GetBullishBearishSignal(currentClose - resistanceLevel1, prevClose - prevResistanceLevel1, currentClose - supportLevel1, 
                 prevClose - prevSupportLevel1);
@@ -559,13 +559,13 @@ public static partial class Calculations
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
             var pp1 = (prevHigh + prevLow + prevClose) / 3;
-            pp1List.AddRounded(pp1);
+            pp1List.Add(pp1);
 
             var pp2 = (prevHigh + prevLow + prevClose + currentOpen) / 4;
-            pp2List.AddRounded(pp2);
+            pp2List.Add(pp2);
 
             var pp3 = (prevHigh + prevLow + currentOpen) / 3;
-            pp3List.AddRounded(pp3);
+            pp3List.Add(pp3);
         }
 
         var ppav1List = GetMovingAverageList(stockData, maType, length, pp1List);
@@ -624,14 +624,14 @@ public static partial class Calculations
 
             var prevPivot = pivotList.LastOrDefault();
             var pivot = x / 4;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var ratio = x / 2;
             var supportLevel1 = ratio - prevHigh;
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var resistanceLevel1 = ratio - prevLow;
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);
             signalsList.Add(signal);
@@ -672,15 +672,15 @@ public static partial class Calculations
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
-            pivotList.AddRounded(pivot);
+            pivotList.Add(pivot);
 
             var prevSupportLevel1 = supportLevel1List.LastOrDefault();
             var supportLevel1 = pivot - (prevHigh - pivot);
-            supportLevel1List.AddRounded(supportLevel1);
+            supportLevel1List.Add(supportLevel1);
 
             var prevResistanceLevel1 = resistanceLevel1List.LastOrDefault();
             var resistanceLevel1 = pivot + (pivot - prevLow);
-            resistanceLevel1List.AddRounded(resistanceLevel1);
+            resistanceLevel1List.Add(resistanceLevel1);
 
             var signal = GetBullishBearishSignal(currentClose - resistanceLevel1, prevClose - prevResistanceLevel1, 
                 currentClose - supportLevel1, prevClose - prevSupportLevel1);

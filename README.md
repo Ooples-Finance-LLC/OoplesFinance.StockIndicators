@@ -1,89 +1,42 @@
+# OoplesFinance.StockIndicators (High-Precision Fork)
 
-![Nuget](https://img.shields.io/nuget/dt/OoplesFinance.StockIndicators?style=plastic)
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/OoplesFinance.StockIndicators?style=plastic)
-![GitHub](https://img.shields.io/github/license/ooples/OoplesFinance.StockIndicators?style=plastic)
+## [List of Available indicators](INDICATORS.md)
 
-## .Net Stock Indicator Library
+> "Approximation is the enemy of alpha. In finance, 3.14 is not Pi. It is an error."
 
-This is a stock indicator library that is completely open source (Apache 2.0 license) and very easy to use. Current version contains [763 stock indicators](https://ooples.github.io/OoplesFinance.StockIndicators/indicators) and I will add more as I get requests for them!
+This release marks the divergence of the **High-Precision Fork** from the original [OoplesFinance.StockIndicators](https://github.com/Ooples/OoplesFinance.StockIndicators).
 
+## The Change Log
 
-### How to use this library
+The original library treats floating-point precision with the sort of casual disdain usually reserved for airline safety demonstrations. It rounds inputs, intermediates, and outputs as if extra decimal places were a tax liability. It approximates constants (using `3.14` for PI), which is perfectly adequate for government work, but terrifying for finance. It treats trading numbers as a fun game, like Monopoly, but with real consequences.
 
-Here is an example to show how easy it is to create indicators using other indicators
+I reject such violence. We chose rigor.
 
-```cs
-var stockData = new StockData(openPrices, highPrices, lowPrices, closePrices, volumes);
-var results = stockData.CalculateRelativeStrengthIndex().CalculateMovingAverageConvergenceDivergence();
-```
+### 1. Rounding: Deleted
 
-Here is a simple example calculating default bollinger bands to get you started using the [Alpaca C# Api](https://github.com/alpacahq/alpaca-trade-api-csharp)
+Every instance of `Math.Round` has been excised. If the market gives you data with 8 decimal places, and the indicator math produces 28, you get 28. We do not truncate your alpha.
 
-```cs
-using Alpaca.Markets;
-using OoplesFinance.StockIndicators.Models;
-using static OoplesFinance.StockIndicators.Calculations;
+### 2. Constants: Restored
 
-const string paperApiKey = "REPLACEME";
-const string paperApiSecret = "REPLACEME";
-const string symbol = "AAPL";
-var startDate = new DateTime(2021, 01, 01);
-var endDate = new DateTime(2021, 12, 31);
+Magic numbers are gone.
 
-var client = Environments.Paper.GetAlpacaDataClient(new SecretKey(paperApiKey, paperApiSecret));
-var bars = (await client.ListHistoricalBarsAsync(new HistoricalBarsRequest(symbol, startDate, endDate, BarTimeFrame.Day)).ConfigureAwait(false)).Items;
-var stockData = new StockData(bars.Select(x => x.Open), bars.Select(x => x.High), bars.Select(x => x.Low), bars.Select(x => x.Close), bars.Select(x => x.Volume), bars.Select(x => x.TimeUtc));
+- PI is `Math.PI`, not `3.14`.
+- Sqrt(2) is `Math.Sqrt(2)`, not `1.414`.
 
-var results = stockData.CalculateBollingerBands();
-var upperBandList = results.OutputValues["UpperBand"];
-var middleBandList = results.OutputValues["MiddleBand"];
-var lowerBandList = results.OutputValues["LowerBand"];
-```
+### 3. Logic: Preserved
 
-Here is a more advanced example showing how to calculate bollinger bands with full customization and using a custom input of high rather than the default close
-```cs
-var stockData = new StockData(bars.Select(x => x.Open), bars.Select(x => x.High), bars.Select(x => x.Low), 
-bars.Select(x => x.Close), bars.Select(x => x.Volume), bars.Select(x => x.TimeUtc), InputName.High);
+We changed the physics, not the rules. The algorithms remain identical to the upstream source; they just run with the full fidelity of the .NET `double` type.
 
-var results = stockData.CalculateBollingerBands(MovingAvgType.EhlersMesaAdaptiveMovingAverage, 15, 2.5m);
-var upperBandList = results.OutputValues["UpperBand"];
-var middleBandList = results.OutputValues["MiddleBand"];
-var lowerBandList = results.OutputValues["LowerBand"];
-```
+## Artifacts
 
-It is extremely important to remember that if you use the same data source to calculate different indicators without using the chaining method then you need to clear the data in between each call. We have a great example for this below:
-```cs
-var stockData = new StockData(bars.Select(x => x.Open), bars.Select(x => x.High), bars.Select(x => x.Low), 
-bars.Select(x => x.Close), bars.Select(x => x.Volume), bars.Select(x => x.TimeUtc), InputName.High);
+This release includes the raw binaries for those who prefer to manage their own dependencies:
 
-var sma = stockData.CalculateSimpleMovingAverage(14);
+- **`.nupkg`**: The standard package.
+- **`.dll`**: The assembly. For when you trust the file system more than NuGet.
+- **`.pdb`**: The symbols. Step through the code and witness the absence of rounding errors yourself.
 
-// if you don't perform this clear method in between then your ema result will be calculated using the sma results
-stockData.Clear();
+## Philosophy
 
-var ema = stockData.CalculateExponentialMovingAverage(14);
-```
+This fork aligns with the architectural strictness of [QuanTAlib](https://github.com/mihakralj/QuanTAlib). In financial computing, approximation is an error.
 
-For more detailed Alpaca examples then check out my more advanced [Alpaca example code](https://github.com/alpacahq/alpaca-trade-api-csharp/blob/develop/UsageExamples/IndicatorLibraryExample.cs)
-
-
-### Support This Project
-
-BTC: 36DRmZefJNW82q9pHY1kWYSZhLUWQkpgGq
-
-ETH: 0x7D6e58754476189ffF736B63b6159D2647f74f34
-
-USDC: 0x587Ae0709f45b970992bdD772bF693141D95CAED
-
-DOGE: DF1nsK1nLASzmwHNAfNengBGS4w7bNyJ1e
-
-SHIB: 0xCDe2355212764218355c9393FbE121Ae49B43382
-
-Paypal: [https://www.paypal.me/cheatcountry](https://www.paypal.me/cheatcountry)
-
-Patreon: [https://patreon.com/cheatcountry](https://patreon.com/cheatcountry)
-
-
-### Support or Contact
-
-Email me at cheatcountry@gmail.com for any help or support or to let me know of ways to further improve this library.
+If you are the sort of person who thinks `3.14` is close enough, you probably also think "ish" is a valid unit of measurement. We wish you the best of luck with your "money-ish".

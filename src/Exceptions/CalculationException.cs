@@ -10,7 +10,6 @@
 
 namespace OoplesFinance.StockIndicators.Exceptions;
 
-[Serializable]
 public sealed class CalculationException : Exception
 {
     public CalculationException()
@@ -28,7 +27,10 @@ public sealed class CalculationException : Exception
 
     }
 
+    [Obsolete("Obsolete")]
+#pragma warning disable SYSLIB0051 // Type or member is obsolete
     private CalculationException(SerializationInfo info, StreamingContext context) : base(info, context)
+#pragma warning restore SYSLIB0051 // Type or member is obsolete
     {
 
     }

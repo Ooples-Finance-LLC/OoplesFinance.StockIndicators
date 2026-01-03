@@ -1,7 +1,7 @@
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
-//     Copyright © Franklin Moormann, 2020-2022
+//     Copyright ï¿½ Franklin Moormann, 2020-2022
 //     cheatcountry@gmail.com
 //
 //     This library is free software and it uses the Apache 2.0 license
@@ -41,15 +41,15 @@ public static partial class Calculations
 
             var prevHighest = highestList.LastOrDefault();
             var highest = stochSma > prevHighest ? stochSma : prevHighest;
-            highestList.AddRounded(highest);
+            highestList.Add(highest);
 
             var prevLowest = i >= 1 ? lowestList.LastOrDefault() : double.MaxValue;
             var lowest = stochSma < prevLowest ? stochSma : prevLowest;
-            lowestList.AddRounded(lowest);
+            lowestList.Add(lowest);
 
             var midpoint = MinOrMax((lowest + highest) / 2, 100, 0);
             var dmo = MinOrMax(midpoint - (smaVal - stochSma), 100, 0);
-            dmoList.AddRounded(dmo);
+            dmoList.Add(dmo);
 
             var signal = GetRsiSignal(dmo - prevDmo1, prevDmo1 - prevDmo2, dmo, prevDmo1, 77, 23);
             signalsList.Add(signal);
@@ -94,11 +94,11 @@ public static partial class Calculations
 
             var prevRocMa1 = rocMaList.LastOrDefault();
             var rocMa = prevRocMa1 + ((roc - prevRocMa1) * sc1);
-            rocMaList.AddRounded(rocMa);
+            rocMaList.Add(rocMa);
 
             var prevPmo = pmoList.LastOrDefault();
             var pmo = prevPmo + (((rocMa * 10) - prevPmo) * sc2);
-            pmoList.AddRounded(pmo);
+            pmoList.Add(pmo);
         }
 
         var pmoSignalList = GetMovingAverageList(stockData, maType, signalLength, pmoList);
@@ -152,16 +152,16 @@ public static partial class Calculations
             var currentEma = emaList[i];
 
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            tempList.Add(currentValue);
 
             var sma = tempList.TakeLastExt(p).Average();
             var prevAmom = amomList.LastOrDefault();
             var amom = sma != 0 ? 100 * ((currentEma / sma) - 1) : 0;
-            amomList.AddRounded(amom);
+            amomList.Add(amom);
 
             var prevAmoms = amomsList.LastOrDefault();
             var amoms = amomList.TakeLastExt(signalLength).Average();
-            amomsList.AddRounded(amoms);
+            amomsList.Add(amoms);
 
             var signal = GetCompareSignal(amom - amoms, prevAmom - prevAmoms);
             signalsList.Add(signal);
@@ -221,7 +221,7 @@ public static partial class Calculations
             var ratio = decSum != 0 ? advSum / decSum : 0;
 
             var utm = (200 * bbPct) + (100 * ratio) + (2 * mo) + (1.5 * mfi3) + (3 * mfi2) + (3 * mfi1);
-            utmList.AddRounded(utm);
+            utmList.Add(utm);
         }
 
         stockData.CustomValuesList = utmList;
@@ -276,7 +276,7 @@ public static partial class Calculations
 
                 var prevCpmo = cpmoList.LastOrDefault();
                 var cpmo = pmo - spPmo;
-                cpmoList.AddRounded(cpmo);
+                cpmoList.Add(cpmo);
 
                 var signal = GetCompareSignal(cpmo, prevCpmo);
                 signalsList.Add(signal);
@@ -318,10 +318,10 @@ public static partial class Calculations
             var prevMa = i >= 1 ? maList[i - 1] : 0;
 
             double cumo = currentValue > prevMa ? 1 : currentValue < prevMa ? -1 : 0;
-            cumoList.AddRounded(cumo);
+            cumoList.Add(cumo);
 
             var cumoSum = cumoList.Sum();
-            cumoSumList.AddRounded(cumoSum);
+            cumoSumList.Add(cumoSum);
         }
 
         stockData.CustomValuesList = cumoSumList;
@@ -368,7 +368,7 @@ public static partial class Calculations
             var prevPrice = i >= length ? inputList[i - length] : 0;
 
             var momentumOscillator = prevPrice != 0 ? currentPrice / prevPrice * 100 : 0;
-            momentumOscillatorList.AddRounded(momentumOscillator);
+            momentumOscillatorList.Add(momentumOscillator);
         }
 
         var emaList = GetMovingAverageList(stockData, maType, length, momentumOscillatorList);
@@ -418,10 +418,10 @@ public static partial class Calculations
             var priceChg = MinPastValues(i, length2, currentValue - prevValue);
 
             var loss = i >= length2 && priceChg < 0 ? Math.Abs(priceChg) : 0;
-            lossList.AddRounded(loss);
+            lossList.Add(loss);
 
             var gain = i >= length2 && priceChg > 0 ? priceChg : 0;
-            gainList.AddRounded(gain);
+            gainList.Add(gain);
         }
 
         var avgGainList = GetMovingAverageList(stockData, maType, length1, gainList);
@@ -433,7 +433,7 @@ public static partial class Calculations
             var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
             var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-            rsiList.AddRounded(rsi);
+            rsiList.Add(rsi);
         }
 
         var rsiSignalList = GetMovingAverageList(stockData, maType, length1, rsiList);
@@ -445,7 +445,7 @@ public static partial class Calculations
 
             var prevRsiHistogram = rsiHistogramList.LastOrDefault();
             var rsiHistogram = rsi - rsiSignal;
-            rsiHistogramList.AddRounded(rsiHistogram);
+            rsiHistogramList.Add(rsiHistogram);
 
             var signal = GetRsiSignal(rsiHistogram, prevRsiHistogram, rsi, prevRsi, 70, 30);
             signalsList.Add(signal);
@@ -494,10 +494,10 @@ public static partial class Calculations
             var prevPmol2 = pmol2List.LastOrDefault();
 
             var pmol2 = ((ival - 100 - prevPmol2) * smPmol2) + prevPmol2;
-            pmol2List.AddRounded(pmol2);
+            pmol2List.Add(pmol2);
 
             var pmol = (((10 * pmol2) - prevPmol) * smPmol) + prevPmol;
-            pmolList.AddRounded(pmol);
+            pmolList.Add(pmol);
         }
 
         var pmolsList = GetMovingAverageList(stockData, maType, signalLength, pmolList);
@@ -508,7 +508,7 @@ public static partial class Calculations
 
             var prevD = dList.LastOrDefault();
             var d = pmol - pmols;
-            dList.AddRounded(d);
+            dList.Add(d);
 
             var signal = GetCompareSignal(d, prevD);
             signalsList.Add(signal);
@@ -572,10 +572,10 @@ public static partial class Calculations
             var priceChg = MinPastValues(i, 1, currentValue - prevValue);
 
             var loss = i >= 1 && priceChg < 0 ? Math.Abs(priceChg) : 0;
-            lossList.AddRounded(loss);
+            lossList.Add(loss);
 
             var gain = i >= 1 && priceChg > 0 ? priceChg : 0;
-            gainList.AddRounded(gain);
+            gainList.Add(gain);
 
             var avgGainSma = gainList.TakeLastExt(dmiLength).Average();
             var avgLossSma = lossList.TakeLastExt(dmiLength).Average();
@@ -583,14 +583,14 @@ public static partial class Calculations
 
             var prevDmiSma = dmiSmaList.LastOrDefault();
             var dmiSma = avgLossSma == 0 ? 100 : avgGainSma == 0 ? 0 : 100 - (100 / (1 + rsSma));
-            dmiSmaList.AddRounded(dmiSma);
+            dmiSmaList.Add(dmiSma);
 
             var dmiSignalSma = dmiSmaList.TakeLastExt(dmiLength).Average();
-            dmiSignalSmaList.AddRounded(dmiSignalSma);
+            dmiSignalSmaList.Add(dmiSignalSma);
 
             var prevDmiHistogram = dmiHistogramSmaList.LastOrDefault();
             var dmiHistogramSma = dmiSma - dmiSignalSma;
-            dmiHistogramSmaList.AddRounded(dmiHistogramSma);
+            dmiHistogramSmaList.Add(dmiHistogramSma);
 
             var signal = GetRsiSignal(dmiHistogramSma, prevDmiHistogram, dmiSma, prevDmiSma, 70, 30);
             signalsList.Add(signal);
@@ -635,7 +635,7 @@ public static partial class Calculations
             var midpriceSmaAvg = (midprice + sma) / 2;
 
             var diff = currentValue - midpriceSmaAvg;
-            diffList.AddRounded(diff);
+            diffList.Add(diff);
         }
 
         stockData.CustomValuesList = diffList;

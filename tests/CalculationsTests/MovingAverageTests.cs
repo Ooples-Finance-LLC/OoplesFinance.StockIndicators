@@ -11,9 +11,10 @@ public sealed class MovingAverageTests : GlobalTestData
 
         // Act
         var results = stockData.CalculateSimpleMovingAverage().CustomValuesList;
+        var roundedResults = results.Select(x => Math.Round(x, 4)).ToList();
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        results.Should().BeEquivalentTo(expectedResults);
+        roundedResults.Should().BeEquivalentTo(expectedResults);
     }
 }

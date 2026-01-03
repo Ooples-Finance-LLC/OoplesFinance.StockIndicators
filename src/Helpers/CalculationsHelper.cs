@@ -1,7 +1,7 @@
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
-//     Copyright © Franklin Moormann, 2020-2022
+//     Copyright ï¿½ Franklin Moormann, 2020-2022
 //     cheatcountry@gmail.com
 //
 //     This library is free software and it uses the Apache 2.0 license
@@ -753,15 +753,15 @@ public static class CalculationsHelper
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            inputList.AddRounded(input);
+            inputList.Add(input);
 
             var list = inputList.TakeLastExt(Math.Max(length, 2)).ToList();
 
             var highestValue = list.Max();
-            highestValuesList.AddRounded(highestValue);
+            highestValuesList.Add(highestValue);
 
             var lowestValue = list.Min();
-            lowestValuesList.AddRounded(lowestValue);
+            lowestValuesList.Add(lowestValue);
         }
 
         return (highestValuesList, lowestValuesList);
@@ -785,29 +785,19 @@ public static class CalculationsHelper
         for (var i = 0; i < count; i++)
         {
             var high = highList[i];
-            tempHighList.AddRounded(high);
+            tempHighList.Add(high);
 
             var low = lowList[i];
-            tempLowList.AddRounded(low);
+            tempLowList.Add(low);
 
             var highest = tempHighList.TakeLastExt(length).Max();
-            highestList.AddRounded(highest);
+            highestList.Add(highest);
 
             var lowest = tempLowList.TakeLastExt(length).Min();
-            lowestList.AddRounded(lowest);
+            lowestList.Add(lowest);
         }
 
         return (highestList, lowestList);
-    }
-
-    /// <summary>
-    /// Rounds the incoming value to a default of 4 double points
-    /// </summary>
-    /// <param name="list">The list.</param>
-    /// <param name="value">The value.</param>
-    public static void AddRounded(this List<double> list, double value)
-    {
-        list.Add(Math.Round(value, 4));
     }
 
     /// <summary>
@@ -910,5 +900,16 @@ public static class CalculationsHelper
     {
         stockData.SignalsList?.Clear();
         stockData.CustomValuesList?.Clear();
+    }
+
+    /// <summary>
+    /// Adds a rounded value to the list
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="value"></param>
+    /// <param name="digits"></param>
+    public static void AddRounded(this List<double> list, double value, int digits = 4)
+    {
+        list.Add(Math.Round(value, digits));
     }
 }
