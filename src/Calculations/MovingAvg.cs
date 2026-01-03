@@ -67,23 +67,25 @@ public static partial class Calculations
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        double numerator = 0;
+        double windowSum = 0;
+        double weightedSumDenominator = (double)length * (length + 1) / 2;
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                double weight = length - j;
-                var prevValue = i >= j ? inputList[i - j] : 0;
+            numerator += length * currentValue - windowSum;
+            windowSum += currentValue;
 
-                sum += prevValue * weight;
-                weightedSum += weight;
+            if (i >= length)
+            {
+                windowSum -= inputList[i - length];
             }
 
             var prevWma = wmaList.LastOrDefault();
-            var wma = weightedSum != 0 ? sum / weightedSum : 0;
+            var wma = numerator / weightedSumDenominator;
             wmaList.AddRounded(wma);
 
             var signal = GetCompareSignal(currentValue - wma, prevVal - prevWma);
