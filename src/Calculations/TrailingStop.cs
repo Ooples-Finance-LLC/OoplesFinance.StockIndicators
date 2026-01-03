@@ -40,27 +40,27 @@ public static partial class Calculations
 
             var prevA = i >= 1 ? aList.LastOrDefault() : currentValue;
             var a = Math.Max(currentValue, prevA) - (Math.Abs(currentValue - prevA) * per);
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var prevB = i >= 1 ? bList.LastOrDefault() : currentValue;
             var b = Math.Min(currentValue, prevB) + (Math.Abs(currentValue - prevB) * per);
-            bList.AddRounded(b);
+            bList.Add(b);
 
             var prevUp = upList.LastOrDefault();
             var up = a > prevA ? a : a < prevA && b < prevB ? a : prevUp;
-            upList.AddRounded(up);
+            upList.Add(up);
 
             var prevDn = dnList.LastOrDefault();
             var dn = b < prevB ? b : b > prevB && a > prevA ? b : prevDn;
-            dnList.AddRounded(dn);
+            dnList.Add(dn);
 
             var prevOs = osList.LastOrDefault();
             var os = up > currentValue ? 1 : dn > currentValue ? 0 : prevOs;
-            osList.AddRounded(os);
+            osList.Add(os);
 
             var prevTs = tsList.LastOrDefault();
             var ts = (os * dn) + ((1 - os) * up);
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
             signalsList.Add(signal);
@@ -106,19 +106,19 @@ public static partial class Calculations
 
             var prevUpper = upperList.LastOrDefault();
             var upper = ma2 + d;
-            upperList.AddRounded(upper);
+            upperList.Add(upper);
 
             var prevLower = lowerList.LastOrDefault();
             var lower = ma2 - d;
-            lowerList.AddRounded(lower);
+            lowerList.Add(lower);
 
             var prevOs = osList.LastOrDefault();
             var os = currentValue > prevUpper ? 1 : currentValue < prevLower ? 0 : prevOs;
-            osList.AddRounded(os);
+            osList.Add(os);
 
             var prevTs = tsList.LastOrDefault();
             var ts = (os * lower) + ((1 - os) * upper);
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
             signalsList.Add(signal);
@@ -225,11 +225,11 @@ public static partial class Calculations
             {
                 SAR = i > 1 ? Math.Max(SAR, prevHigh2) : Math.Max(SAR, prevHigh1);
             }
-            sarList.AddRounded(SAR);
+            sarList.Add(SAR);
 
             var prevNextSar = nextSarList.LastOrDefault();
             var nextSar = SAR + (af * (ep - SAR));
-            nextSarList.AddRounded(nextSar);
+            nextSarList.Add(nextSar);
 
             var signal = GetCompareSignal(currentHigh - nextSar, prevHigh1 - prevNextSar);
             signalsList.Add(signal);
@@ -275,11 +275,11 @@ public static partial class Calculations
 
             var prevExitLong = chandelierExitLongList.LastOrDefault();
             var chandelierExitLong = highestHigh - (currentAvgTrueRange * mult);
-            chandelierExitLongList.AddRounded(chandelierExitLong);
+            chandelierExitLongList.Add(chandelierExitLong);
 
             var prevExitShort = chandelierExitShortList.LastOrDefault();
             var chandelierExitShort = lowestLow + (currentAvgTrueRange * mult);
-            chandelierExitShortList.AddRounded(chandelierExitShort);
+            chandelierExitShortList.Add(chandelierExitShort);
 
             var signal = GetBullishBearishSignal(currentValue - chandelierExitLong, prevValue - prevExitLong, currentValue - chandelierExitShort, prevValue - prevExitShort);
             signalsList.Add(signal);
@@ -328,7 +328,7 @@ public static partial class Calculations
 
             var atrts = upTrend ? Math.Max(currentValue - (factor * currentAtr), prevAtrts) : dnTrend ?
                 Math.Min(currentValue + (factor * currentAtr), prevAtrts) : prevAtrts;
-            atrtsList.AddRounded(atrts);
+            atrtsList.Add(atrts);
 
             var signal = GetCompareSignal(currentValue - atrts, prevValue - prevAtrts);
             signalsList.Add(signal);
@@ -373,26 +373,26 @@ public static partial class Calculations
             var x = currentValue + ((prevA - prevA2) * mult);
 
             var a = x > prevA + s ? prevA + s : x < prevA - s ? prevA - s : prevA;
-            aList.AddRounded(a);
+            aList.Add(a);
 
             var up = a + (Math.Abs(a - prevA) * mult);
             var dn = a - (Math.Abs(a - prevA) * mult);
 
             var prevUpper = upperList.LastOrDefault();
             var upper = up == a ? prevUpper : up;
-            upperList.AddRounded(upper);
+            upperList.Add(upper);
 
             var prevLower = lowerList.LastOrDefault();
             var lower = dn == a ? prevLower : dn;
-            lowerList.AddRounded(lower);
+            lowerList.Add(lower);
 
             var prevOs = osList.LastOrDefault();
             var os = currentValue > upper ? 1 : currentValue > lower ? 0 : prevOs;
-            osList.AddRounded(os);
+            osList.Add(os);
 
             var prevTs = tsList.LastOrDefault();
             var ts = (os * lower) + ((1 - os) * upper);
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
             signalsList.Add(signal);
@@ -460,10 +460,10 @@ public static partial class Calculations
                     nrtr = hp * (1 - pct);
                 }
             }
-            trendList.AddRounded(trend);
-            hpList.AddRounded(hp);
-            lpList.AddRounded(lp);
-            nrtrList.AddRounded(nrtr);
+            trendList.Add(trend);
+            hpList.Add(hp);
+            lpList.Add(lp);
+            nrtrList.Add(nrtr);
 
             var signal = GetCompareSignal(currentValue - nrtr, prevValue - prevNrtr);
             signalsList.Add(signal);
@@ -546,8 +546,8 @@ public static partial class Calculations
                     }
                 }
             }
-            trendList.AddRounded(trend);
-            nextTrendList.AddRounded(nextTrend);
+            trendList.Add(trend);
+            nextTrendList.Add(nextTrend);
 
             double up = 0, down = 0, arrowUp = 0, arrowDown = 0;
             if (trend == 0)
@@ -574,11 +574,11 @@ public static partial class Calculations
                     down = Math.Min(minHigh, prevDown);
                 }
             }
-            upList.AddRounded(up);
-            downList.AddRounded(down);
+            upList.Add(up);
+            downList.Add(down);
 
             var ht = trend == 0 ? up : down;
-            htList.AddRounded(ht);
+            htList.Add(ht);
 
             var signal = GetConditionSignal(arrowUp != 0 && trend == 0 && prevTrend == 1, arrowDown != 0 && trend == 1 && prevTrend == 0);
             signalsList.Add(signal);
@@ -629,7 +629,7 @@ public static partial class Calculations
             var prevLow = i >= 2 ? lowList[i - 2] : 0;
 
             var dtr = Math.Max(Math.Max(currentHigh - prevLow, Math.Abs(currentHigh - prevClose)), Math.Abs(currentLow - prevClose));
-            dtrList.AddRounded(dtr);
+            dtrList.Add(dtr);
         }
 
         var dtrAvgList = GetMovingAverageList(stockData, maType, length, dtrList);
@@ -649,16 +649,16 @@ public static partial class Calculations
 
             var warningLine = maFast < maSlow ? currentTypicalPrice + dtrAvg + (stdDev1 * dtrStd) :
                 currentTypicalPrice - dtrAvg - (stdDev1 * dtrStd);
-            warningLineList.AddRounded(warningLine);
+            warningLineList.Add(warningLine);
 
             var dev1 = maFast < maSlow ? currentTypicalPrice + dtrAvg + (stdDev2 * dtrStd) : currentTypicalPrice - dtrAvg - (stdDev2 * dtrStd);
-            dev1List.AddRounded(dev1);
+            dev1List.Add(dev1);
 
             var dev2 = maFast < maSlow ? currentTypicalPrice + dtrAvg + (stdDev3 * dtrStd) : currentTypicalPrice - dtrAvg - (stdDev3 * dtrStd);
-            dev2List.AddRounded(dev2);
+            dev2List.Add(dev2);
 
             var dev3 = maFast < maSlow ? currentTypicalPrice + dtrAvg + (stdDev4 * dtrStd) : currentTypicalPrice - dtrAvg - (stdDev4 * dtrStd);
-            dev3List.AddRounded(dev3);
+            dev3List.Add(dev3);
 
             var signal = GetCompareSignal(maFast - maSlow, prevMaFast - prevMaSlow);
             signalsList.Add(signal);
@@ -719,16 +719,16 @@ public static partial class Calculations
             var prevClose = i >= 2 ? inputList[i - 2] : 0;
 
             double trend = maFast > maSlow ? 1 : -1;
-            trendList.AddRounded(trend);
+            trendList.Add(trend);
 
             var price = trend == 1 ? currentHigh : currentLow;
             price = trend > 0 ? Math.Max(price, currentHigh) : Math.Min(price, currentLow);
-            priceList.AddRounded(price);
+            priceList.Add(price);
 
             var mmax = Math.Max(Math.Max(currentHigh, prevHigh), prevClose);
             var mmin = Math.Min(Math.Min(currentLow, prevLow), prevClose);
             var rrange = mmax - mmin;
-            rrangeList.AddRounded(rrange);
+            rrangeList.Add(rrange);
         }
 
         var rangeAvgList = GetMovingAverageList(stockData, maType, length, rrangeList);
@@ -743,17 +743,17 @@ public static partial class Calculations
             var prevPrice = i >= 1 ? priceList[i - 1] : 0;
 
             var val = (price + ((-1) * trend)) * (avg + (stdDev1 * dev));
-            valList.AddRounded(val);
+            valList.Add(val);
 
             var val1 = (price + ((-1) * trend)) * (avg + (stdDev2 * dev));
-            val1List.AddRounded(val1);
+            val1List.Add(val1);
 
             var val2 = (price + ((-1) * trend)) * (avg + (stdDev3 * dev));
-            val2List.AddRounded(val2);
+            val2List.Add(val2);
 
             var prevVal3 = val3List.LastOrDefault();
             var val3 = (price + ((-1) * trend)) * (avg + (stdDev4 * dev));
-            val3List.AddRounded(val3);
+            val3List.Add(val3);
 
             var signal = GetCompareSignal(price - val3, prevPrice - prevVal3);
             signalsList.Add(signal);
@@ -801,10 +801,10 @@ public static partial class Calculations
             var pSL = i >= 1 ? stopLList.LastOrDefault() : currentClose;
 
             var stopL = currentHigh > prevHH ? currentHigh - (pct * currentHigh) : pSL;
-            stopLList.AddRounded(stopL);
+            stopLList.Add(stopL);
 
             var stopS = currentLow < prevLL ? currentLow + (pct * currentLow) : pSS;
-            stopSList.AddRounded(stopS);
+            stopSList.Add(stopS);
 
             var signal = GetConditionSignal(prevHigh < stopS && currentHigh > stopS, prevLow > stopL && currentLow < stopL);
             signalsList.Add(signal);
@@ -850,11 +850,11 @@ public static partial class Calculations
 
             var prevOs = osList.LastOrDefault();
             var os = currentValue > prevA ? 1 : currentValue < prevB ? 0 : prevOs;
-            osList.AddRounded(os);
+            osList.Add(os);
 
             var prevTs = tsList.LastOrDefault();
             var ts = (os * b) + ((1 - os) * a);
-            tsList.AddRounded(ts);
+            tsList.Add(ts);
 
             var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
             signalsList.Add(signal);
@@ -908,16 +908,16 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
             var dmMinus = prevLow > currentLow ? prevLow - currentLow : 0;
-            dmMinusList.AddRounded(dmMinus);
+            dmMinusList.Add(dmMinus);
 
             double dmMinusCount = prevLow > currentLow ? 1 : 0;
-            dmMinusCountList.AddRounded(dmMinusCount);
+            dmMinusCountList.Add(dmMinusCount);
 
             var dmPlus = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
-            dmPlusList.AddRounded(dmPlus);
+            dmPlusList.Add(dmPlus);
 
             double dmPlusCount = currentHigh > prevHigh ? 1 : 0;
-            dmPlusCountList.AddRounded(dmPlusCount);
+            dmPlusCountList.Add(dmPlusCount);
 
             var countM = dmMinusCountList.TakeLastExt(length2).Sum();
             var dmMinusSum = dmMinusList.TakeLastExt(length2).Sum();
@@ -927,17 +927,17 @@ public static partial class Calculations
             var dmAvgPlus = countP != 0 ? dmPlusSum / countP : 0;
 
             var safeZMinus = prevLow - (factor * dmAvgMinus);
-            safeZMinusList.AddRounded(safeZMinus);
+            safeZMinusList.Add(safeZMinus);
 
             var safeZPlus = prevHigh + (factor * dmAvgPlus);
-            safeZPlusList.AddRounded(safeZPlus);
+            safeZPlusList.Add(safeZPlus);
 
             var highest = safeZMinusList.TakeLastExt(length3).Max();
             var lowest = safeZPlusList.TakeLastExt(length3).Min();
 
             var prevStop = stopList.LastOrDefault();
             var stop = currentValue >= currentEma ? highest : lowest;
-            stopList.AddRounded(stop);
+            stopList.Add(stop);
 
             var signal = GetBullishBearishSignal(currentValue - Math.Max(currentEma, stop), prevValue - Math.Max(prevEma, prevStop),
                 currentValue - Math.Min(currentEma, stop), prevValue - Math.Min(prevEma, prevStop));

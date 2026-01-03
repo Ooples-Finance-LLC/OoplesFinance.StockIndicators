@@ -10,7 +10,6 @@
 
 namespace OoplesFinance.StockIndicators.Exceptions;
 
-[Serializable]
 public sealed class CalculationException : Exception
 {
     public CalculationException()

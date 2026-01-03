@@ -38,7 +38,7 @@ public static partial class Calculations
             var slowEma = slowEmaList[i];
 
             var macd = fastEma - slowEma;
-            macdList.AddRounded(macd);
+            macdList.Add(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, macdList);
@@ -49,7 +49,7 @@ public static partial class Calculations
 
             var prevMacdHistogram = macdHistogramList.LastOrDefault();
             var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.AddRounded(macdHistogram);
+            macdHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
@@ -112,16 +112,16 @@ public static partial class Calculations
             var ema17 = ema17List[i];
 
             var macd1 = ema17 - ema14;
-            macd1List.AddRounded(macd1);
+            macd1List.Add(macd1);
 
             var macd2 = ema17 - ema8;
-            macd2List.AddRounded(macd2);
+            macd2List.Add(macd2);
 
             var macd3 = ema10 - ema16;
-            macd3List.AddRounded(macd3);
+            macd3List.Add(macd3);
 
             var macd4 = ema5 - ema10;
-            macd4List.AddRounded(macd4);
+            macd4List.Add(macd4);
         }
 
         var macd1SignalLineList = GetMovingAverageList(stockData, maType, length1, macd1List);
@@ -143,14 +143,14 @@ public static partial class Calculations
 
             var prevMacd2Histogram = macd2HistogramList.LastOrDefault();
             var macd2Histogram = macd2 - macd2SignalLine;
-            macd2HistogramList.AddRounded(macd2Histogram);
+            macd2HistogramList.Add(macd2Histogram);
 
             var macd3Histogram = macd3 - macd3SignalLine;
             var macdYellow = yellowMult * macd3Histogram;
 
             var prevMacd4Histogram = macd4HistogramList.LastOrDefault();
             var macd4Histogram = macd4 - macd4SignalLine;
-            macd4HistogramList.AddRounded(macd4Histogram);
+            macd4HistogramList.Add(macd4Histogram);
 
             var signal = GetCompareSignal(macd4Histogram - macd2Histogram, prevMacd4Histogram - prevMacd2Histogram);
             signalsList.Add(signal);
@@ -201,14 +201,14 @@ public static partial class Calculations
             var mi = typicalPriceZeroLagEmaList[i];
 
             var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
-            macdList.AddRounded(macd);
+            macdList.Add(macd);
 
             var macdSignalLine = macdList.TakeLastExt(signalLength).Average();
-            macdSignalLineList.AddRounded(macdSignalLine);
+            macdSignalLineList.Add(macdSignalLine);
 
             var prevMacdHistogram = macdHistogramList.LastOrDefault();
             var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.AddRounded(macdHistogram);
+            macdHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
@@ -252,7 +252,7 @@ public static partial class Calculations
 
             var prevKcd = kcdList.LastOrDefault();
             var kcd = pk - pkSma;
-            kcdList.AddRounded(kcd);
+            kcdList.Add(kcd);
 
             var signal = GetCompareSignal(kcd, prevKcd);
             signalsList.Add(signal);
@@ -300,10 +300,10 @@ public static partial class Calculations
             var ema26 = ema26List[i];
 
             var diff12 = currentValue - ema12;
-            diff12List.AddRounded(diff12);
+            diff12List.Add(diff12);
 
             var diff26 = currentValue - ema26;
-            diff26List.AddRounded(diff26);
+            diff26List.Add(diff26);
         }
 
         var diff12EmaList = GetMovingAverageList(stockData, maType, fastLength, diff12List);
@@ -316,13 +316,13 @@ public static partial class Calculations
             var diff26Ema = diff26EmaList[i];
 
             var i1 = ema12 + diff12Ema;
-            i1List.AddRounded(i1);
+            i1List.Add(i1);
 
             var i2 = ema26 + diff26Ema;
-            i2List.AddRounded(i2);
+            i2List.Add(i2);
 
             var macd = i1 - i2;
-            macdList.AddRounded(macd);
+            macdList.Add(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
@@ -333,7 +333,7 @@ public static partial class Calculations
 
             var prevMacdHistogram = macdHistogramList.LastOrDefault();
             var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.AddRounded(macdHistogram);
+            macdHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
@@ -378,7 +378,7 @@ public static partial class Calculations
             var mob2 = mob2List[i];
 
             var tfsMob = mob1 - mob2;
-            tfsMobList.AddRounded(tfsMob);
+            tfsMobList.Add(tfsMob);
         }
 
         var tfsMobSignalLineList = GetMovingAverageList(stockData, maType, signalLength, tfsMobList);
@@ -389,7 +389,7 @@ public static partial class Calculations
 
             var prevTfsMobHistogram = tfsMobHistogramList.LastOrDefault();
             var tfsMobHistogram = tfsMob - tfsMobSignalLine;
-            tfsMobHistogramList.AddRounded(tfsMobHistogram);
+            tfsMobHistogramList.Add(tfsMobHistogram);
 
             var signal = GetCompareSignal(tfsMobHistogram, prevTfsMobHistogram);
             signalsList.Add(signal);
@@ -447,26 +447,26 @@ public static partial class Calculations
 
             var macd = fastMa - slowMa;
             var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
-            macztList.AddRounded(maczt);
+            macztList.Add(maczt);
 
             var prevL0 = i >= 1 ? l0List.LastOrDefault() : maczt;
             var l0 = ((1 - gamma) * maczt) + (gamma * prevL0);
-            l0List.AddRounded(l0);
+            l0List.Add(l0);
 
             var prevL1 = i >= 1 ? l1List.LastOrDefault() : maczt;
             var l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
-            l1List.AddRounded(l1);
+            l1List.Add(l1);
 
             var prevL2 = i >= 1 ? l2List.LastOrDefault() : maczt;
             var l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
-            l2List.AddRounded(l2);
+            l2List.Add(l2);
 
             var prevL3 = i >= 1 ? l3List.LastOrDefault() : maczt;
             var l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
-            l3List.AddRounded(l3);
+            l3List.Add(l3);
 
             var macz = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-            maczList.AddRounded(macz);
+            maczList.Add(macz);
         }
 
         var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
@@ -477,7 +477,7 @@ public static partial class Calculations
 
             var prevHist = histList.LastOrDefault();
             var hist = macz - maczSignal;
-            histList.AddRounded(hist);
+            histList.Add(hist);
 
             var signal = GetCompareSignal(hist, prevHist);
             signalsList.Add(signal);
@@ -532,7 +532,7 @@ public static partial class Calculations
 
             var macd = fastMa - slowMa;
             var macz = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
-            maczList.AddRounded(macz);
+            maczList.Add(macz);
         }
 
         var maczSignalList = GetMovingAverageList(stockData, maType, signalLength, maczList);
@@ -543,7 +543,7 @@ public static partial class Calculations
 
             var prevHist = histList.LastOrDefault();
             var hist = macz - maczSignal;
-            histList.AddRounded(hist);
+            histList.Add(hist);
 
             var signal = GetCompareSignal(hist, prevHist);
             signalsList.Add(signal);
@@ -589,10 +589,10 @@ public static partial class Calculations
             var mac = emaCloseList[i];
 
             var macd = mac - mao;
-            macdList.AddRounded(macd);
+            macdList.Add(macd);
 
             var macdMirror = mao - mac;
-            macdMirrorList.AddRounded(macdMirror);
+            macdMirrorList.Add(macdMirror);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
@@ -606,10 +606,10 @@ public static partial class Calculations
 
             var prevMacdHistogram = macdHistogramList.LastOrDefault();
             var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.AddRounded(macdHistogram);
+            macdHistogramList.Add(macdHistogram);
 
             var macdMirrorHistogram = macdMirror - macdMirrorSignalLine;
-            macdMirrorHistogramList.AddRounded(macdMirrorHistogram);
+            macdMirrorHistogramList.Add(macdMirrorHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
@@ -660,22 +660,22 @@ public static partial class Calculations
 
             var prevFs = fsList.LastOrDefault();
             var fs = prevFs + (scAlpha * (currentValue - prevFs));
-            fsList.AddRounded(fs);
+            fsList.Add(fs);
 
             var prevSs = ssList.LastOrDefault();
             var ss = prevSs + (lcAlpha * (currentValue - prevSs));
-            ssList.AddRounded(ss);
+            ssList.Add(ss);
 
             var r = fs - ss;
-            rList.AddRounded(r);
+            rList.Add(r);
 
             var prevS = sList.LastOrDefault();
             var s = prevS + (spAlpha * (r - prevS));
-            sList.AddRounded(s);
+            sList.Add(s);
 
             var prevH = hList.LastOrDefault();
             var h = r - s;
-            hList.AddRounded(h);
+            hList.Add(h);
 
             var signal = GetCompareSignal(h, prevH);
             signalsList.Add(signal);
@@ -729,13 +729,13 @@ public static partial class Calculations
             var range = hh - ll;
 
             var fastStochastic = range != 0 ? (fastEma - ll) / range : 0;
-            fastStochasticList.AddRounded(fastStochastic);
+            fastStochasticList.Add(fastStochastic);
 
             var slowStochastic = range != 0 ? (slowEma - ll) / range : 0;
-            slowStochasticList.AddRounded(slowStochastic);
+            slowStochasticList.Add(slowStochastic);
 
             var macdStochastic = 10 * (fastStochastic - slowStochastic);
-            macdStochasticList.AddRounded(macdStochastic);
+            macdStochasticList.Add(macdStochastic);
         }
 
         var macdStochasticSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdStochasticList);
@@ -746,7 +746,7 @@ public static partial class Calculations
 
             var prevMacdHistogram = macdStochasticHistogramList.LastOrDefault();
             var macdHistogram = macdStochastic - macdStochasticSignalLine;
-            macdStochasticHistogramList.AddRounded(macdHistogram);
+            macdStochasticHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);
@@ -791,7 +791,7 @@ public static partial class Calculations
             var ema2 = period2EmaList[i];
 
             var macd = ema1 - ema2;
-            macdList.AddRounded(macd);
+            macdList.Add(macd);
         }
 
         var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, macdList);
@@ -802,7 +802,7 @@ public static partial class Calculations
 
             var prevMacdHistogram = macdHistogramList.LastOrDefault();
             var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.AddRounded(macdHistogram);
+            macdHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList.Add(signal);

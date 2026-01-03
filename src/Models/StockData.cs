@@ -102,19 +102,19 @@ public class StockData : IStockData
             Dates.Add(date);
 
             var open = ticker.Open;
-            OpenPrices.AddRounded(open);
+            OpenPrices.Add(open);
 
             var high = ticker.High;
-            HighPrices.AddRounded(high);
+            HighPrices.Add(high);
 
             var low = ticker.Low;
-            LowPrices.AddRounded(low);
+            LowPrices.Add(low);
 
             var close = ticker.Close;
-            ClosePrices.AddRounded(close);
+            ClosePrices.Add(close);
 
             var volume = ticker.Volume;
-            Volumes.AddRounded(volume);
+            Volumes.Add(volume);
         }
         
         TickerDataList = tickerDataList.ToList();

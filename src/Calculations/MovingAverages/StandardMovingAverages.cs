@@ -28,7 +28,7 @@ public static partial class Calculations
 
             var prevSma = smaList.LastOrDefault();
             var sma = i >= length - 1 ? sum / length : 0;
-            smaList.AddRounded(sma);
+            smaList.Add(sma);
 
             var signal = GetCompareSignal(currentValue - sma, prevValue - prevSma);
             signalsList.Add(signal);
@@ -76,7 +76,7 @@ public static partial class Calculations
 
             var prevWma = wmaList.LastOrDefault();
             var wma = numerator / weightedSumDenominator;
-            wmaList.AddRounded(wma);
+            wmaList.Add(wma);
 
             var signal = GetCompareSignal(currentValue - wma, prevVal - prevWma);
             signalsList.Add(signal);

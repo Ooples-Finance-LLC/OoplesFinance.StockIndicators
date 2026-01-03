@@ -45,16 +45,16 @@ public static partial class Calculations
             var s = high - prevHigh2 + (low - prevLow2);
 
             var s1 = n * m * s;
-            s1List.AddRounded(s1);
+            s1List.Add(s1);
 
             var s2 = Math.Abs(s);
-            s2List.AddRounded(s2);
+            s2List.Add(s2);
 
             var s1Sum = s1List.TakeLastExt(length).Sum();
             var s2Sum = s2List.TakeLastExt(length).Sum();
 
             var rei = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
-            reiList.AddRounded(rei);
+            reiList.Add(rei);
 
             var signal = GetRsiSignal(rei - prevRei1, prevRei1 - prevRei2, rei, prevRei1, 100, -100);
             signalsList.Add(signal);
@@ -100,17 +100,17 @@ public static partial class Calculations
 
             var bp = gapup > 0.15 ? (currentHigh - prevClose + currentClose - currentLow) * currentVolume :
                 currentClose > currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
-            bpList.AddRounded(bp);
+            bpList.Add(bp);
 
             var sp = gapdown > 0.15 ? (prevClose - currentLow + currentHigh - currentClose) * currentVolume :
                 currentClose < currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
-            spList.AddRounded(sp);
+            spList.Add(sp);
 
             var bpSum = bpList.TakeLastExt(length).Sum();
             var spSum = spList.TakeLastExt(length).Sum();
 
             var pressureRatio = bpSum - spSum != 0 ? MinOrMax(100 * bpSum / (bpSum - spSum), 100, 0) : 0;
-            pressureRatioList.AddRounded(pressureRatio);
+            pressureRatioList.Add(pressureRatio);
 
             var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
             signalsList.Add(signal);
@@ -155,17 +155,17 @@ public static partial class Calculations
             var prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
 
             var buyingPressure = delta > 0 ? ratio * currentVolume : 0;
-            bpList.AddRounded(buyingPressure);
+            bpList.Add(buyingPressure);
 
             var sellingPressure = delta < 0 ? ratio * currentVolume : 0;
-            spList.AddRounded(sellingPressure);
+            spList.Add(sellingPressure);
 
             var bpSum = bpList.TakeLastExt(length).Sum();
             var spSum = spList.TakeLastExt(length).Sum();
             var denom = bpSum + Math.Abs(spSum);
 
             var pressureRatio = denom != 0 ? MinOrMax(100 * bpSum / denom, 100, 0) : 50;
-            pressureRatioList.AddRounded(pressureRatio);
+            pressureRatioList.Add(pressureRatio);
 
             var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
             signalsList.Add(signal);
@@ -211,7 +211,7 @@ public static partial class Calculations
 
             double drp = dCount == length1 ? 1 : uCount == length1 ? -1 : 0;
             var drpPrice = drp != 0 ? currentValue : 0;
-            drpPriceList.AddRounded(drpPrice);
+            drpPriceList.Add(drpPrice);
 
             var signal = GetConditionSignal(drp > 0 || uCount > dCount, drp < 0 || dCount > uCount);
             signalsList.Add(signal);
@@ -256,7 +256,7 @@ public static partial class Calculations
 
             double drp = dCount == length ? 1 : uCount == length ? -1 : 0;
             var drpPrice = drp != 0 ? currentValue : 0;
-            drpPriceList.AddRounded(drpPrice);
+            drpPriceList.Add(drpPrice);
 
             var signal = GetConditionSignal(drp > 0 || uCount > dCount, drp < 0 || dCount > uCount);
             signalsList.Add(signal);
@@ -296,10 +296,10 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
 
             var dMax = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
-            dMaxList.AddRounded(dMax);
+            dMaxList.Add(dMax);
 
             var dMin = currentLow < prevLow ? prevLow - currentLow : 0;
-            dMinList.AddRounded(dMin);
+            dMinList.Add(dMin);
         }
 
         var maxMaList = GetMovingAverageList(stockData, maType, length, dMaxList);
@@ -312,7 +312,7 @@ public static partial class Calculations
             var prevDemarker2 = i >= 2 ? demarkerList[i - 2] : 0;
 
             var demarker = maxMa + minMa != 0 ? MinOrMax(maxMa / (maxMa + minMa) * 100, 100, 0) : 0;
-            demarkerList.AddRounded(demarker);
+            demarkerList.Add(demarker);
 
             var signal = GetRsiSignal(demarker - prevDemarker1, prevDemarker1 - prevDemarker2, demarker, prevDemarker1, 70, 30);
             signalsList.Add(signal);
