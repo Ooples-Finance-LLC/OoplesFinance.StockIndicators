@@ -21,18 +21,23 @@ public static partial class Calculations
     public static StockData CalculateSimpleMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> smaList = new();
-        List<double> tempList = new();
         List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        double sum = 0;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            tempList.AddRounded(currentValue);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            sum += currentValue;
+
+            if (i >= length)
+            {
+                sum -= inputList[i - length];
+            }
 
             var prevSma = smaList.LastOrDefault();
-            var sma = tempList.Count >= length ? tempList.TakeLastExt(length).Average() : 0;
+            var sma = i >= length - 1 ? sum / length : 0;
             smaList.AddRounded(sma);
 
             var signal = GetCompareSignal(currentValue - sma, prevValue - prevSma);
