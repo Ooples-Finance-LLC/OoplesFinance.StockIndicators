@@ -1,7 +1,7 @@
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
-//     Copyright © Franklin Moormann, 2020-2022
+//     Copyright ï¿½ Franklin Moormann, 2020-2022
 //     cheatcountry@gmail.com
 //
 //     This library is free software and it uses the Apache 2.0 license
@@ -467,7 +467,7 @@ public static partial class Calculations
         List<Signal> signalsList = new();
 
         var alligatorList = CalculateAlligatorIndex(stockData, inputName, maType, jawLength, jawOffset, teethLength, teethOffset, lipsLength, lipsOffset).OutputValues;
-        var jawList = alligatorList["Jaw"];
+        var jawList = alligatorList["Jaws"];
         var teethList = alligatorList["Teeth"];
         var lipsList = alligatorList["Lips"];
 
@@ -4533,7 +4533,6 @@ public static partial class Calculations
     public static StockData CalculateHighLowIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 10)
     {
-        List<double> hliList = new();
         List<double> advList = new();
         List<double> loList = new();
         List<double> advDiffList = new();
@@ -4565,8 +4564,8 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var zmbti = zmbtiList[i];
-            var prevZmbti1 = i >= 1 ? hliList[i - 1] : 0;
-            var prevZmbti2 = i >= 2 ? hliList[i - 2] : 0;
+            var prevZmbti1 = i >= 1 ? zmbtiList[i - 1] : 0;
+            var prevZmbti2 = i >= 2 ? zmbtiList[i - 2] : 0;
 
             var signal = GetRsiSignal(zmbti - prevZmbti1, prevZmbti1 - prevZmbti2, zmbti, prevZmbti1, 70, 30);
             signalsList.Add(signal);
@@ -8656,6 +8655,7 @@ public static partial class Calculations
         var kijunList = ichiMokuList.OutputValues["KijunSen"];
         var senkouAList = ichiMokuList.OutputValues["SenkouSpanA"];
         var senkouBList = ichiMokuList.OutputValues["SenkouSpanB"];
+        stockData.Clear();
         var adxItemsList = CalculateAverageDirectionalIndex(stockData, length: adxLength);
         var adxList = adxItemsList.CustomValuesList;
         var adxPlusList = adxItemsList.OutputValues["DiPlus"];
@@ -8664,6 +8664,7 @@ public static partial class Calculations
         var bullBearPowerList = CalculateElderRayIndex(stockData, length: bullBearLength);
         var bullPowerList = bullBearPowerList.OutputValues["BullPower"];
         var bearPowerList = bullBearPowerList.OutputValues["BearPower"];
+        stockData.Clear();
         var hullMaList = CalculateHullMovingAverage(stockData, length: hullMaLength).CustomValuesList;
         var williamsPctList = CalculateWilliamsR(stockData, length: williamRLength).CustomValuesList;
         var vwmaList = CalculateVolumeWeightedMovingAverage(stockData, length: vwmaLength).CustomValuesList;
