@@ -81,6 +81,12 @@ internal sealed class RollingSum
 internal sealed class RollingMinMax
 {
     private readonly int _length;
+    private readonly bool _useLinear;
+    private readonly double[]? _linearBuffer;
+    private int _linearCount;
+    private int _linearIndex;
+    private double _linearMin;
+    private double _linearMax;
     private readonly LinkedList<(double value, int index)> _minDeque = new();   
     private readonly LinkedList<(double value, int index)> _maxDeque = new();   
     private int _index;
@@ -88,11 +94,34 @@ internal sealed class RollingMinMax
     public RollingMinMax(int length)
     {
         _length = Math.Max(1, length);
+        _useLinear = _length <= RollingWindowSettings.SmallWindowThreshold;
+        if (_useLinear)
+        {
+            _linearBuffer = new double[_length];
+        }
     }
 
     public void Add(double value)
     {
-        while (_minDeque.Last != null && _minDeque.Last.Value.value >= value)
+        if (_useLinear)
+        {
+            _linearBuffer![_linearIndex] = value;
+            _linearIndex++;
+            if (_linearIndex == _length)
+            {
+                _linearIndex = 0;
+            }
+
+            if (_linearCount < _length)
+            {
+                _linearCount++;
+            }
+
+            RecalculateLinearMinMax();
+            return;
+        }
+
+        while (_minDeque.Last != null && _minDeque.Last.Value.value >= value)   
         {
             _minDeque.RemoveLast();
         }
@@ -124,6 +153,11 @@ internal sealed class RollingMinMax
     {
         get
         {
+            if (_useLinear)
+            {
+                return _linearMin;
+            }
+
             var node = _minDeque.First;
             return node != null ? node.Value.value : 0;
         }
@@ -133,9 +167,43 @@ internal sealed class RollingMinMax
     {
         get
         {
+            if (_useLinear)
+            {
+                return _linearMax;
+            }
+
             var node = _maxDeque.First;
             return node != null ? node.Value.value : 0;
         }
+    }
+
+    private void RecalculateLinearMinMax()
+    {
+        if (_linearCount == 0)
+        {
+            _linearMin = 0;
+            _linearMax = 0;
+            return;
+        }
+
+        var min = double.PositiveInfinity;
+        var max = double.NegativeInfinity;
+        for (var i = 0; i < _linearCount; i++)
+        {
+            var value = _linearBuffer![i];
+            if (value < min)
+            {
+                min = value;
+            }
+
+            if (value > max)
+            {
+                max = value;
+            }
+        }
+
+        _linearMin = min == double.PositiveInfinity ? 0 : min;
+        _linearMax = max == double.NegativeInfinity ? 0 : max;
     }
 }
 
