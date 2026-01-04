@@ -1,3 +1,6 @@
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
+
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -10,36 +13,30 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateSimpleMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> smaList = new();
-        List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+        var smaSpan = outputBuffer.Span;
+        MovingAverageCore.SimpleMovingAverage(inputSpan, smaSpan, length);
+        var smaList = outputBuffer.ToList();
 
-        double sum = 0;
-        for (var i = 0; i < stockData.Count; i++)
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        for (var i = 0; i < count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            sum += currentValue;
-
-            if (i >= length)
-            {
-                sum -= inputList[i - length];
-            }
-
-            var prevSma = smaList.LastOrDefault();
-            var sma = i >= length - 1 ? sum / length : 0;
-            smaList.Add(sma);
-
+            var sma = smaList[i];
+            var prevSma = i >= 1 ? smaList[i - 1] : 0;
             var signal = GetCompareSignal(currentValue - sma, prevValue - prevSma);
-            signalsList.Add(signal);
+            signalsList?.Add(signal);
         }
 
-        stockData.OutputValues = new Dictionary<string, List<double>>
-        {
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Sma", smaList }
-        };
-        stockData.SignalsList = signalsList;
-        stockData.CustomValuesList = smaList;
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(smaList);
         stockData.IndicatorName = IndicatorName.SimpleMovingAverage;
 
         return stockData;
@@ -53,43 +50,35 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateWeightedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> wmaList = new();
-        List<Signal> signalsList = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+        var wmaSpan = outputBuffer.Span;
+        MovingAverageCore.WeightedMovingAverage(inputSpan, wmaSpan, length);
+        var wmaList = outputBuffer.ToList();
 
-        double numerator = 0;
-        double windowSum = 0;
-        double weightedSumDenominator = (double)length * (length + 1) / 2;
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        for (var i = 0; i < count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            numerator += length * currentValue - windowSum;
-            windowSum += currentValue;
-
-            if (i >= length)
-            {
-                windowSum -= inputList[i - length];
-            }
-
-            var prevWma = wmaList.LastOrDefault();
-            var wma = numerator / weightedSumDenominator;
-            wmaList.Add(wma);
-
+            var wma = wmaList[i];
+            var prevWma = i >= 1 ? wmaList[i - 1] : 0;
             var signal = GetCompareSignal(currentValue - wma, prevVal - prevWma);
-            signalsList.Add(signal);
+            signalsList?.Add(signal);
         }
 
-        stockData.OutputValues = new Dictionary<string, List<double>>
-        {
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Wma", wmaList }
-        };
-        stockData.SignalsList = signalsList;
-        stockData.CustomValuesList = wmaList;
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(wmaList);
         stockData.IndicatorName = IndicatorName.WeightedMovingAverage;
 
         return stockData;
     }
 }
+
+
+

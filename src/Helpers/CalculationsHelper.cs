@@ -8,10 +8,279 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
+using System.Runtime.CompilerServices;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 public static class CalculationsHelper
 {
+    private static readonly ConditionalWeakTable<StockData, Dictionary<DerivedSeriesKind, List<double>>> DerivedSeriesCache
+        = new();
+
+    public static T GetLastOrDefault<T>(IReadOnlyList<T> list)
+    {
+        return list.Count > 0 ? list[list.Count - 1] : default!;
+    }
+
+    private static double SumValues(IReadOnlyList<double> values)
+    {
+        var sum = 0d;
+        for (var i = 0; i < values.Count; i++)
+        {
+            sum += values[i];
+        }
+
+        return sum;
+    }
+
+    private static bool SequenceEqualValues(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (left[i] != right[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static void SetOutputValues(this StockData stockData, Func<Dictionary<string, List<double>>> outputFactory)
+    {
+        if (!ShouldIncludeOutputValues(stockData))
+        {
+            stockData.OutputValues?.Clear();
+            return;
+        }
+
+        var outputs = outputFactory();
+        if (TryGetRoundingDigits(stockData, out var roundingDigits))
+        {
+            outputs = RoundOutputValues(outputs, roundingDigits);
+        }
+
+        stockData.OutputValues = outputs;
+    }
+
+    public static List<Signal>? CreateSignalsList(StockData stockData, int capacity = 0)
+    {
+        if (!ShouldIncludeSignals(stockData))
+        {
+            return null;
+        }
+
+        if (capacity <= 0)
+        {
+            capacity = stockData.Count;
+        }
+
+        return capacity > 0 ? new List<Signal>(capacity) : new List<Signal>();
+    }
+
+    public static void SetSignals(this StockData stockData, List<Signal>? signalsList)
+    {
+        if (!ShouldIncludeSignals(stockData) || signalsList == null)
+        {
+            stockData.SignalsList?.Clear();
+            return;
+        }
+
+        stockData.SignalsList = signalsList;
+    }
+
+    public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
+    {
+        if (!ShouldIncludeCustomValues(stockData))
+        {
+            stockData.CustomValuesList?.Clear();
+            return;
+        }
+
+        if (TryGetRoundingDigits(stockData, out var roundingDigits))
+        {
+            stockData.CustomValuesList = RoundValuesList(customValuesList, roundingDigits);
+            return;
+        }
+
+        stockData.CustomValuesList = customValuesList;
+    }
+
+    private static bool ShouldIncludeOutputValues(StockData stockData)
+    {
+        return stockData.Options?.IncludeOutputValues ?? true;
+    }
+
+    private static bool ShouldIncludeSignals(StockData stockData)
+    {
+        return stockData.Options?.IncludeSignals ?? true;
+    }
+
+    private static bool ShouldIncludeCustomValues(StockData stockData)
+    {
+        return stockData.Options?.IncludeCustomValues ?? true;
+    }
+
+    private static bool TryGetRoundingDigits(StockData stockData, out int roundingDigits)
+    {
+        var digits = stockData.Options?.RoundingDigits;
+        if (!digits.HasValue)
+        {
+            roundingDigits = 0;
+            return false;
+        }
+
+        roundingDigits = digits.Value;
+        if (roundingDigits < -15)
+        {
+            roundingDigits = -15;
+        }
+        else if (roundingDigits > 15)
+        {
+            roundingDigits = 15;
+        }
+
+        return true;
+    }
+
+    internal static List<double> GetDerivedSeriesList(StockData stockData, DerivedSeriesKind kind)
+    {
+        if (!CanCacheDerivedSeries(stockData))
+        {
+            return BuildDerivedSeriesList(stockData, kind);
+        }
+
+        var cache = DerivedSeriesCache.GetOrCreateValue(stockData);
+        if (cache.TryGetValue(kind, out var cached))
+        {
+            return cached;
+        }
+
+        var series = BuildDerivedSeriesList(stockData, kind);
+        cache[kind] = series;
+        return series;
+    }
+
+    internal static List<double> GetTrueRangeList(StockData stockData)
+    {
+        return GetDerivedSeriesList(stockData, DerivedSeriesKind.TrueRange);
+    }
+
+    private static bool CanCacheDerivedSeries(StockData stockData)
+    {
+        if (!(stockData.Options?.EnableDerivedSeriesCache ?? true))
+        {
+            return false;
+        }
+
+        return stockData.CustomValuesList == null || stockData.CustomValuesList.Count == 0;
+    }
+
+    private static IReadOnlyList<double> GetDerivedCloseList(StockData stockData)
+    {
+        if (stockData.CustomValuesList != null && stockData.CustomValuesList.Count > 0)
+        {
+            return stockData.CustomValuesList;
+        }
+
+        return stockData.ClosePrices;
+    }
+
+    private static List<double> BuildDerivedSeriesList(StockData stockData, DerivedSeriesKind kind)
+    {
+        var count = stockData.Count;
+        var list = new List<double>(count);
+        if (count == 0)
+        {
+            return list;
+        }
+
+        var highs = stockData.HighPrices;
+        var lows = stockData.LowPrices;
+        var opens = stockData.OpenPrices;
+        var closes = GetDerivedCloseList(stockData);
+
+        switch (kind)
+        {
+            case DerivedSeriesKind.Hl2:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i]) / 2);
+                }
+                break;
+            case DerivedSeriesKind.Hlc3:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i] + closes[i]) / 3);
+                }
+                break;
+            case DerivedSeriesKind.Ohlc4:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((opens[i] + highs[i] + lows[i] + closes[i]) / 4);
+                }
+                break;
+            case DerivedSeriesKind.WeightedClose:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i] + (closes[i] * 2)) / 4);
+                }
+                break;
+            case DerivedSeriesKind.AveragePrice:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((opens[i] + closes[i]) / 2);
+                }
+                break;
+            case DerivedSeriesKind.TrueRange:
+                for (var i = 0; i < count; i++)
+                {
+                    var prevClose = i >= 1 ? closes[i - 1] : 0;
+                    list.Add(CalculateTrueRange(highs[i], lows[i], prevClose));
+                }
+                break;
+            default:
+                break;
+        }
+
+        return list;
+    }
+
+    private static List<double> RoundValuesList(List<double> values, int roundingDigits)
+    {
+        var count = values.Count;
+        var rounded = new List<double>(count);
+        for (var i = 0; i < count; i++)
+        {
+            rounded.Add(Math.Round(values[i], roundingDigits));
+        }
+
+        return rounded;
+    }
+
+    private static Dictionary<string, List<double>> RoundOutputValues(Dictionary<string, List<double>> outputs, int roundingDigits)
+    {
+        var rounded = new Dictionary<string, List<double>>(outputs.Count);
+        foreach (var kvp in outputs)
+        {
+            rounded[kvp.Key] = RoundValuesList(kvp.Value, roundingDigits);
+        }
+
+        return rounded;
+    }
+
     /// <summary>
     /// Calculates the user chosen moving average with user's custom settings
     /// </summary>
@@ -22,14 +291,44 @@ public static class CalculationsHelper
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
-    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null, 
+    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,        
         int? fastLength = null, int? slowLength = null)
     {
         List<double> movingAvgList = new();
 
         if (customValuesList != null)
         {
-            stockData.CustomValuesList = customValuesList;
+            stockData.SetCustomValues(customValuesList);
+        }
+
+        if (movingAvgType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage
+            or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod)
+        {
+            var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
+            var count = inputList.Count;
+            var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+            var outputSpan = outputBuffer.Span;
+
+            switch (movingAvgType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WildersSmoothingMethod:
+                    MovingAverageCore.WellesWilderMovingAverage(inputSpan, outputSpan, length);
+                    break;
+            }
+
+            movingAvgList = outputBuffer.ToList();
+            stockData.SetCustomValues(movingAvgList);
+            return movingAvgList;
         }
 
         switch (movingAvgType)
@@ -542,23 +841,23 @@ public static class CalculationsHelper
             InputName.Low => stockData.LowPrices,
             InputName.High => stockData.HighPrices,
             InputName.Volume => stockData.Volumes,
-            InputName.TypicalPrice => stockData.CalculateTypicalPrice().CustomValuesList,
-            InputName.FullTypicalPrice => stockData.CalculateFullTypicalPrice().CustomValuesList,
-            InputName.MedianPrice => stockData.CalculateMedianPrice().CustomValuesList,
-            InputName.WeightedClose => stockData.CalculateWeightedClose().CustomValuesList,
+            InputName.TypicalPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Hlc3),
+            InputName.FullTypicalPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Ohlc4),
+            InputName.MedianPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Hl2),
+            InputName.WeightedClose => GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose),
             InputName.Open => stockData.OpenPrices,
             InputName.AdjustedClose => stockData.ClosePrices,
             InputName.Midpoint => stockData.CalculateMidpoint().CustomValuesList,
             InputName.Midprice => stockData.CalculateMidprice().CustomValuesList,
-            InputName.AveragePrice => stockData.CalculateAveragePrice().CustomValuesList,
+            InputName.AveragePrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.AveragePrice),
             _ => stockData.ClosePrices,
         };
 
         if (inputList.Count > 0)
         {
-            var sum = inputList.Sum();
-
-            if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
+            var sum = SumValues(inputList);
+            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
+            if (isVolumeInput)
             {
                 var minMaxList = GetMaxAndMinValuesList(inputList, 0);
                 highList = minMaxList.Item1;
@@ -566,8 +865,19 @@ public static class CalculationsHelper
             }
             else
             {
-                highList = stockData.HighPrices;
-                lowList = stockData.LowPrices;
+                var lowSum = SumValues(stockData.LowPrices);
+                var highSum = SumValues(stockData.HighPrices);
+                if (sum < lowSum || sum > highSum)
+                {
+                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
+                    highList = minMaxList.Item1;
+                    lowList = minMaxList.Item2;
+                }
+                else
+                {
+                    highList = stockData.HighPrices;
+                    lowList = stockData.LowPrices;
+                }
             }
         }
         else
@@ -615,9 +925,9 @@ public static class CalculationsHelper
 
         if (inputList.Count > 0)
         {
-            var sum = inputList.Sum();
-
-            if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
+            var sum = SumValues(inputList);
+            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
+            if (isVolumeInput)
             {
                 var minMaxList = GetMaxAndMinValuesList(inputList, 0);
                 highList = minMaxList.Item1;
@@ -625,8 +935,19 @@ public static class CalculationsHelper
             }
             else
             {
-                highList = stockData.HighPrices;
-                lowList = stockData.LowPrices;
+                var lowSum = SumValues(stockData.LowPrices);
+                var highSum = SumValues(stockData.HighPrices);
+                if (sum < lowSum || sum > highSum)
+                {
+                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
+                    highList = minMaxList.Item1;
+                    lowList = minMaxList.Item2;
+                }
+                else
+                {
+                    highList = stockData.HighPrices;
+                    lowList = stockData.LowPrices;
+                }
             }
         }
         else
@@ -651,53 +972,113 @@ public static class CalculationsHelper
     public static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> volumeList)
         GetInputValuesList(StockData stockData, InputLength inputLength)
     {
-        List<double> inputList = new();
-        List<double> highList = new();
-        List<double> lowList = new();
-        List<double> openList = new();
-        List<double> volumeList = new();
+        var capacity = stockData.TickerDataList.Count;
+        List<double> inputList = new(capacity);
+        List<double> highList = new(capacity);
+        List<double> lowList = new(capacity);
+        List<double> openList = new(capacity);
+        List<double> volumeList = new(capacity);
+        var parentGroups = new Dictionary<DateTime, InputLengthGroup>();
+        var parentOrder = new List<DateTime>();
+        var tickerDataList = stockData.TickerDataList;
 
-        var groupedDatesParent = stockData.TickerDataList.GroupBy(x => x.Date.Date);
-        for (var i = 0; i < groupedDatesParent.Count(); i++)
+        for (var i = 0; i < tickerDataList.Count; i++)
         {
-            var parent = groupedDatesParent.ElementAt(i);
+            var ticker = tickerDataList[i];
+            var parentKey = ticker.Date.Date;
 
-            IEnumerable<IGrouping<int, TickerData>> groupedDatesChild = inputLength switch
+            if (!parentGroups.TryGetValue(parentKey, out var parentGroup))
             {
-                InputLength.Minute => parent.GroupBy(x => x.Date.Minute),
-                InputLength.Hour => parent.GroupBy(x => x.Date.Hour),
-                InputLength.Day => parent.GroupBy(x => x.Date.Day),
-                InputLength.Week => parent.GroupBy(x => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(x.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)),
-                InputLength.Month => parent.GroupBy(x => x.Date.Month),
-                InputLength.Year => parent.GroupBy(x => x.Date.Year),
-                _ => parent.GroupBy(x => x.Date.Day),
+                parentGroup = new InputLengthGroup();
+                parentGroups[parentKey] = parentGroup;
+                parentOrder.Add(parentKey);
+            }
+
+            var childKey = inputLength switch
+            {
+                InputLength.Minute => ticker.Date.Minute,
+                InputLength.Hour => ticker.Date.Hour,
+                InputLength.Day => ticker.Date.Day,
+                InputLength.Week => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(ticker.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                InputLength.Month => ticker.Date.Month,
+                InputLength.Year => ticker.Date.Year,
+                _ => ticker.Date.Day,
             };
 
-            for (var j = 0; j < groupedDatesChild.Count(); j++)
+            if (!parentGroup.Children.TryGetValue(childKey, out var childGroup))
             {
-                var groupedDates = groupedDatesChild.ElementAt(j);
+                childGroup = new OhlcvAggregate();
+                parentGroup.Children[childKey] = childGroup;
+                parentGroup.ChildOrder.Add(childKey);
+            }
 
-                if (groupedDates.Any())
+            childGroup.Add(ticker);
+        }
+
+        for (var i = 0; i < parentOrder.Count; i++)
+        {
+            var parentGroup = parentGroups[parentOrder[i]];
+            var childOrder = parentGroup.ChildOrder;
+            for (var j = 0; j < childOrder.Count; j++)
+            {
+                var childGroup = parentGroup.Children[childOrder[j]];
+                if (!childGroup.HasValue)
                 {
-                    var high = groupedDates.Max(x => x.High);
-                    highList.Add(high);
-
-                    var low = groupedDates.Min(x => x.Low);
-                    lowList.Add(low);
-
-                    var volume = groupedDates.Sum(x => x.Volume);
-                    volumeList.Add(volume);
-
-                    var open = groupedDates.First().Open;
-                    openList.Add(open);
-
-                    var close = groupedDates.Last().Close;
-                    inputList.Add(close);
+                    continue;
                 }
+
+                highList.Add(childGroup.High);
+                lowList.Add(childGroup.Low);
+                volumeList.Add(childGroup.Volume);
+                openList.Add(childGroup.Open);
+                inputList.Add(childGroup.Close);
             }
         }
 
         return (inputList, highList, lowList, openList, volumeList);
+    }
+
+    private sealed class InputLengthGroup
+    {
+        public Dictionary<int, OhlcvAggregate> Children { get; } = new();
+        public List<int> ChildOrder { get; } = new();
+    }
+
+    private sealed class OhlcvAggregate
+    {
+        public bool HasValue { get; private set; }
+        public double Open { get; private set; }
+        public double High { get; private set; }
+        public double Low { get; private set; }
+        public double Close { get; private set; }
+        public double Volume { get; private set; }
+
+        public void Add(TickerData ticker)
+        {
+            if (!HasValue)
+            {
+                Open = ticker.Open;
+                High = ticker.High;
+                Low = ticker.Low;
+                Close = ticker.Close;
+                Volume = ticker.Volume;
+                HasValue = true;
+                return;
+            }
+
+            if (ticker.High > High)
+            {
+                High = ticker.High;
+            }
+
+            if (ticker.Low < Low)
+            {
+                Low = ticker.Low;
+            }
+
+            Volume += ticker.Volume;
+            Close = ticker.Close;
+        }
     }
 
     /// <summary>
@@ -746,22 +1127,18 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> inputs, int length)
     {
-        List<double> highestValuesList = new();
-        List<double> lowestValuesList = new();
-        List<double> inputList = new();
+        var count = inputs.Count;
+        List<double> highestValuesList = new(count);
+        List<double> lowestValuesList = new(count);
+        var windowLength = Math.Max(length, 2);
+        var window = new RollingMinMax(windowLength);
 
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            inputList.Add(input);
-
-            var list = inputList.TakeLastExt(Math.Max(length, 2)).ToList();
-
-            var highestValue = list.Max();
-            highestValuesList.Add(highestValue);
-
-            var lowestValue = list.Min();
-            lowestValuesList.Add(lowestValue);
+            window.Add(input);
+            highestValuesList.Add(window.Max);
+            lowestValuesList.Add(window.Min);
         }
 
         return (highestValuesList, lowestValuesList);
@@ -776,25 +1153,20 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> highList, List<double> lowList, int length)
     {
-        List<double> highestList = new();
-        List<double> lowestList = new();
-        List<double> tempHighList = new();
-        List<double> tempLowList = new();
         var count = highList.Count == lowList.Count ? highList.Count : 0;
+        List<double> highestList = new(count);
+        List<double> lowestList = new(count);
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
 
         for (var i = 0; i < count; i++)
         {
             var high = highList[i];
-            tempHighList.Add(high);
-
             var low = lowList[i];
-            tempLowList.Add(low);
-
-            var highest = tempHighList.TakeLastExt(length).Max();
-            highestList.Add(highest);
-
-            var lowest = tempLowList.TakeLastExt(length).Min();
-            lowestList.Add(lowest);
+            highWindow.Add(high);
+            lowWindow.Add(low);
+            highestList.Add(highWindow.Max);
+            lowestList.Add(lowWindow.Min);
         }
 
         return (highestList, lowestList);
@@ -829,18 +1201,46 @@ public static class CalculationsHelper
         if (0 == count)
             yield break;
 
-        if (source is ICollection<T> collection)
+        if (source is IList<T> list)
         {
-            foreach (var item in source.Skip(Math.Max(0, collection.Count - count)))
-                yield return item;
+            var start = Math.Max(0, list.Count - count);
+            for (var i = start; i < list.Count; i++)
+                yield return list[i];
 
             yield break;
         }
 
-        if (source is IReadOnlyCollection<T> collection1)
+        if (source is IReadOnlyList<T> readOnlyList)
         {
-            foreach (var item in source.Skip(Math.Max(0, collection1.Count - count)))
-                yield return item;
+            var start = Math.Max(0, readOnlyList.Count - count);
+            for (var i = start; i < readOnlyList.Count; i++)
+                yield return readOnlyList[i];
+
+            yield break;
+        }
+
+        if (source is ICollection<T> collection)
+        {
+            var skip = Math.Max(0, collection.Count - count);
+            var index = 0;
+            foreach (var item in source)
+            {
+                if (index++ >= skip)
+                    yield return item;
+            }
+
+            yield break;
+        }
+
+        if (source is IReadOnlyCollection<T> readOnlyCollection)
+        {
+            var skip = Math.Max(0, readOnlyCollection.Count - count);
+            var index = 0;
+            foreach (var item in source)
+            {
+                if (index++ >= skip)
+                    yield return item;
+            }
 
             yield break;
         }
@@ -855,7 +1255,7 @@ public static class CalculationsHelper
             result.Enqueue(item);
         }
 
-        foreach (var _ in result)
+        while (result.Count > 0)
             yield return result.Dequeue();
     }
 
@@ -867,7 +1267,8 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static double PercentileNearestRank(this IEnumerable<double> sequence, double percentile)
     {
-        var list = sequence.OrderBy(i => i).ToList();
+        var list = new List<double>(sequence);
+        list.Sort();
         var n = list.Count;
         var rank = n > 0 ? (int)Math.Ceiling(percentile / 100 * n) : 0;
 
@@ -913,3 +1314,14 @@ public static class CalculationsHelper
         list.Add(Math.Round(value, digits));
     }
 }
+
+internal enum DerivedSeriesKind
+{
+    Hl2,
+    Hlc3,
+    Ohlc4,
+    WeightedClose,
+    AveragePrice,
+    TrueRange
+}
+
