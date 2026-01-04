@@ -20,6 +20,8 @@ public static class StreamingPerformanceRunner
         var tickCount = DefaultTickCount;
         var includeOutputs = false;
         var extended = false;
+        var timeframeCount = 0;
+        var indicatorCount = 0;
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
@@ -34,6 +36,24 @@ public static class StreamingPerformanceRunner
             else if (string.Equals(arg, "--extended", StringComparison.OrdinalIgnoreCase))
             {
                 extended = true;
+            }
+            else if (string.Equals(arg, "--timeframes", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            {
+                if (int.TryParse(args[i + 1], out var parsed))
+                {
+                    timeframeCount = Math.Max(0, parsed);
+                }
+
+                i++;
+            }
+            else if (string.Equals(arg, "--indicators", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            {
+                if (int.TryParse(args[i + 1], out var parsed))
+                {
+                    indicatorCount = Math.Max(0, parsed);
+                }
+
+                i++;
             }
             else if (string.Equals(arg, "--ticks", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
             {
@@ -51,7 +71,7 @@ public static class StreamingPerformanceRunner
             return false;
         }
 
-        var result = Run(tickCount, includeOutputs, extended);
+        var result = Run(tickCount, includeOutputs, extended, timeframeCount, indicatorCount);
         Console.WriteLine($"Streaming fanout: ticks={result.TickCount}, timeframes={result.TimeframeCount}, indicators={result.IndicatorCount}");
         Console.WriteLine($"Elapsed: {result.Elapsed.TotalSeconds:N2}s");
         Console.WriteLine($"Throughput: {result.TicksPerSecond:N0} ticks/sec");
@@ -61,7 +81,7 @@ public static class StreamingPerformanceRunner
     }
 
     public static StreamingPerfResult Run(int tickCount = DefaultTickCount, bool includeOutputs = false,
-        bool extended = false)
+        bool extended = false, int timeframeCount = 0, int indicatorCount = 0)
     {
         var timeframes = new[]
         {
@@ -71,6 +91,16 @@ public static class StreamingPerformanceRunner
             BarTimeframe.Minutes(1),
             BarTimeframe.Minutes(5)
         };
+        if (timeframeCount > 0 && timeframeCount < timeframes.Length)
+        {
+            var trimmed = new BarTimeframe[timeframeCount];
+            for (var i = 0; i < timeframeCount; i++)
+            {
+                trimmed[i] = timeframes[i];
+            }
+
+            timeframes = trimmed;
+        }
 
         var indicators = new List<Func<IStreamingIndicatorState>>
         {
@@ -93,6 +123,10 @@ public static class StreamingPerformanceRunner
             indicators.Add(() => new AwesomeOscillatorState());
             indicators.Add(() => new AcceleratorOscillatorState());
             indicators.Add(() => new TrixState());
+        }
+        if (indicatorCount > 0 && indicatorCount < indicators.Count)
+        {
+            indicators.RemoveRange(indicatorCount, indicators.Count - indicatorCount);
         }
 
         var engine = new StreamingIndicatorEngine(new StreamingIndicatorEngineOptions

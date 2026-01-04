@@ -26,6 +26,23 @@ public static class CalculationsHelper
 
     private static double SumValues(IReadOnlyList<double> values)
     {
+        if (values.Count == 0)
+        {
+            return 0;
+        }
+
+#if NET8_0_OR_GREATER
+        if (values is List<double> list)
+        {
+            return VectorMath.Sum(SpanCompat.AsReadOnlySpan(list));
+        }
+
+        if (values is double[] array)
+        {
+            return VectorMath.Sum(array);
+        }
+#endif
+
         var sum = 0d;
         for (var i = 0; i < values.Count; i++)
         {
@@ -33,6 +50,39 @@ public static class CalculationsHelper
         }
 
         return sum;
+    }
+
+    internal static List<double> GetDifferenceList(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    {
+        if (left.Count != right.Count)
+        {
+            throw new ArgumentException("Input lists must have the same length.");
+        }
+
+        var count = left.Count;
+#if NET8_0_OR_GREATER
+        if (left is List<double> leftList && right is List<double> rightList)
+        {
+            var output = SpanCompat.CreateOutputBuffer(count);
+            VectorMath.Diff(SpanCompat.AsReadOnlySpan(leftList), SpanCompat.AsReadOnlySpan(rightList), output.Span);
+            return output.ToList();
+        }
+
+        if (left is double[] leftArray && right is double[] rightArray)
+        {
+            var output = SpanCompat.CreateOutputBuffer(count);
+            VectorMath.Diff(leftArray, rightArray, output.Span);
+            return output.ToList();
+        }
+#endif
+
+        var list = new List<double>(count);
+        for (var i = 0; i < count; i++)
+        {
+            list.Add(left[i] - right[i]);
+        }
+
+        return list;
     }
 
     private static bool SequenceEqualValues(IReadOnlyList<double> left, IReadOnlyList<double> right)

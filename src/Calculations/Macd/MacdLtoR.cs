@@ -15,32 +15,18 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageConvergenceDivergence(this StockData stockData,
         MovingAvgType movingAvgType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
-        List<double> macdList = new(stockData.Count);
-        List<double> macdHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var fastEmaList = GetMovingAverageList(stockData, movingAvgType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, movingAvgType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var fastEma = fastEmaList[i];
-            var slowEma = slowEmaList[i];
-
-            var macd = fastEma - slowEma;
-            macdList.Add(macd);
-        }
-
+        var macdList = GetDifferenceList(fastEmaList, slowEmaList);
         var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, macdList);
+        var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var macd = macdList[i];
-            var macdSignalLine = macdSignalLineList[i];
-
+            var macdHistogram = macdHistogramList[i];
             var prevMacdHistogram = i >= 1 ? macdHistogramList[i - 1] : 0;
-            var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.Add(macdHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList?.Add(signal);
@@ -307,43 +293,22 @@ public static partial class Calculations
     public static StockData CalculateMirroredMovingAverageConvergenceDivergence(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9)
     {
-        List<double> macdList = new(stockData.Count);
-        List<double> macdHistogramList = new(stockData.Count);
-        List<double> macdMirrorList = new(stockData.Count);
-        List<double> macdMirrorHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
 
         var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
         var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mao = emaOpenList[i];
-            var mac = emaCloseList[i];
-
-            var macd = mac - mao;
-            macdList.Add(macd);
-
-            var macdMirror = mao - mac;
-            macdMirrorList.Add(macdMirror);
-        }
-
+        var macdList = GetDifferenceList(emaCloseList, emaOpenList);
+        var macdMirrorList = GetDifferenceList(emaOpenList, emaCloseList);
         var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
         var macdMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdMirrorList);
+        var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
+        var macdMirrorHistogramList = GetDifferenceList(macdMirrorList, macdMirrorSignalLineList);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var macd = macdList[i];
-            var macdMirror = macdMirrorList[i];
-            var macdSignalLine = macdSignalLineList[i];
-            var macdMirrorSignalLine = macdMirrorSignalLineList[i];
-
+            var macdHistogram = macdHistogramList[i];
+            var macdMirrorHistogram = macdMirrorHistogramList[i];
             var prevMacdHistogram = i >= 1 ? macdHistogramList[i - 1] : 0;
-            var macdHistogram = macd - macdSignalLine;
-            macdHistogramList.Add(macdHistogram);
-
-            var macdMirrorHistogram = macdMirror - macdMirrorSignalLine;
-            macdMirrorHistogramList.Add(macdMirrorHistogram);
 
             var signal = GetCompareSignal(macdHistogram, prevMacdHistogram);
             signalsList?.Add(signal);
