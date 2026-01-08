@@ -2,8 +2,8 @@
 Generated: 2026-01-08 05:50:53
 Summary:
 - Total indicators: 774
-- Stateful implemented: 672
-- Pending: 102
+- Stateful implemented: 697
+- Pending: 77
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -661,7 +661,32 @@ Summary:
 - [x] SwamiStochastics
 - [x] SymmetricallyWeightedMovingAverage
 - [x] TechnicalRank
+- [x] TechnicalRatings
+- [x] TFSMboIndicator
+- [x] TFSMboPercentagePriceOscillator
+- [x] TFSTetherLineIndicator
+- [x] TFSVolumeOscillator
+- [x] TheRangeIndicator
+- [x] TickLineMomentumOscillator
+- [x] TillsonIE2
+- [x] TillsonT3MovingAverage
+- [x] TimeAndMoneyChannel
+- [x] TimePriceIndicator
 - [x] TimeSeriesForecast
+- [x] TironeLevels
+- [x] TopsAndBottomsFinder
+- [x] TotalPowerIndicator
+- [x] TraderPressureIndex
+- [x] TradersDynamicIndex
+- [x] TradeVolumeIndex
+- [x] TradingMadeMoreSimplerOscillator
+- [x] TrendAnalysisIndex
+- [x] TrendAnalysisIndicator
+- [x] TrendContinuationFactor
+- [x] TrendDetectionIndex
+- [x] TrendDirectionForceIndex
+- [x] Trender
+- [x] TrendExhaustionIndicator
 - [x] TriangularMovingAverage
 - [x] Trix
 - [x] TrueStrengthIndex
@@ -681,31 +706,6 @@ Summary:
 
 ## Pending
 - [ ] None
-- [ ] TechnicalRatings
-- [ ] TFSMboIndicator
-- [ ] TFSMboPercentagePriceOscillator
-- [ ] TFSTetherLineIndicator
-- [ ] TFSVolumeOscillator
-- [ ] TheRangeIndicator
-- [ ] TickLineMomentumOscillator
-- [ ] TillsonIE2
-- [ ] TillsonT3MovingAverage
-- [ ] TimeAndMoneyChannel
-- [ ] TimePriceIndicator
-- [ ] TironeLevels
-- [ ] TopsAndBottomsFinder
-- [ ] TotalPowerIndicator
-- [ ] TraderPressureIndex
-- [ ] TradersDynamicIndex
-- [ ] TradeVolumeIndex
-- [ ] TradingMadeMoreSimplerOscillator
-- [ ] TrendAnalysisIndex
-- [ ] TrendAnalysisIndicator
-- [ ] TrendContinuationFactor
-- [ ] TrendDetectionIndex
-- [ ] TrendDirectionForceIndex
-- [ ] Trender
-- [ ] TrendExhaustionIndicator
 - [ ] TrendForceHistogram
 - [ ] TrendImpulseFilter
 - [ ] TrendIntensityIndex
