@@ -2,8 +2,8 @@
 Generated: 2026-01-08 05:50:53
 Summary:
 - Total indicators: 774
-- Stateful implemented: 647
-- Pending: 127
+- Stateful implemented: 672
+- Pending: 102
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -624,18 +624,43 @@ Summary:
 - [x] SlowSmoothedMovingAverage
 - [x] SmartEnvelope
 - [x] SMIErgodicIndicator
+- [x] SmoothedDeltaRatioOscillator
+- [x] SmoothedRateOfChange
 - [x] SmoothedVolatilityBands
+- [x] SmoothedWilliamsAccumulationDistribution
+- [x] SortinoRatio
+- [x] SpearmanIndicator
+- [x] Spencer15PointMovingAverage
+- [x] Spencer21PointMovingAverage
+- [x] SquareRootWeightedMovingAverage
+- [x] SqueezeMomentumIndicator
 - [x] StandardDeviation
 - [x] StandardDeviationChannel
 - [x] StandardDeviationVolatility
+- [x] StandardPivotPoints
 - [x] StationaryExtrapolatedLevels
+- [x] StationaryExtrapolatedLevelsOscillator
 - [x] StatisticalVolatility
+- [x] StiffnessIndicator
 - [x] StochasticConnorsRelativeStrengthIndex
+- [x] StochasticCustomOscillator
+- [x] StochasticFastOscillator
 - [x] StochasticMomentumIndex
+- [x] StochasticMovingAverageConvergenceDivergenceOscillator
 - [x] StochasticOscillator
+- [x] StochasticRegular
 - [x] StochasticRelativeStrengthIndex
 - [x] StollerAverageRangeChannels
+- [x] StrengthOfMovement
+- [x] SuperTrend
+- [x] SuperTrendFilter
+- [x] SupportAndResistanceOscillator
 - [x] SupportResistance
+- [x] SurfaceRoughnessEstimator
+- [x] Svama
+- [x] SwamiStochastics
+- [x] SymmetricallyWeightedMovingAverage
+- [x] TechnicalRank
 - [x] TimeSeriesForecast
 - [x] TriangularMovingAverage
 - [x] Trix
@@ -656,31 +681,6 @@ Summary:
 
 ## Pending
 - [ ] None
-- [ ] SmoothedDeltaRatioOscillator
-- [ ] SmoothedRateOfChange
-- [ ] SmoothedWilliamsAccumulationDistribution
-- [ ] SortinoRatio
-- [ ] SpearmanIndicator
-- [ ] Spencer15PointMovingAverage
-- [ ] Spencer21PointMovingAverage
-- [ ] SquareRootWeightedMovingAverage
-- [ ] SqueezeMomentumIndicator
-- [ ] StandardPivotPoints
-- [ ] StationaryExtrapolatedLevelsOscillator
-- [ ] StiffnessIndicator
-- [ ] StochasticCustomOscillator
-- [ ] StochasticFastOscillator
-- [ ] StochasticMovingAverageConvergenceDivergenceOscillator
-- [ ] StochasticRegular
-- [ ] StrengthOfMovement
-- [ ] SuperTrend
-- [ ] SuperTrendFilter
-- [ ] SupportAndResistanceOscillator
-- [ ] SurfaceRoughnessEstimator
-- [ ] Svama
-- [ ] SwamiStochastics
-- [ ] SymmetricallyWeightedMovingAverage
-- [ ] TechnicalRank
 - [ ] TechnicalRatings
 - [ ] TFSMboIndicator
 - [ ] TFSMboPercentagePriceOscillator
