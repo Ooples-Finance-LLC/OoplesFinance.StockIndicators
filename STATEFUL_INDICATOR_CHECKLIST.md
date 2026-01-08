@@ -2,8 +2,8 @@
 Generated: 2026-01-08 05:50:53
 Summary:
 - Total indicators: 774
-- Stateful implemented: 697
-- Pending: 77
+- Stateful implemented: 722
+- Pending: 52
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -687,11 +687,36 @@ Summary:
 - [x] TrendDirectionForceIndex
 - [x] Trender
 - [x] TrendExhaustionIndicator
+- [x] TrendForceHistogram
+- [x] TrendImpulseFilter
+- [x] TrendIntensityIndex
+- [x] TrendPersistenceRate
+- [x] TrendStep
+- [x] TrendTraderBands
+- [x] TrendTriggerFactor
+- [x] TreynorRatio
 - [x] TriangularMovingAverage
+- [x] TrigonometricOscillator
+- [x] Trimean
+- [x] TripleExponentialMovingAverage
 - [x] Trix
 - [x] TrueStrengthIndex
+- [x] TStepLeastSquaresMovingAverage
+- [x] TTMScalperIndicator
+- [x] TurboScaler
+- [x] TurboStochasticsFast
+- [x] TurboStochasticsSlow
+- [x] TurboTrigger
+- [x] TwiggsMoneyFlow
 - [x] TypicalPrice
+- [x] UberTrendIndicator
+- [x] UhlMaCrossoverSystem
 - [x] UlcerIndex
+- [x] UltimateMomentumIndicator
+- [x] UltimateMovingAverage
+- [x] UltimateMovingAverageBands
+- [x] UltimateOscillator
+- [x] UltimateTraderOscillator
 - [x] UltimateVolatilityIndicator
 - [x] UniChannel
 - [x] VerticalHorizontalFilter
@@ -706,31 +731,6 @@ Summary:
 
 ## Pending
 - [ ] None
-- [ ] TrendForceHistogram
-- [ ] TrendImpulseFilter
-- [ ] TrendIntensityIndex
-- [ ] TrendPersistenceRate
-- [ ] TrendStep
-- [ ] TrendTraderBands
-- [ ] TrendTriggerFactor
-- [ ] TreynorRatio
-- [ ] TrigonometricOscillator
-- [ ] Trimean
-- [ ] TripleExponentialMovingAverage
-- [ ] TStepLeastSquaresMovingAverage
-- [ ] TTMScalperIndicator
-- [ ] TurboScaler
-- [ ] TurboStochasticsFast
-- [ ] TurboStochasticsSlow
-- [ ] TurboTrigger
-- [ ] TwiggsMoneyFlow
-- [ ] UberTrendIndicator
-- [ ] UhlMaCrossoverSystem
-- [ ] UltimateMomentumIndicator
-- [ ] UltimateMovingAverage
-- [ ] UltimateMovingAverageBands
-- [ ] UltimateOscillator
-- [ ] UltimateTraderOscillator
 - [ ] UpsideDownsideVolume
 - [ ] UpsidePotentialRatio
 - [ ] ValueChartIndicator
