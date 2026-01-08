@@ -1,0 +1,784 @@
+# Stateful Indicator Checklist
+Generated: 2026-01-08 05:50:53
+Summary:
+- Total indicators: 774
+- Stateful implemented: 647
+- Pending: 127
+
+## Implemented
+- [x] _1LCLeastSquaresMovingAverage
+- [x] _3HMA
+- [x] _4MovingAverageConvergenceDivergence
+- [x] _4PercentagePriceOscillator
+- [x] AbsolutePriceOscillator
+- [x] AbsoluteStrengthIndex
+- [x] AbsoluteStrengthMTFIndicator
+- [x] AcceleratorOscillator
+- [x] AccumulationDistributionLine
+- [x] AccumulativeSwingIndex
+- [x] AdaptiveAutonomousRecursiveMovingAverage
+- [x] AdaptiveAutonomousRecursiveTrailingStop
+- [x] AdaptiveErgodicCandlestickOscillator
+- [x] AdaptiveExponentialMovingAverage
+- [x] AdaptiveLeastSquares
+- [x] AdaptiveMovingAverage
+- [x] AdaptivePriceZoneIndicator
+- [x] AdaptiveRelativeStrengthIndex
+- [x] AdaptiveStochastic
+- [x] AdaptiveTrailingStop
+- [x] AhrensMovingAverage
+- [x] AlligatorIndex
+- [x] AlphaDecreasingExponentialMovingAverage
+- [x] AnchoredMomentum
+- [x] ApirineSlowRelativeStrengthIndex
+- [x] ArnaudLegouxMovingAverage
+- [x] AroonOscillator
+- [x] AsymmetricalRelativeStrengthIndex
+- [x] AtrFilteredExponentialMovingAverage
+- [x] AutoDispersionBands
+- [x] AutoFilter
+- [x] AutoLine
+- [x] AutoLineWithDrift
+- [x] AutonomousRecursiveMovingAverage
+- [x] AverageAbsoluteErrorNormalization
+- [x] AverageDirectionalIndex
+- [x] AverageMoneyFlowOscillator
+- [x] AveragePrice
+- [x] AverageTrueRange
+- [x] AverageTrueRangeChannel
+- [x] AverageTrueRangeTrailingStops
+- [x] AwesomeOscillator
+- [x] BalanceOfPower
+- [x] BayesianOscillator
+- [x] BearPowerIndicator
+- [x] BelkhayateTiming
+- [x] BetterVolumeIndicator
+- [x] BilateralStochasticOscillator
+- [x] BollingerBands
+- [x] BollingerBandsAverageTrueRange
+- [x] BollingerBandsFibonacciRatios
+- [x] BollingerBandsPercentB
+- [x] BollingerBandsWidth
+- [x] BollingerBandsWithAtrPct
+- [x] BreakoutRelativeStrengthIndex
+- [x] BryantAdaptiveMovingAverage
+- [x] BuffAverage
+- [x] BullPowerIndicator
+- [x] CalmarRatio
+- [x] CamarillaPivotPoints
+- [x] CCTStochRelativeStrengthIndex
+- [x] CenterOfLinearity
+- [x] ChaikinMoneyFlow
+- [x] ChaikinOscillator
+- [x] ChaikinVolatility
+- [x] ChandeCompositeMomentumIndex
+- [x] ChandeForecastOscillator
+- [x] ChandeIntradayMomentumIndex
+- [x] ChandeKrollRSquaredIndex
+- [x] ChandelierExit
+- [x] ChandeMomentumOscillator
+- [x] ChandeMomentumOscillatorAbsolute
+- [x] ChandeMomentumOscillatorAbsoluteAverage
+- [x] ChandeMomentumOscillatorAverage
+- [x] ChandeMomentumOscillatorAverageDisparityIndex
+- [x] ChandeMomentumOscillatorFilter
+- [x] ChandeQuickStick
+- [x] ChandeTrendScore
+- [x] ChandeVolatilityIndexDynamicAverageIndicator
+- [x] ChartmillValueIndicator
+- [x] ChoppinessIndex
+- [x] ChopZone
+- [x] ClosedFormDistanceVolatility
+- [x] CommodityChannelIndex
+- [x] CommoditySelectionIndex
+- [x] ComparePriceMomentumOscillator
+- [x] CompoundRatioMovingAverage
+- [x] ConditionalAccumulator
+- [x] ConfluenceIndicator
+- [x] ConnorsRelativeStrengthIndex
+- [x] ConstanceBrownCompositeIndex
+- [x] ContractHighLow
+- [x] CoppockCurve
+- [x] CoralTrendIndicator
+- [x] CorrectedMovingAverage
+- [x] CubedWeightedMovingAverage
+- [x] DailyAveragePriceDelta
+- [x] DampedSineWaveWeightedFilter
+- [x] DampingIndex
+- [x] DecisionPointBreadthSwenlinTradingOscillator
+- [x] DecisionPointPriceMomentumOscillator
+- [x] DeltaMovingAverage
+- [x] Dema2Lines
+- [x] DemandOscillator
+- [x] Demarker
+- [x] DemarkPivotPoints
+- [x] DemarkPressureRatioV1
+- [x] DemarkPressureRatioV2
+- [x] DemarkRangeExpansionIndex
+- [x] DemarkReversalPoints
+- [x] DemarkSetupIndicator
+- [x] DEnvelope
+- [x] DerivativeOscillator
+- [x] DetrendedPriceOscillator
+- [x] DetrendedSyntheticPrice
+- [x] DidiIndex
+- [x] DiNapoliMovingAverageConvergenceDivergence
+- [x] DiNapoliPercentagePriceOscillator
+- [x] DiNapoliPreferredStochasticOscillator
+- [x] DirectionalTrendIndex
+- [x] DisparityIndex
+- [x] DistanceWeightedMovingAverage
+- [x] DMIStochastic
+- [x] DominantCycleTunedRelativeStrengthIndex
+- [x] DonchianChannels
+- [x] DonchianChannelWidth
+- [x] DoubleExponentialMovingAverage
+- [x] DoubleExponentialSmoothing
+- [x] DoubleSmoothedMomenta
+- [x] DoubleSmoothedRelativeStrengthIndex
+- [x] DoubleSmoothedStochastic
+- [x] DoubleStochasticOscillator
+- [x] DrunkardWalk
+- [x] DTOscillator
+- [x] DynamicallyAdjustableFilter
+- [x] DynamicallyAdjustableMovingAverage
+- [x] DynamicMomentumIndex
+- [x] DynamicMomentumOscillator
+- [x] DynamicPivotPoints
+- [x] DynamicSupportAndResistance
+- [x] EarningSupportResistanceLevels
+- [x] EaseOfMovement
+- [x] EdgePreservingFilter
+- [x] EfficientAutoLine
+- [x] EfficientPrice
+- [x] EfficientTrendStepChannel
+- [x] Ehlers2PoleButterworthFilterV1
+- [x] Ehlers2PoleButterworthFilterV2
+- [x] Ehlers2PoleSuperSmootherFilterV1
+- [x] Ehlers2PoleSuperSmootherFilterV2
+- [x] Ehlers3PoleButterworthFilterV1
+- [x] Ehlers3PoleButterworthFilterV2
+- [x] Ehlers3PoleSuperSmootherFilter
+- [x] EhlersAdaptiveBandPassFilter
+- [x] EhlersAdaptiveCenterOfGravityOscillator
+- [x] EhlersAdaptiveCommodityChannelIndexV1
+- [x] EhlersAdaptiveCommodityChannelIndexV2
+- [x] EhlersAdaptiveCyberCycle
+- [x] EhlersAdaptiveLaguerreFilter
+- [x] EhlersAdaptiveRelativeStrengthIndexV1
+- [x] EhlersAdaptiveRelativeStrengthIndexV2
+- [x] EhlersAdaptiveRsiFisherTransformV1
+- [x] EhlersAdaptiveRsiFisherTransformV2
+- [x] EhlersAdaptiveStochasticIndicatorV1
+- [x] EhlersAdaptiveStochasticIndicatorV2
+- [x] EhlersAdaptiveStochasticInverseFisherTransform
+- [x] EhlersAllPassPhaseShifter
+- [x] EhlersAlternateSignalToNoiseRatio
+- [x] EhlersAMDetector
+- [x] EhlersAnticipateIndicator
+- [x] EhlersAutoCorrelationIndicator
+- [x] EhlersAutoCorrelationPeriodogram
+- [x] EhlersAutoCorrelationReversals
+- [x] EhlersAverageErrorFilter
+- [x] EhlersBandPassFilterV1
+- [x] EhlersBandPassFilterV2
+- [x] EhlersBetterExponentialMovingAverage
+- [x] EhlersCenterofGravityOscillator
+- [x] EhlersChebyshevLowPassFilter
+- [x] EhlersClassicHilbertTransformer
+- [x] EhlersCombFilterSpectralEstimate
+- [x] EhlersCommodityChannelIndexInverseFisherTransform
+- [x] EhlersConvolutionIndicator
+- [x] EhlersCorrelationAngleIndicator
+- [x] EhlersCorrelationCycleIndicator
+- [x] EhlersCorrelationTrendIndicator
+- [x] EhlersCyberCycle
+- [x] EhlersCycleAmplitude
+- [x] EhlersCycleBandPassFilter
+- [x] EhlersDecycler
+- [x] EhlersDecyclerOscillatorV1
+- [x] EhlersDecyclerOscillatorV2
+- [x] EhlersDetrendedLeadingIndicator
+- [x] EhlersDeviationScaledMovingAverage
+- [x] EhlersDeviationScaledSuperSmoother
+- [x] EhlersDiscreteFourierTransform
+- [x] EhlersDiscreteFourierTransformSpectralEstimate
+- [x] EhlersDistanceCoefficientFilter
+- [x] EhlersDominantCycleTunedBypassFilter
+- [x] EhlersDualDifferentiatorDominantCycle
+- [x] EhlersEarlyOnsetTrendIndicator
+- [x] EhlersEmpiricalModeDecomposition
+- [x] EhlersEnhancedSignalToNoiseRatio
+- [x] EhlersEvenBetterSineWaveIndicator
+- [x] EhlersFilter
+- [x] EhlersFiniteImpulseResponseFilter
+- [x] EhlersFisherizedDeviationScaledOscillator
+- [x] EhlersFisherTransform
+- [x] EhlersFMDemodulatorIndicator
+- [x] EhlersFourierSeriesAnalysis
+- [x] EhlersFractalAdaptiveMovingAverage
+- [x] EhlersGaussianFilter
+- [x] EhlersHammingMovingAverage
+- [x] EhlersHammingWindowIndicator
+- [x] EhlersHannMovingAverage
+- [x] EhlersHannWindowIndicator
+- [x] EhlersHighPassFilterV1
+- [x] EhlersHighPassFilterV2
+- [x] EhlersHilbertOscillator
+- [x] EhlersHilbertTransformer
+- [x] EhlersHilbertTransformerIndicator
+- [x] EhlersHilbertTransformIndicator
+- [x] EhlersHomodyneDominantCycle
+- [x] EhlersHpLpRoofingFilter
+- [x] EhlersHurstCoefficient
+- [x] EhlersImpulseReaction
+- [x] EhlersImpulseResponse
+- [x] EhlersInfiniteImpulseResponseFilter
+- [x] EhlersInstantaneousPhaseIndicator
+- [x] EhlersInstantaneousTrendlineV1
+- [x] EhlersInstantaneousTrendlineV2
+- [x] EhlersInverseFisherTransform
+- [x] EhlersKaufmanAdaptiveMovingAverage
+- [x] EhlersLaguerreFilter
+- [x] EhlersLaguerreRelativeStrengthIndex
+- [x] EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha
+- [x] EhlersLeadingIndicator
+- [x] EhlersMarketStateIndicator
+- [x] EhlersMedianAverageAdaptiveFilter
+- [x] EhlersMesaPredictIndicatorV1
+- [x] EhlersMesaPredictIndicatorV2
+- [x] EhlersModifiedOptimumEllipticFilter
+- [x] EhlersModifiedRelativeStrengthIndex
+- [x] EhlersModifiedStochasticIndicator
+- [x] EhlersMotherOfAdaptiveMovingAverages
+- [x] EhlersMovingAverageDifferenceIndicator
+- [x] EhlersNoiseEliminationTechnology
+- [x] EhlersOptimumEllipticFilter
+- [x] EhlersPhaseAccumulationDominantCycle
+- [x] EhlersPhaseCalculation
+- [x] EhlersRecursiveMedianFilter
+- [x] EhlersRecursiveMedianOscillator
+- [x] EhlersReflexIndicator
+- [x] EhlersRelativeStrengthIndexInverseFisherTransform
+- [x] EhlersRelativeVigorIndex
+- [x] EhlersRestoringPullIndicator
+- [x] EhlersReverseExponentialMovingAverageIndicatorV1
+- [x] EhlersReverseExponentialMovingAverageIndicatorV2
+- [x] EhlersRocketRelativeStrengthIndex
+- [x] EhlersRoofingFilterIndicator
+- [x] EhlersRoofingFilterV1
+- [x] EhlersRoofingFilterV2
+- [x] EhlersSignalToNoiseRatioV1
+- [x] EhlersSignalToNoiseRatioV2
+- [x] EhlersSimpleClipIndicator
+- [x] EhlersSimpleCycleIndicator
+- [x] EhlersSimpleDecycler
+- [x] EhlersSimpleDerivIndicator
+- [x] EhlersSimpleWindowIndicator
+- [x] EhlersSineWaveIndicatorV1
+- [x] EhlersSineWaveIndicatorV2
+- [x] EhlersSmoothedAdaptiveMomentumIndicator
+- [x] EhlersSnakeUniversalTradingFilter
+- [x] EhlersSpearmanRankIndicator
+- [x] EhlersSpectrumDerivedFilterBank
+- [x] EhlersSquelchIndicator
+- [x] EhlersStochastic
+- [x] EhlersStochasticCenterOfGravityOscillator
+- [x] EhlersStochasticCyberCycle
+- [x] EhlersSuperPassbandFilter
+- [x] EhlersSuperSmootherFilter
+- [x] EhlersSwissArmyKnifeIndicator
+- [x] EhlersTrendExtraction
+- [x] EhlersTrendflexIndicator
+- [x] EhlersTriangleMovingAverage
+- [x] EhlersTriangleWindowIndicator
+- [x] EhlersTripleDelayLineDetrender
+- [x] EhlersTruncatedBandPassFilter
+- [x] EhlersUniversalOscillator
+- [x] EhlersUniversalTradingFilter
+- [x] EhlersVariableIndexDynamicAverage
+- [x] EhlersVossPredictiveFilter
+- [x] EhlersZeroCrossingsDominantCycle
+- [x] EhlersZeroLagExponentialMovingAverage
+- [x] EhlersZeroMeanRoofingFilter
+- [x] ElasticVolumeWeightedMovingAverageV1
+- [x] ElasticVolumeWeightedMovingAverageV2
+- [x] ElderMarketThermometer
+- [x] ElderRayIndex
+- [x] ElderSafeZoneStops
+- [x] ElliottWaveOscillator
+- [x] EmaWaveIndicator
+- [x] EndPointMovingAverage
+- [x] EnhancedIndex
+- [x] EnhancedWilliamsR
+- [x] EquityMovingAverage
+- [x] ErgodicCandlestickOscillator
+- [x] ErgodicCommoditySelectionIndex
+- [x] ErgodicMeanDeviationIndicator
+- [x] ErgodicMovingAverageConvergenceDivergence
+- [x] ErgodicPercentagePriceOscillator
+- [x] ErgodicTrueStrengthIndexV1
+- [x] ErgodicTrueStrengthIndexV2
+- [x] ExponentialMovingAverage
+- [x] ExtendedRecursiveBands
+- [x] FallingRisingFilter
+- [x] FareySequenceWeightedMovingAverage
+- [x] FastandSlowKurtosisOscillator
+- [x] FastandSlowRelativeStrengthIndexOscillator
+- [x] FastandSlowStochasticOscillator
+- [x] FastSlowDegreeOscillator
+- [x] FearAndGreedIndicator
+- [x] FibonacciPivotPoints
+- [x] FibonacciRetrace
+- [x] FibonacciWeightedMovingAverage
+- [x] FiniteVolumeElements
+- [x] FireflyOscillator
+- [x] FisherLeastSquaresMovingAverage
+- [x] FisherTransformStochasticOscillator
+- [x] FlaggingBands
+- [x] FloorPivotPoints
+- [x] FoldedRelativeStrengthIndex
+- [x] ForceIndex
+- [x] ForecastOscillator
+- [x] FractalChaosBands
+- [x] FractalChaosOscillator
+- [x] FreedomOfMovement
+- [x] FunctionToCandles
+- [x] FXSniperIndicator
+- [x] GainLossMovingAverage
+- [x] GannHiLoActivator
+- [x] GannSwingOscillator
+- [x] GannTrendOscillator
+- [x] GatorOscillator
+- [x] GeneralFilterEstimator
+- [x] GeneralizedDoubleExponentialMovingAverage
+- [x] GOscillator
+- [x] GrandTrendForecasting
+- [x] GroverLlorensActivator
+- [x] GroverLlorensCycleOscillator
+- [x] GuppyCountBackLine
+- [x] GuppyDistanceIndicator
+- [x] GuppyMultipleMovingAverage
+- [x] HalfTrend
+- [x] HampelFilter
+- [x] HawkeyeVolumeIndicator
+- [x] HendersonWeightedMovingAverage
+- [x] HerrickPayoffIndex
+- [x] HighLowIndex
+- [x] HirashimaSugitaRS
+- [x] HoltExponentialMovingAverage
+- [x] HullEstimate
+- [x] HurstBands
+- [x] HurstCycleChannel
+- [x] HybridConvolutionFilter
+- [x] IchimokuCloud
+- [x] IIRLeastSquaresEstimate
+- [x] ImpulseMovingAverageConvergenceDivergence
+- [x] ImpulsePercentagePriceOscillator
+- [x] InertiaIndicator
+- [x] InformationRatio
+- [x] InsyncIndex
+- [x] InternalBarStrengthIndicator
+- [x] InterquartileRangeBands
+- [x] InverseDistanceWeightedMovingAverage
+- [x] InverseFisherFastZScore
+- [x] InverseFisherZScore
+- [x] JapaneseCorrelationCoefficient
+- [x] JmaRsxClone
+- [x] JrcFractalDimension
+- [x] JsaMovingAverage
+- [x] JurikMovingAverage
+- [x] KalmanSmoother
+- [x] KarobeinOscillator
+- [x] KaseConvergenceDivergence
+- [x] KaseDevStopV1
+- [x] KaseDevStopV2
+- [x] KaseIndicator
+- [x] KasePeakOscillatorV1
+- [x] KasePeakOscillatorV2
+- [x] KaseSerialDependencyIndex
+- [x] KaufmanAdaptiveBands
+- [x] KaufmanAdaptiveCorrelationOscillator
+- [x] KaufmanAdaptiveLeastSquaresMovingAverage
+- [x] KaufmanAdaptiveMovingAverage
+- [x] KaufmanBinaryWave
+- [x] KaufmanStressIndicator
+- [x] KendallRankCorrelationCoefficient
+- [x] KirshenbaumBands
+- [x] KlingerVolumeOscillator
+- [x] KnowSureThing
+- [x] KurtosisIndicator
+- [x] KwanIndicator
+- [x] FastZScore
+- [x] FullTypicalPrice
+- [x] GarmanKlassVolatility
+- [x] GChannels
+- [x] GopalakrishnanRangeIndex
+- [x] HighLowBands
+- [x] HighLowMovingAverage
+- [x] HistoricalVolatility
+- [x] HistoricalVolatilityPercentile
+- [x] HullMovingAverage
+- [x] KeltnerChannels
+- [x] LBRPaintBars
+- [x] LeastSquaresMovingAverage
+- [x] LeoMovingAverage
+- [x] LightLeastSquaresMovingAverage
+- [x] LindaRaschke3_10Oscillator
+- [x] LinearExtrapolation
+- [x] LinearQuadraticConvergenceDivergenceOscillator
+- [x] LinearRegressionLine
+- [x] LinearTrailingStop
+- [x] LinearWeightedMovingAverage
+- [x] LiquidRelativeStrengthIndex
+- [x] LogisticCorrelation
+- [x] LinearChannels
+- [x] LinearRegression
+- [x] MacZIndicator
+- [x] MacZVwapIndicator
+- [x] MarketDirectionIndicator
+- [x] MarketFacilitationIndex
+- [x] MarketMeannessIndex
+- [x] MartinRatio
+- [x] MassIndex
+- [x] MassThrustIndicator
+- [x] MassThrustOscillator
+- [x] MayerMultiple
+- [x] McClellanOscillator
+- [x] McGinleyDynamicIndicator
+- [x] McNichollMovingAverage
+- [x] MeanAbsoluteDeviationBands
+- [x] MeanAbsoluteErrorBands
+- [x] MedianPrice
+- [x] MiddleHighLowMovingAverage
+- [x] Midpoint
+- [x] MidpointOscillator
+- [x] Midprice
+- [x] MirroredMovingAverageConvergenceDivergence
+- [x] MirroredPercentagePriceOscillator
+- [x] MobilityOscillator
+- [x] ModifiedGannHiloActivator
+- [x] ModifiedPriceVolumeTrend
+- [x] ModularFilter
+- [x] MomentaRelativeStrengthIndex
+- [x] MomentumOscillator
+- [x] MoneyFlowIndex
+- [x] MorphedSineWave
+- [x] MotionSmoothnessIndex
+- [x] MotionToAttractionChannels
+- [x] MotionToAttractionTrailingStop
+- [x] MoveTracker
+- [x] MovingAverageAdaptiveFilter
+- [x] MovingAverageAdaptiveQ
+- [x] MovingAverageBands
+- [x] MovingAverageBandWidth
+- [x] MovingAverageChannel
+- [x] MovingAverageConvergenceDivergence
+- [x] MovingAverageConvergenceDivergenceLeader
+- [x] MovingAverageDisplacedEnvelope
+- [x] MovingAverageEnvelope
+- [x] MovingAverageSupportResistance
+- [x] MovingAverageV3
+- [x] MultiDepthZeroLagExponentialMovingAverage
+- [x] MultiLevelIndicator
+- [x] MultiVoteOnBalanceVolume
+- [x] NarrowBandpassFilter
+- [x] NarrowSidewaysChannel
+- [x] NaturalDirectionalCombo
+- [x] NaturalDirectionalIndex
+- [x] NaturalMarketCombo
+- [x] NaturalMarketMirror
+- [x] NaturalMarketRiver
+- [x] NaturalMarketSlope
+- [x] NaturalMovingAverage
+- [x] NaturalStochasticIndicator
+- [x] NegativeVolumeDisparityIndicator
+- [x] NegativeVolumeIndex
+- [x] NickRypockTrailingReverse
+- [x] NormalizedRelativeVigorIndex
+- [x] NthOrderDifferencingOscillator
+- [x] OceanIndicator
+- [x] OCHistogram
+- [x] OmegaRatio
+- [x] OnBalanceVolume
+- [x] OnBalanceVolumeDisparityIndicator
+- [x] OnBalanceVolumeModified
+- [x] OnBalanceVolumeReflex
+- [x] OptimalWeightedMovingAverage
+- [x] OptimizedTrendTracker
+- [x] OscarIndicator
+- [x] OscOscillator
+- [x] OvershootReductionMovingAverage
+- [x] ParabolicSAR
+- [x] ParabolicWeightedMovingAverage
+- [x] ParametricCorrectiveLinearMovingAverage
+- [x] ParametricKalmanFilter
+- [x] PeakValleyEstimation
+- [x] PentupleExponentialMovingAverage
+- [x] PercentChangeOscillator
+- [x] PercentagePriceOscillator
+- [x] PercentagePriceOscillatorLeader
+- [x] PercentageTrailingStops
+- [x] PercentageTrend
+- [x] PercentageVolumeOscillator
+- [x] PerformanceIndex
+- [x] PeriodicChannel
+- [x] PhaseChangeIndex
+- [x] PivotDetectorOscillator
+- [x] PivotPointAverage
+- [x] PolarizedFractalEfficiency
+- [x] PolynomialLeastSquaresMovingAverage
+- [x] PositiveVolumeIndex
+- [x] PoweredKaufmanAdaptiveMovingAverage
+- [x] PremierStochasticOscillator
+- [x] PrettyGoodOscillator
+- [x] PriceChannel
+- [x] PriceCurveChannel
+- [x] PriceCycleOscillator
+- [x] PriceHeadleyAccelerationBands
+- [x] PriceLineChannel
+- [x] PriceMomentumOscillator
+- [x] PriceVolumeOscillator
+- [x] PriceVolumeRank
+- [x] PriceVolumeTrend
+- [x] PriceZoneOscillator
+- [x] PrimeNumberBands
+- [x] PrimeNumberOscillator
+- [x] PringSpecialK
+- [x] ProjectedSupportAndResistance
+- [x] ProjectionBands
+- [x] ProjectionBandwidth
+- [x] ProjectionOscillator
+- [x] PseudoPolynomialChannel
+- [x] PsychologicalLine
+- [x] QmaSmaDifference
+- [x] QuadraticLeastSquaresMovingAverage
+- [x] QuadraticMovingAverage
+- [x] QuadraticRegression
+- [x] QuadrupleExponentialMovingAverage
+- [x] QuantitativeQualitativeEstimation
+- [x] QuasiWhiteNoise
+- [x] QuickMovingAverage
+- [x] R2AdaptiveRegression
+- [x] RahulMohindarOscillator
+- [x] RainbowOscillator
+- [x] RandomWalkIndex
+- [x] RangeActionVerificationIndex
+- [x] RangeBands
+- [x] RangeIdentifier
+- [x] RapidRelativeStrengthIndex
+- [x] RateOfChange
+- [x] RateOfChangeBands
+- [x] RatioOCHLAverager
+- [x] ReallySimpleIndicator
+- [x] RecursiveDifferenciator
+- [x] RecursiveMovingTrendAverage
+- [x] RecursiveRelativeStrengthIndex
+- [x] RecursiveStochastic
+- [x] RegressionOscillator
+- [x] RegularizedExponentialMovingAverage
+- [x] RelativeDifferenceOfSquaresOscillator
+- [x] RelativeMomentumIndex
+- [x] RelativeNormalizedVolatility
+- [x] RelativeSpreadStrength
+- [x] RelativeStrength3DIndicator
+- [x] RelativeStrengthIndex
+- [x] RelativeVigorIndex
+- [x] RelativeVolatilityIndexV1
+- [x] RelativeVolatilityIndexV2
+- [x] RelativeVolumeIndicator
+- [x] Repulse
+- [x] RepulsionMovingAverage
+- [x] RetentionAccelerationFilter
+- [x] RetrospectiveCandlestickChart
+- [x] ReversalPoints
+- [x] ReverseEngineeringRelativeStrengthIndex
+- [x] ReverseMovingAverageConvergenceDivergence
+- [x] RexOscillator
+- [x] RightSidedRickerMovingAverage
+- [x] RobustWeightingOscillator
+- [x] RootMovingAverageSquaredErrorBands
+- [x] RSINGIndicator
+- [x] RSMKIndicator
+- [x] RunningEquity
+- [x] ScalpersChannel
+- [x] SchaffTrendCycle
+- [x] SectorRotationModel
+- [x] SelfAdjustingRelativeStrengthIndex
+- [x] SelfWeightedMovingAverage
+- [x] SellGravitationIndex
+- [x] SentimentZoneOscillator
+- [x] SequentiallyFilteredMovingAverage
+- [x] SettingLessTrendStepFiltering
+- [x] ShapeshiftingMovingAverage
+- [x] SharpeRatio
+- [x] SharpModifiedMovingAverage
+- [x] ShinoharaIntensityRatio
+- [x] SigmaSpikes
+- [x] SimpleCycle
+- [x] SimpleLines
+- [x] SimpleMovingAverage
+- [x] SimplifiedLeastSquaresMovingAverage
+- [x] SimplifiedWeightedMovingAverage
+- [x] SineWeightedMovingAverage
+- [x] SlowSmoothedMovingAverage
+- [x] SmartEnvelope
+- [x] SMIErgodicIndicator
+- [x] SmoothedVolatilityBands
+- [x] StandardDeviation
+- [x] StandardDeviationChannel
+- [x] StandardDeviationVolatility
+- [x] StationaryExtrapolatedLevels
+- [x] StatisticalVolatility
+- [x] StochasticConnorsRelativeStrengthIndex
+- [x] StochasticMomentumIndex
+- [x] StochasticOscillator
+- [x] StochasticRelativeStrengthIndex
+- [x] StollerAverageRangeChannels
+- [x] SupportResistance
+- [x] TimeSeriesForecast
+- [x] TriangularMovingAverage
+- [x] Trix
+- [x] TrueStrengthIndex
+- [x] TypicalPrice
+- [x] UlcerIndex
+- [x] UltimateVolatilityIndicator
+- [x] UniChannel
+- [x] VerticalHorizontalFilter
+- [x] VolatilityBasedMomentum
+- [x] VolatilityQualityIndex
+- [x] VolatilitySwitchIndicator
+- [x] VortexIndicator
+- [x] WeightedClose
+- [x] WeightedMovingAverage
+- [x] WellesWilderMovingAverage
+- [x] WilliamsR
+
+## Pending
+- [ ] None
+- [ ] SmoothedDeltaRatioOscillator
+- [ ] SmoothedRateOfChange
+- [ ] SmoothedWilliamsAccumulationDistribution
+- [ ] SortinoRatio
+- [ ] SpearmanIndicator
+- [ ] Spencer15PointMovingAverage
+- [ ] Spencer21PointMovingAverage
+- [ ] SquareRootWeightedMovingAverage
+- [ ] SqueezeMomentumIndicator
+- [ ] StandardPivotPoints
+- [ ] StationaryExtrapolatedLevelsOscillator
+- [ ] StiffnessIndicator
+- [ ] StochasticCustomOscillator
+- [ ] StochasticFastOscillator
+- [ ] StochasticMovingAverageConvergenceDivergenceOscillator
+- [ ] StochasticRegular
+- [ ] StrengthOfMovement
+- [ ] SuperTrend
+- [ ] SuperTrendFilter
+- [ ] SupportAndResistanceOscillator
+- [ ] SurfaceRoughnessEstimator
+- [ ] Svama
+- [ ] SwamiStochastics
+- [ ] SymmetricallyWeightedMovingAverage
+- [ ] TechnicalRank
+- [ ] TechnicalRatings
+- [ ] TFSMboIndicator
+- [ ] TFSMboPercentagePriceOscillator
+- [ ] TFSTetherLineIndicator
+- [ ] TFSVolumeOscillator
+- [ ] TheRangeIndicator
+- [ ] TickLineMomentumOscillator
+- [ ] TillsonIE2
+- [ ] TillsonT3MovingAverage
+- [ ] TimeAndMoneyChannel
+- [ ] TimePriceIndicator
+- [ ] TironeLevels
+- [ ] TopsAndBottomsFinder
+- [ ] TotalPowerIndicator
+- [ ] TraderPressureIndex
+- [ ] TradersDynamicIndex
+- [ ] TradeVolumeIndex
+- [ ] TradingMadeMoreSimplerOscillator
+- [ ] TrendAnalysisIndex
+- [ ] TrendAnalysisIndicator
+- [ ] TrendContinuationFactor
+- [ ] TrendDetectionIndex
+- [ ] TrendDirectionForceIndex
+- [ ] Trender
+- [ ] TrendExhaustionIndicator
+- [ ] TrendForceHistogram
+- [ ] TrendImpulseFilter
+- [ ] TrendIntensityIndex
+- [ ] TrendPersistenceRate
+- [ ] TrendStep
+- [ ] TrendTraderBands
+- [ ] TrendTriggerFactor
+- [ ] TreynorRatio
+- [ ] TrigonometricOscillator
+- [ ] Trimean
+- [ ] TripleExponentialMovingAverage
+- [ ] TStepLeastSquaresMovingAverage
+- [ ] TTMScalperIndicator
+- [ ] TurboScaler
+- [ ] TurboStochasticsFast
+- [ ] TurboStochasticsSlow
+- [ ] TurboTrigger
+- [ ] TwiggsMoneyFlow
+- [ ] UberTrendIndicator
+- [ ] UhlMaCrossoverSystem
+- [ ] UltimateMomentumIndicator
+- [ ] UltimateMovingAverage
+- [ ] UltimateMovingAverageBands
+- [ ] UltimateOscillator
+- [ ] UltimateTraderOscillator
+- [ ] UpsideDownsideVolume
+- [ ] UpsidePotentialRatio
+- [ ] ValueChartIndicator
+- [ ] VanillaABCDPattern
+- [ ] VaradiOscillator
+- [ ] VariableAdaptiveMovingAverage
+- [ ] VariableIndexDynamicAverage
+- [ ] VariableLengthMovingAverage
+- [ ] VariableMovingAverage
+- [ ] VariableMovingAverageBands
+- [ ] VerticalHorizontalMovingAverage
+- [ ] VervoortHeikenAshiCandlestickOscillator
+- [ ] VervoortHeikenAshiLongTermCandlestickOscillator
+- [ ] VervoortModifiedBollingerBandIndicator
+- [ ] VervoortSmoothedOscillator
+- [ ] VervoortVolatilityBands
+- [ ] VixTradingSystem
+- [ ] VolatilityIndexDynamicAverageIndicator
+- [ ] VolatilityMovingAverage
+- [ ] VolatilityRatio
+- [ ] VolatilityWaveMovingAverage
+- [ ] VolumeAccumulationOscillator
+- [ ] VolumeAccumulationPercent
+- [ ] VolumeAdaptiveBands
+- [ ] VolumeAdjustedMovingAverage
+- [ ] VolumeFlowIndicator
+- [ ] VolumePositiveNegativeIndicator
+- [ ] VolumePriceConfirmationIndicator
+- [ ] VolumeWeightedAveragePrice
+- [ ] VolumeWeightedMovingAverage
+- [ ] VolumeWeightedRelativeStrengthIndex
+- [ ] VortexBands
+- [ ] VostroIndicator
+- [ ] WaddahAttarExplosion
+- [ ] WamiOscillator
+- [ ] WaveTrendOscillator
+- [ ] WellesWilderSummation
+- [ ] WellesWilderVolatilitySystem
+- [ ] WellRoundedMovingAverage
+- [ ] WilliamsAccumulationDistribution
+- [ ] WilliamsFractals
+- [ ] WilsonRelativePriceChannel
+- [ ] WindowedVolumeWeightedMovingAverage
+- [ ] WoodieCommodityChannelIndex
+- [ ] WoodiePivotPoints
+- [ ] ZDistanceFromVwap
+- [ ] ZeroLagExponentialMovingAverage
+- [ ] ZeroLagSmoothedCycle
+- [ ] ZeroLagTripleExponentialMovingAverage
+- [ ] ZeroLowLagMovingAverage
+- [ ] ZScore
