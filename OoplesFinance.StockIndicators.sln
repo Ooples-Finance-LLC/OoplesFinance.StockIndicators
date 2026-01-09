@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OoplesFinance.StockIndicators.Benchmarks", "benchmarks\OoplesFinance.StockIndicators.Benchmarks\OoplesFinance.StockIndicators.Benchmarks.csproj", "{FAF02917-D36E-4A7D-93E4-050499F4409B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{64D87A0D-9AAB-4ED2-8430-E1AA9216187D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OoplesFinance.StockIndicators.DevConsole", "examples\OoplesFinance.StockIndicators.DevConsole\OoplesFinance.StockIndicators.DevConsole.csproj", "{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Global
@@ -59,12 +63,25 @@ Global
 		{FAF02917-D36E-4A7D-93E4-050499F4409B}.Release|x64.Build.0 = Release|Any CPU
 		{FAF02917-D36E-4A7D-93E4-050499F4409B}.Release|x86.ActiveCfg = Release|Any CPU
 		{FAF02917-D36E-4A7D-93E4-050499F4409B}.Release|x86.Build.0 = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|x64.Build.0 = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Debug|x86.Build.0 = Debug|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|x64.Build.0 = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FAF02917-D36E-4A7D-93E4-050499F4409B} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
+		{AC0E5937-DCB4-4BF3-9317-5595DFD4E3DE} = {64D87A0D-9AAB-4ED2-8430-E1AA9216187D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8553B6C1-6080-4FC5-9EFE-900E9A86574A}

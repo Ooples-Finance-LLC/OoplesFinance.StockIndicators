@@ -44,7 +44,7 @@ Generated: 2026-01-03
    - Dates stored once and shared by both views.
 
 5. Multi-target strategy
-   - net461 + net8.0 + net10.0 (or latest available).
+   - net461 + net10.0 (or latest available).
    - net461 uses System.Memory for spans (no CollectionsMarshal).
    - net8+ uses CollectionsMarshal.AsSpan and other modern APIs behind #if.
 
@@ -168,7 +168,7 @@ US-10 Indicator options
 US-11 Multi-target support
 - Story: As a user, I can run the library on net461 and newer runtimes.
 - Acceptance:
-  - Builds succeed for net461, net8.0, and net10.0 (or latest).
+  - Builds succeed for net461 and net10.0 (or latest).
   - net461 uses safe fallback paths (no CollectionsMarshal).
 - Performance:
   - net8+ benchmarks show improvements vs baseline; net461 does not regress vs baseline net461.

@@ -11,6 +11,7 @@ using Perfolizer.Horology;
 using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
+using System;
 using System.Collections.Generic;
 
 namespace OoplesFinance.StockIndicators.Benchmarks;
@@ -21,6 +22,12 @@ namespace OoplesFinance.StockIndicators.Benchmarks;
 [Config(typeof(BenchmarkConfig))]
 public class IndicatorBenchmarks
 {
+    private static readonly int[] DefaultCounts = { 10_000 };
+    private static readonly int[] DefaultCountsFull = { 10_000, 100_000 };
+    private static readonly int[] DefaultLengths = { 14, 50 };
+    private static readonly int[] DefaultLengthsFull = { 14, 50, 200 };
+    private static int[]? _countOverrides;
+    private static int[]? _lengthOverrides;
     private BenchmarkData _data = null!;
     private StockData _stockData = null!;
 
@@ -32,13 +39,50 @@ public class IndicatorBenchmarks
     public int Count { get; set; }
 
     public IEnumerable<int> Counts =>
-        BenchmarkProfile.IsFull ? new[] { 10_000, 100_000 } : new[] { 10_000 };
+        _countOverrides ??= LoadIntOverrides("OOPLES_BENCHMARK_COUNTS", "BENCHMARK_COUNTS") ??
+        (BenchmarkProfile.IsFull ? DefaultCountsFull : DefaultCounts);
 
     [ParamsSource(nameof(Lengths))]
     public int Length { get; set; }
 
     public IEnumerable<int> Lengths =>
-        BenchmarkProfile.IsFull ? new[] { 14, 50, 200 } : new[] { 14, 50 };
+        _lengthOverrides ??= LoadIntOverrides("OOPLES_BENCHMARK_LENGTHS", "BENCHMARK_LENGTHS") ??
+        (BenchmarkProfile.IsFull ? DefaultLengthsFull : DefaultLengths);
+
+    private static int[]? LoadIntOverrides(string primary, string fallback)
+    {
+        var overrides = LoadIntOverrides(primary);
+        return overrides ?? LoadIntOverrides(fallback);
+    }
+
+    private static int[]? LoadIntOverrides(string envVar)
+    {
+        var raw = Environment.GetEnvironmentVariable(envVar);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        var tokens = raw.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var values = new List<int>();
+        var seen = new HashSet<int>();
+
+        foreach (var token in tokens)
+        {
+            if (int.TryParse(token, out var value) && value > 0 && seen.Add(value))
+            {
+                values.Add(value);
+            }
+        }
+
+        if (values.Count == 0)
+        {
+            return null;
+        }
+
+        values.Sort();
+        return values.ToArray();
+    }
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -406,9 +450,9 @@ public class IndicatorBenchmarks
         public BenchmarkConfig()
         {
             AddJob(Job.Default
-                .WithMinIterationTime(TimeInterval.FromMilliseconds(100))
-                .WithWarmupCount(1)
-                .WithIterationCount(1)
+                .WithMinIterationTime(TimeInterval.FromMilliseconds(250))
+                .WithWarmupCount(3)
+                .WithIterationCount(5)
                 .WithInvocationCount(1)
                 .WithUnrollFactor(1));
             AddExporter(MarkdownExporter.GitHub);

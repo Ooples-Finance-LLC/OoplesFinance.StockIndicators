@@ -10,6 +10,7 @@ public sealed class StreamingSession : IDisposable
     private readonly IStreamObserver _observer;
     private readonly List<StreamingIndicatorEngine.IndicatorRegistration> _registrations = new();
     private readonly List<StreamingIndicatorEngine.StatefulIndicatorRegistration> _stateRegistrations = new();
+    private readonly List<StreamingIndicatorEngine.MultiSeriesIndicatorRegistration> _multiSeriesRegistrations = new();
     private bool _disposed;
 
     public StreamingSession(IStreamSource source, StreamingOptions? options = null)
@@ -111,6 +112,17 @@ public sealed class StreamingSession : IDisposable
         return registrations;
     }
 
+    public StreamingIndicatorEngine.MultiSeriesIndicatorRegistration RegisterMultiSeriesIndicator(
+        SeriesKey primarySeries, IReadOnlyList<SeriesKey> dependencies, IMultiSeriesIndicatorState indicator,
+        Action<MultiSeriesIndicatorStateUpdate> onUpdate, IndicatorSubscriptionOptions? options = null)
+    {
+        var resolvedOptions = options ?? _options.CreateSubscriptionOptions();
+        var registration = Engine.RegisterMultiSeriesIndicator(primarySeries, dependencies, indicator, onUpdate,
+            resolvedOptions);
+        _multiSeriesRegistrations.Add(registration);
+        return registration;
+    }
+
     public IReadOnlyList<StreamingIndicatorEngine.IndicatorRegistration> RegisterIndicators(
         IReadOnlyList<StreamingIndicatorRegistration> registrations)
     {
@@ -173,6 +185,11 @@ public sealed class StreamingSession : IDisposable
         for (var i = 0; i < _stateRegistrations.Count; i++)
         {
             _stateRegistrations[i].Dispose();
+        }
+
+        for (var i = 0; i < _multiSeriesRegistrations.Count; i++)
+        {
+            _multiSeriesRegistrations[i].Dispose();
         }
 
         _subscription.Dispose();

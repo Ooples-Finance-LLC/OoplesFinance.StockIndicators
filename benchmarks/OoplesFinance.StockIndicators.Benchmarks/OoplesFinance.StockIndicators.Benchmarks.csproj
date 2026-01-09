@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <BaselineTargetFramework>net7.0</BaselineTargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
+    <BaselineTargetFramework>net10.0</BaselineTargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>

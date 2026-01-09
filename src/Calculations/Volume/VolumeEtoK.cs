@@ -158,6 +158,7 @@ public static partial class Calculations
             var currentVolume = volumeList[i];
             var prevHalfRange = i >= 1 ? halfRangeList[i - 1] : 0;
             var halfRange = (currentHigh - currentLow) * 0.5;
+            halfRangeList.Add(halfRange);
             var boxRatio = currentHigh - currentLow != 0 ? currentVolume / (currentHigh - currentLow) : 0;
 
             var prevMidpointMove = i >= 1 ? midpointMoveList[i - 1] : 0;

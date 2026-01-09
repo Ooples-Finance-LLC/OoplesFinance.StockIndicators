@@ -7,6 +7,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
     private readonly Dictionary<AggregatorKey, BarAggregator> _aggregators = new();
     private readonly Dictionary<AggregatorKey, List<IndicatorSubscription>> _subscriptions = new();
     private readonly Dictionary<AggregatorKey, List<IndicatorStateSubscription>> _stateSubscriptions = new();
+    private readonly Dictionary<AggregatorKey, List<MultiSeriesIndicatorSubscription>> _multiSeriesSubscriptions = new();
     private readonly Dictionary<string, List<BarAggregator>> _aggregatorsBySymbol = new(StringComparer.OrdinalIgnoreCase);
     private readonly StreamingIndicatorEngineOptions _options;
 
@@ -130,7 +131,72 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
         var subscription = new IndicatorStateSubscription(symbol, timeframe, indicator, onUpdate, options);
         subs.Add(subscription);
 
-        return new StatefulIndicatorRegistration(this, key, subscription);
+        return new StatefulIndicatorRegistration(this, key, subscription);      
+    }
+
+    public MultiSeriesIndicatorRegistration RegisterMultiSeriesIndicator(SeriesKey primarySeries,
+        IReadOnlyList<SeriesKey> dependencies, IMultiSeriesIndicatorState indicator,
+        Action<MultiSeriesIndicatorStateUpdate> onUpdate, IndicatorSubscriptionOptions? options = null)
+    {
+        if (indicator == null)
+        {
+            throw new ArgumentNullException(nameof(indicator));
+        }
+
+        if (onUpdate == null)
+        {
+            throw new ArgumentNullException(nameof(onUpdate));
+        }
+
+        if (dependencies == null)
+        {
+            throw new ArgumentNullException(nameof(dependencies));
+        }
+
+        var series = BuildSeriesList(primarySeries, dependencies);
+        var subscription = new MultiSeriesIndicatorSubscription(primarySeries, series, indicator, onUpdate, options);
+        var keys = new List<AggregatorKey>(series.Count);
+
+        for (var i = 0; i < series.Count; i++)
+        {
+            var seriesKey = series[i];
+            var key = new AggregatorKey(seriesKey.Symbol, seriesKey.Timeframe);
+            EnsureAggregator(key);
+
+            if (!_multiSeriesSubscriptions.TryGetValue(key, out var subs))
+            {
+                subs = new List<MultiSeriesIndicatorSubscription>();
+                _multiSeriesSubscriptions[key] = subs;
+            }
+
+            subs.Add(subscription);
+            keys.Add(key);
+        }
+
+        return new MultiSeriesIndicatorRegistration(this, keys, subscription);
+    }
+
+    private static IReadOnlyList<SeriesKey> BuildSeriesList(SeriesKey primarySeries,
+        IReadOnlyList<SeriesKey> dependencies)
+    {
+        var series = new List<SeriesKey>(dependencies.Count + 1);
+        var seen = new HashSet<SeriesKey>();
+
+        if (seen.Add(primarySeries))
+        {
+            series.Add(primarySeries);
+        }
+
+        for (var i = 0; i < dependencies.Count; i++)
+        {
+            var seriesKey = dependencies[i];
+            if (seen.Add(seriesKey))
+            {
+                series.Add(seriesKey);
+            }
+        }
+
+        return series;
     }
 
     public IReadOnlyList<StatefulIndicatorRegistration> RegisterStatefulIndicator(string symbol,
@@ -267,6 +333,15 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
                 stateSubs[i].HandleBar(bar);
             }
         }
+
+        if (_multiSeriesSubscriptions.TryGetValue(key, out var multiSubs))
+        {
+            var seriesKey = new SeriesKey(key.Symbol, key.Timeframe);
+            for (var i = 0; i < multiSubs.Count; i++)
+            {
+                multiSubs[i].HandleBar(seriesKey, bar);
+            }
+        }
     }
 
     private void Unregister(AggregatorKey key, IndicatorSubscription subscription)
@@ -293,6 +368,18 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
         }
 
         subscription.Dispose();
+    }
+
+    private void UnregisterMultiSeries(AggregatorKey key, MultiSeriesIndicatorSubscription subscription)
+    {
+        if (_multiSeriesSubscriptions.TryGetValue(key, out var subs))
+        {
+            subs.Remove(subscription);
+            if (subs.Count == 0)
+            {
+                _multiSeriesSubscriptions.Remove(key);
+            }
+        }
     }
 
     public sealed class IndicatorRegistration : IDisposable
@@ -344,6 +431,38 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
             }
 
             _engine.UnregisterStateful(_key, _subscription);
+            _disposed = true;
+        }
+    }
+
+    public sealed class MultiSeriesIndicatorRegistration : IDisposable
+    {
+        private readonly StreamingIndicatorEngine _engine;
+        private readonly IReadOnlyList<AggregatorKey> _keys;
+        private readonly MultiSeriesIndicatorSubscription _subscription;
+        private bool _disposed;
+
+        internal MultiSeriesIndicatorRegistration(StreamingIndicatorEngine engine,
+            IReadOnlyList<AggregatorKey> keys, MultiSeriesIndicatorSubscription subscription)
+        {
+            _engine = engine;
+            _keys = keys;
+            _subscription = subscription;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                _engine.UnregisterMultiSeries(_keys[i], _subscription);
+            }
+
+            _subscription.Dispose();
             _disposed = true;
         }
     }
@@ -489,6 +608,114 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
             }
         }
     }
+
+    internal sealed class MultiSeriesIndicatorSubscription : IDisposable
+    {
+        private readonly SeriesKey _primarySeries;
+        private readonly IReadOnlyList<SeriesKey> _series;
+        private readonly IMultiSeriesIndicatorState _indicator;
+        private readonly Action<MultiSeriesIndicatorStateUpdate> _onUpdate;
+        private readonly IndicatorSubscriptionOptions _options;
+        private readonly SeriesAlignmentPolicy _alignmentPolicy;
+        private readonly SeriesStore _store = new();
+        private readonly MultiSeriesContext _context;
+
+        public MultiSeriesIndicatorSubscription(SeriesKey primarySeries, IReadOnlyList<SeriesKey> series,
+            IMultiSeriesIndicatorState indicator, Action<MultiSeriesIndicatorStateUpdate> onUpdate,
+            IndicatorSubscriptionOptions? options)
+        {
+            _primarySeries = primarySeries;
+            _series = series;
+            _indicator = indicator;
+            _onUpdate = onUpdate;
+            _options = options ?? new IndicatorSubscriptionOptions();
+            _alignmentPolicy = _options.SeriesAlignmentPolicy;
+            _context = new MultiSeriesContext(_store);
+        }
+
+        public void HandleBar(SeriesKey seriesKey, OhlcvBar bar)
+        {
+            if (!_options.IncludeUpdates && !bar.IsFinal)
+            {
+                return;
+            }
+
+            _store.Update(seriesKey, bar);
+
+            var result = _indicator.Update(_context, seriesKey, bar, bar.IsFinal, _options.IncludeOutputValues);
+            if (!result.HasValue)
+            {
+                return;
+            }
+
+            if (!ShouldEmit(seriesKey, bar.EndTime))
+            {
+                return;
+            }
+
+            _onUpdate(new MultiSeriesIndicatorStateUpdate(_primarySeries, seriesKey, bar.IsFinal, _indicator.Name,
+                result.Value, result.Outputs));
+        }
+
+        private bool ShouldEmit(SeriesKey seriesKey, DateTime endTime)
+        {
+            if (!seriesKey.Equals(_primarySeries))
+            {
+                return false;
+            }
+
+            if (_alignmentPolicy == SeriesAlignmentPolicy.LastKnown)
+            {
+                return HasAllSeries(useFinal: !_options.IncludeUpdates);
+            }
+
+            return AreAligned(endTime, useFinal: !_options.IncludeUpdates);
+        }
+
+        private bool HasAllSeries(bool useFinal)
+        {
+            for (var i = 0; i < _series.Count; i++)
+            {
+                if (!TryGetSeriesBar(_series[i], useFinal, out _))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool AreAligned(DateTime endTime, bool useFinal)
+        {
+            for (var i = 0; i < _series.Count; i++)
+            {
+                if (!TryGetSeriesBar(_series[i], useFinal, out var bar))
+                {
+                    return false;
+                }
+
+                if (bar.EndTime != endTime)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool TryGetSeriesBar(SeriesKey key, bool useFinal, out OhlcvBar bar)
+        {
+            return useFinal ? _store.TryGetLatestFinal(key, out bar) : _store.TryGetLatest(key, out bar);
+        }
+
+        public void Dispose()
+        {
+            if (_indicator is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+    }
 }
 
 public sealed class IndicatorUpdate
@@ -511,6 +738,7 @@ public sealed class IndicatorSubscriptionOptions
 {
     public bool IncludeUpdates { get; set; } = true;
     public bool IncludeOutputValues { get; set; } = true;
+    public SeriesAlignmentPolicy SeriesAlignmentPolicy { get; set; } = SeriesAlignmentPolicy.LastKnown;
     public InputName InputName { get; set; } = InputName.Close;
     public IndicatorOptions? Options { get; set; }
 }

@@ -1,9 +1,9 @@
 # Stateful Indicator Checklist
-Generated: 2026-01-08 05:50:53
+Generated: 2026-01-08 19:57:04
 Summary:
 - Total indicators: 774
-- Stateful implemented: 722
-- Pending: 52
+- Stateful implemented: 747
+- Pending: 27
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -719,10 +719,35 @@ Summary:
 - [x] UltimateTraderOscillator
 - [x] UltimateVolatilityIndicator
 - [x] UniChannel
+- [x] UpsideDownsideVolume
+- [x] UpsidePotentialRatio
+- [x] ValueChartIndicator
+- [x] VanillaABCDPattern
+- [x] VaradiOscillator
+- [x] VariableAdaptiveMovingAverage
+- [x] VariableIndexDynamicAverage
+- [x] VariableLengthMovingAverage
+- [x] VariableMovingAverage
+- [x] VariableMovingAverageBands
 - [x] VerticalHorizontalFilter
+- [x] VerticalHorizontalMovingAverage
+- [x] VervoortHeikenAshiCandlestickOscillator
+- [x] VervoortHeikenAshiLongTermCandlestickOscillator
+- [x] VervoortModifiedBollingerBandIndicator
+- [x] VervoortSmoothedOscillator
+- [x] VervoortVolatilityBands
+- [x] VixTradingSystem
 - [x] VolatilityBasedMomentum
+- [x] VolatilityIndexDynamicAverageIndicator
+- [x] VolatilityMovingAverage
 - [x] VolatilityQualityIndex
+- [x] VolatilityRatio
 - [x] VolatilitySwitchIndicator
+- [x] VolatilityWaveMovingAverage
+- [x] VolumeAccumulationOscillator
+- [x] VolumeAccumulationPercent
+- [x] VolumeAdaptiveBands
+- [x] VolumeAdjustedMovingAverage
 - [x] VortexIndicator
 - [x] WeightedClose
 - [x] WeightedMovingAverage
@@ -731,31 +756,6 @@ Summary:
 
 ## Pending
 - [ ] None
-- [ ] UpsideDownsideVolume
-- [ ] UpsidePotentialRatio
-- [ ] ValueChartIndicator
-- [ ] VanillaABCDPattern
-- [ ] VaradiOscillator
-- [ ] VariableAdaptiveMovingAverage
-- [ ] VariableIndexDynamicAverage
-- [ ] VariableLengthMovingAverage
-- [ ] VariableMovingAverage
-- [ ] VariableMovingAverageBands
-- [ ] VerticalHorizontalMovingAverage
-- [ ] VervoortHeikenAshiCandlestickOscillator
-- [ ] VervoortHeikenAshiLongTermCandlestickOscillator
-- [ ] VervoortModifiedBollingerBandIndicator
-- [ ] VervoortSmoothedOscillator
-- [ ] VervoortVolatilityBands
-- [ ] VixTradingSystem
-- [ ] VolatilityIndexDynamicAverageIndicator
-- [ ] VolatilityMovingAverage
-- [ ] VolatilityRatio
-- [ ] VolatilityWaveMovingAverage
-- [ ] VolumeAccumulationOscillator
-- [ ] VolumeAccumulationPercent
-- [ ] VolumeAdaptiveBands
-- [ ] VolumeAdjustedMovingAverage
 - [ ] VolumeFlowIndicator
 - [ ] VolumePositiveNegativeIndicator
 - [ ] VolumePriceConfirmationIndicator
