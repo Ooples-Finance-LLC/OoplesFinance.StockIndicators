@@ -1,9 +1,9 @@
 # Stateful Indicator Checklist
-Generated: 2026-01-08 19:57:04
+Generated: 2026-01-08 21:44:53
 Summary:
 - Total indicators: 774
-- Stateful implemented: 747
-- Pending: 27
+- Stateful implemented: 772
+- Pending: 2
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -748,37 +748,37 @@ Summary:
 - [x] VolumeAccumulationPercent
 - [x] VolumeAdaptiveBands
 - [x] VolumeAdjustedMovingAverage
+- [x] VolumeFlowIndicator
+- [x] VolumePositiveNegativeIndicator
+- [x] VolumePriceConfirmationIndicator
+- [x] VolumeWeightedAveragePrice
+- [x] VolumeWeightedMovingAverage
+- [x] VolumeWeightedRelativeStrengthIndex
+- [x] VortexBands
 - [x] VortexIndicator
+- [x] VostroIndicator
+- [x] WaddahAttarExplosion
+- [x] WamiOscillator
+- [x] WaveTrendOscillator
 - [x] WeightedClose
 - [x] WeightedMovingAverage
 - [x] WellesWilderMovingAverage
+- [x] WellesWilderSummation
+- [x] WellesWilderVolatilitySystem
+- [x] WellRoundedMovingAverage
+- [x] WilliamsAccumulationDistribution
+- [x] WilliamsFractals
 - [x] WilliamsR
+- [x] WilsonRelativePriceChannel
+- [x] WindowedVolumeWeightedMovingAverage
+- [x] WoodieCommodityChannelIndex
+- [x] WoodiePivotPoints
+- [x] ZDistanceFromVwap
+- [x] ZeroLagExponentialMovingAverage
+- [x] ZeroLagSmoothedCycle
+- [x] ZeroLagTripleExponentialMovingAverage
+- [x] ZeroLowLagMovingAverage
 
 ## Pending
 - [ ] None
-- [ ] VolumeFlowIndicator
-- [ ] VolumePositiveNegativeIndicator
-- [ ] VolumePriceConfirmationIndicator
-- [ ] VolumeWeightedAveragePrice
-- [ ] VolumeWeightedMovingAverage
-- [ ] VolumeWeightedRelativeStrengthIndex
-- [ ] VortexBands
-- [ ] VostroIndicator
-- [ ] WaddahAttarExplosion
-- [ ] WamiOscillator
-- [ ] WaveTrendOscillator
-- [ ] WellesWilderSummation
-- [ ] WellesWilderVolatilitySystem
-- [ ] WellRoundedMovingAverage
-- [ ] WilliamsAccumulationDistribution
-- [ ] WilliamsFractals
-- [ ] WilsonRelativePriceChannel
-- [ ] WindowedVolumeWeightedMovingAverage
-- [ ] WoodieCommodityChannelIndex
-- [ ] WoodiePivotPoints
-- [ ] ZDistanceFromVwap
-- [ ] ZeroLagExponentialMovingAverage
-- [ ] ZeroLagSmoothedCycle
-- [ ] ZeroLagTripleExponentialMovingAverage
-- [ ] ZeroLowLagMovingAverage
 - [ ] ZScore
