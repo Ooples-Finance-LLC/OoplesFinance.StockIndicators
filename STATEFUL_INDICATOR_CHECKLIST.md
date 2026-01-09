@@ -1,9 +1,9 @@
 # Stateful Indicator Checklist
-Generated: 2026-01-08 21:44:53
+Generated: 2026-01-08 21:49:41
 Summary:
 - Total indicators: 774
-- Stateful implemented: 772
-- Pending: 2
+- Stateful implemented: 773
+- Pending: 1
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -778,7 +778,7 @@ Summary:
 - [x] ZeroLagSmoothedCycle
 - [x] ZeroLagTripleExponentialMovingAverage
 - [x] ZeroLowLagMovingAverage
+- [x] ZScore
 
 ## Pending
 - [ ] None
-- [ ] ZScore
