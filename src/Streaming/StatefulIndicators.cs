@@ -15937,6 +15937,35 @@ internal sealed class DoubleExponentialMovingAverageSmoother : IMovingAverageSmo
     }
 }
 
+internal sealed class ZeroLagExponentialMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly EmaState _ema1;
+    private readonly EmaState _ema2;
+
+    public ZeroLagExponentialMovingAverageSmoother(int length)
+    {
+        _ema1 = new EmaState(length);
+        _ema2 = new EmaState(length);
+    }
+
+    public double Next(double value, bool isFinal)
+    {
+        var ema1 = _ema1.GetNext(value, isFinal);
+        var ema2 = _ema2.GetNext(ema1, isFinal);
+        return ema1 + (ema1 - ema2);
+    }
+
+    public void Reset()
+    {
+        _ema1.Reset();
+        _ema2.Reset();
+    }
+
+    public void Dispose()
+    {
+    }
+}
+
 internal sealed class TripleExponentialMovingAverageSmoother : IMovingAverageSmoother
 {
     private readonly EmaState _ema1;
@@ -15999,7 +16028,40 @@ internal sealed class ZeroLagTripleExponentialMovingAverageSmoother : IMovingAve
     }
 }
 
-internal sealed class WeightedMovingAverageSmoother : IMovingAverageSmoother    
+internal sealed class McNichollMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly double _alpha;
+    private readonly EmaState _ema1;
+    private readonly EmaState _ema2;
+
+    public McNichollMovingAverageSmoother(int length)
+    {
+        var resolved = Math.Max(1, length);
+        _alpha = 2d / (resolved + 1);
+        _ema1 = new EmaState(resolved);
+        _ema2 = new EmaState(resolved);
+    }
+
+    public double Next(double value, bool isFinal)
+    {
+        var ema1 = _ema1.GetNext(value, isFinal);
+        var ema2 = _ema2.GetNext(ema1, isFinal);
+        var denom = 1 - _alpha;
+        return denom != 0 ? (((2 - _alpha) * ema1) - ema2) / denom : 0;
+    }
+
+    public void Reset()
+    {
+        _ema1.Reset();
+        _ema2.Reset();
+    }
+
+    public void Dispose()
+    {
+    }
+}
+
+internal sealed class WeightedMovingAverageSmoother : IMovingAverageSmoother
 {
     private readonly WmaState _wma;
 
@@ -16113,8 +16175,10 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.SimpleMovingAverage => new SimpleMovingAverageSmoother(length),
             MovingAvgType.ExponentialMovingAverage => new ExponentialMovingAverageSmoother(length),
             MovingAvgType.DoubleExponentialMovingAverage => new DoubleExponentialMovingAverageSmoother(length),
+            MovingAvgType.ZeroLagExponentialMovingAverage => new ZeroLagExponentialMovingAverageSmoother(length),
             MovingAvgType.TripleExponentialMovingAverage => new TripleExponentialMovingAverageSmoother(length),
             MovingAvgType.ZeroLagTripleExponentialMovingAverage => new ZeroLagTripleExponentialMovingAverageSmoother(length),
+            MovingAvgType.McNichollMovingAverage => new McNichollMovingAverageSmoother(length),
             MovingAvgType.WeightedMovingAverage => new WeightedMovingAverageSmoother(length),
             MovingAvgType.WildersSmoothingMethod => new WilderMovingAverageSmoother(length),
             MovingAvgType.EhlersHannMovingAverage => new EhlersHannMovingAverageSmoother(length),
