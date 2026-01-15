@@ -197,7 +197,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var pList = CalculateEhlersAdaptiveCyberCycle(stockData, length: length).OutputValues["Period"];
+        var pList = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersAdaptiveCyberCycle(data, length: length))["Period"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -251,12 +252,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var decycler1List = CalculateEhlersSimpleDecycler(stockData, fastLength).CustomValuesList;
-        var decycler2List = CalculateEhlersSimpleDecycler(stockData, slowLength).CustomValuesList;
+        var decycler1List = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersSimpleDecycler(data, fastLength));
+        var decycler2List = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersSimpleDecycler(data, slowLength));
         stockData.SetCustomValues(decycler1List);
-        var decycler1FilteredList = CalculateEhlersHighPassFilterV1(stockData, fastLength, 0.5).CustomValuesList;
+        var decycler1FilteredList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersHighPassFilterV1(data, fastLength, 0.5));
         stockData.SetCustomValues(decycler2List);
-        var decycler2FilteredList = CalculateEhlersHighPassFilterV1(stockData, slowLength, 0.5).CustomValuesList;
+        var decycler2FilteredList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersHighPassFilterV1(data, slowLength, 0.5));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -304,8 +309,10 @@ public static partial class Calculations
         List<double> decList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var hp1List = CalculateEhlersHighPassFilterV2(stockData, maType, fastLength).CustomValuesList;
-        var hp2List = CalculateEhlersHighPassFilterV2(stockData, maType, slowLength).CustomValuesList;
+        var hp1List = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersHighPassFilterV2(data, maType, fastLength));
+        var hp2List = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersHighPassFilterV2(data, maType, slowLength));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -398,7 +405,8 @@ public static partial class Calculations
         var twoPiPer = MinOrMax(2 * Math.PI / length1, 0.99, 0.01);
         var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
 
-        var domCycList = CalculateEhlersSpectrumDerivedFilterBank(stockData, minLength, maxLength, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersSpectrumDerivedFilterBank(data, minLength, maxLength, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -517,9 +525,10 @@ public static partial class Calculations
         List<double> angleList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var ecciList = CalculateEhlersCorrelationCycleIndicator(stockData, length);
-        var realList = ecciList.OutputValues["Real"];
-        var imagList = ecciList.OutputValues["Imag"];
+        var ecciOutputs = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersCorrelationCycleIndicator(data, length));
+        var realList = ecciOutputs["Real"];
+        var imagList = ecciOutputs["Imag"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -562,7 +571,8 @@ public static partial class Calculations
         List<double> predictList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var hFiltList = CalculateEhlersImpulseResponse(stockData, maType, length, bw).CustomValuesList;
+        var hFiltList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersImpulseResponse(data, maType, length, bw));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -632,7 +642,8 @@ public static partial class Calculations
         RollingSum yySum = new();
         RollingSum xySum = new();
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -702,7 +713,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var rArray = new double[length1 + 1];
 
-        var corrList = CalculateEhlersAutoCorrelationIndicator(stockData, length1, length2).CustomValuesList;
+        var corrList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -782,8 +794,10 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var domCycList = CalculateEhlersAutoCorrelationPeriodogram(stockData, length1, length2, length3).CustomValuesList;
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -852,7 +866,8 @@ public static partial class Calculations
         List<double> fishList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var arsiList = CalculateEhlersAdaptiveRelativeStrengthIndexV2(stockData, maType, length1, length2, length3).CustomValuesList;
+        var arsiList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAdaptiveRelativeStrengthIndexV2(data, maType, length1, length2, length3));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -905,8 +920,10 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var domCycList = CalculateEhlersAutoCorrelationPeriodogram(stockData, length1, length2, length3).CustomValuesList;
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -983,7 +1000,8 @@ public static partial class Calculations
         List<double> triggerList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var astocList = CalculateEhlersAdaptiveStochasticIndicatorV2(stockData, maType, length1, length2, length3).CustomValuesList;
+        var astocList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAdaptiveStochasticIndicatorV2(data, maType, length1, length2, length3));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1043,8 +1061,10 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var domCycList = CalculateEhlersAutoCorrelationPeriodogram(stockData, length1, length2, length3).CustomValuesList;
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1114,7 +1134,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var rArray = new double[length1 + 1];
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1181,7 +1202,8 @@ public static partial class Calculations
         List<double> bpList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1254,7 +1276,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var corrList = CalculateEhlersAutoCorrelationIndicator(stockData, length1, length2).CustomValuesList;
+        var corrList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
         var emaList = GetMovingAverageList(stockData, maType, length2, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1304,7 +1327,8 @@ public static partial class Calculations
         List<double> imagList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1372,9 +1396,10 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var hilbertList = CalculateEhlersHilbertTransformer(stockData, length1, length2);
-        var realList = hilbertList.OutputValues["Real"];
-        var imagList = hilbertList.OutputValues["Imag"];
+        var hilbertOutputs = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersHilbertTransformer(data, length1, length2));
+        var realList = hilbertOutputs["Real"];
+        var imagList = hilbertOutputs["Imag"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1425,10 +1450,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var ehlersMamaList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData);
-        var reList = ehlersMamaList.OutputValues["Real"];
-        var imList = ehlersMamaList.OutputValues["Imag"];
-        var mamaList = ehlersMamaList.CustomValuesList;
+        var ehlersMamaOutputs = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data));
+        var reList = ehlersMamaOutputs["Real"];
+        var imList = ehlersMamaOutputs["Imag"];
+        var mamaList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1785,7 +1812,8 @@ public static partial class Calculations
 
         var lbLength = (int)Math.Ceiling((double)length / 4);
 
-        var bpList = CalculateEhlersCycleBandPassFilter(stockData, length, delta).CustomValuesList;
+        var bpList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersCycleBandPassFilter(data, length, delta));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1839,8 +1867,10 @@ public static partial class Calculations
         List<double> leadPeakList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var domCycList = CalculateEhlersAutoCorrelationPeriodogram(stockData, length1, length2, length3).CustomValuesList;
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2098,7 +2128,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).OutputValues["SmoothPeriod"];
+        var spList = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2148,7 +2179,8 @@ public static partial class Calculations
         List<double> fishList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var arsiList = CalculateEhlersAdaptiveRelativeStrengthIndexV1(stockData).CustomValuesList;
+        var arsiList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersAdaptiveRelativeStrengthIndexV1(data));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2189,7 +2221,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).OutputValues["SmoothPeriod"];
+        var spList = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2249,7 +2282,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
 
-        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).OutputValues["SmoothPeriod"];
+        var spList = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2316,7 +2350,8 @@ public static partial class Calculations
         List<double> iFishList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var cciList = CalculateCommodityChannelIndex(stockData, inputName, maType, length, constant).CustomValuesList;
+        var cciList = GetCustomValuesListInternal(stockData,
+            data => CalculateCommodityChannelIndex(data, inputName, maType, length, constant));
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -1546,26 +1546,32 @@ public static partial class Calculations
         options.IncludeOutputValues = true;
         options.IncludeSignals = true;
 
-        var result = calculator(stockData);
-        var list = new List<double>(result.CustomValuesList);
-
-        options.IncludeCustomValues = prevIncludeCustom;
-        options.IncludeOutputValues = prevIncludeOutput;
-        options.IncludeSignals = prevIncludeSignals;
-
-        if (prevIncludeCustom == false)
+        List<double> list;
+        try
         {
-            stockData.CustomValuesList = new List<double>();
+            var result = calculator(stockData);
+            list = new List<double>(result.CustomValuesList);
         }
-
-        if (prevIncludeOutput == false)
+        finally
         {
-            stockData.OutputValues = new Dictionary<string, List<double>>();
-        }
+            options.IncludeCustomValues = prevIncludeCustom;
+            options.IncludeOutputValues = prevIncludeOutput;
+            options.IncludeSignals = prevIncludeSignals;
 
-        if (prevIncludeSignals == false)
-        {
-            stockData.SignalsList = new List<Signal>();
+            if (prevIncludeCustom == false)
+            {
+                stockData.CustomValuesList = new List<double>();
+            }
+
+            if (prevIncludeOutput == false)
+            {
+                stockData.OutputValues = new Dictionary<string, List<double>>();
+            }
+
+            if (prevIncludeSignals == false)
+            {
+                stockData.SignalsList = new List<Signal>();
+            }
         }
 
         return list;
@@ -1587,30 +1593,36 @@ public static partial class Calculations
         options.IncludeOutputValues = true;
         options.IncludeSignals = true;
 
-        var result = calculator(stockData);
-        var outputValues = new Dictionary<string, List<double>>(result.OutputValues.Count);
-        foreach (var kvp in result.OutputValues)
+        Dictionary<string, List<double>> outputValues;
+        try
         {
-            outputValues[kvp.Key] = new List<double>(kvp.Value);
+            var result = calculator(stockData);
+            outputValues = new Dictionary<string, List<double>>(result.OutputValues.Count);
+            foreach (var kvp in result.OutputValues)
+            {
+                outputValues[kvp.Key] = new List<double>(kvp.Value);
+            }
         }
-
-        options.IncludeCustomValues = prevIncludeCustom;
-        options.IncludeOutputValues = prevIncludeOutput;
-        options.IncludeSignals = prevIncludeSignals;
-
-        if (prevIncludeCustom == false)
+        finally
         {
-            stockData.CustomValuesList = new List<double>();
-        }
+            options.IncludeCustomValues = prevIncludeCustom;
+            options.IncludeOutputValues = prevIncludeOutput;
+            options.IncludeSignals = prevIncludeSignals;
 
-        if (prevIncludeOutput == false)
-        {
-            stockData.OutputValues = new Dictionary<string, List<double>>();
-        }
+            if (prevIncludeCustom == false)
+            {
+                stockData.CustomValuesList = new List<double>();
+            }
 
-        if (prevIncludeSignals == false)
-        {
-            stockData.SignalsList = new List<Signal>();
+            if (prevIncludeOutput == false)
+            {
+                stockData.OutputValues = new Dictionary<string, List<double>>();
+            }
+
+            if (prevIncludeSignals == false)
+            {
+                stockData.SignalsList = new List<Signal>();
+            }
         }
 
         return outputValues;
