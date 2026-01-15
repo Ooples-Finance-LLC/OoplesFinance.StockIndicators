@@ -915,12 +915,21 @@ public static partial class Calculations
             var prevAstoc1 = i >= 1 ? astocList[i - 1] : 0;
             var prevAstoc2 = i >= 2 ? astocList[i - 2] : 0;
 
-            double highest = 0, lowest = 0;
-            for (var j = 0; j < (int)Math.Ceiling(domCyc); j++)
+            var window = (int)Math.Ceiling(domCyc);
+            var highest = roofingFilter;
+            var lowest = roofingFilter;
+            for (var j = 1; j < window && i >= j; j++)
             {
-                var filt = i >= j ? roofingFilterList[i - j] : 0;
-                highest = filt > highest ? filt : highest;
-                lowest = filt < lowest ? filt : lowest;
+                var filt = roofingFilterList[i - j];
+                if (filt > highest)
+                {
+                    highest = filt;
+                }
+
+                if (filt < lowest)
+                {
+                    lowest = filt;
+                }
             }
 
             var prevStoc = GetLastOrDefault(stocList);
@@ -1437,8 +1446,9 @@ public static partial class Calculations
             rangeList.Add(range);
 
             var temp = range != 0 ? (re + im) / (range * range) : 0;
+            var logTemp = temp > 0 ? Math.Log10(temp) : 0;
             var prevSnr = GetLastOrDefault(snrList);
-            var snr = (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + length)) + (0.75 * prevSnr);
+            var snr = (0.25 * ((10 * logTemp) + length)) + (0.75 * prevSnr);
             snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - mama, prevValue - prevMama, snr, length);
@@ -2034,8 +2044,8 @@ public static partial class Calculations
             var roofingFilter = (c1 * ((highPass + prevHp1) / 2)) + (c2 * prevRoofingFilter1) + (c3 * prevRoofingFilter2);
             roofingFilterList.Add(roofingFilter);
 
-            var n = i + 1;
-            double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, corr = 0, conv = 0, slope = 0;
+            var n = Math.Min(i + 1, length3);
+            double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
             for (var j = 1; j <= length3; j++)
             {
                 var x = i >= j - 1 ? roofingFilterList[i - (j - 1)] : 0;
@@ -2045,14 +2055,17 @@ public static partial class Calculations
                 sxx += Pow(x, 2);
                 sxy += x * y;
                 syy += Pow(y, 2);
-                corr = ((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy)) > 0 ? ((n * sxy) - (sx * sy)) /
-                    Sqrt(((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy))) : 0;
-                conv = (1 + (Exp(3 * corr) - 1)) / (Exp(3 * corr) + 1) / 2;
-
-                var filtLength = (int)Math.Ceiling(0.5 * n);
-                var prevFilt = i >= filtLength ? roofingFilterList[i - filtLength] : 0;
-                slope = prevFilt < roofingFilter ? -1 : 1;
             }
+            var corr = ((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy)) > 0
+                ? ((n * sxy) - (sx * sy)) / Sqrt(((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy)))
+                : 0;
+            var expCorr = Exp(3 * corr);
+            var denom = expCorr + 1;
+            var conv = denom != 0 ? expCorr / denom / 2 : 0;
+
+            var filtLength = (int)Math.Ceiling(0.5 * n);
+            var prevFilt = i >= filtLength ? roofingFilterList[i - filtLength] : 0;
+            var slope = prevFilt < roofingFilter ? -1 : 1;
             convList.Add(conv);
             slopeList.Add(slope);
 

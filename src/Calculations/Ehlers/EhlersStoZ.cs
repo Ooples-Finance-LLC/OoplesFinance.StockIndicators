@@ -67,7 +67,7 @@ public static partial class Calculations
         int length1 = 5, int length2 = 8)
     {
         length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
+        length2 = Math.Max(length2, 2);
         List<double> f3List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1063,7 +1063,9 @@ public static partial class Calculations
             rangeList.Add(range);
 
             var prevAmp = GetLastOrDefault(ampList);
-            var amp = range != 0 ? (0.25 * ((10 * Math.Log(v2 / (range * range)) / Math.Log(10)) + 1.9)) + (0.75 * prevAmp) : 0;
+            var temp = range != 0 ? v2 / (range * range) : 0;
+            var logTemp = temp > 0 ? Math.Log10(temp) : 0;
+            var amp = range != 0 ? (0.25 * ((10 * logTemp) + 1.9)) + (0.75 * prevAmp) : 0;
             ampList.Add(amp);
 
             var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, amp, 1.9);
@@ -1219,8 +1221,9 @@ public static partial class Calculations
             rangeList.Add(range);
 
             var temp = range != 0 ? ((i1 * i1) + (q1 * q1)) / (range * range) : 0;
+            var logTemp = temp > 0 ? Math.Log10(temp) : 0;
             var prevSnr = GetLastOrDefault(snrList);
-            var snr = range > 0 ? (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + length)) + (0.75 * prevSnr) : 0;
+            var snr = range > 0 ? (0.25 * ((10 * logTemp) + length)) + (0.75 * prevSnr) : 0;
             snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - mama, prevValue - prevMama, snr, length);

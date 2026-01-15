@@ -76,7 +76,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersPhaseCalculation(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 15)
     {
-        length = Math.Max(length, 1);
+        length = Math.Max(length, 2);
         List<double> phaseList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -288,7 +288,8 @@ public static partial class Calculations
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV1(stockData, maType, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV1(data, maType, length1, length2));
         var (highestList, lowestList) = GetMaxAndMinValuesList(roofingFilterList, length3);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -348,7 +349,8 @@ public static partial class Calculations
         var c3 = -1 * a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -537,7 +539,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        var domCycList = CalculateEhlersSpectrumDerivedFilterBank(stockData, minLength, maxLength, length1, length2).CustomValuesList;
+        var domCycList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersSpectrumDerivedFilterBank(data, minLength, maxLength, length1, length2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -584,7 +587,8 @@ public static partial class Calculations
         List<double> stateList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var angleList = CalculateEhlersCorrelationAngleIndicator(stockData, length).CustomValuesList;
+        var angleList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersCorrelationAngleIndicator(data, length));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -626,7 +630,8 @@ public static partial class Calculations
         List<double> argList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var hpFilterList = CalculateEhlersHighPassFilterV1(stockData, length1, 1).CustomValuesList;
+        var hpFilterList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersHighPassFilterV1(data, length1, 1));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -675,7 +680,8 @@ public static partial class Calculations
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
         lowerLength = Math.Max(lowerLength, 1);
-        upperLength = Math.Max(upperLength, 1);
+        upperLength = Math.Max(upperLength, 2);
+        length3 = Math.Max(length3, length1);
         List<double> ssfList = new(stockData.Count);
         List<double> hpList = new(stockData.Count);
         List<double> prePredictList = new(stockData.Count);
@@ -865,6 +871,7 @@ public static partial class Calculations
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
         length4 = Math.Max(length4, 1);
+        length4 = Math.Min(length4, length1);
         List<double> ssfList = new(stockData.Count);
         List<double> hpList = new(stockData.Count);
         List<double> predictList = new(stockData.Count);
@@ -1082,6 +1089,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersReverseExponentialMovingAverageIndicatorV1(this StockData stockData, double alpha = 0.1)
     {
+        alpha = MinOrMax(alpha, 0.99, 0.01);
         List<double> emaList = new(stockData.Count);
         List<double> re1List = new(stockData.Count);
         List<double> re2List = new(stockData.Count);
@@ -1161,10 +1169,14 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersReverseExponentialMovingAverageIndicatorV2(this StockData stockData, double trendAlpha = 0.05, double cycleAlpha = 0.3)
     {
+        trendAlpha = MinOrMax(trendAlpha, 0.99, 0.01);
+        cycleAlpha = MinOrMax(cycleAlpha, 0.99, 0.01);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var trendList = CalculateEhlersReverseExponentialMovingAverageIndicatorV1(stockData, trendAlpha).CustomValuesList;
-        var cycleList = CalculateEhlersReverseExponentialMovingAverageIndicatorV1(stockData, cycleAlpha).CustomValuesList;
+        var trendList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersReverseExponentialMovingAverageIndicatorV1(data, trendAlpha));
+        var cycleList = GetCustomValuesListInternal(stockData,
+            data => CalculateEhlersReverseExponentialMovingAverageIndicatorV1(data, cycleAlpha));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1262,9 +1274,10 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var hilbertList = CalculateEhlersHilbertTransformer(stockData, length1, length2);
-        var realList = hilbertList.OutputValues["Real"];
-        var imagList = hilbertList.OutputValues["Imag"];
+        var hilbertOutputs = GetOutputValuesInternal(stockData,
+            data => CalculateEhlersHilbertTransformer(data, length1, length2));
+        var realList = hilbertOutputs["Real"];
+        var imagList = hilbertOutputs["Imag"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1328,6 +1341,7 @@ public static partial class Calculations
     /// <returns></returns>
     public static StockData CalculateEhlersLaguerreRelativeStrengthIndex(this StockData stockData, double gamma = 0.5)
     {
+        gamma = MinOrMax(gamma, 1, 0);
         List<double> laguerreRsiList = new(stockData.Count);
         List<double> l0List = new(stockData.Count);
         List<double> l1List = new(stockData.Count);
@@ -1479,7 +1493,8 @@ public static partial class Calculations
         List<double> iFishList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).CustomValuesList;
+        var rsiList = GetCustomValuesListInternal(stockData,
+            data => CalculateRelativeStrengthIndex(data, maType, length: length));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1512,6 +1527,93 @@ public static partial class Calculations
         stockData.IndicatorName = IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform;
 
         return stockData;
+    }
+
+    // Ensure internal calculations can access outputs even when options disable them.
+    private static List<double> GetCustomValuesListInternal(StockData stockData, Func<StockData, StockData> calculator)
+    {
+        var options = stockData.Options;
+        if (options == null || options.IncludeCustomValues != false)
+        {
+            return calculator(stockData).CustomValuesList;
+        }
+
+        var prevIncludeCustom = options.IncludeCustomValues;
+        var prevIncludeOutput = options.IncludeOutputValues;
+        var prevIncludeSignals = options.IncludeSignals;
+
+        options.IncludeCustomValues = true;
+        options.IncludeOutputValues = true;
+        options.IncludeSignals = true;
+
+        var result = calculator(stockData);
+        var list = new List<double>(result.CustomValuesList);
+
+        options.IncludeCustomValues = prevIncludeCustom;
+        options.IncludeOutputValues = prevIncludeOutput;
+        options.IncludeSignals = prevIncludeSignals;
+
+        if (prevIncludeCustom == false)
+        {
+            stockData.CustomValuesList = new List<double>();
+        }
+
+        if (prevIncludeOutput == false)
+        {
+            stockData.OutputValues = new Dictionary<string, List<double>>();
+        }
+
+        if (prevIncludeSignals == false)
+        {
+            stockData.SignalsList = new List<Signal>();
+        }
+
+        return list;
+    }
+
+    private static Dictionary<string, List<double>> GetOutputValuesInternal(StockData stockData, Func<StockData, StockData> calculator)
+    {
+        var options = stockData.Options;
+        if (options == null || options.IncludeOutputValues != false)
+        {
+            return calculator(stockData).OutputValues;
+        }
+
+        var prevIncludeCustom = options.IncludeCustomValues;
+        var prevIncludeOutput = options.IncludeOutputValues;
+        var prevIncludeSignals = options.IncludeSignals;
+
+        options.IncludeCustomValues = true;
+        options.IncludeOutputValues = true;
+        options.IncludeSignals = true;
+
+        var result = calculator(stockData);
+        var outputValues = new Dictionary<string, List<double>>(result.OutputValues.Count);
+        foreach (var kvp in result.OutputValues)
+        {
+            outputValues[kvp.Key] = new List<double>(kvp.Value);
+        }
+
+        options.IncludeCustomValues = prevIncludeCustom;
+        options.IncludeOutputValues = prevIncludeOutput;
+        options.IncludeSignals = prevIncludeSignals;
+
+        if (prevIncludeCustom == false)
+        {
+            stockData.CustomValuesList = new List<double>();
+        }
+
+        if (prevIncludeOutput == false)
+        {
+            stockData.OutputValues = new Dictionary<string, List<double>>();
+        }
+
+        if (prevIncludeSignals == false)
+        {
+            stockData.SignalsList = new List<Signal>();
+        }
+
+        return outputValues;
     }
 }
 
