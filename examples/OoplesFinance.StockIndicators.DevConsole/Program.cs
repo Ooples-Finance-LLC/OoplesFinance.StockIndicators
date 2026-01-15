@@ -53,6 +53,9 @@ internal static class Program
                 case "6":
                     RunFacadeSketches();
                     break;
+                case "7":
+                    RunFacadeSketchesV2();
+                    break;
                 case "a":
                     RunBatchExample();
                     RunStreamingExample();
@@ -60,6 +63,7 @@ internal static class Program
                     RunComplexSetupExample();
                     RunSessionExample();
                     RunFacadeSketches();
+                    RunFacadeSketchesV2();
                     break;
                 case "q":
                     return;
@@ -82,6 +86,7 @@ internal static class Program
         Console.WriteLine("4) Complex streaming setup (multi indicator/timeframe)");
         Console.WriteLine("5) Streaming session (replay source)");
         Console.WriteLine("6) Facade/builder sketches");
+        Console.WriteLine("7) Facade/builder sketches (v2)");
         Console.WriteLine("A) Run all");
         Console.WriteLine("Q) Quit");
         Console.Write("> ");
@@ -190,6 +195,11 @@ internal static class Program
             case "sketches":
                 RunFacadeSketches();
                 return true;
+            case "facade-v2":
+            case "sketch-v2":
+            case "sketches-v2":
+                RunFacadeSketchesV2();
+                return true;
             default:
                 return false;
         }
@@ -200,7 +210,7 @@ internal static class Program
         Console.WriteLine();
         Console.WriteLine("Usage:");
         Console.WriteLine("  --run-all           Run all examples and exit");   
-        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session, facade)");
+        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session, facade, facade-v2)");
         Console.WriteLine("  --no-pause          Skip pause after running");    
     }
 
@@ -365,6 +375,11 @@ internal static class Program
     private static void RunFacadeSketches()
     {
         FacadeSketches.Run();
+    }
+
+    private static void RunFacadeSketchesV2()
+    {
+        FacadeSketchesV2.Run();
     }
 
     private static List<TickerData> BuildSampleData(int count, double startPrice, DateTime start)
