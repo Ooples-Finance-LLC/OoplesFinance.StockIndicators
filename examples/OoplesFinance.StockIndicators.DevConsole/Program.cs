@@ -50,12 +50,16 @@ internal static class Program
                 case "5":
                     RunSessionExample();
                     break;
+                case "6":
+                    RunFacadeSketches();
+                    break;
                 case "a":
                     RunBatchExample();
                     RunStreamingExample();
                     RunMultiSeriesExample();
                     RunComplexSetupExample();
                     RunSessionExample();
+                    RunFacadeSketches();
                     break;
                 case "q":
                     return;
@@ -77,6 +81,7 @@ internal static class Program
         Console.WriteLine("3) Streaming engine (multi-series)");
         Console.WriteLine("4) Complex streaming setup (multi indicator/timeframe)");
         Console.WriteLine("5) Streaming session (replay source)");
+        Console.WriteLine("6) Facade/builder sketches");
         Console.WriteLine("A) Run all");
         Console.WriteLine("Q) Quit");
         Console.Write("> ");
@@ -180,6 +185,11 @@ internal static class Program
             case "session":
                 RunSessionExample();
                 return true;
+            case "facade":
+            case "sketch":
+            case "sketches":
+                RunFacadeSketches();
+                return true;
             default:
                 return false;
         }
@@ -189,9 +199,9 @@ internal static class Program
     {
         Console.WriteLine();
         Console.WriteLine("Usage:");
-        Console.WriteLine("  --run-all           Run all examples and exit");
-        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session)");
-        Console.WriteLine("  --no-pause          Skip pause after running");
+        Console.WriteLine("  --run-all           Run all examples and exit");   
+        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session, facade)");
+        Console.WriteLine("  --no-pause          Skip pause after running");    
     }
 
     private static void RunBatchExample()
@@ -323,7 +333,7 @@ internal static class Program
     private static void RunSessionExample()
     {
         Console.WriteLine();
-        Console.WriteLine("Streaming session example (replay source):");
+        Console.WriteLine("Streaming session example (replay source):");        
 
         var events = BuildTradeEvents(PrimarySymbol, SecondarySymbol, 8);
         var source = new ReplayStreamSource(events, TimeSpan.Zero);
@@ -350,6 +360,11 @@ internal static class Program
             var last = updates[updates.Count - 1];
             Console.WriteLine($"SMA(3) last = {FormatValue(last.Value)}");
         }
+    }
+
+    private static void RunFacadeSketches()
+    {
+        FacadeSketches.Run();
     }
 
     private static List<TickerData> BuildSampleData(int count, double startPrice, DateTime start)
