@@ -2,9 +2,9 @@
 Generated: 2026-01-09 08:03:52
 Summary:
 - Total indicators: 774
-- Stateful implemented: 773
+- Stateful implemented: 774
 - Pending: 0
-- N/A: 1
+- N/A: 0
 
 ## Implemented
 - [x] _1LCLeastSquaresMovingAverage
@@ -780,8 +780,8 @@ Summary:
 - [x] ZeroLagTripleExponentialMovingAverage
 - [x] ZeroLowLagMovingAverage
 - [x] ZScore
+- [x] ZweigMarketBreadthIndicator
 
 ## Pending
 
 ## N/A
-- [x] None (N/A)

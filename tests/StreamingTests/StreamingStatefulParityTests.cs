@@ -3047,9 +3047,315 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("OnBalanceVolumeDisparityIndicator",
+                new StatefulIndicatorSpec("OnBalanceVolumeDisparityIndicator",  
                     () => new OnBalanceVolumeDisparityIndicatorState(),
                     data => data.CalculateOnBalanceVolumeDisparityIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ZweigMarketBreadthIndicator",
+                    () => new ZweigMarketBreadthIndicatorState(),
+                    data => data.CalculateZweigMarketBreadthIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AverageDirectionalIndex",
+                    () => new AverageDirectionalIndexState(),
+                    data => data.CalculateAverageDirectionalIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AverageTrueRange",
+                    () => new AverageTrueRangeState(),
+                    data => data.CalculateAverageTrueRange().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ExponentialMovingAverage",
+                    () => new ExponentialMovingAverageState(),
+                    data => data.CalculateExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("MoneyFlowIndex",
+                    () => new MoneyFlowIndexState(),
+                    data => data.CalculateMoneyFlowIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("MovingAverageConvergenceDivergence",
+                    () => new MovingAverageConvergenceDivergenceState(),
+                    data => data.CalculateMovingAverageConvergenceDivergence().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("OnBalanceVolume",
+                    () => new OnBalanceVolumeState(),
+                    data => data.CalculateOnBalanceVolume().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("OnBalanceVolumeModified",
+                    () => new OnBalanceVolumeModifiedState(),
+                    data => data.CalculateOnBalanceVolumeModified().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("OnBalanceVolumeReflex",
+                    () => new OnBalanceVolumeReflexState(),
+                    data => data.CalculateOnBalanceVolumeReflex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersLaguerreFilter",
+                    () => new EhlersLaguerreFilterState(),
+                    data => data.CalculateEhlersLaguerreFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersLaguerreRelativeStrengthIndex",
+                    () => new EhlersLaguerreRelativeStrengthIndexState(),
+                    data => data.CalculateEhlersLaguerreRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha",
+                    () => new EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(),
+                    data => data.CalculateEhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersLeadingIndicator",
+                    () => new EhlersLeadingIndicatorState(),
+                    data => data.CalculateEhlersLeadingIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersMarketStateIndicator",
+                    () => new EhlersMarketStateIndicatorState(),
+                    data => data.CalculateEhlersMarketStateIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersMedianAverageAdaptiveFilter",
+                    () => new EhlersMedianAverageAdaptiveFilterState(),
+                    data => data.CalculateEhlersMedianAverageAdaptiveFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersMesaPredictIndicatorV1",
+                    () => new EhlersMesaPredictIndicatorV1State(),
+                    data => data.CalculateEhlersMesaPredictIndicatorV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersMesaPredictIndicatorV2",
+                    () => new EhlersMesaPredictIndicatorV2State(),
+                    data => data.CalculateEhlersMesaPredictIndicatorV2().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersModifiedOptimumEllipticFilter",
+                    () => new EhlersModifiedOptimumEllipticFilterState(),
+                    data => data.CalculateEhlersModifiedOptimumEllipticFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersModifiedRelativeStrengthIndex",
+                    () => new EhlersModifiedRelativeStrengthIndexState(),
+                    data => data.CalculateEhlersModifiedRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersModifiedStochasticIndicator",
+                    () => new EhlersModifiedStochasticIndicatorState(),
+                    data => data.CalculateEhlersModifiedStochasticIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersMovingAverageDifferenceIndicator",
+                    () => new EhlersMovingAverageDifferenceIndicatorState(),
+                    data => data.CalculateEhlersMovingAverageDifferenceIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersNoiseEliminationTechnology",
+                    () => new EhlersNoiseEliminationTechnologyState(),
+                    data => data.CalculateEhlersNoiseEliminationTechnology().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersOptimumEllipticFilter",
+                    () => new EhlersOptimumEllipticFilterState(),
+                    data => data.CalculateEhlersOptimumEllipticFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersPhaseAccumulationDominantCycle",
+                    () => new EhlersPhaseAccumulationDominantCycleState(),
+                    data => data.CalculateEhlersPhaseAccumulationDominantCycle().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersPhaseCalculation",
+                    () => new EhlersPhaseCalculationState(),
+                    data => data.CalculateEhlersPhaseCalculation().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRecursiveMedianFilter",        
+                    () => new EhlersRecursiveMedianFilterState(),
+                    data => data.CalculateEhlersRecursiveMedianFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("BollingerBands.MiddleBand",
+                    () => new BollingerBandsState(),
+                    data => data.CalculateBollingerBands().OutputValues["MiddleBand"])
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRecursiveMedianOscillator",
+                    () => new EhlersRecursiveMedianOscillatorState(),
+                    data => data.CalculateEhlersRecursiveMedianOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersReflexIndicator",
+                    () => new EhlersReflexIndicatorState(),
+                    data => data.CalculateEhlersReflexIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRelativeStrengthIndexInverseFisherTransform",
+                    () => new EhlersRelativeStrengthIndexInverseFisherTransformState(),
+                    data => data.CalculateEhlersRelativeStrengthIndexInverseFisherTransform().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRelativeVigorIndex",
+                    () => new EhlersRelativeVigorIndexState(),
+                    data => data.CalculateEhlersRelativeVigorIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRestoringPullIndicator",
+                    () => new EhlersRestoringPullIndicatorState(),
+                    data => data.CalculateEhlersRestoringPullIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersReverseExponentialMovingAverageIndicatorV1",
+                    () => new EhlersReverseExponentialMovingAverageIndicatorV1State(),
+                    data => data.CalculateEhlersReverseExponentialMovingAverageIndicatorV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersReverseExponentialMovingAverageIndicatorV2.EremaCycle",
+                    () => new EhlersReverseExponentialMovingAverageIndicatorV2State(),
+                    data => data.CalculateEhlersReverseExponentialMovingAverageIndicatorV2().OutputValues["EremaCycle"])
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRocketRelativeStrengthIndex",
+                    () => new EhlersRocketRelativeStrengthIndexState(),
+                    data => data.CalculateEhlersRocketRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRoofingFilterIndicator",
+                    () => new EhlersRoofingFilterIndicatorState(),
+                    data => data.CalculateEhlersRoofingFilterIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersRoofingFilterV1",
+                    () => new EhlersRoofingFilterV1State(),
+                    data => data.CalculateEhlersRoofingFilterV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSignalToNoiseRatioV1",
+                    () => new EhlersSignalToNoiseRatioV1State(),
+                    data => data.CalculateEhlersSignalToNoiseRatioV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSignalToNoiseRatioV2",
+                    () => new EhlersSignalToNoiseRatioV2State(),
+                    data => data.CalculateEhlersSignalToNoiseRatioV2().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSimpleClipIndicator",
+                    () => new EhlersSimpleClipIndicatorState(),
+                    data => data.CalculateEhlersSimpleClipIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSimpleCycleIndicator",
+                    () => new EhlersSimpleCycleIndicatorState(),
+                    data => data.CalculateEhlersSimpleCycleIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSimpleDecycler",
+                    () => new EhlersSimpleDecyclerState(),
+                    data => data.CalculateEhlersSimpleDecycler().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSimpleDerivIndicator",
+                    () => new EhlersSimpleDerivIndicatorState(),
+                    data => data.CalculateEhlersSimpleDerivIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSimpleWindowIndicator",
+                    () => new EhlersSimpleWindowIndicatorState(),
+                    data => data.CalculateEhlersSimpleWindowIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSineWaveIndicatorV1",
+                    () => new EhlersSineWaveIndicatorV1State(),
+                    data => data.CalculateEhlersSineWaveIndicatorV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSineWaveIndicatorV2",
+                    () => new EhlersSineWaveIndicatorV2State(),
+                    data => data.CalculateEhlersSineWaveIndicatorV2().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSmoothedAdaptiveMomentumIndicator",
+                    () => new EhlersSmoothedAdaptiveMomentumIndicatorState(),
+                    data => data.CalculateEhlersSmoothedAdaptiveMomentum().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSnakeUniversalTradingFilter",
+                    () => new EhlersSnakeUniversalTradingFilterState(),
+                    data => data.CalculateEhlersSnakeUniversalTradingFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSpearmanRankIndicator",
+                    () => new EhlersSpearmanRankIndicatorState(),
+                    data => data.CalculateEhlersSpearmanRankIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSpectrumDerivedFilterBank",
+                    () => new EhlersSpectrumDerivedFilterBankState(),
+                    data => data.CalculateEhlersSpectrumDerivedFilterBank().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("EhlersSquelchIndicator",
+                    () => new EhlersSquelchIndicatorState(),
+                    data => data.CalculateEhlersSquelchIndicator().CustomValuesList)
             };
         }
     }
