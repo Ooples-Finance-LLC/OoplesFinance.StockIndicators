@@ -1836,8 +1836,8 @@ public static partial class Calculations
         {
             var roofingFilter = roofingFilterList[i];
             var domCyc = MinOrMax(domCycList[i], length1, length3);
-            var beta = Math.Cos(2 * Math.PI / 0.9 * domCyc);
-            var gamma = 1 / Math.Cos(2 * Math.PI * bw / 0.9 * domCyc);
+            var beta = Math.Cos(2 * Math.PI / (0.9 * domCyc));
+            var gamma = 1 / Math.Cos(2 * Math.PI * bw / (0.9 * domCyc));
             var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
             var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
             var prevBp1 = i >= 1 ? bpList[i - 1] : 0;

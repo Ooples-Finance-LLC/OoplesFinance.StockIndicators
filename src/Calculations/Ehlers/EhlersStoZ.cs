@@ -447,9 +447,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var beta = Math.Max(Math.Cos(2 * Math.PI / length), 0.99);
-        var gamma = 1 / Math.Cos(4 * Math.PI * delta / length);
-        var alpha = Math.Max(gamma - Sqrt((gamma * gamma) - 1), 0.99);
+        var beta = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * delta / length, 0.99, 0.01));
+        var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
 
         for (var i = 0; i < stockData.Count; i++)
         {

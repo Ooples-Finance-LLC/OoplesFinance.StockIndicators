@@ -697,9 +697,26 @@ public static partial class Calculations
         var length2Size = length2 + 1;
         var lowerSize = lowerLength + 1;
         var xxSize = upperLength + Math.Max(length1, length3) + 1;
+        // Reuse buffers per bar to avoid repeated allocations.
+        var pArray = new double[length2Size];
+        var bb1Array = new double[upperSize];
+        var bb2Array = new double[upperSize];
+        var coefArray = new double[length2Size];
+        var coefAArray = new double[length2Size];
+        var xxArray = new double[xxSize];
+        var hCoefArray = new double[length2Size];
+        var coef1Array = new double[lowerSize];
 
         for (var i = 0; i < stockData.Count; i++)
         {
+            Array.Clear(pArray, 0, pArray.Length);
+            Array.Clear(bb1Array, 0, bb1Array.Length);
+            Array.Clear(bb2Array, 0, bb2Array.Length);
+            Array.Clear(coefArray, 0, coefArray.Length);
+            Array.Clear(coefAArray, 0, coefAArray.Length);
+            Array.Clear(xxArray, 0, xxArray.Length);
+            Array.Clear(hCoefArray, 0, hCoefArray.Length);
+            Array.Clear(coef1Array, 0, coef1Array.Length);
             var currentValue = inputList[i];
             var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
             var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
@@ -709,13 +726,6 @@ public static partial class Calculations
             var prevSsf2 = i >= 2 ? ssfList[i - 2] : 0;
             var prevPredict1 = i >= 1 ? predictList[i - 1] : 0;
             var priorSsf = i >= upperLength - 1 ? ssfList[i - (upperLength - 1)] : 0;
-            var pArray = new double[length2Size];
-            var bb1Array = new double[upperSize];
-            var bb2Array = new double[upperSize];
-            var coefArray = new double[length2Size];
-            var coefAArray = new double[length2Size];
-            var xxArray = new double[xxSize];
-            var hCoefArray = new double[length2Size];
 
             var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
             hpList.Add(hp);
@@ -779,7 +789,6 @@ public static partial class Calculations
                 }
             }
 
-            var coef1Array = new double[lowerSize];
             for (var j = 1; j <= length2; j++)
             {
                 coef1Array[1] = coefArray[j];
@@ -899,13 +908,16 @@ public static partial class Calculations
         }
 
         var filtList = GetMovingAverageList(stockData, maType, length3, ssfList);
+        var bufferLength = Math.Max((2 * length1) + 2, length1 + length4 + 2);
+        var xxArray = new double[bufferLength];
+        var yyArray = new double[bufferLength];
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevPredict1 = i >= 1 ? predictList[i - 1] : 0;
             var prevPredict2 = i >= 2 ? predictList[i - 2] : 0;
 
-            var xxArray = new double[100];
-            var yyArray = new double[100];
+            Array.Clear(xxArray, 0, xxArray.Length);
+            Array.Clear(yyArray, 0, yyArray.Length);
             for (var j = 1; j <= length1; j++)
             {
                 var prevFilt = i >= length1 - j ? filtList[i - (length1 - j)] : 0;
