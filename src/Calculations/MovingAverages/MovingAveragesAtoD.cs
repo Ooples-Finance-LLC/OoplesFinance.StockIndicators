@@ -870,7 +870,7 @@ public static partial class Calculations
             double sum = 0, weightedSum = 0, bas = 1 + (r * 2);
             for (var j = 0; j <= length - 1; j++)
             {
-                var weight = Pow(bas, length - i);
+                var weight = Pow(bas, length - j);
                 var prevValue = i >= j ? inputList[i - j] : 0;
 
                 sum += prevValue * weight;

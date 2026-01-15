@@ -170,8 +170,9 @@ public static partial class Calculations
             var lowestLow1 = lowestList1[i];
             var highestHigh2 = highestList2[i];
             var lowestLow2 = lowestList2[i];
-            var highestHigh3 = highestList2[Math.Max(i - halfP, i)];
-            var lowestLow3 = lowestList2[Math.Max(i - halfP, i)];
+            var lagIndex = Math.Max(i - halfP, 0);
+            var highestHigh3 = highestList2[lagIndex];
+            var lowestLow3 = lowestList2[lagIndex];
             var n3 = (highestHigh1 - lowestLow1) / length;
             var n1 = (highestHigh2 - lowestLow2) / halfP;
             var n2 = (highestHigh3 - lowestLow3) / halfP;

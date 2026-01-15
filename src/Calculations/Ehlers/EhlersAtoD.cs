@@ -582,8 +582,11 @@ public static partial class Calculations
                 }
                 var corr = ((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2)) > 0 ? ((length * sxy) - (sx * sy)) /
                     Sqrt(((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2))) : 0;
-                start = corr > maxCorr ? length - j : 0;
-                maxCorr = corr > maxCorr ? corr : maxCorr;
+                if (corr > maxCorr)
+                {
+                    maxCorr = corr;
+                    start = length - j;
+                }
             }
 
             var prevPredict = GetLastOrDefault(predictList);
@@ -1492,9 +1495,10 @@ public static partial class Calculations
             var cleanedData = i <= 5 ? currentValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
             cleanedDataList.Add(cleanedData);
 
-            double pwr = 0, cosPart = 0, sinPart = 0;
+            double pwr = 0;
             for (var j = minLength; j <= maxLength; j++)
             {
+                double cosPart = 0, sinPart = 0;
                 for (var n = 0; n <= maxLength - 1; n++)
                 {
                     var prevCleanedData = i >= n ? cleanedDataList[i - n] : 0;
@@ -1502,7 +1506,8 @@ public static partial class Calculations
                     sinPart += prevCleanedData * Math.Sin(MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
                 }
 
-                pwr = (cosPart * cosPart) + (sinPart * sinPart);
+                var periodPwr = (cosPart * cosPart) + (sinPart * sinPart);
+                pwr = Math.Max(pwr, periodPwr);
             }
             powerList.Add(pwr);
 
@@ -1778,7 +1783,7 @@ public static partial class Calculations
             var prevPtop2 = i >= 2 ? ptopList[i - 2] : 0;
 
             double power = 0;
-            for (var j = length; j < length; j++)
+            for (var j = 0; j < length; j++)
             {
                 var prevBp1 = i >= j ? bpList[i - j] : 0;
                 var prevBp2 = i >= j + lbLength ? bpList[i - (j + lbLength)] : 0;

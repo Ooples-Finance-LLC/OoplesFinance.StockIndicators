@@ -383,8 +383,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * length);
+        var period = 0.5 * length;
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);  
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -505,8 +506,8 @@ public static partial class Calculations
         RollingSum filtPowSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var l1 = Math.Cos(MinOrMax(2 * Math.PI / 2 * length1, 0.99, 0.01));
-        var g1 = Math.Cos(MinOrMax(bw * 2 * Math.PI / 2 * length1, 0.99, 0.01));
+        var l1 = Math.Cos(MinOrMax(2 * Math.PI / (2 * length1), 0.99, 0.01));
+        var g1 = Math.Cos(MinOrMax(bw * 2 * Math.PI / (2 * length1), 0.99, 0.01));
         var s1 = (1 / g1) - Sqrt(1 / Pow(g1, 2) - 1);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -830,8 +831,8 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var priceArray = new double[50];
-            var rankArray = new double[50];
+            var priceArray = new double[length + 1];
+            var rankArray = new double[length + 1];
             for (var j = 1; j <= length; j++)
             {
                 var prevPrice = i >= j - 1 ? inputList[i - (j - 1)] : 0;
@@ -907,7 +908,7 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var trunArray = new double[100];
+            var trunArray = new double[length2 + 3];
             for (var j = length2; j > 0; j--)
             {
                 var prevValue1 = i >= j - 1 ? inputList[i - (j - 1)] : 0;
@@ -1125,7 +1126,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersTriangleWindowIndicator;
+        stockData.IndicatorName = IndicatorName.EhlersSimpleWindowIndicator;  
 
         return stockData;
     }

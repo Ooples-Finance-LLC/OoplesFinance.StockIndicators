@@ -465,8 +465,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * length);
+        var period = 0.5 * length;
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);  
         var c2 = b1;
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
@@ -692,6 +693,10 @@ public static partial class Calculations
         var coef2 = b;
         var coef3 = -a * a;
         var coef1 = 1 - coef2 - coef3;
+        var upperSize = upperLength + 1;
+        var length2Size = length2 + 1;
+        var lowerSize = lowerLength + 1;
+        var xxSize = upperLength + Math.Max(length1, length3) + 1;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -704,13 +709,13 @@ public static partial class Calculations
             var prevSsf2 = i >= 2 ? ssfList[i - 2] : 0;
             var prevPredict1 = i >= 1 ? predictList[i - 1] : 0;
             var priorSsf = i >= upperLength - 1 ? ssfList[i - (upperLength - 1)] : 0;
-            var pArray = new double[500];
-            var bb1Array = new double[500];
-            var bb2Array = new double[500];
-            var coefArray = new double[500];
-            var coefAArray = new double[500];
-            var xxArray = new double[520];
-            var hCoefArray = new double[520];
+            var pArray = new double[length2Size];
+            var bb1Array = new double[upperSize];
+            var bb2Array = new double[upperSize];
+            var coefArray = new double[length2Size];
+            var coefAArray = new double[length2Size];
+            var xxArray = new double[xxSize];
+            var hCoefArray = new double[length2Size];
 
             var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
             hpList.Add(hp);
@@ -774,7 +779,7 @@ public static partial class Calculations
                 }
             }
 
-            var coef1Array = new double[500];
+            var coef1Array = new double[lowerSize];
             for (var j = 1; j <= length2; j++)
             {
                 coef1Array[1] = coefArray[j];
@@ -1022,7 +1027,7 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var xArray = new double[50];
+            var xArray = new double[length + 1];
             for (var j = 1; j <= length; j++)
             {
                 var prevPrice = i >= j - 1 ? inputList[i - (j - 1)] : 0;
