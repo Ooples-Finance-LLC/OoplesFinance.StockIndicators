@@ -1133,7 +1133,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersSimpleWindowIndicator;  
+        stockData.IndicatorName = IndicatorName.EhlersTriangleWindowIndicator;
 
         return stockData;
     }
