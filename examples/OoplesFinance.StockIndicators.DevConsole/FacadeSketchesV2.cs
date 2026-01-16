@@ -28,6 +28,7 @@ internal static class FacadeSketchesV2
         Console.WriteLine("Option A: Builder -> Result (AiDotNet-style flow)");
 
         var data = BuildSampleData(160, 100d, new DateTime(2024, 4, 2, 9, 30, 0, DateTimeKind.Utc));
+        var stockData = new StockData(data);
         var builder = IndicatorModelBuilder
             .Create()
             .ConfigureIndicator(SeriesId.Sma20, IndicatorSpecs.Sma(20))
@@ -36,7 +37,7 @@ internal static class FacadeSketchesV2
             .Combine(SeriesId.SmaMinusRsi, SeriesId.Sma20, SeriesId.Rsi14, CombineOp.Subtract);
 
         var model = builder.Build();
-        var result = model.Run(data);
+        var result = model.Run(stockData);
 
         PrintLast(result, SeriesId.Sma20, "SMA(20)");
         PrintLast(result, SeriesId.Rsi14, "RSI(14)");
@@ -50,8 +51,9 @@ internal static class FacadeSketchesV2
         Console.WriteLine("Option B: Recipe builder (spec + chain)");
 
         var data = BuildSampleData(160, 97d, new DateTime(2024, 5, 2, 9, 30, 0, DateTimeKind.Utc));
+        var stockData = new StockData(data);
         var flow = IndicatorFlow
-            .For(data)
+            .For(stockData)
             .Add(SeriesId.Sma20, IndicatorSpecs.Sma(20))
             .Add(SeriesId.Rsi14, IndicatorSpecs.Rsi(14))
             .Add(SeriesId.Macd, IndicatorSpecs.Macd(MacdOutputKey.Macd))
@@ -355,8 +357,8 @@ internal static class FacadeSketchesV2
             var count = _data.Count;
             for (var i = 0; i < count; i++)
             {
-                var l = i < left.Count ? left[i] : 0;
-                var r = i < right.Count ? right[i] : 0;
+                var l = i < left.Count ? left[i] : double.NaN;
+                var r = i < right.Count ? right[i] : double.NaN;
                 combined.Add(ApplyCombine(node.CombineOp, l, r));
             }
 
@@ -409,7 +411,7 @@ internal static class FacadeSketchesV2
                 CombineOp.Add => left + right,
                 CombineOp.Subtract => left - right,
                 CombineOp.Multiply => left * right,
-                CombineOp.Divide => right == 0 ? 0 : left / right,
+                CombineOp.Divide => left / right,
                 _ => left
             };
         }
@@ -481,7 +483,8 @@ internal static class FacadeSketchesV2
             }
 
             var updates = new List<StreamingIndicatorStateUpdate>();
-            using var session = StreamingSession.Create(source, options.Symbols, options: options);
+            var symbols = options.Symbols ?? new[] { _symbol };
+            using var session = StreamingSession.Create(source, symbols, options: options);
             for (var i = 0; i < _steps.Count; i++)
             {
                 var step = _steps[i];

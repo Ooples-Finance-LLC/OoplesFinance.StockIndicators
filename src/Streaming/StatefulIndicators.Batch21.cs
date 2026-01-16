@@ -965,13 +965,13 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
             var sp = _hasMarketPrev ? bar.Close - _prevMarketValue : 0;
             var zsp = stdDev != 0 ? sp / stdDev : 0;
             var absZsp = Math.Abs(zsp);
-            var absZspSma = _marketAbsSma.Next(absZsp, isFinal);
+            var marketAbsZspSma = _marketAbsSma.Next(absZsp, isFinal);
 
             if (isFinal)
             {
                 _prevMarketValue = bar.Close;
                 _hasMarketPrev = true;
-                _latestMarketAbsSma = absZspSma;
+                _latestMarketAbsSma = marketAbsZspSma;
                 _hasMarketAbsSma = true;
             }
 

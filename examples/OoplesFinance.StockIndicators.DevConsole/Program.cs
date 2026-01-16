@@ -29,7 +29,7 @@ internal static class Program
             var input = Console.ReadLine();
             if (input == null)
             {
-                continue;
+                return;
             }
 
             var choice = input.Trim().ToLowerInvariant();
@@ -56,6 +56,18 @@ internal static class Program
                 case "7":
                     RunFacadeSketchesV2();
                     break;
+                case "8":
+                    RunFacadeSketchesV3();
+                    break;
+                case "9":
+                    RunFacadeSketchesV4();
+                    break;
+                case "10":
+                    RunFacadeSketchesV5();
+                    break;
+                case "11":
+                    RunFacadeSketchesV6();
+                    break;
                 case "a":
                     RunBatchExample();
                     RunStreamingExample();
@@ -64,6 +76,10 @@ internal static class Program
                     RunSessionExample();
                     RunFacadeSketches();
                     RunFacadeSketchesV2();
+                    RunFacadeSketchesV3();
+                    RunFacadeSketchesV4();
+                    RunFacadeSketchesV5();
+                    RunFacadeSketchesV6();
                     break;
                 case "q":
                     return;
@@ -87,6 +103,10 @@ internal static class Program
         Console.WriteLine("5) Streaming session (replay source)");
         Console.WriteLine("6) Facade/builder sketches");
         Console.WriteLine("7) Facade/builder sketches (v2)");
+        Console.WriteLine("8) Facade/builder sketches (v3)");
+        Console.WriteLine("9) Facade/builder sketches (v4)");
+        Console.WriteLine("10) Facade/builder sketches (v5)");
+        Console.WriteLine("11) Facade/builder sketches (v6)");
         Console.WriteLine("A) Run all");
         Console.WriteLine("Q) Quit");
         Console.Write("> ");
@@ -143,6 +163,12 @@ internal static class Program
             RunMultiSeriesExample();
             RunComplexSetupExample();
             RunSessionExample();
+            RunFacadeSketches();
+            RunFacadeSketchesV2();
+            RunFacadeSketchesV3();
+            RunFacadeSketchesV4();
+            RunFacadeSketchesV5();
+            RunFacadeSketchesV6();
             if (!noPause)
             {
                 Pause();
@@ -200,6 +226,26 @@ internal static class Program
             case "sketches-v2":
                 RunFacadeSketchesV2();
                 return true;
+            case "facade-v3":
+            case "sketch-v3":
+            case "sketches-v3":
+                RunFacadeSketchesV3();
+                return true;
+            case "facade-v4":
+            case "sketch-v4":
+            case "sketches-v4":
+                RunFacadeSketchesV4();
+                return true;
+            case "facade-v5":
+            case "sketch-v5":
+            case "sketches-v5":
+                RunFacadeSketchesV5();
+                return true;
+            case "facade-v6":
+            case "sketch-v6":
+            case "sketches-v6":
+                RunFacadeSketchesV6();
+                return true;
             default:
                 return false;
         }
@@ -209,9 +255,9 @@ internal static class Program
     {
         Console.WriteLine();
         Console.WriteLine("Usage:");
-        Console.WriteLine("  --run-all           Run all examples and exit");   
-        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session, facade, facade-v2)");
-        Console.WriteLine("  --no-pause          Skip pause after running");    
+        Console.WriteLine("  --run-all           Run all examples and exit");
+        Console.WriteLine("  --example <name>    Run one example (batch, streaming, multi-series, complex, session, facade, facade-v2, facade-v3, facade-v4, facade-v5, facade-v6)");
+        Console.WriteLine("  --no-pause          Skip pause after running");
     }
 
     private static void RunBatchExample()
@@ -380,6 +426,26 @@ internal static class Program
     private static void RunFacadeSketchesV2()
     {
         FacadeSketchesV2.Run();
+    }
+
+    private static void RunFacadeSketchesV3()
+    {
+        FacadeSketchesV3.Run();
+    }
+
+    private static void RunFacadeSketchesV4()
+    {
+        FacadeSketchesV4.Run();
+    }
+
+    private static void RunFacadeSketchesV5()
+    {
+        FacadeSketchesV5.Run();
+    }
+
+    private static void RunFacadeSketchesV6()
+    {
+        FacadeSketchesV6.Run();
     }
 
     private static List<TickerData> BuildSampleData(int count, double startPrice, DateTime start)

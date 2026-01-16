@@ -204,7 +204,7 @@ internal static class FacadeSketches
                 throw new ArgumentNullException(nameof(indicator));
             }
 
-            _nodes[name] = SeriesNode.Indicator(input.Name, indicator, outputKey);
+            _nodes[name] = SeriesNode.CreateIndicator(input.Name, indicator, outputKey);
             return new SeriesRef(name);
         }
 
@@ -286,9 +286,19 @@ internal static class FacadeSketches
 
         public List<double> Resolve(string name)
         {
+            return Resolve(name, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private List<double> Resolve(string name, HashSet<string> visiting)
+        {
             if (_cache.TryGetValue(name, out var cached))
             {
                 return cached;
+            }
+
+            if (!visiting.Add(name))
+            {
+                throw new InvalidOperationException($"Cycle detected in series graph at '{name}'.");
             }
 
             if (!_nodes.TryGetValue(name, out var node))
@@ -303,15 +313,16 @@ internal static class FacadeSketches
                     resolved = GetBaseInput();
                     break;
                 case SeriesNodeKind.Indicator:
-                    resolved = ResolveIndicator(node);
+                    resolved = ResolveIndicator(node, visiting);
                     break;
                 case SeriesNodeKind.Combine:
-                    resolved = ResolveCombine(node);
+                    resolved = ResolveCombine(node, visiting);
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown node kind for '{name}'.");
             }
 
+            visiting.Remove(name);
             _cache[name] = resolved;
             return resolved;
         }
@@ -322,9 +333,9 @@ internal static class FacadeSketches
             return new List<double>(input);
         }
 
-        private List<double> ResolveIndicator(SeriesNode node)
+        private List<double> ResolveIndicator(SeriesNode node, HashSet<string> visiting)
         {
-            var input = Resolve(node.InputName!);
+            var input = Resolve(node.InputName!, visiting);
             var working = CloneWithCustomValues(_baseData, input);
             var result = node.Indicator!(working);
 
@@ -341,16 +352,16 @@ internal static class FacadeSketches
             return new List<double>(list);
         }
 
-        private List<double> ResolveCombine(SeriesNode node)
+        private List<double> ResolveCombine(SeriesNode node, HashSet<string> visiting)
         {
-            var left = Resolve(node.LeftName!);
-            var right = Resolve(node.RightName!);
+            var left = Resolve(node.LeftName!, visiting);
+            var right = Resolve(node.RightName!, visiting);
             var combined = new List<double>(_baseData.Count);
             var count = _baseData.Count;
             for (var i = 0; i < count; i++)
             {
-                var l = i < left.Count ? left[i] : 0;
-                var r = i < right.Count ? right[i] : 0;
+                var l = i < left.Count ? left[i] : double.NaN;
+                var r = i < right.Count ? right[i] : double.NaN;
                 combined.Add(node.Combiner!(l, r));
             }
 
@@ -422,7 +433,7 @@ internal static class FacadeSketches
             return new SeriesNode(SeriesNodeKind.Base, null, null, null, null, null, null);
         }
 
-        public static SeriesNode Indicator(string inputName, Func<StockData, StockData> indicator, string? outputKey)
+        public static SeriesNode CreateIndicator(string inputName, Func<StockData, StockData> indicator, string? outputKey)
         {
             return new SeriesNode(SeriesNodeKind.Indicator, inputName, indicator, outputKey, null, null, null);
         }
@@ -477,7 +488,8 @@ internal static class FacadeSketches
             }
 
             var updates = new List<StreamingIndicatorStateUpdate>();
-            using var session = StreamingSession.Create(source, options.Symbols, options: options);
+            var symbols = options.Symbols ?? new[] { _symbol };
+            using var session = StreamingSession.Create(source, symbols, options: options);
             for (var i = 0; i < _steps.Count; i++)
             {
                 var step = _steps[i];

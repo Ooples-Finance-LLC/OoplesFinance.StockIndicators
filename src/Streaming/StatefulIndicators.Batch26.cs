@@ -1528,7 +1528,8 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var nom = rbc - lowest;
         var den = highest - lowestRbc;
         var fastK = den != 0 ? MathHelper.MinOrMax(100 * nom / den, 100, 0) : 0;
-        var fastKSum = isFinal ? _fastKSum.Add(fastK, out var fastKCount) : _fastKSum.Preview(fastK, out var fastKCount);
+        int fastKCount;
+        var fastKSum = isFinal ? _fastKSum.Add(fastK, out fastKCount) : _fastKSum.Preview(fastK, out fastKCount);
         var sk = fastKCount > 0 ? fastKSum / fastKCount : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1636,13 +1637,15 @@ public sealed class VervoortVolatilityBandsState : IStreamingIndicatorState, IDi
         var value = _input.GetValue(bar);
         var medianAvg = _medianAvg.Next(value, isFinal);
         var medianAvgEma = _medianAvgEma.Next(medianAvg, isFinal);
-        var medianAvgSum = isFinal ? _medianAvgSum.Add(medianAvg, out var medianCount) : _medianAvgSum.Preview(medianAvg, out var medianCount);
+        int medianCount;
+        var medianAvgSum = isFinal ? _medianAvgSum.Add(medianAvg, out medianCount) : _medianAvgSum.Preview(medianAvg, out medianCount);
         var medianAvgSma = medianCount > 0 ? medianAvgSum / medianCount : 0;
 
         var prevValue = _hasPrev ? _prevValue : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         var typical = value >= prevValue ? value - prevLow : prevValue - bar.Low;
-        var typicalSum = isFinal ? _typicalSum.Add(typical, out var typicalCount) : _typicalSum.Preview(typical, out var typicalCount);
+        int typicalCount;
+        var typicalSum = isFinal ? _typicalSum.Add(typical, out typicalCount) : _typicalSum.Preview(typical, out typicalCount);
         var typicalSma = typicalCount > 0 ? typicalSum / typicalCount : 0;
         var deviation = _devMult * typicalSma;
         var devHigh = _devHighMa.Next(deviation, isFinal);
@@ -2189,7 +2192,8 @@ public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
         var medianValue = (bar.High + bar.Low) / 2d;
         var vao = value != medianValue ? bar.Volume * (value - medianValue) : bar.Volume;
-        var vaoSum = isFinal ? _vaoSum.Add(vao, out var countAfter) : _vaoSum.Preview(vao, out var countAfter);
+        int countAfter;
+        var vaoSum = isFinal ? _vaoSum.Add(vao, out countAfter) : _vaoSum.Preview(vao, out countAfter);
         var vaoAvg = countAfter > 0 ? vaoSum / countAfter : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;

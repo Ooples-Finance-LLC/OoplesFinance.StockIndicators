@@ -1707,7 +1707,7 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     private readonly IMovingAverageSmoother? _meanMa;
     private readonly StandardDeviationVolatilityState? _stdDev;
     private readonly StreamingInputResolver _input;
-    private readonly StreamingInputResolver? _vwapInput;
+    private readonly StreamingInputResolver _vwapInput;
     private double _inputValue;
     private double _cumVolume;
     private double _cumVolumePrice;
@@ -1725,6 +1725,7 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
         }
         else
         {
+            _vwapInput = default;
             _meanMa = MovingAverageSmootherFactory.Create(_maType, _length);
             _stdDev = new StandardDeviationVolatilityState(_maType, _length, _ => _inputValue);
         }
@@ -1747,6 +1748,7 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
         }
         else
         {
+            _vwapInput = default;
             _meanMa = MovingAverageSmootherFactory.Create(_maType, _length);
             _stdDev = new StandardDeviationVolatilityState(_maType, _length, _ => _inputValue);
         }
@@ -1772,7 +1774,7 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
         double stdDev;
         if (_maType == MovingAvgType.VolumeWeightedAveragePrice)
         {
-            var vwapValue = _vwapInput!.GetValue(bar);
+            var vwapValue = _vwapInput.GetValue(bar);
             var volume = bar.Volume;
             var volumeSum = _cumVolume + volume;
             var volumePriceSum = _cumVolumePrice + (vwapValue * volume);

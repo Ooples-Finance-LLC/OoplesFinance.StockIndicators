@@ -2175,11 +2175,11 @@ public sealed class TrendDetectionIndexState : IStreamingIndicatorState, IDispos
             : 0;
         var mom = _index >= _length1 ? value - prevValue : 0;
 
-        int _;
-        var tdiDirection = isFinal ? _momSum.Add(mom, out _) : _momSum.Preview(mom, out _);
+        int countAfter;
+        var tdiDirection = isFinal ? _momSum.Add(mom, out countAfter) : _momSum.Preview(mom, out countAfter);
         var momAbs = Math.Abs(mom);
-        var momAbsSum1 = isFinal ? _momAbsSum1.Add(momAbs, out _) : _momAbsSum1.Preview(momAbs, out _);
-        var momAbsSum2 = isFinal ? _momAbsSum2.Add(momAbs, out _) : _momAbsSum2.Preview(momAbs, out _);
+        var momAbsSum1 = isFinal ? _momAbsSum1.Add(momAbs, out countAfter) : _momAbsSum1.Preview(momAbs, out countAfter);
+        var momAbsSum2 = isFinal ? _momAbsSum2.Add(momAbs, out countAfter) : _momAbsSum2.Preview(momAbs, out countAfter);
         var tdi = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
 
         if (isFinal)
