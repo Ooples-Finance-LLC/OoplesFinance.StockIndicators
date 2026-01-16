@@ -13,19 +13,136 @@ namespace OoplesFinance.StockIndicators.Models;
 [Serializable]
 public class StockData : IStockData
 {
+    private List<double>? _inputValues;
+    private List<double>? _openPrices;
+    private List<double>? _highPrices;
+    private List<double>? _lowPrices;
+    private List<double>? _closePrices;
+    private List<double>? _volumes;
+    private List<DateTime>? _dates;
+    private List<TickerData>? _tickerDataList;
+    private bool _columnsInitialized;
+    private bool _rowsInitialized;
+
     public InputName InputName { get; set; }
     public IndicatorName IndicatorName { get; set; }
-    public List<double> InputValues { get; set; }
-    public List<double> OpenPrices { get; set; }
-    public List<double> HighPrices { get; set; }
-    public List<double> LowPrices { get; set; }
-    public List<double> ClosePrices { get; set; }
-    public List<double> Volumes { get; set; }
-    public List<DateTime> Dates { get; set; }
-    public List<TickerData> TickerDataList { get; set; }
+
+    public List<double> InputValues
+    {
+        get
+        {
+            if (_inputValues == null)
+            {
+                _inputValues = new List<double>(ClosePrices);
+            }
+
+            return _inputValues;
+        }
+        set => _inputValues = value ?? new List<double>();
+    }
+
+    public List<double> OpenPrices
+    {
+        get
+        {
+            EnsureColumns();
+            return _openPrices!;
+        }
+        set
+        {
+            _openPrices = value ?? new List<double>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<double> HighPrices
+    {
+        get
+        {
+            EnsureColumns();
+            return _highPrices!;
+        }
+        set
+        {
+            _highPrices = value ?? new List<double>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<double> LowPrices
+    {
+        get
+        {
+            EnsureColumns();
+            return _lowPrices!;
+        }
+        set
+        {
+            _lowPrices = value ?? new List<double>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<double> ClosePrices
+    {
+        get
+        {
+            EnsureColumns();
+            return _closePrices!;
+        }
+        set
+        {
+            _closePrices = value ?? new List<double>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<double> Volumes
+    {
+        get
+        {
+            EnsureColumns();
+            return _volumes!;
+        }
+        set
+        {
+            _volumes = value ?? new List<double>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<DateTime> Dates
+    {
+        get
+        {
+            EnsureColumns();
+            return _dates!;
+        }
+        set
+        {
+            _dates = value ?? new List<DateTime>();
+            _columnsInitialized = true;
+        }
+    }
+
+    public List<TickerData> TickerDataList
+    {
+        get
+        {
+            EnsureRows();
+            return _tickerDataList!;
+        }
+        set
+        {
+            _tickerDataList = value ?? new List<TickerData>();
+            _rowsInitialized = true;
+        }
+    }
+
     public List<double> CustomValuesList { get; set; }
     public Dictionary<string, List<double>> OutputValues { get; set; }
     public List<Signal> SignalsList { get; set; }
+    public IndicatorOptions? Options { get; set; }
     public int Count { get; set; }
 
     /// <summary>
@@ -40,41 +157,22 @@ public class StockData : IStockData
     public StockData(IEnumerable<double> openPrices, IEnumerable<double> highPrices, IEnumerable<double> lowPrices, IEnumerable<double> closePrices,
         IEnumerable<double> volumes, IEnumerable<DateTime> dates, InputName inputName = InputName.Close)
     {
-        OpenPrices = new List<double>(openPrices);
-        HighPrices = new List<double>(highPrices);
-        LowPrices = new List<double>(lowPrices);
-        ClosePrices = new List<double>(closePrices);
-        Volumes = new List<double>(volumes);
-        Dates = new List<DateTime>(dates);
-        InputValues = new List<double>(closePrices);
+        _openPrices = new List<double>(openPrices);
+        _highPrices = new List<double>(highPrices);
+        _lowPrices = new List<double>(lowPrices);
+        _closePrices = new List<double>(closePrices);
+        _volumes = new List<double>(volumes);
+        _dates = new List<DateTime>(dates);
+        _columnsInitialized = true;
+        _rowsInitialized = false;
+        _tickerDataList = null;
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
         InputName = inputName;
         IndicatorName = IndicatorName.None;
-        Count = (OpenPrices.Count + HighPrices.Count + LowPrices.Count + ClosePrices.Count + Volumes.Count + Dates.Count) / 6 == ClosePrices.Count ? ClosePrices.Count : 0;
-
-        TickerDataList = new List<TickerData>();
-        for (var i = 0; i < Count; i++)
-        {
-            var open = OpenPrices[i];
-            var high = HighPrices[i];
-            var low = LowPrices[i];
-            var close = ClosePrices[i];
-            var volume = Volumes[i];
-            var date = Dates[i];
-
-            var ticker = new TickerData()
-            {
-                Date = date,
-                Open = open,
-                High = high,
-                Low = low,
-                Close = close,
-                Volume = volume
-            };
-            TickerDataList.Add(ticker);
-        }
+        Options = new IndicatorOptions();
+        Count = CalculateCount(_openPrices, _highPrices, _lowPrices, _closePrices, _volumes, _dates);
     }
 
     /// <summary>
@@ -83,42 +181,131 @@ public class StockData : IStockData
     /// <param name="tickerDataList"></param>
     public StockData(IEnumerable<TickerData> tickerDataList, InputName inputName = InputName.Close)
     {
-        OpenPrices = new List<double>();
-        HighPrices = new List<double>();
-        LowPrices = new List<double>();
-        ClosePrices = new List<double>();
-        Volumes = new List<double>();
-        Dates = new List<DateTime>();
+        _tickerDataList = new List<TickerData>();
+        foreach (var ticker in tickerDataList)
+        {
+            _tickerDataList.Add(ticker);
+        }
+
+        _rowsInitialized = true;
+        _columnsInitialized = false;
+        _openPrices = null;
+        _highPrices = null;
+        _lowPrices = null;
+        _closePrices = null;
+        _volumes = null;
+        _dates = null;
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
         InputName = inputName;
+        Options = new IndicatorOptions();
+        Count = _tickerDataList.Count;
+    }
 
-        for (var i = 0; i < tickerDataList.Count(); i++)
+    public void EnsureColumnView()
+    {
+        EnsureColumns();
+    }
+
+    public void EnsureRowView()
+    {
+        EnsureRows();
+    }
+
+    private static int CalculateCount(List<double> openPrices, List<double> highPrices, List<double> lowPrices,
+        List<double> closePrices, List<double> volumes, List<DateTime> dates)
+    {
+        return (openPrices.Count + highPrices.Count + lowPrices.Count + closePrices.Count + volumes.Count + dates.Count) / 6 == closePrices.Count
+            ? closePrices.Count
+            : 0;
+    }
+
+    private void EnsureColumns()
+    {
+        if (_columnsInitialized)
         {
-            var ticker = tickerDataList.ElementAt(i);
-
-            var date = ticker.Date;
-            Dates.Add(date);
-
-            var open = ticker.Open;
-            OpenPrices.Add(open);
-
-            var high = ticker.High;
-            HighPrices.Add(high);
-
-            var low = ticker.Low;
-            LowPrices.Add(low);
-
-            var close = ticker.Close;
-            ClosePrices.Add(close);
-
-            var volume = ticker.Volume;
-            Volumes.Add(volume);
+            _openPrices ??= new List<double>();
+            _highPrices ??= new List<double>();
+            _lowPrices ??= new List<double>();
+            _closePrices ??= new List<double>();
+            _volumes ??= new List<double>();
+            _dates ??= new List<DateTime>();
+            return;
         }
-        
-        TickerDataList = tickerDataList.ToList();
-        InputValues = new List<double>(ClosePrices);
-        Count = (OpenPrices.Count + HighPrices.Count + LowPrices.Count + ClosePrices.Count + Volumes.Count + Dates.Count) / 6 == ClosePrices.Count ? ClosePrices.Count : 0;
+
+        if (_tickerDataList == null || _tickerDataList.Count == 0)
+        {
+            _openPrices = new List<double>();
+            _highPrices = new List<double>();
+            _lowPrices = new List<double>();
+            _closePrices = new List<double>();
+            _volumes = new List<double>();
+            _dates = new List<DateTime>();
+            _columnsInitialized = true;
+            return;
+        }
+
+        var count = _tickerDataList.Count;
+        var openPrices = new List<double>(count);
+        var highPrices = new List<double>(count);
+        var lowPrices = new List<double>(count);
+        var closePrices = new List<double>(count);
+        var volumes = new List<double>(count);
+        var dates = new List<DateTime>(count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var ticker = _tickerDataList[i];
+            dates.Add(ticker.Date);
+            openPrices.Add(ticker.Open);
+            highPrices.Add(ticker.High);
+            lowPrices.Add(ticker.Low);
+            closePrices.Add(ticker.Close);
+            volumes.Add(ticker.Volume);
+        }
+
+        _openPrices = openPrices;
+        _highPrices = highPrices;
+        _lowPrices = lowPrices;
+        _closePrices = closePrices;
+        _volumes = volumes;
+        _dates = dates;
+        _columnsInitialized = true;
+    }
+
+    private void EnsureRows()
+    {
+        if (_rowsInitialized)
+        {
+            _tickerDataList ??= new List<TickerData>();
+            return;
+        }
+
+        EnsureColumns();
+        var count = Count;
+        var rows = new List<TickerData>(count);
+        var dates = _dates!;
+        var opens = _openPrices!;
+        var highs = _highPrices!;
+        var lows = _lowPrices!;
+        var closes = _closePrices!;
+        var volumes = _volumes!;
+
+        for (var i = 0; i < count; i++)
+        {
+            rows.Add(new TickerData
+            {
+                Date = dates[i],
+                Open = opens[i],
+                High = highs[i],
+                Low = lows[i],
+                Close = closes[i],
+                Volume = volumes[i]
+            });
+        }
+
+        _tickerDataList = rows;
+        _rowsInitialized = true;
     }
 }
