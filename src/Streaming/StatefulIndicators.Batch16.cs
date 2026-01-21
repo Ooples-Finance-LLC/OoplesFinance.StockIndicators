@@ -1089,7 +1089,8 @@ public sealed class LeastSquaresMovingAverageState : IStreamingIndicatorState, I
     {
         var value = _input.GetValue(bar);
         var wma = _wma.GetNext(value, isFinal);
-        var sma = _sma.Next(value, isFinal);
+        // Batch LSMA computes SMA of WMA values, not SMA of close prices (due to how GetInputValuesList works)
+        var sma = _sma.Next(wma, isFinal);
         var lsma = (3 * wma) - (2 * sma);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1148,7 +1149,8 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
     {
         var value = _input.GetValue(bar);
         var wma = _wma.GetNext(value, isFinal);
-        var sma = _sma.Next(value, isFinal);
+        // Batch LeoMA computes SMA of WMA values, not SMA of close prices (due to how GetInputValuesList works)
+        var sma = _sma.Next(wma, isFinal);
         var lma = (2 * wma) - sma;
 
         IReadOnlyDictionary<string, double>? outputs = null;

@@ -104,8 +104,9 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
     public EhlersReflexIndicatorState(int length = 20, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
+        var period = 0.5 * _length;
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
@@ -122,8 +123,9 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
         }
 
         _length = Math.Max(1, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
+        var period = 0.5 * _length;
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
@@ -808,8 +810,10 @@ public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, 
         var ema = _ema.Next(value, isFinal);
         var range = (0.2 * (bar.High - bar.Low)) + (0.8 * _prevRange);
         var v2 = (0.2 * ((inPhase * inPhase) + (quad * quad))) + (0.8 * _prevV2);
+        var temp = range != 0 ? v2 / (range * range) : 0;
+        var logTemp = temp > 0 ? Math.Log10(temp) : 0;
         var amp = range != 0
-            ? (0.25 * ((10 * Math.Log(v2 / (range * range)) / Math.Log(10)) + 1.9)) + (0.75 * _prevAmp)
+            ? (0.25 * ((10 * logTemp) + 1.9)) + (0.75 * _prevAmp)
             : 0;
 
         if (isFinal)
@@ -1705,8 +1709,9 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
 
         _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength3);
         _filtValues = new PooledRingBuffer<double>(_length1);
-        _xxArray = new double[_length1 + _length4 + 2];
-        _yyArray = new double[_length1 + _length4 + 2];
+        var bufferLength = Math.Max((2 * _length1) + 2, _length1 + _length4 + 2);
+        _xxArray = new double[bufferLength];
+        _yyArray = new double[bufferLength];
     }
 
     public EhlersMesaPredictIndicatorV2State(MovingAvgType maType, int length1, int length2, int length3, int length4,
@@ -1739,8 +1744,9 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
 
         _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength3);
         _filtValues = new PooledRingBuffer<double>(_length1);
-        _xxArray = new double[_length1 + _length4 + 2];
-        _yyArray = new double[_length1 + _length4 + 2];
+        var bufferLength = Math.Max((2 * _length1) + 2, _length1 + _length4 + 2);
+        _xxArray = new double[bufferLength];
+        _yyArray = new double[bufferLength];
     }
 
     public IndicatorName Name => IndicatorName.EhlersMesaPredictIndicatorV2;
@@ -3939,8 +3945,9 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
     public EhlersTrendflexIndicatorState(int length = 20, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
+        var period = 0.5 * _length;
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
@@ -3956,8 +3963,9 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
         }
 
         _length = Math.Max(1, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / 0.5 * _length);
+        var period = 0.5 * _length;
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;

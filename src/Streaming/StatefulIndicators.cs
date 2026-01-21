@@ -14796,7 +14796,9 @@ public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState : IStreami
 public sealed class CompoundRatioMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _sumWindow;
+    private readonly double _bas;
+    private readonly double[] _weights;
+    private readonly PooledRingBuffer<double> _buffer;
     private readonly IMovingAverageSmoother _smoother;
     private readonly StreamingInputResolver _input;
 
@@ -14804,7 +14806,14 @@ public sealed class CompoundRatioMovingAverageState : IStreamingIndicatorState, 
         int length = 20, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
-        _sumWindow = new RollingWindowSum(_length);
+        var r = Math.Pow(_length, ((double)1 / (_length - 1)) - 1);
+        _bas = 1 + (r * 2);
+        _weights = new double[_length];
+        for (var j = 0; j < _length; j++)
+        {
+            _weights[j] = Math.Pow(_bas, _length - j);
+        }
+        _buffer = new PooledRingBuffer<double>(_length);
         var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(_length)), 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, smoothLength);
         _input = new StreamingInputResolver(inputName, null);
@@ -14818,7 +14827,14 @@ public sealed class CompoundRatioMovingAverageState : IStreamingIndicatorState, 
         }
 
         _length = Math.Max(1, length);
-        _sumWindow = new RollingWindowSum(_length);
+        var r = Math.Pow(_length, ((double)1 / (_length - 1)) - 1);
+        _bas = 1 + (r * 2);
+        _weights = new double[_length];
+        for (var j = 0; j < _length; j++)
+        {
+            _weights[j] = Math.Pow(_bas, _length - j);
+        }
+        _buffer = new PooledRingBuffer<double>(_length);
         var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(_length)), 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, smoothLength);
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -14828,16 +14844,46 @@ public sealed class CompoundRatioMovingAverageState : IStreamingIndicatorState, 
 
     public void Reset()
     {
-        _sumWindow.Reset();
+        _buffer.Clear();
         _smoother.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var sum = isFinal ? _sumWindow.Add(value, out _) : _sumWindow.Preview(value, out _);
-        var coraRaw = _length != 0 ? sum / _length : 0;
+
+        double sum = 0, weightedSum = 0;
+        var count = _buffer.Count;
+
+        // Compute weighted sum from existing buffer values
+        // j=0 is the newest value (current), j=count is oldest in buffer
+        // Weight for j is _weights[j] = Pow(bas, length - j)
+        for (var j = 0; j < count && j < _length - 1; j++)
+        {
+            var idx = count - 1 - j;
+            var prevValue = _buffer[idx];
+            var weight = _weights[j + 1];
+            sum += prevValue * weight;
+            weightedSum += weight;
+        }
+
+        // Add current value with weight[0]
+        sum += value * _weights[0];
+        weightedSum += _weights[0];
+
+        // Fill remaining with zeros (implicit, no contribution)
+        for (var j = count + 1; j < _length; j++)
+        {
+            weightedSum += _weights[j];
+        }
+
+        var coraRaw = weightedSum != 0 ? sum / weightedSum : 0;
         var coraWave = _smoother.Next(coraRaw, isFinal);
+
+        if (isFinal)
+        {
+            _buffer.TryAdd(value, out _);
+        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -14853,7 +14899,7 @@ public sealed class CompoundRatioMovingAverageState : IStreamingIndicatorState, 
 
     public void Dispose()
     {
-        _sumWindow.Dispose();
+        _buffer.Dispose();
         _smoother.Dispose();
     }
 }

@@ -377,7 +377,7 @@ public sealed class EhlersHighPassFilterV2State : IStreamingIndicatorState, IDis
     private readonly StreamingInputResolver _input;
     private readonly HighPassFilterV2Engine _engine;
 
-    public EhlersHighPassFilterV2State(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 220,
+    public EhlersHighPassFilterV2State(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20,
         InputName inputName = InputName.Close)
     {
         _input = new StreamingInputResolver(inputName, null);
