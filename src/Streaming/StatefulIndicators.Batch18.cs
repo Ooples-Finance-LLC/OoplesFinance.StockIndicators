@@ -1189,6 +1189,8 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _smoother;
     private readonly PooledRingBuffer<double> _highValues;
     private readonly PooledRingBuffer<double> _lowValues;
+    private readonly PooledRingBuffer<double> _highestValues;
+    private readonly PooledRingBuffer<double> _lowestValues;
     private readonly PooledRingBuffer<double> _inputValues;
     private readonly StreamingInputResolver _input;
 
@@ -1199,6 +1201,8 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _highValues = new PooledRingBuffer<double>(_length);
         _lowValues = new PooledRingBuffer<double>(_length);
+        _highestValues = new PooledRingBuffer<double>(_length);
+        _lowestValues = new PooledRingBuffer<double>(_length);
         _inputValues = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -1214,6 +1218,8 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _highValues = new PooledRingBuffer<double>(_length);
         _lowValues = new PooledRingBuffer<double>(_length);
+        _highestValues = new PooledRingBuffer<double>(_length);
+        _lowestValues = new PooledRingBuffer<double>(_length);
         _inputValues = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
@@ -1225,6 +1231,8 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
         _smoother.Reset();
         _highValues.Clear();
         _lowValues.Clear();
+        _highestValues.Clear();
+        _lowestValues.Clear();
         _inputValues.Clear();
     }
 
@@ -1233,11 +1241,19 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
         var close = _input.GetValue(bar);
         var high = bar.High;
         var low = bar.Low;
+
+        // Compute rolling max/min for current bar (same as GetMaxAndMinValuesList)
+        // This is what batch stores in highestList[i] / lowestList[i]
+        var pendingHighest = ComputeRollingMax(high);
+        var pendingLowest = ComputeRollingMin(low);
+
         double weightSum = 0;
         double denomSum = 0;
         for (var j = 0; j < _length; j++)
         {
-            GetWindowHighLow(high, low, j, out var hh, out var ll);
+            // Batch uses highestList[i - j] which is the rolling max computed at position (i - j)
+            var hh = EhlersStreamingWindow.GetOffsetValue(_highestValues, pendingHighest, j);
+            var ll = EhlersStreamingWindow.GetOffsetValue(_lowestValues, pendingLowest, j);
             var c = EhlersStreamingWindow.GetOffsetValue(_inputValues, close, j);
             var range = hh - ll;
             var frac = range != 0 ? (c - ll) / range : 0;
@@ -1251,8 +1267,12 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
 
         if (isFinal)
         {
+            // Store raw high/low for rolling window computation
             _highValues.TryAdd(high, out _);
             _lowValues.TryAdd(low, out _);
+            // Store the pre-computed rolling max/min (like batch's highestList/lowestList)
+            _highestValues.TryAdd(pendingHighest, out _);
+            _lowestValues.TryAdd(pendingLowest, out _);
             _inputValues.TryAdd(close, out _);
         }
 
@@ -1273,42 +1293,41 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
         _smoother.Dispose();
         _highValues.Dispose();
         _lowValues.Dispose();
+        _highestValues.Dispose();
+        _lowestValues.Dispose();
         _inputValues.Dispose();
     }
 
-    private void GetWindowHighLow(double pendingHigh, double pendingLow, int offset, out double high, out double low)
+    private double ComputeRollingMax(double pendingValue)
     {
-        var available = _highValues.Count + 1 - offset;
-        if (available <= 0)
+        var max = pendingValue;
+        var count = Math.Min(_length - 1, _highValues.Count);
+        for (var i = 0; i < count; i++)
         {
-            high = 0;
-            low = 0;
-            return;
-        }
-
-        var count = Math.Min(_length, available);
-        var hasValue = false;
-        double h = 0;
-        double l = 0;
-        for (var k = 0; k < count; k++)
-        {
-            var highValue = EhlersStreamingWindow.GetOffsetValue(_highValues, pendingHigh, offset + k);
-            var lowValue = EhlersStreamingWindow.GetOffsetValue(_lowValues, pendingLow, offset + k);
-            if (!hasValue)
+            var value = _highValues[_highValues.Count - 1 - i];
+            if (value > max)
             {
-                h = highValue;
-                l = lowValue;
-                hasValue = true;
-            }
-            else
-            {
-                h = Math.Max(h, highValue);
-                l = Math.Min(l, lowValue);
+                max = value;
             }
         }
 
-        high = hasValue ? h : 0;
-        low = hasValue ? l : 0;
+        return max;
+    }
+
+    private double ComputeRollingMin(double pendingValue)
+    {
+        var min = pendingValue;
+        var count = Math.Min(_length - 1, _lowValues.Count);
+        for (var i = 0; i < count; i++)
+        {
+            var value = _lowValues[_lowValues.Count - 1 - i];
+            if (value < min)
+            {
+                min = value;
+            }
+        }
+
+        return min;
     }
 }
 
