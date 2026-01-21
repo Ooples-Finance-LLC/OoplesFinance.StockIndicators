@@ -1654,6 +1654,8 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
     private readonly RollingWindowMin _lowWindow1;
     private readonly RollingWindowMax _highWindow2;
     private readonly RollingWindowMin _lowWindow2;
+    private readonly PooledRingBuffer<double> _laggedHighest2;
+    private readonly PooledRingBuffer<double> _laggedLowest2;
     private readonly StreamingInputResolver _input;
     private double _prevFilter;
     private bool _hasPrev;
@@ -1666,6 +1668,8 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         _lowWindow1 = new RollingWindowMin(_length);
         _highWindow2 = new RollingWindowMax(_halfP);
         _lowWindow2 = new RollingWindowMin(_halfP);
+        _laggedHighest2 = new PooledRingBuffer<double>(_halfP + 1);
+        _laggedLowest2 = new PooledRingBuffer<double>(_halfP + 1);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -1682,6 +1686,8 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         _lowWindow1 = new RollingWindowMin(_length);
         _highWindow2 = new RollingWindowMax(_halfP);
         _lowWindow2 = new RollingWindowMin(_halfP);
+        _laggedHighest2 = new PooledRingBuffer<double>(_halfP + 1);
+        _laggedLowest2 = new PooledRingBuffer<double>(_halfP + 1);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1693,6 +1699,8 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         _lowWindow1.Reset();
         _highWindow2.Reset();
         _lowWindow2.Reset();
+        _laggedHighest2.Clear();
+        _laggedLowest2.Clear();
         _prevFilter = 0;
         _hasPrev = false;
     }
@@ -1704,8 +1712,19 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         var lowestLow1 = isFinal ? _lowWindow1.Add(bar.Low, out _) : _lowWindow1.Preview(bar.Low, out _);
         var highestHigh2 = isFinal ? _highWindow2.Add(bar.High, out _) : _highWindow2.Preview(bar.High, out _);
         var lowestLow2 = isFinal ? _lowWindow2.Add(bar.Low, out _) : _lowWindow2.Preview(bar.Low, out _);
-        var highestHigh3 = highestHigh2;
-        var lowestLow3 = lowestLow2;
+
+        // Add current values to lag buffers FIRST (batch computes all values first, then accesses lagged)
+        if (isFinal)
+        {
+            _laggedHighest2.TryAdd(highestHigh2, out _);
+            _laggedLowest2.TryAdd(lowestLow2, out _);
+        }
+
+        // Use lagged values from halfP bars ago (batch: lagIndex = Math.Max(i - halfP, 0))
+        // For first halfP bars, lagIndex stays at 0 (uses first bar's value)
+        // After that, the oldest value in the ring buffer is from halfP bars ago
+        var highestHigh3 = _laggedHighest2.Count > 0 ? _laggedHighest2[0] : highestHigh2;
+        var lowestLow3 = _laggedLowest2.Count > 0 ? _laggedLowest2[0] : lowestLow2;
 
         var n3 = (highestHigh1 - lowestLow1) / _length;
         var n1 = (highestHigh2 - lowestLow2) / _halfP;
@@ -1740,6 +1759,8 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         _lowWindow1.Dispose();
         _highWindow2.Dispose();
         _lowWindow2.Dispose();
+        _laggedHighest2.Dispose();
+        _laggedLowest2.Dispose();
     }
 }
 

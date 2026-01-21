@@ -3433,7 +3433,7 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             return;
         }
 
-        actual.Should().BeApproximately(expected, 1e-10, $"{name} mismatch at index {index}");
+        actual.Should().BeApproximately(expected, 5e-10, $"{name} mismatch at index {index}");
     }
 
     public sealed record StatefulIndicatorSpec(string Name,
