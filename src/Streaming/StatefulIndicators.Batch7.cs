@@ -2005,8 +2005,8 @@ public sealed class EhlersAdaptiveBandPassFilterState : IStreamingIndicatorState
         var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
         domCyc = MathHelper.MinOrMax(domCyc, _length1, _length3);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var beta = Math.Cos(2 * Math.PI / 0.9 * domCyc);
-        var gamma = 1 / Math.Cos(2 * Math.PI * _bw / 0.9 * domCyc);
+        var beta = Math.Cos(2 * Math.PI / (0.9 * domCyc));
+        var gamma = 1 / Math.Cos(2 * Math.PI * _bw / (0.9 * domCyc));
         var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
 
         var bp = _index > 2
