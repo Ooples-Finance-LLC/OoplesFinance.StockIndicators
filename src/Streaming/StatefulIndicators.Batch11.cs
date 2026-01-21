@@ -3401,8 +3401,8 @@ public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicator
     {
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / 2 * _length1, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / 2 * _length1, 0.99, 0.01));
+        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / (2 * _length1), 0.99, 0.01));
+        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / (2 * _length1), 0.99, 0.01));
         _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length1);
         _input = new StreamingInputResolver(inputName, null);
@@ -3421,8 +3421,8 @@ public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicator
 
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / 2 * _length1, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / 2 * _length1, 0.99, 0.01));
+        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / (2 * _length1), 0.99, 0.01));
+        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / (2 * _length1), 0.99, 0.01));
         _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length1);
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -5064,7 +5064,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
         var longSum = isFinal ? _longPowSum.Add(longPow, out var longCount) : _longPowSum.Preview(longPow, out longCount);
         var longMa = longCount > 0 ? longSum / longCount : 0;
         var longRms = longMa > 0 ? MathHelper.Sqrt(longMa) : 0;
-        var kk = longRms != 0 ? MathHelper.MinOrMax(0.2 * shortRms / longRms, 0.99, 0.001) : 0;
+        var kk = longRms != 0 ? MathHelper.MinOrMax(0.2 * shortRms / longRms, 0.99, 0.01) : 0;
 
         var prevVidya = _hasPrev ? _prevVidya : 0;
         var vidya = (kk * value) + ((1 - kk) * prevVidya);
