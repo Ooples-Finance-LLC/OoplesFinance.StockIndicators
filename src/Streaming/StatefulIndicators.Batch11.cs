@@ -472,7 +472,8 @@ public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State : IStr
     {
         var value = _input.GetValue(bar);
         var trend = _trendEngine.Next(value, isFinal);
-        var cycle = _cycleEngine.Next(value, isFinal);
+        // Batch chains: cycle engine processes trend output (due to CustomValuesList chaining)
+        var cycle = _cycleEngine.Next(trend, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
