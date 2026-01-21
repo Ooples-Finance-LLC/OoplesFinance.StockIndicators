@@ -1059,12 +1059,17 @@ public sealed class EhlersCycleBandPassFilterState : IStreamingIndicatorState
 public sealed class EhlersCycleAmplitudeState : IStreamingIndicatorState
 {
     private readonly int _length;
+    private readonly int _lbLength;
     private readonly EhlersCycleBandPassFilterState _bpState;
+    private readonly PooledRingBuffer<double> _bpBuffer;
 
     public EhlersCycleAmplitudeState(int length = 20, double delta = 0.1)
     {
         _length = Math.Max(1, length);
+        _lbLength = (int)Math.Ceiling(_length / 4.0);
         _bpState = new EhlersCycleBandPassFilterState(_length, delta);
+        // Need to buffer: length values for bp1, plus lbLength offset for bp2
+        _bpBuffer = new PooledRingBuffer<double>(_length + _lbLength);
     }
 
     public IndicatorName Name => IndicatorName.EhlersCycleAmplitude;
@@ -1072,12 +1077,41 @@ public sealed class EhlersCycleAmplitudeState : IStreamingIndicatorState
     public void Reset()
     {
         _bpState.Reset();
+        _bpBuffer.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _bpState.Update(bar, isFinal, includeOutputs: false).Value;
-        var ptop = 2 * MathHelper.Sqrt2 * MathHelper.Sqrt(0 / (double)_length);
+        var bp = _bpState.Update(bar, isFinal, includeOutputs: false).Value;
+        var bpCount = _bpBuffer.Count;
+
+        // Calculate power sum: sum of (bp[i-j]^2 + bp[i-j-lbLength]^2) for j = 0 to length-1
+        double power = 0;
+        for (var j = 0; j < _length; j++)
+        {
+            // prevBp1: bp[i - j] -> current bp when j=0, then look back in buffer
+            double prevBp1;
+            if (j == 0)
+            {
+                prevBp1 = bp;
+            }
+            else
+            {
+                var idx1 = bpCount - j;
+                prevBp1 = idx1 >= 0 && idx1 < bpCount ? _bpBuffer[idx1] : 0;
+            }
+            // prevBp2: bp[i - j - lbLength]
+            var idx2 = bpCount - j - _lbLength;
+            var prevBp2 = idx2 >= 0 && idx2 < bpCount ? _bpBuffer[idx2] : 0;
+            power += MathHelper.Pow(prevBp1, 2) + MathHelper.Pow(prevBp2, 2);
+        }
+
+        var ptop = 2 * 1.414 * Math.Sqrt(power / _length);
+
+        if (isFinal)
+        {
+            _bpBuffer.TryAdd(bp, out _);
+        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1583,12 +1617,12 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
         var v1Neg2 = (0.080778 * (value + (1.907 * prevValue1) + prevValue2)) +
                      (0.293 * _prevV1Neg2_1) - (0.063 * _prevV1Neg2_2);
         var waveNeg2 = v1Neg2 + (0.513 * _prevV1Neg2_1) + _prevV1Neg2_2 +
-                       (0.4451 * _prevWaveNeg2_1) - (0.481 * _prevWaveNeg2_2);
+                       (0.451 * _prevWaveNeg2_1) - (0.481 * _prevWaveNeg2_2);
 
         var v1Neg1 = (0.021394 * (value + (1.777 * prevValue1) + prevValue2)) +
                      (0.731 * _prevV1Neg1_1) - (0.166 * _prevV1Neg1_2);
         var waveNeg1 = v1Neg1 + (0.977 * _prevV1Neg1_1) + _prevV1Neg1_2 +
-                       (1.0008 * _prevWaveNeg1_1) - (0.561 * _prevWaveNeg1_2);
+                       (1.008 * _prevWaveNeg1_1) - (0.561 * _prevWaveNeg1_2);
 
         var v10 = (0.0095822 * (value + (1.572 * prevValue1) + prevValue2)) +
                   (1.026 * _prevV10_1) - (0.282 * _prevV10_2);
