@@ -7,8 +7,15 @@ namespace OoplesFinance.StockIndicators.Streaming;
 
 public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly FastandSlowKurtosisOscillatorState _fsk;
+    // RSI state (computes RSI on close prices)
     private readonly RsiState _rsi;
+    // FSK inline state (operates on RSI values, not close prices - matching batch chaining behavior)
+    private readonly int _fskLength;
+    private const double FskRatio = 0.03;
+    private readonly PooledRingBuffer<double> _fskValues;
+    private double _fskPrevMomentum;
+    private double _fskPrevFsk;
+    // Smoothers
     private readonly IMovingAverageSmoother _fskSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
@@ -16,7 +23,8 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
     public FastandSlowRelativeStrengthIndexOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 6, InputName inputName = InputName.Close)
     {
-        _fsk = new FastandSlowKurtosisOscillatorState(maType, Math.Max(1, length1), 0.03, inputName);
+        _fskLength = Math.Max(1, length1);
+        _fskValues = new PooledRingBuffer<double>(_fskLength);
         _rsi = new RsiState(maType, Math.Max(1, length3));
         _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
@@ -31,7 +39,8 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _fsk = new FastandSlowKurtosisOscillatorState(maType, Math.Max(1, length1), 0.03, selector);
+        _fskLength = Math.Max(1, length1);
+        _fskValues = new PooledRingBuffer<double>(_fskLength);
         _rsi = new RsiState(maType, Math.Max(1, length3));
         _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
@@ -42,8 +51,10 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
 
     public void Reset()
     {
-        _fsk.Reset();
         _rsi.Reset();
+        _fskValues.Clear();
+        _fskPrevMomentum = 0;
+        _fskPrevFsk = 0;
         _fskSmoother.Reset();
         _signalSmoother.Reset();
     }
@@ -52,7 +63,20 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        var fsk = _fsk.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Compute FSK on RSI values (matching batch chaining behavior where FSK sees RSI via CustomValuesList)
+        var hasMomentum = _fskValues.Count >= _fskLength;
+        var prevRsi = hasMomentum ? EhlersStreamingWindow.GetOffsetValue(_fskValues, rsi, _fskLength) : 0;
+        var momentum = hasMomentum ? rsi - prevRsi : 0;
+        var fsk = (FskRatio * (momentum - _fskPrevMomentum)) + ((1 - FskRatio) * _fskPrevFsk);
+
+        if (isFinal)
+        {
+            _fskValues.TryAdd(rsi, out _);
+            _fskPrevMomentum = momentum;
+            _fskPrevFsk = fsk;
+        }
+
         var v4 = _fskSmoother.Next(fsk, isFinal);
         var fsrsi = (10000 * v4) + rsi;
         var signal = _signalSmoother.Next(fsrsi, isFinal);
@@ -72,8 +96,8 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
 
     public void Dispose()
     {
-        _fsk.Dispose();
         _rsi.Dispose();
+        _fskValues.Dispose();
         _fskSmoother.Dispose();
         _signalSmoother.Dispose();
     }
