@@ -1039,7 +1039,8 @@ public sealed class EhlersAlternateSignalToNoiseRatioState : IStreamingIndicator
         var snapshot = _mama.Next(bar.Close, isFinal);
         var range = (0.1 * (bar.High - bar.Low)) + (0.9 * _prevRange);
         var temp = range != 0 ? (snapshot.Real + snapshot.Imag) / (range * range) : 0;
-        var snr = (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + _length)) + (0.75 * _prevSnr);
+        var logTemp = temp > 0 ? Math.Log10(temp) : 0;
+        var snr = (0.25 * ((10 * logTemp) + _length)) + (0.75 * _prevSnr);
 
         if (isFinal)
         {
