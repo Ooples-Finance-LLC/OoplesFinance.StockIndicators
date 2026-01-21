@@ -1566,42 +1566,40 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
     {
         var value = _input.GetValue(bar);
         var prevTrend = _hasPrev ? _trend : 0;
-        var prevHp = _hasPrev ? _hp : value;
-        var prevLp = _hasPrev ? _lp : value;
+        // Batch uses GetLastOrDefault which returns 0 for empty lists
+        var prevHp = _hasPrev ? _hp : 0;
+        var prevLp = _hasPrev ? _lp : 0;
+        // Batch initializes trend=0, hp=0, lp=0 each iteration
         double nrtr;
-        double trend;
-        double hp;
-        double lp;
+        double trend = 0;
+        double hp = 0;
+        double lp = 0;
 
         if (prevTrend >= 0)
         {
-            hp = Math.Max(value, prevHp);
+            hp = value > prevHp ? value : prevHp;
             nrtr = hp * (1 - _pct);
-            trend = value <= nrtr ? -1 : 1;
+            // Only set trend=-1 when value <= nrtr; otherwise trend stays 0
             if (value <= nrtr)
             {
+                trend = -1;
                 lp = value;
                 nrtr = lp * (1 + _pct);
             }
-            else
-            {
-                lp = prevLp;
-            }
+            // Note: lp stays 0 when value > nrtr (matching batch behavior)
         }
         else
         {
-            lp = Math.Min(value, prevLp);
+            lp = value < prevLp ? value : prevLp;
             nrtr = lp * (1 + _pct);
-            trend = value > nrtr ? 1 : -1;
+            // Only set trend=1 when value > nrtr; otherwise trend stays 0
             if (value > nrtr)
             {
+                trend = 1;
                 hp = value;
                 nrtr = hp * (1 - _pct);
             }
-            else
-            {
-                hp = prevHp;
-            }
+            // Note: hp stays 0 when value <= nrtr (matching batch behavior)
         }
 
         if (isFinal)
