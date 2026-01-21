@@ -1294,7 +1294,7 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
                        (pow2 * prevHp2);
         var roofingFilter = (_c1 * ((highPass + prevHp1) / 2)) + (_c2 * prevRoofingFilter1) + (_c3 * prevRoofingFilter2);
 
-        var n = _index + 1;
+        var n = Math.Min(_index + 1, _length3);
         double sx = 0;
         double sy = 0;
         double sxx = 0;
