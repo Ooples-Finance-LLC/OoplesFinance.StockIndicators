@@ -1,3 +1,4 @@
+using System.Buffers;
 using OoplesFinance.StockIndicators.Builder.Notifications;
 using OoplesFinance.StockIndicators.Builder.Signals;
 using OoplesFinance.StockIndicators.Builder.Trading;
@@ -8,8 +9,9 @@ namespace OoplesFinance.StockIndicators.Builder;
 
 /// <summary>
 /// Runtime for executing indicators and processing signals.
+/// Implements IDisposable to manage buffer lifecycles and return all buffers to pool.
 /// </summary>
-public sealed class IndicatorRuntime
+public sealed class IndicatorRuntime : IDisposable
 {
     private readonly IndicatorDataSource _source;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
@@ -28,8 +30,19 @@ public sealed class IndicatorRuntime
     private readonly bool[] _signalStates;
     private readonly double?[] _signalPrevious;
     private readonly SignalGroupState[] _groupStates;
+    private readonly object _statsLock = new();
     private bool _hasEmitted;
     private bool _started;
+    private volatile bool _disposed;
+
+    // Buffer management
+    private readonly Dictionary<SeriesHandle, IndicatorBuffer<double>> _buffers = new();
+    private readonly object _buffersLock = new();
+
+    // Statistics
+    private long _buffersAllocated;
+    private long _buffersReused;
+    private long _totalBytesAllocated;
 
     internal IndicatorRuntime(
         IndicatorDataSource source,
@@ -76,6 +89,68 @@ public sealed class IndicatorRuntime
     public IndicatorSnapshot? Latest { get; private set; }
 
     /// <summary>
+    /// Gets the number of buffers allocated during this session.
+    /// </summary>
+    public long BuffersAllocated
+    {
+        get
+        {
+            lock (_statsLock)
+            {
+                return _buffersAllocated;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the number of buffer reuse operations during this session.
+    /// </summary>
+    public long BuffersReused
+    {
+        get
+        {
+            lock (_statsLock)
+            {
+                return _buffersReused;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the total bytes allocated for buffers during this session.
+    /// </summary>
+    public long TotalBytesAllocated
+    {
+        get
+        {
+            lock (_statsLock)
+            {
+                return _totalBytesAllocated;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the buffer reuse rate as a percentage (0-100).
+    /// </summary>
+    public double BufferReuseRate
+    {
+        get
+        {
+            lock (_statsLock)
+            {
+                var total = _buffersAllocated + _buffersReused;
+                return total == 0 ? 0 : (double)_buffersReused / total * 100;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets whether this runtime has been disposed.
+    /// </summary>
+    public bool IsDisposed => _disposed;
+
+    /// <summary>
     /// Event raised when indicators are updated.
     /// </summary>
     public event Action<IndicatorSnapshot>? Updated;
@@ -85,6 +160,7 @@ public sealed class IndicatorRuntime
     /// </summary>
     public void Subscribe(params SeriesHandle[] handles)
     {
+        ThrowIfDisposed();
         if (handles == null || handles.Length == 0)
         {
             return;
@@ -93,6 +169,95 @@ public sealed class IndicatorRuntime
         for (var i = 0; i < handles.Length; i++)
         {
             ActivateSeries(handles[i]);
+        }
+    }
+
+    /// <summary>
+    /// Gets the buffer for a computed indicator series.
+    /// The buffer is owned by the runtime and will be returned to the pool when the runtime is disposed.
+    /// Copy data with ToList() or ToArray() if you need it after disposal.
+    /// </summary>
+    /// <param name="handle">The series handle to retrieve.</param>
+    /// <returns>The indicator buffer for the series.</returns>
+    /// <exception cref="ObjectDisposedException">The runtime has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">The series has not been computed.</exception>
+    public IndicatorBuffer<double> GetSeries(SeriesHandle handle)
+    {
+        ThrowIfDisposed();
+        lock (_buffersLock)
+        {
+            if (_buffers.TryGetValue(handle, out var buffer))
+            {
+                return buffer;
+            }
+        }
+
+        // Try to resolve from latest snapshot if available
+        if (Latest is not null && Latest.TryGetSeries(handle, out var values))
+        {
+            return GetOrCreateBuffer(handle, values.Span);
+        }
+
+        throw new InvalidOperationException($"Series {handle} has not been computed. Call Start() first.");
+    }
+
+    /// <summary>
+    /// Tries to get the buffer for a computed indicator series.
+    /// </summary>
+    /// <param name="handle">The series handle to retrieve.</param>
+    /// <param name="buffer">The indicator buffer if found.</param>
+    /// <returns>True if the buffer was found; otherwise false.</returns>
+    public bool TryGetSeries(SeriesHandle handle, out IndicatorBuffer<double>? buffer)
+    {
+        if (_disposed)
+        {
+            buffer = null;
+            return false;
+        }
+
+        lock (_buffersLock)
+        {
+            if (_buffers.TryGetValue(handle, out var existing))
+            {
+                buffer = existing;
+                return true;
+            }
+        }
+
+        if (Latest is not null && Latest.TryGetSeries(handle, out var values))
+        {
+            buffer = GetOrCreateBuffer(handle, values.Span);
+            return true;
+        }
+
+        buffer = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Gets or creates a buffer for the specified series handle.
+    /// </summary>
+    private IndicatorBuffer<double> GetOrCreateBuffer(SeriesHandle handle, ReadOnlySpan<double> values)
+    {
+        lock (_buffersLock)
+        {
+            if (_buffers.TryGetValue(handle, out var existing))
+            {
+                lock (_statsLock)
+                {
+                    _buffersReused++;
+                }
+                return existing;
+            }
+
+            var buffer = new IndicatorBuffer<double>(values);
+            _buffers[handle] = buffer;
+            lock (_statsLock)
+            {
+                _buffersAllocated++;
+                _totalBytesAllocated += values.Length * sizeof(double);
+            }
+            return buffer;
         }
     }
 
@@ -457,5 +622,43 @@ public sealed class IndicatorRuntime
             result[i] = symbols[i].Value;
         }
         return result;
+    }
+
+    /// <summary>
+    /// Throws if the runtime has been disposed.
+    /// </summary>
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(IndicatorRuntime),
+                "Cannot access buffer after runtime has been disposed. Copy data with ToList() or ToArray() before disposing.");
+        }
+    }
+
+    /// <summary>
+    /// Disposes the runtime and returns all buffers to the pool atomically.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        // Return all buffers to pool atomically
+        lock (_buffersLock)
+        {
+            foreach (var kvp in _buffers)
+            {
+                kvp.Value.Dispose();
+            }
+            _buffers.Clear();
+        }
+
+        // Clear event handlers to prevent leaks
+        Updated = null;
     }
 }
