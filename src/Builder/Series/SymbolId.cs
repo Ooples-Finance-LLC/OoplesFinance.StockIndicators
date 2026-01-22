@@ -136,7 +136,7 @@ public readonly struct SymbolId : IEquatable<SymbolId>
 /// </summary>
 public static class SymbolDefaults
 {
-    private static readonly SymbolId[] AllUsSymbols = { SymbolId.Aapl, SymbolId.Msft, SymbolId.Goog, SymbolId.Amzn, SymbolId.Tsla, SymbolId.Nvda, SymbolId.Meta };
+    private static readonly SymbolId[] AllUsSymbols = { SymbolId.Aapl, SymbolId.Msft, SymbolId.Goog, SymbolId.Amzn, SymbolId.Tsla, SymbolId.Nvda, SymbolId.Meta, SymbolId.Spy, SymbolId.Qqq };
 
     /// <summary>
     /// Gets all US market symbols.

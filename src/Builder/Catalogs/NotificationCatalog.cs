@@ -66,8 +66,10 @@ public sealed class NotificationCatalog
     /// <summary>
     /// Adds a custom notification channel.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when channel is null.</exception>
     public NotificationCatalog AddChannel(INotificationChannel channel)
     {
+        if (channel is null) throw new ArgumentNullException(nameof(channel));
         _channels.Add(channel);
         return this;
     }

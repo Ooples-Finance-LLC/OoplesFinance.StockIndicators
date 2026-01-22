@@ -18,7 +18,7 @@ public sealed class BacktestOptions
     /// <summary>
     /// Gets or sets the initial capital. Defaults to 100,000.
     /// </summary>
-    public double? InitialCapital { get; set; }
+    public double? InitialCapital { get; set; } = 100_000d;
 
     /// <summary>
     /// Gets or sets the fee model.

@@ -302,6 +302,7 @@ public static partial class Calculations
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
         var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
 
+        double prevAtrDev = 0;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -316,8 +317,10 @@ public static partial class Calculations
             var atrDev = bbDiff != 0 ? currentAtr / bbDiff : 0;
             atrDevList.Add(atrDev);
 
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, atrDev, 0.5);
+            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, atrDev, prevAtrDev);
             signalsList?.Add(signal);
+
+            prevAtrDev = atrDev;
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

@@ -942,7 +942,8 @@ internal static class FacadeSketchesV4
 
         public void Execute(TradeRequest request)
         {
-            Console.WriteLine($"Alpaca: {_options.ApiKey} {request.SignalId} {request.Action}");
+            var maskedKey = string.IsNullOrEmpty(_options.ApiKey) ? "[NO_KEY]" : $"***{_options.ApiKey[^4..]}";
+            Console.WriteLine($"Alpaca: {maskedKey} {request.SignalId} {request.Action}");
         }
     }
     private sealed class IndicatorRuntime

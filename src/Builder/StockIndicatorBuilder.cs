@@ -74,6 +74,7 @@ public sealed class StockIndicatorBuilder
     public StockIndicatorBuilder ConfigureIndicators(IndicatorOptions? options = null, Action<IndicatorCatalog>? configure = null)
     {
         _indicatorOptions = options ?? new IndicatorOptions();
+        _defaultsApplied = false;
         ApplyIndicatorDefaults();
         configure?.Invoke(_indicators);
         return this;
@@ -168,6 +169,7 @@ public sealed class StockIndicatorBuilder
             new Dictionary<IndicatorKey, SeriesHandle>(_keys),
             _signals.Build(),
             _signals.BuildGroups(),
+            _signals.BuildRangeRules(),
             _notifications.Build(),
             _autoTrading.Build(),
             _behavior,

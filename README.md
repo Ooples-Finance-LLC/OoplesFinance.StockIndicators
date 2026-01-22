@@ -117,19 +117,23 @@ using OoplesFinance.StockIndicators.Builder;
 var stockData = new StockData(opens, highs, lows, closes, volumes, dates);
 var source = IndicatorDataSource.FromBatch(stockData);
 
+// Declare handles at outer scope for cross-lambda access
+SeriesHandle sma = default, rsi = default;
+SignalHandle overboughtSignal = default;
+
 // Configure indicators with the fluent builder
 var builder = new StockIndicatorBuilder(source)
     .ConfigureIndicators(indicators =>
     {
-        var sma = indicators.Sma(20);
-        var rsi = indicators.Rsi(14);
+        sma = indicators.Sma(20);
+        rsi = indicators.Rsi(14);
         var bb = indicators.BollingerBands(20, 2);
         var macd = indicators.Macd(12, 26, 9);
     })
     .ConfigureSignals(signals =>
     {
         // Define trading signals
-        signals.When(rsi).CrossesAbove(70).Emit("overbought");
+        overboughtSignal = signals.When(rsi).CrossesAbove(70).Emit("overbought");
         signals.When(rsi).CrossesBelow(30).Emit("oversold");
 
         // Group conditions
@@ -155,7 +159,7 @@ var builder = new StockIndicatorBuilder(source)
 
 // Build and use
 using var runtime = builder.Build();
-var smaBuffer = runtime.GetSeries(smaHandle);
+var smaBuffer = runtime.GetSeries(sma);
 var values = smaBuffer.AsSpan(); // Zero-allocation access
 ```
 
@@ -190,12 +194,13 @@ For migration from v1.x, see [MIGRATION.md](MIGRATION.md).
 ## Dev Console
 A developer console is available to run batch, streaming, and multi-series examples locally.
 
-```
+```bash
 dotnet run --project examples/OoplesFinance.StockIndicators.DevConsole/OoplesFinance.StockIndicators.DevConsole.csproj
 ```
 
 Non-interactive:
-```
+
+```bash
 dotnet run --project examples/OoplesFinance.StockIndicators.DevConsole/OoplesFinance.StockIndicators.DevConsole.csproj -- --run-all --no-pause
 ```
 
@@ -203,7 +208,9 @@ dotnet run --project examples/OoplesFinance.StockIndicators.DevConsole/OoplesFin
 Sample BenchmarkDotNet results (Count=10000, net10.0). Optimized = this fork, Baseline = original library.
 
 <!-- PERF_TABLES_START -->
+
 Length = 14
+
 | Indicator | Optimized (us) | Baseline (us) | Speedup |
 | --- | --- | --- | --- |
 | SMA | 319.6 | 13636.9 | 42.7x |

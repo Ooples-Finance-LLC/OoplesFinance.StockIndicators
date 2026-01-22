@@ -82,10 +82,13 @@ var smaValues = smaBuffer.ToList();
 ### Step 4: Add Signals (New in v2.0)
 
 ```csharp
+// Declare handles at outer scope for cross-lambda access
+SeriesHandle rsi = default;
+
 var builder = new StockIndicatorBuilder(source)
     .ConfigureIndicators(indicators =>
     {
-        var rsi = indicators.Rsi(14);
+        rsi = indicators.Rsi(14);
     })
     .ConfigureSignals(signals =>
     {

@@ -81,8 +81,10 @@ public sealed class IndicatorDataSource
     /// </summary>
     /// <param name="data">The stock data to use.</param>
     /// <param name="defaults">Optional provider defaults.</param>
+    /// <exception cref="ArgumentNullException">Thrown when data is null.</exception>
     public static IndicatorDataSource FromBatch(StockData data, IDataProviderDefaults? defaults = null)
     {
+        if (data is null) throw new ArgumentNullException(nameof(data));
         return new IndicatorDataSource(IndicatorSourceKind.Batch, data, null, defaults, null, null);
     }
 
@@ -92,8 +94,10 @@ public sealed class IndicatorDataSource
     /// </summary>
     /// <param name="data">The collection of stock data to use.</param>
     /// <param name="defaults">Optional provider defaults.</param>
+    /// <exception cref="ArgumentNullException">Thrown when data is null.</exception>
     public static IndicatorDataSource FromBatch(IEnumerable<StockData> data, IDataProviderDefaults? defaults = null)
     {
+        if (data is null) throw new ArgumentNullException(nameof(data));
         var list = data.ToList();
         if (list.Count == 0)
         {
@@ -115,8 +119,10 @@ public sealed class IndicatorDataSource
     /// </summary>
     /// <param name="source">The stream source to use.</param>
     /// <param name="defaults">Optional provider defaults.</param>
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
     public static IndicatorDataSource FromStreaming(IStreamSource source, IDataProviderDefaults? defaults = null)
     {
+        if (source is null) throw new ArgumentNullException(nameof(source));
         return new IndicatorDataSource(IndicatorSourceKind.Streaming, null, source, defaults, null, null);
     }
 

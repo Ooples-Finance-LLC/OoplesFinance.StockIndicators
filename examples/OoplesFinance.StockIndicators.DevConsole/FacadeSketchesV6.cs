@@ -1806,7 +1806,8 @@ internal static class FacadeSketchesV6
 
         public void Execute(TradeRequest request)
         {
-            Console.WriteLine($"Alpaca: {_options.ApiKey} {request.Signal} {request.Action}");
+            var maskedKey = string.IsNullOrEmpty(_options.ApiKey) ? "[NO_KEY]" : $"***{_options.ApiKey[^4..]}";
+            Console.WriteLine($"Alpaca: {maskedKey} {request.Signal} {request.Action}");
         }
     }
     private sealed class IndicatorRuntime
@@ -1938,6 +1939,12 @@ internal static class FacadeSketchesV6
                 }
 
                 var handle = pair.Key;
+
+                // Respect lazy compute policy - skip inactive series
+                if (!_activeSeries.Contains(handle))
+                {
+                    continue;
+                }
                 var spec = pair.Value.Spec!;
                 var key = pair.Value.SeriesKey;
                 var state = CreateStreamingState(spec);

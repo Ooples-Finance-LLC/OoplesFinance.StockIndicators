@@ -2,12 +2,15 @@ namespace OoplesFinance.StockIndicators.Builder;
 
 /// <summary>
 /// Immutable snapshot of indicator values at a point in time.
+/// Lazily-resolved values are cached separately to maintain immutability of the original series.
 /// </summary>
 public sealed class IndicatorSnapshot
 {
     private readonly Dictionary<SeriesHandle, double[]> _series;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
     private readonly Func<SeriesHandle, double[]?>? _resolver;
+    private readonly object _cacheLock = new();
+    private Dictionary<SeriesHandle, double[]>? _lazyCache;
 
     /// <summary>
     /// Creates a new indicator snapshot.
@@ -27,18 +30,35 @@ public sealed class IndicatorSnapshot
     /// </summary>
     public bool TryGetSeries(SeriesHandle handle, out ReadOnlyMemory<double> values)
     {
+        // First check the immutable original series
         if (_series.TryGetValue(handle, out var list))
         {
             values = list;
             return true;
         }
 
+        // Then check the lazy cache (thread-safe)
+        lock (_cacheLock)
+        {
+            if (_lazyCache != null && _lazyCache.TryGetValue(handle, out var cached))
+            {
+                values = cached;
+                return true;
+            }
+        }
+
+        // Try to resolve lazily
         if (_resolver != null)
         {
             var resolved = _resolver(handle);
             if (resolved != null)
             {
-                _series[handle] = resolved;
+                // Store in separate lazy cache to maintain immutability of _series
+                lock (_cacheLock)
+                {
+                    _lazyCache ??= new Dictionary<SeriesHandle, double[]>();
+                    _lazyCache[handle] = resolved;
+                }
                 values = resolved;
                 return true;
             }

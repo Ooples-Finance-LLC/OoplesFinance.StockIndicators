@@ -345,7 +345,7 @@ public sealed class SignalGroupRule
             SignalGroupMode.All => activeCount == total,
             SignalGroupMode.Any => activeCount > 0,
             SignalGroupMode.AtLeast => activeCount >= Math.Max(1, RequiredCount ?? total),
-            SignalGroupMode.Percent => activeCount >= Math.Ceiling(total * Math.Max(0, RequiredPercent ?? 0) / 100d),
+            SignalGroupMode.Percent => activeCount >= Math.Ceiling(total * Math.Min(100, Math.Max(0, RequiredPercent ?? 0)) / 100d),
             _ => false
         };
     }

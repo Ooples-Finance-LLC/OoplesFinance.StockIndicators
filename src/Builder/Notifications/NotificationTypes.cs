@@ -504,7 +504,7 @@ public sealed class DiscordNotificationChannel : INotificationChannel
             });
 
             using var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync(webhookUrl, content, cancellationToken).ConfigureAwait(false);
+            using var response = await HttpClient.PostAsync(webhookUrl, content, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {

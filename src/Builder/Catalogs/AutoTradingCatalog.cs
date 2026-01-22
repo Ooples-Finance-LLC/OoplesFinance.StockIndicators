@@ -35,8 +35,10 @@ public sealed class AutoTradingCatalog
     /// <summary>
     /// Adds a custom trade adapter.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when adapter is null.</exception>
     public AutoTradeAdapterBuilder AddAdapter(IAutoTradeAdapter adapter)
     {
+        if (adapter is null) throw new ArgumentNullException(nameof(adapter));
         _adapters.Add(adapter);
         return new AutoTradeAdapterBuilder(this, adapter);
     }

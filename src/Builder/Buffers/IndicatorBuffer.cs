@@ -7,6 +7,13 @@ namespace OoplesFinance.StockIndicators.Builder;
 /// A high-performance buffer type that uses ArrayPool internally for zero heap allocations in hot paths.
 /// Implements IReadOnlyList&lt;T&gt; for easy enumeration and indexing, and IDisposable to return the buffer to the pool.
 /// </summary>
+/// <remarks>
+/// <para><b>Thread Safety:</b></para>
+/// <para>This type is safe for concurrent reads but not for concurrent writes. Multiple threads may read
+/// from the buffer simultaneously, but writes (including Add, Clear, and Dispose) must be synchronized
+/// externally if called from multiple threads. Once disposed, all read operations will throw
+/// <see cref="ObjectDisposedException"/>.</para>
+/// </remarks>
 /// <typeparam name="T">The element type (must be a value type for performance).</typeparam>
 public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
     where T : struct
@@ -14,6 +21,7 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
     private static readonly ArrayPool<T> SharedPool = ArrayPool<T>.Shared;
 
     private readonly ArrayPool<T> _pool;
+    private bool _ownsArray;
     private T[]? _array;
     private int _count;
     private volatile bool _disposed;
@@ -33,6 +41,7 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
         _pool = pool ?? SharedPool;
         _array = capacity > 0 ? _pool.Rent(capacity) : Array.Empty<T>();
         _count = 0;
+        _ownsArray = capacity > 0;
     }
 
     /// <summary>
@@ -46,6 +55,7 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
         _array = source.Length > 0 ? _pool.Rent(source.Length) : Array.Empty<T>();
         source.CopyTo(_array);
         _count = source.Length;
+        _ownsArray = source.Length > 0;
     }
 
     /// <summary>
@@ -191,12 +201,14 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
     public async Task<List<T>> ToListAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        var list = new List<T>(_count);
+        var array = _array;
+        int count = _count;
+        var list = new List<T>(count);
         const int batchSize = 1024;
-        for (int i = 0; i < _count; i++)
+        for (int i = 0; i < count && array is not null; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            list.Add(_array![i]);
+            list.Add(array[i]);
             if (i > 0 && i % batchSize == 0)
             {
                 await Task.Yield();
@@ -358,7 +370,7 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
         }
         _disposed = true;
 
-        if (_array is not null && _array.Length > 0)
+        if (_ownsArray && _array is not null && _array.Length > 0)
         {
             ReturnArrayToPool(_array);
         }
@@ -418,6 +430,7 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
         var buffer = new IndicatorBuffer<T>(0, pool);
         buffer._array = array;
         buffer._count = count;
+        buffer._ownsArray = pool is not null;
         return buffer;
     }
 }

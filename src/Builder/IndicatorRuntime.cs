@@ -18,6 +18,7 @@ public sealed class IndicatorRuntime : IDisposable
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
     private readonly IReadOnlyList<SignalRule> _signals;
     private readonly IReadOnlyList<SignalGroupRule> _groupSignals;
+    private readonly IReadOnlyList<SignalRangeRule> _rangeSignals;
     private readonly IReadOnlyList<INotificationChannel> _notifications;
     private readonly AutoTradingConfiguration _autoTrading;
     private readonly BehaviorOptions _behavior;
@@ -30,6 +31,7 @@ public sealed class IndicatorRuntime : IDisposable
     private readonly bool[] _signalStates;
     private readonly double?[] _signalPrevious;
     private readonly SignalGroupState[] _groupStates;
+    private readonly bool[] _rangeStates;
     private readonly object _statsLock = new();
     private bool _hasEmitted;
     private bool _started;
@@ -38,6 +40,14 @@ public sealed class IndicatorRuntime : IDisposable
     // Buffer management
     private readonly Dictionary<SeriesHandle, IndicatorBuffer<double>> _buffers = new();
     private readonly object _buffersLock = new();
+
+    // Streaming session (stored as field to prevent premature disposal)
+    private StreamingSession? _streamingSession;
+
+    // Object pooling for streaming hot-path allocations
+    private Dictionary<SeriesHandle, double[]>? _streamingValues;
+    private Dictionary<SeriesHandle, double[]>? _snapshotPool;
+    private readonly object _poolLock = new();
 
     // Statistics
     private long _buffersAllocated;
@@ -50,6 +60,7 @@ public sealed class IndicatorRuntime : IDisposable
         Dictionary<IndicatorKey, SeriesHandle> keys,
         IReadOnlyList<SignalRule> signals,
         IReadOnlyList<SignalGroupRule> groupSignals,
+        IReadOnlyList<SignalRangeRule> rangeSignals,
         IReadOnlyList<INotificationChannel> notifications,
         AutoTradingConfiguration autoTrading,
         BehaviorOptions behavior,
@@ -65,6 +76,7 @@ public sealed class IndicatorRuntime : IDisposable
         _keys = keys;
         _signals = signals;
         _groupSignals = groupSignals;
+        _rangeSignals = rangeSignals;
         _notifications = notifications;
         _autoTrading = autoTrading;
         _behavior = behavior;
@@ -77,6 +89,7 @@ public sealed class IndicatorRuntime : IDisposable
         _signalStates = new bool[signals.Count];
         _signalPrevious = new double?[signals.Count];
         _groupStates = new SignalGroupState[groupSignals.Count];
+        _rangeStates = new bool[rangeSignals.Count];
         for (var i = 0; i < groupSignals.Count; i++)
         {
             _groupStates[i] = new SignalGroupState(groupSignals[i].Conditions.Length);
@@ -316,8 +329,12 @@ public sealed class IndicatorRuntime : IDisposable
             throw new InvalidOperationException("Streaming options must include at least one symbol.");
         }
 
-        var values = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
-        using var session = StreamingSession.Create(stream, symbols, options: options);
+        // Initialize pooled objects for hot-path reuse
+        _streamingValues = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
+        _snapshotPool = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
+
+        // Store session as field to prevent premature disposal (Start() is non-blocking)
+        _streamingSession = StreamingSession.Create(stream, symbols, options: options);
         var subscriptionOptions = options.CreateSubscriptionOptions();
 
         foreach (var pair in _nodes)
@@ -328,6 +345,13 @@ public sealed class IndicatorRuntime : IDisposable
             }
 
             var handle = pair.Key;
+
+            // Respect lazy compute policy - skip inactive series
+            if (!_activeSeries.Contains(handle))
+            {
+                continue;
+            }
+
             var spec = pair.Value.Spec;
             if (spec == null)
             {
@@ -341,17 +365,35 @@ public sealed class IndicatorRuntime : IDisposable
                 continue;
             }
 
-            session.RegisterStatefulIndicator(key.Symbol.Value, key.Timeframe, state, update =>
+            _streamingSession.RegisterStatefulIndicator(key.Symbol.Value, key.Timeframe, state, update =>
             {
                 var value = StreamingIndicatorFactory.ExtractValue(update, spec);
-                values[handle] = new[] { value };
-                UpdateFormulaNodes(values);
-                var snapshotSeries = new Dictionary<SeriesHandle, double[]>(values);
-                Publish(new IndicatorSnapshot(snapshotSeries, _keys, requested => ResolveStreamingSeries(snapshotSeries, requested)));
+
+                // Reuse buffer instead of allocating new array each time
+                lock (_poolLock)
+                {
+                    if (!_streamingValues!.TryGetValue(handle, out var buffer))
+                    {
+                        buffer = new double[1];
+                        _streamingValues[handle] = buffer;
+                    }
+                    buffer[0] = value;
+
+                    UpdateFormulaNodes(_streamingValues);
+
+                    // Reuse snapshot dictionary by clearing and refilling
+                    _snapshotPool!.Clear();
+                    foreach (var kvp in _streamingValues)
+                    {
+                        _snapshotPool[kvp.Key] = kvp.Value;
+                    }
+
+                    PublishStreaming(new IndicatorSnapshot(_snapshotPool, _keys, requested => ResolveStreamingSeries(_snapshotPool, requested)));
+                }
             }, subscriptionOptions);
         }
 
-        session.Start();
+        _streamingSession.Start();
     }
 
     private void UpdateFormulaNodes(Dictionary<SeriesHandle, double[]> values)
@@ -379,7 +421,13 @@ public sealed class IndicatorRuntime : IDisposable
             if (node.Formula != null)
             {
                 var result = node.Formula(left, right);
-                values[pair.Key] = new[] { result };
+                // Reuse buffer instead of allocating new array each time
+                if (!values.TryGetValue(pair.Key, out var buffer))
+                {
+                    buffer = new double[1];
+                    values[pair.Key] = buffer;
+                }
+                buffer[0] = result;
             }
         }
     }
@@ -469,9 +517,22 @@ public sealed class IndicatorRuntime : IDisposable
         }
     }
 
-    private void Publish(IndicatorSnapshot snapshot)
+    /// <summary>
+    /// Publishes a snapshot from streaming mode (respects warmup suppression).
+    /// </summary>
+    private void PublishStreaming(IndicatorSnapshot snapshot)
     {
-        if (!_behavior.EmitWarmup && !_hasEmitted)
+        Publish(snapshot, allowWarmupSkip: _behavior.SuppressStreamingWarmup ?? _behavior.EmitWarmup == false);
+    }
+
+    /// <summary>
+    /// Publishes a snapshot.
+    /// </summary>
+    /// <param name="snapshot">The snapshot to publish.</param>
+    /// <param name="allowWarmupSkip">If true and this is the first emission, skip it (warmup suppression).</param>
+    private void Publish(IndicatorSnapshot snapshot, bool allowWarmupSkip = false)
+    {
+        if (allowWarmupSkip && !_hasEmitted)
         {
             _hasEmitted = true;
             return;
@@ -522,6 +583,33 @@ public sealed class IndicatorRuntime : IDisposable
         }
 
         EvaluateGroupSignals(snapshot);
+        EvaluateRangeSignals(snapshot);
+    }
+
+    private void EvaluateRangeSignals(IndicatorSnapshot snapshot)
+    {
+        for (var i = 0; i < _rangeSignals.Count; i++)
+        {
+            var rule = _rangeSignals[i];
+            if (!rule.Series.TryResolve(snapshot, out var values))
+            {
+                continue;
+            }
+
+            var last = LastValue(values);
+            if (double.IsNaN(last))
+            {
+                continue;
+            }
+
+            var active = rule.IsActive(last);
+            if (active && !_rangeStates[i])
+            {
+                Dispatch(rule.Handle, rule.Name, last);
+            }
+
+            _rangeStates[i] = active;
+        }
     }
 
     private void EvaluateGroupSignals(IndicatorSnapshot snapshot)
@@ -612,7 +700,14 @@ public sealed class IndicatorRuntime : IDisposable
                 continue;
             }
 
-            ruleConfig.Adapter.Execute(new TradeRequest(handle, ruleConfig.Action, DateTime.UtcNow));
+            try
+            {
+                ruleConfig.Adapter.Execute(new TradeRequest(handle, ruleConfig.Action, DateTime.UtcNow));
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"[AutoTrading] Error executing trade: {ex.Message}");
+            }
         }
     }
 
@@ -659,6 +754,19 @@ public sealed class IndicatorRuntime : IDisposable
         }
 
         _disposed = true;
+
+        // Dispose streaming session if active
+        _streamingSession?.Dispose();
+        _streamingSession = null;
+
+        // Clear pooled objects
+        lock (_poolLock)
+        {
+            _streamingValues?.Clear();
+            _snapshotPool?.Clear();
+            _streamingValues = null;
+            _snapshotPool = null;
+        }
 
         // Return all buffers to pool atomically
         lock (_buffersLock)

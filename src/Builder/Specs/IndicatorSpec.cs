@@ -15,8 +15,10 @@ public sealed class IndicatorSpec
     /// <summary>
     /// Creates a new indicator specification.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when options is null.</exception>
     public IndicatorSpec(IndicatorName name, IIndicatorSpecOptions options, IndicatorOutput output)
     {
+        if (options is null) throw new ArgumentNullException(nameof(options));
         Name = name;
         Options = options;
         Output = output;

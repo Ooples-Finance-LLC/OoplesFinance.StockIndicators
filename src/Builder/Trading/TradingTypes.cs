@@ -301,12 +301,12 @@ public sealed class AlpacaTradeAdapter : IAutoTradeAdapter
             });
 
             var url = $"{baseUrl}/v2/orders";
-            var requestMessage = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url);
+            using var requestMessage = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url);
             requestMessage.Headers.Add("APCA-API-KEY-ID", apiKey);
             requestMessage.Headers.Add("APCA-API-SECRET-KEY", apiSecret);
             requestMessage.Content = new System.Net.Http.StringContent(orderPayload, System.Text.Encoding.UTF8, "application/json");
 
-            var response = HttpClient.SendAsync(requestMessage).GetAwaiter().GetResult();
+            using var response = HttpClient.SendAsync(requestMessage).GetAwaiter().GetResult();
             var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
             if (response.IsSuccessStatusCode)

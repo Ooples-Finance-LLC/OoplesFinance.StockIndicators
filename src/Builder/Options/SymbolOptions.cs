@@ -26,16 +26,20 @@ public sealed class SymbolOptions
     /// <summary>
     /// Creates options for specific symbols.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when symbols is null.</exception>
     public static SymbolOptions For(params SymbolId[] symbols)
     {
+        if (symbols is null) throw new ArgumentNullException(nameof(symbols));
         return new SymbolOptions { Symbols = symbols };
     }
 
     /// <summary>
     /// Creates options for specific symbols by string.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when symbols is null.</exception>
     public static SymbolOptions For(params string[] symbols)
     {
+        if (symbols is null) throw new ArgumentNullException(nameof(symbols));
         var symbolIds = new SymbolId[symbols.Length];
         for (var i = 0; i < symbols.Length; i++)
         {

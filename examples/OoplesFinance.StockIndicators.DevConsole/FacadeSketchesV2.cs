@@ -484,6 +484,29 @@ internal static class FacadeSketchesV2
 
             var updates = new List<StreamingIndicatorStateUpdate>();
             var symbols = options.Symbols ?? new[] { _symbol };
+
+            // Ensure the indicator's symbol is included in the subscription list
+            var hasSymbol = false;
+            for (var i = 0; i < symbols.Count; i++)
+            {
+                if (string.Equals(symbols[i], _symbol, StringComparison.OrdinalIgnoreCase))
+                {
+                    hasSymbol = true;
+                    break;
+                }
+            }
+
+            if (!hasSymbol)
+            {
+                var merged = new string[symbols.Count + 1];
+                for (var i = 0; i < symbols.Count; i++)
+                {
+                    merged[i] = symbols[i];
+                }
+                merged[symbols.Count] = _symbol;
+                symbols = merged;
+            }
+
             using var session = StreamingSession.Create(source, symbols, options: options);
             for (var i = 0; i < _steps.Count; i++)
             {

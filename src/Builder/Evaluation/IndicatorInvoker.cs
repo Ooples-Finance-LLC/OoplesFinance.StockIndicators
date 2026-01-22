@@ -34,6 +34,13 @@ internal static class IndicatorInvoker
         {
             // Build parameter array: first parameter is always stockData, then optional parameters
             var methodParams = method.GetParameters();
+
+            // Detect extra parameters that the method doesn't accept
+            if (parameters.Length > methodParams.Length - 1)
+            {
+                throw new ArgumentException($"Too many parameters for indicator '{name}'. Expected at most {methodParams.Length - 1}, got {parameters.Length}.");
+            }
+
             var args = new object[methodParams.Length];
             args[0] = data; // StockData is always first parameter
 

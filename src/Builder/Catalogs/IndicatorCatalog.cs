@@ -408,7 +408,7 @@ public sealed partial class IndicatorCatalog
             FormulaOp.Add => (x, y) => x + y,
             FormulaOp.Subtract => (x, y) => x - y,
             FormulaOp.Multiply => (x, y) => x * y,
-            FormulaOp.Divide => (x, y) => x / y,
+            FormulaOp.Divide => (x, y) => y == 0 ? double.NaN : x / y,
             _ => (x, y) => double.NaN
         });
     }

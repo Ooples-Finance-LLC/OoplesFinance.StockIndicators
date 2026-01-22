@@ -6,17 +6,33 @@ using OoplesFinance.StockIndicators.Models;
 namespace OoplesFinance.StockIndicators.Builder;
 
 /// <summary>
-/// Evaluates series in a computation graph.
+/// Evaluates series in a computation graph with multi-symbol support.
 /// </summary>
 internal sealed class SeriesEvaluator
 {
-    private readonly StockData _data;
+    private readonly Dictionary<SeriesKey, StockData> _dataByKey;
+    private readonly StockData _defaultData;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<SeriesHandle, double[]> _cache;
 
+    /// <summary>
+    /// Creates a new series evaluator with single-symbol data (backwards compatible).
+    /// </summary>
     public SeriesEvaluator(StockData data, Dictionary<SeriesHandle, SeriesNode> nodes)
     {
-        _data = data;
+        _defaultData = data;
+        _dataByKey = new Dictionary<SeriesKey, StockData>();
+        _nodes = nodes;
+        _cache = new Dictionary<SeriesHandle, double[]>();
+    }
+
+    /// <summary>
+    /// Creates a new series evaluator with multi-symbol data support.
+    /// </summary>
+    public SeriesEvaluator(Dictionary<SeriesKey, StockData> dataByKey, StockData defaultData, Dictionary<SeriesHandle, SeriesNode> nodes)
+    {
+        _dataByKey = dataByKey;
+        _defaultData = defaultData;
         _nodes = nodes;
         _cache = new Dictionary<SeriesHandle, double[]>();
     }
@@ -58,7 +74,7 @@ internal sealed class SeriesEvaluator
         switch (node.Kind)
         {
             case SeriesNodeKind.Base:
-                resolved = GetBaseInput();
+                resolved = GetBaseInput(node.SeriesKey);
                 break;
             case SeriesNodeKind.Indicator:
                 resolved = ResolveIndicator(node, visiting);
@@ -83,7 +99,8 @@ internal sealed class SeriesEvaluator
         }
 
         var input = Resolve(node.Input.Value, visiting);
-        var working = CloneWithCustomValues(_data, input);
+        var baseData = GetBaseData(node.SeriesKey);
+        var working = CloneWithCustomValues(baseData, input);
         var result = ApplyIndicator(working, node.Spec);
         return ExtractOutput(result, node.Spec);
     }
@@ -109,9 +126,26 @@ internal sealed class SeriesEvaluator
         return values;
     }
 
-    private double[] GetBaseInput()
+    /// <summary>
+    /// Gets the base data for a series key, supporting multi-symbol scenarios.
+    /// </summary>
+    private StockData GetBaseData(SeriesKey seriesKey)
     {
-        var input = _data.CustomValuesList.Count > 0 ? _data.CustomValuesList : _data.InputValues;
+        if (_dataByKey.TryGetValue(seriesKey, out var data))
+        {
+            return data;
+        }
+
+        return _defaultData;
+    }
+
+    /// <summary>
+    /// Gets the base input values for a series key.
+    /// </summary>
+    private double[] GetBaseInput(SeriesKey seriesKey)
+    {
+        var data = GetBaseData(seriesKey);
+        var input = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         return input.ToArray();
     }
 
@@ -163,7 +197,7 @@ internal sealed class SeriesEvaluator
 
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
-        var key = GetOutputKey(spec.Name, spec.Output);
+        var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
         if (key is not null && result.OutputValues.TryGetValue(key, out var list))
         {
             return list.ToArray();
@@ -171,29 +205,110 @@ internal sealed class SeriesEvaluator
 
         return result.CustomValuesList.ToArray();
     }
+}
 
-    private static string? GetOutputKey(IndicatorName name, IndicatorOutput output)
+/// <summary>
+/// Extensible registry for indicator output key mappings.
+/// </summary>
+public static class IndicatorOutputRegistry
+{
+    private static readonly Dictionary<(IndicatorName, IndicatorOutput), string> OutputKeyMap = new()
     {
-        if (name == IndicatorName.MovingAverageConvergenceDivergence)
+        // MACD outputs
+        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Signal), "Signal" },
+        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Histogram), "Histogram" },
+
+        // Bollinger Bands outputs
+        { (IndicatorName.BollingerBands, IndicatorOutput.UpperBand), "UpperBand" },
+        { (IndicatorName.BollingerBands, IndicatorOutput.MiddleBand), "MiddleBand" },
+        { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
+
+        // Stochastic outputs (K/D lines)
+        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "SignalFastK" },
+
+        // ADX outputs (DI+, DI-, ADX)
+        { (IndicatorName.AverageDirectionalIndex, IndicatorOutput.Signal), "Adx" },
+
+        // Aroon outputs
+        { (IndicatorName.AroonOscillator, IndicatorOutput.UpperBand), "AroonUp" },
+        { (IndicatorName.AroonOscillator, IndicatorOutput.LowerBand), "AroonDown" },
+
+        // CCI outputs
+        { (IndicatorName.CommodityChannelIndex, IndicatorOutput.Primary), "Cci" },
+
+        // Williams %R outputs
+        { (IndicatorName.WilliamsR, IndicatorOutput.Primary), "WilliamsR" },
+    };
+
+    private static readonly object RegistryLock = new();
+
+    /// <summary>
+    /// Gets the output key for an indicator and output type.
+    /// </summary>
+    /// <param name="name">The indicator name.</param>
+    /// <param name="output">The output type.</param>
+    /// <returns>The output key string, or null if using default output.</returns>
+    public static string? GetOutputKey(IndicatorName name, IndicatorOutput output)
+    {
+        // Primary output typically uses CustomValuesList, not OutputValues
+        if (output == IndicatorOutput.Primary)
         {
-            return output switch
+            // Check if there's a specific mapping for this indicator's primary output
+            lock (RegistryLock)
             {
-                IndicatorOutput.Signal => "Signal",
-                IndicatorOutput.Histogram => "Histogram",
-                _ => null
-            };
+                if (OutputKeyMap.TryGetValue((name, output), out var key))
+                {
+                    return key;
+                }
+            }
+            return null;
         }
 
-        if (name == IndicatorName.BollingerBands)
+        lock (RegistryLock)
         {
-            return output switch
+            if (OutputKeyMap.TryGetValue((name, output), out var key))
             {
-                IndicatorOutput.UpperBand => "UpperBand",
-                IndicatorOutput.LowerBand => "LowerBand",
-                _ => "MiddleBand"
-            };
+                return key;
+            }
         }
 
-        return null;
+        // Fallback mappings for common output types
+        return output switch
+        {
+            IndicatorOutput.UpperBand => "UpperBand",
+            IndicatorOutput.MiddleBand => "MiddleBand",
+            IndicatorOutput.LowerBand => "LowerBand",
+            IndicatorOutput.Signal => "Signal",
+            IndicatorOutput.Histogram => "Histogram",
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Registers a custom output key mapping.
+    /// </summary>
+    /// <param name="name">The indicator name.</param>
+    /// <param name="output">The output type.</param>
+    /// <param name="key">The output key string.</param>
+    public static void Register(IndicatorName name, IndicatorOutput output, string key)
+    {
+        lock (RegistryLock)
+        {
+            OutputKeyMap[(name, output)] = key;
+        }
+    }
+
+    /// <summary>
+    /// Checks if an output key mapping exists.
+    /// </summary>
+    /// <param name="name">The indicator name.</param>
+    /// <param name="output">The output type.</param>
+    /// <returns>True if a mapping exists.</returns>
+    public static bool HasMapping(IndicatorName name, IndicatorOutput output)
+    {
+        lock (RegistryLock)
+        {
+            return OutputKeyMap.ContainsKey((name, output));
+        }
     }
 }

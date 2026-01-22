@@ -38,8 +38,12 @@ public static partial class Calculations
             var lc = Math.Abs(currentLow - prevValue);
             var mm = Math.Max(Math.Max(lh, hc), lc);
             var prevBasis = i >= 1 ? smaList[i - 1] : 0;
-            var atrs = mm == hc ? hc / (prevValue + (hc / 2)) : mm == lc ? lc / (currentLow + (lc / 2)) : mm == lh ? lh /
-                (currentLow + (lh / 2)) : 0;
+            var hcDenom = prevValue + (hc / 2);
+            var lcDenom = currentLow + (lc / 2);
+            var lhDenom = currentLow + (lh / 2);
+            var atrs = mm == hc ? (hcDenom != 0 ? hc / hcDenom : 0) :
+                       mm == lc ? (lcDenom != 0 ? lc / lcDenom : 0) :
+                       mm == lh ? (lhDenom != 0 ? lh / lhDenom : 0) : 0;
 
             var prevAptr = GetLastOrDefault(aptrList);
             var aptr = (100 * atrs * ratio) + (prevAptr * (1 - ratio));
