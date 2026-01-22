@@ -55,6 +55,7 @@ public sealed class StockIndicatorBuilder
     {
         _symbolOptions = options;
         _resolvedSymbols = null;
+        _defaultSeriesKey = null;
         return this;
     }
 
@@ -65,6 +66,7 @@ public sealed class StockIndicatorBuilder
     {
         _dataOptions = options;
         _resolvedTimeframe = null;
+        _defaultSeriesKey = null;
         return this;
     }
 

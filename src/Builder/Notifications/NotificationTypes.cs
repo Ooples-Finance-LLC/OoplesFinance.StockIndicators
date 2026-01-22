@@ -223,8 +223,8 @@ public sealed class EmailNotificationChannel : INotificationChannel
             var body = $"Signal: {notification.Name}\nValue: {notification.Value:F4}\nTime: {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
 
             using var client = new System.Net.Mail.SmtpClient(host, port);
-            // Always enable SSL to encrypt sensitive data (security requirement)
-            client.EnableSsl = true;
+            // Default to SSL unless explicitly disabled via options
+            client.EnableSsl = _options.UseSsl ?? true;
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {
                 client.Credentials = new System.Net.NetworkCredential(username, password);
