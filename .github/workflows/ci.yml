@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.x
 
       - name: Restore dependencies
         run: dotnet restore src/OoplesFinance.StockIndicators.csproj
@@ -32,4 +32,11 @@ jobs:
         run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
 
       - name: Build and run tests
-        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --verbosity normal
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0 --verbosity normal --logger trx --results-directory ./test-results
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./test-results
