@@ -65,13 +65,22 @@ public readonly struct SignalSeries
 public readonly struct SignalCondition
 {
     /// <summary>
-    /// Creates a new signal condition.
+    /// Creates a new signal condition with a single threshold.
     /// </summary>
     public SignalCondition(SeriesHandle series, SignalTrigger trigger, double threshold)
+        : this(series, trigger, threshold, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a new signal condition with optional second threshold (for Between/Outside).
+    /// </summary>
+    public SignalCondition(SeriesHandle series, SignalTrigger trigger, double threshold, double? thresholdHigh)
     {
         Series = series;
         Trigger = trigger;
         Threshold = threshold;
+        ThresholdHigh = thresholdHigh;
     }
 
     /// <summary>
@@ -85,14 +94,24 @@ public readonly struct SignalCondition
     public SignalTrigger Trigger { get; }
 
     /// <summary>
-    /// Gets the threshold value.
+    /// Gets the threshold value (low threshold for Between/Outside).
     /// </summary>
     public double Threshold { get; }
+
+    /// <summary>
+    /// Gets the high threshold value (for Between/Outside triggers).
+    /// </summary>
+    public double? ThresholdHigh { get; }
 
     /// <summary>
     /// Gets whether this is a cross trigger.
     /// </summary>
     public bool IsCross => Trigger == SignalTrigger.CrossesAbove || Trigger == SignalTrigger.CrossesBelow;
+
+    /// <summary>
+    /// Gets whether this is a range trigger (Between/Outside).
+    /// </summary>
+    public bool IsRange => Trigger == SignalTrigger.Between || Trigger == SignalTrigger.Outside;
 
     /// <summary>
     /// Creates an Above condition.
@@ -127,6 +146,22 @@ public readonly struct SignalCondition
     }
 
     /// <summary>
+    /// Creates a Between condition (low &lt; value &lt; high).
+    /// </summary>
+    public static SignalCondition Between(SeriesHandle series, double low, double high)
+    {
+        return new SignalCondition(series, SignalTrigger.Between, low, high);
+    }
+
+    /// <summary>
+    /// Creates an Outside condition (value &lt; low OR value &gt; high).
+    /// </summary>
+    public static SignalCondition Outside(SeriesHandle series, double low, double high)
+    {
+        return new SignalCondition(series, SignalTrigger.Outside, low, high);
+    }
+
+    /// <summary>
     /// Checks if the condition is currently active.
     /// </summary>
     public bool IsActive(double value)
@@ -135,6 +170,8 @@ public readonly struct SignalCondition
         {
             SignalTrigger.Above => value >= Threshold,
             SignalTrigger.Below => value <= Threshold,
+            SignalTrigger.Between => ThresholdHigh.HasValue && value > Threshold && value < ThresholdHigh.Value,
+            SignalTrigger.Outside => ThresholdHigh.HasValue && (value < Threshold || value > ThresholdHigh.Value),
             _ => false
         };
     }
@@ -359,6 +396,22 @@ public readonly struct SignalRuleBuilder
     {
         return new SignalEmissionBuilder(_catalog, _series, SignalTrigger.CrossesBelow, threshold);
     }
+
+    /// <summary>
+    /// Creates a Between trigger (low &lt; value &lt; high).
+    /// </summary>
+    public SignalRangeEmissionBuilder Between(double low, double high)
+    {
+        return new SignalRangeEmissionBuilder(_catalog, _series, SignalTrigger.Between, low, high);
+    }
+
+    /// <summary>
+    /// Creates an Outside trigger (value &lt; low OR value &gt; high).
+    /// </summary>
+    public SignalRangeEmissionBuilder Outside(double low, double high)
+    {
+        return new SignalRangeEmissionBuilder(_catalog, _series, SignalTrigger.Outside, low, high);
+    }
 }
 
 /// <summary>
@@ -387,6 +440,99 @@ public readonly struct SignalEmissionBuilder
         var handle = _catalog.NextHandle();
         _catalog.AddRule(new SignalRule(handle, name ?? handle.ToString(), _series, _trigger, _threshold));
         return handle;
+    }
+}
+
+/// <summary>
+/// Builder for range signal emission (Between/Outside).
+/// </summary>
+public readonly struct SignalRangeEmissionBuilder
+{
+    private readonly SignalCatalog _catalog;
+    private readonly SignalSeries _series;
+    private readonly SignalTrigger _trigger;
+    private readonly double _low;
+    private readonly double _high;
+
+    internal SignalRangeEmissionBuilder(SignalCatalog catalog, SignalSeries series, SignalTrigger trigger, double low, double high)
+    {
+        _catalog = catalog;
+        _series = series;
+        _trigger = trigger;
+        _low = low;
+        _high = high;
+    }
+
+    /// <summary>
+    /// Emits the signal with an optional name.
+    /// </summary>
+    public SignalHandle Emit(string? name = null)
+    {
+        var handle = _catalog.NextHandle();
+        _catalog.AddRangeRule(new SignalRangeRule(handle, name ?? handle.ToString(), _series, _trigger, _low, _high));
+        return handle;
+    }
+}
+
+/// <summary>
+/// Represents a range signal rule (Between/Outside).
+/// </summary>
+public sealed class SignalRangeRule
+{
+    /// <summary>
+    /// Creates a new range signal rule.
+    /// </summary>
+    public SignalRangeRule(SignalHandle handle, string name, SignalSeries series, SignalTrigger trigger, double low, double high)
+    {
+        Handle = handle;
+        Name = name;
+        Series = series;
+        Trigger = trigger;
+        Low = low;
+        High = high;
+    }
+
+    /// <summary>
+    /// Gets the signal handle.
+    /// </summary>
+    public SignalHandle Handle { get; }
+
+    /// <summary>
+    /// Gets the signal name.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Gets the series reference.
+    /// </summary>
+    public SignalSeries Series { get; }
+
+    /// <summary>
+    /// Gets the trigger type.
+    /// </summary>
+    public SignalTrigger Trigger { get; }
+
+    /// <summary>
+    /// Gets the low threshold.
+    /// </summary>
+    public double Low { get; }
+
+    /// <summary>
+    /// Gets the high threshold.
+    /// </summary>
+    public double High { get; }
+
+    /// <summary>
+    /// Checks if the rule is currently active.
+    /// </summary>
+    public bool IsActive(double value)
+    {
+        return Trigger switch
+        {
+            SignalTrigger.Between => value > Low && value < High,
+            SignalTrigger.Outside => value < Low || value > High,
+            _ => false
+        };
     }
 }
 
@@ -467,6 +613,33 @@ public readonly struct SignalGroupAggregationBuilder
     {
         return new SignalGroupAggregationBuilder(_catalog, _conditions, _mode, _requiredCount, _requiredPercent,
             SignalWindow.FromBars(bars));
+    }
+
+    /// <summary>
+    /// Sets the window to a time duration.
+    /// </summary>
+    public SignalGroupAggregationBuilder ForTime(TimeSpan duration)
+    {
+        return new SignalGroupAggregationBuilder(_catalog, _conditions, _mode, _requiredCount, _requiredPercent,
+            SignalWindow.FromDuration(duration));
+    }
+
+    /// <summary>
+    /// Sets the validity window to a number of bars after trigger.
+    /// </summary>
+    public SignalGroupAggregationBuilder WithinBars(int bars)
+    {
+        var newWindow = _window.WithValidityBars(bars);
+        return new SignalGroupAggregationBuilder(_catalog, _conditions, _mode, _requiredCount, _requiredPercent, newWindow);
+    }
+
+    /// <summary>
+    /// Sets the validity window to a time duration after trigger.
+    /// </summary>
+    public SignalGroupAggregationBuilder WithinTime(TimeSpan duration)
+    {
+        var newWindow = _window.WithValidityDuration(duration);
+        return new SignalGroupAggregationBuilder(_catalog, _conditions, _mode, _requiredCount, _requiredPercent, newWindow);
     }
 
     /// <summary>

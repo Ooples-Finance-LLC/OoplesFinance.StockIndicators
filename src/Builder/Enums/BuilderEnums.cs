@@ -160,7 +160,17 @@ public enum SignalTrigger
     /// <summary>
     /// Triggers when value crosses below threshold.
     /// </summary>
-    CrossesBelow
+    CrossesBelow,
+
+    /// <summary>
+    /// Triggers when value is between low and high thresholds.
+    /// </summary>
+    Between,
+
+    /// <summary>
+    /// Triggers when value is outside low and high thresholds.
+    /// </summary>
+    Outside
 }
 
 /// <summary>

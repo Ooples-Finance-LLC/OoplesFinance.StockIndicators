@@ -589,7 +589,19 @@ public sealed class IndicatorRuntime : IDisposable
         var notification = new NotificationEvent(handle, name, value, DateTime.UtcNow);
         for (var i = 0; i < _notifications.Count; i++)
         {
-            _notifications[i].Notify(notification);
+            // Fire-and-forget async notification with error handling
+            var channel = _notifications[i];
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await channel.NotifyAsync(notification).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    System.Console.WriteLine($"[Notification] Error dispatching to channel: {ex.Message}");
+                }
+            });
         }
 
         for (var i = 0; i < _autoTrading.Rules.Count; i++)

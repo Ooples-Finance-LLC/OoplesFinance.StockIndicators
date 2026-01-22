@@ -6,9 +6,9 @@ namespace OoplesFinance.StockIndicators.Builder.Notifications;
 public interface INotificationChannel
 {
     /// <summary>
-    /// Sends a notification.
+    /// Sends a notification asynchronously.
     /// </summary>
-    void Notify(NotificationEvent notification);
+    Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -179,9 +179,10 @@ public sealed class DiscordOptions
 public sealed class ConsoleNotificationChannel : INotificationChannel
 {
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         System.Console.WriteLine($"[Signal] {notification.Name}: value={notification.Value:F4} at {notification.Timestamp:yyyy-MM-dd HH:mm:ss}");
+        return Task.CompletedTask;
     }
 }
 
@@ -201,7 +202,7 @@ public sealed class EmailNotificationChannel : INotificationChannel
     }
 
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         var host = _options.SmtpHost ?? Environment.GetEnvironmentVariable("SMTP_HOST");
         var port = _options.SmtpPort ?? 587;
@@ -230,7 +231,7 @@ public sealed class EmailNotificationChannel : INotificationChannel
             }
 
             using var message = new System.Net.Mail.MailMessage(from ?? "noreply@example.com", to, subject, body);
-            client.Send(message);
+            await client.SendMailAsync(message).ConfigureAwait(false);
             System.Console.WriteLine($"[Email] Sent to {to}: {notification.Name}");
         }
         catch (Exception ex)
@@ -257,7 +258,7 @@ public sealed class SmsNotificationChannel : INotificationChannel
     }
 
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         var accountSid = _options.AccountSid ?? Environment.GetEnvironmentVariable("TWILIO_SID");
         var authToken = _options.AuthToken ?? Environment.GetEnvironmentVariable("TWILIO_TOKEN");
@@ -284,18 +285,18 @@ public sealed class SmsNotificationChannel : INotificationChannel
             });
 
             var authBytes = System.Text.Encoding.ASCII.GetBytes($"{accountSid}:{authToken}");
-            var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url);
+            using var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url);
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
             request.Content = content;
 
-            var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 System.Console.WriteLine($"[SMS] Sent to {toNumber}: {notification.Name}");
             }
             else
             {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 System.Console.WriteLine($"[SMS] Failed to send to {toNumber}: {response.StatusCode} - {error}");
             }
         }
@@ -323,7 +324,7 @@ public sealed class WebhookNotificationChannel : INotificationChannel
     }
 
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         var url = _options.Url;
         if (string.IsNullOrEmpty(url))
@@ -342,7 +343,7 @@ public sealed class WebhookNotificationChannel : INotificationChannel
                 _ => System.Net.Http.HttpMethod.Post
             };
 
-            var request = new System.Net.Http.HttpRequestMessage(method, url);
+            using var request = new System.Net.Http.HttpRequestMessage(method, url);
 
             // Add custom headers
             if (_options.Headers is not null)
@@ -365,14 +366,14 @@ public sealed class WebhookNotificationChannel : INotificationChannel
             var contentType = _options.ContentType ?? "application/json";
             request.Content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, contentType);
 
-            var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 System.Console.WriteLine($"[Webhook] Posted to {url}: {notification.Name}");
             }
             else
             {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 System.Console.WriteLine($"[Webhook] Failed to post to {url}: {response.StatusCode} - {error}");
             }
         }
@@ -400,7 +401,7 @@ public sealed class TelegramNotificationChannel : INotificationChannel
     }
 
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         var botToken = _options.BotToken ?? Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         var chatId = _options.ChatId ?? Environment.GetEnvironmentVariable("TELEGRAM_CHAT_ID");
@@ -413,10 +414,10 @@ public sealed class TelegramNotificationChannel : INotificationChannel
 
         try
         {
-            var message = $"📊 *Signal Alert*\n\n" +
-                         $"*Signal:* {EscapeMarkdown(notification.Name)}\n" +
-                         $"*Value:* {notification.Value:F4}\n" +
-                         $"*Time:* {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
+            var message = $"Signal Alert\n\n" +
+                         $"Signal: {EscapeMarkdown(notification.Name)}\n" +
+                         $"Value: {notification.Value:F4}\n" +
+                         $"Time: {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
 
             var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
 
@@ -427,8 +428,8 @@ public sealed class TelegramNotificationChannel : INotificationChannel
                 parse_mode = "Markdown"
             });
 
-            var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var response = HttpClient.PostAsync(url, content).GetAwaiter().GetResult();
+            using var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
@@ -436,7 +437,7 @@ public sealed class TelegramNotificationChannel : INotificationChannel
             }
             else
             {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 System.Console.WriteLine($"[Telegram] Failed to send to chat {chatId}: {response.StatusCode} - {error}");
             }
         }
@@ -470,7 +471,7 @@ public sealed class DiscordNotificationChannel : INotificationChannel
     }
 
     /// <inheritdoc />
-    public void Notify(NotificationEvent notification)
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
     {
         var webhookUrl = _options.WebhookUrl ?? Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL");
 
@@ -489,7 +490,7 @@ public sealed class DiscordNotificationChannel : INotificationChannel
                 {
                     new
                     {
-                        title = "📊 Signal Alert",
+                        title = "Signal Alert",
                         color = 3447003, // Blue color
                         fields = new[]
                         {
@@ -502,8 +503,8 @@ public sealed class DiscordNotificationChannel : INotificationChannel
                 }
             });
 
-            var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var response = HttpClient.PostAsync(webhookUrl, content).GetAwaiter().GetResult();
+            using var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync(webhookUrl, content, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
@@ -511,7 +512,7 @@ public sealed class DiscordNotificationChannel : INotificationChannel
             }
             else
             {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 System.Console.WriteLine($"[Discord] Failed to post webhook: {response.StatusCode} - {error}");
             }
         }

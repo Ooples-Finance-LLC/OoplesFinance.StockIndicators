@@ -9,6 +9,7 @@ public sealed class SignalCatalog
 {
     private readonly List<SignalRule> _rules = new();
     private readonly List<SignalGroupRule> _groupRules = new();
+    private readonly List<SignalRangeRule> _rangeRules = new();
     private int _nextId;
 
     /// <summary>
@@ -47,6 +48,12 @@ public sealed class SignalCatalog
         return rule.Handle;
     }
 
+    internal SignalHandle AddRangeRule(SignalRangeRule rule)
+    {
+        _rangeRules.Add(rule);
+        return rule.Handle;
+    }
+
     internal SignalHandle NextHandle()
     {
         _nextId++;
@@ -61,5 +68,10 @@ public sealed class SignalCatalog
     internal IReadOnlyList<SignalGroupRule> BuildGroups()
     {
         return new List<SignalGroupRule>(_groupRules);
+    }
+
+    internal IReadOnlyList<SignalRangeRule> BuildRangeRules()
+    {
+        return new List<SignalRangeRule>(_rangeRules);
     }
 }

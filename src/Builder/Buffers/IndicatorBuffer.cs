@@ -183,6 +183,83 @@ public sealed class IndicatorBuffer<T> : IReadOnlyList<T>, IDisposable
     }
 
     /// <summary>
+    /// Asynchronously copies the buffer contents to a new user-owned List&lt;T&gt;.
+    /// Yields to allow other tasks to run during large buffer operations.
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>A task that produces a new List&lt;T&gt; containing a copy of the buffer contents.</returns>
+    public async Task<List<T>> ToListAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        var list = new List<T>(_count);
+        const int batchSize = 1024;
+        for (int i = 0; i < _count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            list.Add(_array![i]);
+            if (i > 0 && i % batchSize == 0)
+            {
+                await Task.Yield();
+            }
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Asynchronously copies the buffer contents to a new user-owned array.
+    /// Yields to allow other tasks to run during large buffer operations.
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>A task that produces a new array containing a copy of the buffer contents.</returns>
+    public async Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_count == 0)
+        {
+            return Array.Empty<T>();
+        }
+        var result = new T[_count];
+        const int batchSize = 4096;
+        for (int offset = 0; offset < _count; offset += batchSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            int len = Math.Min(batchSize, _count - offset);
+            AsSpan(offset, len).CopyTo(result.AsSpan(offset, len));
+            if (offset + len < _count)
+            {
+                await Task.Yield();
+            }
+        }
+        return result;
+    }
+
+#if !NET461
+    /// <summary>
+    /// Returns an async enumerable that iterates through the buffer.
+    /// Useful for streaming processing scenarios.
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>An IAsyncEnumerable that yields buffer elements.</returns>
+    public async IAsyncEnumerable<T> AsAsyncEnumerable([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        int count = _count;
+        var array = _array;
+        const int yieldFrequency = 256;
+        for (int i = 0; i < count && array is not null; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return array[i];
+            if (i > 0 && i % yieldFrequency == 0)
+            {
+                await Task.Yield();
+            }
+        }
+    }
+#endif
+
+    /// <summary>
     /// Adds an element to the end of the buffer, growing if necessary.
     /// </summary>
     /// <param name="item">The item to add.</param>
