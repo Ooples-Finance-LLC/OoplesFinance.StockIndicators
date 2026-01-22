@@ -12,6 +12,7 @@ public static partial class Calculations
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTriangularMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20)
     {
@@ -58,6 +59,7 @@ public static partial class Calculations
     }
 
 
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWellesWilderMovingAverage(this StockData stockData, int length = 14)
     {
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -97,6 +99,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <param name="vFactor">The v factor.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTillsonT3MovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 5, double vFactor = 0.7)
     {
@@ -151,6 +154,7 @@ public static partial class Calculations
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTripleExponentialMovingAverage(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
@@ -195,6 +199,7 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="inputName">Name of the input.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData, InputName inputName = InputName.TypicalPrice)
     {
         List<double> vwapList = new(stockData.Count);
@@ -247,6 +252,7 @@ public static partial class Calculations
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeWeightedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
@@ -299,6 +305,7 @@ public static partial class Calculations
     /// <param name="maxLength">The maximum length.</param>
     /// <param name="acc">The acc.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUltimateMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int minLength = 5, int maxLength = 50, double acc = 1)
     {
@@ -375,6 +382,7 @@ public static partial class Calculations
     /// <param name="minLength">The minimum length.</param>
     /// <param name="maxLength">The maximum length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVariableLengthMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int minLength = 5, int maxLength = 50)
     {
@@ -430,6 +438,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="lag"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZeroLowLagMovingAverage(this StockData stockData, int length = 50, double lag = 1.4)
     {
         List<double> aList = new(stockData.Count);
@@ -477,6 +486,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZeroLagExponentialMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
@@ -521,6 +531,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZeroLagTripleExponentialMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14)
     {
@@ -564,6 +575,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWindowedVolumeWeightedMovingAverage(this StockData stockData, int length = 100)
     {
         List<double> bartlettWList = new(stockData.Count);
@@ -655,6 +667,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWellRoundedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> aList = new(stockData.Count);
@@ -719,6 +732,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWellesWilderSummation(this StockData stockData, int length = 14)
     {
         List<double> sumList = new(stockData.Count);
@@ -755,6 +769,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrimean(this StockData stockData, int length = 14)
     {
         List<double> tempList = new(stockData.Count);
@@ -811,6 +826,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVariableIndexDynamicAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
@@ -853,6 +869,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSymmetricallyWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> swmaList = new(stockData.Count);
@@ -932,6 +949,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="factor"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeAdjustedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, double factor = 0.67)
     {
@@ -996,6 +1014,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="kf"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolatilityWaveMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 20, double kf = 2.5)
     {
@@ -1072,6 +1091,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVariableAdaptiveMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
@@ -1119,6 +1139,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVariableMovingAverage(this StockData stockData, int length = 6)
     {
         List<double> vmaList = new(stockData.Count);
@@ -1203,6 +1224,7 @@ public static partial class Calculations
     /// <param name="smoothLength"></param>
     /// <param name="stdDevMult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolatilityMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, int lbLength = 10, int smoothLength = 3)
     {
@@ -1278,6 +1300,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVerticalHorizontalMovingAverage(this StockData stockData, int length = 50)
     {
         List<double> changeList = new(stockData.Count);
@@ -1330,6 +1353,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="sc"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTStepLeastSquaresMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100, double sc = 0.5)
     {
@@ -1414,6 +1438,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTillsonIE2(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 15)
     {
         List<double> ie2List = new(stockData.Count);
@@ -1456,6 +1481,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer21PointMovingAverage(this StockData stockData)
     {
         List<double> spmaList = new(stockData.Count);
@@ -1525,6 +1551,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer15PointMovingAverage(this StockData stockData)
     {
         List<double> spmaList = new(stockData.Count);
@@ -1589,6 +1616,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSquareRootWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> srwmaList = new(stockData.Count);
@@ -1635,6 +1663,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShapeshiftingMovingAverage(this StockData stockData, int length = 50)
     {
         List<double> filtXList = new(stockData.Count);
@@ -1690,6 +1719,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSelfWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> wmaList = new(stockData.Count);
@@ -1735,6 +1765,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSineWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> swmaList = new(stockData.Count);
@@ -1781,6 +1812,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimplifiedWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> wmaList = new(stockData.Count);
@@ -1837,6 +1869,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimplifiedLeastSquaresMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> cmlList = new(stockData.Count);
@@ -1896,6 +1929,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSharpModifiedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         List<double> shmmaList = new(stockData.Count);
@@ -1944,6 +1978,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSlowSmoothedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 15)
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -1986,6 +2021,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSequentiallyFilteredMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 50)
     {
@@ -2035,6 +2071,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSvama(this StockData stockData, int length = 14)
     {
         List<double> hList = new(stockData.Count);
@@ -2089,6 +2126,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSettingLessTrendStepFiltering(this StockData stockData)
     {
         List<double> chgList = new(stockData.Count);

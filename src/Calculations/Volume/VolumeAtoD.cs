@@ -9,6 +9,7 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChaikinMoneyFlow(this StockData stockData, int length = 20)
     {
         List<double> chaikinMoneyFlowList = new(stockData.Count);
@@ -65,6 +66,7 @@ public static partial class Calculations
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAccumulationDistributionLine(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14)
     {
@@ -120,6 +122,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <param name="smoothLength">Length of the smooth.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAverageMoneyFlowOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length = 5, int smoothLength = 3)
     {
@@ -187,6 +190,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="lbLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBetterVolumeIndicator(this StockData stockData, int length = 8, int lbLength = 2)
     {
         List<double> v1List = new(stockData.Count);
@@ -387,6 +391,7 @@ public static partial class Calculations
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBuffAverage(this StockData stockData, int fastLength = 5, int slowLength = 20)
     {
         List<double> priceVolList = new(stockData.Count);

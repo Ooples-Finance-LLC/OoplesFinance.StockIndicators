@@ -12,6 +12,7 @@ public static partial class Calculations
     /// <param name="slowLength">Length of the slow.</param>
     /// <param name="signalLength">Length of the signal.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMovingAverageConvergenceDivergence(this StockData stockData,
         MovingAvgType movingAvgType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -54,6 +55,7 @@ public static partial class Calculations
     /// <param name="slowLength"></param>
     /// <param name="signalLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMovingAverageConvergenceDivergenceLeader(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -140,6 +142,7 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <param name="gamma"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMacZVwapIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 12, int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02)
     {
@@ -231,6 +234,7 @@ public static partial class Calculations
     /// <param name="gamma"></param>
     /// <param name="mult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMacZIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
     {
@@ -293,6 +297,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="signalLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMirroredMovingAverageConvergenceDivergence(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9)
     {

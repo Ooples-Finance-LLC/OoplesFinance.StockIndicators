@@ -13,6 +13,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="smoothLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeWeightedRelativeStrengthIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10, int smoothLength = 3)
     {
@@ -78,6 +79,7 @@ public static partial class Calculations
     /// <param name="smoothingLength"></param>
     /// <param name="mult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSelfAdjustingRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14, int smoothingLength = 21, double mult = 2)
     {
@@ -134,6 +136,7 @@ public static partial class Calculations
     /// <param name="smoothLength1"></param>
     /// <param name="smoothLength2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticConnorsRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3)
     {
@@ -177,6 +180,7 @@ public static partial class Calculations
     /// <param name="smoothLength1"></param>
     /// <param name="smoothLength2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14, int smoothLength1 = 3, int smoothLength2 = 3)
     {

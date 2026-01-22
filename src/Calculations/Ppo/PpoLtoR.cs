@@ -12,6 +12,7 @@ public static partial class Calculations
     /// <param name="slowLength">Length of the slow.</param>
     /// <param name="signalLength">Length of the signal.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePercentagePriceOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -68,6 +69,7 @@ public static partial class Calculations
     /// <param name="slowLength">Length of the slow.</param>
     /// <param name="signalLength">Length of the signal.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePercentageVolumeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -124,6 +126,7 @@ public static partial class Calculations
     /// <param name="slowLength"></param>
     /// <param name="signalLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePercentagePriceOscillatorLeader(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -180,6 +183,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="signalLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMirroredPercentagePriceOscillator(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9)
     {

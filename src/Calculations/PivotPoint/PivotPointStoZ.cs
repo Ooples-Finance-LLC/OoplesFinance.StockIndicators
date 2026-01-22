@@ -9,6 +9,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="inputLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStandardPivotPoints(this StockData stockData, InputLength inputLength = InputLength.Day)
     {
         List<double> pivotList = new(stockData.Count);
@@ -110,6 +111,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="inputLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWoodiePivotPoints(this StockData stockData, InputLength inputLength = InputLength.Day)
     {
         List<double> pivotList = new(stockData.Count);

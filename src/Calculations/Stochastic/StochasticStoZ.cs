@@ -12,6 +12,7 @@ public static partial class Calculations
     /// <param name="smoothLength1">Length of the K signal.</param>
     /// <param name="smoothLength2">Length of the D signal.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, int smoothLength1 = 3, int smoothLength2 = 3)
     {
@@ -65,6 +66,7 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <param name="turboLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTurboStochasticsFast(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
@@ -111,6 +113,7 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <param name="turboLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTurboStochasticsSlow(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
@@ -161,6 +164,7 @@ public static partial class Calculations
     /// <param name="smoothLength1"></param>
     /// <param name="smoothLength2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
     {
@@ -232,6 +236,7 @@ public static partial class Calculations
     /// <param name="smoothLength1"></param>
     /// <param name="smoothLength2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticFastOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14, int smoothLength1 = 3, int smoothLength2 = 2)
     {
@@ -273,6 +278,7 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <param name="length3"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticCustomOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7,
         int length2 = 3, int length3 = 12)
     {
@@ -339,6 +345,7 @@ public static partial class Calculations
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStochasticRegular(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5, 
         int length2 = 3)
     {
@@ -378,6 +385,7 @@ public static partial class Calculations
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSwamiStochastics(this StockData stockData, int fastLength = 12, int slowLength = 48)
     {
         List<double> numList = new(stockData.Count);

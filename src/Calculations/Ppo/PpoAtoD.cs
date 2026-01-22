@@ -17,6 +17,7 @@ public static partial class Calculations
     /// <param name="blueMult"></param>
     /// <param name="yellowMult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData Calculate4PercentagePriceOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 5, int length2 = 8, int length3 = 10, int length4 = 17,
         int length5 = 14, int length6 = 16, double blueMult = 4.3, double yellowMult = 1.4)
@@ -124,6 +125,7 @@ public static partial class Calculations
     /// <param name="sc"></param>
     /// <param name="sp"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDiNapoliPercentagePriceOscillator(this StockData stockData, double lc = 17.5185, double sc = 8.3896, 
         double sp = 9.0503)
     {

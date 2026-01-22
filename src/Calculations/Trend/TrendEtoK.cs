@@ -9,6 +9,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateGannTrendOscillator(this StockData stockData, int length = 3)
     {
         List<double> gannTrendOscillatorList = new(stockData.Count);
@@ -52,6 +53,7 @@ public static partial class Calculations
     /// <param name="forecastLength"></param>
     /// <param name="mult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateGrandTrendForecasting(this StockData stockData, int length = 100, int forecastLength = 200, double mult = 2)
     {
         List<double> upperList = new(stockData.Count);

@@ -12,6 +12,7 @@ public static partial class Calculations
     /// <param name="fastAlpha">The fast alpha.</param>
     /// <param name="slowAlpha">The slow alpha.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersMotherOfAdaptiveMovingAverages(this StockData stockData, double fastAlpha = 0.5, double slowAlpha = 0.05)
     {
         const double HilbertTransformCoeff1 = 0.0962;
@@ -150,6 +151,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersFractalAdaptiveMovingAverage(this StockData stockData, int length = 20)
     {
         List<double> filterList = new(stockData.Count);
@@ -203,6 +205,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="threshold"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersMedianAverageAdaptiveFilter(this StockData stockData, int length = 39, double threshold = 0.002)
     {
         List<double> filterList = new(stockData.Count);
@@ -305,6 +308,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV2(this StockData stockData, int length = 10)
     {
         List<double> filtList = new(stockData.Count);
@@ -347,6 +351,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleSuperSmootherFilter(this StockData stockData, int length = 20)
     {
         List<double> filtList = new(stockData.Count);
@@ -393,6 +398,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
         List<double> filtList = new(stockData.Count);
@@ -435,6 +441,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
         List<double> filtList = new(stockData.Count);
@@ -478,6 +485,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
         List<double> filtList = new(stockData.Count);
@@ -523,6 +531,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
         List<double> filtList = new(stockData.Count);
@@ -571,6 +580,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersGaussianFilter(this StockData stockData, int length = 14)
     {
         List<double> gf1List = new(stockData.Count);
@@ -643,6 +653,7 @@ public static partial class Calculations
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersRecursiveMedianFilter(this StockData stockData, int length1 = 5, int length2 = 12)
     {
         List<double> tempList = new(stockData.Count);
@@ -687,6 +698,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSuperSmootherFilter(this StockData stockData, int length = 10)
     {
         List<double> filtList = new(stockData.Count);
@@ -730,6 +742,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV1(this StockData stockData, int length = 15)
     {
         List<double> filtList = new(stockData.Count);
@@ -772,6 +785,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAverageErrorFilter(this StockData stockData, int length = 27)
     {
         List<double> filtList = new(stockData.Count);
@@ -825,6 +839,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="alpha"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLaguerreFilter(this StockData stockData, double alpha = 0.2)
     {
         List<double> filterList = new(stockData.Count);
@@ -888,6 +903,7 @@ public static partial class Calculations
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveLaguerreFilter(this StockData stockData, int length1 = 14, int length2 = 5)
     {
         List<double> filterList = new(stockData.Count);
@@ -964,6 +980,7 @@ public static partial class Calculations
     /// <param name="alpha1"></param>
     /// <param name="alpha2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLeadingIndicator(this StockData stockData, double alpha1 = 0.25, double alpha2 = 0.33)
     {
         List<double> leadList = new(stockData.Count);
@@ -1003,6 +1020,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersOptimumEllipticFilter(this StockData stockData)
     {
         List<double> oefList = new(stockData.Count);
@@ -1039,6 +1057,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersModifiedOptimumEllipticFilter(this StockData stockData)
     {
         List<double> moefList = new(stockData.Count);
@@ -1079,6 +1098,7 @@ public static partial class Calculations
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersFilter(this StockData stockData, int length1 = 15, int length2 = 5)
     {
         List<double> filterList = new(stockData.Count);
@@ -1125,6 +1145,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDistanceCoefficientFilter(this StockData stockData, int length = 14)
     {
         List<double> filterList = new(stockData.Count);
@@ -1182,6 +1203,7 @@ public static partial class Calculations
     /// <param name="coef6"></param>
     /// <param name="coef7"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersFiniteImpulseResponseFilter(this StockData stockData, double coef1 = 1, double coef2 = 3.5, double coef3 = 4.5,
         double coef4 = 3, double coef5 = 0.5, double coef6 = -0.5, double coef7 = -1.5)
     {
@@ -1226,6 +1248,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersInfiniteImpulseResponseFilter(this StockData stockData, int length = 14)
     {
         List<double> filterList = new(stockData.Count);
@@ -1266,6 +1289,7 @@ public static partial class Calculations
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDeviationScaledMovingAverage(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, int fastLength = 20, int slowLength = 40)
     {
@@ -1328,6 +1352,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHannMovingAverage(this StockData stockData, int length = 20)
     {
         List<double> filtList = new(stockData.Count);
@@ -1374,6 +1399,7 @@ public static partial class Calculations
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDeviationScaledSuperSmoother(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 12, int length2 = 50)
     {
@@ -1441,6 +1467,7 @@ public static partial class Calculations
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersZeroLagExponentialMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
@@ -1489,6 +1516,7 @@ public static partial class Calculations
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersVariableIndexDynamicAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int fastLength = 9, int slowLength = 30)
     {
@@ -1549,6 +1577,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersKaufmanAdaptiveMovingAverage(this StockData stockData, int length = 20)
     {
         List<double> kamaList = new(stockData.Count);
@@ -1597,6 +1626,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="qq"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAllPassPhaseShifter(this StockData stockData, int length = 20, double qq = 0.5)
     {
         List<double> phaserList = new(stockData.Count);
@@ -1638,6 +1668,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersChebyshevLowPassFilter(this StockData stockData)
     {
         List<double> v1Neg2List = new(stockData.Count);
@@ -1785,6 +1816,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersBetterExponentialMovingAverage(this StockData stockData, int length = 20)
     {
         List<double> emaList = new(stockData.Count);
@@ -1829,6 +1861,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="pedestal"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHammingMovingAverage(this StockData stockData, int length = 20, double pedestal = 3)
     {
         List<double> filtList = new(stockData.Count);
@@ -1873,6 +1906,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersTriangleMovingAverage(this StockData stockData, int length = 20)
     {
         List<double> filtList = new(stockData.Count);

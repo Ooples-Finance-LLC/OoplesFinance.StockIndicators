@@ -11,6 +11,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="atrLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateHalfTrend(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 2,
         int atrLength = 100)
     {
@@ -132,6 +133,7 @@ public static partial class Calculations
     /// <param name="stdDev3"></param>
     /// <param name="stdDev4"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKaseDevStopV1(this StockData stockData, InputName inputName = InputName.TypicalPrice,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20, double stdDev1 = 0,
         double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
@@ -214,6 +216,7 @@ public static partial class Calculations
     /// <param name="stdDev3"></param>
     /// <param name="stdDev4"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKaseDevStopV2(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 10, int slowLength = 21, int length = 20, double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2,
         double stdDev4 = 3.6)
@@ -306,6 +309,7 @@ public static partial class Calculations
     /// <param name="length3"></param>
     /// <param name="factor"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateElderSafeZoneStops(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 63, int length2 = 22, int length3 = 3, double factor = 2.5)
     {

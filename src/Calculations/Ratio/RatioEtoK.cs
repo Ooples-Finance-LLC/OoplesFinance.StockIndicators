@@ -10,6 +10,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="bmk"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateInformationRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 30, double bmk = 0.05)
     {

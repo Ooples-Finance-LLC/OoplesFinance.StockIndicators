@@ -10,6 +10,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <param name="factor">The factor.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveTrailingStop(this StockData stockData, int length = 100, double factor = 3)
     {
         List<double> upList = new(stockData.Count);
@@ -75,6 +76,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <param name="gamma">The gamma.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveAutonomousRecursiveTrailingStop(this StockData stockData, int length = 14, double gamma = 3)
     {
         List<double> tsList = new(stockData.Count);
@@ -134,6 +136,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <param name="mult">The mult.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChandelierExit(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22, 
         double mult = 3)
     {
@@ -186,6 +189,7 @@ public static partial class Calculations
     /// <param name="length2">The length2.</param>
     /// <param name="factor">The factor.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAverageTrueRangeTrailingStops(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 63, int length2 = 21, double factor = 3)
     {

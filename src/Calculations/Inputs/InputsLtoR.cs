@@ -8,6 +8,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMedianPrice(this StockData stockData)
     {
         var medianPriceList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hl2);
@@ -41,6 +42,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMidpoint(this StockData stockData, int length = 14)
     {
         List<double> midpointList = new(stockData.Count);
@@ -80,6 +82,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMidprice(this StockData stockData, int length = 14)
     {
         List<double> midpriceList = new(stockData.Count);

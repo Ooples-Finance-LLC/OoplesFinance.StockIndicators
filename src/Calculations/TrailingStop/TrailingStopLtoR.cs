@@ -11,6 +11,7 @@ public static partial class Calculations
     /// <param name="increment">The increment.</param>
     /// <param name="maximum">The maximum.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateParabolicSAR(this StockData stockData, double start = 0.02, double increment = 0.02, double maximum = 0.2)
     {
         List<double> sarList = new(stockData.Count);
@@ -121,6 +122,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="mult"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateLinearTrailingStop(this StockData stockData, int length = 14, double mult = 28)
     {
         List<double> aList = new(stockData.Count);
@@ -184,6 +186,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNickRypockTrailingReverse(this StockData stockData, int length = 2)
     {
         List<double> nrtrList = new(stockData.Count);
@@ -256,6 +259,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="pct"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePercentageTrailingStops(this StockData stockData, int length = 100, double pct = 10)
     {
         List<double> stopSList = new(stockData.Count);
@@ -304,6 +308,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMotionToAttractionTrailingStop(this StockData stockData, int length = 14)
     {
         List<double> osList = new(stockData.Count);

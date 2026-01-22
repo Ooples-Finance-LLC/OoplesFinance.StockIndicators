@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;

@@ -10,6 +10,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="bmk"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUpsidePotentialRatio(this StockData stockData, int length = 30, double bmk = 0.05)
     {
         List<double> retList = new(stockData.Count);
@@ -66,6 +67,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="breakoutLevel"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolatilityRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14, double breakoutLevel = 0.5)
     {
@@ -117,6 +119,7 @@ public static partial class Calculations
     /// <param name="beta"></param>
     /// <param name="bmk"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTreynorRatio(this StockData stockData, int length = 30, double beta = 1, double bmk = 0.02)
     {
         List<double> treynorList = new(stockData.Count);
@@ -165,6 +168,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="bmk"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSortinoRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
@@ -231,6 +235,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="bmk"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSharpeRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
@@ -284,6 +289,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShinoharaIntensityRatio(this StockData stockData, int length = 14)
     {
         List<double> tempOpenList = new(stockData.Count);

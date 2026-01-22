@@ -11,6 +11,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="inputLength"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePivotPointAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 3, InputLength inputLength = InputLength.Day)
     {
         List<double> pp1List = new(stockData.Count);

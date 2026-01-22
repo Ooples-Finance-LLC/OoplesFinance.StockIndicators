@@ -9,6 +9,7 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="length"></param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDemarkSetupIndicator(this StockData stockData, int length = 4)
     {
         List<double> drpPriceList = new(stockData.Count);

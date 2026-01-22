@@ -8,6 +8,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTypicalPrice(this StockData stockData)
     {
         var tpList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hlc3);
@@ -40,6 +41,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWeightedClose(this StockData stockData)    
     {
         var weightedCloseList = GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose);

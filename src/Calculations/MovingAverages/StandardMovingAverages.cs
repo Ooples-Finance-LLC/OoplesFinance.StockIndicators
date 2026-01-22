@@ -11,6 +11,7 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimpleMovingAverage(this StockData stockData, int length = 14)
     {
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -48,6 +49,7 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);

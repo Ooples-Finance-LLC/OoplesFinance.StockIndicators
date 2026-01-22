@@ -8,6 +8,10 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
+// Suppress obsolete warnings for internal Calculate* method calls - this helper
+// needs to invoke these methods to provide the dynamic indicator invocation API.
+#pragma warning disable CS0618
+
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 using System.Runtime.CompilerServices;

@@ -8,6 +8,7 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateFullTypicalPrice(this StockData stockData)
     {
         var fullTpList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Ohlc4);
