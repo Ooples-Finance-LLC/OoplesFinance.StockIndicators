@@ -186,7 +186,7 @@ public sealed class ConsoleNotificationChannel : INotificationChannel
 }
 
 /// <summary>
-/// Email notification channel (placeholder implementation).
+/// Email notification channel using SMTP.
 /// </summary>
 public sealed class EmailNotificationChannel : INotificationChannel
 {
@@ -203,18 +203,50 @@ public sealed class EmailNotificationChannel : INotificationChannel
     /// <inheritdoc />
     public void Notify(NotificationEvent notification)
     {
-        var to = _options.To ?? "unknown";
-        System.Console.WriteLine($"[Email] To: {to}, Signal: {notification.Name}, Value: {notification.Value:F4}");
-        // TODO: Implement actual SMTP sending
+        var host = _options.SmtpHost ?? Environment.GetEnvironmentVariable("SMTP_HOST");
+        var port = _options.SmtpPort ?? 587;
+        var username = _options.Username ?? Environment.GetEnvironmentVariable("SMTP_USERNAME");
+        var password = _options.Password ?? Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+        var from = _options.From ?? username;
+        var to = _options.To;
+        var useSsl = _options.UseSsl ?? true;
+
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(to))
+        {
+            System.Console.WriteLine($"[Email] Configuration incomplete - Host: {host ?? "missing"}, To: {to ?? "missing"}");
+            return;
+        }
+
+        try
+        {
+            var subject = _options.Subject ?? $"Signal Alert: {notification.Name}";
+            var body = $"Signal: {notification.Name}\nValue: {notification.Value:F4}\nTime: {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
+
+            using var client = new System.Net.Mail.SmtpClient(host, port);
+            client.EnableSsl = useSsl;
+            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            {
+                client.Credentials = new System.Net.NetworkCredential(username, password);
+            }
+
+            using var message = new System.Net.Mail.MailMessage(from ?? "noreply@example.com", to, subject, body);
+            client.Send(message);
+            System.Console.WriteLine($"[Email] Sent to {to}: {notification.Name}");
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[Email] Failed to send to {to}: {ex.Message}");
+        }
     }
 }
 
 /// <summary>
-/// SMS notification channel (placeholder implementation).
+/// SMS notification channel using Twilio API.
 /// </summary>
 public sealed class SmsNotificationChannel : INotificationChannel
 {
     private readonly SmsOptions _options;
+    private static readonly System.Net.Http.HttpClient HttpClient = new();
 
     /// <summary>
     /// Creates a new SMS notification channel.
@@ -227,18 +259,60 @@ public sealed class SmsNotificationChannel : INotificationChannel
     /// <inheritdoc />
     public void Notify(NotificationEvent notification)
     {
-        var to = _options.ToNumber ?? "unknown";
-        System.Console.WriteLine($"[SMS] To: {to}, Signal: {notification.Name}, Value: {notification.Value:F4}");
-        // TODO: Implement actual Twilio SMS sending
+        var accountSid = _options.AccountSid ?? Environment.GetEnvironmentVariable("TWILIO_SID");
+        var authToken = _options.AuthToken ?? Environment.GetEnvironmentVariable("TWILIO_TOKEN");
+        var fromNumber = _options.FromNumber ?? Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER");
+        var toNumber = _options.ToNumber;
+
+        if (string.IsNullOrEmpty(accountSid) || string.IsNullOrEmpty(authToken) ||
+            string.IsNullOrEmpty(fromNumber) || string.IsNullOrEmpty(toNumber))
+        {
+            System.Console.WriteLine($"[SMS] Configuration incomplete - AccountSid: {(string.IsNullOrEmpty(accountSid) ? "missing" : "set")}, To: {toNumber ?? "missing"}");
+            return;
+        }
+
+        try
+        {
+            var message = $"Signal Alert: {notification.Name} = {notification.Value:F4} at {notification.Timestamp:HH:mm:ss}";
+            var url = $"https://api.twilio.com/2010-04-01/Accounts/{accountSid}/Messages.json";
+
+            var content = new System.Net.Http.FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["To"] = toNumber ?? string.Empty,
+                ["From"] = fromNumber ?? string.Empty,
+                ["Body"] = message
+            });
+
+            var authBytes = System.Text.Encoding.ASCII.GetBytes($"{accountSid}:{authToken}");
+            var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
+            request.Content = content;
+
+            var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            if (response.IsSuccessStatusCode)
+            {
+                System.Console.WriteLine($"[SMS] Sent to {toNumber}: {notification.Name}");
+            }
+            else
+            {
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                System.Console.WriteLine($"[SMS] Failed to send to {toNumber}: {response.StatusCode} - {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[SMS] Failed to send to {toNumber}: {ex.Message}");
+        }
     }
 }
 
 /// <summary>
-/// Webhook notification channel (placeholder implementation).
+/// Webhook notification channel using HTTP.
 /// </summary>
 public sealed class WebhookNotificationChannel : INotificationChannel
 {
     private readonly WebhookOptions _options;
+    private static readonly System.Net.Http.HttpClient HttpClient = new();
 
     /// <summary>
     /// Creates a new webhook notification channel.
@@ -251,18 +325,71 @@ public sealed class WebhookNotificationChannel : INotificationChannel
     /// <inheritdoc />
     public void Notify(NotificationEvent notification)
     {
-        var url = _options.Url ?? "unknown";
-        System.Console.WriteLine($"[Webhook] URL: {url}, Signal: {notification.Name}, Value: {notification.Value:F4}");
-        // TODO: Implement actual HTTP webhook
+        var url = _options.Url;
+        if (string.IsNullOrEmpty(url))
+        {
+            System.Console.WriteLine("[Webhook] Configuration incomplete - URL missing");
+            return;
+        }
+
+        try
+        {
+            var method = _options.Method?.ToUpperInvariant() switch
+            {
+                "GET" => System.Net.Http.HttpMethod.Get,
+                "PUT" => System.Net.Http.HttpMethod.Put,
+                "DELETE" => System.Net.Http.HttpMethod.Delete,
+                _ => System.Net.Http.HttpMethod.Post
+            };
+
+            var request = new System.Net.Http.HttpRequestMessage(method, url);
+
+            // Add custom headers
+            if (_options.Headers is not null)
+            {
+                foreach (var header in _options.Headers)
+                {
+                    request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+            }
+
+            // Create JSON payload
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                signal = notification.Name,
+                value = notification.Value,
+                timestamp = notification.Timestamp.ToString("o"),
+                signalId = notification.Signal.Id
+            });
+
+            var contentType = _options.ContentType ?? "application/json";
+            request.Content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, contentType);
+
+            var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            if (response.IsSuccessStatusCode)
+            {
+                System.Console.WriteLine($"[Webhook] Posted to {url}: {notification.Name}");
+            }
+            else
+            {
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                System.Console.WriteLine($"[Webhook] Failed to post to {url}: {response.StatusCode} - {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[Webhook] Failed to post to {url}: {ex.Message}");
+        }
     }
 }
 
 /// <summary>
-/// Telegram notification channel (placeholder implementation).
+/// Telegram notification channel using Bot API.
 /// </summary>
 public sealed class TelegramNotificationChannel : INotificationChannel
 {
     private readonly TelegramOptions _options;
+    private static readonly System.Net.Http.HttpClient HttpClient = new();
 
     /// <summary>
     /// Creates a new Telegram notification channel.
@@ -275,18 +402,64 @@ public sealed class TelegramNotificationChannel : INotificationChannel
     /// <inheritdoc />
     public void Notify(NotificationEvent notification)
     {
-        var chatId = _options.ChatId ?? "unknown";
-        System.Console.WriteLine($"[Telegram] Chat: {chatId}, Signal: {notification.Name}, Value: {notification.Value:F4}");
-        // TODO: Implement actual Telegram bot API
+        var botToken = _options.BotToken ?? Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
+        var chatId = _options.ChatId ?? Environment.GetEnvironmentVariable("TELEGRAM_CHAT_ID");
+
+        if (string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(chatId))
+        {
+            System.Console.WriteLine($"[Telegram] Configuration incomplete - BotToken: {(string.IsNullOrEmpty(botToken) ? "missing" : "set")}, ChatId: {chatId ?? "missing"}");
+            return;
+        }
+
+        try
+        {
+            var message = $"📊 *Signal Alert*\n\n" +
+                         $"*Signal:* {EscapeMarkdown(notification.Name)}\n" +
+                         $"*Value:* {notification.Value:F4}\n" +
+                         $"*Time:* {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
+
+            var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                chat_id = chatId,
+                text = message,
+                parse_mode = "Markdown"
+            });
+
+            var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            var response = HttpClient.PostAsync(url, content).GetAwaiter().GetResult();
+
+            if (response.IsSuccessStatusCode)
+            {
+                System.Console.WriteLine($"[Telegram] Sent to chat {chatId}: {notification.Name}");
+            }
+            else
+            {
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                System.Console.WriteLine($"[Telegram] Failed to send to chat {chatId}: {response.StatusCode} - {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[Telegram] Failed to send to chat {chatId}: {ex.Message}");
+        }
+    }
+
+    private static string EscapeMarkdown(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        return text.Replace("_", "\\_").Replace("*", "\\*").Replace("[", "\\[").Replace("`", "\\`");
     }
 }
 
 /// <summary>
-/// Discord notification channel (placeholder implementation).
+/// Discord notification channel using webhooks.
 /// </summary>
 public sealed class DiscordNotificationChannel : INotificationChannel
 {
     private readonly DiscordOptions _options;
+    private static readonly System.Net.Http.HttpClient HttpClient = new();
 
     /// <summary>
     /// Creates a new Discord notification channel.
@@ -299,8 +472,52 @@ public sealed class DiscordNotificationChannel : INotificationChannel
     /// <inheritdoc />
     public void Notify(NotificationEvent notification)
     {
-        var url = _options.WebhookUrl ?? Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL") ?? "unknown";
-        System.Console.WriteLine($"[Discord] Webhook, Signal: {notification.Name}, Value: {notification.Value:F4}");
-        // TODO: Implement actual Discord webhook
+        var webhookUrl = _options.WebhookUrl ?? Environment.GetEnvironmentVariable("DISCORD_WEBHOOK_URL");
+
+        if (string.IsNullOrEmpty(webhookUrl))
+        {
+            System.Console.WriteLine("[Discord] Configuration incomplete - WebhookUrl missing");
+            return;
+        }
+
+        try
+        {
+            // Discord webhook payload with embed for better formatting
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                embeds = new[]
+                {
+                    new
+                    {
+                        title = "📊 Signal Alert",
+                        color = 3447003, // Blue color
+                        fields = new[]
+                        {
+                            new { name = "Signal", value = notification.Name, inline = true },
+                            new { name = "Value", value = notification.Value.ToString("F4"), inline = true },
+                            new { name = "Time", value = notification.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"), inline = false }
+                        },
+                        timestamp = notification.Timestamp.ToString("o")
+                    }
+                }
+            });
+
+            var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+            var response = HttpClient.PostAsync(webhookUrl, content).GetAwaiter().GetResult();
+
+            if (response.IsSuccessStatusCode)
+            {
+                System.Console.WriteLine($"[Discord] Posted webhook: {notification.Name}");
+            }
+            else
+            {
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                System.Console.WriteLine($"[Discord] Failed to post webhook: {response.StatusCode} - {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[Discord] Failed to post webhook: {ex.Message}");
+        }
     }
 }

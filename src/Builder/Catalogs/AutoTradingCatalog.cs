@@ -23,9 +23,11 @@ public sealed class AutoTradingCatalog
     /// <summary>
     /// Creates an Alpaca trade adapter builder.
     /// </summary>
-    public AutoTradeAdapterBuilder Alpaca(AlpacaOptions? options = null)
+    /// <param name="options">Alpaca API configuration options.</param>
+    /// <param name="executionOptions">Trade execution options including safety settings.</param>
+    public AutoTradeAdapterBuilder Alpaca(AlpacaOptions? options = null, TradeExecutionOptions? executionOptions = null)
     {
-        var adapter = new AlpacaTradeAdapter(options ?? new AlpacaOptions());
+        var adapter = new AlpacaTradeAdapter(options ?? new AlpacaOptions(), executionOptions);
         _adapters.Add(adapter);
         return new AutoTradeAdapterBuilder(this, adapter);
     }
