@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore src/OoplesFinance.StockIndicators.csproj
+
+      - name: Build library
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release
+
+      - name: Restore test dependencies
+        run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
+
+      - name: Build tests
+        run: dotnet build tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-ubuntu
+          path: tests/TestResults/*.trx
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore src/OoplesFinance.StockIndicators.csproj
+
+      - name: Build library
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release
+
+      - name: Restore test dependencies
+        run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
+
+      - name: Build tests
+        run: dotnet build tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: tests/TestResults/*.trx
