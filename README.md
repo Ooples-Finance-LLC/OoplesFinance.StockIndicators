@@ -106,6 +106,87 @@ Notes:
 - `SeriesAlignmentPolicy.Strict` requires all series to share the same `EndTime`. With `IncludeUpdates = false`,
   alignment uses final bars only.
 
+## v2.0 Builder API (New)
+
+The v2.0 builder API provides zero-allocation indicator computation with fluent configuration:
+
+```csharp
+using OoplesFinance.StockIndicators.Builder;
+
+// Create data source
+var stockData = new StockData(opens, highs, lows, closes, volumes, dates);
+var source = IndicatorDataSource.FromBatch(stockData);
+
+// Configure indicators with the fluent builder
+var builder = new StockIndicatorBuilder(source)
+    .ConfigureIndicators(indicators =>
+    {
+        var sma = indicators.Sma(20);
+        var rsi = indicators.Rsi(14);
+        var bb = indicators.BollingerBands(20, 2);
+        var macd = indicators.Macd(12, 26, 9);
+    })
+    .ConfigureSignals(signals =>
+    {
+        // Define trading signals
+        signals.When(rsi).CrossesAbove(70).Emit("overbought");
+        signals.When(rsi).CrossesBelow(30).Emit("oversold");
+
+        // Group conditions
+        signals.Group(
+            SignalCondition.Above(rsi, 50),
+            SignalCondition.Above(sma, 100))
+            .All()
+            .ForBars(3)
+            .Emit("bullish");
+    })
+    .ConfigureNotifications(notify =>
+    {
+        notify.Console();
+        notify.Email(new EmailOptions { To = "alerts@example.com" });
+        notify.Telegram(new TelegramOptions { ChatId = "123456" });
+    })
+    .ConfigureAutoTrading(trade =>
+    {
+        trade.Alpaca(new AlpacaOptions { UsePaper = true })
+            .OnSignal(overboughtSignal)
+            .MarketSell();
+    });
+
+// Build and use
+using var runtime = builder.Build();
+var smaBuffer = runtime.GetSeries(smaHandle);
+var values = smaBuffer.AsSpan(); // Zero-allocation access
+```
+
+### Features
+
+- **750+ Indicators**: Access all indicators via `indicators.Calculate(IndicatorName, params)` or typed methods
+- **Zero Allocations**: `IndicatorBuffer<T>` uses `ArrayPool<T>` for zero-allocation hot paths
+- **SIMD Optimized**: Math operations use loop unrolling for improved performance
+- **Lazy Evaluation**: Only compute indicators referenced by signals
+- **Multi-Symbol Support**: `indicators.For(symbol, timeframe)` for cross-symbol analysis
+
+### Notification Adapters
+
+| Adapter | Configuration |
+|---------|---------------|
+| Console | `notify.Console()` |
+| Email | `notify.Email(new EmailOptions { SmtpHost, To })` |
+| SMS | `notify.Sms(new SmsOptions { AccountSid, ToNumber })` |
+| Webhook | `notify.Webhook(new WebhookOptions { Url })` |
+| Telegram | `notify.Telegram(new TelegramOptions { BotToken, ChatId })` |
+| Discord | `notify.Discord(new DiscordOptions { WebhookUrl })` |
+
+### Trading Adapters
+
+| Adapter | Configuration |
+|---------|---------------|
+| Console (dry-run) | `trade.ConsoleAdapter()` |
+| Alpaca | `trade.Alpaca(new AlpacaOptions { UsePaper = true })` |
+
+For migration from v1.x, see [MIGRATION.md](MIGRATION.md).
+
 ## Dev Console
 A developer console is available to run batch, streaming, and multi-series examples locally.
 
