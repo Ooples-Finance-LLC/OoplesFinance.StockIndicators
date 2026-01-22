@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <!-- Emit source generator output files for debugging -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)generated</CompilerGeneratedFilesOutputPath>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Description>Largest C# stock indicator library with over 750 to choose from and easiest to use with abilities such as making an indicator out of any other indicator or using any moving average with any indicator. </Description>
@@ -58,6 +61,9 @@
     <Compile Remove="bin\**" />
     <EmbeddedResource Remove="bin\**" />
     <None Remove="bin\**" />
+    <!-- Exclude source generator files from main project compilation -->
+    <Compile Remove="SourceGeneration\**" />
+    <None Remove="SourceGeneration\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +77,19 @@
   <ItemGroup>
     <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+  </ItemGroup>
+
+  <!-- Source Generator: Build the generator project first -->
+  <ItemGroup>
+    <ProjectReference Include="SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj"
+                      ReferenceOutputAssembly="false"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Source Generator: Reference the built analyzer DLL -->
+  <ItemGroup>
+    <Analyzer Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">

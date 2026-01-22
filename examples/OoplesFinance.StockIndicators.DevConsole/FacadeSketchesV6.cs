@@ -31,7 +31,7 @@ internal static class FacadeSketchesV6
         var source = IndicatorDataSource.FromBatch(new StockData(data));
 
         SeriesHandle sma = default;
-        BollingerBandsSeries bands = default;
+        BollingerBandsResult bands = default;
         SignalHandle overBand = default;
 
         var builder = new StockIndicatorBuilder(source)
@@ -951,7 +951,7 @@ internal static class FacadeSketchesV6
             return _builder.AddIndicator(IndicatorSpecs.Rsi(length), series, _builder.ResolveSeriesKey(series), key);
         }
 
-        public MacdSeries Macd(int fastLength = 12, int slowLength = 26, int signalLength = 9,
+        public MacdResult Macd(int fastLength = 12, int slowLength = 26, int signalLength = 9,
             SeriesHandle? input = null, IndicatorKey? primaryKey = null, IndicatorKey? signalKey = null, IndicatorKey? histogramKey = null)
         {
             var series = input ?? Price();
@@ -963,10 +963,10 @@ internal static class FacadeSketchesV6
             var histogram = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, IndicatorOutput.Histogram),
                 series, seriesKey, histogramKey);
 
-            return new MacdSeries(primary, signal, histogram);
+            return new MacdResult(primary, signal, histogram);
         }
 
-        public BollingerBandsSeries BollingerBands(int length = 20, double stdDevMult = 2, SeriesHandle? input = null,
+        public BollingerBandsResult BollingerBands(int length = 20, double stdDevMult = 2, SeriesHandle? input = null,
             IndicatorKey? upperKey = null, IndicatorKey? middleKey = null, IndicatorKey? lowerKey = null)
         {
             var series = input ?? Price();
@@ -978,7 +978,7 @@ internal static class FacadeSketchesV6
             var lower = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, IndicatorOutput.LowerBand),
                 series, seriesKey, lowerKey);
 
-            return new BollingerBandsSeries(upper, middle, lower);
+            return new BollingerBandsResult(upper, middle, lower);
         }
 
         public SeriesHandle Formula(SeriesHandle left, SeriesHandle right, FormulaOp op)
@@ -1070,22 +1070,22 @@ internal static class FacadeSketchesV6
             return _catalog.Rsi(length, _input, key);
         }
 
-        public MacdSeries Macd(int fastLength = 12, int slowLength = 26, int signalLength = 9,
+        public MacdResult Macd(int fastLength = 12, int slowLength = 26, int signalLength = 9,
             IndicatorKey? primaryKey = null, IndicatorKey? signalKey = null, IndicatorKey? histogramKey = null)
         {
             return _catalog.Macd(fastLength, slowLength, signalLength, _input, primaryKey, signalKey, histogramKey);
         }
 
-        public BollingerBandsSeries BollingerBands(int length = 20, double stdDevMult = 2,
+        public BollingerBandsResult BollingerBands(int length = 20, double stdDevMult = 2,
             IndicatorKey? upperKey = null, IndicatorKey? middleKey = null, IndicatorKey? lowerKey = null)
         {
             return _catalog.BollingerBands(length, stdDevMult, _input, upperKey, middleKey, lowerKey);
         }
     }
 
-    private readonly struct MacdSeries
+    private readonly struct MacdResult
     {
-        public MacdSeries(SeriesHandle primary, SeriesHandle signal, SeriesHandle histogram)
+        public MacdResult(SeriesHandle primary, SeriesHandle signal, SeriesHandle histogram)
         {
             Primary = primary;
             Signal = signal;
@@ -1097,9 +1097,9 @@ internal static class FacadeSketchesV6
         public SeriesHandle Histogram { get; }
     }
 
-    private readonly struct BollingerBandsSeries
+    private readonly struct BollingerBandsResult
     {
-        public BollingerBandsSeries(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
+        public BollingerBandsResult(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
         {
             Upper = upper;
             Middle = middle;

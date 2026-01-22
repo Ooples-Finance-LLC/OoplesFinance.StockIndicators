@@ -1,14 +1,14 @@
 namespace OoplesFinance.StockIndicators.Builder;
 
 /// <summary>
-/// MACD multi-output series.
+/// MACD multi-output result.
 /// </summary>
-public readonly struct MacdSeries
+public readonly struct MacdResult
 {
     /// <summary>
-    /// Creates a new MACD series.
+    /// Creates a new MACD result.
     /// </summary>
-    public MacdSeries(SeriesHandle primary, SeriesHandle signal, SeriesHandle histogram)
+    public MacdResult(SeriesHandle primary, SeriesHandle signal, SeriesHandle histogram)
     {
         Primary = primary;
         Signal = signal;
@@ -32,14 +32,14 @@ public readonly struct MacdSeries
 }
 
 /// <summary>
-/// Bollinger Bands multi-output series.
+/// Bollinger Bands multi-output result.
 /// </summary>
-public readonly struct BollingerBandsSeries
+public readonly struct BollingerBandsResult
 {
     /// <summary>
-    /// Creates a new Bollinger Bands series.
+    /// Creates a new Bollinger Bands result.
     /// </summary>
-    public BollingerBandsSeries(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
+    public BollingerBandsResult(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
     {
         Upper = upper;
         Middle = middle;
@@ -63,14 +63,14 @@ public readonly struct BollingerBandsSeries
 }
 
 /// <summary>
-/// Stochastic multi-output series.
+/// Stochastic multi-output result.
 /// </summary>
-public readonly struct StochasticSeries
+public readonly struct StochasticResult
 {
     /// <summary>
-    /// Creates a new Stochastic series.
+    /// Creates a new Stochastic result.
     /// </summary>
-    public StochasticSeries(SeriesHandle k, SeriesHandle d)
+    public StochasticResult(SeriesHandle k, SeriesHandle d)
     {
         K = k;
         D = d;
@@ -88,14 +88,14 @@ public readonly struct StochasticSeries
 }
 
 /// <summary>
-/// Aroon multi-output series.
+/// Aroon multi-output result.
 /// </summary>
-public readonly struct AroonSeries
+public readonly struct AroonResult
 {
     /// <summary>
-    /// Creates a new Aroon series.
+    /// Creates a new Aroon result.
     /// </summary>
-    public AroonSeries(SeriesHandle up, SeriesHandle down, SeriesHandle oscillator)
+    public AroonResult(SeriesHandle up, SeriesHandle down, SeriesHandle oscillator)
     {
         Up = up;
         Down = down;
@@ -119,14 +119,14 @@ public readonly struct AroonSeries
 }
 
 /// <summary>
-/// Ichimoku multi-output series.
+/// Ichimoku multi-output result.
 /// </summary>
-public readonly struct IchimokuSeries
+public readonly struct IchimokuResult
 {
     /// <summary>
-    /// Creates a new Ichimoku series.
+    /// Creates a new Ichimoku result.
     /// </summary>
-    public IchimokuSeries(
+    public IchimokuResult(
         SeriesHandle tenkanSen,
         SeriesHandle kijunSen,
         SeriesHandle senkouSpanA,
@@ -167,14 +167,14 @@ public readonly struct IchimokuSeries
 }
 
 /// <summary>
-/// Keltner Channel multi-output series.
+/// Keltner Channel multi-output result.
 /// </summary>
-public readonly struct KeltnerChannelSeries
+public readonly struct KeltnerChannelResult
 {
     /// <summary>
-    /// Creates a new Keltner Channel series.
+    /// Creates a new Keltner Channel result.
     /// </summary>
-    public KeltnerChannelSeries(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
+    public KeltnerChannelResult(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
     {
         Upper = upper;
         Middle = middle;
@@ -198,14 +198,14 @@ public readonly struct KeltnerChannelSeries
 }
 
 /// <summary>
-/// Donchian Channel multi-output series.
+/// Donchian Channel multi-output result.
 /// </summary>
-public readonly struct DonchianChannelSeries
+public readonly struct DonchianChannelResult
 {
     /// <summary>
-    /// Creates a new Donchian Channel series.
+    /// Creates a new Donchian Channel result.
     /// </summary>
-    public DonchianChannelSeries(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
+    public DonchianChannelResult(SeriesHandle upper, SeriesHandle middle, SeriesHandle lower)
     {
         Upper = upper;
         Middle = middle;
