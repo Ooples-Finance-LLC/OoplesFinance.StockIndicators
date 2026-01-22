@@ -398,7 +398,7 @@ public static partial class Calculations
         List<double> displacedTeethList = new(stockData.Count);
         List<double> displacedLipsList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
 
         var jawList = GetMovingAverageList(stockData, maType, jawLength, inputList);
         var teethList = GetMovingAverageList(stockData, maType, teethLength, inputList);

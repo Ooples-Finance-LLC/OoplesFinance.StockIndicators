@@ -340,6 +340,8 @@ public static partial class Calculations
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
         var medianPriceList = CalculateMedianPrice(stockData).CustomValuesList;
+        // Reset CustomValuesList so TypicalPrice uses actual close prices, not medianPriceList
+        stockData.SetCustomValues(new List<double>());
         var typicalPriceList = CalculateTypicalPrice(stockData).CustomValuesList;
         var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
 

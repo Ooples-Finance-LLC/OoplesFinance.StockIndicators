@@ -156,6 +156,9 @@ public static partial class Calculations
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
         var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        // Reset CustomValuesList to ensure ZDistanceFromVwap uses close prices, not slowSmaList
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var zScoreList = CalculateZDistanceFromVwapIndicator(stockData, length: length1).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

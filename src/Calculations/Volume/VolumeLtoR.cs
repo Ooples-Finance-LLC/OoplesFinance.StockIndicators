@@ -323,6 +323,9 @@ public static partial class Calculations
         var obvList = CalculateOnBalanceVolume(stockData, maType, length).CustomValuesList;
         var obvSmaList = GetMovingAverageList(stockData, maType, length, obvList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         stockData.SetCustomValues(obvList);
         var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
@@ -395,6 +398,9 @@ public static partial class Calculations
         var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).CustomValuesList;
         var nviSmaList = GetMovingAverageList(stockData, maType, length, nviList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         stockData.SetCustomValues(nviList);
         var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;

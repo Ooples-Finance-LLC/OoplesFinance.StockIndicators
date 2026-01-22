@@ -254,6 +254,9 @@ public static partial class Calculations
 
         var decycler1List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersSimpleDecycler(data, fastLength));
+        // Reset to use close prices for decycler2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var decycler2List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersSimpleDecycler(data, slowLength));
         stockData.SetCustomValues(decycler1List);
@@ -311,6 +314,9 @@ public static partial class Calculations
 
         var hp1List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersHighPassFilterV2(data, maType, fastLength));
+        // Reset to use close prices for second HighPassFilterV2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var hp2List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersHighPassFilterV2(data, maType, slowLength));
 
@@ -796,6 +802,9 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -922,6 +931,9 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -1063,6 +1075,9 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -1869,6 +1884,9 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
+        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 

@@ -1810,6 +1810,9 @@ public static partial class Calculations
 
         var periodList = GetOutputValuesInternal(stockData,
             data => CalculateEhlersAdaptiveCyberCycle(data, length, alpha))["Period"];
+        // Reset to use close prices for CyberCycle (clear both CustomValues and Signals)
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var cycleList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersCyberCycle(data));
 

@@ -720,6 +720,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var ndxList = CalculateNaturalDirectionalIndex(stockData, maType, length, smoothLength).CustomValuesList;
+        // Reset CustomValuesList to prevent contamination of NST calculation
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var nstList = CalculateNaturalStochasticIndicator(stockData, maType, length, smoothLength).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -935,6 +938,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var nmrList = CalculateNaturalMarketRiver(stockData, maType, length).CustomValuesList;
+        // Reset CustomValuesList to prevent contamination of NMM calculation
+        stockData.SetCustomValues(new List<double>());
+        stockData.SignalsList = new List<Signal>();
         var nmmList = CalculateNaturalMarketMirror(stockData, maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
