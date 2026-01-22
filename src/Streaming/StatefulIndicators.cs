@@ -11214,7 +11214,7 @@ public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable
     private readonly PooledRingBuffer<double> _lipsWindow;
     private readonly StreamingInputResolver _input;
 
-    public AlligatorIndexState(InputName inputName = InputName.Close, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13,
+    public AlligatorIndexState(InputName inputName = InputName.MedianPrice, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13,
         int jawOffset = 8, int teethLength = 8, int teethOffset = 5, int lipsLength = 5, int lipsOffset = 3)
     {
         _jawOffset = Math.Max(0, jawOffset);
@@ -16212,6 +16212,70 @@ internal sealed class EhlersHannMovingAverageSmoother : IMovingAverageSmoother, 
     }
 }
 
+internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly int _length;
+    private readonly double[] _weights;
+    private readonly double _weightSum;
+    private readonly PooledRingBuffer<double> _values;
+
+    public SymmetricallyWeightedMovingAverageSmoother(int length)
+    {
+        _length = Math.Max(1, length);
+        _weights = new double[_length];
+        var floorLength = (int)Math.Floor((double)_length / 2);
+        var roundLength = (int)Math.Round((double)_length / 2);
+        double sum = 0;
+        for (var j = 0; j <= _length - 1; j++)
+        {
+            double weight;
+            if (floorLength == roundLength)
+            {
+                weight = j < floorLength ? (j + 1) * _length : (_length - j) * _length;
+            }
+            else
+            {
+                weight = j <= floorLength ? (j + 1) * _length : (_length - j) * _length;
+            }
+
+            _weights[j] = weight;
+            sum += weight;
+        }
+
+        _weightSum = sum;
+        _values = new PooledRingBuffer<double>(_length);
+    }
+
+    public double Next(double value, bool isFinal)
+    {
+        double sum = 0;
+        for (var j = 0; j <= _length - 1; j++)
+        {
+            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
+            sum += prevValue * _weights[j];
+        }
+
+        var swma = _weightSum != 0 ? sum / _weightSum : 0;
+
+        if (isFinal)
+        {
+            _values.TryAdd(value, out _);
+        }
+
+        return swma;
+    }
+
+    public void Reset()
+    {
+        _values.Clear();
+    }
+
+    public void Dispose()
+    {
+        _values.Dispose();
+    }
+}
+
 internal static class MovingAverageSmootherFactory
 {
     public static IMovingAverageSmoother Create(MovingAvgType maType, int length)
@@ -16233,6 +16297,7 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 => new Ehlers2PoleSuperSmootherFilterV2Smoother(length),
             MovingAvgType.EhlersTriangleMovingAverage => new EhlersTriangleMovingAverageSmoother(length),
             MovingAvgType.EhlersModifiedOptimumEllipticFilter => new EhlersModifiedOptimumEllipticFilterSmoother(length),
+            MovingAvgType.SymmetricallyWeightedMovingAverage => new SymmetricallyWeightedMovingAverageSmoother(length),
             _ => throw new NotSupportedException($"MovingAvgType {maType} is not supported in streaming stateful indicators.")
         };
     }

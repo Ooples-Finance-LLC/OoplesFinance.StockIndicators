@@ -1426,13 +1426,16 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
     private readonly LinearRegressionState _linReg;
     private readonly QuadraticRegressionEngine _quadReg;
     private readonly IMovingAverageSmoother _signalSmoother;
+    private double _linRegValue;
 
     public LinearQuadraticConvergenceDivergenceOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 50, int signalLength = 25, InputName inputName = InputName.Close)
     {
         var resolved = Math.Max(1, length);
         _linReg = new LinearRegressionState(resolved, inputName);
-        _quadReg = new QuadraticRegressionEngine(maType, resolved, inputName);
+        // Batch contamination: CalculateLinearRegression sets CustomValuesList to linReg output,
+        // then CalculateQuadraticRegression uses those linReg values as input (not original close prices)
+        _quadReg = new QuadraticRegressionEngine(maType, resolved, _ => _linRegValue);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
@@ -1446,7 +1449,8 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 
         var resolved = Math.Max(1, length);
         _linReg = new LinearRegressionState(resolved, selector);
-        _quadReg = new QuadraticRegressionEngine(maType, resolved, selector);
+        // Batch contamination: quadReg uses linReg output as input
+        _quadReg = new QuadraticRegressionEngine(maType, resolved, _ => _linRegValue);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
@@ -1457,11 +1461,14 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
         _linReg.Reset();
         _quadReg.Reset();
         _signalSmoother.Reset();
+        _linRegValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
+        // Must set _linRegValue before _quadReg.Next since quadReg uses selector that returns _linRegValue
+        _linRegValue = linReg;
         var quadReg = _quadReg.Next(bar, isFinal);
         var lqcd = quadReg - linReg;
         var signal = _signalSmoother.Next(lqcd, isFinal);
@@ -1498,6 +1505,7 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
     private readonly StandardDeviationVolatilityState _xStdDev;
     private readonly StreamingInputResolver _input;
     private double _indexValue;
+    private double _yMaValue;
     private int _index;
 
     public LinearRegressionLineState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
@@ -1507,7 +1515,9 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, inputName);
+        // Batch contamination: GetMovingAverageList sets CustomValuesList = yMaList, then
+        // CalculateStandardDeviationVolatility uses yMaList (not original close prices)
+        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
         _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -1523,7 +1533,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, selector);
+        // Batch contamination: stdDev uses yMa values, not original input values
+        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
         _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
@@ -1538,6 +1549,7 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _yStdDev.Reset();
         _xStdDev.Reset();
         _indexValue = 0;
+        _yMaValue = 0;
         _index = 0;
     }
 
@@ -1553,6 +1565,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
         var yMa = _yMa.Next(value, isFinal);
         var xMa = _xMa.Next(x, isFinal);
+        // Must set _yMaValue before _yStdDev.Update() since stdDev uses selector that returns _yMaValue
+        _yMaValue = yMa;
         var my = _yStdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var mx = _xStdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var slope = mx != 0 ? corr * (my / mx) : 0;
@@ -1963,10 +1977,12 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
-    private readonly StreamingInputResolver _vwapInput;
     private readonly double _gamma;
+    // Track three cumulative VWAPs due to batch contamination pattern in stdDev(VWAP)
     private double _volSum;
-    private double _volPriceSum;
+    private double _volPriceSum1;       // VWAP1: typicalPrice = (H+L+C)/3
+    private double _volPriceSum1Prime;  // VWAP1': typicalPrice = (H+L+VWAP1)/3
+    private double _volPriceSum2;       // VWAP2: typicalPrice = (H+L+deviationSquared)/3 where devSq = (VWAP1-VWAP1')²
     private double _l0;
     private double _l1;
     private double _l2;
@@ -1982,9 +1998,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(inputName, null);
-        _vwapInput = new StreamingInputResolver(InputName.TypicalPrice, null);
         _gamma = gamma;
-        _ = length1;
+        _ = length1; // Not used - batch VWAP is cumulative, not windowed
     }
 
     public MacZVwapIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length1,
@@ -2000,9 +2015,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, selector);
-        _vwapInput = new StreamingInputResolver(InputName.TypicalPrice, null);
         _gamma = gamma;
-        _ = length1;
+        _ = length1; // Not used - batch VWAP is cumulative, not windowed
     }
 
     public IndicatorName Name => IndicatorName.MacZVwapIndicator;
@@ -2014,7 +2028,9 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _slowSmoother.Reset();
         _signalSmoother.Reset();
         _volSum = 0;
-        _volPriceSum = 0;
+        _volPriceSum1 = 0;
+        _volPriceSum1Prime = 0;
+        _volPriceSum2 = 0;
         _l0 = 0;
         _l1 = 0;
         _l2 = 0;
@@ -2028,13 +2044,41 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         var stdev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var fastMa = _fastSmoother.Next(value, isFinal);
         var slowMa = _slowSmoother.Next(value, isFinal);
-        var vwapValue = _vwapInput.GetValue(bar);
 
+        // Batch ZDistanceFromVwap + stdDev(VWAP) contamination pattern:
+        // ZDistanceFromVwap computes VWAP1, sets CustomValuesList = VWAP1
+        // stdDev(VWAP) then uses CustomValuesList (VWAP1) as inputList:
+        //   1. Call 1: GetMovingAverageList(VWAP, VWAP1) sets CustomValuesList = VWAP1
+        //      -> VWAP uses TypicalPrice = (H+L+VWAP1)/3, produces VWAP1'
+        //   2. deviation = VWAP1 - VWAP1' (NOT close - VWAP1!)
+        //   3. Call 2: GetMovingAverageList(VWAP, deviationSquared) sets CustomValuesList = devSq
+        //      -> VWAP uses TypicalPrice = (H+L+deviationSquared)/3, produces VWAP2 (variance)
+        //   4. stdDev = sqrt(VWAP2)
+        // zscore = (close - VWAP1) / stdDev
+
+        // VWAP1: typicalPrice1 = (H+L+C)/3
+        var typicalPrice1 = (bar.High + bar.Low + bar.Close) / 3;
         var volSum = _volSum + bar.Volume;
-        var volPriceSum = _volPriceSum + (vwapValue * bar.Volume);
-        var vwap = volSum != 0 ? volPriceSum / volSum : 0;
-        var vwapSd = MathHelper.Sqrt(vwap);
-        var zscore = vwapSd != 0 ? (value - vwap) / vwapSd : 0;
+        var volPriceSum1 = _volPriceSum1 + (typicalPrice1 * bar.Volume);
+        var vwap1 = volSum != 0 ? volPriceSum1 / volSum : 0;
+
+        // VWAP1': typicalPrice1' = (H+L+VWAP1)/3 - contaminated by VWAP1 as "close"
+        var typicalPrice1Prime = (bar.High + bar.Low + vwap1) / 3;
+        var volPriceSum1Prime = _volPriceSum1Prime + (typicalPrice1Prime * bar.Volume);
+        var vwap1Prime = volSum != 0 ? volPriceSum1Prime / volSum : 0;
+
+        // deviation = VWAP1 - VWAP1' (batch uses inputList[i] - smaList[i] where inputList = VWAP1)
+        var deviation = vwap1 - vwap1Prime;
+        var deviationSquared = deviation * deviation;
+
+        // VWAP2: typicalPrice2 = (H+L+deviationSquared)/3 - batch passes deviationSquared as CustomValuesList
+        var typicalPrice2 = (bar.High + bar.Low + deviationSquared) / 3;
+        var volPriceSum2 = _volPriceSum2 + (typicalPrice2 * bar.Volume);
+        var vwap2Variance = volSum != 0 ? volPriceSum2 / volSum : 0;
+
+        // stdDev = sqrt(VWAP2 "variance")
+        var vwapSd = MathHelper.Sqrt(vwap2Variance);
+        var zscore = vwapSd != 0 ? (value - vwap1) / vwapSd : 0;
 
         var macd = fastMa - slowMa;
         var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
@@ -2055,7 +2099,9 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         if (isFinal)
         {
             _volSum = volSum;
-            _volPriceSum = volPriceSum;
+            _volPriceSum1 = volPriceSum1;
+            _volPriceSum1Prime = volPriceSum1Prime;
+            _volPriceSum2 = volPriceSum2;
             _l0 = l0;
             _l1 = l1;
             _l2 = l2;

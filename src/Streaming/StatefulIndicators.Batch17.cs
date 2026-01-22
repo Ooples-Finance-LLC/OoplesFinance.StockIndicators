@@ -109,7 +109,7 @@ public sealed class MarketMeannessIndexState : IStreamingIndicatorState, IDispos
             }
         }
 
-        var mmi = _length != 1 ? 100d * (nl + nh) / (_length - 1) : 0;
+        var mmi = _length != 1 ? (double)(100 * (nl + nh) / (_length - 1)) : 0;
         var mmiSmoothed = _mmiNet != null
             ? _mmiNet.Next(mmi, isFinal)
             : _mmiSmoother!.Next(mmi, isFinal);
@@ -595,8 +595,8 @@ public sealed class McClellanOscillatorState : IStreamingIndicatorState, IDispos
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var advance = _hasPrev && value > prevValue ? 1d : 0d;
-        var decline = _hasPrev && value < prevValue ? 1d : 0d;
+        var advance = value > prevValue ? 1d : 0d;
+        var decline = value < prevValue ? 1d : 0d;
 
         var advanceSum = isFinal ? _advSum.Add(advance, out _) : _advSum.Preview(advance, out _);
         var declineSum = isFinal ? _decSum.Add(decline, out _) : _decSum.Preview(decline, out _);

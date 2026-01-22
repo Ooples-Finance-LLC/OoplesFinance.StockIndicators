@@ -316,10 +316,9 @@ public sealed class EhlersDiscreteFourierTransformState : IStreamingIndicatorSta
                                              (2 * prevHp4) + prevHp5) / 12;
 
         double pwr = 0;
-        double cosPart = 0;
-        double sinPart = 0;
         for (var j = _minLength; j <= _maxLength; j++)
         {
+            double cosPart = 0, sinPart = 0;
             for (var n = 0; n <= _maxLength - 1; n++)
             {
                 var prevCleaned = EhlersStreamingWindow.GetOffsetValue(_cleanedValues, cleaned, n);
@@ -327,7 +326,8 @@ public sealed class EhlersDiscreteFourierTransformState : IStreamingIndicatorSta
                 sinPart += prevCleaned * Math.Sin(MathHelper.MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
             }
 
-            pwr = (cosPart * cosPart) + (sinPart * sinPart);
+            var periodPwr = (cosPart * cosPart) + (sinPart * sinPart);
+            pwr = Math.Max(pwr, periodPwr);
         }
 
         var maxPwr = _index >= _minLength

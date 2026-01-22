@@ -107,10 +107,8 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
 {
     private readonly FastandSlowKurtosisOscillatorState _fsk;
     private readonly IMovingAverageSmoother _fskSmoother;
-    // Inline Stochastic on FSK values (matching batch chaining behavior)
-    private readonly int _stochLength;
-    private readonly RollingWindowMin _fskMin;
-    private readonly RollingWindowMax _fskMax;
+    // Stochastic operates on stockData (close prices) in batch, NOT on FSK values
+    private readonly StochasticOscillatorState _stoch;
     private readonly IMovingAverageSmoother _slowKSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
 
@@ -119,11 +117,10 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
     {
         _fsk = new FastandSlowKurtosisOscillatorState(maType, Math.Max(1, length1), 0.03, inputName);
         _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        // Stochastic operates on FSK values in batch due to CustomValuesList chaining
-        _stochLength = Math.Max(1, length3);
-        _fskMin = new RollingWindowMin(_stochLength);
-        _fskMax = new RollingWindowMax(_stochLength);
-        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, _stochLength);
+        // StochasticOscillator operates on stockData (close) in batch, not on FSK values
+        // Use length3 for stochastic length, smoothLength1=1 and smoothLength2=1 (no smoothing for raw fastK)
+        _stoch = new StochasticOscillatorState(maType, Math.Max(1, length3), 1, 1, inputName);
+        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
     }
 
@@ -137,11 +134,10 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
 
         _fsk = new FastandSlowKurtosisOscillatorState(maType, Math.Max(1, length1), 0.03, selector);
         _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        // Stochastic operates on FSK values in batch due to CustomValuesList chaining
-        _stochLength = Math.Max(1, length3);
-        _fskMin = new RollingWindowMin(_stochLength);
-        _fskMax = new RollingWindowMax(_stochLength);
-        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, _stochLength);
+        // StochasticOscillator operates on stockData (close) in batch, not on FSK values
+        // Use length3 for stochastic length, smoothLength1=1 and smoothLength2=1 (no smoothing for raw fastK)
+        _stoch = new StochasticOscillatorState(maType, Math.Max(1, length3), 1, 1, selector);
+        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
     }
 
@@ -151,8 +147,7 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
     {
         _fsk.Reset();
         _fskSmoother.Reset();
-        _fskMin.Reset();
-        _fskMax.Reset();
+        _stoch.Reset();
         _slowKSmoother.Reset();
         _signalSmoother.Reset();
     }
@@ -162,21 +157,8 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
         var fsk = _fsk.Update(bar, isFinal, includeOutputs: false).Value;
         var v4 = _fskSmoother.Next(fsk, isFinal);
 
-        // Compute Stochastic on FSK values (matching batch chaining behavior)
-        double lowestLow, highestHigh;
-        if (isFinal)
-        {
-            lowestLow = _fskMin.Add(fsk, out _);
-            highestHigh = _fskMax.Add(fsk, out _);
-        }
-        else
-        {
-            lowestLow = _fskMin.Preview(fsk, out _);
-            highestHigh = _fskMax.Preview(fsk, out _);
-        }
-
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? Math.Max(0, Math.Min(100, ((fsk - lowestLow) / range) * 100)) : 0;
+        // Get FastK from StochasticOscillator (operates on close prices, not FSK)
+        var fastK = _stoch.Update(bar, isFinal, includeOutputs: false).Value;
         var slowK = _slowKSmoother.Next(fastK, isFinal);
         var fsst = (500 * v4) + slowK;
         var signal = _signalSmoother.Next(fsst, isFinal);
@@ -198,8 +180,7 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
     {
         _fsk.Dispose();
         _fskSmoother.Dispose();
-        _fskMin.Dispose();
-        _fskMax.Dispose();
+        _stoch.Dispose();
         _slowKSmoother.Dispose();
         _signalSmoother.Dispose();
     }

@@ -2224,10 +2224,8 @@ public sealed class HybridConvolutionFilterState : IStreamingIndicatorState, IDi
         double output = 0;
         for (var j = 1; j <= _length; j++)
         {
-            var signArg = MathHelper.MinOrMax((double)j / _length * Math.PI, 0.99, 0.01);
-            var sign = 0.5 * (1 - Math.Cos(signArg));
-            var priorArg = MathHelper.MinOrMax((double)(j - 1) / _length * Math.PI, 0.99, 0.01);
-            var d = sign - (0.5 * (1 - Math.Cos(priorArg)));
+            var sign = 0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)j / _length * Math.PI, 0.99, 0.01)));
+            var d = sign - (0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)(j - 1) / _length, 0.99, 0.01))));
             var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
             output += ((sign * prevOutput) + ((1 - sign) * prevValue)) * d;
         }

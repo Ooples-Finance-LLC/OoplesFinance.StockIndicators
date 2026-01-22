@@ -1280,14 +1280,17 @@ public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicator
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevP1 = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevP2 = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevP3 = EhlersStreamingWindow.GetOffsetValue(_values, value, 3);
+        // Batch uses 0 when there isn't enough history (i >= 1, i >= 2, i >= 3 checks)
+        var prevP1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
+        var prevP2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
+        var prevP3 = _values.Count >= 3 ? _values[_values.Count - 3] : 0;
 
         var smth = (value + (2 * prevP1) + (2 * prevP2) + prevP3) / 6;
 
         var existingCount = _smthValues.Count;
+
         var available = existingCount < _length ? existingCount + 1 : _length;
+
         if (existingCount < _length)
         {
             for (var i = 0; i < existingCount; i++)
@@ -1315,17 +1318,19 @@ public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicator
 
         while (value3 > _threshold && len > 0)
         {
-            var remaining = available - removedOffset;
-            var count = Math.Min(len, remaining);
+            // Match batch: requestedCount determines odd/even logic, actualCount is elements available
+            var requestedCount = Math.Min(len, available);
+            var actualCount = available - removedOffset;
             var alpha = (double)2 / (len + 1);
-            var median = GetMedian(_windowScratch, removedOffset, count, _medianScratch);
+            var median = GetMedian(_windowScratch, removedOffset, actualCount, requestedCount, _medianScratch);
             value2 = (alpha * smth) + ((1 - alpha) * prevV2);
             value3 = median != 0 ? Math.Abs(median - value2) / median : value3;
             len -= 2;
 
-            if (value3 > _threshold && len > 0 && len < available && removedOffset + 1 < available)
+            // Match batch condition exactly (no extra bounds check)
+            if (value3 > _threshold && len > 0 && len < available)
             {
-                removedOffset = Math.Min(removedOffset + 2, available);
+                removedOffset += 2;
             }
         }
 
@@ -1360,22 +1365,36 @@ public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicator
         _smthValues.Dispose();
     }
 
-    private static double GetMedian(double[] values, int start, int count, double[] scratch)
+    /// <summary>
+    /// Computes the median matching batch's OrderStatisticTree behavior.
+    /// The batch uses 'requestedCount' for odd/even logic but clamps ranks to actual tree size.
+    /// </summary>
+    private static double GetMedian(double[] values, int start, int actualCount, int requestedCount, double[] scratch)
     {
-        if (count <= 0)
+        if (actualCount <= 0)
         {
             return 0;
         }
 
-        Array.Copy(values, start, scratch, 0, count);
-        Array.Sort(scratch, 0, count);
-        var mid = count / 2;
-        if ((count & 1) == 1)
+        Array.Copy(values, start, scratch, 0, actualCount);
+        Array.Sort(scratch, 0, actualCount);
+
+        // Match batch behavior: use requestedCount for odd/even logic
+        // but clamp ranks to actualCount (like SelectByRank does)
+        if ((requestedCount & 1) == 1)
         {
-            return scratch[mid];
+            // Odd: SelectByRank((requestedCount + 1) / 2), clamped to actualCount
+            var rank = (requestedCount + 1) / 2;
+            rank = Math.Min(rank, actualCount);
+            return scratch[rank - 1]; // 0-indexed
         }
 
-        return (scratch[mid - 1] + scratch[mid]) / 2;
+        // Even: average of SelectByRank(requestedCount / 2) and SelectByRank(requestedCount / 2 + 1)
+        var leftRank = requestedCount / 2;
+        var rightRank = (requestedCount / 2) + 1;
+        leftRank = Math.Min(leftRank, actualCount);
+        rightRank = Math.Min(rightRank, actualCount);
+        return (scratch[leftRank - 1] + scratch[rightRank - 1]) / 2; // 0-indexed
     }
 }
 public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState, IDisposable
@@ -3810,7 +3829,9 @@ public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingI
         var cg = _cogState.Update(bar, isFinal, includeOutputs: false).Value;
         var min = cg;
         var max = cg;
-        for (var i = 0; i < _cgValues.Count; i++)
+        // Skip oldest value when buffer is full to match batch's sliding window behavior
+        var start = _cgValues.Count == _windowLength ? 1 : 0;
+        for (var i = start; i < _cgValues.Count; i++)
         {
             var value = _cgValues[i];
             if (value < min)
@@ -4045,9 +4066,9 @@ public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisp
         int length = 20, double delta = 0.1, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
-        _beta = Math.Max(Math.Cos(2 * Math.PI / _length), 0.99);
-        var gamma = 1 / Math.Cos(4 * Math.PI * delta / _length);
-        _alpha = Math.Max(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99);
+        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / _length, 0.99, 0.01));
+        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
         _trendSmoother = MovingAverageSmootherFactory.Create(maType, _length * 2);
         _input = new StreamingInputResolver(inputName, null);
         _values = new PooledRingBuffer<double>(2);
@@ -4063,9 +4084,9 @@ public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisp
         }
 
         _length = Math.Max(1, length);
-        _beta = Math.Max(Math.Cos(2 * Math.PI / _length), 0.99);
-        var gamma = 1 / Math.Cos(4 * Math.PI * delta / _length);
-        _alpha = Math.Max(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99);
+        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / _length, 0.99, 0.01));
+        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
         _trendSmoother = MovingAverageSmootherFactory.Create(maType, _length * 2);
         _input = new StreamingInputResolver(InputName.Close, selector);
         _values = new PooledRingBuffer<double>(2);
@@ -4770,7 +4791,9 @@ public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, 
         var cycle = _cycleState.Update(bar, isFinal, includeOutputs: false).Value;
         var min = cycle;
         var max = cycle;
-        for (var i = 0; i < _cycleValues.Count; i++)
+        // Skip oldest value when buffer is full to match batch's sliding window behavior
+        var start = _cycleValues.Count == _windowLength ? 1 : 0;
+        for (var i = start; i < _cycleValues.Count; i++)
         {
             var value = _cycleValues[i];
             if (value < min)
@@ -4868,7 +4891,9 @@ public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposabl
         var rf = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var min = rf;
         var max = rf;
-        for (var i = 0; i < _rfValues.Count; i++)
+        // Skip oldest value when buffer is full to match batch's sliding window behavior
+        var start = _rfValues.Count == _windowLength ? 1 : 0;
+        for (var i = start; i < _rfValues.Count; i++)
         {
             var value = _rfValues[i];
             if (value < min)

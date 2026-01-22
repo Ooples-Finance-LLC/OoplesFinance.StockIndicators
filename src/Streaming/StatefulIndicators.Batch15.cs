@@ -683,7 +683,7 @@ public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDi
 public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly IMovingAverageSmoother _varianceMa;
     private readonly StreamingInputResolver _input;
 
     public InverseFisherZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100,
@@ -691,7 +691,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     {
         var resolved = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, inputName);
+        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -704,7 +704,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
 
         var resolved = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, selector);
+        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -713,15 +713,18 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     public void Reset()
     {
         _sma.Reset();
-        _stdDev.Reset();
+        _varianceMa.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var z = stdDev != 0 ? (value - sma) / stdDev : 0;
+        // Compute deviation using the same SMA that's used for z-score
+        var deviation = value - sma;
+        var variance = _varianceMa.Next(deviation * deviation, isFinal);
+        var stdDev = MathHelper.Sqrt(variance);
+        var z = stdDev != 0 ? deviation / stdDev : 0;
         var expZ = MathHelper.Exp(2 * z);
         var f = expZ + 1 != 0 ? MathHelper.MinOrMax((((expZ - 1) / (expZ + 1)) + 1) * 50, 100, 0) : 0;
 
@@ -740,7 +743,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     public void Dispose()
     {
         _sma.Dispose();
-        _stdDev.Dispose();
+        _varianceMa.Dispose();
     }
 }
 

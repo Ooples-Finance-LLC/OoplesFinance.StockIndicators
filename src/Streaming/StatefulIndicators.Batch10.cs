@@ -34,9 +34,9 @@ public sealed class EhlersEmpiricalModeDecompositionState : IStreamingIndicatorS
         _peakSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
         _valleySmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
 
-        _beta = Math.Max(Math.Cos(2 * Math.PI / resolvedLength1), 0.99);
-        var gamma = 1 / Math.Cos(4 * Math.PI * delta / resolvedLength1);
-        _alpha = Math.Max(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99);
+        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolvedLength1, 0.99, 0.01));
+        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
     }
 
     public EhlersEmpiricalModeDecompositionState(MovingAvgType maType, int length1, int length2, double delta, double fraction,
@@ -55,9 +55,9 @@ public sealed class EhlersEmpiricalModeDecompositionState : IStreamingIndicatorS
         _peakSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
         _valleySmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
 
-        _beta = Math.Max(Math.Cos(2 * Math.PI / resolvedLength1), 0.99);
-        var gamma = 1 / Math.Cos(4 * Math.PI * delta / resolvedLength1);
-        _alpha = Math.Max(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99);
+        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolvedLength1, 0.99, 0.01));
+        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
     }
 
     public IndicatorName Name => IndicatorName.EhlersEmpiricalModeDecomposition;

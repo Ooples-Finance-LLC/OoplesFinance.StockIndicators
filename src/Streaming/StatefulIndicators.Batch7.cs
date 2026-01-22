@@ -1239,8 +1239,11 @@ public sealed class EhlersAnticipateIndicatorState : IStreamingIndicatorState, I
                 ? (((double)_length * sxy) - (sx * sy)) /
                   MathHelper.Sqrt(denom * (((double)_length * syy) - MathHelper.Pow(sy, 2)))
                 : 0;
-            start = corr > maxCorr ? _length - j : 0;
-            maxCorr = corr > maxCorr ? corr : maxCorr;
+            if (corr > maxCorr)
+            {
+                maxCorr = corr;
+                start = _length - j;
+            }
         }
 
         var predict = Math.Sin(MathHelper.MinOrMax(2 * Math.PI * start / _length, 0.99, 0.01));
@@ -1755,10 +1758,11 @@ public sealed class EhlersAdaptiveStochasticIndicatorV2State : IStreamingIndicat
         domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
 
-        double highest = 0;
-        double lowest = 0;
         var length = (int)Math.Ceiling(domCyc);
-        for (var j = 0; j < length; j++)
+        var highest = roofingFilter;
+        var lowest = roofingFilter;
+        // Match batch: only look back at values that exist (j <= count of stored values)
+        for (var j = 1; j < length && j <= _roofingValues.Count; j++)
         {
             var filt = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, j);
             if (filt > highest)
