@@ -210,7 +210,6 @@ public sealed class EmailNotificationChannel : INotificationChannel
         var password = _options.Password ?? Environment.GetEnvironmentVariable("SMTP_PASSWORD");
         var from = _options.From ?? username;
         var to = _options.To;
-        var useSsl = _options.UseSsl ?? true;
 
         if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(to))
         {
@@ -224,7 +223,8 @@ public sealed class EmailNotificationChannel : INotificationChannel
             var body = $"Signal: {notification.Name}\nValue: {notification.Value:F4}\nTime: {notification.Timestamp:yyyy-MM-dd HH:mm:ss}";
 
             using var client = new System.Net.Mail.SmtpClient(host, port);
-            client.EnableSsl = useSsl;
+            // Always enable SSL to encrypt sensitive data (security requirement)
+            client.EnableSsl = true;
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {
                 client.Credentials = new System.Net.NetworkCredential(username, password);
@@ -429,7 +429,7 @@ public sealed class TelegramNotificationChannel : INotificationChannel
             });
 
             using var content = new System.Net.Http.StringContent(payload, System.Text.Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
+            using var response = await HttpClient.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {

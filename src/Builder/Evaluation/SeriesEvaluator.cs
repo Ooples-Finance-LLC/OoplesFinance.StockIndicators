@@ -238,6 +238,22 @@ public static class IndicatorOutputRegistry
 
         // Williams %R outputs
         { (IndicatorName.WilliamsR, IndicatorOutput.Primary), "WilliamsR" },
+
+        // Donchian Channels outputs
+        { (IndicatorName.DonchianChannels, IndicatorOutput.UpperBand), "UpperChannel" },
+        { (IndicatorName.DonchianChannels, IndicatorOutput.MiddleBand), "MiddleChannel" },
+        { (IndicatorName.DonchianChannels, IndicatorOutput.LowerBand), "LowerChannel" },
+
+        // Keltner Channels outputs
+        { (IndicatorName.KeltnerChannels, IndicatorOutput.UpperBand), "UpperBand" },
+        { (IndicatorName.KeltnerChannels, IndicatorOutput.MiddleBand), "MiddleBand" },
+        { (IndicatorName.KeltnerChannels, IndicatorOutput.LowerBand), "LowerBand" },
+
+        // Ichimoku Cloud outputs
+        { (IndicatorName.IchimokuCloud, IndicatorOutput.Primary), "TenkanSen" },
+        { (IndicatorName.IchimokuCloud, IndicatorOutput.Signal), "KijunSen" },
+        { (IndicatorName.IchimokuCloud, IndicatorOutput.UpperBand), "SenkouSpanA" },
+        { (IndicatorName.IchimokuCloud, IndicatorOutput.LowerBand), "SenkouSpanB" },
     };
 
     private static readonly object RegistryLock = new();

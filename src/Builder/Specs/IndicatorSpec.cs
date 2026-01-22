@@ -183,7 +183,8 @@ public sealed class BollingerBandsSpecOptions : IIndicatorSpecOptions
     public BollingerBandsSpecOptions(int length, double stdDevMult)
     {
         Length = Math.Max(1, length);
-        StdDevMult = stdDevMult;
+        // Validate StdDevMult to prevent invalid band calculations (inverted/collapsed bands)
+        StdDevMult = Math.Max(0.001, stdDevMult);
     }
 
     public int Length { get; }

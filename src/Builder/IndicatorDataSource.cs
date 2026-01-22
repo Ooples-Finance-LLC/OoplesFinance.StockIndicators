@@ -157,7 +157,7 @@ public sealed class IndicatorDataSource
     }
 
     /// <summary>
-    /// Merges multiple StockData instances into one.
+    /// Merges multiple StockData instances into one, ensuring chronological order.
     /// </summary>
     private static StockData MergeStockData(List<StockData> dataList)
     {
@@ -168,7 +168,17 @@ public sealed class IndicatorDataSource
             totalCapacity += data.Count;
         }
 
-        // Merge all data
+        // Collect all ticks into a list for sorting
+        var allTicks = new List<TickerData>(totalCapacity);
+        foreach (var data in dataList)
+        {
+            allTicks.AddRange(data.TickerDataList);
+        }
+
+        // Sort by date to ensure chronological order (oldest to newest)
+        allTicks.Sort((a, b) => a.Date.CompareTo(b.Date));
+
+        // Build output lists from sorted data
         var dates = new List<DateTime>(totalCapacity);
         var opens = new List<double>(totalCapacity);
         var highs = new List<double>(totalCapacity);
@@ -176,18 +186,14 @@ public sealed class IndicatorDataSource
         var closes = new List<double>(totalCapacity);
         var volumes = new List<double>(totalCapacity);
 
-        foreach (var data in dataList)
+        foreach (var tick in allTicks)
         {
-            var tickerData = data.TickerDataList;
-            foreach (var tick in tickerData)
-            {
-                dates.Add(tick.Date);
-                opens.Add((double)tick.Open);
-                highs.Add((double)tick.High);
-                lows.Add((double)tick.Low);
-                closes.Add((double)tick.Close);
-                volumes.Add((double)tick.Volume);
-            }
+            dates.Add(tick.Date);
+            opens.Add((double)tick.Open);
+            highs.Add((double)tick.High);
+            lows.Add((double)tick.Low);
+            closes.Add((double)tick.Close);
+            volumes.Add((double)tick.Volume);
         }
 
         // StockData constructor signature: opens, highs, lows, closes, volumes, dates

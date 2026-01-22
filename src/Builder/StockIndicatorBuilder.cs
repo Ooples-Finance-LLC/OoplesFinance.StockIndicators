@@ -417,7 +417,8 @@ public sealed class StockIndicatorBuilder
 
         if (_dataOptions?.StreamingOptions != null)
         {
-            var custom = _dataOptions.StreamingOptions;
+            // Clone to avoid mutating caller's options object
+            var custom = CloneStreamingOptions(_dataOptions.StreamingOptions);
             custom.Symbols ??= ToSymbolStrings(symbols);
             return custom;
         }
@@ -433,6 +434,30 @@ public sealed class StockIndicatorBuilder
         }
 
         return CreateDefaultStreamingOptions(symbols);
+    }
+
+    private static StreamingOptions CloneStreamingOptions(StreamingOptions source)
+    {
+        return new StreamingOptions
+        {
+            Symbols = source.Symbols,
+            Timeframes = source.Timeframes,
+            SubscribeTrades = source.SubscribeTrades,
+            SubscribeQuotes = source.SubscribeQuotes,
+            SubscribeBars = source.SubscribeBars,
+            UpdatePolicy = source.UpdatePolicy,
+            QuotePriceMode = source.QuotePriceMode,
+            OutOfOrderPolicy = source.OutOfOrderPolicy,
+            ReorderWindow = source.ReorderWindow,
+            MaxBufferSize = source.MaxBufferSize,
+            ProcessingMode = source.ProcessingMode,
+            BackpressurePolicy = source.BackpressurePolicy,
+            MaxPendingMessages = source.MaxPendingMessages,
+            InputName = source.InputName,
+            IncludeOutputValues = source.IncludeOutputValues,
+            IndicatorOptions = source.IndicatorOptions,
+            Indicators = source.Indicators
+        };
     }
 
     private static StreamingOptions CreateDefaultStreamingOptions(IReadOnlyList<SymbolId> symbols)
