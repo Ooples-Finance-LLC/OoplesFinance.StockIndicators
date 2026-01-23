@@ -326,6 +326,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "EhlersSuperSmootherFilter",
         "ErgodicCandlestickOscillator",
         "StochasticFastOscillator",
+        "MassThrustIndicator",
+        "McGinleyDynamicIndicator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -970,6 +972,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "EhlersSuperSmootherFilter" => "ComputeSuperSmootherFast",
             "ErgodicCandlestickOscillator" => "ComputeErgodicCandlestickOscillatorFast",
             "StochasticFastOscillator" => "ComputeStochasticKFast",
+            "MassThrustIndicator" => "ComputeMassThrustFast",
+            "McGinleyDynamicIndicator" => "ComputeMcGinleyDynamicFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
