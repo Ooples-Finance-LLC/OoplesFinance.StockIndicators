@@ -323,6 +323,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "ConnorsRelativeStrengthIndex",
         "StochasticRelativeStrengthIndex",
         "VolumeWeightedRelativeStrengthIndex",
+        "EhlersSuperSmootherFilter",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -964,6 +965,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "ConnorsRelativeStrengthIndex" => "ComputeConnorsRsiFast",
             "StochasticRelativeStrengthIndex" => "ComputeStochRsiFast",
             "VolumeWeightedRelativeStrengthIndex" => "ComputeVolumeWeightedRsiFast",
+            "EhlersSuperSmootherFilter" => "ComputeSuperSmootherFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
