@@ -330,6 +330,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "McGinleyDynamicIndicator",
         "PringSpecialK",
         "TillsonT3MovingAverage",
+        "ChandeQuickStick",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -978,6 +979,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "McGinleyDynamicIndicator" => "ComputeMcGinleyDynamicFast",
             "PringSpecialK" => "ComputeSpecialKFast",
             "TillsonT3MovingAverage" => "ComputeT3Fast",
+            "ChandeQuickStick" => "ComputeQstickFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
