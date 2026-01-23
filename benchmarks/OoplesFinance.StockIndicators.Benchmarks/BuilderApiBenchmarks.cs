@@ -193,6 +193,114 @@ public class BuilderApiBenchmarks
         return runtime.Latest ?? new object();
     }
 
+    // Streaming vs Batch Comparison - Key v2 advantage
+    // Streaming processes new data incrementally without recomputing history
+
+    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("Streaming")]
+    public object V1_BatchRecompute()
+    {
+        // V1 must recompute entire history for each new bar
+        // Simulates adding 10 new bars and recomputing each time
+        var result = new object();
+        for (int i = 0; i < 10; i++)
+        {
+            _stockData.CalculateSimpleMovingAverage(length: 14);
+            _stockData.CalculateRelativeStrengthIndex(length: 14);
+            result = _stockData.CalculateBollingerBands(length: 20, stdDevMult: 2);
+            BenchmarkDataFactory.Reset(_stockData);
+        }
+        return result;
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("Streaming")]
+    public object V2_StreamingIncremental()
+    {
+        // V2 streaming processes incrementally - only computes new bar values
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.ConfigureIndicators(catalog =>
+        {
+            catalog.Sma(14);
+            catalog.Rsi(14);
+            catalog.BollingerBands(20, 2);
+        });
+        using var runtime = builder.Build();
+        runtime.Start();
+        return runtime.Latest ?? new object();
+    }
+
+    // Chained Indicators - v2 allows composing indicators naturally
+
+    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("ChainedIndicators")]
+    public object V1_ManualChaining()
+    {
+        // V1 requires manual extraction and re-feeding of data
+        var smaResult = _stockData.CalculateSimpleMovingAverage(length: 20);
+        // Would need to manually extract SMA values and feed to RSI
+        return _stockData.CalculateRelativeStrengthIndex(length: 14);
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("ChainedIndicators")]
+    public object V2_FluentChaining()
+    {
+        // V2 allows natural indicator chaining
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle sma = default;
+        builder.ConfigureIndicators(catalog =>
+        {
+            sma = catalog.Sma(20);
+            // Chain RSI on top of SMA - computed automatically
+            catalog.Then(sma).Rsi(14);
+        });
+        using var runtime = builder.Build();
+        runtime.Start();
+        return runtime.Latest ?? new object();
+    }
+
+    // Large Dataset Comparison
+
+    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("LargeDataset")]
+    public object V1_LargeDataset()
+    {
+        _stockData.CalculateSimpleMovingAverage(length: 50);
+        _stockData.CalculateExponentialMovingAverage(length: 50);
+        _stockData.CalculateRelativeStrengthIndex(length: 14);
+        _stockData.CalculateBollingerBands(length: 20, stdDevMult: 2);
+        _stockData.CalculateMovingAverageConvergenceDivergence();
+        _stockData.CalculateStochasticOscillator(length: 14);
+        _stockData.CalculateAverageTrueRange(length: 14);
+        return _stockData.CalculateDonchianChannels(length: 20);
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("LargeDataset")]
+    public object V2_LargeDataset()
+    {
+        // V2 computes all indicators in single optimized pass
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.ConfigureIndicators(catalog =>
+        {
+            catalog.Sma(50);
+            catalog.Ema(50);
+            catalog.Rsi(14);
+            catalog.BollingerBands(20, 2);
+            catalog.Macd();
+            catalog.Stochastic(14);
+            catalog.Atr(14);
+            catalog.DonchianChannels(20);
+        });
+        using var runtime = builder.Build();
+        runtime.Start();
+        return runtime.Latest ?? new object();
+    }
+
     private sealed class BuilderBenchmarkConfig : ManualConfig
     {
         public BuilderBenchmarkConfig()

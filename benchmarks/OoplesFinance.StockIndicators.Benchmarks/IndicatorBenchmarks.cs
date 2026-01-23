@@ -1,3 +1,5 @@
+#pragma warning disable CS0618 // Suppress obsolete warnings for v1 API benchmarking
+
 #if BASELINE
 extern alias Original;
 #endif
