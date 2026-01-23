@@ -7582,5 +7582,389 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators (Batch 12) - Vervoort and Specialized
+
+    /// <summary>
+    /// Computes Vervoort Smoothed Oscillator.
+    /// </summary>
+    internal static void VervoortSmoothedOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+        var demaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            var dema = demaArray.AsSpan(0, close.Length);
+
+            // Calculate EMA
+            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
+            MovingAverageCore.ExponentialMovingAverage(ema, dema, length);
+
+            // Oscillator = 2 * EMA - DEMA (Smoothed)
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - (2 * ema[i] - dema[i]);
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(demaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Relative Difference of Squares Oscillator.
+    /// </summary>
+    internal static void RelativeDifferenceOfSquaresOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                var sumUp = 0.0;
+                var sumDown = 0.0;
+                for (var j = 0; j < length; j++)
+                {
+                    var diff = close[i - j] - close[i - j - 1 < 0 ? 0 : i - j - 1];
+                    var diffSq = diff * diff;
+                    if (diff > 0) sumUp += diffSq;
+                    else sumDown += diffSq;
+                }
+
+                var total = sumUp + sumDown;
+                output[i] = total != 0 ? (sumUp - sumDown) / total * 100 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Linear Quadratic Convergence Divergence Oscillator.
+    /// </summary>
+    internal static void LinearQuadraticConvergenceDivergenceOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var linRegArray = pool.Rent(close.Length);
+        var quadRegArray = pool.Rent(close.Length);
+
+        try
+        {
+            var linReg = linRegArray.AsSpan(0, close.Length);
+            var quadReg = quadRegArray.AsSpan(0, close.Length);
+
+            // Linear regression
+            MovingAverageCore.LinearRegression(close, linReg, length);
+
+            // Quadratic approximation (use DEMA as proxy for quadratic behavior)
+            MovingAverageCore.ExponentialMovingAverage(close, quadReg, length);
+            var emaOfEma = pool.Rent(close.Length);
+            try
+            {
+                var eofe = emaOfEma.AsSpan(0, close.Length);
+                MovingAverageCore.ExponentialMovingAverage(quadReg, eofe, length);
+
+                // Output = Linear - Quadratic convergence
+                for (var i = 0; i < close.Length; i++)
+                {
+                    output[i] = linReg[i] - (2 * quadReg[i] - eofe[i]);
+                }
+            }
+            finally
+            {
+                pool.Return(emaOfEma);
+            }
+        }
+        finally
+        {
+            pool.Return(linRegArray);
+            pool.Return(quadRegArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stationary Extrapolated Levels Oscillator.
+    /// </summary>
+    internal static void StationaryExtrapolatedLevelsOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var linRegArray = pool.Rent(close.Length);
+        var slopeArray = pool.Rent(close.Length);
+
+        try
+        {
+            var linReg = linRegArray.AsSpan(0, close.Length);
+            var slope = slopeArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.LinearRegression(close, linReg, length);
+            TrendCore.LinearRegressionSlope(close, slope, length);
+
+            // Extrapolated level = linReg + slope (projected one bar ahead)
+            // Oscillator = close - extrapolated level
+            for (var i = 0; i < close.Length; i++)
+            {
+                var extrapolated = linReg[i] + slope[i];
+                output[i] = close[i] - extrapolated;
+            }
+        }
+        finally
+        {
+            pool.Return(linRegArray);
+            pool.Return(slopeArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Percentage Price Oscillator Leader.
+    /// </summary>
+    internal static void PercentagePriceOscillatorLeader(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(close.Length);
+        var slowEmaArray = pool.Rent(close.Length);
+        var fastSlopeArray = pool.Rent(close.Length);
+        var slowSlopeArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, close.Length);
+            var slowEma = slowEmaArray.AsSpan(0, close.Length);
+            var fastSlope = fastSlopeArray.AsSpan(0, close.Length);
+            var slowSlope = slowSlopeArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
+
+            // Calculate slopes
+            for (var i = 1; i < close.Length; i++)
+            {
+                fastSlope[i] = fastEma[i] - fastEma[i - 1];
+                slowSlope[i] = slowEma[i] - slowEma[i - 1];
+            }
+
+            // Leader = PPO + scaled slope difference
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (slowEma[i] != 0)
+                {
+                    var ppo = (fastEma[i] - slowEma[i]) / slowEma[i] * 100;
+                    var slopeDiff = (fastSlope[i] - slowSlope[i]) / (Math.Abs(slowEma[i]) / 100 + 0.001);
+                    output[i] = ppo + slopeDiff;
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+            pool.Return(fastSlopeArray);
+            pool.Return(slowSlopeArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Kaufman Adaptive Correlation Oscillator.
+    /// </summary>
+    internal static void KaufmanAdaptiveCorrelationOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var kamaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var kama = kamaArray.AsSpan(0, close.Length);
+
+            // Calculate KAMA
+            MovingAverageCore.KaufmanAdaptiveMovingAverage(close, kama, length, 2, 30);
+
+            // Correlation-based oscillator
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    // Calculate correlation between price and KAMA
+                    var sumXY = 0.0;
+                    var sumX = 0.0;
+                    var sumY = 0.0;
+                    var sumX2 = 0.0;
+                    var sumY2 = 0.0;
+
+                    for (var j = 0; j < length; j++)
+                    {
+                        var x = close[i - j];
+                        var y = kama[i - j];
+                        sumXY += x * y;
+                        sumX += x;
+                        sumY += y;
+                        sumX2 += x * x;
+                        sumY2 += y * y;
+                    }
+
+                    var n = length;
+                    var denom = Math.Sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+                    if (denom != 0)
+                    {
+                        output[i] = (n * sumXY - sumX * sumY) / denom * 100;
+                    }
+                    else
+                    {
+                        output[i] = 0;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(kamaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stochastic Moving Average Convergence Divergence Oscillator.
+    /// </summary>
+    internal static void StochasticMacdOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26, int signalLength = 9, int stochLength = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var macdLineArray = pool.Rent(close.Length);
+        var stochMacdArray = pool.Rent(close.Length);
+
+        try
+        {
+            var macdLine = macdLineArray.AsSpan(0, close.Length);
+            var stochMacd = stochMacdArray.AsSpan(0, close.Length);
+
+            // Calculate MACD line
+            var fastEma = pool.Rent(close.Length);
+            var slowEma = pool.Rent(close.Length);
+            try
+            {
+                MovingAverageCore.ExponentialMovingAverage(close, fastEma.AsSpan(0, close.Length), fastLength);
+                MovingAverageCore.ExponentialMovingAverage(close, slowEma.AsSpan(0, close.Length), slowLength);
+                for (var i = 0; i < close.Length; i++)
+                {
+                    macdLine[i] = fastEma[i] - slowEma[i];
+                }
+            }
+            finally
+            {
+                pool.Return(fastEma);
+                pool.Return(slowEma);
+            }
+
+            // Calculate Stochastic of MACD
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < stochLength - 1)
+                {
+                    output[i] = 50;
+                }
+                else
+                {
+                    var highest = macdLine[i];
+                    var lowest = macdLine[i];
+                    for (var j = i - stochLength + 1; j <= i; j++)
+                    {
+                        if (macdLine[j] > highest) highest = macdLine[j];
+                        if (macdLine[j] < lowest) lowest = macdLine[j];
+                    }
+
+                    var range = highest - lowest;
+                    output[i] = range != 0 ? (macdLine[i] - lowest) / range * 100 : 50;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(macdLineArray);
+            pool.Return(stochMacdArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes McClellan Oscillator (market breadth).
+    /// </summary>
+    internal static void McClellanOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 19, int slowLength = 39)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(close.Length);
+        var slowEmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, close.Length);
+            var slowEma = slowEmaArray.AsSpan(0, close.Length);
+
+            // For individual stocks, use price as proxy for breadth
+            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
+
+            // McClellan Oscillator = Fast EMA - Slow EMA
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = fastEma[i] - slowEma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

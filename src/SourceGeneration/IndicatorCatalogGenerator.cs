@@ -429,6 +429,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "EhlersStochasticCenterOfGravityOscillator",
         "EhlersFisherizedDeviationScaledOscillator",
         "EhlersAdaptiveCenterOfGravityOscillator",
+
+        // Additional Oscillators (Batch 12) - Vervoort and Specialized
+        "VervoortSmoothedOscillator",
+        "RelativeDifferenceOfSquaresOscillator",
+        "LinearQuadraticConvergenceDivergenceOscillator",
+        "StationaryExtrapolatedLevelsOscillator",
+        "PercentagePriceOscillatorLeader",
+        "KaufmanAdaptiveCorrelationOscillator",
+        "StochasticMovingAverageConvergenceDivergenceOscillator",
+        "McClellanOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1176,6 +1186,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "EhlersStochasticCenterOfGravityOscillator" => "ComputeEhlersStochasticCenterOfGravityOscillatorFast",
             "EhlersFisherizedDeviationScaledOscillator" => "ComputeEhlersFisherizedDeviationScaledOscillatorFast",
             "EhlersAdaptiveCenterOfGravityOscillator" => "ComputeEhlersAdaptiveCenterOfGravityOscillatorFast",
+
+            // Additional Oscillators (Batch 12) - Vervoort and Specialized
+            "VervoortSmoothedOscillator" => "ComputeVervoortSmoothedOscillatorFast",
+            "RelativeDifferenceOfSquaresOscillator" => "ComputeRelativeDifferenceOfSquaresOscillatorFast",
+            "LinearQuadraticConvergenceDivergenceOscillator" => "ComputeLinearQuadraticConvergenceDivergenceOscillatorFast",
+            "StationaryExtrapolatedLevelsOscillator" => "ComputeStationaryExtrapolatedLevelsOscillatorFast",
+            "PercentagePriceOscillatorLeader" => "ComputePercentagePriceOscillatorLeaderFast",
+            "KaufmanAdaptiveCorrelationOscillator" => "ComputeKaufmanAdaptiveCorrelationOscillatorFast",
+            "StochasticMovingAverageConvergenceDivergenceOscillator" => "ComputeStochasticMacdOscillatorFast",
+            "McClellanOscillator" => "ComputeMcClellanOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
