@@ -329,6 +329,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "MassThrustIndicator",
         "McGinleyDynamicIndicator",
         "PringSpecialK",
+        "TillsonT3MovingAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -976,6 +977,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "MassThrustIndicator" => "ComputeMassThrustFast",
             "McGinleyDynamicIndicator" => "ComputeMcGinleyDynamicFast",
             "PringSpecialK" => "ComputeSpecialKFast",
+            "TillsonT3MovingAverage" => "ComputeT3Fast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
