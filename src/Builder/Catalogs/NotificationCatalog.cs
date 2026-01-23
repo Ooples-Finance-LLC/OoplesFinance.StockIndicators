@@ -76,6 +76,7 @@ public sealed class NotificationCatalog
 
     internal IReadOnlyList<INotificationChannel> Build()
     {
-        return new List<INotificationChannel>(_channels);
+        // Return singleton empty array when no channels configured to avoid allocation
+        return _channels.Count == 0 ? Array.Empty<INotificationChannel>() : new List<INotificationChannel>(_channels);
     }
 }

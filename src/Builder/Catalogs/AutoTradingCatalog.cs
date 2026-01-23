@@ -50,6 +50,12 @@ public sealed class AutoTradingCatalog
 
     internal AutoTradingConfiguration Build()
     {
+        // Return singleton empty configuration when no trading configured to avoid allocation
+        if (_rules.Count == 0 && _adapters.Count == 0)
+        {
+            return AutoTradingConfiguration.Empty;
+        }
+
         return new AutoTradingConfiguration(new List<AutoTradeRule>(_rules), new List<IAutoTradeAdapter>(_adapters));
     }
 }

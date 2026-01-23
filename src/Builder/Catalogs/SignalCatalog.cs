@@ -62,16 +62,17 @@ public sealed class SignalCatalog
 
     internal IReadOnlyList<SignalRule> Build()
     {
-        return new List<SignalRule>(_rules);
+        // Return singleton empty array when no signals configured to avoid allocation
+        return _rules.Count == 0 ? Array.Empty<SignalRule>() : new List<SignalRule>(_rules);
     }
 
     internal IReadOnlyList<SignalGroupRule> BuildGroups()
     {
-        return new List<SignalGroupRule>(_groupRules);
+        return _groupRules.Count == 0 ? Array.Empty<SignalGroupRule>() : new List<SignalGroupRule>(_groupRules);
     }
 
     internal IReadOnlyList<SignalRangeRule> BuildRangeRules()
     {
-        return new List<SignalRangeRule>(_rangeRules);
+        return _rangeRules.Count == 0 ? Array.Empty<SignalRangeRule>() : new List<SignalRangeRule>(_rangeRules);
     }
 }

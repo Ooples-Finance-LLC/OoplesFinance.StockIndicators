@@ -81,6 +81,11 @@ public sealed class AutoTradeRule
 public sealed class AutoTradingConfiguration
 {
     /// <summary>
+    /// Singleton empty configuration to avoid allocation when no trading is configured.
+    /// </summary>
+    public static readonly AutoTradingConfiguration Empty = new(Array.Empty<AutoTradeRule>(), Array.Empty<IAutoTradeAdapter>());
+
+    /// <summary>
     /// Creates a new auto-trading configuration.
     /// </summary>
     public AutoTradingConfiguration(IReadOnlyList<AutoTradeRule> rules, IReadOnlyList<IAutoTradeAdapter> adapters)

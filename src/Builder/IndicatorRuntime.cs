@@ -86,10 +86,11 @@ public sealed class IndicatorRuntime : IDisposable
         _signalOptions = signalOptions;
         _backtestOptions = backtestOptions;
         _benchmarkOptions = benchmarkOptions;
-        _signalStates = new bool[signals.Count];
-        _signalPrevious = new double?[signals.Count];
-        _groupStates = new SignalGroupState[groupSignals.Count];
-        _rangeStates = new bool[rangeSignals.Count];
+        // Use Array.Empty for zero-length arrays to avoid allocations in the common case
+        _signalStates = signals.Count == 0 ? Array.Empty<bool>() : new bool[signals.Count];
+        _signalPrevious = signals.Count == 0 ? Array.Empty<double?>() : new double?[signals.Count];
+        _groupStates = groupSignals.Count == 0 ? Array.Empty<SignalGroupState>() : new SignalGroupState[groupSignals.Count];
+        _rangeStates = rangeSignals.Count == 0 ? Array.Empty<bool>() : new bool[rangeSignals.Count];
         for (var i = 0; i < groupSignals.Count; i++)
         {
             _groupStates[i] = new SignalGroupState(groupSignals[i].Conditions.Length);
