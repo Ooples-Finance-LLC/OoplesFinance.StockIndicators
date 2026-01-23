@@ -1797,4 +1797,332 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Batch 15 - Ehlers and Specialized Moving Averages
+
+    /// <summary>
+    /// Computes Ehlers Better Exponential Moving Average.
+    /// Uses zero-lag calculations for improved response.
+    /// </summary>
+    internal static void EhlersBetterExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var alpha = 2.0 / (length + 1);
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(input.Length);
+        var errArray = pool.Rent(input.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, input.Length);
+            var err = errArray.AsSpan(0, input.Length);
+
+            ema[0] = input[0];
+            err[0] = 0;
+            output[0] = input[0];
+
+            for (var i = 1; i < input.Length; i++)
+            {
+                ema[i] = alpha * input[i] + (1 - alpha) * ema[i - 1];
+                err[i] = input[i] - ema[i];
+                output[i] = ema[i] + (1 - alpha) * err[i];
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(errArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Deviation Scaled Moving Average.
+    /// Adapts to volatility using standard deviation.
+    /// </summary>
+    internal static void EhlersDeviationScaledMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(input.Length);
+        var devArray = pool.Rent(input.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, input.Length);
+            var dev = devArray.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma, length);
+
+            // Calculate deviation
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    dev[i] = 0;
+                    output[i] = input[i];
+                    continue;
+                }
+
+                double sumSq = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var diff = input[i - j] - sma[i];
+                    sumSq += diff * diff;
+                }
+                dev[i] = Math.Sqrt(sumSq / length);
+
+                // Scale factor based on deviation
+                var scale = dev[i] > 0 ? (input[i] - sma[i]) / dev[i] : 0;
+                var alpha = Math.Abs(scale) / (Math.Abs(scale) + 1);
+                output[i] = alpha * input[i] + (1 - alpha) * (i > 0 ? output[i - 1] : input[i]);
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+            pool.Return(devArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Hann Moving Average.
+    /// Uses Hann window for smoothing.
+    /// </summary>
+    internal static void EhlersHannMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-calculate Hann weights
+        var weights = new double[length];
+        double weightSum = 0;
+        for (var i = 0; i < length; i++)
+        {
+            weights[i] = 0.5 * (1 - Math.Cos(2 * Math.PI * i / (length - 1)));
+            weightSum += weights[i];
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                sum += input[i - length + 1 + j] * weights[j];
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Triangle Moving Average.
+    /// Uses triangular window coefficients.
+    /// </summary>
+    internal static void EhlersTriangleMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var halfLen = (length + 1) / 2;
+
+        // Pre-calculate triangular weights
+        var weights = new double[length];
+        double weightSum = 0;
+        for (var i = 0; i < length; i++)
+        {
+            weights[i] = i < halfLen ? i + 1 : length - i;
+            weightSum += weights[i];
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                sum += input[i - length + 1 + j] * weights[j];
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Elastic Volume Weighted Moving Average V1.
+    /// Volume-weighted with elastic adjustment.
+    /// </summary>
+    internal static void ElasticVolumeWeightedMovingAverageV1(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < price.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var vwmaArray = pool.Rent(price.Length);
+
+        try
+        {
+            var vwma = vwmaArray.AsSpan(0, price.Length);
+            VolumeWeightedMovingAverage(price, volume, vwma, length);
+
+            // Apply elastic smoothing
+            var k = 2.0 / (length + 1);
+            output[0] = price[0];
+
+            for (var i = 1; i < price.Length; i++)
+            {
+                // Elastic factor based on volume ratio
+                double avgVol = 0;
+                var startIdx = Math.Max(0, i - length + 1);
+                var count = i - startIdx;
+                if (count > 0)
+                {
+                    for (var j = startIdx; j < i; j++)
+                    {
+                        avgVol += volume[j];
+                    }
+                    avgVol /= count;
+                }
+                var volRatio = volume[i] > 0 && i >= length - 1 && avgVol > 0 ? volume[i] / (avgVol + 0.001) : 1.0;
+                var elasticK = k * Math.Min(volRatio, 2.0);
+                output[i] = elasticK * vwma[i] + (1 - elasticK) * output[i - 1];
+            }
+        }
+        finally
+        {
+            pool.Return(vwmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Holt Exponential Moving Average.
+    /// Double exponential smoothing with trend component.
+    /// </summary>
+    internal static void HoltExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.5, double beta = 0.5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var a = 2.0 / (length + 1);
+        var b = beta * a;
+
+        double level = input[0];
+        double trend = 0;
+        output[0] = level;
+
+        for (var i = 1; i < input.Length; i++)
+        {
+            var prevLevel = level;
+            level = a * input[i] + (1 - a) * (level + trend);
+            trend = b * (level - prevLevel) + (1 - b) * trend;
+            output[i] = level + trend;
+        }
+    }
+
+    /// <summary>
+    /// Computes Pentuple Exponential Moving Average.
+    /// Five-fold EMA for extreme smoothing.
+    /// </summary>
+    internal static void PentupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1 = pool.Rent(input.Length);
+        var ema2 = pool.Rent(input.Length);
+        var ema3 = pool.Rent(input.Length);
+        var ema4 = pool.Rent(input.Length);
+        var ema5 = pool.Rent(input.Length);
+
+        try
+        {
+            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema4.AsSpan(0, input.Length), ema5.AsSpan(0, input.Length), length);
+
+            // PEMA = 5*EMA1 - 10*EMA2 + 10*EMA3 - 5*EMA4 + EMA5
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = 5 * ema1[i] - 10 * ema2[i] + 10 * ema3[i] - 5 * ema4[i] + ema5[i];
+            }
+        }
+        finally
+        {
+            pool.Return(ema1);
+            pool.Return(ema2);
+            pool.Return(ema3);
+            pool.Return(ema4);
+            pool.Return(ema5);
+        }
+    }
+
+    /// <summary>
+    /// Computes Quadruple Exponential Moving Average.
+    /// Four-fold EMA for heavy smoothing.
+    /// </summary>
+    internal static void QuadrupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1 = pool.Rent(input.Length);
+        var ema2 = pool.Rent(input.Length);
+        var ema3 = pool.Rent(input.Length);
+        var ema4 = pool.Rent(input.Length);
+
+        try
+        {
+            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
+            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
+
+            // QEMA = 4*EMA1 - 6*EMA2 + 4*EMA3 - EMA4
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = 4 * ema1[i] - 6 * ema2[i] + 4 * ema3[i] - ema4[i];
+            }
+        }
+        finally
+        {
+            pool.Return(ema1);
+            pool.Return(ema2);
+            pool.Return(ema3);
+            pool.Return(ema4);
+        }
+    }
+
+    #endregion
 }

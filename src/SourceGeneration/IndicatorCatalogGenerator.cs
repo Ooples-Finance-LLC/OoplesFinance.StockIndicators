@@ -459,6 +459,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "SlowSmoothedMovingAverage",
         "RepulsionMovingAverage",
         "QuickMovingAverage",
+
+        // Additional Moving Averages (Batch 15) - Ehlers and Specialized
+        "EhlersBetterExponentialMovingAverage",
+        "EhlersDeviationScaledMovingAverage",
+        "EhlersHannMovingAverage",
+        "EhlersTriangleMovingAverage",
+        "ElasticVolumeWeightedMovingAverageV1",
+        "HoltExponentialMovingAverage",
+        "PentupleExponentialMovingAverage",
+        "QuadrupleExponentialMovingAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1236,6 +1246,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "SlowSmoothedMovingAverage" => "ComputeSlowSmoothedMovingAverageFast",
             "RepulsionMovingAverage" => "ComputeRepulsionMovingAverageFast",
             "QuickMovingAverage" => "ComputeQuickMovingAverageFast",
+
+            // Additional Moving Averages (Batch 15) - Ehlers and Specialized
+            "EhlersBetterExponentialMovingAverage" => "ComputeEhlersBetterExponentialMovingAverageFast",
+            "EhlersDeviationScaledMovingAverage" => "ComputeEhlersDeviationScaledMovingAverageFast",
+            "EhlersHannMovingAverage" => "ComputeEhlersHannMovingAverageFast",
+            "EhlersTriangleMovingAverage" => "ComputeEhlersTriangleMovingAverageFast",
+            "ElasticVolumeWeightedMovingAverageV1" => "ComputeElasticVolumeWeightedMovingAverageV1Fast",
+            "HoltExponentialMovingAverage" => "ComputeHoltExponentialMovingAverageFast",
+            "PentupleExponentialMovingAverage" => "ComputePentupleExponentialMovingAverageFast",
+            "QuadrupleExponentialMovingAverage" => "ComputeQuadrupleExponentialMovingAverageFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
