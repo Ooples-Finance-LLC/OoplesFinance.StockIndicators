@@ -719,6 +719,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "UltimateOscillator" => "ComputeUltimateOscillatorFast",
             "TrueStrengthIndex" => "ComputeTsiFast",
             "StochasticRsi" => "ComputeStochRsiFast",
+            "MovingAverageConvergenceDivergence" => "ComputeMacdLineFast",
             "AroonOscillator" => "ComputeAroonOscillatorFast",
             "DetrendedPriceOscillator" => "ComputeDpoFast",
             "Trix" => "ComputeTrixFast",
