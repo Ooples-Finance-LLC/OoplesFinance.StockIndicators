@@ -324,6 +324,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "StochasticRelativeStrengthIndex",
         "VolumeWeightedRelativeStrengthIndex",
         "EhlersSuperSmootherFilter",
+        "ErgodicCandlestickOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -966,6 +967,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "StochasticRelativeStrengthIndex" => "ComputeStochRsiFast",
             "VolumeWeightedRelativeStrengthIndex" => "ComputeVolumeWeightedRsiFast",
             "EhlersSuperSmootherFilter" => "ComputeSuperSmootherFast",
+            "ErgodicCandlestickOscillator" => "ComputeErgodicCandlestickOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
