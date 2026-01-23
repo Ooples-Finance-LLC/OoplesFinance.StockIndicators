@@ -308,6 +308,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "StandardDeviationVolatility",
         "AverageTrueRangeChannel",
         "VolatilityRatio",
+
+        // Trend - TrendCore (Additional Batch 4)
+        "TrendDetectionIndex",
+
+        // Oscillators - Additional Batch 9
+        "ChandeIntradayMomentumIndex",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -933,6 +939,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "StandardDeviationVolatility" => "ComputeStandardDeviationVolatilityFast",
             "AverageTrueRangeChannel" => "ComputeAverageTrueRangeChannelFast",
             "VolatilityRatio" => "ComputeVolatilityRatioFast",
+
+            // Trend (Additional Batch 4)
+            "TrendDetectionIndex" => "ComputeTrendDetectionFast",
+
+            // Oscillators (Additional Batch 9)
+            "ChandeIntradayMomentumIndex" => "ComputeIntradayMomentumIndexFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
