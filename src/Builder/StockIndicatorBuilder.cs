@@ -276,7 +276,8 @@ public sealed class StockIndicatorBuilder
             return;
         }
 
-        var selection = _indicatorOptions?.Selection ?? IndicatorSelection.All();
+        // Default to None for optimal performance - only compute explicitly configured indicators
+        var selection = _indicatorOptions?.Selection ?? IndicatorSelection.None();
         _indicators.ApplyDefaults(selection);
         _defaultsApplied = true;
     }

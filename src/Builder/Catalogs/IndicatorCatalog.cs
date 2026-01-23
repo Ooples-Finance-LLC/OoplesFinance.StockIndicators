@@ -430,6 +430,9 @@ public sealed partial class IndicatorCatalog
 
         switch (selection.Preset)
         {
+            case IndicatorPreset.None:
+                // No default indicators - optimal for performance
+                return;
             case IndicatorPreset.All:
             case IndicatorPreset.Core:
                 var price = Price();

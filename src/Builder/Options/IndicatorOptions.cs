@@ -62,4 +62,13 @@ public sealed class IndicatorSelection
     {
         return new IndicatorSelection(IndicatorPreset.Only, names);
     }
+
+    /// <summary>
+    /// Creates an empty selection (no default indicators).
+    /// This is the default - only indicators explicitly added via ConfigureIndicators are computed.
+    /// </summary>
+    public static IndicatorSelection None()
+    {
+        return new IndicatorSelection(IndicatorPreset.None, null);
+    }
 }

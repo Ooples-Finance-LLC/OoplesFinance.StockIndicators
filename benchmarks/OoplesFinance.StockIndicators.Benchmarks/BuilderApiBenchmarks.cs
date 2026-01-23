@@ -301,6 +301,62 @@ public class BuilderApiBenchmarks
         return runtime.Latest ?? new object();
     }
 
+    // Diagnostic benchmarks to identify v2.0 bottlenecks
+
+    [Benchmark]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_1_CreateDataSource()
+    {
+        return IndicatorDataSource.FromBatch(_stockData);
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_2_CreateBuilder()
+    {
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        return new StockIndicatorBuilder(source);
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_3_ConfigureIndicators()
+    {
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.ConfigureIndicators(catalog => catalog.Sma(14));
+        return builder;
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_4_Build()
+    {
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.ConfigureIndicators(catalog => catalog.Sma(14));
+        return builder.Build();
+    }
+
+    [Benchmark]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_5_BuildAndStart()
+    {
+        var source = IndicatorDataSource.FromBatch(_stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.ConfigureIndicators(catalog => catalog.Sma(14));
+        using var runtime = builder.Build();
+        runtime.Start();
+        return runtime.Latest ?? new object();
+    }
+
+    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("Diagnostic")]
+    public object Diag_V1_Baseline()
+    {
+        return _stockData.CalculateSimpleMovingAverage(length: 14);
+    }
+
     private sealed class BuilderBenchmarkConfig : ManualConfig
     {
         public BuilderBenchmarkConfig()

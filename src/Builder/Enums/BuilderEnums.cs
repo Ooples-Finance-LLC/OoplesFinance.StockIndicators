@@ -38,6 +38,12 @@ public enum IndicatorComputePolicy
 public enum IndicatorPreset
 {
     /// <summary>
+    /// No default indicators - only compute what is explicitly configured.
+    /// This is the recommended default for optimal performance.
+    /// </summary>
+    None,
+
+    /// <summary>
     /// All available indicators.
     /// </summary>
     All,

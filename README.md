@@ -191,6 +191,128 @@ var values = smaBuffer.AsSpan(); // Zero-allocation access
 
 For migration from v1.x, see [MIGRATION.md](MIGRATION.md).
 
+## Why v2.0?
+
+The v2.0 Builder API represents a fundamental shift in how you work with indicators. Here's why you should consider upgrading:
+
+### Performance: Streaming is 45% Faster
+
+When processing real-time data with incremental updates, v2.0's streaming engine significantly outperforms v1.0's batch recomputation approach:
+
+| Scenario | v1.0 (us) | v2.0 (us) | Improvement |
+|----------|-----------|-----------|-------------|
+| Streaming (10 updates, 3 indicators) | 27,136 | 14,987 | **45% faster** |
+
+*Benchmark: 10,000 data points, SMA(14) + RSI(14) + Bollinger Bands(20,2). AMD Ryzen 9 3950X, .NET 10.0.*
+
+**Why v2.0 wins at streaming:** v1.0 must recompute the entire history for each new bar. v2.0's streaming engine processes data incrementally, only computing the new values.
+
+**When v1.0 is faster:** For one-time batch calculations on static data, v1.0's direct `Calculate*` methods have less overhead since there's no builder setup cost. If you're doing a single calculation and never updating, v1.0 remains efficient.
+
+### Unified Batch and Streaming API
+
+Write your indicator logic once, use it for both historical analysis and live trading:
+
+```csharp
+// Same builder configuration works for both modes
+var builder = new StockIndicatorBuilder(source)
+    .ConfigureIndicators(ind => { sma = ind.Sma(20); rsi = ind.Rsi(14); })
+    .ConfigureSignals(sig => sig.When(rsi).CrossesAbove(70).Emit("overbought"));
+
+// Batch mode: source = IndicatorDataSource.FromBatch(stockData)
+// Streaming mode: source = IndicatorDataSource.FromStreaming(options)
+```
+
+### Natural Indicator Chaining
+
+Compose indicators intuitively without manual data extraction:
+
+```csharp
+// v1.0: Manual and error-prone
+var smaResult = stockData.CalculateSimpleMovingAverage(20);
+// Now manually extract values and feed to RSI... complex!
+
+// v2.0: Natural composition
+indicators.Then(sma).Rsi(14);  // RSI of SMA - automatic!
+```
+
+### Built-in Signal Generation
+
+Detect trading signals declaratively:
+
+```csharp
+.ConfigureSignals(signals =>
+{
+    // Crossover detection
+    signals.When(fastMa).CrossesAbove(slowMa).Emit("golden_cross");
+    signals.When(rsi).CrossesBelow(30).Emit("oversold");
+
+    // Multi-condition groups
+    signals.Group(
+        SignalCondition.Above(rsi, 50),
+        SignalCondition.Above(price, sma200))
+        .All()
+        .ForBars(3)
+        .Emit("bullish_confirmation");
+})
+```
+
+### Integrated Notifications
+
+Get alerted when signals fire:
+
+```csharp
+.ConfigureNotifications(notify =>
+{
+    notify.Console();                                    // Debug output
+    notify.Email(new EmailOptions { To = "..." });       // SMTP email
+    notify.Sms(new SmsOptions { ToNumber = "..." });     // Twilio SMS
+    notify.Telegram(new TelegramOptions { ChatId = "..." }); // Telegram bot
+    notify.Discord(new DiscordOptions { WebhookUrl = "..." }); // Discord
+    notify.Webhook(new WebhookOptions { Url = "..." });  // Custom webhook
+})
+```
+
+### Auto-Trading Integration
+
+Execute trades automatically when signals fire:
+
+```csharp
+.ConfigureAutoTrading(trade =>
+{
+    trade.Alpaca(new AlpacaOptions { UsePaper = true })
+        .OnSignal(buySignal)
+        .MarketBuy(quantity: 10);
+})
+```
+
+### When to Use Each API
+
+| Use Case | Recommended API |
+|----------|-----------------|
+| One-time batch calculation | v1.0 `Calculate*` methods |
+| Real-time streaming data | **v2.0 Builder API** |
+| Multiple indicators together | **v2.0 Builder API** |
+| Signal detection | **v2.0 Builder API** |
+| Notifications/alerts | **v2.0 Builder API** |
+| Auto-trading | **v2.0 Builder API** |
+| Indicator chaining (RSI of SMA) | **v2.0 Builder API** |
+
+### v1.0 vs v2.0 Benchmark Details
+
+Full benchmark results comparing v1.0 and v2.0 APIs (10,000 data points):
+
+| Category | v1.0 (us) | v2.0 (us) | Notes |
+|----------|-----------|-----------|-------|
+| SMA single | 326 | 8,896 | v2.0 has builder setup overhead |
+| EMA single | 306 | 9,958 | v2.0 has builder setup overhead |
+| RSI single | 555 | 9,380 | v2.0 has builder setup overhead |
+| Bollinger single | 1,091 | 12,699 | v2.0 has builder setup overhead |
+| **Streaming (10 updates)** | 27,136 | **14,987** | **v2.0 45% faster** |
+| Multi-indicator (4 ind.) | 3,258 | 15,491 | Setup overhead amortizes with more indicators |
+
+*The v2.0 benchmarks create a new builder for each call to measure full setup cost. In real applications, you create the builder once and reuse it, eliminating repeated setup overhead.*
+
 ## Dev Console
 A developer console is available to run batch, streaming, and multi-series examples locally.
 
