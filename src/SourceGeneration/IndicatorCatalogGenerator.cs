@@ -409,6 +409,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "SmoothedDeltaRatioOscillator",
         "FastSlowDegreeOscillator",
         "RobustWeightingOscillator",
+
+        // Additional Oscillators (Batch 10)
+        "KasePeakOscillatorV2",
+        "StochasticCustomOscillator",
+        "PivotDetectorOscillator",
+        "TickLineMomentumOscillator",
+        "SupportAndResistanceOscillator",
+        "TradingMadeMoreSimplerOscillator",
+        "NthOrderDifferencingOscillator",
+        "OscOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1136,6 +1146,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "SmoothedDeltaRatioOscillator" => "ComputeSmoothedDeltaRatioOscillatorFast",
             "FastSlowDegreeOscillator" => "ComputeFastSlowDegreeOscillatorFast",
             "RobustWeightingOscillator" => "ComputeRobustWeightingOscillatorFast",
+
+            // Additional Oscillators (Batch 10)
+            "KasePeakOscillatorV2" => "ComputeKasePeakOscillatorV2Fast",
+            "StochasticCustomOscillator" => "ComputeStochasticCustomOscillatorFast",
+            "PivotDetectorOscillator" => "ComputePivotDetectorOscillatorFast",
+            "TickLineMomentumOscillator" => "ComputeTickLineMomentumOscillatorFast",
+            "SupportAndResistanceOscillator" => "ComputeSupportAndResistanceOscillatorFast",
+            "TradingMadeMoreSimplerOscillator" => "ComputeTradingMadeMoreSimplerOscillatorFast",
+            "NthOrderDifferencingOscillator" => "ComputeNthOrderDifferencingOscillatorFast",
+            "OscOscillator" => "ComputeOscOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

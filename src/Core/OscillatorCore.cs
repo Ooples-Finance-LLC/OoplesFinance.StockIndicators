@@ -6765,5 +6765,396 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators (Batch 10)
+
+    /// <summary>
+    /// Computes Kase Peak Oscillator V2 using different methodology.
+    /// </summary>
+    internal static void KasePeakOscillatorV2(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 30)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var trueRangeArray = pool.Rent(close.Length);
+        var sqrtTrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var trueRange = trueRangeArray.AsSpan(0, close.Length);
+            var sqrtTr = sqrtTrArray.AsSpan(0, close.Length);
+
+            // Calculate True Range and sqrt
+            VolatilityCore.TrueRange(high, low, close, trueRange);
+            for (var i = 0; i < close.Length; i++)
+            {
+                sqrtTr[i] = Math.Sqrt(trueRange[i]);
+            }
+
+            // Calculate Kase Peak V2
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    var sumSqrtTr = 0.0;
+                    for (var j = i - length + 1; j <= i; j++)
+                    {
+                        sumSqrtTr += sqrtTr[j];
+                    }
+
+                    if (sumSqrtTr != 0)
+                    {
+                        var momentum = close[i] - close[i - length];
+                        output[i] = momentum / sumSqrtTr * Math.Sqrt(length);
+                    }
+                    else
+                    {
+                        output[i] = 0;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(trueRangeArray);
+            pool.Return(sqrtTrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stochastic Custom Oscillator with custom smoothing.
+    /// </summary>
+    internal static void StochasticCustomOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int kPeriod = 14, int dPeriod = 3, int smoothPeriod = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var kArray = pool.Rent(close.Length);
+        var smoothKArray = pool.Rent(close.Length);
+        var dArray = pool.Rent(close.Length);
+
+        try
+        {
+            var k = kArray.AsSpan(0, close.Length);
+            var smoothK = smoothKArray.AsSpan(0, close.Length);
+            var d = dArray.AsSpan(0, close.Length);
+
+            // Calculate raw %K
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < kPeriod - 1)
+                {
+                    k[i] = 50;
+                }
+                else
+                {
+                    var highest = high[i];
+                    var lowest = low[i];
+                    for (var j = i - kPeriod + 1; j <= i; j++)
+                    {
+                        if (high[j] > highest) highest = high[j];
+                        if (low[j] < lowest) lowest = low[j];
+                    }
+
+                    var range = highest - lowest;
+                    k[i] = range != 0 ? (close[i] - lowest) / range * 100 : 50;
+                }
+            }
+
+            // Smooth %K
+            MovingAverageCore.SimpleMovingAverage(k, smoothK, smoothPeriod);
+
+            // Calculate %D
+            MovingAverageCore.SimpleMovingAverage(smoothK, d, dPeriod);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = smoothK[i] - d[i];
+            }
+        }
+        finally
+        {
+            pool.Return(kArray);
+            pool.Return(smoothKArray);
+            pool.Return(dArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Pivot Detector Oscillator using pivot point detection.
+    /// </summary>
+    internal static void PivotDetectorOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 5)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length * 2)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                // Check for pivot high
+                var isPivotHigh = true;
+                var centerHigh = high[i - length];
+                for (var j = -length; j <= length; j++)
+                {
+                    if (j != 0 && high[i - length + j] >= centerHigh)
+                    {
+                        isPivotHigh = false;
+                        break;
+                    }
+                }
+
+                // Check for pivot low
+                var isPivotLow = true;
+                var centerLow = low[i - length];
+                for (var j = -length; j <= length; j++)
+                {
+                    if (j != 0 && low[i - length + j] <= centerLow)
+                    {
+                        isPivotLow = false;
+                        break;
+                    }
+                }
+
+                if (isPivotHigh) output[i] = 100;
+                else if (isPivotLow) output[i] = -100;
+                else output[i] = 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Tick Line Momentum Oscillator using up/down tick logic.
+    /// </summary>
+    internal static void TickLineMomentumOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var tickLineArray = pool.Rent(close.Length);
+        var maArray = pool.Rent(close.Length);
+
+        try
+        {
+            var tickLine = tickLineArray.AsSpan(0, close.Length);
+            var ma = maArray.AsSpan(0, close.Length);
+
+            // Calculate tick line (cumulative up/down ticks)
+            tickLine[0] = 0;
+            for (var i = 1; i < close.Length; i++)
+            {
+                if (close[i] > close[i - 1]) tickLine[i] = tickLine[i - 1] + 1;
+                else if (close[i] < close[i - 1]) tickLine[i] = tickLine[i - 1] - 1;
+                else tickLine[i] = tickLine[i - 1];
+            }
+
+            // Calculate MA of tick line
+            MovingAverageCore.SimpleMovingAverage(tickLine, ma, length);
+
+            // Oscillator = tick line - MA
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = tickLine[i] - ma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(tickLineArray);
+            pool.Return(maArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Support and Resistance Oscillator.
+    /// </summary>
+    internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                var highestHigh = high[i];
+                var lowestLow = low[i];
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (high[j] > highestHigh) highestHigh = high[j];
+                    if (low[j] < lowestLow) lowestLow = low[j];
+                }
+
+                var range = highestHigh - lowestLow;
+                if (range != 0)
+                {
+                    // Position relative to support/resistance levels
+                    var position = (close[i] - lowestLow) / range;
+                    output[i] = (position - 0.5) * 200; // -100 to +100
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Trading Made More Simpler Oscillator.
+    /// </summary>
+    internal static void TradingMadeMoreSimplerOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hlc3Array = pool.Rent(close.Length);
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hlc3 = hlc3Array.AsSpan(0, close.Length);
+            var ema = emaArray.AsSpan(0, close.Length);
+
+            // Calculate HLC/3
+            for (var i = 0; i < close.Length; i++)
+            {
+                hlc3[i] = (high[i] + low[i] + close[i]) / 3;
+            }
+
+            // EMA of HLC/3
+            MovingAverageCore.ExponentialMovingAverage(hlc3, ema, length);
+
+            // Oscillator = close - ema
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - ema[i];
+            }
+        }
+        finally
+        {
+            pool.Return(hlc3Array);
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Nth Order Differencing Oscillator.
+    /// </summary>
+    internal static void NthOrderDifferencingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int order = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var currentArray = pool.Rent(close.Length);
+        var prevArray = pool.Rent(close.Length);
+
+        try
+        {
+            var current = currentArray.AsSpan(0, close.Length);
+            var prev = prevArray.AsSpan(0, close.Length);
+
+            // Start with close prices
+            close.CopyTo(current);
+
+            // Apply differencing n times
+            for (var n = 0; n < order; n++)
+            {
+                current.CopyTo(prev);
+                for (var i = 0; i < close.Length; i++)
+                {
+                    if (i < length)
+                    {
+                        current[i] = 0;
+                    }
+                    else
+                    {
+                        current[i] = prev[i] - prev[i - length];
+                    }
+                }
+            }
+
+            current.CopyTo(output);
+        }
+        finally
+        {
+            pool.Return(currentArray);
+            pool.Return(prevArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Osc Oscillator (general purpose oscillator).
+    /// </summary>
+    internal static void OscOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 5, int slowLength = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastMaArray = pool.Rent(close.Length);
+        var slowMaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastMa = fastMaArray.AsSpan(0, close.Length);
+            var slowMa = slowMaArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(close, fastMa, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(close, slowMa, slowLength);
+
+            // Oscillator = (fast - slow) / slow * 100
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (slowMa[i] != 0)
+                {
+                    output[i] = (fastMa[i] - slowMa[i]) / slowMa[i] * 100;
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(fastMaArray);
+            pool.Return(slowMaArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }
