@@ -3744,5 +3744,95 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    #region Batch 5 - Additional Oscillators
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Average Disparity Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // Length parameter maps to cmoLength; smaLength uses default
+        _ = length;
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChandeMomentumOscillatorAverageDisparityIndex(close, buffer.WritableSpan, length, 3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeMomentumOscillatorFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChandeMomentumOscillatorFilter(close, buffer.WritableSpan, length, 3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes DiNapoli Percentage Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // Length parameter is unused - DiNapoli uses fixed periods (3, 7)
+        _ = length;
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DiNapoliPercentagePriceOscillator(close, buffer.WritableSpan, 3, 7);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes DiNapoli Preferred Stochastic Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDiNapoliPreferredStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DiNapoliPreferredStochasticOscillator(high, low, close, buffer.WritableSpan, length, 3, 3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ergodic Percentage Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeErgodicPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // Length parameter maps to short length; others use defaults
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ErgodicPercentagePriceOscillator(close, buffer.WritableSpan, length, 20, 5);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFastSlowKurtosisOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // Length parameter is unused - uses fixed fast/slow periods
+        _ = length;
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.FastSlowKurtosisOscillator(close, buffer.WritableSpan, 5, 20);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fast and Slow RSI Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.FastSlowRsiOscillator(close, buffer.WritableSpan, length / 2, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }

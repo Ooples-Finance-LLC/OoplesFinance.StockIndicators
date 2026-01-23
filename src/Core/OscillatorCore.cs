@@ -4950,5 +4950,343 @@ internal static class OscillatorCore
         }
     }
 
+    #region Additional Oscillators - Batch 5
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Average Disparity Index.
+    /// </summary>
+    internal static void ChandeMomentumOscillatorAverageDisparityIndex(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int smaLength = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cmoArray = pool.Rent(input.Length);
+        var smaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var cmo = cmoArray.AsSpan(0, input.Length);
+            var sma = smaArray.AsSpan(0, input.Length);
+
+            // Calculate CMO
+            ChandeMomentumOscillator(input, cmo, cmoLength);
+
+            // Calculate SMA of CMO
+            MovingAverageCore.SimpleMovingAverage(cmo, sma, smaLength);
+
+            // Calculate disparity: CMO - SMA(CMO)
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = cmo[i] - sma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(cmoArray);
+            pool.Return(smaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Filter.
+    /// </summary>
+    internal static void ChandeMomentumOscillatorFilter(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int filterLength = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cmoArray = pool.Rent(input.Length);
+
+        try
+        {
+            var cmo = cmoArray.AsSpan(0, input.Length);
+
+            // Calculate CMO
+            ChandeMomentumOscillator(input, cmo, cmoLength);
+
+            // Apply EMA filter
+            MovingAverageCore.ExponentialMovingAverage(cmo, output, filterLength);
+        }
+        finally
+        {
+            pool.Return(cmoArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes DiNapoli Percentage Price Oscillator.
+    /// Uses DiNapoli's preferred periods of 3.0 and 3.7 for DEMA calculation.
+    /// </summary>
+    internal static void DiNapoliPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int longLength = 7)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var shortDemaArray = pool.Rent(input.Length);
+        var longDemaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var shortDema = shortDemaArray.AsSpan(0, input.Length);
+            var longDema = longDemaArray.AsSpan(0, input.Length);
+
+            // Calculate short and long DEMA
+            MovingAverageCore.DoubleExponentialMovingAverage(input, shortDema, shortLength);
+            MovingAverageCore.DoubleExponentialMovingAverage(input, longDema, longLength);
+
+            // Calculate PPO: ((shortDema - longDema) / longDema) * 100
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = longDema[i] != 0 ? ((shortDema[i] - longDema[i]) / longDema[i]) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(shortDemaArray);
+            pool.Return(longDemaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes DiNapoli Preferred Stochastic Oscillator.
+    /// Uses modified stochastic with smoothing.
+    /// </summary>
+    internal static void DiNapoliPreferredStochasticOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 8, int smoothK = 3, int smoothD = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rawKArray = pool.Rent(close.Length);
+        var smoothKArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rawK = rawKArray.AsSpan(0, close.Length);
+            var smoothKSpan = smoothKArray.AsSpan(0, close.Length);
+
+            // Calculate raw %K
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    rawK[i] = 50;
+                    continue;
+                }
+
+                var highestHigh = high[i];
+                var lowestLow = low[i];
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (high[j] > highestHigh) highestHigh = high[j];
+                    if (low[j] < lowestLow) lowestLow = low[j];
+                }
+
+                var range = highestHigh - lowestLow;
+                rawK[i] = range != 0 ? ((close[i] - lowestLow) / range) * 100 : 50;
+            }
+
+            // Apply smoothing to %K using modified moving average
+            MovingAverageCore.ModifiedMovingAverage(rawK, smoothKSpan, smoothK);
+
+            // Apply second smoothing (%D)
+            MovingAverageCore.ModifiedMovingAverage(smoothKSpan, output, smoothD);
+        }
+        finally
+        {
+            pool.Return(rawKArray);
+            pool.Return(smoothKArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ergodic Percentage Price Oscillator.
+    /// </summary>
+    internal static void ErgodicPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 5, int longLength = 20, int signalLength = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var priceChangeArray = pool.Rent(input.Length);
+        var absPriceChangeArray = pool.Rent(input.Length);
+        var emaShortPcArray = pool.Rent(input.Length);
+        var emaLongPcArray = pool.Rent(input.Length);
+        var emaShortAbsArray = pool.Rent(input.Length);
+        var emaLongAbsArray = pool.Rent(input.Length);
+
+        try
+        {
+            var priceChange = priceChangeArray.AsSpan(0, input.Length);
+            var absPriceChange = absPriceChangeArray.AsSpan(0, input.Length);
+            var emaShortPc = emaShortPcArray.AsSpan(0, input.Length);
+            var emaLongPc = emaLongPcArray.AsSpan(0, input.Length);
+            var emaShortAbs = emaShortAbsArray.AsSpan(0, input.Length);
+            var emaLongAbs = emaLongAbsArray.AsSpan(0, input.Length);
+
+            // Calculate price changes
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i == 0)
+                {
+                    priceChange[i] = 0;
+                    absPriceChange[i] = 0;
+                }
+                else
+                {
+                    priceChange[i] = input[i] - input[i - 1];
+                    absPriceChange[i] = Math.Abs(priceChange[i]);
+                }
+            }
+
+            // Apply double smoothing
+            MovingAverageCore.ExponentialMovingAverage(priceChange, emaShortPc, shortLength);
+            MovingAverageCore.ExponentialMovingAverage(emaShortPc, emaLongPc, longLength);
+            MovingAverageCore.ExponentialMovingAverage(absPriceChange, emaShortAbs, shortLength);
+            MovingAverageCore.ExponentialMovingAverage(emaShortAbs, emaLongAbs, longLength);
+
+            // Calculate oscillator
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = emaLongAbs[i] != 0 ? (emaLongPc[i] / emaLongAbs[i]) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(priceChangeArray);
+            pool.Return(absPriceChangeArray);
+            pool.Return(emaShortPcArray);
+            pool.Return(emaLongPcArray);
+            pool.Return(emaShortAbsArray);
+            pool.Return(emaLongAbsArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Fast and Slow Kurtosis Oscillator.
+    /// </summary>
+    internal static void FastSlowKurtosisOscillator(ReadOnlySpan<double> input, Span<double> output, int fastLength = 5, int slowLength = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastKurtArray = pool.Rent(input.Length);
+        var slowKurtArray = pool.Rent(input.Length);
+
+        try
+        {
+            var fastKurt = fastKurtArray.AsSpan(0, input.Length);
+            var slowKurt = slowKurtArray.AsSpan(0, input.Length);
+
+            // Calculate fast and slow kurtosis
+            CalculateRollingKurtosis(input, fastKurt, fastLength);
+            CalculateRollingKurtosis(input, slowKurt, slowLength);
+
+            // Oscillator is fast - slow
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = fastKurt[i] - slowKurt[i];
+            }
+        }
+        finally
+        {
+            pool.Return(fastKurtArray);
+            pool.Return(slowKurtArray);
+        }
+    }
+
+    /// <summary>
+    /// Helper method to calculate rolling kurtosis.
+    /// </summary>
+    private static void CalculateRollingKurtosis(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate mean
+            var sum = 0.0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+            var mean = sum / length;
+
+            // Calculate variance and fourth moment
+            var variance = 0.0;
+            var m4 = 0.0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var diff = input[j] - mean;
+                var diff2 = diff * diff;
+                variance += diff2;
+                m4 += diff2 * diff2;
+            }
+            variance /= length;
+            m4 /= length;
+
+            // Kurtosis = m4 / variance^2 - 3 (excess kurtosis)
+            output[i] = variance > 0 ? (m4 / (variance * variance)) - 3 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Fast and Slow Relative Strength Index Oscillator.
+    /// </summary>
+    internal static void FastSlowRsiOscillator(ReadOnlySpan<double> input, Span<double> output, int fastLength = 7, int slowLength = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastRsiArray = pool.Rent(input.Length);
+        var slowRsiArray = pool.Rent(input.Length);
+
+        try
+        {
+            var fastRsi = fastRsiArray.AsSpan(0, input.Length);
+            var slowRsi = slowRsiArray.AsSpan(0, input.Length);
+
+            // Calculate fast and slow RSI
+            RelativeStrengthIndex(input, fastRsi, fastLength);
+            RelativeStrengthIndex(input, slowRsi, slowLength);
+
+            // Oscillator is fast - slow
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = fastRsi[i] - slowRsi[i];
+            }
+        }
+        finally
+        {
+            pool.Return(fastRsiArray);
+            pool.Return(slowRsiArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

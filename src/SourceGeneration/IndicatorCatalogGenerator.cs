@@ -360,6 +360,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "DMIStochastic",
         "CCTStochRelativeStrengthIndex",
         "BilateralStochasticOscillator",
+
+        // Additional Oscillators (Batch 5)
+        "ChandeMomentumOscillatorAverageDisparityIndex",
+        "ChandeMomentumOscillatorFilter",
+        "DiNapoliPercentagePriceOscillator",
+        "DiNapoliPreferredStochasticOscillator",
+        "ErgodicPercentagePriceOscillator",
+        "FastandSlowKurtosisOscillator",
+        "FastandSlowRelativeStrengthIndexOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1038,6 +1047,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "DMIStochastic" => "ComputeDMIStochasticFast",
             "CCTStochRelativeStrengthIndex" => "ComputeCCTStochRelativeStrengthIndexFast",
             "BilateralStochasticOscillator" => "ComputeBilateralStochasticOscillatorFast",
+
+            // Additional Oscillators (Batch 5)
+            "ChandeMomentumOscillatorAverageDisparityIndex" => "ComputeChandeMomentumOscillatorAverageDisparityIndexFast",
+            "ChandeMomentumOscillatorFilter" => "ComputeChandeMomentumOscillatorFilterFast",
+            "DiNapoliPercentagePriceOscillator" => "ComputeDiNapoliPercentagePriceOscillatorFast",
+            "DiNapoliPreferredStochasticOscillator" => "ComputeDiNapoliPreferredStochasticOscillatorFast",
+            "ErgodicPercentagePriceOscillator" => "ComputeErgodicPercentagePriceOscillatorFast",
+            "FastandSlowKurtosisOscillator" => "ComputeFastSlowKurtosisOscillatorFast",
+            "FastandSlowRelativeStrengthIndexOscillator" => "ComputeFastSlowRsiOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
