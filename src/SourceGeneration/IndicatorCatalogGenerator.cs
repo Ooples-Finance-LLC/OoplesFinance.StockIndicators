@@ -343,6 +343,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "DoubleSmoothedMomenta",
         "HighLowIndex",
         "MarketFacilitationIndex",
+
+        // Additional Oscillators (Batch 3) - Derived
+        "ChandeMomentumOscillatorAbsoluteAverage",
+        "ChandeMomentumOscillatorAverage",
+        "DoubleStochasticOscillator",
+        "DTOscillator",
+        "ComparePriceMomentumOscillator",
+        "DailyAveragePriceDelta",
+        "DemandOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1004,6 +1013,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "DoubleSmoothedMomenta" => "ComputeDoubleSmoothedMomentaFast",
             "HighLowIndex" => "ComputeHighLowIndexFast",
             "MarketFacilitationIndex" => "ComputeMarketFacilitationIndexFast",
+
+            // Additional Oscillators (Batch 3) - Derived
+            "ChandeMomentumOscillatorAbsoluteAverage" => "ComputeChandeMomentumOscillatorAbsoluteAverageFast",
+            "ChandeMomentumOscillatorAverage" => "ComputeChandeMomentumOscillatorAverageFast",
+            "DoubleStochasticOscillator" => "ComputeDoubleStochasticOscillatorFast",
+            "DTOscillator" => "ComputeDTOscillatorFast",
+            "ComparePriceMomentumOscillator" => "ComputeComparePriceMomentumOscillatorFast",
+            "DailyAveragePriceDelta" => "ComputeDailyAveragePriceDeltaFast",
+            "DemandOscillator" => "ComputeDemandOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

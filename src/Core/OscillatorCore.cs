@@ -4324,5 +4324,286 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Absolute Average (CMOA smoothed with EMA).
+    /// </summary>
+    internal static void ChandeMomentumOscillatorAbsoluteAverage(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int emaLength = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cmoaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var cmoa = cmoaArray.AsSpan(0, input.Length);
+            ChandeMomentumOscillatorAbsolute(input, cmoa, cmoLength);
+            MovingAverageCore.ExponentialMovingAverage(cmoa, output, emaLength);
+        }
+        finally
+        {
+            pool.Return(cmoaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Average (CMO smoothed with EMA).
+    /// </summary>
+    internal static void ChandeMomentumOscillatorAverage(ReadOnlySpan<double> input, Span<double> output, int cmoLength = 9, int emaLength = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cmoArray = pool.Rent(input.Length);
+
+        try
+        {
+            var cmo = cmoArray.AsSpan(0, input.Length);
+            ChandeMomentumOscillator(input, cmo, cmoLength);
+            MovingAverageCore.ExponentialMovingAverage(cmo, output, emaLength);
+        }
+        finally
+        {
+            pool.Return(cmoArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Double Stochastic Oscillator.
+    /// </summary>
+    internal static void DoubleStochasticOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int kLength = 14, int dLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var stoch1Array = pool.Rent(close.Length);
+        var stoch2Array = pool.Rent(close.Length);
+
+        try
+        {
+            var stoch1 = stoch1Array.AsSpan(0, close.Length);
+            var stoch2 = stoch2Array.AsSpan(0, close.Length);
+
+            // First stochastic
+            StochasticK(high, low, close, stoch1, kLength);
+
+            // Second stochastic on the result
+            StochasticKOnValues(stoch1, stoch2, kLength);
+
+            // Smooth with SMA for %D
+            MovingAverageCore.SimpleMovingAverage(stoch2, output, dLength);
+        }
+        finally
+        {
+            pool.Return(stoch1Array);
+            pool.Return(stoch2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stochastic %K on pre-computed values (for double stochastic).
+    /// </summary>
+    private static void StochasticKOnValues(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var max = input[i];
+            var min = input[i];
+
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (input[j] > max) max = input[j];
+                if (input[j] < min) min = input[j];
+            }
+
+            var range = max - min;
+            output[i] = range != 0 ? (input[i] - min) / range * 100 : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes DTOscillator (DeMarker-based oscillator with stochastic smoothing).
+    /// </summary>
+    internal static void DTOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int rsiLength = 13, int stochLength = 8, int smaLength = 5)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(close.Length);
+        var stochArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, close.Length);
+            var stoch = stochArray.AsSpan(0, close.Length);
+
+            // Calculate RSI
+            RelativeStrengthIndex(close, rsi, rsiLength);
+
+            // Apply stochastic to RSI
+            StochasticKOnValues(rsi, stoch, stochLength);
+
+            // Smooth with SMA
+            MovingAverageCore.SimpleMovingAverage(stoch, output, smaLength);
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(stochArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Compare Price Momentum Oscillator.
+    /// </summary>
+    internal static void ComparePriceMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int firstLength = 35, int secondLength = 10, int signalLength = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var roc1Array = pool.Rent(input.Length);
+        var roc2Array = pool.Rent(input.Length);
+        var ema1Array = pool.Rent(input.Length);
+        var ema2Array = pool.Rent(input.Length);
+
+        try
+        {
+            var roc1 = roc1Array.AsSpan(0, input.Length);
+            var roc2 = roc2Array.AsSpan(0, input.Length);
+            var ema1 = ema1Array.AsSpan(0, input.Length);
+            var ema2 = ema2Array.AsSpan(0, input.Length);
+
+            // ROC for first period
+            RateOfChange(input, roc1, firstLength);
+
+            // EMA of ROC
+            MovingAverageCore.ExponentialMovingAverage(roc1, ema1, secondLength);
+
+            // Double EMA
+            MovingAverageCore.ExponentialMovingAverage(ema1, output, signalLength);
+        }
+        finally
+        {
+            pool.Return(roc1Array);
+            pool.Return(roc2Array);
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Daily Average Price Delta (price minus average price).
+    /// </summary>
+    internal static void DailyAveragePriceDelta(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var avgArray = pool.Rent(input.Length);
+
+        try
+        {
+            var avg = avgArray.AsSpan(0, input.Length);
+            MovingAverageCore.SimpleMovingAverage(input, avg, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = input[i] - avg[i];
+            }
+        }
+        finally
+        {
+            pool.Return(avgArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Demand Oscillator (buying vs selling pressure).
+    /// </summary>
+    internal static void DemandOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var demandArray = pool.Rent(close.Length);
+        var supplyArray = pool.Rent(close.Length);
+
+        try
+        {
+            var demand = demandArray.AsSpan(0, close.Length);
+            var supply = supplyArray.AsSpan(0, close.Length);
+
+            // Calculate buying pressure (demand) and selling pressure (supply)
+            for (var i = 0; i < close.Length; i++)
+            {
+                var range = high[i] - low[i];
+                if (range > 0)
+                {
+                    var buyingPressure = (close[i] - low[i]) / range * volume[i];
+                    var sellingPressure = (high[i] - close[i]) / range * volume[i];
+                    demand[i] = buyingPressure;
+                    supply[i] = sellingPressure;
+                }
+                else
+                {
+                    demand[i] = 0;
+                    supply[i] = 0;
+                }
+            }
+
+            // Sum over period and calculate oscillator
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
+                double sumDemand = 0, sumSupply = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sumDemand += demand[j];
+                    sumSupply += supply[j];
+                }
+
+                var total = sumDemand + sumSupply;
+                output[i] = total != 0 ? (sumDemand - sumSupply) / total * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(demandArray);
+            pool.Return(supplyArray);
+        }
+    }
+
     #endregion
 }
