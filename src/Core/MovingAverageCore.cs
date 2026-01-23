@@ -1203,4 +1203,324 @@ internal static class MovingAverageCore
             pool.Return(slowEmaArray);
         }
     }
+
+    /// <summary>
+    /// Computes Alpha Decreasing Exponential Moving Average.
+    /// EMA with alpha that decreases over time.
+    /// </summary>
+    internal static void AlphaDecreasingEma(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = input[0];
+        for (var i = 1; i < input.Length; i++)
+        {
+            // Alpha decreases as we go
+            var alpha = 2.0 / (length + i);
+            output[i] = alpha * input[i] + (1 - alpha) * output[i - 1];
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive Exponential Moving Average.
+    /// EMA with adaptive smoothing based on price movement.
+    /// </summary>
+    internal static void AdaptiveExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = input[0];
+        var baseAlpha = 2.0 / (length + 1);
+
+        for (var i = 1; i < input.Length; i++)
+        {
+            // Adapt alpha based on absolute percentage change
+            var change = input[i - 1] > 0 ? Math.Abs((input[i] - input[i - 1]) / input[i - 1]) : 0;
+            var adaptedAlpha = baseAlpha * (1 + 10 * change);
+            adaptedAlpha = Math.Min(1.0, adaptedAlpha);
+            output[i] = adaptedAlpha * input[i] + (1 - adaptedAlpha) * output[i - 1];
+        }
+    }
+
+    /// <summary>
+    /// Computes Autonomous Recursive Moving Average.
+    /// Self-adjusting recursive filter.
+    /// </summary>
+    internal static void AutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var k = 2.0 / (length + 1);
+        output[0] = input[0];
+
+        for (var i = 1; i < input.Length; i++)
+        {
+            var error = input[i] - output[i - 1];
+            var adaptedK = k + 0.5 * Math.Tanh(error / (Math.Abs(output[i - 1]) + 1e-10));
+            adaptedK = Math.Max(0.01, Math.Min(0.99, adaptedK));
+            output[i] = output[i - 1] + adaptedK * error;
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive Least Squares MA.
+    /// Least squares regression with adaptive window.
+    /// </summary>
+    internal static void AdaptiveLeastSquares(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            // Calculate linear regression endpoint
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var x = j;
+                var y = input[i - length + 1 + j];
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+            }
+
+            var meanX = sumX / length;
+            var meanY = sumY / length;
+            var denominator = sumX2 - length * meanX * meanX;
+
+            if (Math.Abs(denominator) > 1e-10)
+            {
+                var slope = (sumXY - length * meanX * meanY) / denominator;
+                var intercept = meanY - slope * meanX;
+                output[i] = intercept + slope * (length - 1);
+            }
+            else
+            {
+                output[i] = meanY;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes ATR Filtered EMA.
+    /// EMA that filters based on ATR volatility.
+    /// </summary>
+    internal static void AtrFilteredEma(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            var alpha = 2.0 / (length + 1);
+            output[0] = close[0];
+
+            for (var i = 1; i < close.Length; i++)
+            {
+                // Filter: only update if change exceeds a fraction of ATR
+                var change = Math.Abs(close[i] - output[i - 1]);
+                var threshold = atr[i] * 0.1;
+
+                if (change > threshold)
+                {
+                    output[i] = alpha * close[i] + (1 - alpha) * output[i - 1];
+                }
+                else
+                {
+                    output[i] = output[i - 1];
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Median Moving Average.
+    /// Moving average using median instead of mean.
+    /// </summary>
+    internal static void MedianMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var windowArray = pool.Rent(length);
+
+        try
+        {
+            var window = windowArray.AsSpan(0, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = input[i];
+                    continue;
+                }
+
+                // Copy window values
+                for (var j = 0; j < length; j++)
+                {
+                    window[j] = input[i - length + 1 + j];
+                }
+
+                // Sort to find median (simple insertion sort for small arrays)
+                for (var j = 1; j < length; j++)
+                {
+                    var key = window[j];
+                    var k = j - 1;
+                    while (k >= 0 && window[k] > key)
+                    {
+                        window[k + 1] = window[k];
+                        k--;
+                    }
+                    window[k + 1] = key;
+                }
+
+                // Get median
+                output[i] = length % 2 == 0 ?
+                    (window[length / 2 - 1] + window[length / 2]) / 2 :
+                    window[length / 2];
+            }
+        }
+        finally
+        {
+            pool.Return(windowArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Adjusted Moving Average.
+    /// MA weighted by volume.
+    /// </summary>
+    internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            double sumPriceVolume = 0;
+            double sumVolume = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sumPriceVolume += input[j] * volume[j];
+                sumVolume += volume[j];
+            }
+
+            output[i] = sumVolume > 0 ? sumPriceVolume / sumVolume : input[i];
+        }
+    }
+
+    /// <summary>
+    /// Computes Quadratic Weighted Moving Average.
+    /// MA with quadratic weight distribution.
+    /// </summary>
+    internal static void QuadraticWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-calculate weight sum
+        double weightSum = 0;
+        for (var w = 1; w <= length; w++)
+        {
+            weightSum += w * w;
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var weight = (j + 1) * (j + 1);
+                sum += input[i - length + 1 + j] * weight;
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Parabolic Weighted Moving Average.
+    /// MA with parabolic weight curve.
+    /// </summary>
+    internal static void ParabolicWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-calculate weight sum using parabolic weights
+        double weightSum = 0;
+        for (var w = 0; w < length; w++)
+        {
+            var weight = length * length - w * w;
+            weightSum += weight;
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var weight = length * length - (length - 1 - j) * (length - 1 - j);
+                sum += input[i - length + 1 + j] * weight;
+            }
+            output[i] = sum / weightSum;
+        }
+    }
 }

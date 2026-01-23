@@ -3085,4 +3085,110 @@ internal static partial class IndicatorCompute
     }
 
     #endregion
+
+    #region Moving Averages - Additional Batch 4
+
+    /// <summary>
+    /// Computes Alpha Decreasing EMA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AlphaDecreasingEma(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive EMA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveEmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AdaptiveExponentialMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Autonomous Recursive MA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AutonomousRecursiveMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Least Squares using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AdaptiveLeastSquares(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes ATR Filtered EMA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrFilteredEmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AtrFilteredEma(close, high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Median Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMedianMaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.MedianMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Adjusted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeAdjustedMaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.VolumeAdjustedMovingAverage(close, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Quadratic Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeQuadraticWmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.QuadraticWeightedMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Parabolic Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeParabolicWmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.ParabolicWeightedMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
 }

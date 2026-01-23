@@ -288,6 +288,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "DownsideDeviation",
         "AtrChannelWidth",
         "CommoditySelectionIndex",
+
+        // Moving Averages - MovingAverageCore (Additional Batch 4)
+        "AlphaDecreasingExponentialMovingAverage",
+        "AdaptiveExponentialMovingAverage",
+        "AutonomousRecursiveMovingAverage",
+        "AdaptiveLeastSquares",
+        "AtrFilteredExponentialMovingAverage",
+        "ParabolicWeightedMovingAverage",
+        "VolumeAdjustedMovingAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -893,6 +902,15 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "DownsideDeviation" => "ComputeDownsideDeviationFast",
             "AtrChannelWidth" => "ComputeAtrChannelWidthFast",
             "CommoditySelectionIndex" => "ComputeCommoditySelectionIndexFast",
+
+            // Moving Averages (Additional Batch 4)
+            "AlphaDecreasingExponentialMovingAverage" => "ComputeAlphaDecreasingEmaFast",
+            "AdaptiveExponentialMovingAverage" => "ComputeAdaptiveEmaFast",
+            "AutonomousRecursiveMovingAverage" => "ComputeAutonomousRecursiveMaFast",
+            "AdaptiveLeastSquares" => "ComputeAdaptiveLeastSquaresFast",
+            "AtrFilteredExponentialMovingAverage" => "ComputeAtrFilteredEmaFast",
+            "ParabolicWeightedMovingAverage" => "ComputeParabolicWmaFast",
+            "VolumeAdjustedMovingAverage" => "ComputeVolumeAdjustedMaFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
