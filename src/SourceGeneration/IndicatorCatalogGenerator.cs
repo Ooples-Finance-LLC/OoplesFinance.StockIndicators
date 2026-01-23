@@ -379,6 +379,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "FisherTransformStochasticOscillator",
         "KarobeinOscillator",
         "GroverLlorensCycleOscillator",
+
+        // Additional Oscillators (Batch 7)
+        "ImpulsePercentagePriceOscillator",
+        "LindaRaschke3_10Oscillator",
+        "MidpointOscillator",
+        "MirroredPercentagePriceOscillator",
+        "MobilityOscillator",
+        "PercentChangeOscillator",
+        "PriceCycleOscillator",
+        "PriceVolumeOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1076,6 +1086,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "FisherTransformStochasticOscillator" => "ComputeFisherTransformStochasticOscillatorFast",
             "KarobeinOscillator" => "ComputeKarobeinOscillatorFast",
             "GroverLlorensCycleOscillator" => "ComputeGroverLlorensCycleOscillatorFast",
+
+            // Additional Oscillators (Batch 7)
+            "ImpulsePercentagePriceOscillator" => "ComputeImpulsePercentagePriceOscillatorFast",
+            "LindaRaschke3_10Oscillator" => "ComputeLindaRaschke310OscillatorFast",
+            "MidpointOscillator" => "ComputeMidpointOscillatorFast",
+            "MirroredPercentagePriceOscillator" => "ComputeMirroredPercentagePriceOscillatorFast",
+            "MobilityOscillator" => "ComputeMobilityOscillatorFast",
+            "PercentChangeOscillator" => "ComputePercentChangeOscillatorFast",
+            "PriceCycleOscillator" => "ComputePriceCycleOscillatorFast",
+            "PriceVolumeOscillator" => "ComputePriceVolumeOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
