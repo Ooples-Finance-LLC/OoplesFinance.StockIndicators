@@ -419,6 +419,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "TradingMadeMoreSimplerOscillator",
         "NthOrderDifferencingOscillator",
         "OscOscillator",
+
+        // Additional Oscillators (Batch 11) - Ehlers Oscillators
+        "EhlersCenterofGravityOscillator",
+        "EhlersDecyclerOscillatorV1",
+        "EhlersHilbertOscillator",
+        "EhlersUniversalOscillator",
+        "EhlersRecursiveMedianOscillator",
+        "EhlersStochasticCenterOfGravityOscillator",
+        "EhlersFisherizedDeviationScaledOscillator",
+        "EhlersAdaptiveCenterOfGravityOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1156,6 +1166,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "TradingMadeMoreSimplerOscillator" => "ComputeTradingMadeMoreSimplerOscillatorFast",
             "NthOrderDifferencingOscillator" => "ComputeNthOrderDifferencingOscillatorFast",
             "OscOscillator" => "ComputeOscOscillatorFast",
+
+            // Additional Oscillators (Batch 11) - Ehlers Oscillators
+            "EhlersCenterofGravityOscillator" => "ComputeEhlersCenterOfGravityOscillatorFast",
+            "EhlersDecyclerOscillatorV1" => "ComputeEhlersDecyclerOscillatorV1Fast",
+            "EhlersHilbertOscillator" => "ComputeEhlersHilbertOscillatorFast",
+            "EhlersUniversalOscillator" => "ComputeEhlersUniversalOscillatorFast",
+            "EhlersRecursiveMedianOscillator" => "ComputeEhlersRecursiveMedianOscillatorFast",
+            "EhlersStochasticCenterOfGravityOscillator" => "ComputeEhlersStochasticCenterOfGravityOscillatorFast",
+            "EhlersFisherizedDeviationScaledOscillator" => "ComputeEhlersFisherizedDeviationScaledOscillatorFast",
+            "EhlersAdaptiveCenterOfGravityOscillator" => "ComputeEhlersAdaptiveCenterOfGravityOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

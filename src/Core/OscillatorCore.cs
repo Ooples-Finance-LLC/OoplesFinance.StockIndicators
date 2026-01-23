@@ -7156,5 +7156,431 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators (Batch 11) - Ehlers Oscillators
+
+    /// <summary>
+    /// Computes Ehlers Center of Gravity Oscillator.
+    /// </summary>
+    internal static void EhlersCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                var num = 0.0;
+                var denom = 0.0;
+                for (var j = 0; j < length; j++)
+                {
+                    var price = close[i - j];
+                    num += (j + 1) * price;
+                    denom += price;
+                }
+
+                output[i] = denom != 0 ? -num / denom + (length + 1) / 2.0 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Decycler Oscillator V1.
+    /// </summary>
+    internal static void EhlersDecyclerOscillatorV1(ReadOnlySpan<double> close, Span<double> output, int shortLength = 10, int longLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var shortHpArray = pool.Rent(close.Length);
+        var longHpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var shortHp = shortHpArray.AsSpan(0, close.Length);
+            var longHp = longHpArray.AsSpan(0, close.Length);
+
+            var alphaShort = (Math.Cos(2 * Math.PI / shortLength) + Math.Sin(2 * Math.PI / shortLength) - 1) / Math.Cos(2 * Math.PI / shortLength);
+            var alphaLong = (Math.Cos(2 * Math.PI / longLength) + Math.Sin(2 * Math.PI / longLength) - 1) / Math.Cos(2 * Math.PI / longLength);
+
+            // High-pass filter
+            shortHp[0] = 0;
+            longHp[0] = 0;
+            for (var i = 1; i < close.Length; i++)
+            {
+                shortHp[i] = (1 - alphaShort / 2) * (1 - alphaShort / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
+                            2 * (1 - alphaShort) * shortHp[i - 1] - (1 - alphaShort) * (1 - alphaShort) * (i > 1 ? shortHp[i - 2] : 0);
+                longHp[i] = (1 - alphaLong / 2) * (1 - alphaLong / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
+                           2 * (1 - alphaLong) * longHp[i - 1] - (1 - alphaLong) * (1 - alphaLong) * (i > 1 ? longHp[i - 2] : 0);
+            }
+
+            // Oscillator = short decycler - long decycler
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = (close[i] - shortHp[i]) - (close[i] - longHp[i]);
+            }
+        }
+        finally
+        {
+            pool.Return(shortHpArray);
+            pool.Return(longHpArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Hilbert Oscillator.
+    /// </summary>
+    internal static void EhlersHilbertOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 7)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(close.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, close.Length);
+
+            // 4-bar weighted average
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < 3)
+                {
+                    smooth[i] = close[i];
+                }
+                else
+                {
+                    smooth[i] = (4 * close[i] + 3 * close[i - 1] + 2 * close[i - 2] + close[i - 3]) / 10.0;
+                }
+            }
+
+            // Hilbert transform approximation
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    var detrender = 0.0962 * smooth[i] + 0.5769 * smooth[Math.Max(0, i - 2)] -
+                                   0.5769 * smooth[Math.Max(0, i - 4)] - 0.0962 * smooth[Math.Max(0, i - 6)];
+                    output[i] = detrender;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Universal Oscillator.
+    /// </summary>
+    internal static void EhlersUniversalOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var whitenArray = pool.Rent(close.Length);
+        var filtArray = pool.Rent(close.Length);
+
+        try
+        {
+            var whiten = whitenArray.AsSpan(0, close.Length);
+            var filt = filtArray.AsSpan(0, close.Length);
+
+            var a1 = Math.Exp(-1.414 * Math.PI / length);
+            var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
+            var c2 = b1;
+            var c3 = -a1 * a1;
+            var c1 = 1 - c2 - c3;
+
+            // Whitening
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < 1)
+                {
+                    whiten[i] = close[i];
+                }
+                else
+                {
+                    whiten[i] = close[i] - close[i - 1];
+                }
+            }
+
+            // Super smoother filter
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < 2)
+                {
+                    filt[i] = whiten[i];
+                }
+                else
+                {
+                    filt[i] = c1 * (whiten[i] + whiten[i - 1]) / 2 + c2 * filt[i - 1] + c3 * filt[i - 2];
+                }
+            }
+
+            // RMS normalization
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    var rms = 0.0;
+                    for (var j = 0; j < length; j++)
+                    {
+                        rms += filt[i - j] * filt[i - j];
+                    }
+                    rms = Math.Sqrt(rms / length);
+
+                    output[i] = rms != 0 ? filt[i] / rms : 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(whitenArray);
+            pool.Return(filtArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Recursive Median Oscillator.
+    /// </summary>
+    internal static void EhlersRecursiveMedianOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 5, int smoothLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var medianArray = pool.Rent(close.Length);
+        var windowArray = pool.Rent(length);
+        var smoothedArray = pool.Rent(close.Length);
+
+        try
+        {
+            var median = medianArray.AsSpan(0, close.Length);
+            var window = windowArray.AsSpan(0, length);
+            var smoothed = smoothedArray.AsSpan(0, close.Length);
+
+            // Calculate rolling median
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    median[i] = close[i];
+                }
+                else
+                {
+                    for (var j = 0; j < length; j++)
+                    {
+                        window[j] = close[i - j];
+                    }
+                    var sorted = window.ToArray();
+                    Array.Sort(sorted);
+                    median[i] = sorted[length / 2];
+                }
+            }
+
+            // Smooth the median
+            MovingAverageCore.SimpleMovingAverage(median, smoothed, smoothLength);
+
+            // Oscillator = close - smoothed median
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - smoothed[i];
+            }
+        }
+        finally
+        {
+            pool.Return(medianArray);
+            pool.Return(windowArray);
+            pool.Return(smoothedArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Stochastic Center of Gravity Oscillator.
+    /// </summary>
+    internal static void EhlersStochasticCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 8)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cgArray = pool.Rent(close.Length);
+
+        try
+        {
+            var cg = cgArray.AsSpan(0, close.Length);
+
+            // Calculate Center of Gravity
+            EhlersCenterOfGravityOscillator(close, cg, length);
+
+            // Stochastic of CG
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 50;
+                }
+                else
+                {
+                    var highest = cg[i];
+                    var lowest = cg[i];
+                    for (var j = i - length + 1; j <= i; j++)
+                    {
+                        if (cg[j] > highest) highest = cg[j];
+                        if (cg[j] < lowest) lowest = cg[j];
+                    }
+
+                    var range = highest - lowest;
+                    output[i] = range != 0 ? (cg[i] - lowest) / range * 100 : 50;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(cgArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Fisherized Deviation Scaled Oscillator.
+    /// </summary>
+    internal static void EhlersFisherizedDeviationScaledOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var filtArray = pool.Rent(close.Length);
+
+        try
+        {
+            var filt = filtArray.AsSpan(0, close.Length);
+
+            var a1 = Math.Exp(-1.414 * Math.PI / length);
+            var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
+            var c2 = b1;
+            var c3 = -a1 * a1;
+            var c1 = 1 - c2 - c3;
+
+            // Super smoother
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < 2)
+                {
+                    filt[i] = close[i];
+                }
+                else
+                {
+                    filt[i] = c1 * (close[i] + close[i - 1]) / 2 + c2 * filt[i - 1] + c3 * filt[i - 2];
+                }
+            }
+
+            // Fisher transform of normalized filter
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    // Calculate RMS
+                    var rms = 0.0;
+                    for (var j = 0; j < length; j++)
+                    {
+                        var diff = close[i - j] - filt[i - j];
+                        rms += diff * diff;
+                    }
+                    rms = Math.Sqrt(rms / length);
+
+                    if (rms != 0)
+                    {
+                        var norm = (close[i] - filt[i]) / rms;
+                        norm = Math.Max(-0.999, Math.Min(0.999, norm)); // Clamp for Fisher
+                        output[i] = 0.5 * Math.Log((1 + norm) / (1 - norm));
+                    }
+                    else
+                    {
+                        output[i] = 0;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(filtArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Adaptive Center of Gravity Oscillator.
+    /// </summary>
+    internal static void EhlersAdaptiveCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var cgArray = pool.Rent(close.Length);
+        var smoothedArray = pool.Rent(close.Length);
+
+        try
+        {
+            var cg = cgArray.AsSpan(0, close.Length);
+            var smoothed = smoothedArray.AsSpan(0, close.Length);
+
+            // Calculate base CG
+            EhlersCenterOfGravityOscillator(close, cg, length);
+
+            // Adaptive smoothing using EMA
+            MovingAverageCore.ExponentialMovingAverage(cg, smoothed, 3);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = smoothed[i];
+            }
+        }
+        finally
+        {
+            pool.Return(cgArray);
+            pool.Return(smoothedArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }
