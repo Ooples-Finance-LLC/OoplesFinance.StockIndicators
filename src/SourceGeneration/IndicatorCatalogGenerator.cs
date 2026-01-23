@@ -244,6 +244,42 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "IchimokuTenkanSen",
         "IchimokuKijunSen",
         "MassThrust",
+
+        // Volume - VolumeCore (Additional Batch 3)
+        "WilliamsAD",
+        "NetVolume",
+        "CumulativeVolumeIndex",
+        "VolumeMomentum",
+        "VolumePriceTrend",
+        "ElderRayBullPower",
+        "ElderRayBearPower",
+        "NormalizedVolume",
+        "VolumeWeightedRsi",
+
+        // Oscillators - OscillatorCore (Additional Batch 7)
+        "ChandeCompositeMomentumIndex",
+        "ChandeKrollRSquaredIndex",
+        "BayesianOscillator",
+        "AnchoredMomentum",
+        "ChartmillValueIndicator",
+        "CenterOfLinearity",
+        "BreakoutRelativeStrengthIndex",
+        "AsymmetricalRelativeStrengthIndex",
+        "AdaptiveStochastic",
+        "AdaptiveRelativeStrengthIndex",
+
+        // Trend - TrendCore (Additional Batch 4)
+        "ChandeTrendScore",
+        "ChopZone",
+        "AutoLine",
+        "AutoLineWithDrift",
+        "AutoFilter",
+        "BuffAverage",
+        "BryantAdaptiveMovingAverage",
+        "AverageTrueRangeTrailingStops",
+        "CompoundRatioMovingAverage",
+        "ConditionalAccumulator",
+        "AhrensMovingAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -805,6 +841,42 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "IchimokuTenkanSen" => "ComputeIchimokuTenkanSenFast",
             "IchimokuKijunSen" => "ComputeIchimokuKijunSenFast",
             "MassThrust" => "ComputeMassThrustFast",
+
+            // Volume (Additional Batch 3)
+            "WilliamsAD" => "ComputeWilliamsADFast",
+            "NetVolume" => "ComputeNetVolumeFast",
+            "CumulativeVolumeIndex" => "ComputeCumulativeVolumeIndexFast",
+            "VolumeMomentum" => "ComputeVolumeMomentumFast",
+            "VolumePriceTrend" => "ComputeVolumePriceTrendFast",
+            "ElderRayBullPower" => "ComputeElderRayBullPowerFast",
+            "ElderRayBearPower" => "ComputeElderRayBearPowerFast",
+            "NormalizedVolume" => "ComputeNormalizedVolumeFast",
+            "VolumeWeightedRsi" => "ComputeVolumeWeightedRsiFast",
+
+            // Oscillators (Additional Batch 7)
+            "ChandeCompositeMomentumIndex" => "ComputeChandeCompositeMomentumIndexFast",
+            "ChandeKrollRSquaredIndex" => "ComputeChandeKrollRSquaredIndexFast",
+            "BayesianOscillator" => "ComputeBayesianOscillatorFast",
+            "AnchoredMomentum" => "ComputeAnchoredMomentumFast",
+            "ChartmillValueIndicator" => "ComputeChartmillValueIndicatorFast",
+            "CenterOfLinearity" => "ComputeCenterOfLinearityFast",
+            "BreakoutRelativeStrengthIndex" => "ComputeBreakoutRsiFast",
+            "AsymmetricalRelativeStrengthIndex" => "ComputeAsymmetricalRsiFast",
+            "AdaptiveStochastic" => "ComputeAdaptiveStochasticFast",
+            "AdaptiveRelativeStrengthIndex" => "ComputeAdaptiveRsiFast",
+
+            // Trend (Additional Batch 4)
+            "ChandeTrendScore" => "ComputeChandeTrendScoreFast",
+            "ChopZone" => "ComputeChopZoneFast",
+            "AutoLine" => "ComputeAutoLineFast",
+            "AutoLineWithDrift" => "ComputeAutoLineWithDriftFast",
+            "AutoFilter" => "ComputeAutoFilterFast",
+            "BuffAverage" => "ComputeBuffAverageFast",
+            "BryantAdaptiveMovingAverage" => "ComputeBryantAdaptiveMovingAverageFast",
+            "AverageTrueRangeTrailingStops" => "ComputeAtrTrailingStopsFast",
+            "CompoundRatioMovingAverage" => "ComputeCompoundRatioMovingAverageFast",
+            "ConditionalAccumulator" => "ComputeConditionalAccumulatorFast",
+            "AhrensMovingAverage" => "ComputeAhrensMovingAverageFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

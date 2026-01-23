@@ -3156,4 +3156,403 @@ internal static class OscillatorCore
             pool.Return(bearEmaArray);
         }
     }
+
+    /// <summary>
+    /// Computes Chande Composite Momentum Index.
+    /// Combines CMO with other momentum metrics.
+    /// </summary>
+    internal static void ChandeCompositeMomentumIndex(ReadOnlySpan<double> close, Span<double> output, int shortLength = 3, int longLength = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var shortCmoArray = pool.Rent(close.Length);
+        var longCmoArray = pool.Rent(close.Length);
+
+        try
+        {
+            var shortCmo = shortCmoArray.AsSpan(0, close.Length);
+            var longCmo = longCmoArray.AsSpan(0, close.Length);
+
+            ChandeMomentumOscillator(close, shortCmo, shortLength);
+            ChandeMomentumOscillator(close, longCmo, longLength);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = (shortCmo[i] + longCmo[i]) / 2;
+            }
+        }
+        finally
+        {
+            pool.Return(shortCmoArray);
+            pool.Return(longCmoArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Chande Kroll R-Squared Index.
+    /// Measures trend strength using R-Squared.
+    /// </summary>
+    internal static void ChandeKrollRSquaredIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // R-Squared measures how well prices fit a linear regression line
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate linear regression
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var x = j;
+                var y = close[i - length + 1 + j];
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+            }
+
+            var meanX = sumX / length;
+            var meanY = sumY / length;
+
+            var slope = (sumXY - length * meanX * meanY) / (sumX2 - length * meanX * meanX);
+            var intercept = meanY - slope * meanX;
+
+            // Calculate R-Squared
+            double ssTot = 0, ssRes = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var y = close[i - length + 1 + j];
+                var yPred = intercept + slope * j;
+                ssTot += (y - meanY) * (y - meanY);
+                ssRes += (y - yPred) * (y - yPred);
+            }
+
+            output[i] = ssTot > 0 ? 100 * (1 - ssRes / ssTot) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Bayesian Oscillator.
+    /// Uses probability-based approach to measure price movement.
+    /// </summary>
+    internal static void BayesianOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 50;
+                continue;
+            }
+
+            var upCount = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (close[j] > close[j - 1])
+                {
+                    upCount++;
+                }
+            }
+
+            // Bayesian probability of up move given recent history
+            output[i] = 100.0 * upCount / length;
+        }
+    }
+
+    /// <summary>
+    /// Computes Anchored Momentum.
+    /// Measures momentum relative to a specific bar.
+    /// </summary>
+    internal static void AnchoredMomentum(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var anchor = close[i - length];
+            output[i] = anchor > 0 ? 100 * (close[i] - anchor) / anchor : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Chartmill Value Indicator.
+    /// Measures value/momentum relative to recent range.
+    /// </summary>
+    internal static void ChartmillValueIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double highest = double.MinValue;
+            double lowest = double.MaxValue;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                highest = Math.Max(highest, close[j]);
+                lowest = Math.Min(lowest, close[j]);
+            }
+
+            var range = highest - lowest;
+            output[i] = range > 0 ? 100 * (close[i] - lowest) / range : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes Center of Linearity.
+    /// Measures how linear the price movement is.
+    /// </summary>
+    internal static void CenterOfLinearity(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate center of mass of price action
+            double sumProduct = 0;
+            double sumPrices = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var price = close[i - length + 1 + j];
+                sumProduct += (j + 1) * price;
+                sumPrices += price;
+            }
+
+            var centerOfMass = sumPrices > 0 ? sumProduct / sumPrices : length / 2.0;
+            var expectedCenter = (length + 1) / 2.0;
+
+            // Normalize to -100 to +100 range
+            output[i] = 100 * (centerOfMass - expectedCenter) / expectedCenter;
+        }
+    }
+
+    /// <summary>
+    /// Computes Breakout RSI.
+    /// RSI variant optimized for breakout detection.
+    /// </summary>
+    internal static void BreakoutRsi(ReadOnlySpan<double> close, Span<double> output, int length = 14, double threshold = 70)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, close.Length);
+            RelativeStrengthIndex(close, rsi, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                // Enhance RSI signal near breakout levels
+                if (rsi[i] > threshold || rsi[i] < 100 - threshold)
+                {
+                    output[i] = rsi[i];
+                }
+                else
+                {
+                    output[i] = 50; // Neutral when not in breakout zone
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Asymmetrical RSI.
+    /// RSI with different up/down smoothing.
+    /// </summary>
+    internal static void AsymmetricalRsi(ReadOnlySpan<double> close, Span<double> output, int upLength = 14, int downLength = 7)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var gainsArray = pool.Rent(close.Length);
+        var lossesArray = pool.Rent(close.Length);
+        var avgGainArray = pool.Rent(close.Length);
+        var avgLossArray = pool.Rent(close.Length);
+
+        try
+        {
+            var gains = gainsArray.AsSpan(0, close.Length);
+            var losses = lossesArray.AsSpan(0, close.Length);
+            var avgGain = avgGainArray.AsSpan(0, close.Length);
+            var avgLoss = avgLossArray.AsSpan(0, close.Length);
+
+            gains[0] = 0;
+            losses[0] = 0;
+            for (var i = 1; i < close.Length; i++)
+            {
+                var change = close[i] - close[i - 1];
+                gains[i] = change > 0 ? change : 0;
+                losses[i] = change < 0 ? -change : 0;
+            }
+
+            MovingAverageCore.ExponentialMovingAverage(gains, avgGain, upLength);
+            MovingAverageCore.ExponentialMovingAverage(losses, avgLoss, downLength);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var rs = avgLoss[i] > 0 ? avgGain[i] / avgLoss[i] : 100;
+                output[i] = 100 - 100 / (1 + rs);
+            }
+        }
+        finally
+        {
+            pool.Return(gainsArray);
+            pool.Return(lossesArray);
+            pool.Return(avgGainArray);
+            pool.Return(avgLossArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive Stochastic.
+    /// Stochastic with adaptive period based on volatility.
+    /// </summary>
+    internal static void AdaptiveStochastic(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int minLength = 5, int maxLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < maxLength)
+            {
+                output[i] = 50;
+                continue;
+            }
+
+            // Calculate volatility to adapt period
+            double sumAtr = 0;
+            for (var j = i - 10; j <= i; j++)
+            {
+                var tr = Math.Max(high[j] - low[j],
+                    Math.Max(Math.Abs(high[j] - close[j - 1]), Math.Abs(low[j] - close[j - 1])));
+                sumAtr += tr;
+            }
+            var avgAtr = sumAtr / 10;
+
+            // Higher volatility = shorter period
+            var adaptivePeriod = avgAtr > 0 ?
+                Math.Max(minLength, Math.Min(maxLength, (int)(minLength + (maxLength - minLength) * (1 - avgAtr / close[i])))) :
+                (minLength + maxLength) / 2;
+
+            // Calculate stochastic with adaptive period
+            var highestHigh = double.MinValue;
+            var lowestLow = double.MaxValue;
+            for (var j = i - adaptivePeriod + 1; j <= i; j++)
+            {
+                highestHigh = Math.Max(highestHigh, high[j]);
+                lowestLow = Math.Min(lowestLow, low[j]);
+            }
+
+            var range = highestHigh - lowestLow;
+            output[i] = range > 0 ? 100 * (close[i] - lowestLow) / range : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive RSI.
+    /// RSI with adaptive period based on market conditions.
+    /// </summary>
+    internal static void AdaptiveRsi(ReadOnlySpan<double> close, Span<double> output, int minLength = 5, int maxLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < maxLength)
+            {
+                output[i] = 50;
+                continue;
+            }
+
+            // Calculate efficiency ratio to adapt period
+            var change = Math.Abs(close[i] - close[i - maxLength]);
+            double volatility = 0;
+            for (var j = i - maxLength + 1; j <= i; j++)
+            {
+                volatility += Math.Abs(close[j] - close[j - 1]);
+            }
+
+            var er = volatility > 0 ? change / volatility : 0;
+
+            // Higher efficiency = shorter period
+            var adaptivePeriod = (int)(maxLength - er * (maxLength - minLength));
+            adaptivePeriod = Math.Max(minLength, Math.Min(maxLength, adaptivePeriod));
+
+            // Calculate RSI with adaptive period
+            double sumGain = 0, sumLoss = 0;
+            for (var j = i - adaptivePeriod + 1; j <= i; j++)
+            {
+                var delta = close[j] - close[j - 1];
+                if (delta > 0)
+                    sumGain += delta;
+                else
+                    sumLoss -= delta;
+            }
+
+            var rs = sumLoss > 0 ? sumGain / sumLoss : 100;
+            output[i] = 100 - 100 / (1 + rs);
+        }
+    }
 }

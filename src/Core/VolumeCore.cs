@@ -703,4 +703,294 @@ internal static class VolumeCore
             output[i] = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
         }
     }
+
+    /// <summary>
+    /// Computes Williams Accumulation/Distribution.
+    /// </summary>
+    internal static void WilliamsAD(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0)
+        {
+            return;
+        }
+
+        output[0] = 0;
+        double wad = 0;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            double trueRangeHigh = Math.Max(high[i], close[i - 1]);
+            double trueRangeLow = Math.Min(low[i], close[i - 1]);
+
+            if (close[i] > close[i - 1])
+            {
+                wad += close[i] - trueRangeLow;
+            }
+            else if (close[i] < close[i - 1])
+            {
+                wad += close[i] - trueRangeHigh;
+            }
+
+            output[i] = wad;
+        }
+    }
+
+    /// <summary>
+    /// Computes Net Volume.
+    /// </summary>
+    internal static void NetVolume(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0)
+        {
+            return;
+        }
+
+        output[0] = 0;
+        for (var i = 1; i < close.Length; i++)
+        {
+            if (close[i] > close[i - 1])
+            {
+                output[i] = volume[i];
+            }
+            else if (close[i] < close[i - 1])
+            {
+                output[i] = -volume[i];
+            }
+            else
+            {
+                output[i] = 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Cumulative Volume Index.
+    /// </summary>
+    internal static void CumulativeVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0)
+        {
+            return;
+        }
+
+        double cvi = 0;
+        output[0] = 0;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            if (close[i] > close[i - 1])
+            {
+                cvi += volume[i];
+            }
+            else if (close[i] < close[i - 1])
+            {
+                cvi -= volume[i];
+            }
+
+            output[i] = cvi;
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Momentum.
+    /// </summary>
+    internal static void VolumeMomentum(ReadOnlySpan<double> volume, Span<double> output, int length = 10)
+    {
+        if (output.Length < volume.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < volume.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                output[i] = volume[i] - volume[i - length];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Price Trend.
+    /// </summary>
+    internal static void VolumePriceTrend(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0)
+        {
+            return;
+        }
+
+        double vpt = 0;
+        output[0] = 0;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var pctChange = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
+            vpt += volume[i] * pctChange;
+            output[i] = vpt;
+        }
+    }
+
+    /// <summary>
+    /// Computes Elder Ray Bull Power.
+    /// </summary>
+    internal static void ElderRayBullPower(ReadOnlySpan<double> high, ReadOnlySpan<double> close, Span<double> output, int length = 13)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = high[i] - ema[i];
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Elder Ray Bear Power.
+    /// </summary>
+    internal static void ElderRayBearPower(ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 13)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = low[i] - ema[i];
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Normalized Volume.
+    /// </summary>
+    internal static void NormalizedVolume(ReadOnlySpan<double> volume, Span<double> output, int length = 20)
+    {
+        if (output.Length < volume.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(volume.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, volume.Length);
+            MovingAverageCore.SimpleMovingAverage(volume, sma, length);
+
+            for (var i = 0; i < volume.Length; i++)
+            {
+                output[i] = sma[i] != 0 ? volume[i] / sma[i] : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Weighted RSI.
+    /// </summary>
+    internal static void VolumeWeightedRsi(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0)
+        {
+            return;
+        }
+
+        double avgGain = 0;
+        double avgLoss = 0;
+        output[0] = 50;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var change = close[i] - close[i - 1];
+            var weightedChange = change * volume[i];
+
+            var gain = weightedChange > 0 ? weightedChange : 0;
+            var loss = weightedChange < 0 ? -weightedChange : 0;
+
+            if (i <= length)
+            {
+                avgGain += gain;
+                avgLoss += loss;
+
+                if (i == length)
+                {
+                    avgGain /= length;
+                    avgLoss /= length;
+                }
+
+                output[i] = 50;
+            }
+            else
+            {
+                var k = 1.0 / length;
+                avgGain = (gain * k) + (avgGain * (1 - k));
+                avgLoss = (loss * k) + (avgLoss * (1 - k));
+
+                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
+                output[i] = avgLoss == 0 ? 100 : 100 - (100 / (1 + rs));
+            }
+        }
+    }
 }

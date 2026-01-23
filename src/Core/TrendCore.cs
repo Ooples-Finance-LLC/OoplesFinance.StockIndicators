@@ -1274,4 +1274,365 @@ internal static class TrendCore
             pool.Return(thrustArray);
         }
     }
+
+    /// <summary>
+    /// Computes Chande Trend Score.
+    /// Measures trend strength over multiple timeframes.
+    /// </summary>
+    internal static void ChandeTrendScore(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var score = 0;
+            for (var j = 1; j <= length; j++)
+            {
+                if (close[i] > close[i - j])
+                {
+                    score++;
+                }
+                else if (close[i] < close[i - j])
+                {
+                    score--;
+                }
+            }
+
+            output[i] = score;
+        }
+    }
+
+    /// <summary>
+    /// Computes Chop Zone indicator.
+    /// Measures whether market is choppy or trending.
+    /// </summary>
+    internal static void ChopZone(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            var ema = emaArray.AsSpan(0, close.Length);
+
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+            MovingAverageCore.ExponentialMovingAverage(close, ema, 34);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (atr[i] > 0)
+                {
+                    var distance = (close[i] - ema[i]) / atr[i];
+                    output[i] = distance;
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Auto Line indicator.
+    /// Adaptive trend line calculation.
+    /// </summary>
+    internal static void AutoLine(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = close[0];
+        for (var i = 1; i < close.Length; i++)
+        {
+            var change = Math.Abs(close[i] - close[i - 1]);
+            var alpha = change > 0 ? Math.Min(1.0, change / close[i - 1]) : 0.1;
+            alpha = Math.Max(2.0 / (length + 1), alpha);
+            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]);
+        }
+    }
+
+    /// <summary>
+    /// Computes Auto Line with Drift indicator.
+    /// Adaptive trend line with drift adjustment.
+    /// </summary>
+    internal static void AutoLineWithDrift(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = close[0];
+        var drift = 0.0;
+        for (var i = 1; i < close.Length; i++)
+        {
+            var change = Math.Abs(close[i] - close[i - 1]);
+            var alpha = change > 0 ? Math.Min(1.0, change / close[i - 1]) : 0.1;
+            alpha = Math.Max(2.0 / (length + 1), alpha);
+
+            drift = alpha * (close[i] - close[i - 1]) + (1 - alpha) * drift;
+            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]) + drift;
+        }
+    }
+
+    /// <summary>
+    /// Computes Auto Filter indicator.
+    /// Adaptive filter for trend detection.
+    /// </summary>
+    internal static void AutoFilter(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, close.Length);
+            MovingAverageCore.SimpleMovingAverage(close, sma, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                // Auto filter adjusts based on price position relative to SMA
+                output[i] = close[i] > sma[i] ? sma[i] + Math.Abs(close[i] - sma[i]) * 0.5 :
+                           close[i] < sma[i] ? sma[i] - Math.Abs(close[i] - sma[i]) * 0.5 : sma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Buff Average indicator.
+    /// Smoothed average for trend following.
+    /// </summary>
+    internal static void BuffAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1Array = pool.Rent(close.Length);
+        var ema2Array = pool.Rent(close.Length);
+
+        try
+        {
+            var ema1 = ema1Array.AsSpan(0, close.Length);
+            var ema2 = ema2Array.AsSpan(0, close.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(close, ema1, length);
+            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = 2 * ema1[i] - ema2[i];
+            }
+        }
+        finally
+        {
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Bryant Adaptive Moving Average.
+    /// Adaptive MA based on market conditions.
+    /// </summary>
+    internal static void BryantAdaptiveMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = close[0];
+        for (var i = 1; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = close[i];
+                continue;
+            }
+
+            // Calculate volatility factor
+            var sumChange = 0.0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sumChange += Math.Abs(close[j] - close[j - 1]);
+            }
+            var avgChange = sumChange / length;
+
+            // Adapt smoothing factor based on volatility
+            var k = avgChange > 0 ? Math.Min(1.0, Math.Abs(close[i] - close[i - 1]) / avgChange) : 0.5;
+            var alpha = (2.0 / (length + 1)) + k * (1 - 2.0 / (length + 1));
+
+            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]);
+        }
+    }
+
+    /// <summary>
+    /// Computes ATR Trailing Stops.
+    /// Stop loss levels based on ATR.
+    /// </summary>
+    internal static void AtrTrailingStops(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            output[0] = close[0];
+            var trend = 1; // 1 = uptrend, -1 = downtrend
+
+            for (var i = 1; i < close.Length; i++)
+            {
+                var atrValue = atr[i] * multiplier;
+                var longStop = close[i] - atrValue;
+                var shortStop = close[i] + atrValue;
+
+                if (trend == 1)
+                {
+                    output[i] = Math.Max(output[i - 1], longStop);
+                    if (close[i] < output[i])
+                    {
+                        trend = -1;
+                        output[i] = shortStop;
+                    }
+                }
+                else
+                {
+                    output[i] = Math.Min(output[i - 1], shortStop);
+                    if (close[i] > output[i])
+                    {
+                        trend = 1;
+                        output[i] = longStop;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Compound Ratio Moving Average.
+    /// </summary>
+    internal static void CompoundRatioMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = close[i];
+                continue;
+            }
+
+            var sum = 0.0;
+            var weightSum = 0.0;
+            for (var j = 0; j < length; j++)
+            {
+                var weight = Math.Pow(1.0 + (double)j / length, j);
+                sum += close[i - j] * weight;
+                weightSum += weight;
+            }
+
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Conditional Accumulator.
+    /// Accumulates values based on conditions.
+    /// </summary>
+    internal static void ConditionalAccumulator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = close[0];
+        for (var i = 1; i < close.Length; i++)
+        {
+            if (close[i] > close[i - 1])
+            {
+                output[i] = output[i - 1] + (close[i] - close[i - 1]);
+            }
+            else if (close[i] < close[i - 1])
+            {
+                output[i] = output[i - 1] - (close[i - 1] - close[i]);
+            }
+            else
+            {
+                output[i] = output[i - 1];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Ahrens Moving Average.
+    /// </summary>
+    internal static void AhrensMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = close[0];
+        var k = 2.0 / (length + 1);
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var diff = close[i] - output[i - 1];
+            output[i] = output[i - 1] + k * diff * (1 + Math.Abs(diff) / (Math.Abs(close[i]) + 1e-10));
+        }
+    }
 }

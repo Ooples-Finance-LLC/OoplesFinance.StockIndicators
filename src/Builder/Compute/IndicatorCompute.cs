@@ -2649,4 +2649,360 @@ internal static partial class IndicatorCompute
     }
 
     #endregion
+
+    #region Volume Indicators - Additional Batch 2
+
+    /// <summary>
+    /// Computes Williams Accumulation/Distribution using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsADFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.WilliamsAD(high, low, close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Net Volume using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNetVolumeFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.NetVolume(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Cumulative Volume Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCumulativeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.CumulativeVolumeIndex(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Momentum using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeMomentumFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.VolumeMomentum(volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Price Trend using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumePriceTrendFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.VolumePriceTrend(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Elder Ray Bull Power using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeElderRayBullPowerFast(StockData data, ComputeContext context, int length = 13)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.ElderRayBullPower(high, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Elder Ray Bear Power using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeElderRayBearPowerFast(StockData data, ComputeContext context, int length = 13)
+    {
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.ElderRayBearPower(low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Normalized Volume using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNormalizedVolumeFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.NormalizedVolume(volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Weighted RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        VolumeCore.VolumeWeightedRsi(close, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Oscillators - Additional Batch 7
+
+    /// <summary>
+    /// Computes Chande Composite Momentum Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context, int shortLength = 3, int longLength = 10)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChandeCompositeMomentumIndex(close, buffer.WritableSpan, shortLength, longLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chande Kroll R-Squared Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeKrollRSquaredIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChandeKrollRSquaredIndex(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bayesian Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBayesianOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.BayesianOscillator(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Anchored Momentum using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAnchoredMomentumFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.AnchoredMomentum(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chartmill Value Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChartmillValueIndicator(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Center of Linearity using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCenterOfLinearityFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.CenterOfLinearity(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Breakout RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.BreakoutRsi(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Asymmetrical RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAsymmetricalRsiFast(StockData data, ComputeContext context, int upLength = 14, int downLength = 7)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.AsymmetricalRsi(close, buffer.WritableSpan, upLength, downLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Stochastic using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.AdaptiveStochastic(high, low, close, buffer.WritableSpan, minLength, maxLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.AdaptiveRsi(close, buffer.WritableSpan, minLength, maxLength);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Trend - Additional Batch 4
+
+    /// <summary>
+    /// Computes Chande Trend Score using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeTrendScoreFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.ChandeTrendScore(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chop Zone using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChopZoneFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.ChopZone(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Auto Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AutoLine(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Auto Line with Drift using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AutoLineWithDrift(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Auto Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAutoFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AutoFilter(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Buff Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBuffAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.BuffAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bryant Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.BryantAdaptiveMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes ATR Trailing Stops using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AtrTrailingStops(high, low, close, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Compound Ratio Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.CompoundRatioMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Conditional Accumulator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeConditionalAccumulatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.ConditionalAccumulator(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ahrens Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAhrensMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AhrensMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
 }
