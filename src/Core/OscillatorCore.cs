@@ -3843,4 +3843,158 @@ internal static class OscillatorCore
     }
 
     #endregion
+
+    #region Additional Oscillators (Batch 1)
+
+    /// <summary>
+    /// Computes Absolute Chande Momentum Oscillator (absolute value of CMO).
+    /// </summary>
+    internal static void ChandeMomentumOscillatorAbsolute(ReadOnlySpan<double> input, Span<double> output, int length = 9)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double sumUp = 0, sumDown = 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var change = input[i] - input[i - 1];
+            var up = change > 0 ? change : 0;
+            var down = change < 0 ? -change : 0;
+
+            if (i < length)
+            {
+                sumUp += up;
+                sumDown += down;
+                output[i] = 0;
+            }
+            else
+            {
+                var oldChange = input[i - length] - (i > length ? input[i - length - 1] : 0);
+                var oldUp = oldChange > 0 ? oldChange : 0;
+                var oldDown = oldChange < 0 ? -oldChange : 0;
+                sumUp = sumUp - oldUp + up;
+                sumDown = sumDown - oldDown + down;
+
+                var total = sumUp + sumDown;
+                var cmo = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
+                output[i] = Math.Abs(cmo);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Percent Change (simple percentage change over 1 period).
+    /// </summary>
+    internal static void PercentChange(ReadOnlySpan<double> input, Span<double> output, int length = 1)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                var prevValue = input[i - length];
+                output[i] = prevValue != 0 ? (input[i] - prevValue) / prevValue * 100 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Price Change (simple difference from previous bar).
+    /// </summary>
+    internal static void PriceChange(ReadOnlySpan<double> input, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        output[0] = 0;
+        for (var i = 1; i < input.Length; i++)
+        {
+            output[i] = input[i] - input[i - 1];
+        }
+    }
+
+    /// <summary>
+    /// Computes Range (High - Low).
+    /// </summary>
+    internal static void Range(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            output[i] = high[i] - low[i];
+        }
+    }
+
+    /// <summary>
+    /// Computes Mid-Range ((High + Low) / 2).
+    /// </summary>
+    internal static void MidRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            output[i] = (high[i] + low[i]) / 2;
+        }
+    }
+
+    /// <summary>
+    /// Computes OHLC Average ((Open + High + Low + Close) / 4).
+    /// </summary>
+    internal static void OhlcAverage(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+        }
+    }
+
+    /// <summary>
+    /// Computes HLC Average ((High + Low + Close) / 3).
+    /// </summary>
+    internal static void HlcAverage(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            output[i] = (high[i] + low[i] + close[i]) / 3;
+        }
+    }
+
+    #endregion
 }

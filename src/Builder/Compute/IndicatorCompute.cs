@@ -3341,4 +3341,95 @@ internal static partial class IndicatorCompute
     }
 
     #endregion
+
+    #region Additional Oscillators (Batch 1)
+
+    /// <summary>
+    /// Computes Absolute Chande Momentum Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteFast(StockData data, ComputeContext context, int length = 9)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.ChandeMomentumOscillatorAbsolute(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Percent Change using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePercentChangeFast(StockData data, ComputeContext context, int length = 1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PercentChange(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Change using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceChangeFast(StockData data, ComputeContext context)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PriceChange(inputSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Range (High - Low) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRangeFast(StockData data, ComputeContext context)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.Range(high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Mid-Range using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMidRangeFast(StockData data, ComputeContext context)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MidRange(high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes OHLC Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOhlcAverageFast(StockData data, ComputeContext context)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.OhlcAverage(open, high, low, close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes HLC Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHlcAverageFast(StockData data, ComputeContext context)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.HlcAverage(high, low, close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    #endregion
 }

@@ -335,6 +335,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         // Bollinger Bands Extensions (Batch 1)
         "BollingerBandsPercentB",
         "BollingerBandsAverageTrueRange",
+
+        // Additional Oscillators (Batch 1)
+        "ChandeMomentumOscillatorAbsolute",
+        "PriceChange",
+        "Range",
+        "MidRange",
+        "OhlcAverage",
+        "HlcAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -988,6 +996,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             // Bollinger Bands Extensions (Batch 1)
             "BollingerBandsPercentB" => "ComputeBollingerBandsPercentBFast",
             "BollingerBandsAverageTrueRange" => "ComputeBollingerBandsAtrFast",
+
+            // Additional Oscillators (Batch 1)
+            "ChandeMomentumOscillatorAbsolute" => "ComputeChandeMomentumOscillatorAbsoluteFast",
+            "PriceChange" => "ComputePriceChangeFast",
+            "Range" => "ComputeRangeFast",
+            "MidRange" => "ComputeMidRangeFast",
+            "OhlcAverage" => "ComputeOhlcAverageFast",
+            "HlcAverage" => "ComputeHlcAverageFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
