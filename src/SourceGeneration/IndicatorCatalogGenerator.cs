@@ -302,6 +302,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "TrendContinuationFactor",
         "TrendPersistenceRate",
         "InertiaIndicator",
+
+        // Volatility - VolatilityCore (Additional Batch 3)
+        "StandardDeviationChannel",
+        "StandardDeviationVolatility",
+        "AverageTrueRangeChannel",
+        "VolatilityRatio",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -921,6 +927,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "TrendContinuationFactor" => "ComputeTrendContinuationFactorFast",
             "TrendPersistenceRate" => "ComputeTrendPersistenceRateFast",
             "InertiaIndicator" => "ComputeInertiaFast",
+
+            // Volatility (Additional Batch 3)
+            "StandardDeviationChannel" => "ComputeStandardDeviationChannelFast",
+            "StandardDeviationVolatility" => "ComputeStandardDeviationVolatilityFast",
+            "AverageTrueRangeChannel" => "ComputeAverageTrueRangeChannelFast",
+            "VolatilityRatio" => "ComputeVolatilityRatioFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

@@ -1080,4 +1080,231 @@ internal static class VolatilityCore
             pool.Return(adxArray);
         }
     }
+
+    #region Additional Batch 3
+
+    /// <summary>
+    /// Computes Standard Deviation Channel (middle line).
+    /// </summary>
+    internal static void StandardDeviationChannel(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Calculate moving average as middle line
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = close[i];
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += close[j];
+            }
+            output[i] = sum / length;
+        }
+    }
+
+    /// <summary>
+    /// Computes Standard Deviation Volatility (annualized).
+    /// </summary>
+    internal static void StandardDeviationVolatility(ReadOnlySpan<double> close, Span<double> output, int length = 20, int annualizationFactor = 252)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrtAnnualize = Math.Sqrt(annualizationFactor);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate returns
+            var returns = new double[length];
+            for (var j = 0; j < length; j++)
+            {
+                var idx = i - length + 1 + j;
+                returns[j] = idx > 0 && close[idx - 1] != 0 ? (close[idx] - close[idx - 1]) / close[idx - 1] : 0;
+            }
+
+            // Calculate mean
+            double mean = 0;
+            foreach (var r in returns) mean += r;
+            mean /= length;
+
+            // Calculate standard deviation of returns
+            double variance = 0;
+            foreach (var r in returns) variance += (r - mean) * (r - mean);
+            variance /= length;
+
+            output[i] = Math.Sqrt(variance) * sqrtAnnualize * 100;
+        }
+    }
+
+    /// <summary>
+    /// Computes Average True Range Channel (middle line = ATR-based).
+    /// </summary>
+    internal static void AverageTrueRangeChannel(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            AverageTrueRange(high, low, close, atr, length);
+
+            // Calculate EMA of close for middle line
+            var k = 2.0 / (length + 1);
+            output[0] = close[0];
+            for (var i = 1; i < close.Length; i++)
+            {
+                output[i] = close[i] * k + output[i - 1] * (1 - k);
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volatility Ratio.
+    /// </summary>
+    internal static void VolatilityRatio(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Current true range
+            var prevClose = i > 0 ? close[i - 1] : close[0];
+            var tr = Math.Max(high[i] - low[i], Math.Max(Math.Abs(high[i] - prevClose), Math.Abs(low[i] - prevClose)));
+
+            // Average true range over period
+            double atrSum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var pc = j > 0 ? close[j - 1] : close[0];
+                var trJ = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - pc), Math.Abs(low[j] - pc)));
+                atrSum += trJ;
+            }
+            var avgTr = atrSum / length;
+
+            output[i] = avgTr > 0 ? tr / avgTr : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Relative Volatility Index for High.
+    /// </summary>
+    internal static void RelativeVolatilityIndexHigh(ReadOnlySpan<double> high, Span<double> output, int length = 14, int stdDevLength = 10)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        OscillatorCore.RelativeVolatilityIndex(high, output, length, stdDevLength);
+    }
+
+    /// <summary>
+    /// Computes Relative Volatility Index for Low.
+    /// </summary>
+    internal static void RelativeVolatilityIndexLow(ReadOnlySpan<double> low, Span<double> output, int length = 14, int stdDevLength = 10)
+    {
+        if (output.Length < low.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        OscillatorCore.RelativeVolatilityIndex(low, output, length, stdDevLength);
+    }
+
+    /// <summary>
+    /// Computes Volatility Stop.
+    /// </summary>
+    internal static void VolatilityStop(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            AverageTrueRange(high, low, close, atr, length);
+
+            var trend = 1; // 1 = up, -1 = down
+            output[0] = close[0];
+
+            for (var i = 1; i < close.Length; i++)
+            {
+                var atrValue = atr[i] * multiplier;
+
+                if (trend == 1)
+                {
+                    var stop = Math.Max(output[i - 1], close[i] - atrValue);
+                    if (close[i] < output[i - 1])
+                    {
+                        trend = -1;
+                        output[i] = close[i] + atrValue;
+                    }
+                    else
+                    {
+                        output[i] = stop;
+                    }
+                }
+                else
+                {
+                    var stop = Math.Min(output[i - 1], close[i] + atrValue);
+                    if (close[i] > output[i - 1])
+                    {
+                        trend = 1;
+                        output[i] = close[i] - atrValue;
+                    }
+                    else
+                    {
+                        output[i] = stop;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    #endregion
 }
