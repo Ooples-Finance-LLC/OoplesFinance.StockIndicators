@@ -389,6 +389,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "PercentChangeOscillator",
         "PriceCycleOscillator",
         "PriceVolumeOscillator",
+
+        // Additional Oscillators (Batch 8)
+        "ProjectionOscillator",
+        "RainbowOscillator",
+        "RegressionOscillator",
+        "RexOscillator",
+        "SentimentZoneOscillator",
+        "WaveTrendOscillator",
+        "WamiOscillator",
+        "VolumeAccumulationOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1096,6 +1106,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "PercentChangeOscillator" => "ComputePercentChangeOscillatorFast",
             "PriceCycleOscillator" => "ComputePriceCycleOscillatorFast",
             "PriceVolumeOscillator" => "ComputePriceVolumeOscillatorFast",
+
+            // Additional Oscillators (Batch 8)
+            "ProjectionOscillator" => "ComputeProjectionOscillatorFast",
+            "RainbowOscillator" => "ComputeRainbowOscillatorFast",
+            "RegressionOscillator" => "ComputeRegressionOscillatorFast",
+            "RexOscillator" => "ComputeRexOscillatorFast",
+            "SentimentZoneOscillator" => "ComputeSentimentZoneOscillatorFast",
+            "WaveTrendOscillator" => "ComputeWaveTrendOscillatorFast",
+            "WamiOscillator" => "ComputeWamiOscillatorFast",
+            "VolumeAccumulationOscillator" => "ComputeVolumeAccumulationOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

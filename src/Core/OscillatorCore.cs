@@ -5994,5 +5994,375 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators - Batch 8
+
+    /// <summary>
+    /// Computes Projection Oscillator.
+    /// </summary>
+    internal static void ProjectionOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 50;
+                continue;
+            }
+
+            var hh = high[i];
+            var ll = low[i];
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (high[j] > hh) hh = high[j];
+                if (low[j] < ll) ll = low[j];
+            }
+
+            var range = hh - ll;
+            output[i] = range != 0 ? ((close[i] - ll) / range) * 100 : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes Rainbow Oscillator (based on Rainbow Moving Averages).
+    /// </summary>
+    internal static void RainbowOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var sma1Array = pool.Rent(input.Length);
+        var sma2Array = pool.Rent(input.Length);
+        var sma3Array = pool.Rent(input.Length);
+
+        try
+        {
+            var sma1 = sma1Array.AsSpan(0, input.Length);
+            var sma2 = sma2Array.AsSpan(0, input.Length);
+            var sma3 = sma3Array.AsSpan(0, input.Length);
+
+            // Calculate nested SMAs
+            MovingAverageCore.SimpleMovingAverage(input, sma1, length);
+            MovingAverageCore.SimpleMovingAverage(sma1, sma2, length);
+            MovingAverageCore.SimpleMovingAverage(sma2, sma3, length);
+
+            // Oscillator = SMA1 - SMA3 (difference between fast and slow rainbow bands)
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = sma1[i] - sma3[i];
+            }
+        }
+        finally
+        {
+            pool.Return(sma1Array);
+            pool.Return(sma2Array);
+            pool.Return(sma3Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Regression Oscillator.
+    /// </summary>
+    internal static void RegressionOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var lrArray = pool.Rent(input.Length);
+
+        try
+        {
+            var lr = lrArray.AsSpan(0, input.Length);
+
+            // Calculate linear regression
+            TrendCore.LinearRegressionSlope(input, lr, length);
+
+            // Apply smoothing
+            MovingAverageCore.SimpleMovingAverage(lr, output, length / 2 > 0 ? length / 2 : 1);
+        }
+        finally
+        {
+            pool.Return(lrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Rex Oscillator.
+    /// </summary>
+    internal static void RexOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var tvbArray = pool.Rent(close.Length);
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var tvb = tvbArray.AsSpan(0, close.Length);
+            var ema = emaArray.AsSpan(0, close.Length);
+
+            // Calculate True Value Bar (TVB)
+            for (var i = 0; i < close.Length; i++)
+            {
+                tvb[i] = (3 * close[i]) - (high[i] + low[i] + open[i]);
+            }
+
+            // Apply EMA
+            MovingAverageCore.ExponentialMovingAverage(tvb, ema, length);
+
+            // Output is the TVB EMA
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = ema[i];
+            }
+        }
+        finally
+        {
+            pool.Return(tvbArray);
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Sentiment Zone Oscillator.
+    /// </summary>
+    internal static void SentimentZoneOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var signedVolumeArray = pool.Rent(close.Length);
+        var svoSmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var signedVolume = signedVolumeArray.AsSpan(0, close.Length);
+            var svoSma = svoSmaArray.AsSpan(0, close.Length);
+
+            // Calculate signed volume
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i == 0)
+                {
+                    signedVolume[i] = 0;
+                }
+                else
+                {
+                    var change = close[i] - close[i - 1];
+                    signedVolume[i] = change > 0 ? volume[i] : (change < 0 ? -volume[i] : 0);
+                }
+            }
+
+            // Calculate SMA of signed volume
+            MovingAverageCore.SimpleMovingAverage(signedVolume, svoSma, length);
+
+            // Normalize to -100 to 100
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
+                var totalVolume = 0.0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    totalVolume += volume[j];
+                }
+
+                output[i] = totalVolume != 0 ? (svoSma[i] / (totalVolume / length)) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(signedVolumeArray);
+            pool.Return(svoSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Wave Trend Oscillator.
+    /// </summary>
+    internal static void WaveTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int channelLength = 10, int avgLength = 21)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hlc3Array = pool.Rent(close.Length);
+        var emaHlc3Array = pool.Rent(close.Length);
+        var absDevArray = pool.Rent(close.Length);
+        var emaDevArray = pool.Rent(close.Length);
+        var ciArray = pool.Rent(close.Length);
+        var tciArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hlc3 = hlc3Array.AsSpan(0, close.Length);
+            var emaHlc3 = emaHlc3Array.AsSpan(0, close.Length);
+            var absDev = absDevArray.AsSpan(0, close.Length);
+            var emaDev = emaDevArray.AsSpan(0, close.Length);
+            var ci = ciArray.AsSpan(0, close.Length);
+            var tci = tciArray.AsSpan(0, close.Length);
+
+            // Calculate HLC/3
+            for (var i = 0; i < close.Length; i++)
+            {
+                hlc3[i] = (high[i] + low[i] + close[i]) / 3;
+            }
+
+            // Calculate EMA of HLC/3
+            MovingAverageCore.ExponentialMovingAverage(hlc3, emaHlc3, channelLength);
+
+            // Calculate absolute deviation
+            for (var i = 0; i < close.Length; i++)
+            {
+                absDev[i] = Math.Abs(hlc3[i] - emaHlc3[i]);
+            }
+
+            // Calculate EMA of deviation
+            MovingAverageCore.ExponentialMovingAverage(absDev, emaDev, channelLength);
+
+            // Calculate CI
+            for (var i = 0; i < close.Length; i++)
+            {
+                var d = emaDev[i] * 0.015;
+                ci[i] = d != 0 ? (hlc3[i] - emaHlc3[i]) / d : 0;
+            }
+
+            // Calculate TCI (Wave Trend)
+            MovingAverageCore.ExponentialMovingAverage(ci, tci, avgLength);
+
+            // Output
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = tci[i];
+            }
+        }
+        finally
+        {
+            pool.Return(hlc3Array);
+            pool.Return(emaHlc3Array);
+            pool.Return(absDevArray);
+            pool.Return(emaDevArray);
+            pool.Return(ciArray);
+            pool.Return(tciArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes WAMI Oscillator (Williams Accumulation Mark Index).
+    /// </summary>
+    internal static void WamiOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 13)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var adArray = pool.Rent(close.Length);
+        var emaAdArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ad = adArray.AsSpan(0, close.Length);
+            var emaAd = emaAdArray.AsSpan(0, close.Length);
+
+            // Calculate Williams %AD
+            for (var i = 0; i < close.Length; i++)
+            {
+                var trueHigh = i > 0 ? Math.Max(high[i], close[i - 1]) : high[i];
+                var trueLow = i > 0 ? Math.Min(low[i], close[i - 1]) : low[i];
+                var range = trueHigh - trueLow;
+
+                ad[i] = range != 0 ? (close[i] - trueLow) - (trueHigh - close[i]) : 0;
+            }
+
+            // Apply EMA
+            MovingAverageCore.ExponentialMovingAverage(ad, emaAd, length);
+
+            // Output
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = emaAd[i];
+            }
+        }
+        finally
+        {
+            pool.Return(adArray);
+            pool.Return(emaAdArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Accumulation Oscillator.
+    /// </summary>
+    internal static void VolumeAccumulationOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var vaArray = pool.Rent(close.Length);
+        var shortEmaArray = pool.Rent(close.Length);
+        var longEmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var va = vaArray.AsSpan(0, close.Length);
+            var shortEma = shortEmaArray.AsSpan(0, close.Length);
+            var longEma = longEmaArray.AsSpan(0, close.Length);
+
+            // Calculate volume accumulation
+            for (var i = 0; i < close.Length; i++)
+            {
+                var hl = high[i] - low[i];
+                var clv = hl != 0 ? ((close[i] - low[i]) - (high[i] - close[i])) / hl : 0;
+                va[i] = clv * volume[i];
+            }
+
+            // Calculate EMAs
+            MovingAverageCore.ExponentialMovingAverage(va, shortEma, shortLength);
+            MovingAverageCore.ExponentialMovingAverage(va, longEma, longLength);
+
+            // Oscillator = short - long
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = shortEma[i] - longEma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(vaArray);
+            pool.Return(shortEmaArray);
+            pool.Return(longEmaArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }
