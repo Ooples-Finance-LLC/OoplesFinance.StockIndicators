@@ -191,6 +191,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "AveragePrice",
         "Midpoint",
         "Midprice",
+        "PivotPointAverage",
 
         // Volume - VolumeCore (Additional Batch 2)
         "TradeVolumeIndex",
@@ -831,6 +832,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "AveragePrice" => "ComputeAveragePriceFast",
             "Midpoint" => "ComputeMidpointFast",
             "Midprice" => "ComputeMidpriceFast",
+            "PivotPointAverage" => "ComputePivotPointFast",
 
             // Volume (Additional Batch 2)
             "TradeVolumeIndex" => "ComputeTradeVolumeIndexFast",
