@@ -338,11 +338,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
         // Additional Oscillators (Batch 1)
         "ChandeMomentumOscillatorAbsolute",
-        "PriceChange",
-        "Range",
-        "MidRange",
-        "OhlcAverage",
-        "HlcAverage",
+
+        // Additional Oscillators (Batch 2) - Statistical/Returns
+        "DoubleSmoothedMomenta",
+        "HighLowIndex",
+        "MarketFacilitationIndex",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -999,11 +999,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
             // Additional Oscillators (Batch 1)
             "ChandeMomentumOscillatorAbsolute" => "ComputeChandeMomentumOscillatorAbsoluteFast",
-            "PriceChange" => "ComputePriceChangeFast",
-            "Range" => "ComputeRangeFast",
-            "MidRange" => "ComputeMidRangeFast",
-            "OhlcAverage" => "ComputeOhlcAverageFast",
-            "HlcAverage" => "ComputeHlcAverageFast",
+
+            // Additional Oscillators (Batch 2) - Statistical/Returns
+            "DoubleSmoothedMomenta" => "ComputeDoubleSmoothedMomentaFast",
+            "HighLowIndex" => "ComputeHighLowIndexFast",
+            "MarketFacilitationIndex" => "ComputeMarketFacilitationIndexFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

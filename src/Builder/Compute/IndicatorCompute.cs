@@ -3431,5 +3431,154 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Double Smoothed Momenta using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDoubleSmoothedMomentaFast(StockData data, ComputeContext context, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.DoubleSmoothedMomenta(inputSpan, buffer.WritableSpan, momentumLength, firstSmooth, secondSmooth);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes High-Low Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHighLowIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.HighLowIndex(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Market Facilitation Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMarketFacilitationIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // Length parameter is unused - MFI doesn't require a period
+        _ = length;
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MarketFacilitationIndex(high, low, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Trend Score using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrendScoreFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.TrendScore(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rolling Median using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMedianValueFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.MedianValue(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Log Returns using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLogReturnsFast(StockData data, ComputeContext context, int length = 1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.LogReturns(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Simple Returns using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimpleReturnsFast(StockData data, ComputeContext context, int length = 1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.SimpleReturns(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Cumulative Sum using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCumulativeSumFast(StockData data, ComputeContext context)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.CumulativeSum(inputSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rolling Maximum using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRollingMaxFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RollingMax(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rolling Minimum using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRollingMinFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RollingMin(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Position using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePricePositionFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.PricePosition(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes ATR Percent using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrPercentFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.AtrPercent(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
     #endregion
 }

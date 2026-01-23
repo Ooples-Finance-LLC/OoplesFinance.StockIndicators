@@ -3996,5 +3996,333 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Double Smoothed Momenta (EMA of EMA of momentum).
+    /// </summary>
+    internal static void DoubleSmoothedMomenta(ReadOnlySpan<double> input, Span<double> output, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // First compute momentum (price difference over period)
+        var pool = ArrayPool<double>.Shared;
+        var momentumArray = pool.Rent(input.Length);
+        var firstEmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var momentum = momentumArray.AsSpan(0, input.Length);
+
+            // Momentum = current - previous (by momentumLength)
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < momentumLength)
+                {
+                    momentum[i] = 0;
+                }
+                else
+                {
+                    momentum[i] = input[i] - input[i - momentumLength];
+                }
+            }
+
+            // First EMA of momentum
+            var firstEma = firstEmaArray.AsSpan(0, input.Length);
+            MovingAverageCore.ExponentialMovingAverage(momentum, firstEma, firstSmooth);
+
+            // Second EMA (double smoothing)
+            MovingAverageCore.ExponentialMovingAverage(firstEma, output, secondSmooth);
+        }
+        finally
+        {
+            pool.Return(momentumArray);
+            pool.Return(firstEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes High-Low Index (ratio of new highs vs new lows over period).
+    /// </summary>
+    internal static void HighLowIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 50; // neutral
+                continue;
+            }
+
+            var newHighs = 0;
+            var newLows = 0;
+
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var prevHigh = j > 0 ? high[j - 1] : high[0];
+                var prevLow = j > 0 ? low[j - 1] : low[0];
+
+                if (high[j] > prevHigh) newHighs++;
+                if (low[j] < prevLow) newLows++;
+            }
+
+            var total = newHighs + newLows;
+            output[i] = total != 0 ? (double)newHighs / total * 100 : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes Market Facilitation Index ((High - Low) / Volume).
+    /// </summary>
+    internal static void MarketFacilitationIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            output[i] = volume[i] != 0 ? (high[i] - low[i]) / volume[i] : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Trend Score (direction consistency over period).
+    /// </summary>
+    internal static void TrendScore(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var score = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (input[j] > input[j - 1])
+                    score++;
+                else if (input[j] < input[j - 1])
+                    score--;
+            }
+
+            output[i] = score;
+        }
+    }
+
+    /// <summary>
+    /// Computes Rolling Median value over a period.
+    /// </summary>
+    internal static void MedianValue(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var window = new double[length];
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            // Copy window values
+            for (var j = 0; j < length; j++)
+            {
+                window[j] = input[i - length + 1 + j];
+            }
+
+            // Sort and get median
+            Array.Sort(window);
+            output[i] = length % 2 == 0
+                ? (window[length / 2 - 1] + window[length / 2]) / 2
+                : window[length / 2];
+        }
+    }
+
+    /// <summary>
+    /// Computes Log Returns (ln(current/previous)).
+    /// </summary>
+    internal static void LogReturns(ReadOnlySpan<double> input, Span<double> output, int length = 1)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length || input[i - length] <= 0 || input[i] <= 0)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                output[i] = Math.Log(input[i] / input[i - length]);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Simple Returns ((current - previous) / previous).
+    /// </summary>
+    internal static void SimpleReturns(ReadOnlySpan<double> input, Span<double> output, int length = 1)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length || input[i - length] == 0)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                output[i] = (input[i] - input[i - length]) / input[i - length];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Cumulative Sum of values.
+    /// </summary>
+    internal static void CumulativeSum(ReadOnlySpan<double> input, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double sum = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            sum += input[i];
+            output[i] = sum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Rolling Maximum value over a period.
+    /// </summary>
+    internal static void RollingMax(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var startIdx = Math.Max(0, i - length + 1);
+            var max = input[startIdx];
+            for (var j = startIdx + 1; j <= i; j++)
+            {
+                if (input[j] > max) max = input[j];
+            }
+            output[i] = max;
+        }
+    }
+
+    /// <summary>
+    /// Computes Rolling Minimum value over a period.
+    /// </summary>
+    internal static void RollingMin(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var startIdx = Math.Max(0, i - length + 1);
+            var min = input[startIdx];
+            for (var j = startIdx + 1; j <= i; j++)
+            {
+                if (input[j] < min) min = input[j];
+            }
+            output[i] = min;
+        }
+    }
+
+    /// <summary>
+    /// Computes Price Position within range ((close - low) / (high - low) * 100).
+    /// </summary>
+    internal static void PricePosition(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var startIdx = Math.Max(0, i - length + 1);
+            var highestHigh = high[startIdx];
+            var lowestLow = low[startIdx];
+
+            for (var j = startIdx + 1; j <= i; j++)
+            {
+                if (high[j] > highestHigh) highestHigh = high[j];
+                if (low[j] < lowestLow) lowestLow = low[j];
+            }
+
+            var range = highestHigh - lowestLow;
+            output[i] = range != 0 ? (close[i] - lowestLow) / range * 100 : 50;
+        }
+    }
+
+    /// <summary>
+    /// Computes Average True Range Percent (ATR / Close * 100).
+    /// </summary>
+    internal static void AtrPercent(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // First compute ATR
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            // ATR Percent = ATR / Close * 100
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] != 0 ? atr[i] / close[i] * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
     #endregion
 }
