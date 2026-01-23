@@ -6364,5 +6364,406 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators (Batch 9)
+
+    /// <summary>
+    /// Computes Kase Peak Oscillator V1 using true range and trend momentum.
+    /// </summary>
+    internal static void KasePeakOscillatorV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 30)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var trueRangeArray = pool.Rent(close.Length);
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var trueRange = trueRangeArray.AsSpan(0, close.Length);
+            var atr = atrArray.AsSpan(0, close.Length);
+
+            // Calculate True Range
+            VolatilityCore.TrueRange(high, low, close, trueRange);
+            MovingAverageCore.SimpleMovingAverage(trueRange, atr, length);
+
+            // Calculate oscillator based on trend strength
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length || atr[i] == 0)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    var momentum = close[i] - close[i - length];
+                    output[i] = momentum / (atr[i] * Math.Sqrt(length));
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(trueRangeArray);
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Varadi Oscillator using percentage changes.
+    /// </summary>
+    internal static void VaradiOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var pctChangeArray = pool.Rent(close.Length);
+        var absChangeArray = pool.Rent(close.Length);
+        var sumPctArray = pool.Rent(close.Length);
+        var sumAbsArray = pool.Rent(close.Length);
+
+        try
+        {
+            var pctChange = pctChangeArray.AsSpan(0, close.Length);
+            var absChange = absChangeArray.AsSpan(0, close.Length);
+            var sumPct = sumPctArray.AsSpan(0, close.Length);
+            var sumAbs = sumAbsArray.AsSpan(0, close.Length);
+
+            // Calculate percentage changes
+            pctChange[0] = 0;
+            absChange[0] = 0;
+            for (var i = 1; i < close.Length; i++)
+            {
+                if (close[i - 1] != 0)
+                {
+                    pctChange[i] = (close[i] - close[i - 1]) / close[i - 1];
+                    absChange[i] = Math.Abs(pctChange[i]);
+                }
+            }
+
+            // Calculate rolling sums
+            MovingAverageCore.SimpleMovingAverage(pctChange, sumPct, length);
+            MovingAverageCore.SimpleMovingAverage(absChange, sumAbs, length);
+
+            // Calculate oscillator
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (sumAbs[i] != 0)
+                {
+                    output[i] = (sumPct[i] * length) / (sumAbs[i] * length);
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(pctChangeArray);
+            pool.Return(absChangeArray);
+            pool.Return(sumPctArray);
+            pool.Return(sumAbsArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Prime Number Oscillator using nearest prime detection.
+    /// </summary>
+    internal static void PrimeNumberOscillator(ReadOnlySpan<double> close, Span<double> output, int tolerance = 5)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        static bool IsPrime(int n)
+        {
+            if (n < 2) return false;
+            if (n == 2) return true;
+            if (n % 2 == 0) return false;
+            for (var i = 3; i <= Math.Sqrt(n); i += 2)
+            {
+                if (n % i == 0) return false;
+            }
+            return true;
+        }
+
+        static int NearestPrime(int n)
+        {
+            if (IsPrime(n)) return n;
+            var lower = n - 1;
+            var upper = n + 1;
+            while (!IsPrime(lower) && !IsPrime(upper))
+            {
+                lower--;
+                upper++;
+            }
+            return IsPrime(lower) ? lower : upper;
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var priceInt = (int)Math.Round(close[i] * 100);
+            var nearestPrime = NearestPrime(priceInt);
+            output[i] = priceInt - nearestPrime;
+        }
+    }
+
+    /// <summary>
+    /// Computes Trigonometric Oscillator using sine/cosine transformations.
+    /// </summary>
+    internal static void TrigonometricOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                // Calculate highest and lowest in period
+                var highest = close[i];
+                var lowest = close[i];
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (close[j] > highest) highest = close[j];
+                    if (close[j] < lowest) lowest = close[j];
+                }
+
+                var range = highest - lowest;
+                if (range != 0)
+                {
+                    var normalizedPrice = (close[i] - lowest) / range;
+                    var angle = normalizedPrice * Math.PI;
+                    output[i] = Math.Sin(angle) * 100;
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Ultimate Trader Oscillator combining multiple momentum measures.
+    /// </summary>
+    internal static void UltimateTraderOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int shortLength = 5, int mediumLength = 10, int longLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiShortArray = pool.Rent(close.Length);
+        var rsiMediumArray = pool.Rent(close.Length);
+        var rsiLongArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rsiShort = rsiShortArray.AsSpan(0, close.Length);
+            var rsiMedium = rsiMediumArray.AsSpan(0, close.Length);
+            var rsiLong = rsiLongArray.AsSpan(0, close.Length);
+
+            // Calculate RSI at different timeframes
+            RelativeStrengthIndex(close, rsiShort, shortLength);
+            RelativeStrengthIndex(close, rsiMedium, mediumLength);
+            RelativeStrengthIndex(close, rsiLong, longLength);
+
+            // Weighted average (4-2-1 weighting)
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = (rsiShort[i] * 4 + rsiMedium[i] * 2 + rsiLong[i]) / 7.0;
+            }
+        }
+        finally
+        {
+            pool.Return(rsiShortArray);
+            pool.Return(rsiMediumArray);
+            pool.Return(rsiLongArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Smoothed Delta Ratio Oscillator using delta ratios.
+    /// </summary>
+    internal static void SmoothedDeltaRatioOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var deltaRatioArray = pool.Rent(close.Length);
+        var smoothedArray = pool.Rent(close.Length);
+
+        try
+        {
+            var deltaRatio = deltaRatioArray.AsSpan(0, close.Length);
+            var smoothed = smoothedArray.AsSpan(0, close.Length);
+
+            // Calculate delta ratio
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    deltaRatio[i] = 0;
+                }
+                else
+                {
+                    var upSum = 0.0;
+                    var downSum = 0.0;
+                    for (var j = i - length + 1; j <= i; j++)
+                    {
+                        var delta = close[j] - close[j - 1];
+                        if (delta > 0) upSum += delta;
+                        else downSum += Math.Abs(delta);
+                    }
+
+                    if (upSum + downSum != 0)
+                    {
+                        deltaRatio[i] = (upSum - downSum) / (upSum + downSum) * 100;
+                    }
+                    else
+                    {
+                        deltaRatio[i] = 0;
+                    }
+                }
+            }
+
+            // Smooth the result
+            MovingAverageCore.SimpleMovingAverage(deltaRatio, smoothed, smoothLength);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = smoothed[i];
+            }
+        }
+        finally
+        {
+            pool.Return(deltaRatioArray);
+            pool.Return(smoothedArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Fast Slow Degree Oscillator using angular transformations.
+    /// </summary>
+    internal static void FastSlowDegreeOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 5, int slowLength = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastMaArray = pool.Rent(close.Length);
+        var slowMaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastMa = fastMaArray.AsSpan(0, close.Length);
+            var slowMa = slowMaArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.SimpleMovingAverage(close, fastMa, fastLength);
+            MovingAverageCore.SimpleMovingAverage(close, slowMa, slowLength);
+
+            // Calculate angular degree between fast and slow
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (slowMa[i] != 0)
+                {
+                    var ratio = (fastMa[i] - slowMa[i]) / slowMa[i];
+                    output[i] = Math.Atan(ratio * 100) * (180.0 / Math.PI);
+                }
+                else
+                {
+                    output[i] = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(fastMaArray);
+            pool.Return(slowMaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Robust Weighting Oscillator using outlier-resistant statistics.
+    /// </summary>
+    internal static void RobustWeightingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var windowArray = pool.Rent(length);
+
+        try
+        {
+            var window = windowArray.AsSpan(0, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                }
+                else
+                {
+                    // Copy window
+                    for (var j = 0; j < length; j++)
+                    {
+                        window[j] = close[i - length + 1 + j];
+                    }
+
+                    // Sort for median
+                    var sortedWindow = window.ToArray();
+                    Array.Sort(sortedWindow);
+                    var median = sortedWindow[length / 2];
+
+                    // Calculate MAD (Median Absolute Deviation)
+                    var mad = 0.0;
+                    for (var j = 0; j < length; j++)
+                    {
+                        mad += Math.Abs(window[j] - median);
+                    }
+                    mad /= length;
+
+                    if (mad != 0)
+                    {
+                        output[i] = (close[i] - median) / (mad * 1.4826); // 1.4826 is the consistency constant
+                    }
+                    else
+                    {
+                        output[i] = 0;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(windowArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

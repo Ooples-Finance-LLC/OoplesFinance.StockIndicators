@@ -399,6 +399,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "WaveTrendOscillator",
         "WamiOscillator",
         "VolumeAccumulationOscillator",
+
+        // Additional Oscillators (Batch 9)
+        "KasePeakOscillatorV1",
+        "VaradiOscillator",
+        "PrimeNumberOscillator",
+        "TrigonometricOscillator",
+        "UltimateTraderOscillator",
+        "SmoothedDeltaRatioOscillator",
+        "FastSlowDegreeOscillator",
+        "RobustWeightingOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1116,6 +1126,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "WaveTrendOscillator" => "ComputeWaveTrendOscillatorFast",
             "WamiOscillator" => "ComputeWamiOscillatorFast",
             "VolumeAccumulationOscillator" => "ComputeVolumeAccumulationOscillatorFast",
+
+            // Additional Oscillators (Batch 9)
+            "KasePeakOscillatorV1" => "ComputeKasePeakOscillatorV1Fast",
+            "VaradiOscillator" => "ComputeVaradiOscillatorFast",
+            "PrimeNumberOscillator" => "ComputePrimeNumberOscillatorFast",
+            "TrigonometricOscillator" => "ComputeTrigonometricOscillatorFast",
+            "UltimateTraderOscillator" => "ComputeUltimateTraderOscillatorFast",
+            "SmoothedDeltaRatioOscillator" => "ComputeSmoothedDeltaRatioOscillatorFast",
+            "FastSlowDegreeOscillator" => "ComputeFastSlowDegreeOscillatorFast",
+            "RobustWeightingOscillator" => "ComputeRobustWeightingOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
