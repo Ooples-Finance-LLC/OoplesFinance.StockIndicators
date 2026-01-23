@@ -1523,4 +1523,278 @@ internal static class MovingAverageCore
             output[i] = sum / weightSum;
         }
     }
+
+    #region Batch 14 - Additional Moving Averages
+
+    /// <summary>
+    /// Computes Ultimate Moving Average (T3 of T3).
+    /// </summary>
+    internal static void UltimateMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double vFactor = 0.7)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var t3Array = pool.Rent(input.Length);
+        var t3ofT3Array = pool.Rent(input.Length);
+
+        try
+        {
+            var t3 = t3Array.AsSpan(0, input.Length);
+            var t3ofT3 = t3ofT3Array.AsSpan(0, input.Length);
+
+            T3MovingAverage(input, t3, length, vFactor);
+            T3MovingAverage(t3, t3ofT3, length, vFactor);
+
+            t3ofT3.CopyTo(output);
+        }
+        finally
+        {
+            pool.Return(t3Array);
+            pool.Return(t3ofT3Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Symmetrically Weighted Moving Average.
+    /// Weights are symmetric around the center.
+    /// </summary>
+    internal static void SymmetricallyWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Calculate symmetric triangular weights
+        var halfLen = (length + 1) / 2;
+        double weightSum = 0;
+        for (var w = 1; w <= halfLen; w++)
+        {
+            weightSum += w * (w <= length - w + 1 ? 2 : 1);
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var pos = j + 1;
+                var weight = pos <= halfLen ? pos : length - pos + 1;
+                sum += input[i - length + 1 + j] * weight;
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Square Root Weighted Moving Average.
+    /// Weights are square root of position.
+    /// </summary>
+    internal static void SquareRootWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-calculate weight sum
+        double weightSum = 0;
+        for (var w = 1; w <= length; w++)
+        {
+            weightSum += Math.Sqrt(w);
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var weight = Math.Sqrt(j + 1);
+                sum += input[i - length + 1 + j] * weight;
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Spencer 15-Point Moving Average.
+    /// Classic Henderson-type filter for smooth trends.
+    /// </summary>
+    internal static void Spencer15PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Spencer 15-point weights (symmetric)
+        var weights = new double[] { -3, -6, -5, 3, 21, 46, 67, 74, 67, 46, 21, 3, -5, -6, -3 };
+        double weightSum = 320; // Sum of absolute weights
+
+        var halfLen = 7; // (15 - 1) / 2
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < halfLen || i >= input.Length - halfLen)
+            {
+                output[i] = input[i]; // Use input for edges
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < 15; j++)
+            {
+                sum += input[i - halfLen + j] * weights[j];
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Spencer 21-Point Moving Average.
+    /// Extended Henderson-type filter for smoother trends.
+    /// </summary>
+    internal static void Spencer21PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 21)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Spencer 21-point weights (symmetric)
+        var weights = new double[] { -1, -3, -5, -5, -2, 6, 18, 33, 47, 57, 60, 57, 47, 33, 18, 6, -2, -5, -5, -3, -1 };
+        double weightSum = 350; // Sum of weights
+
+        var halfLen = 10; // (21 - 1) / 2
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < halfLen || i >= input.Length - halfLen)
+            {
+                output[i] = input[i]; // Use input for edges
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = 0; j < 21; j++)
+            {
+                sum += input[i - halfLen + j] * weights[j];
+            }
+            output[i] = sum / weightSum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Slow Smoothed Moving Average.
+    /// SMA of SMA for extra smoothness.
+    /// </summary>
+    internal static void SlowSmoothedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var sma1Array = pool.Rent(input.Length);
+        var sma2Array = pool.Rent(input.Length);
+
+        try
+        {
+            var sma1 = sma1Array.AsSpan(0, input.Length);
+            var sma2 = sma2Array.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma1, length);
+            SimpleMovingAverage(sma1, sma2, length);
+
+            sma2.CopyTo(output);
+        }
+        finally
+        {
+            pool.Return(sma1Array);
+            pool.Return(sma2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Repulsion Moving Average.
+    /// Combines multiple EMAs with repulsion weighting.
+    /// </summary>
+    internal static void RepulsionMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1Array = pool.Rent(input.Length);
+        var ema2Array = pool.Rent(input.Length);
+        var ema3Array = pool.Rent(input.Length);
+
+        try
+        {
+            var ema1 = ema1Array.AsSpan(0, input.Length);
+            var ema2 = ema2Array.AsSpan(0, input.Length);
+            var ema3 = ema3Array.AsSpan(0, input.Length);
+
+            var len1 = Math.Max(1, length / 2);
+            var len2 = length;
+            var len3 = length * 2;
+
+            ExponentialMovingAverage(input, ema1, len1);
+            ExponentialMovingAverage(input, ema2, len2);
+            ExponentialMovingAverage(input, ema3, len3);
+
+            // Repulsion = 3 * EMA1 - 2 * EMA2 + EMA3 / 2
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = 3 * ema1[i] - 2 * ema2[i] + ema3[i] / 2;
+            }
+        }
+        finally
+        {
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
+            pool.Return(ema3Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Quick Moving Average.
+    /// Fast response moving average using weighted decay.
+    /// </summary>
+    internal static void QuickMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Quick MA = current close + decay * (previous QMA - current close)
+        var decay = 1.0 - (2.0 / (length + 1));
+
+        output[0] = input[0];
+        for (var i = 1; i < input.Length; i++)
+        {
+            output[i] = input[i] + decay * (output[i - 1] - input[i]);
+        }
+    }
+
+    #endregion
 }

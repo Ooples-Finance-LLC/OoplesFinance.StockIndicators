@@ -449,6 +449,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "TFSMboPercentagePriceOscillator",
         "TFSVolumeOscillator",
         "MassThrustOscillator",
+
+        // Additional Moving Averages (Batch 14)
+        "UltimateMovingAverage",
+        "SymmetricallyWeightedMovingAverage",
+        "SquareRootWeightedMovingAverage",
+        "Spencer15PointMovingAverage",
+        "Spencer21PointMovingAverage",
+        "SlowSmoothedMovingAverage",
+        "RepulsionMovingAverage",
+        "QuickMovingAverage",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1216,6 +1226,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "TFSMboPercentagePriceOscillator" => "ComputeTFSMboPercentagePriceOscillatorFast",
             "TFSVolumeOscillator" => "ComputeTFSVolumeOscillatorFast",
             "MassThrustOscillator" => "ComputeMassThrustOscillatorFast",
+
+            // Additional Moving Averages (Batch 14)
+            "UltimateMovingAverage" => "ComputeUltimateMovingAverageFast",
+            "SymmetricallyWeightedMovingAverage" => "ComputeSymmetricallyWeightedMovingAverageFast",
+            "SquareRootWeightedMovingAverage" => "ComputeSquareRootWeightedMovingAverageFast",
+            "Spencer15PointMovingAverage" => "ComputeSpencer15PointMovingAverageFast",
+            "Spencer21PointMovingAverage" => "ComputeSpencer21PointMovingAverageFast",
+            "SlowSmoothedMovingAverage" => "ComputeSlowSmoothedMovingAverageFast",
+            "RepulsionMovingAverage" => "ComputeRepulsionMovingAverageFast",
+            "QuickMovingAverage" => "ComputeQuickMovingAverageFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
