@@ -150,7 +150,6 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "VerticalHorizontalFilter",
         "KeltnerChannels",
         "TrendDetection",
-        "PriceChannels",
 
         // Oscillators - OscillatorCore (Additional Batch 3)
         "AbsoluteStrengthIndex",
@@ -331,6 +330,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "PringSpecialK",
         "TillsonT3MovingAverage",
         "ChandeQuickStick",
+        "PriceChannel",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -799,7 +799,6 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "VerticalHorizontalFilter" => "ComputeVhfFast",
             "KeltnerChannels" => "ComputeKeltnerChannelMiddleFast",
             "TrendDetection" => "ComputeTrendDetectionFast",
-            "PriceChannels" => "ComputePriceChannelMiddleFast",
 
             // Oscillators (Additional Batch 3)
             "AbsoluteStrengthIndex" => "ComputeAbsoluteStrengthIndexFast",
@@ -980,6 +979,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "PringSpecialK" => "ComputeSpecialKFast",
             "TillsonT3MovingAverage" => "ComputeT3Fast",
             "ChandeQuickStick" => "ComputeQstickFast",
+            "PriceChannel" => "ComputePriceChannelMiddleFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
