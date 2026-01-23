@@ -48,16 +48,29 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
     // These use span-based Core implementations for zero-allocation compute
     private static readonly HashSet<string> FastPathIndicators = new(StringComparer.OrdinalIgnoreCase)
     {
-        "SimpleMovingAverage",      // MovingAverageCore.SimpleMovingAverage
-        "ExponentialMovingAverage", // MovingAverageCore.ExponentialMovingAverage
-        "WeightedMovingAverage",    // MovingAverageCore.WeightedMovingAverage
-        "RelativeStrengthIndex",    // OscillatorCore.RelativeStrengthIndex
-        "AverageTrueRange",         // VolatilityCore.AverageTrueRange
-        "RateOfChange",             // OscillatorCore.RateOfChange
-        "MomentumOscillator",       // OscillatorCore.Momentum
-        "StandardDeviation",        // VolatilityCore.StandardDeviation
-        "WilliamsR",                // OscillatorCore.WilliamsR
-        "CommodityChannelIndex",    // OscillatorCore.CommodityChannelIndex
+        // Moving Averages - MovingAverageCore
+        "SimpleMovingAverage",
+        "ExponentialMovingAverage",
+        "WeightedMovingAverage",
+        "DoubleExponentialMovingAverage",
+        "TripleExponentialMovingAverage",
+        "HullMovingAverage",
+        "TriangularMovingAverage",
+        "WellesWilderMovingAverage",
+        "LinearRegression",
+        "KaufmanAdaptiveMovingAverage",
+        "ZeroLagExponentialMovingAverage",
+
+        // Oscillators - OscillatorCore
+        "RelativeStrengthIndex",
+        "RateOfChange",
+        "MomentumOscillator",
+        "WilliamsR",
+        "CommodityChannelIndex",
+
+        // Volatility - VolatilityCore
+        "AverageTrueRange",
+        "StandardDeviation",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -423,16 +436,30 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         // Map indicator name to the hand-written fast path method name
         return indicatorName switch
         {
+            // Moving Averages
             "SimpleMovingAverage" => "ComputeSmaFast",
             "ExponentialMovingAverage" => "ComputeEmaFast",
             "WeightedMovingAverage" => "ComputeWmaFast",
+            "DoubleExponentialMovingAverage" => "ComputeDemaFast",
+            "TripleExponentialMovingAverage" => "ComputeTemaFast",
+            "HullMovingAverage" => "ComputeHmaFast",
+            "TriangularMovingAverage" => "ComputeTmaFast",
+            "WellesWilderMovingAverage" => "ComputeWwmaFast",
+            "LinearRegression" => "ComputeLinRegFast",
+            "KaufmanAdaptiveMovingAverage" => "ComputeKamaFast",
+            "ZeroLagExponentialMovingAverage" => "ComputeZlemaFast",
+
+            // Oscillators
             "RelativeStrengthIndex" => "ComputeRsiFast",
-            "AverageTrueRange" => "ComputeAtrFast",
             "RateOfChange" => "ComputeRocFast",
             "MomentumOscillator" => "ComputeMomentumFast",
-            "StandardDeviation" => "ComputeStdDevFast",
             "WilliamsR" => "ComputeWilliamsRFast",
             "CommodityChannelIndex" => "ComputeCciFast",
+
+            // Volatility
+            "AverageTrueRange" => "ComputeAtrFast",
+            "StandardDeviation" => "ComputeStdDevFast",
+
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
     }

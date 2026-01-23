@@ -89,6 +89,126 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Double Exponential Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeDemaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.DoubleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Triple Exponential Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeTemaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TripleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hull Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeHmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HullMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Triangular Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeTmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TriangularMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Welles Wilder Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeWwmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WellesWilderMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Regression using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeLinRegFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LinearRegression(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kaufman Adaptive Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeKamaFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.KaufmanAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Zero-Lag EMA using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeZlemaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ZeroLagEma(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
     #endregion
 
     #region Oscillators
