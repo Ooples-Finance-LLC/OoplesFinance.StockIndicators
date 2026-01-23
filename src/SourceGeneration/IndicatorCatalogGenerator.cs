@@ -245,6 +245,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "IchimokuKijunSen",
         "MassThrust",
 
+        // Trend - TrendCore (Batch 16 - Ichimoku, Fractals, Alligator)
+        "IchimokuSenkouSpanA",
+        "IchimokuSenkouSpanB",
+        "IchimokuChikouSpan",
+        "WilliamsFractalUp",
+        "WilliamsFractalDown",
+        "AlligatorJaw",
+        "AlligatorTeeth",
+        "AlligatorLips",
+
         // Volume - VolumeCore (Additional Batch 3)
         "WilliamsAD",
         "NetVolume",
@@ -1031,6 +1041,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "IchimokuTenkanSen" => "ComputeIchimokuTenkanSenFast",
             "IchimokuKijunSen" => "ComputeIchimokuKijunSenFast",
             "MassThrust" => "ComputeMassThrustFast",
+
+            // Trend (Batch 16 - Ichimoku, Fractals, Alligator)
+            "IchimokuSenkouSpanA" => "ComputeIchimokuSenkouSpanAFast",
+            "IchimokuSenkouSpanB" => "ComputeIchimokuSenkouSpanBFast",
+            "IchimokuChikouSpan" => "ComputeIchimokuChikouSpanFast",
+            "WilliamsFractalUp" => "ComputeWilliamsFractalUpFast",
+            "WilliamsFractalDown" => "ComputeWilliamsFractalDownFast",
+            "AlligatorJaw" => "ComputeAlligatorJawFast",
+            "AlligatorTeeth" => "ComputeAlligatorTeethFast",
+            "AlligatorLips" => "ComputeAlligatorLipsFast",
 
             // Volume (Additional Batch 3)
             "WilliamsAD" => "ComputeWilliamsADFast",

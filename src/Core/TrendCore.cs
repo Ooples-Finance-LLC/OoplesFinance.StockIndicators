@@ -1635,4 +1635,268 @@ internal static class TrendCore
             output[i] = output[i - 1] + k * diff * (1 + Math.Abs(diff) / (Math.Abs(close[i]) + 1e-10));
         }
     }
+
+    #region Batch 16 - Additional Trend Indicators
+
+    /// <summary>
+    /// Computes Ichimoku Senkou Span A (Leading Span A).
+    /// </summary>
+    internal static void IchimokuSenkouSpanA(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int tenkanLength = 9, int kijunLength = 26)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var tenkanArray = pool.Rent(high.Length);
+        var kijunArray = pool.Rent(high.Length);
+
+        try
+        {
+            var tenkan = tenkanArray.AsSpan(0, high.Length);
+            var kijun = kijunArray.AsSpan(0, high.Length);
+
+            IchimokuTenkanSen(high, low, tenkan, tenkanLength);
+            IchimokuKijunSen(high, low, kijun, kijunLength);
+
+            // Senkou Span A = (Tenkan + Kijun) / 2
+            for (var i = 0; i < high.Length; i++)
+            {
+                output[i] = (tenkan[i] + kijun[i]) / 2;
+            }
+        }
+        finally
+        {
+            pool.Return(tenkanArray);
+            pool.Return(kijunArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ichimoku Senkou Span B (Leading Span B).
+    /// </summary>
+    internal static void IchimokuSenkouSpanB(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 52)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var highest = double.MinValue;
+            var lowest = double.MaxValue;
+
+            for (var j = 0; j < length; j++)
+            {
+                var idx = i - j;
+                if (high[idx] > highest) highest = high[idx];
+                if (low[idx] < lowest) lowest = low[idx];
+            }
+
+            output[i] = (highest + lowest) / 2;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ichimoku Chikou Span (Lagging Span).
+    /// Simply the close price (actual lagging is done via displacement).
+    /// </summary>
+    internal static void IchimokuChikouSpan(ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        close.CopyTo(output);
+    }
+
+    /// <summary>
+    /// Computes Aroon Up indicator.
+    /// </summary>
+    internal static void AroonUp(ReadOnlySpan<double> high, Span<double> output, int length = 25)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var highestIdx = 0;
+            var highest = double.MinValue;
+            for (var j = 0; j <= length; j++)
+            {
+                var idx = i - j;
+                if (high[idx] > highest)
+                {
+                    highest = high[idx];
+                    highestIdx = j;
+                }
+            }
+
+            output[i] = ((length - highestIdx) / (double)length) * 100;
+        }
+    }
+
+    /// <summary>
+    /// Computes Aroon Down indicator.
+    /// </summary>
+    internal static void AroonDown(ReadOnlySpan<double> low, Span<double> output, int length = 25)
+    {
+        if (output.Length < low.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < low.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var lowestIdx = 0;
+            var lowest = double.MaxValue;
+            for (var j = 0; j <= length; j++)
+            {
+                var idx = i - j;
+                if (low[idx] < lowest)
+                {
+                    lowest = low[idx];
+                    lowestIdx = j;
+                }
+            }
+
+            output[i] = ((length - lowestIdx) / (double)length) * 100;
+        }
+    }
+
+    /// <summary>
+    /// Computes Williams Fractal Up.
+    /// </summary>
+    internal static void WilliamsFractalUp(ReadOnlySpan<double> high, Span<double> output, int length = 2)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var lookback = length * 2 + 1;
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < lookback - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var midIdx = i - length;
+            var isFractal = true;
+
+            for (var j = 1; j <= length; j++)
+            {
+                if (high[midIdx - j] >= high[midIdx] || high[midIdx + j] >= high[midIdx])
+                {
+                    isFractal = false;
+                    break;
+                }
+            }
+
+            output[i] = isFractal ? high[midIdx] : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Williams Fractal Down.
+    /// </summary>
+    internal static void WilliamsFractalDown(ReadOnlySpan<double> low, Span<double> output, int length = 2)
+    {
+        if (output.Length < low.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var lookback = length * 2 + 1;
+
+        for (var i = 0; i < low.Length; i++)
+        {
+            if (i < lookback - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var midIdx = i - length;
+            var isFractal = true;
+
+            for (var j = 1; j <= length; j++)
+            {
+                if (low[midIdx - j] <= low[midIdx] || low[midIdx + j] <= low[midIdx])
+                {
+                    isFractal = false;
+                    break;
+                }
+            }
+
+            output[i] = isFractal ? low[midIdx] : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Alligator Jaw (Blue line - 13-period SMMA displaced by 8 bars).
+    /// </summary>
+    internal static void AlligatorJaw(ReadOnlySpan<double> close, Span<double> output, int length = 13)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        MovingAverageCore.SmoothedMovingAverage(close, output, length);
+    }
+
+    /// <summary>
+    /// Computes Alligator Teeth (Red line - 8-period SMMA displaced by 5 bars).
+    /// </summary>
+    internal static void AlligatorTeeth(ReadOnlySpan<double> close, Span<double> output, int length = 8)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        MovingAverageCore.SmoothedMovingAverage(close, output, length);
+    }
+
+    /// <summary>
+    /// Computes Alligator Lips (Green line - 5-period SMMA displaced by 3 bars).
+    /// </summary>
+    internal static void AlligatorLips(ReadOnlySpan<double> close, Span<double> output, int length = 5)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        MovingAverageCore.SmoothedMovingAverage(close, output, length);
+    }
+
+    #endregion
 }

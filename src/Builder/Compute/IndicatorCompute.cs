@@ -4807,5 +4807,99 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 16 - Trend Indicators (Ichimoku, Fractals, Alligator)
+
+    /// <summary>
+    /// Computes Ichimoku Senkou Span A using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeIchimokuSenkouSpanAFast(StockData data, ComputeContext context, int length = 26)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.IchimokuSenkouSpanA(high, low, buffer.WritableSpan, 9, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ichimoku Senkou Span B using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeIchimokuSenkouSpanBFast(StockData data, ComputeContext context, int length = 52)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.IchimokuSenkouSpanB(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ichimoku Chikou Span using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeIchimokuChikouSpanFast(StockData data, ComputeContext context, int length = 26)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.IchimokuChikouSpan(close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Fractal Up using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsFractalUpFast(StockData data, ComputeContext context, int length = 2)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.WilliamsFractalUp(high, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Fractal Down using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsFractalDownFast(StockData data, ComputeContext context, int length = 2)
+    {
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.WilliamsFractalDown(low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Alligator Jaw using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAlligatorJawFast(StockData data, ComputeContext context, int length = 13)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AlligatorJaw(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Alligator Teeth using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAlligatorTeethFast(StockData data, ComputeContext context, int length = 8)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AlligatorTeeth(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Alligator Lips using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAlligatorLipsFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.AlligatorLips(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }
