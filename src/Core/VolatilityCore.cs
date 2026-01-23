@@ -789,4 +789,295 @@ internal static class VolatilityCore
             output[i] = Math.Sqrt(sum / length) * sqrtFactor;
         }
     }
+
+    /// <summary>
+    /// Computes Rogers-Satchell Volatility.
+    /// More accurate for trending markets than close-to-close volatility.
+    /// </summary>
+    internal static void RogersSatchellVolatility(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrtFactor = Math.Sqrt(252);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
+                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
+                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
+                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+
+                sum += logHC * logHO + logLC * logLO;
+            }
+
+            output[i] = Math.Sqrt(sum / length) * sqrtFactor;
+        }
+    }
+
+    /// <summary>
+    /// Computes Yang-Zhang Volatility.
+    /// Combines open, high, low, close for robust volatility estimate.
+    /// </summary>
+    internal static void YangZhangVolatility(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrtFactor = Math.Sqrt(252);
+        var k = 0.34 / (1 + (double)(length + 1) / (length - 1));
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Overnight volatility
+            double overnightSum = 0;
+            double overnightMean = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (j > 0 && close[j - 1] != 0)
+                {
+                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    overnightMean += logOC;
+                }
+            }
+            overnightMean /= length;
+
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (j > 0 && close[j - 1] != 0)
+                {
+                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    overnightSum += (logOC - overnightMean) * (logOC - overnightMean);
+                }
+            }
+            var overnightVar = overnightSum / (length - 1);
+
+            // Open-to-close volatility
+            double ocSum = 0;
+            double ocMean = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (open[j] != 0)
+                {
+                    var logCO = Math.Log(close[j] / open[j]);
+                    ocMean += logCO;
+                }
+            }
+            ocMean /= length;
+
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (open[j] != 0)
+                {
+                    var logCO = Math.Log(close[j] / open[j]);
+                    ocSum += (logCO - ocMean) * (logCO - ocMean);
+                }
+            }
+            var openToCloseVar = ocSum / (length - 1);
+
+            // Rogers-Satchell volatility
+            double rsSum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
+                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
+                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
+                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+                rsSum += logHC * logHO + logLC * logLO;
+            }
+            var rsVar = rsSum / length;
+
+            // Yang-Zhang formula
+            var yzVar = overnightVar + k * openToCloseVar + (1 - k) * rsVar;
+            output[i] = Math.Sqrt(yzVar) * sqrtFactor;
+        }
+    }
+
+    /// <summary>
+    /// Computes Calmar Ratio.
+    /// Risk-adjusted return measure.
+    /// </summary>
+    internal static void CalmarRatio(ReadOnlySpan<double> close, Span<double> output, int length = 252)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate annualized return
+            var startPrice = close[i - length + 1];
+            var totalReturn = startPrice > 0 ? (close[i] - startPrice) / startPrice : 0;
+            var annualizedReturn = totalReturn; // Assume length is already 252 trading days
+
+            // Calculate maximum drawdown
+            double maxDrawdown = 0;
+            double peak = close[i - length + 1];
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                peak = Math.Max(peak, close[j]);
+                var drawdown = peak > 0 ? (peak - close[j]) / peak : 0;
+                maxDrawdown = Math.Max(maxDrawdown, drawdown);
+            }
+
+            output[i] = maxDrawdown > 0 ? annualizedReturn / maxDrawdown : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Sortino Ratio component - Downside Deviation.
+    /// </summary>
+    internal static void DownsideDeviation(ReadOnlySpan<double> close, Span<double> output, int length = 20, double targetReturn = 0)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sumSquaredDownside = 0;
+            var count = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var ret = close[j - 1] > 0 ? (close[j] - close[j - 1]) / close[j - 1] : 0;
+                if (ret < targetReturn)
+                {
+                    sumSquaredDownside += (ret - targetReturn) * (ret - targetReturn);
+                    count++;
+                }
+            }
+
+            output[i] = count > 0 ? Math.Sqrt(sumSquaredDownside / count) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Average Day Range.
+    /// Average of high-low range.
+    /// </summary>
+    internal static void AverageDayRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rangeArray = pool.Rent(high.Length);
+
+        try
+        {
+            var range = rangeArray.AsSpan(0, high.Length);
+
+            for (var i = 0; i < high.Length; i++)
+            {
+                range[i] = high[i] - low[i];
+            }
+
+            MovingAverageCore.SimpleMovingAverage(range, output, length);
+        }
+        finally
+        {
+            pool.Return(rangeArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes ATR Channel Width.
+    /// Distance between upper and lower ATR bands.
+    /// </summary>
+    internal static void AtrChannelWidth(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            AverageTrueRange(high, low, close, atr, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = 2 * multiplier * atr[i];
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Commodity Selection Index.
+    /// Measures trending potential of a commodity.
+    /// </summary>
+    internal static void CommoditySelectionIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double pointValue = 1, double margin = 1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+        var adxArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            var adx = adxArray.AsSpan(0, close.Length);
+
+            AverageTrueRange(high, low, close, atr, length);
+            OscillatorCore.AverageDirectionalIndex(high, low, close, adx, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var k = margin > 0 ? 100 * pointValue / Math.Sqrt(margin) : 0;
+                output[i] = k * atr[i] * adx[i] / 100;
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+            pool.Return(adxArray);
+        }
+    }
 }

@@ -3005,4 +3005,84 @@ internal static partial class IndicatorCompute
     }
 
     #endregion
+
+    #region Volatility - Additional Batch 2
+
+    /// <summary>
+    /// Computes Rogers-Satchell Volatility using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRogersSatchellVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.RogersSatchellVolatility(open, high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Yang-Zhang Volatility using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeYangZhangVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.YangZhangVolatility(open, high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Calmar Ratio using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 252)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.CalmarRatio(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Downside Deviation using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDownsideDeviationFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.DownsideDeviation(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes ATR Channel Width using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrChannelWidthFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.AtrChannelWidth(high, low, close, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Commodity Selection Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.CommoditySelectionIndex(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
 }

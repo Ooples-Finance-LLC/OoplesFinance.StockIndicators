@@ -280,6 +280,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "CompoundRatioMovingAverage",
         "ConditionalAccumulator",
         "AhrensMovingAverage",
+
+        // Volatility - VolatilityCore (Additional Batch 2)
+        "RogersSatchellVolatility",
+        "YangZhangVolatility",
+        "CalmarRatio",
+        "DownsideDeviation",
+        "AtrChannelWidth",
+        "CommoditySelectionIndex",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -877,6 +885,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "CompoundRatioMovingAverage" => "ComputeCompoundRatioMovingAverageFast",
             "ConditionalAccumulator" => "ComputeConditionalAccumulatorFast",
             "AhrensMovingAverage" => "ComputeAhrensMovingAverageFast",
+
+            // Volatility (Additional Batch 2)
+            "RogersSatchellVolatility" => "ComputeRogersSatchellVolatilityFast",
+            "YangZhangVolatility" => "ComputeYangZhangVolatilityFast",
+            "CalmarRatio" => "ComputeCalmarRatioFast",
+            "DownsideDeviation" => "ComputeDownsideDeviationFast",
+            "AtrChannelWidth" => "ComputeAtrChannelWidthFast",
+            "CommoditySelectionIndex" => "ComputeCommoditySelectionIndexFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
