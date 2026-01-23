@@ -314,6 +314,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
         // Oscillators - Additional Batch 9
         "ChandeIntradayMomentumIndex",
+
+        // Volume - Additional Batch 5
+        "WilliamsAccumulationDistribution",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -945,6 +948,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
             // Oscillators (Additional Batch 9)
             "ChandeIntradayMomentumIndex" => "ComputeIntradayMomentumIndexFast",
+
+            // Volume (Additional Batch 5)
+            "WilliamsAccumulationDistribution" => "ComputeWilliamsADFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
