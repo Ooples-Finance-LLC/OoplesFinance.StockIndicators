@@ -15,6 +15,12 @@ internal sealed class SeriesEvaluator
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<SeriesHandle, double[]> _cache;
 
+    // Cached base input to avoid repeated ToArray() calls
+    private double[]? _cachedDefaultInput;
+
+    // Reusable HashSet for cycle detection (avoid allocation per Evaluate call)
+    private readonly HashSet<SeriesHandle> _visitingSet = new();
+
     /// <summary>
     /// Creates a new series evaluator with single-symbol data (backwards compatible).
     /// </summary>
@@ -42,7 +48,8 @@ internal sealed class SeriesEvaluator
         var result = new Dictionary<SeriesHandle, double[]>();
         foreach (var handle in handles)
         {
-            result[handle] = Resolve(handle, new HashSet<SeriesHandle>());
+            _visitingSet.Clear();
+            result[handle] = Resolve(handle);
         }
 
         return result;
@@ -50,17 +57,18 @@ internal sealed class SeriesEvaluator
 
     public double[] Evaluate(SeriesHandle handle)
     {
-        return Resolve(handle, new HashSet<SeriesHandle>());
+        _visitingSet.Clear();
+        return Resolve(handle);
     }
 
-    private double[] Resolve(SeriesHandle handle, HashSet<SeriesHandle> visiting)
+    private double[] Resolve(SeriesHandle handle)
     {
         if (_cache.TryGetValue(handle, out var cached))
         {
             return cached;
         }
 
-        if (!visiting.Add(handle))
+        if (!_visitingSet.Add(handle))
         {
             throw new InvalidOperationException("Cycle detected in series graph.");
         }
@@ -77,43 +85,67 @@ internal sealed class SeriesEvaluator
                 resolved = GetBaseInput(node.SeriesKey);
                 break;
             case SeriesNodeKind.Indicator:
-                resolved = ResolveIndicator(node, visiting);
+                resolved = ResolveIndicator(node);
                 break;
             case SeriesNodeKind.Formula:
-                resolved = ResolveFormula(node, visiting);
+                resolved = ResolveFormula(node);
                 break;
             default:
                 throw new InvalidOperationException("Unknown series node kind.");
         }
 
-        visiting.Remove(handle);
+        _visitingSet.Remove(handle);
         _cache[handle] = resolved;
         return resolved;
     }
 
-    private double[] ResolveIndicator(SeriesNode node, HashSet<SeriesHandle> visiting)
+    private double[] ResolveIndicator(SeriesNode node)
     {
         if (!node.Input.HasValue || node.Spec == null)
         {
             throw new InvalidOperationException("Indicator node missing input or spec.");
         }
 
-        var input = Resolve(node.Input.Value, visiting);
         var baseData = GetBaseData(node.SeriesKey);
+
+        // Fast path: if input is the base series (close prices), use original data directly
+        // This avoids cloning StockData and copying arrays
+        if (IsBaseSeriesInput(node.Input.Value, node.SeriesKey))
+        {
+            var result = ApplyIndicator(baseData, node.Spec);
+            return ExtractOutput(result, node.Spec);
+        }
+
+        // Chained indicator path: need to clone with custom input values
+        var input = Resolve(node.Input.Value);
         var working = CloneWithCustomValues(baseData, input);
-        var result = ApplyIndicator(working, node.Spec);
-        return ExtractOutput(result, node.Spec);
+        var result2 = ApplyIndicator(working, node.Spec);
+        return ExtractOutput(result2, node.Spec);
     }
 
-    private double[] ResolveFormula(SeriesNode node, HashSet<SeriesHandle> visiting)
+    /// <summary>
+    /// Checks if the input handle points to the base price series for the given series key.
+    /// </summary>
+    private bool IsBaseSeriesInput(SeriesHandle inputHandle, SeriesKey seriesKey)
+    {
+        if (!_nodes.TryGetValue(inputHandle, out var inputNode))
+        {
+            return false;
+        }
+
+        // Input is a base series node with matching series key
+        return inputNode.Kind == SeriesNodeKind.Base && inputNode.SeriesKey.Equals(seriesKey);
+    }
+
+    private double[] ResolveFormula(SeriesNode node)
     {
         if (!node.Left.HasValue || !node.Right.HasValue || node.Formula == null)
         {
             throw new InvalidOperationException("Formula node missing operands or function.");
         }
 
-        var left = Resolve(node.Left.Value, visiting);
-        var right = Resolve(node.Right.Value, visiting);
+        var left = Resolve(node.Left.Value);
+        var right = Resolve(node.Right.Value);
         var count = Math.Max(left.Length, right.Length);
         var values = new double[count];
         for (var i = 0; i < count; i++)
@@ -145,6 +177,20 @@ internal sealed class SeriesEvaluator
     private double[] GetBaseInput(SeriesKey seriesKey)
     {
         var data = GetBaseData(seriesKey);
+
+        // Fast path: cache default data input to avoid repeated ToArray() calls
+        if (ReferenceEquals(data, _defaultData))
+        {
+            if (_cachedDefaultInput is not null)
+            {
+                return _cachedDefaultInput;
+            }
+
+            var defaultInput = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+            _cachedDefaultInput = defaultInput.ToArray();
+            return _cachedDefaultInput;
+        }
+
         var input = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         return input.ToArray();
     }
