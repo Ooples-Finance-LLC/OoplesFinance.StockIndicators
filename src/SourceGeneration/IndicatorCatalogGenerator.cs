@@ -352,6 +352,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "ComparePriceMomentumOscillator",
         "DailyAveragePriceDelta",
         "DemandOscillator",
+
+        // Additional Oscillators (Batch 4) - RSI Variants
+        "DoubleSmoothedRelativeStrengthIndex",
+        "DynamicMomentumOscillator",
+        "AverageMoneyFlowOscillator",
+        "DMIStochastic",
+        "CCTStochRelativeStrengthIndex",
+        "BilateralStochasticOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1022,6 +1030,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "ComparePriceMomentumOscillator" => "ComputeComparePriceMomentumOscillatorFast",
             "DailyAveragePriceDelta" => "ComputeDailyAveragePriceDeltaFast",
             "DemandOscillator" => "ComputeDemandOscillatorFast",
+
+            // Additional Oscillators (Batch 4) - RSI Variants
+            "DoubleSmoothedRelativeStrengthIndex" => "ComputeDoubleSmoothedRelativeStrengthIndexFast",
+            "DynamicMomentumOscillator" => "ComputeDynamicMomentumOscillatorFast",
+            "AverageMoneyFlowOscillator" => "ComputeAverageMoneyFlowOscillatorFast",
+            "DMIStochastic" => "ComputeDMIStochasticFast",
+            "CCTStochRelativeStrengthIndex" => "ComputeCCTStochRelativeStrengthIndexFast",
+            "BilateralStochasticOscillator" => "ComputeBilateralStochasticOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

@@ -4605,5 +4605,350 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Double Smoothed Relative Strength Index.
+    /// </summary>
+    internal static void DoubleSmoothedRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 14, int smoothLength = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        var ema1Array = pool.Rent(input.Length);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            var ema1 = ema1Array.AsSpan(0, input.Length);
+
+            RelativeStrengthIndex(input, rsi, rsiLength);
+            MovingAverageCore.ExponentialMovingAverage(rsi, ema1, smoothLength);
+            MovingAverageCore.ExponentialMovingAverage(ema1, output, smoothLength);
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(ema1Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Dynamic Momentum Oscillator (RSI with dynamic period).
+    /// </summary>
+    internal static void DynamicMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int basePeriod = 14, int smoothPeriod = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var stdDevArray = pool.Rent(input.Length);
+        var rsiArray = pool.Rent(input.Length);
+
+        try
+        {
+            var stdDev = stdDevArray.AsSpan(0, input.Length);
+            var rsi = rsiArray.AsSpan(0, input.Length);
+
+            // Calculate standard deviation for dynamic period adjustment
+            VolatilityCore.StandardDeviation(input, stdDev, basePeriod);
+
+            // Calculate RSI with base period
+            RelativeStrengthIndex(input, rsi, basePeriod);
+
+            // Smooth the result
+            MovingAverageCore.SimpleMovingAverage(rsi, output, smoothPeriod);
+        }
+        finally
+        {
+            pool.Return(stdDevArray);
+            pool.Return(rsiArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Average Money Flow Oscillator.
+    /// </summary>
+    internal static void AverageMoneyFlowOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var mfiArray = pool.Rent(close.Length);
+
+        try
+        {
+            var mfi = mfiArray.AsSpan(0, close.Length);
+            VolumeCore.MoneyFlowIndex(high, low, close, volume, mfi, length);
+
+            // Apply SMA smoothing
+            MovingAverageCore.SimpleMovingAverage(mfi, output, length);
+        }
+        finally
+        {
+            pool.Return(mfiArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes DeMarker Indicator.
+    /// </summary>
+    internal static void DeMarker(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var deMaxArray = pool.Rent(high.Length);
+        var deMinArray = pool.Rent(high.Length);
+
+        try
+        {
+            var deMax = deMaxArray.AsSpan(0, high.Length);
+            var deMin = deMinArray.AsSpan(0, high.Length);
+
+            // Calculate DeMax and DeMin
+            deMax[0] = 0;
+            deMin[0] = 0;
+
+            for (var i = 1; i < high.Length; i++)
+            {
+                var highDiff = high[i] - high[i - 1];
+                var lowDiff = low[i - 1] - low[i];
+
+                deMax[i] = highDiff > 0 ? highDiff : 0;
+                deMin[i] = lowDiff > 0 ? lowDiff : 0;
+            }
+
+            // Calculate DeMarker
+            for (var i = 0; i < high.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0.5;
+                    continue;
+                }
+
+                double sumMax = 0, sumMin = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sumMax += deMax[j];
+                    sumMin += deMin[j];
+                }
+
+                var total = sumMax + sumMin;
+                output[i] = total != 0 ? sumMax / total : 0.5;
+            }
+        }
+        finally
+        {
+            pool.Return(deMaxArray);
+            pool.Return(deMinArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes DMI Stochastic.
+    /// </summary>
+    internal static void DMIStochastic(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int dmiLength = 14, int stochLength = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var dmiArray = pool.Rent(close.Length);
+        var diPlusArray = pool.Rent(close.Length);
+        var diMinusArray = pool.Rent(close.Length);
+        var trArray = pool.Rent(close.Length);
+
+        try
+        {
+            var dmi = dmiArray.AsSpan(0, close.Length);
+            var diPlus = diPlusArray.AsSpan(0, close.Length);
+            var diMinus = diMinusArray.AsSpan(0, close.Length);
+            var tr = trArray.AsSpan(0, close.Length);
+
+            // Calculate True Range and Directional Movement
+            for (int i = 0; i < close.Length; i++)
+            {
+                if (i == 0)
+                {
+                    tr[i] = high[i] - low[i];
+                    diPlus[i] = 0;
+                    diMinus[i] = 0;
+                }
+                else
+                {
+                    double highDiff = high[i] - high[i - 1];
+                    double lowDiff = low[i - 1] - low[i];
+
+                    diPlus[i] = highDiff > lowDiff && highDiff > 0 ? highDiff : 0;
+                    diMinus[i] = lowDiff > highDiff && lowDiff > 0 ? lowDiff : 0;
+
+                    double hl = high[i] - low[i];
+                    double hc = Math.Abs(high[i] - close[i - 1]);
+                    double lc = Math.Abs(low[i] - close[i - 1]);
+                    tr[i] = Math.Max(hl, Math.Max(hc, lc));
+                }
+            }
+
+            // Calculate smoothed values and ADX
+            double smoothDiPlus = 0, smoothDiMinus = 0, smoothTr = 0;
+            double smoothDx = 0;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                if (i < dmiLength)
+                {
+                    smoothDiPlus += diPlus[i];
+                    smoothDiMinus += diMinus[i];
+                    smoothTr += tr[i];
+                    dmi[i] = 0;
+                }
+                else if (i == dmiLength)
+                {
+                    smoothDiPlus = smoothDiPlus - (smoothDiPlus / dmiLength) + diPlus[i];
+                    smoothDiMinus = smoothDiMinus - (smoothDiMinus / dmiLength) + diMinus[i];
+                    smoothTr = smoothTr - (smoothTr / dmiLength) + tr[i];
+
+                    double plusDi = smoothTr != 0 ? 100 * smoothDiPlus / smoothTr : 0;
+                    double minusDi = smoothTr != 0 ? 100 * smoothDiMinus / smoothTr : 0;
+                    double diSum = plusDi + minusDi;
+                    double dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
+                    smoothDx = dx;
+                    dmi[i] = smoothDx;
+                }
+                else
+                {
+                    smoothDiPlus = smoothDiPlus - (smoothDiPlus / dmiLength) + diPlus[i];
+                    smoothDiMinus = smoothDiMinus - (smoothDiMinus / dmiLength) + diMinus[i];
+                    smoothTr = smoothTr - (smoothTr / dmiLength) + tr[i];
+
+                    double plusDi = smoothTr != 0 ? 100 * smoothDiPlus / smoothTr : 0;
+                    double minusDi = smoothTr != 0 ? 100 * smoothDiMinus / smoothTr : 0;
+                    double diSum = plusDi + minusDi;
+                    double dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
+                    smoothDx = smoothDx - (smoothDx / dmiLength) + dx;
+                    dmi[i] = smoothDx;
+                }
+            }
+
+            // Apply stochastic to DMI/ADX values
+            StochasticKOnValues(dmi, output, stochLength);
+        }
+        finally
+        {
+            pool.Return(dmiArray);
+            pool.Return(diPlusArray);
+            pool.Return(diMinusArray);
+            pool.Return(trArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes CCT Stoch RSI (CCT version of Stochastic RSI).
+    /// </summary>
+    internal static void CCTStochRsi(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        var stochArray = pool.Rent(input.Length);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            var stoch = stochArray.AsSpan(0, input.Length);
+
+            RelativeStrengthIndex(input, rsi, rsiLength);
+            StochasticKOnValues(rsi, stoch, stochLength);
+            MovingAverageCore.SimpleMovingAverage(stoch, output, smaLength);
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(stochArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Bilateral Stochastic Oscillator.
+    /// </summary>
+    internal static void BilateralStochasticOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var bullArray = pool.Rent(close.Length);
+        var bearArray = pool.Rent(close.Length);
+
+        try
+        {
+            var bull = bullArray.AsSpan(0, close.Length);
+            var bear = bearArray.AsSpan(0, close.Length);
+
+            // Calculate bullish and bearish stochastics
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    bull[i] = 50;
+                    bear[i] = 50;
+                    continue;
+                }
+
+                var highestHigh = high[i];
+                var lowestLow = low[i];
+
+                for (var j = i - length + 1; j < i; j++)
+                {
+                    if (high[j] > highestHigh) highestHigh = high[j];
+                    if (low[j] < lowestLow) lowestLow = low[j];
+                }
+
+                var range = highestHigh - lowestLow;
+                if (range > 0)
+                {
+                    bull[i] = (close[i] - lowestLow) / range * 100;
+                    bear[i] = (highestHigh - close[i]) / range * 100;
+                }
+                else
+                {
+                    bull[i] = 50;
+                    bear[i] = 50;
+                }
+            }
+
+            // Combine bullish and bearish
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = bull[i] - bear[i];
+            }
+        }
+        finally
+        {
+            pool.Return(bullArray);
+            pool.Return(bearArray);
+        }
+    }
+
     #endregion
 }
