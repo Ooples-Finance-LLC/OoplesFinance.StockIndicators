@@ -320,6 +320,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
         // Additional Enum Name Aliases (enum uses different name than abbreviated fast path)
         "ConnorsRelativeStrengthIndex",
+        "StochasticRelativeStrengthIndex",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -957,6 +958,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
             // Additional Enum Name Aliases
             "ConnorsRelativeStrengthIndex" => "ComputeConnorsRsiFast",
+            "StochasticRelativeStrengthIndex" => "ComputeStochRsiFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
