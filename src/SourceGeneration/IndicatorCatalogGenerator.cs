@@ -60,6 +60,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "LinearRegression",
         "KaufmanAdaptiveMovingAverage",
         "ZeroLagExponentialMovingAverage",
+        "SmoothedMovingAverage",
+        "McGinleyDynamic",
+        "T3MovingAverage",
+        "VariableIndexDynamicAverage",
+        "VariableMovingAverage",
 
         // Oscillators - OscillatorCore
         "RelativeStrengthIndex",
@@ -67,10 +72,178 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "MomentumOscillator",
         "WilliamsR",
         "CommodityChannelIndex",
+        "StochasticOscillator",
+        "AverageDirectionalIndex",
+        "ChandeMomentumOscillator",
+        "PercentagePriceOscillator",
+        "AbsolutePriceOscillator",
+        "UltimateOscillator",
+        "TrueStrengthIndex",
+        "StochasticRsi",
+        "AroonOscillator",
+        "DetrendedPriceOscillator",
+        "Trix",
+        "MassIndex",
+
+        // Volume - VolumeCore
+        "OnBalanceVolume",
+        "AccumulationDistributionLine",
+        "ChaikinMoneyFlow",
+        "ForceIndex",
+        "VolumeRateOfChange",
+        "NegativeVolumeIndex",
+        "PositiveVolumeIndex",
+        "PriceVolumeTrend",
+        "VolumeWeightedAveragePrice",
+        "ChaikinOscillator",
+        "EaseOfMovement",
 
         // Volatility - VolatilityCore
         "AverageTrueRange",
         "StandardDeviation",
+        "HistoricalVolatility",
+        "ChaikinVolatility",
+        "UlcerIndex",
+        "NormalizedAverageTrueRange",
+        "Variance",
+        "CoefficientOfVariation",
+        "TrueRange",
+        "BollingerBands",
+
+        // Volume - VolumeCore (Additional)
+        "KlingerVolumeOscillator",
+        "VolumePriceConfirmationIndicator",
+
+        // Oscillators - OscillatorCore (Additional Batch 1)
+        "MoneyFlowIndex",
+        "BalanceOfPower",
+        "RelativeVigorIndex",
+        "AroonUp",
+        "AroonDown",
+
+        // Oscillators - OscillatorCore (Additional Batch 2)
+        "StochasticFastD",
+        "AwesomeOscillator",
+        "AcceleratorOscillator",
+        "PercentageVolumeOscillator",
+        "FisherTransform",
+        "ConnorsRsi",
+        "PriceMomentumOscillator",
+        "KnowSureThing",
+        "PercentRank",
+        "ChoppinessIndex",
+
+        // Trend - TrendCore
+        "ParabolicSAR",
+        "SuperTrend",
+        "DonchianChannels",
+        "HighestHigh",
+        "LowestLow",
+        "AverageDayRange",
+        "TypicalPrice",
+        "MedianPrice",
+        "WeightedClose",
+        "PercentageChange",
+        "LinearRegressionSlope",
+        "RSquared",
+        "StandardError",
+        "VerticalHorizontalFilter",
+        "KeltnerChannels",
+        "TrendDetection",
+        "PriceChannels",
+
+        // Oscillators - OscillatorCore (Additional Batch 3)
+        "AbsoluteStrengthIndex",
+        "RelativeMomentumIndex",
+        "IntradayMomentumIndex",
+        "SwingIndex",
+        "AccumulativeSwingIndex",
+
+        // Oscillators - OscillatorCore (Additional Batch 4)
+        "CoppockCurve",
+        "ChandeForecastOscillator",
+        "BullPowerIndicator",
+        "BearPowerIndicator",
+        "PolarizedFractalEfficiency",
+        "SchaffTrendCycle",
+        "PriceZoneOscillator",
+        "ElderForceIndex",
+        "PrettyGoodOscillator",
+        "RelativeVolatilityIndex",
+        "QstickIndicator",
+        "SpecialK",
+
+        // Moving Averages - MovingAverageCore (Additional Batch 2)
+        "ArnaudLegouxMovingAverage",
+        "LeastSquaresMovingAverage",
+        "FractalAdaptiveMovingAverage",
+        "AdaptiveMovingAverage",
+        "SineWeightedMovingAverage",
+        "HammingMovingAverage",
+        "GeometricMovingAverage",
+        "RegularizedExponentialMovingAverage",
+        "ModifiedMovingAverage",
+
+        // Trend - TrendCore (Additional Batch 2)
+        "ZigZag",
+        "ChandelierExit",
+        "TrendIntensityIndex",
+        "AveragePrice",
+        "Midpoint",
+        "Midprice",
+
+        // Volume - VolumeCore (Additional Batch 2)
+        "TradeVolumeIndex",
+        "VolumeOscillator",
+        "VolumeWeightedMovingAverage",
+        "TwiggsMoneyFlow",
+        "VolumeZoneOscillator",
+        "DemandIndex",
+
+        // Oscillators - OscillatorCore (Additional Batch 5)
+        "DisparityIndex",
+        "DirectionalTrendIndex",
+        "DoubleSmoothedStochastic",
+        "DynamicMomentumIndex",
+        "AdaptiveErgodicCandlestickOscillator",
+        "Demarker",
+        "SmoothedRateOfChange",
+
+        // Volatility - VolatilityCore (Additional)
+        "KeltnerChannelWidth",
+        "BollingerBandsWidth",
+        "DonchianChannelWidth",
+        "CloseToCloseVolatility",
+        "ParkinsonVolatility",
+        "GarmanKlassVolatility",
+
+        // Moving Averages - MovingAverageCore (Additional Batch 3)
+        "JurikMovingAverage",
+        "ButterworthFilter",
+        "SuperSmootherFilter",
+        "EndPointMovingAverage",
+        "CubedWeightedMovingAverage",
+        "NaturalMovingAverage",
+
+        // Oscillators - OscillatorCore (Additional Batch 6)
+        "ElliottWaveOscillator",
+        "ForecastOscillator",
+        "DerivativeOscillator",
+        "GatorOscillator",
+        "FractalChaosOscillator",
+        "RahulMohindarOscillator",
+        "PremierStochasticOscillator",
+        "Repulse",
+
+        // Trend - TrendCore (Additional Batch 3)
+        "GannHiLoActivator",
+        "HalfTrend",
+        "VortexIndicator",
+        "LinearRegressionIntercept",
+        "ElderImpulseSystem",
+        "IchimokuTenkanSen",
+        "IchimokuKijunSen",
+        "MassThrust",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -448,6 +621,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "LinearRegression" => "ComputeLinRegFast",
             "KaufmanAdaptiveMovingAverage" => "ComputeKamaFast",
             "ZeroLagExponentialMovingAverage" => "ComputeZlemaFast",
+            "SmoothedMovingAverage" => "ComputeSmmaFast",
+            "McGinleyDynamic" => "ComputeMcGinleyDynamicFast",
+            "T3MovingAverage" => "ComputeT3Fast",
+            "VariableIndexDynamicAverage" => "ComputeVidyaFast",
+            "VariableMovingAverage" => "ComputeVmaFast",
 
             // Oscillators
             "RelativeStrengthIndex" => "ComputeRsiFast",
@@ -455,10 +633,178 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "MomentumOscillator" => "ComputeMomentumFast",
             "WilliamsR" => "ComputeWilliamsRFast",
             "CommodityChannelIndex" => "ComputeCciFast",
+            "StochasticOscillator" => "ComputeStochasticKFast",
+            "AverageDirectionalIndex" => "ComputeAdxFast",
+            "ChandeMomentumOscillator" => "ComputeCmoFast",
+            "PercentagePriceOscillator" => "ComputePpoFast",
+            "AbsolutePriceOscillator" => "ComputeApoFast",
+            "UltimateOscillator" => "ComputeUltimateOscillatorFast",
+            "TrueStrengthIndex" => "ComputeTsiFast",
+            "StochasticRsi" => "ComputeStochRsiFast",
+            "AroonOscillator" => "ComputeAroonOscillatorFast",
+            "DetrendedPriceOscillator" => "ComputeDpoFast",
+            "Trix" => "ComputeTrixFast",
+            "MassIndex" => "ComputeMassIndexFast",
+
+            // Volume
+            "OnBalanceVolume" => "ComputeObvFast",
+            "AccumulationDistributionLine" => "ComputeAdlFast",
+            "ChaikinMoneyFlow" => "ComputeCmfFast",
+            "ForceIndex" => "ComputeForceIndexFast",
+            "VolumeRateOfChange" => "ComputeVrocFast",
+            "NegativeVolumeIndex" => "ComputeNviFast",
+            "PositiveVolumeIndex" => "ComputePviFast",
+            "PriceVolumeTrend" => "ComputePvtFast",
+            "VolumeWeightedAveragePrice" => "ComputeVwapFast",
+            "ChaikinOscillator" => "ComputeChaikinOscillatorFast",
+            "EaseOfMovement" => "ComputeEmvFast",
 
             // Volatility
             "AverageTrueRange" => "ComputeAtrFast",
             "StandardDeviation" => "ComputeStdDevFast",
+            "HistoricalVolatility" => "ComputeHistoricalVolatilityFast",
+            "ChaikinVolatility" => "ComputeChaikinVolatilityFast",
+            "UlcerIndex" => "ComputeUlcerIndexFast",
+            "NormalizedAverageTrueRange" => "ComputeNormalizedAtrFast",
+            "Variance" => "ComputeVarianceFast",
+            "CoefficientOfVariation" => "ComputeCoefficientOfVariationFast",
+            "TrueRange" => "ComputeTrueRangeFast",
+            "BollingerBands" => "ComputeBollingerBandsFast",
+
+            // Volume (Additional)
+            "KlingerVolumeOscillator" => "ComputeKlingerVolumeFast",
+            "VolumePriceConfirmationIndicator" => "ComputeVpciFast",
+
+            // Oscillators (Additional Batch 1)
+            "MoneyFlowIndex" => "ComputeMoneyFlowIndexFast",
+            "BalanceOfPower" => "ComputeBalanceOfPowerFast",
+            "RelativeVigorIndex" => "ComputeRelativeVigorIndexFast",
+            "AroonUp" => "ComputeAroonUpFast",
+            "AroonDown" => "ComputeAroonDownFast",
+
+            // Oscillators (Additional Batch 2)
+            "StochasticFastD" => "ComputeStochasticDFast",
+            "AwesomeOscillator" => "ComputeAwesomeOscillatorFast",
+            "AcceleratorOscillator" => "ComputeAcceleratorOscillatorFast",
+            "PercentageVolumeOscillator" => "ComputePvoFast",
+            "FisherTransform" => "ComputeFisherTransformFast",
+            "ConnorsRsi" => "ComputeConnorsRsiFast",
+            "PriceMomentumOscillator" => "ComputePmoFast",
+            "KnowSureThing" => "ComputeKstFast",
+            "PercentRank" => "ComputePercentRankFast",
+            "ChoppinessIndex" => "ComputeChoppinessIndexFast",
+
+            // Trend
+            "ParabolicSAR" => "ComputeParabolicSarFast",
+            "SuperTrend" => "ComputeSuperTrendFast",
+            "DonchianChannels" => "ComputeDonchianChannelFast",
+            "HighestHigh" => "ComputeHighestHighFast",
+            "LowestLow" => "ComputeLowestLowFast",
+            "AverageDayRange" => "ComputeAdrFast",
+            "TypicalPrice" => "ComputeTypicalPriceFast",
+            "MedianPrice" => "ComputeMedianPriceFast",
+            "WeightedClose" => "ComputeWeightedCloseFast",
+            "PercentageChange" => "ComputePercentageChangeFast",
+            "LinearRegressionSlope" => "ComputeLinRegSlopeFast",
+            "RSquared" => "ComputeRSquaredFast",
+            "StandardError" => "ComputeStandardErrorFast",
+            "VerticalHorizontalFilter" => "ComputeVhfFast",
+            "KeltnerChannels" => "ComputeKeltnerChannelMiddleFast",
+            "TrendDetection" => "ComputeTrendDetectionFast",
+            "PriceChannels" => "ComputePriceChannelMiddleFast",
+
+            // Oscillators (Additional Batch 3)
+            "AbsoluteStrengthIndex" => "ComputeAbsoluteStrengthIndexFast",
+            "RelativeMomentumIndex" => "ComputeRelativeMomentumIndexFast",
+            "IntradayMomentumIndex" => "ComputeIntradayMomentumIndexFast",
+            "SwingIndex" => "ComputeSwingIndexFast",
+            "AccumulativeSwingIndex" => "ComputeAccumulativeSwingIndexFast",
+
+            // Oscillators (Additional Batch 4)
+            "CoppockCurve" => "ComputeCoppockCurveFast",
+            "ChandeForecastOscillator" => "ComputeChandeForecastOscillatorFast",
+            "BullPowerIndicator" => "ComputeBullPowerFast",
+            "BearPowerIndicator" => "ComputeBearPowerFast",
+            "PolarizedFractalEfficiency" => "ComputePolarizedFractalEfficiencyFast",
+            "SchaffTrendCycle" => "ComputeSchaffTrendCycleFast",
+            "PriceZoneOscillator" => "ComputePriceZoneOscillatorFast",
+            "ElderForceIndex" => "ComputeElderForceIndexFast",
+            "PrettyGoodOscillator" => "ComputePrettyGoodOscillatorFast",
+            "RelativeVolatilityIndex" => "ComputeRelativeVolatilityIndexFast",
+            "QstickIndicator" => "ComputeQstickFast",
+            "SpecialK" => "ComputeSpecialKFast",
+
+            // Moving Averages (Additional Batch 2)
+            "ArnaudLegouxMovingAverage" => "ComputeAlmaFast",
+            "LeastSquaresMovingAverage" => "ComputeLsmaFast",
+            "FractalAdaptiveMovingAverage" => "ComputeFramaFast",
+            "AdaptiveMovingAverage" => "ComputeAmaFast",
+            "SineWeightedMovingAverage" => "ComputeSineWmaFast",
+            "HammingMovingAverage" => "ComputeHammingMaFast",
+            "GeometricMovingAverage" => "ComputeGeoMaFast",
+            "RegularizedExponentialMovingAverage" => "ComputeRegularizedEmaFast",
+            "ModifiedMovingAverage" => "ComputeModifiedMaFast",
+
+            // Trend (Additional Batch 2)
+            "ZigZag" => "ComputeZigZagFast",
+            "ChandelierExit" => "ComputeChandelierExitLongFast",
+            "TrendIntensityIndex" => "ComputeTrendIntensityIndexFast",
+            "AveragePrice" => "ComputeAveragePriceFast",
+            "Midpoint" => "ComputeMidpointFast",
+            "Midprice" => "ComputeMidpriceFast",
+
+            // Volume (Additional Batch 2)
+            "TradeVolumeIndex" => "ComputeTradeVolumeIndexFast",
+            "VolumeOscillator" => "ComputeVolumeOscillatorFast",
+            "VolumeWeightedMovingAverage" => "ComputeVwmaFast",
+            "TwiggsMoneyFlow" => "ComputeTwiggsMoneyFlowFast",
+            "VolumeZoneOscillator" => "ComputeVolumeZoneOscillatorFast",
+            "DemandIndex" => "ComputeDemandIndexFast",
+
+            // Oscillators (Additional Batch 5)
+            "DisparityIndex" => "ComputeDisparityIndexFast",
+            "DirectionalTrendIndex" => "ComputeDirectionalTrendIndexFast",
+            "DoubleSmoothedStochastic" => "ComputeDoubleSmoothedStochasticFast",
+            "DynamicMomentumIndex" => "ComputeDynamicMomentumIndexFast",
+            "AdaptiveErgodicCandlestickOscillator" => "ComputeErgodicCandlestickOscillatorFast",
+            "Demarker" => "ComputeDemarkerFast",
+            "SmoothedRateOfChange" => "ComputeSmoothedRocFast",
+
+            // Volatility (Additional)
+            "KeltnerChannelWidth" => "ComputeKeltnerChannelWidthFast",
+            "BollingerBandsWidth" => "ComputeBollingerBandsWidthFast",
+            "DonchianChannelWidth" => "ComputeDonchianChannelWidthFast",
+            "CloseToCloseVolatility" => "ComputeCloseToCloseVolatilityFast",
+            "ParkinsonVolatility" => "ComputeParkinsonVolatilityFast",
+            "GarmanKlassVolatility" => "ComputeGarmanKlassVolatilityFast",
+
+            // Moving Averages (Additional Batch 3)
+            "JurikMovingAverage" => "ComputeJmaFast",
+            "ButterworthFilter" => "ComputeButterworthFilterFast",
+            "SuperSmootherFilter" => "ComputeSuperSmootherFast",
+            "EndPointMovingAverage" => "ComputeEndPointMovingAverageFast",
+            "CubedWeightedMovingAverage" => "ComputeCubicWmaFast",
+            "NaturalMovingAverage" => "ComputeNaturalMaFast",
+
+            // Oscillators (Additional Batch 6)
+            "ElliottWaveOscillator" => "ComputeElliottWaveOscillatorFast",
+            "ForecastOscillator" => "ComputeForecastOscillatorFast",
+            "DerivativeOscillator" => "ComputeDerivativeOscillatorFast",
+            "GatorOscillator" => "ComputeGatorOscillatorFast",
+            "FractalChaosOscillator" => "ComputeFractalChaosOscillatorFast",
+            "RahulMohindarOscillator" => "ComputeRahulMohindarOscillatorFast",
+            "PremierStochasticOscillator" => "ComputePremierStochasticFast",
+            "Repulse" => "ComputeRepulseFast",
+
+            // Trend (Additional Batch 3)
+            "GannHiLoActivator" => "ComputeGannHiLoActivatorFast",
+            "HalfTrend" => "ComputeHalfTrendFast",
+            "VortexIndicator" => "ComputeVortexPositiveFast",
+            "LinearRegressionIntercept" => "ComputeLinRegInterceptFast",
+            "ElderImpulseSystem" => "ComputeElderImpulseSystemFast",
+            "IchimokuTenkanSen" => "ComputeIchimokuTenkanSenFast",
+            "IchimokuKijunSen" => "ComputeIchimokuKijunSenFast",
+            "MassThrust" => "ComputeMassThrustFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
