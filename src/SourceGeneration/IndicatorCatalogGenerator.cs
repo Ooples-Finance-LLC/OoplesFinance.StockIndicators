@@ -7,13 +7,14 @@ using System.Text;
 namespace OoplesFinance.StockIndicators.SourceGeneration;
 
 /// <summary>
-/// Roslyn source generator that creates typed indicator methods for IndicatorCatalog.
+/// Roslyn source generator that creates typed indicator methods for IndicatorCatalog
+/// and optimized compute methods for IndicatorCompute.
 /// Scans the IndicatorName enum and generates methods for indicators that don't have hand-written overloads.
 /// </summary>
 [Generator]
 public class IndicatorCatalogGenerator : IIncrementalGenerator
 {
-    // Hand-written indicators that should not be generated
+    // Hand-written indicators that should not be generated for IndicatorCatalog
     private static readonly HashSet<string> HandWrittenIndicators = new(StringComparer.OrdinalIgnoreCase)
     {
         "SimpleMovingAverage",
@@ -41,6 +42,20 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "IchimokuCloud",
         "StandardDeviation",
         "TrueStrengthIndex"
+    };
+
+    // Indicators with hand-written fast path in IndicatorCompute.cs
+    // These use span-based Core implementations for zero-allocation compute
+    private static readonly HashSet<string> FastPathIndicators = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "SimpleMovingAverage",      // MovingAverageCore.SimpleMovingAverage
+        "ExponentialMovingAverage", // MovingAverageCore.ExponentialMovingAverage
+        "WeightedMovingAverage",    // MovingAverageCore.WeightedMovingAverage
+        "RelativeStrengthIndex",    // OscillatorCore.RelativeStrengthIndex
+        "AverageTrueRange",         // VolatilityCore.AverageTrueRange
+        "RateOfChange",             // OscillatorCore.RateOfChange
+        "MomentumOscillator",       // OscillatorCore.Momentum
+        "StandardDeviation",        // VolatilityCore.StandardDeviation
     };
 
     // Multi-output indicators that need special Result types

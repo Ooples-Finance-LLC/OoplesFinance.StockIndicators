@@ -1,5 +1,6 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
 
@@ -33,226 +34,155 @@ internal static partial class IndicatorCompute
 
         return spec.Options switch
         {
-            SmaSpecOptions sma => ComputeSma(data, context, sma.Length),
-            EmaSpecOptions ema => ComputeEma(data, context, ema.Length),
-            RsiSpecOptions rsi => ComputeRsi(data, context, rsi.Length),
-            AtrSpecOptions atr => ComputeAtr(data, context, atr.Length),
-            AdxSpecOptions adx => ComputeAdx(data, context, adx.Length),
+            SmaSpecOptions sma => ComputeSmaFast(data, context, sma.Length),
+            EmaSpecOptions ema => ComputeEmaFast(data, context, ema.Length),
+            RsiSpecOptions rsi => ComputeRsiFast(data, context, rsi.Length),
+            AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length),
             _ => null
         };
     }
 
-    /// <summary>
-    /// Computes Simple Moving Average.
-    /// </summary>
-    public static ComputeBuffer ComputeSma(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateSimpleMovingAverage(length);
-        return ExtractToBuffer(result, context);
-    }
+    #region Moving Averages
 
     /// <summary>
-    /// Computes Exponential Moving Average.
+    /// Computes Simple Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeEma(StockData data, ComputeContext context, int length = 14)
+    public static ComputeBuffer ComputeSmaFast(StockData data, ComputeContext context, int length = 14)
     {
-        var result = data.CalculateExponentialMovingAverage(length: length);
-        return ExtractToBuffer(result, context);
-    }
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
 
-    /// <summary>
-    /// Computes Relative Strength Index.
-    /// </summary>
-    public static ComputeBuffer ComputeRsi(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateRelativeStrengthIndex(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Average True Range.
-    /// </summary>
-    public static ComputeBuffer ComputeAtr(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateAverageTrueRange(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Average Directional Index.
-    /// </summary>
-    public static ComputeBuffer ComputeAdx(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateAverageDirectionalIndex(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Weighted Moving Average.
-    /// </summary>
-    public static ComputeBuffer ComputeWma(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateWeightedMovingAverage(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Hull Moving Average.
-    /// </summary>
-    public static ComputeBuffer ComputeHma(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateHullMovingAverage(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Triple Exponential Moving Average (TEMA).
-    /// </summary>
-    public static ComputeBuffer ComputeTema(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateTripleExponentialMovingAverage(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Double Exponential Moving Average (DEMA).
-    /// </summary>
-    public static ComputeBuffer ComputeDema(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateDoubleExponentialMovingAverage(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Commodity Channel Index.
-    /// </summary>
-    public static ComputeBuffer ComputeCci(StockData data, ComputeContext context, int length = 20)
-    {
-        var result = data.CalculateCommodityChannelIndex(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Williams %R.
-    /// </summary>
-    public static ComputeBuffer ComputeWilliamsR(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateWilliamsR(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Rate of Change.
-    /// </summary>
-    public static ComputeBuffer ComputeRoc(StockData data, ComputeContext context, int length = 12)
-    {
-        var result = data.CalculateRateOfChange(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Momentum Oscillator.
-    /// </summary>
-    public static ComputeBuffer ComputeMomentum(StockData data, ComputeContext context, int length = 10)
-    {
-        var result = data.CalculateMomentumOscillator(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Standard Deviation Volatility.
-    /// </summary>
-    public static ComputeBuffer ComputeStdDev(StockData data, ComputeContext context, int length = 20)
-    {
-        var result = data.CalculateStandardDeviationVolatility(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes On Balance Volume.
-    /// </summary>
-    public static ComputeBuffer ComputeObv(StockData data, ComputeContext context)
-    {
-        var result = data.CalculateOnBalanceVolume();
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes Money Flow Index.
-    /// </summary>
-    public static ComputeBuffer ComputeMfi(StockData data, ComputeContext context, int length = 14)
-    {
-        var result = data.CalculateMoneyFlowIndex(length: length);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes True Strength Index.
-    /// </summary>
-    public static ComputeBuffer ComputeTsi(StockData data, ComputeContext context, int length1 = 25, int length2 = 13)
-    {
-        var result = data.CalculateTrueStrengthIndex(length1: length1, length2: length2);
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Computes VWAP (Volume Weighted Average Price).
-    /// </summary>
-    public static ComputeBuffer ComputeVwap(StockData data, ComputeContext context)
-    {
-        var result = data.CalculateVolumeWeightedAveragePrice();
-        return ExtractToBuffer(result, context);
-    }
-
-    /// <summary>
-    /// Extracts indicator output to a pooled buffer.
-    /// </summary>
-    /// <param name="result">The StockData containing computation results.</param>
-    /// <param name="context">The compute context for buffer management.</param>
-    /// <returns>A ComputeBuffer containing the indicator values.</returns>
-    private static ComputeBuffer ExtractToBuffer(StockData result, ComputeContext context)
-    {
-        var values = result.CustomValuesList;
-        if (values.Count == 0)
-        {
-            return context.Rent(0);
-        }
-
-        var buffer = context.Rent(values.Count);
-        var span = buffer.WritableSpan;
-
-        // Use span-based copy for performance
-        for (int i = 0; i < values.Count; i++)
-        {
-            span[i] = values[i];
-        }
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SimpleMovingAverage(inputSpan, buffer.WritableSpan, length);
 
         return buffer;
     }
 
     /// <summary>
-    /// Extracts a specific output key from indicator results to a pooled buffer.
+    /// Computes Exponential Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    /// <param name="result">The StockData containing computation results.</param>
-    /// <param name="context">The compute context for buffer management.</param>
-    /// <param name="outputKey">The output key to extract (e.g., "Signal", "UpperBand").</param>
-    /// <returns>A ComputeBuffer containing the indicator values, or an empty buffer if key not found.</returns>
-    private static ComputeBuffer ExtractToBuffer(StockData result, ComputeContext context, string outputKey)
+    public static ComputeBuffer ComputeEmaFast(StockData data, ComputeContext context, int length = 14)
     {
-        if (result.OutputValues.TryGetValue(outputKey, out var values) && values.Count > 0)
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Weighted Moving Average using zero-allocation fast path.
+    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeWmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    #endregion
+
+    #region Oscillators
+
+    /// <summary>
+    /// Computes Relative Strength Index using zero-allocation fast path.
+    /// Uses OscillatorCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rate of Change using zero-allocation fast path.
+    /// Uses OscillatorCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeRocFast(StockData data, ComputeContext context, int length = 12)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RateOfChange(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Momentum using zero-allocation fast path.
+    /// Uses OscillatorCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeMomentumFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.Momentum(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    #endregion
+
+    #region Volatility
+
+    /// <summary>
+    /// Computes Average True Range using zero-allocation fast path.
+    /// Uses VolatilityCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+
+        // Extract OHLC data into spans
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+
+        for (var i = 0; i < count; i++)
         {
-            var buffer = context.Rent(values.Count);
-            var span = buffer.WritableSpan;
-
-            for (int i = 0; i < values.Count; i++)
-            {
-                span[i] = values[i];
-            }
-
-            return buffer;
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
         }
 
-        // Fall back to CustomValuesList
-        return ExtractToBuffer(result, context);
+        var buffer = context.Rent(count);
+        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, length);
+
+        return buffer;
     }
+
+    /// <summary>
+    /// Computes Standard Deviation using zero-allocation fast path.
+    /// Uses VolatilityCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeStdDevFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        VolatilityCore.StandardDeviation(inputSpan, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    #endregion
 }
