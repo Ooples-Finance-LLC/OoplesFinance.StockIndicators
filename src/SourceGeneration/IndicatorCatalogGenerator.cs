@@ -328,6 +328,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "StochasticFastOscillator",
         "MassThrustIndicator",
         "McGinleyDynamicIndicator",
+        "PringSpecialK",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -974,6 +975,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "StochasticFastOscillator" => "ComputeStochasticKFast",
             "MassThrustIndicator" => "ComputeMassThrustFast",
             "McGinleyDynamicIndicator" => "ComputeMcGinleyDynamicFast",
+            "PringSpecialK" => "ComputeSpecialKFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
