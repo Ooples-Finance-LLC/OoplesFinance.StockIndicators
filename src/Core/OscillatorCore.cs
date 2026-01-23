@@ -3555,4 +3555,292 @@ internal static class OscillatorCore
             output[i] = 100 - 100 / (1 + rs);
         }
     }
+
+    #region Additional Batch 8
+
+    /// <summary>
+    /// Computes Smoothed Williams %R.
+    /// </summary>
+    internal static void SmoothedWilliamsR(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rawWr = pool.Rent(close.Length);
+
+        try
+        {
+            // Calculate raw Williams %R
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    rawWr[i] = -50;
+                    continue;
+                }
+
+                double highestHigh = double.MinValue;
+                double lowestLow = double.MaxValue;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (high[j] > highestHigh) highestHigh = high[j];
+                    if (low[j] < lowestLow) lowestLow = low[j];
+                }
+
+                rawWr[i] = highestHigh != lowestLow
+                    ? (highestHigh - close[i]) / (highestHigh - lowestLow) * -100
+                    : -50;
+            }
+
+            // Smooth the Williams %R
+            var k = 2.0 / (smoothLength + 1);
+            output[0] = rawWr[0];
+            for (var i = 1; i < close.Length; i++)
+            {
+                output[i] = rawWr[i] * k + output[i - 1] * (1 - k);
+            }
+        }
+        finally
+        {
+            pool.Return(rawWr);
+        }
+    }
+
+    /// <summary>
+    /// Computes Price Oscillator percentage.
+    /// </summary>
+    internal static void PriceOscillatorPercent(ReadOnlySpan<double> input, Span<double> output, int shortLength = 10, int longLength = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var shortK = 2.0 / (shortLength + 1);
+        var longK = 2.0 / (longLength + 1);
+        double shortEma = input[0];
+        double longEma = input[0];
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                shortEma = input[i] * shortK + shortEma * (1 - shortK);
+                longEma = input[i] * longK + longEma * (1 - longK);
+                output[i] = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Normalized MACD.
+    /// </summary>
+    internal static void NormalizedMacd(ReadOnlySpan<double> input, Span<double> output, int fastLength = 12, int slowLength = 26)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var fastK = 2.0 / (fastLength + 1);
+        var slowK = 2.0 / (slowLength + 1);
+        double fastEma = input[0];
+        double slowEma = input[0];
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                fastEma = input[i] * fastK + fastEma * (1 - fastK);
+                slowEma = input[i] * slowK + slowEma * (1 - slowK);
+                output[i] = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Relative Vigor Index Signal.
+    /// </summary>
+    internal static void RelativeVigorIndexSignal(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10, int signalLength = 4)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rvi = pool.Rent(close.Length);
+
+        try
+        {
+            // Calculate RVI first
+            RelativeVigorIndex(open, high, low, close, rvi.AsSpan(0, close.Length), length);
+
+            // Calculate signal (smoothed RVI)
+            var k = 2.0 / (signalLength + 1);
+            output[0] = rvi[0];
+            for (var i = 1; i < close.Length; i++)
+            {
+                output[i] = rvi[i] * k + output[i - 1] * (1 - k);
+            }
+        }
+        finally
+        {
+            pool.Return(rvi);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Momentum Oscillator.
+    /// </summary>
+    internal static void VolumeMomentumOscillator(ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 20)
+    {
+        if (output.Length < volume.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var shortK = 2.0 / (shortLength + 1);
+        var longK = 2.0 / (longLength + 1);
+        double shortEma = volume[0];
+        double longEma = volume[0];
+
+        for (var i = 0; i < volume.Length; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = 0;
+            }
+            else
+            {
+                shortEma = volume[i] * shortK + shortEma * (1 - shortK);
+                longEma = volume[i] * longK + longEma * (1 - longK);
+                output[i] = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Trend Continuation Factor.
+    /// </summary>
+    internal static void TrendContinuationFactor(ReadOnlySpan<double> close, Span<double> output, int length = 35)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double plusCf = 0, minusCf = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var change = close[j] - close[j - 1];
+                if (change > 0)
+                    plusCf += change;
+                else
+                    minusCf += Math.Abs(change);
+            }
+
+            output[i] = plusCf + minusCf != 0 ? (plusCf - minusCf) / (plusCf + minusCf) * 100 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Trend Persistence Rate.
+    /// </summary>
+    internal static void TrendPersistenceRate(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 50;
+                continue;
+            }
+
+            int upCount = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (close[j] > close[j - 1])
+                    upCount++;
+            }
+
+            output[i] = (double)upCount / length * 100;
+        }
+    }
+
+    /// <summary>
+    /// Computes Inertia indicator.
+    /// </summary>
+    internal static void Inertia(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int rviLength = 14, int smoothLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rvi = pool.Rent(close.Length);
+
+        try
+        {
+            // Calculate Relative Volatility Index first
+            RelativeVolatilityIndex(close, rvi.AsSpan(0, close.Length), rviLength);
+
+            // Calculate linear regression of RVI
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < smoothLength - 1)
+                {
+                    output[i] = 50;
+                    continue;
+                }
+
+                double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                for (var j = 0; j < smoothLength; j++)
+                {
+                    var x = (double)j;
+                    var y = rvi[i - smoothLength + 1 + j];
+                    sumX += x;
+                    sumY += y;
+                    sumXY += x * y;
+                    sumX2 += x * x;
+                }
+
+                var n = (double)smoothLength;
+                var slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                var intercept = (sumY - slope * sumX) / n;
+                output[i] = intercept + slope * (smoothLength - 1);
+            }
+        }
+        finally
+        {
+            pool.Return(rvi);
+        }
+    }
+
+    #endregion
 }

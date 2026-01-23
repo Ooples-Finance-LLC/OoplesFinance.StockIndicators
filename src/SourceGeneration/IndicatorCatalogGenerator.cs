@@ -297,6 +297,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "AtrFilteredExponentialMovingAverage",
         "ParabolicWeightedMovingAverage",
         "VolumeAdjustedMovingAverage",
+
+        // Oscillators - OscillatorCore (Additional Batch 8)
+        "TrendContinuationFactor",
+        "TrendPersistenceRate",
+        "InertiaIndicator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -911,6 +916,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "AtrFilteredExponentialMovingAverage" => "ComputeAtrFilteredEmaFast",
             "ParabolicWeightedMovingAverage" => "ComputeParabolicWmaFast",
             "VolumeAdjustedMovingAverage" => "ComputeVolumeAdjustedMaFast",
+
+            // Oscillators (Additional Batch 8)
+            "TrendContinuationFactor" => "ComputeTrendContinuationFactorFast",
+            "TrendPersistenceRate" => "ComputeTrendPersistenceRateFast",
+            "InertiaIndicator" => "ComputeInertiaFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
