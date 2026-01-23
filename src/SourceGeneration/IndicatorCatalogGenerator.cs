@@ -56,6 +56,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "RateOfChange",             // OscillatorCore.RateOfChange
         "MomentumOscillator",       // OscillatorCore.Momentum
         "StandardDeviation",        // VolatilityCore.StandardDeviation
+        "WilliamsR",                // OscillatorCore.WilliamsR
+        "CommodityChannelIndex",    // OscillatorCore.CommodityChannelIndex
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -429,6 +431,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "RateOfChange" => "ComputeRocFast",
             "MomentumOscillator" => "ComputeMomentumFast",
             "StandardDeviation" => "ComputeStdDevFast",
+            "WilliamsR" => "ComputeWilliamsRFast",
+            "CommodityChannelIndex" => "ComputeCciFast",
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
     }

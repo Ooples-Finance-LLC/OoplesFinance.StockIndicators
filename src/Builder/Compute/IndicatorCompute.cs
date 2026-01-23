@@ -138,6 +138,60 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Williams %R using zero-allocation fast path.
+    /// Uses OscillatorCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsRFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+
+        // Extract OHLC data into spans
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+
+        var buffer = context.Rent(count);
+        OscillatorCore.WilliamsR(high, low, close, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Commodity Channel Index using zero-allocation fast path.
+    /// Uses OscillatorCore with span-based computation directly into pooled buffer.
+    /// </summary>
+    public static ComputeBuffer ComputeCciFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+
+        // Extract OHLC data into spans
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+
+        var buffer = context.Rent(count);
+        OscillatorCore.CommodityChannelIndex(high, low, close, buffer.WritableSpan, length);
+
+        return buffer;
+    }
+
     #endregion
 
     #region Volatility
