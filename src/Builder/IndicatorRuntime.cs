@@ -1,4 +1,5 @@
 using System.Buffers;
+using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Notifications;
 using OoplesFinance.StockIndicators.Builder.Signals;
 using OoplesFinance.StockIndicators.Builder.Trading;
@@ -54,6 +55,9 @@ public sealed class IndicatorRuntime : IDisposable
     private long _buffersReused;
     private long _totalBytesAllocated;
 
+    // Compute context for pooled fast-path computations
+    private readonly ComputeContext _computeContext;
+
     internal IndicatorRuntime(
         IndicatorDataSource source,
         Dictionary<SeriesHandle, SeriesNode> nodes,
@@ -95,6 +99,9 @@ public sealed class IndicatorRuntime : IDisposable
         {
             _groupStates[i] = new SignalGroupState(groupSignals[i].Conditions.Length);
         }
+
+        // Initialize compute context for pooled fast-path computations
+        _computeContext = new ComputeContext();
     }
 
     /// <summary>
@@ -163,6 +170,26 @@ public sealed class IndicatorRuntime : IDisposable
     /// Gets whether this runtime has been disposed.
     /// </summary>
     public bool IsDisposed => _disposed;
+
+    /// <summary>
+    /// Gets the number of compute buffers currently active in the pool.
+    /// </summary>
+    public int ComputeActiveBuffers => _computeContext.ActiveBufferCount;
+
+    /// <summary>
+    /// Gets the total compute buffer rent operations.
+    /// </summary>
+    public long ComputeRentCount => _computeContext.RentCount;
+
+    /// <summary>
+    /// Gets the total compute buffer return operations.
+    /// </summary>
+    public long ComputeReturnCount => _computeContext.ReturnCount;
+
+    /// <summary>
+    /// Gets the internal compute context for use by SeriesEvaluator.
+    /// </summary>
+    internal ComputeContext ComputeContext => _computeContext;
 
     /// <summary>
     /// Event raised when indicators are updated.
@@ -304,7 +331,7 @@ public sealed class IndicatorRuntime : IDisposable
     private void StartBatch()
     {
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
-        var evaluator = new SeriesEvaluator(data, _nodes);
+        var evaluator = new SeriesEvaluator(data, _nodes, _computeContext);
         var series = evaluator.Evaluate(_activeSeries);
         Publish(new IndicatorSnapshot(series, _keys, handle =>
         {
@@ -778,6 +805,9 @@ public sealed class IndicatorRuntime : IDisposable
             }
             _buffers.Clear();
         }
+
+        // Dispose compute context to return all pooled arrays
+        _computeContext.Dispose();
 
         // Clear event handlers to prevent leaks
         Updated = null;

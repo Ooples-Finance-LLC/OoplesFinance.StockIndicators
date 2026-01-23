@@ -1,4 +1,5 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
@@ -14,6 +15,7 @@ internal sealed class SeriesEvaluator
     private readonly StockData _defaultData;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<SeriesHandle, double[]> _cache;
+    private readonly ComputeContext? _computeContext;
 
     // Cached base input to avoid repeated ToArray() calls
     private double[]? _cachedDefaultInput;
@@ -21,27 +23,59 @@ internal sealed class SeriesEvaluator
     // Reusable HashSet for cycle detection (avoid allocation per Evaluate call)
     private readonly HashSet<SeriesHandle> _visitingSet = new();
 
+    // Statistics for fast path usage
+    private int _fastPathHits;
+    private int _standardPathHits;
+
     /// <summary>
     /// Creates a new series evaluator with single-symbol data (backwards compatible).
     /// </summary>
     public SeriesEvaluator(StockData data, Dictionary<SeriesHandle, SeriesNode> nodes)
+        : this(data, nodes, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a new series evaluator with single-symbol data and compute context.
+    /// </summary>
+    public SeriesEvaluator(StockData data, Dictionary<SeriesHandle, SeriesNode> nodes, ComputeContext? computeContext)
     {
         _defaultData = data;
         _dataByKey = new Dictionary<SeriesKey, StockData>();
         _nodes = nodes;
         _cache = new Dictionary<SeriesHandle, double[]>();
+        _computeContext = computeContext;
     }
 
     /// <summary>
     /// Creates a new series evaluator with multi-symbol data support.
     /// </summary>
     public SeriesEvaluator(Dictionary<SeriesKey, StockData> dataByKey, StockData defaultData, Dictionary<SeriesHandle, SeriesNode> nodes)
+        : this(dataByKey, defaultData, nodes, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a new series evaluator with multi-symbol data and compute context.
+    /// </summary>
+    public SeriesEvaluator(Dictionary<SeriesKey, StockData> dataByKey, StockData defaultData, Dictionary<SeriesHandle, SeriesNode> nodes, ComputeContext? computeContext)
     {
         _dataByKey = dataByKey;
         _defaultData = defaultData;
         _nodes = nodes;
         _cache = new Dictionary<SeriesHandle, double[]>();
+        _computeContext = computeContext;
     }
+
+    /// <summary>
+    /// Gets the number of fast path hits (zero-allocation compute).
+    /// </summary>
+    public int FastPathHits => _fastPathHits;
+
+    /// <summary>
+    /// Gets the number of standard path computations.
+    /// </summary>
+    public int StandardPathHits => _standardPathHits;
 
     public Dictionary<SeriesHandle, double[]> Evaluate(IReadOnlyCollection<SeriesHandle> handles)
     {
@@ -112,11 +146,27 @@ internal sealed class SeriesEvaluator
         // This avoids cloning StockData and copying arrays
         if (IsBaseSeriesInput(node.Input.Value, node.SeriesKey))
         {
+            // Try zero-allocation fast path if compute context available
+            if (_computeContext is not null)
+            {
+                var fastResult = IndicatorCompute.TryComputeFast(baseData, node.Spec, _computeContext);
+                if (fastResult.HasValue)
+                {
+                    _fastPathHits++;
+                    // Fast path returns ComputeBuffer, need to copy to double[] for cache
+                    // This is still more efficient because we avoid intermediate allocations
+                    using var buffer = fastResult.Value;
+                    return buffer.ToArray();
+                }
+            }
+
+            _standardPathHits++;
             var result = ApplyIndicator(baseData, node.Spec);
             return ExtractOutput(result, node.Spec);
         }
 
         // Chained indicator path: need to clone with custom input values
+        _standardPathHits++;
         var input = Resolve(node.Input.Value);
         var working = CloneWithCustomValues(baseData, input);
         var result2 = ApplyIndicator(working, node.Spec);
