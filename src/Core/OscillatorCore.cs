@@ -5288,5 +5288,391 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators - Batch 6
+
+    /// <summary>
+    /// Computes Fast and Slow Stochastic Oscillator.
+    /// </summary>
+    internal static void FastSlowStochasticOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int fastLength = 5, int slowLength = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastKArray = pool.Rent(close.Length);
+        var slowKArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastK = fastKArray.AsSpan(0, close.Length);
+            var slowK = slowKArray.AsSpan(0, close.Length);
+
+            // Calculate fast stochastic %K
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < fastLength - 1)
+                {
+                    fastK[i] = 50;
+                    continue;
+                }
+
+                var hh = high[i];
+                var ll = low[i];
+                for (var j = i - fastLength + 1; j <= i; j++)
+                {
+                    if (high[j] > hh) hh = high[j];
+                    if (low[j] < ll) ll = low[j];
+                }
+                var range = hh - ll;
+                fastK[i] = range != 0 ? ((close[i] - ll) / range) * 100 : 50;
+            }
+
+            // Calculate slow stochastic %K
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < slowLength - 1)
+                {
+                    slowK[i] = 50;
+                    continue;
+                }
+
+                var hh = high[i];
+                var ll = low[i];
+                for (var j = i - slowLength + 1; j <= i; j++)
+                {
+                    if (high[j] > hh) hh = high[j];
+                    if (low[j] < ll) ll = low[j];
+                }
+                var range = hh - ll;
+                slowK[i] = range != 0 ? ((close[i] - ll) / range) * 100 : 50;
+            }
+
+            // Output is fast - slow
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = fastK[i] - slowK[i];
+            }
+        }
+        finally
+        {
+            pool.Return(fastKArray);
+            pool.Return(slowKArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes G-Oscillator (Gopalakrishnan Range Index based oscillator).
+    /// </summary>
+    internal static void GOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 10)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var hh = high[i];
+            var ll = low[i];
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (high[j] > hh) hh = high[j];
+                if (low[j] < ll) ll = low[j];
+            }
+
+            var range = hh - ll;
+            // GAPO = ln(range) / ln(length)
+            output[i] = range > 0 ? Math.Log(range) / Math.Log(length) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Gann Swing Oscillator.
+    /// </summary>
+    internal static void GannSwingOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 2)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double swing = 0;
+        double prevHigh = 0, prevLow = 0;
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i == 0)
+            {
+                prevHigh = high[i];
+                prevLow = low[i];
+                output[i] = 0;
+                continue;
+            }
+
+            // Check for higher high or lower low
+            if (high[i] > prevHigh)
+            {
+                swing = 1; // Bullish swing
+                prevHigh = high[i];
+            }
+            else if (low[i] < prevLow)
+            {
+                swing = -1; // Bearish swing
+                prevLow = low[i];
+            }
+
+            output[i] = swing;
+        }
+    }
+
+    /// <summary>
+    /// Computes Gann Trend Oscillator.
+    /// </summary>
+    internal static void GannTrendOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hiLoArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hiLo = hiLoArray.AsSpan(0, close.Length);
+
+            // Calculate HiLo activator
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length)
+                {
+                    hiLo[i] = (high[i] + low[i]) / 2;
+                    continue;
+                }
+
+                // Calculate SMA of high and low
+                var smaHigh = 0.0;
+                var smaLow = 0.0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    smaHigh += high[j];
+                    smaLow += low[j];
+                }
+                smaHigh /= length;
+                smaLow /= length;
+
+                // Determine trend based on close vs SMA
+                if (close[i] > smaHigh)
+                {
+                    hiLo[i] = smaLow;
+                }
+                else if (close[i] < smaLow)
+                {
+                    hiLo[i] = smaHigh;
+                }
+                else
+                {
+                    hiLo[i] = hiLo[i - 1];
+                }
+            }
+
+            // Calculate oscillator as close - hiLo
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - hiLo[i];
+            }
+        }
+        finally
+        {
+            pool.Return(hiLoArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Firefly Oscillator.
+    /// </summary>
+    internal static void FireflyOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10, int smoothLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var zlemaArray = pool.Rent(close.Length);
+        var atrArray = pool.Rent(close.Length);
+        var rawArray = pool.Rent(close.Length);
+
+        try
+        {
+            var zlema = zlemaArray.AsSpan(0, close.Length);
+            var atr = atrArray.AsSpan(0, close.Length);
+            var raw = rawArray.AsSpan(0, close.Length);
+
+            // Calculate ZLEMA of close
+            MovingAverageCore.ZeroLagEma(close, zlema, length);
+
+            // Calculate ATR
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            // Calculate raw oscillator
+            for (var i = 0; i < close.Length; i++)
+            {
+                raw[i] = atr[i] != 0 ? (close[i] - zlema[i]) / atr[i] : 0;
+            }
+
+            // Smooth the result
+            MovingAverageCore.SimpleMovingAverage(raw, output, smoothLength);
+        }
+        finally
+        {
+            pool.Return(zlemaArray);
+            pool.Return(atrArray);
+            pool.Return(rawArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Fisher Transform Stochastic Oscillator.
+    /// </summary>
+    internal static void FisherTransformStochasticOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var stochArray = pool.Rent(close.Length);
+
+        try
+        {
+            var stoch = stochArray.AsSpan(0, close.Length);
+
+            // Calculate stochastic
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    stoch[i] = 0;
+                    continue;
+                }
+
+                var hh = high[i];
+                var ll = low[i];
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (high[j] > hh) hh = high[j];
+                    if (low[j] < ll) ll = low[j];
+                }
+
+                var range = hh - ll;
+                // Normalize to -1 to 1 range for Fisher transform
+                stoch[i] = range != 0 ? ((close[i] - ll) / range) * 2 - 1 : 0;
+            }
+
+            // Apply Fisher transform
+            double prevFisher = 0;
+            for (var i = 0; i < close.Length; i++)
+            {
+                // Limit value to avoid infinity
+                var value = Math.Max(-0.999, Math.Min(0.999, stoch[i]));
+                var fisher = 0.5 * Math.Log((1 + value) / (1 - value));
+                // Smooth with previous value
+                output[i] = 0.5 * (fisher + prevFisher);
+                prevFisher = fisher;
+            }
+        }
+        finally
+        {
+            pool.Return(stochArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Karobein Oscillator.
+    /// </summary>
+    internal static void KarobeinOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(input.Length);
+        var mmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, input.Length);
+            var mma = mmaArray.AsSpan(0, input.Length);
+
+            // Calculate EMA
+            MovingAverageCore.ExponentialMovingAverage(input, ema, length);
+
+            // Calculate Modified Moving Average (smoothed EMA)
+            MovingAverageCore.ModifiedMovingAverage(ema, mma, length);
+
+            // Oscillator = (EMA - MMA) / MMA * 100
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = mma[i] != 0 ? ((ema[i] - mma[i]) / mma[i]) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(mmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Grover Llorens Cycle Oscillator.
+    /// </summary>
+    internal static void GroverLlorensCycleOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(input.Length);
+        var smoothArray = pool.Rent(input.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, input.Length);
+            var smooth = smoothArray.AsSpan(0, input.Length);
+
+            // High-pass filter (simple difference from SMA)
+            MovingAverageCore.SimpleMovingAverage(input, smooth, length);
+            for (var i = 0; i < input.Length; i++)
+            {
+                hp[i] = input[i] - smooth[i];
+            }
+
+            // Apply SuperSmoother (approximated with double EMA)
+            MovingAverageCore.DoubleExponentialMovingAverage(hp, output, length / 2);
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(smoothArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

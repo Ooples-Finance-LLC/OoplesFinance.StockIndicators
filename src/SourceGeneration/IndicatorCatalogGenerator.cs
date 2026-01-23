@@ -369,6 +369,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "ErgodicPercentagePriceOscillator",
         "FastandSlowKurtosisOscillator",
         "FastandSlowRelativeStrengthIndexOscillator",
+
+        // Additional Oscillators (Batch 6)
+        "FastandSlowStochasticOscillator",
+        "GOscillator",
+        "GannSwingOscillator",
+        "GannTrendOscillator",
+        "FireflyOscillator",
+        "FisherTransformStochasticOscillator",
+        "KarobeinOscillator",
+        "GroverLlorensCycleOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1056,6 +1066,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "ErgodicPercentagePriceOscillator" => "ComputeErgodicPercentagePriceOscillatorFast",
             "FastandSlowKurtosisOscillator" => "ComputeFastSlowKurtosisOscillatorFast",
             "FastandSlowRelativeStrengthIndexOscillator" => "ComputeFastSlowRsiOscillatorFast",
+
+            // Additional Oscillators (Batch 6)
+            "FastandSlowStochasticOscillator" => "ComputeFastSlowStochasticOscillatorFast",
+            "GOscillator" => "ComputeGOscillatorFast",
+            "GannSwingOscillator" => "ComputeGannSwingOscillatorFast",
+            "GannTrendOscillator" => "ComputeGannTrendOscillatorFast",
+            "FireflyOscillator" => "ComputeFireflyOscillatorFast",
+            "FisherTransformStochasticOscillator" => "ComputeFisherTransformStochasticOscillatorFast",
+            "KarobeinOscillator" => "ComputeKarobeinOscillatorFast",
+            "GroverLlorensCycleOscillator" => "ComputeGroverLlorensCycleOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
