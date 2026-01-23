@@ -439,6 +439,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "KaufmanAdaptiveCorrelationOscillator",
         "StochasticMovingAverageConvergenceDivergenceOscillator",
         "McClellanOscillator",
+
+        // Additional Oscillators (Batch 13) - Ehlers V2 and Specialized
+        "EhlersDecyclerOscillatorV2",
+        "VervoortHeikenAshiCandlestickOscillator",
+        "VervoortHeikenAshiLongTermCandlestickOscillator",
+        "DecisionPointBreadthSwenlinTradingOscillator",
+        "DecisionPointPriceMomentumOscillator",
+        "TFSMboPercentagePriceOscillator",
+        "TFSVolumeOscillator",
+        "MassThrustOscillator",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1196,6 +1206,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "KaufmanAdaptiveCorrelationOscillator" => "ComputeKaufmanAdaptiveCorrelationOscillatorFast",
             "StochasticMovingAverageConvergenceDivergenceOscillator" => "ComputeStochasticMacdOscillatorFast",
             "McClellanOscillator" => "ComputeMcClellanOscillatorFast",
+
+            // Additional Oscillators (Batch 13) - Ehlers V2 and Specialized
+            "EhlersDecyclerOscillatorV2" => "ComputeEhlersDecyclerOscillatorV2Fast",
+            "VervoortHeikenAshiCandlestickOscillator" => "ComputeVervoortHeikenAshiCandlestickOscillatorFast",
+            "VervoortHeikenAshiLongTermCandlestickOscillator" => "ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast",
+            "DecisionPointBreadthSwenlinTradingOscillator" => "ComputeDecisionPointBreadthSwenlinTradingOscillatorFast",
+            "DecisionPointPriceMomentumOscillator" => "ComputeDecisionPointPriceMomentumOscillatorFast",
+            "TFSMboPercentagePriceOscillator" => "ComputeTFSMboPercentagePriceOscillatorFast",
+            "TFSVolumeOscillator" => "ComputeTFSVolumeOscillatorFast",
+            "MassThrustOscillator" => "ComputeMassThrustOscillatorFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

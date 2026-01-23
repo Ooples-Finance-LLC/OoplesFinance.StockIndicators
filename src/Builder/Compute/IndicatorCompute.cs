@@ -4524,5 +4524,103 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 13 - Additional Ehlers and Specialized Oscillators
+
+    /// <summary>
+    /// Computes Ehlers Decycler Oscillator V2 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.EhlersDecyclerOscillatorV2(close, buffer.WritableSpan, length > 0 ? length * 9 : 125);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vervoort Heiken Ashi Candlestick Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VervoortHeikenAshiCandlestickOscillator(high, low, close, open, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vervoort Heiken Ashi Long Term Candlestick Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VervoortHeikenAshiLongTermCandlestickOscillator(high, low, close, open, buffer.WritableSpan, length > 0 ? length * 4 : 55);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Decision Point Breadth Swenlin Trading Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DecisionPointBreadthSwenlinTradingOscillator(close, buffer.WritableSpan, Math.Max(1, length / 3), length * 7);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Decision Point Price Momentum Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DecisionPointPriceMomentumOscillator(close, buffer.WritableSpan, length > 0 ? length * 2 + 7 : 35, length > 0 ? length + 6 : 20);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TFS MBO Percentage Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TFSMboPercentagePriceOscillator(close, buffer.WritableSpan, length > 0 ? length + 11 : 25, length > 0 ? length * 14 : 200);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TFS Volume Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTFSVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TFSVolumeOscillator(volume, buffer.WritableSpan, length > 0 ? length - 1 : 13, length > 0 ? length * 4 : 55);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Mass Thrust Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMassThrustOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MassThrustOscillator(close, buffer.WritableSpan, length > 0 ? length - 4 : 10);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }

@@ -7966,5 +7966,324 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Batch 13 - Additional Ehlers and Specialized Oscillators
+
+    /// <summary>
+    /// Computes Ehlers Decycler Oscillator V2 (improved version).
+    /// </summary>
+    internal static void EhlersDecyclerOscillatorV2(ReadOnlySpan<double> close, Span<double> output, int length = 125)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+        var smoothArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            var smooth = smoothArray.AsSpan(0, close.Length);
+
+            // High-pass filter using Ehlers super smoother
+            var alpha = (Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) - 1) / Math.Cos(2 * Math.PI / length);
+
+            hp[0] = close[0];
+            hp[1] = close.Length > 1 ? close[1] : close[0];
+
+            for (var i = 2; i < close.Length; i++)
+            {
+                hp[i] = (1 - alpha / 2) * (1 - alpha / 2) * (close[i] - 2 * close[i - 1] + close[i - 2]) + 2 * (1 - alpha) * hp[i - 1] - (1 - alpha) * (1 - alpha) * hp[i - 2];
+            }
+
+            // Smooth the high-pass output
+            MovingAverageCore.ExponentialMovingAverage(hp, smooth, Math.Max(1, length / 10));
+
+            // Oscillator = difference between close and smoothed HP
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - smooth[i];
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(smoothArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Vervoort Heiken Ashi Candlestick Oscillator.
+    /// </summary>
+    internal static void VervoortHeikenAshiCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var haCloseArray = pool.Rent(close.Length);
+        var haOpenArray = pool.Rent(close.Length);
+        var temaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var haClose = haCloseArray.AsSpan(0, close.Length);
+            var haOpen = haOpenArray.AsSpan(0, close.Length);
+            var tema = temaArray.AsSpan(0, close.Length);
+
+            // Calculate Heiken Ashi values
+            haClose[0] = (high[0] + low[0] + close[0] + open[0]) / 4;
+            haOpen[0] = (open[0] + close[0]) / 2;
+
+            for (var i = 1; i < close.Length; i++)
+            {
+                haClose[i] = (high[i] + low[i] + close[i] + open[i]) / 4;
+                haOpen[i] = (haOpen[i - 1] + haClose[i - 1]) / 2;
+            }
+
+            // Calculate HA difference and apply TEMA smoothing
+            var haDiff = pool.Rent(close.Length);
+            try
+            {
+                var diff = haDiff.AsSpan(0, close.Length);
+                for (var i = 0; i < close.Length; i++)
+                {
+                    diff[i] = haClose[i] - haOpen[i];
+                }
+
+                MovingAverageCore.TripleExponentialMovingAverage(diff, tema, length);
+
+                for (var i = 0; i < close.Length; i++)
+                {
+                    output[i] = tema[i];
+                }
+            }
+            finally
+            {
+                pool.Return(haDiff);
+            }
+        }
+        finally
+        {
+            pool.Return(haCloseArray);
+            pool.Return(haOpenArray);
+            pool.Return(temaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Vervoort Heiken Ashi Long Term Candlestick Oscillator.
+    /// </summary>
+    internal static void VervoortHeikenAshiLongTermCandlestickOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 55)
+    {
+        // Same as regular version but with longer default period
+        VervoortHeikenAshiCandlestickOscillator(high, low, close, open, output, length);
+    }
+
+    /// <summary>
+    /// Computes Decision Point Breadth Swenlin Trading Oscillator.
+    /// Uses price rate of change as proxy for breadth when individual stock data is used.
+    /// </summary>
+    internal static void DecisionPointBreadthSwenlinTradingOscillator(ReadOnlySpan<double> close, Span<double> output, int shortLength = 5, int longLength = 100)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rocArray = pool.Rent(close.Length);
+        var shortEmaArray = pool.Rent(close.Length);
+        var longEmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var roc = rocArray.AsSpan(0, close.Length);
+            var shortEma = shortEmaArray.AsSpan(0, close.Length);
+            var longEma = longEmaArray.AsSpan(0, close.Length);
+
+            // Calculate rate of change
+            RateOfChange(close, roc, 1);
+
+            // Apply dual EMA smoothing
+            MovingAverageCore.ExponentialMovingAverage(roc, shortEma, shortLength);
+            MovingAverageCore.ExponentialMovingAverage(shortEma, longEma, longLength);
+
+            // Oscillator = short EMA - long EMA
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = shortEma[i] - longEma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(rocArray);
+            pool.Return(shortEmaArray);
+            pool.Return(longEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Decision Point Price Momentum Oscillator.
+    /// </summary>
+    internal static void DecisionPointPriceMomentumOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 35, int signalLength = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rocArray = pool.Rent(close.Length);
+        var smoothArray = pool.Rent(close.Length);
+        var smoothedArray = pool.Rent(close.Length);
+
+        try
+        {
+            var roc = rocArray.AsSpan(0, close.Length);
+            var smooth = smoothArray.AsSpan(0, close.Length);
+            var smoothed = smoothedArray.AsSpan(0, close.Length);
+
+            // Calculate ROC
+            RateOfChange(close, roc, 1);
+
+            // Double smoothing with EMA
+            MovingAverageCore.ExponentialMovingAverage(roc, smooth, length);
+            MovingAverageCore.ExponentialMovingAverage(smooth, smoothed, signalLength);
+
+            // Scale by 10 for readability
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = smoothed[i] * 10;
+            }
+        }
+        finally
+        {
+            pool.Return(rocArray);
+            pool.Return(smoothArray);
+            pool.Return(smoothedArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes TFS MBO Percentage Price Oscillator.
+    /// </summary>
+    internal static void TFSMboPercentagePriceOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 25, int slowLength = 200)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(close.Length);
+        var slowEmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, close.Length);
+            var slowEma = slowEmaArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
+
+            // TFS MBO PPO = ((fast - slow) / slow) * 100
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes TFS Volume Oscillator.
+    /// </summary>
+    internal static void TFSVolumeOscillator(ReadOnlySpan<double> volume, Span<double> output, int fastLength = 13, int slowLength = 55)
+    {
+        if (output.Length < volume.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(volume.Length);
+        var slowEmaArray = pool.Rent(volume.Length);
+
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, volume.Length);
+            var slowEma = slowEmaArray.AsSpan(0, volume.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(volume, fastEma, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(volume, slowEma, slowLength);
+
+            // Volume oscillator = ((fast - slow) / slow) * 100
+            for (var i = 0; i < volume.Length; i++)
+            {
+                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Mass Thrust Oscillator.
+    /// Uses advancing/declining price ratio as proxy for breadth.
+    /// </summary>
+    internal static void MassThrustOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var thrustArray = pool.Rent(close.Length);
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var thrust = thrustArray.AsSpan(0, close.Length);
+            var ema = emaArray.AsSpan(0, close.Length);
+
+            // Calculate daily thrust (advance/decline ratio proxy)
+            thrust[0] = 0;
+            for (var i = 1; i < close.Length; i++)
+            {
+                var change = close[i] - close[i - 1];
+                thrust[i] = change > 0 ? 1 : (change < 0 ? -1 : 0);
+            }
+
+            // Smooth with EMA
+            MovingAverageCore.ExponentialMovingAverage(thrust, ema, length);
+
+            // Scale to percentage
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = ema[i] * 100;
+            }
+        }
+        finally
+        {
+            pool.Return(thrustArray);
+            pool.Return(emaArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }
