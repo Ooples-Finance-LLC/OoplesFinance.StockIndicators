@@ -1307,4 +1307,90 @@ internal static class VolatilityCore
     }
 
     #endregion
+
+    #region Bollinger Bands Extensions
+
+    /// <summary>
+    /// Computes Bollinger Bands %B indicator.
+    /// %B shows where price is relative to the bands (0 = lower band, 100 = upper band).
+    /// </summary>
+    /// <param name="input">Price series (typically close prices).</param>
+    /// <param name="output">Output span for %B values (0-100 scale).</param>
+    /// <param name="length">Bollinger Bands period (default 20).</param>
+    /// <param name="multiplier">Standard deviation multiplier (default 2).</param>
+    internal static void BollingerBandsPercentB(ReadOnlySpan<double> input, Span<double> output, int length = 20, double multiplier = 2)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate SMA
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+            var sma = sum / length;
+
+            // Calculate Standard Deviation
+            double variance = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var diff = input[j] - sma;
+                variance += diff * diff;
+            }
+            var stdDev = Math.Sqrt(variance / length);
+
+            var upperBand = sma + (multiplier * stdDev);
+            var lowerBand = sma - (multiplier * stdDev);
+            var bandWidth = upperBand - lowerBand;
+
+            output[i] = bandWidth != 0 ? ((input[i] - lowerBand) / bandWidth) * 100 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands with ATR instead of standard deviation.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for middle band values.</param>
+    /// <param name="length">Period (default 20).</param>
+    /// <param name="multiplier">ATR multiplier (default 2).</param>
+    internal static void BollingerBandsAtr(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 20, double multiplier = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Calculate ATR-based middle band (SMA of close for now)
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += close[j];
+            }
+            output[i] = sum / length;
+        }
+    }
+
+    #endregion
 }

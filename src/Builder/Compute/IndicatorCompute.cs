@@ -3315,5 +3315,30 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Bollinger Bands %B using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerBandsPercentBFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        VolatilityCore.BollingerBandsPercentB(inputSpan, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands with ATR using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.BollingerBandsAtr(high, low, close, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
     #endregion
 }

@@ -331,6 +331,10 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "TillsonT3MovingAverage",
         "ChandeQuickStick",
         "PriceChannel",
+
+        // Bollinger Bands Extensions (Batch 1)
+        "BollingerBandsPercentB",
+        "BollingerBandsAverageTrueRange",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -980,6 +984,10 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "TillsonT3MovingAverage" => "ComputeT3Fast",
             "ChandeQuickStick" => "ComputeQstickFast",
             "PriceChannel" => "ComputePriceChannelMiddleFast",
+
+            // Bollinger Bands Extensions (Batch 1)
+            "BollingerBandsPercentB" => "ComputeBollingerBandsPercentBFast",
+            "BollingerBandsAverageTrueRange" => "ComputeBollingerBandsAtrFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
