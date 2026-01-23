@@ -255,6 +255,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "AlligatorTeeth",
         "AlligatorLips",
 
+        // Moving Averages - MovingAverageCore (Batch 17 - Ehlers Laguerre)
+        "EhlersLaguerreFilter",
+        "EhlersLaguerreRelativeStrengthIndex",
+        "EhlersZeroLagExponentialMovingAverage",
+        "EhlersFractalAdaptiveMovingAverage",
+        "EhlersInverseFisherTransform",
+        "EhlersCyberCycle",
+        "EhlersStochastic",
+        "EhlersAdaptiveLaguerreFilter",
+
         // Volume - VolumeCore (Additional Batch 3)
         "WilliamsAD",
         "NetVolume",
@@ -1051,6 +1061,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "AlligatorJaw" => "ComputeAlligatorJawFast",
             "AlligatorTeeth" => "ComputeAlligatorTeethFast",
             "AlligatorLips" => "ComputeAlligatorLipsFast",
+
+            // Moving Averages (Batch 17 - Ehlers Laguerre)
+            "EhlersLaguerreFilter" => "ComputeEhlersLaguerreFilterFast",
+            "EhlersLaguerreRelativeStrengthIndex" => "ComputeEhlersLaguerreRsiFast",
+            "EhlersZeroLagExponentialMovingAverage" => "ComputeEhlersZeroLagEmaFast",
+            "EhlersFractalAdaptiveMovingAverage" => "ComputeEhlersFramaFast",
+            "EhlersInverseFisherTransform" => "ComputeEhlersInverseFisherTransformFast",
+            "EhlersCyberCycle" => "ComputeEhlersCyberCycleFast",
+            "EhlersStochastic" => "ComputeEhlersStochasticFast",
+            "EhlersAdaptiveLaguerreFilter" => "ComputeEhlersAdaptiveLaguerreFilterFast",
 
             // Volume (Additional Batch 3)
             "WilliamsAD" => "ComputeWilliamsADFast",

@@ -2125,4 +2125,437 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Batch 17 - Ehlers Laguerre and Related Filters
+
+    /// <summary>
+    /// Computes Ehlers Laguerre Filter.
+    /// </summary>
+    internal static void EhlersLaguerreFilter(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.2)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var l0 = input.Length > 0 ? input[0] : 0.0;
+        var l1 = l0;
+        var l2 = l0;
+        var l3 = l0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var prevL0 = l0;
+            var prevL1 = l1;
+            var prevL2 = l2;
+
+            l0 = (alpha * input[i]) + ((1 - alpha) * l0);
+            l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * l1);
+            l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * l2);
+            l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * l3);
+
+            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Laguerre Relative Strength Index.
+    /// </summary>
+    internal static void EhlersLaguerreRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output, double gamma = 0.5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        gamma = Math.Max(0, Math.Min(1, gamma));
+        var l0 = input.Length > 0 ? input[0] : 0.0;
+        var l1 = l0;
+        var l2 = l0;
+        var l3 = l0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var prevL0 = l0;
+            var prevL1 = l1;
+            var prevL2 = l2;
+
+            l0 = ((1 - gamma) * input[i]) + (gamma * l0);
+            l1 = (-gamma * l0) + prevL0 + (gamma * l1);
+            l2 = (-gamma * l1) + prevL1 + (gamma * l2);
+            l3 = (-gamma * l2) + prevL2 + (gamma * l3);
+
+            var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
+            var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
+
+            output[i] = cu + cd != 0 ? Math.Max(0, Math.Min(1, cu / (cu + cd))) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Zero Lag Exponential Moving Average.
+    /// </summary>
+    internal static void EhlersZeroLagExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(input.Length);
+        var ecArray = pool.Rent(input.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, input.Length);
+            var ec = ecArray.AsSpan(0, input.Length);
+
+            ExponentialMovingAverage(input, ema, length);
+
+            var gain = 0.0;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var prevEc = i > 0 ? ec[i - 1] : ema[i];
+                var error = input[i] - prevEc;
+
+                // Adaptive gain calculation
+                if (i > 0)
+                {
+                    var leastError = error * error;
+                    if (leastError > 0)
+                    {
+                        gain = Math.Max(0, Math.Min(2, gain + 0.01));
+                    }
+                    else
+                    {
+                        gain = Math.Max(0, gain - 0.01);
+                    }
+                }
+
+                ec[i] = ema[i] + (gain * error);
+                output[i] = ec[i];
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(ecArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Fractal Adaptive Moving Average.
+    /// </summary>
+    internal static void EhlersFractalAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 16)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var halfLength = length / 2;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            // Calculate fractal dimension
+            var n1 = 0.0;
+            var n2 = 0.0;
+            var n3 = 0.0;
+
+            var hh1 = double.MinValue;
+            var ll1 = double.MaxValue;
+            var hh2 = double.MinValue;
+            var ll2 = double.MaxValue;
+            var hh3 = double.MinValue;
+            var ll3 = double.MaxValue;
+
+            for (var j = 0; j < halfLength; j++)
+            {
+                var val = input[i - j];
+                if (val > hh1) hh1 = val;
+                if (val < ll1) ll1 = val;
+            }
+            n1 = (hh1 - ll1) / halfLength;
+
+            for (var j = halfLength; j < length; j++)
+            {
+                var val = input[i - j];
+                if (val > hh2) hh2 = val;
+                if (val < ll2) ll2 = val;
+            }
+            n2 = (hh2 - ll2) / halfLength;
+
+            for (var j = 0; j < length; j++)
+            {
+                var val = input[i - j];
+                if (val > hh3) hh3 = val;
+                if (val < ll3) ll3 = val;
+            }
+            n3 = (hh3 - ll3) / length;
+
+            var dimen = 0.0;
+            if (n1 + n2 > 0 && n3 > 0)
+            {
+                dimen = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
+            }
+
+            var alpha = Math.Exp(-4.6 * (dimen - 1));
+            alpha = Math.Max(0.01, Math.Min(1, alpha));
+
+            var prevFrama = i > 0 ? output[i - 1] : input[i];
+            output[i] = (alpha * input[i]) + ((1 - alpha) * prevFrama);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Inverse Fisher Transform.
+    /// </summary>
+    internal static void EhlersInverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        var smoothedArray = pool.Rent(input.Length);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            var smoothed = smoothedArray.AsSpan(0, input.Length);
+
+            // Calculate RSI-like oscillator
+            OscillatorCore.RelativeStrengthIndex(input, rsi, length);
+
+            // Scale to -5 to +5 range
+            for (var i = 0; i < input.Length; i++)
+            {
+                smoothed[i] = 0.1 * (rsi[i] - 50);
+            }
+
+            // Apply inverse Fisher transform
+            for (var i = 0; i < input.Length; i++)
+            {
+                var x = smoothed[i];
+                var exp2x = Math.Exp(2 * x);
+                output[i] = (exp2x - 1) / (exp2x + 1);
+            }
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(smoothedArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cyber Cycle.
+    /// </summary>
+    internal static void EhlersCyberCycle(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.07)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(input.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, input.Length);
+
+            // 4-bar weighted moving average for smoothing
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < 3)
+                {
+                    smooth[i] = input[i];
+                }
+                else
+                {
+                    smooth[i] = (input[i] + 2 * input[i - 1] + 2 * input[i - 2] + input[i - 3]) / 6;
+                }
+            }
+
+            // Cyber Cycle calculation
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < 7)
+                {
+                    output[i] = (input[i] - 2 * (i >= 1 ? input[i - 1] : 0) + (i >= 2 ? input[i - 2] : 0)) / 4;
+                }
+                else
+                {
+                    var prevCycle1 = output[i - 1];
+                    var prevCycle2 = output[i - 2];
+                    output[i] = ((1 - 0.5 * alpha) * (1 - 0.5 * alpha) * (smooth[i] - 2 * smooth[i - 1] + smooth[i - 2])) +
+                                (2 * (1 - alpha) * prevCycle1) - ((1 - alpha) * (1 - alpha) * prevCycle2);
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Stochastic.
+    /// </summary>
+    internal static void EhlersStochastic(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(input.Length);
+        var roofingArray = pool.Rent(input.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, input.Length);
+            var roofing = roofingArray.AsSpan(0, input.Length);
+
+            // Apply 2-pole super smoother filter first
+            SuperSmoother(input, smooth, length);
+
+            // Apply roofing filter
+            EhlersRoofingFilter(smooth, roofing, 10, 48);
+
+            // Calculate stochastic
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
+                var highest = double.MinValue;
+                var lowest = double.MaxValue;
+
+                for (var j = 0; j < length; j++)
+                {
+                    var val = roofing[i - j];
+                    if (val > highest) highest = val;
+                    if (val < lowest) lowest = val;
+                }
+
+                output[i] = highest - lowest != 0 ? (roofing[i] - lowest) / (highest - lowest) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+            pool.Return(roofingArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Adaptive Laguerre Filter.
+    /// </summary>
+    internal static void EhlersAdaptiveLaguerreFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var l0 = input.Length > 0 ? input[0] : 0.0;
+        var l1 = l0;
+        var l2 = l0;
+        var l3 = l0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            // Calculate adaptive alpha based on price range
+            var highest = double.MinValue;
+            var lowest = double.MaxValue;
+            for (var j = 0; j < length; j++)
+            {
+                var val = input[i - j];
+                if (val > highest) highest = val;
+                if (val < lowest) lowest = val;
+            }
+
+            var diff = highest - lowest;
+            var mid = (highest + lowest) / 2;
+            var alpha = diff > 0 ? Math.Abs(input[i] - mid) / diff : 0.5;
+            alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+
+            var prevL0 = l0;
+            var prevL1 = l1;
+            var prevL2 = l2;
+
+            l0 = (alpha * input[i]) + ((1 - alpha) * l0);
+            l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * l1);
+            l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * l2);
+            l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * l3);
+
+            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Roofing Filter (helper for other Ehlers indicators).
+    /// </summary>
+    internal static void EhlersRoofingFilter(ReadOnlySpan<double> input, Span<double> output, int hpLength = 10, int lpLength = 48)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(input.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, input.Length);
+
+            // High-pass filter
+            var alphaHp = (Math.Cos(2 * Math.PI / hpLength) + Math.Sin(2 * Math.PI / hpLength) - 1) / Math.Cos(2 * Math.PI / hpLength);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < 2)
+                {
+                    hp[i] = 0;
+                }
+                else
+                {
+                    hp[i] = ((1 - alphaHp / 2) * (1 - alphaHp / 2) * (input[i] - 2 * input[i - 1] + input[i - 2])) +
+                            (2 * (1 - alphaHp) * hp[i - 1]) - ((1 - alphaHp) * (1 - alphaHp) * hp[i - 2]);
+                }
+            }
+
+            // Super smoother (low-pass filter)
+            SuperSmoother(hp, output, lpLength);
+        }
+        finally
+        {
+            pool.Return(hpArray);
+        }
+    }
+
+    #endregion
 }

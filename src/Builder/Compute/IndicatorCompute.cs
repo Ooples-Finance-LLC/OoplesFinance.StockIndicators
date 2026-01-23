@@ -4901,5 +4901,100 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 17 - Ehlers Laguerre and Related Filters
+
+    /// <summary>
+    /// Computes Ehlers Laguerre Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var alpha = 2.0 / (length + 1); // Convert length to alpha
+        MovingAverageCore.EhlersLaguerreFilter(close, buffer.WritableSpan, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Laguerre Relative Strength Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersLaguerreRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var gamma = 1.0 - (2.0 / (length + 1)); // Convert length to gamma
+        MovingAverageCore.EhlersLaguerreRelativeStrengthIndex(close, buffer.WritableSpan, gamma);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Zero Lag EMA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersZeroLagEmaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersZeroLagExponentialMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Fractal Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 16)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersFractalAdaptiveMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Inverse Fisher Transform using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersInverseFisherTransform(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cyber Cycle using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCyberCycleFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var alpha = 2.0 / (length + 1); // Convert length to alpha
+        MovingAverageCore.EhlersCyberCycle(close, buffer.WritableSpan, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Stochastic using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersStochastic(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Adaptive Laguerre Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersAdaptiveLaguerreFilter(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }
