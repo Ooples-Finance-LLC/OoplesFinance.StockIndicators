@@ -317,6 +317,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
         // Volume - Additional Batch 5
         "WilliamsAccumulationDistribution",
+
+        // Additional Enum Name Aliases (enum uses different name than abbreviated fast path)
+        "ConnorsRelativeStrengthIndex",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -951,6 +954,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
             // Volume (Additional Batch 5)
             "WilliamsAccumulationDistribution" => "ComputeWilliamsADFast",
+
+            // Additional Enum Name Aliases
+            "ConnorsRelativeStrengthIndex" => "ComputeConnorsRsiFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
