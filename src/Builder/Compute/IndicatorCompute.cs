@@ -5387,6 +5387,19 @@ internal static partial class IndicatorCompute
 
     // ComputeNthOrderDifferencingOscillatorFast already implemented in Batch 11
 
+    /// <summary>
+    /// Computes Morphed Sine Wave using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMorphedSineWaveFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MorphedSineWave(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    // ComputeMarketFacilitationIndexFast and ComputeVolumeAccumulationOscillatorFast already implemented in earlier batches
+
     #endregion
 
     #endregion

@@ -535,6 +535,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "MultiLevelIndicator",
         "MarketDirectionIndicator",
         // NthOrderDifferencingOscillator already added in Batch 11
+        "MorphedSineWave",
+        // MarketFacilitationIndex, VolumeAccumulationOscillator already added in earlier batches
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1386,7 +1388,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "MoveTracker" => "ComputeMoveTrackerFast",
             "MultiLevelIndicator" => "ComputeMultiLevelIndicatorFast",
             "MarketDirectionIndicator" => "ComputeMarketDirectionIndicatorFast",
-            // NthOrderDifferencingOscillator already added in Batch 11
+            // NthOrderDifferencingOscillator, MarketFacilitationIndex, VolumeAccumulationOscillator already added in earlier batches
+            "MorphedSineWave" => "ComputeMorphedSineWaveFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
