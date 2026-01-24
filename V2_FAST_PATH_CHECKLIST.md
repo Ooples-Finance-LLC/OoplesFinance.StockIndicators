@@ -6,18 +6,18 @@ This checklist tracks progress on implementing the v2 Builder fast path for all 
 
 The v2 fast path has three layers:
 
-1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
-2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**409 INDICATORS WIRED** - ALL ComputeFast methods!)
+1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (**597 methods**)
+2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (**~588 methods**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**~588 INDICATORS WIRED**)
 
 ### Current State
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | 511 unique | Span-based implementations (some have aliases) |
-| ComputeFast Wrappers | 522 | Buffer wrappers in IndicatorCompute.cs |
-| SpecOptions Classes | **522** | Typed indicator options |
-| TryComputeFast Dispatch | **522** | Routed to fast path methods |
+| Core Methods | **597** | Span-based implementations (Osc:286 MA:188 Trend:59 Vol:35 Volume:29) |
+| ComputeFast Wrappers | ~588 | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **593** | Typed indicator options |
+| TryComputeFast Dispatch | **~588** | Routed to fast path methods |
 | IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
@@ -29,16 +29,17 @@ The v2 fast path has three layers:
 - **Batch 28**: Added 15 final Core method wrappers (Reverse Engineering RSI, PPO MA, etc.)
 - **Batch 29**: Added TripleHullMovingAverage, AdaptiveAutonomousRecursiveMovingAverage Core methods
 - **Batch 30**: Added GDEMA, Ehlers FIR/IIR Filter, VolumeAdjustedMovingAverage, AverageDayRange
+- **Batches 31-32**: Added Ehlers CenterofGravity, Reflex, Trendflex, StochasticCyberCycle Core methods
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
-- **Total**: 522 SpecOptions, 522 dispatch routes
+- **Total**: 593 SpecOptions, 588 dispatch routes
 
 ### Coverage Analysis
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| Core Methods | 511 unique | ~66% of 773 |
-| SpecOptions/Dispatch | 522 | ~68% of 773 |
-| Remaining indicators | ~251 | ~32% |
+| Core Methods | **597** | **77%** of 773 |
+| SpecOptions/Dispatch | **~588** | **76%** of 773 |
+| Remaining indicators | **~176** | **23%** |
 
 ### Notes on Coverage Calculation
 
@@ -46,9 +47,23 @@ The v2 fast path has three layers:
 - 79 Core method names don't have exact SpecOptions match due to aliasing
 - All Core methods with aliases are already wired through abbreviated SpecOptions
 
+### Implementation Challenges for Remaining Indicators
+
+**MovingAvgType Dependency**: ~80% of remaining indicators depend on `MovingAvgType` parameter which allows 162+ MA variants. These cannot be easily converted to simple Core methods because:
+1. The Calculate method allows dynamic MA selection (e.g., SMA, EMA, DEMA, etc.)
+2. A Core method would need to support all 162 MA types internally, or
+3. Accept a delegate/function pointer for the MA calculation
+
+**Complex Dependencies**: Many remaining indicators call other Calculate methods internally:
+- EhlersAdaptive* indicators depend on EhlersAutoCorrelationPeriodogram
+- Efficient* indicators depend on KaufmanAdaptiveMovingAverage
+- Most RSI/Stochastic variants depend on the base implementations
+
+**Multi-Output Indicators**: Some indicators return multiple output series requiring multiple Core methods or array outputs.
+
 ### Remaining Work for 100% Coverage
 
-263 indicators need Core method implementations:
+~176 indicators need Core method implementations:
 - _1LCLeastSquaresMovingAverage
 - _3HMA
 - _4MovingAverageConvergenceDivergence
