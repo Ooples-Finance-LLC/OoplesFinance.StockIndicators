@@ -4696,6 +4696,987 @@ public sealed class MassThrustOscillatorSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 7 SpecOptions ==========
+
+/// <summary>
+/// Ultimate Moving Average indicator options.
+/// </summary>
+public sealed class UltimateMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public UltimateMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Symmetrically Weighted Moving Average indicator options.
+/// </summary>
+public sealed class SymmetricallyWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SymmetricallyWeightedMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Square Root Weighted Moving Average indicator options.
+/// </summary>
+public sealed class SquareRootWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SquareRootWeightedMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Spencer 15 Point Moving Average indicator options.
+/// </summary>
+public sealed class Spencer15PointMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public Spencer15PointMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Spencer 21 Point Moving Average indicator options.
+/// </summary>
+public sealed class Spencer21PointMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public Spencer21PointMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Slow Smoothed Moving Average indicator options.
+/// </summary>
+public sealed class SlowSmoothedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SlowSmoothedMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Repulsion Moving Average indicator options.
+/// </summary>
+public sealed class RepulsionMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public RepulsionMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quick Moving Average indicator options.
+/// </summary>
+public sealed class QuickMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public QuickMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Better Exponential Moving Average indicator options.
+/// </summary>
+public sealed class EhlersBetterExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersBetterExponentialMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Deviation Scaled Moving Average indicator options.
+/// </summary>
+public sealed class EhlersDeviationScaledMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDeviationScaledMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Hann Moving Average indicator options.
+/// </summary>
+public sealed class EhlersHannMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHannMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Triangle Moving Average indicator options.
+/// </summary>
+public sealed class EhlersTriangleMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersTriangleMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Elastic Volume Weighted Moving Average V1 indicator options.
+/// </summary>
+public sealed class ElasticVolumeWeightedMovingAverageV1SpecOptions : IIndicatorSpecOptions
+{
+    public ElasticVolumeWeightedMovingAverageV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Holt Exponential Moving Average indicator options.
+/// </summary>
+public sealed class HoltExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public HoltExponentialMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Pentuple Exponential Moving Average indicator options.
+/// </summary>
+public sealed class PentupleExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public PentupleExponentialMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quadruple Exponential Moving Average indicator options.
+/// </summary>
+public sealed class QuadrupleExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public QuadrupleExponentialMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ichimoku Senkou Span A indicator options.
+/// </summary>
+public sealed class IchimokuSenkouSpanASpecOptions : IIndicatorSpecOptions
+{
+    public IchimokuSenkouSpanASpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ichimoku Senkou Span B indicator options.
+/// </summary>
+public sealed class IchimokuSenkouSpanBSpecOptions : IIndicatorSpecOptions
+{
+    public IchimokuSenkouSpanBSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ichimoku Chikou Span indicator options.
+/// </summary>
+public sealed class IchimokuChikouSpanSpecOptions : IIndicatorSpecOptions
+{
+    public IchimokuChikouSpanSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams Fractal Up indicator options.
+/// </summary>
+public sealed class WilliamsFractalUpSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsFractalUpSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams Fractal Down indicator options.
+/// </summary>
+public sealed class WilliamsFractalDownSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsFractalDownSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Alligator Jaw indicator options.
+/// </summary>
+public sealed class AlligatorJawSpecOptions : IIndicatorSpecOptions
+{
+    public AlligatorJawSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Alligator Teeth indicator options.
+/// </summary>
+public sealed class AlligatorTeethSpecOptions : IIndicatorSpecOptions
+{
+    public AlligatorTeethSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Alligator Lips indicator options.
+/// </summary>
+public sealed class AlligatorLipsSpecOptions : IIndicatorSpecOptions
+{
+    public AlligatorLipsSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Laguerre Filter indicator options.
+/// </summary>
+public sealed class EhlersLaguerreFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersLaguerreFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Laguerre RSI indicator options.
+/// </summary>
+public sealed class EhlersLaguerreRsiSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersLaguerreRsiSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Zero Lag EMA indicator options.
+/// </summary>
+public sealed class EhlersZeroLagEmaSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersZeroLagEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers FRAMA indicator options.
+/// </summary>
+public sealed class EhlersFramaSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFramaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Inverse Fisher Transform indicator options.
+/// </summary>
+public sealed class EhlersInverseFisherTransformSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersInverseFisherTransformSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Cyber Cycle indicator options.
+/// </summary>
+public sealed class EhlersCyberCycleSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCyberCycleSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Stochastic indicator options.
+/// </summary>
+public sealed class EhlersStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersStochasticSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Adaptive Laguerre Filter indicator options.
+/// </summary>
+public sealed class EhlersAdaptiveLaguerreFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersAdaptiveLaguerreFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Coral Trend Indicator options.
+/// </summary>
+public sealed class CoralTrendIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public CoralTrendIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Damped Sine Wave Weighted Filter indicator options.
+/// </summary>
+public sealed class DampedSineWaveWeightedFilterSpecOptions : IIndicatorSpecOptions
+{
+    public DampedSineWaveWeightedFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fibonacci Weighted Moving Average indicator options.
+/// </summary>
+public sealed class FibonacciWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public FibonacciWeightedMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Generalized Double EMA indicator options.
+/// </summary>
+public sealed class GeneralizedDoubleEmaSpecOptions : IIndicatorSpecOptions
+{
+    public GeneralizedDoubleEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Geometric Mean Moving Average indicator options.
+/// </summary>
+public sealed class GeometricMeanMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public GeometricMeanMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Harmonic Mean Moving Average indicator options.
+/// </summary>
+public sealed class HarmonicMeanMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public HarmonicMeanMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 2 Pole Butterworth Filter V1 indicator options.
+/// </summary>
+public sealed class Ehlers2PoleButterworthFilterV1SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers2PoleButterworthFilterV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 2 Pole Butterworth Filter V2 indicator options.
+/// </summary>
+public sealed class Ehlers2PoleButterworthFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers2PoleButterworthFilterV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 3 Pole Butterworth Filter V1 indicator options.
+/// </summary>
+public sealed class Ehlers3PoleButterworthFilterV1SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers3PoleButterworthFilterV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 3 Pole Butterworth Filter V2 indicator options.
+/// </summary>
+public sealed class Ehlers3PoleButterworthFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers3PoleButterworthFilterV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 2 Pole Super Smoother Filter V1 indicator options.
+/// </summary>
+public sealed class Ehlers2PoleSuperSmootherFilterV1SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers2PoleSuperSmootherFilterV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 2 Pole Super Smoother Filter V2 indicator options.
+/// </summary>
+public sealed class Ehlers2PoleSuperSmootherFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers2PoleSuperSmootherFilterV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers 3 Pole Super Smoother Filter indicator options.
+/// </summary>
+public sealed class Ehlers3PoleSuperSmootherFilterSpecOptions : IIndicatorSpecOptions
+{
+    public Ehlers3PoleSuperSmootherFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Decycler indicator options.
+/// </summary>
+public sealed class EhlersDecyclerSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDecyclerSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Hamming Moving Average indicator options.
+/// </summary>
+public sealed class EhlersHammingMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHammingMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Leading Indicator options.
+/// </summary>
+public sealed class EhlersLeadingIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersLeadingIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers High Pass Filter V1 indicator options.
+/// </summary>
+public sealed class EhlersHighPassFilterV1SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHighPassFilterV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers High Pass Filter V2 indicator options.
+/// </summary>
+public sealed class EhlersHighPassFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHighPassFilterV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Distance Weighted Moving Average indicator options.
+/// </summary>
+public sealed class DistanceWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public DistanceWeightedMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Filter indicator options.
+/// </summary>
+public sealed class EhlersFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers FIR Filter indicator options.
+/// </summary>
+public sealed class EhlersFirFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFirFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers IIR Filter indicator options.
+/// </summary>
+public sealed class EhlersIirFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersIirFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Simple Cycle indicator options.
+/// </summary>
+public sealed class SimpleCycleSpecOptions : IIndicatorSpecOptions
+{
+    public SimpleCycleSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Simple Lines indicator options.
+/// </summary>
+public sealed class SimpleLinesSpecOptions : IIndicatorSpecOptions
+{
+    public SimpleLinesSpecOptions(int length, double multiplier = 10)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Double Exponential Smoothing indicator options.
+/// </summary>
+public sealed class DoubleExponentialSmoothingSpecOptions : IIndicatorSpecOptions
+{
+    public DoubleExponentialSmoothingSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Detrended Synthetic Price indicator options.
+/// </summary>
+public sealed class DetrendedSyntheticPriceSpecOptions : IIndicatorSpecOptions
+{
+    public DetrendedSyntheticPriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Belkhayate Timing indicator options.
+/// </summary>
+public sealed class BelkhayateTimingSpecOptions : IIndicatorSpecOptions
+{
+    public BelkhayateTimingSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demark Setup Indicator options.
+/// </summary>
+public sealed class DemarkSetupIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public DemarkSetupIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Performance Index indicator options.
+/// </summary>
+public sealed class PerformanceIndexSpecOptions : IIndicatorSpecOptions
+{
+    public PerformanceIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Psychological Line indicator options.
+/// </summary>
+public sealed class PsychologicalLineSpecOptions : IIndicatorSpecOptions
+{
+    public PsychologicalLineSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Move Tracker indicator options.
+/// </summary>
+public sealed class MoveTrackerSpecOptions : IIndicatorSpecOptions
+{
+    public MoveTrackerSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Multi Level Indicator options.
+/// </summary>
+public sealed class MultiLevelIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public MultiLevelIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Market Direction Indicator options.
+/// </summary>
+public sealed class MarketDirectionIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public MarketDirectionIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Morphed Sine Wave indicator options.
+/// </summary>
+public sealed class MorphedSineWaveSpecOptions : IIndicatorSpecOptions
+{
+    public MorphedSineWaveSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Full Typical Price indicator options.
+/// </summary>
+public sealed class FullTypicalPriceSpecOptions : IIndicatorSpecOptions
+{
+    public FullTypicalPriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Internal Bar Strength Indicator options.
+/// </summary>
+public sealed class InternalBarStrengthIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public InternalBarStrengthIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Z-Score indicator options.
+/// </summary>
+public sealed class ZScoreSpecOptions : IIndicatorSpecOptions
+{
+    public ZScoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fast Z-Score indicator options.
+/// </summary>
+public sealed class FastZScoreSpecOptions : IIndicatorSpecOptions
+{
+    public FastZScoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kurtosis Indicator options.
+/// </summary>
+public sealed class KurtosisIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public KurtosisIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demark Range Expansion Index indicator options.
+/// </summary>
+public sealed class DemarkRangeExpansionIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DemarkRangeExpansionIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demark Pressure Ratio V1 indicator options.
+/// </summary>
+public sealed class DemarkPressureRatioV1SpecOptions : IIndicatorSpecOptions
+{
+    public DemarkPressureRatioV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demark Pressure Ratio V2 indicator options.
+/// </summary>
+public sealed class DemarkPressureRatioV2SpecOptions : IIndicatorSpecOptions
+{
+    public DemarkPressureRatioV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demark Reversal Points indicator options.
+/// </summary>
+public sealed class DemarkReversalPointsSpecOptions : IIndicatorSpecOptions
+{
+    public DemarkReversalPointsSpecOptions(int length1, int length2)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.

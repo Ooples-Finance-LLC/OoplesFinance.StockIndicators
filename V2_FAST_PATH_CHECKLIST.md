@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**327 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**402 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **332** | 323 new + 9 original |
-| TryComputeFast Dispatch | **327** | 318 new routes wired |
+| SpecOptions Classes | **407** | 398 new + 9 original |
+| TryComputeFast Dispatch | **402** | 393 new routes wired |
 
 ### The Gap
 
 - **411 ComputeFast methods exist** but some still use `GenericIndicatorOptions`
-- **327 indicators** now route through `TryComputeFast`
-- **Missing**: ~84 specific `*SpecOptions` classes and corresponding dispatch cases
+- **402 indicators** now route through `TryComputeFast`
+- **Missing**: ~9 specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -484,6 +484,113 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 **Batch 6 - Mass Thrust oscillator:**
 - [x] MassThrustOscillatorSpecOptions
 
+**Batch 7 - Moving averages:**
+- [x] UltimateMovingAverageSpecOptions
+- [x] SymmetricallyWeightedMovingAverageSpecOptions
+- [x] SquareRootWeightedMovingAverageSpecOptions
+- [x] Spencer15PointMovingAverageSpecOptions
+- [x] Spencer21PointMovingAverageSpecOptions
+- [x] SlowSmoothedMovingAverageSpecOptions
+- [x] RepulsionMovingAverageSpecOptions
+- [x] QuickMovingAverageSpecOptions
+
+**Batch 7 - Ehlers MAs:**
+- [x] EhlersBetterExponentialMovingAverageSpecOptions
+- [x] EhlersDeviationScaledMovingAverageSpecOptions
+- [x] EhlersHannMovingAverageSpecOptions
+- [x] EhlersTriangleMovingAverageSpecOptions
+
+**Batch 7 - Volume weighted/exponential MAs:**
+- [x] ElasticVolumeWeightedMovingAverageV1SpecOptions
+- [x] HoltExponentialMovingAverageSpecOptions
+- [x] PentupleExponentialMovingAverageSpecOptions
+- [x] QuadrupleExponentialMovingAverageSpecOptions
+
+**Batch 7 - Ichimoku components:**
+- [x] IchimokuSenkouSpanASpecOptions
+- [x] IchimokuSenkouSpanBSpecOptions
+- [x] IchimokuChikouSpanSpecOptions
+
+**Batch 7 - Williams fractals:**
+- [x] WilliamsFractalUpSpecOptions
+- [x] WilliamsFractalDownSpecOptions
+
+**Batch 7 - Alligator components:**
+- [x] AlligatorJawSpecOptions
+- [x] AlligatorTeethSpecOptions
+- [x] AlligatorLipsSpecOptions
+
+**Batch 7 - Ehlers Laguerre:**
+- [x] EhlersLaguerreFilterSpecOptions
+- [x] EhlersLaguerreRsiSpecOptions
+- [x] EhlersZeroLagEmaSpecOptions
+- [x] EhlersFramaSpecOptions
+- [x] EhlersInverseFisherTransformSpecOptions
+- [x] EhlersCyberCycleSpecOptions
+- [x] EhlersStochasticSpecOptions
+- [x] EhlersAdaptiveLaguerreFilterSpecOptions
+
+**Batch 7 - Trend/Filter indicators:**
+- [x] CoralTrendIndicatorSpecOptions
+- [x] DampedSineWaveWeightedFilterSpecOptions
+- [x] FibonacciWeightedMovingAverageSpecOptions
+- [x] GeneralizedDoubleEmaSpecOptions
+- [x] GeometricMeanMovingAverageSpecOptions
+- [x] HarmonicMeanMovingAverageSpecOptions
+
+**Batch 7 - Ehlers Butterworth filters:**
+- [x] Ehlers2PoleButterworthFilterV1SpecOptions
+- [x] Ehlers2PoleButterworthFilterV2SpecOptions
+- [x] Ehlers3PoleButterworthFilterV1SpecOptions
+- [x] Ehlers3PoleButterworthFilterV2SpecOptions
+
+**Batch 7 - Ehlers Super Smoother filters:**
+- [x] Ehlers2PoleSuperSmootherFilterV1SpecOptions
+- [x] Ehlers2PoleSuperSmootherFilterV2SpecOptions
+- [x] Ehlers3PoleSuperSmootherFilterSpecOptions
+
+**Batch 7 - More Ehlers filters:**
+- [x] EhlersDecyclerSpecOptions
+- [x] EhlersHammingMovingAverageSpecOptions
+- [x] EhlersLeadingIndicatorSpecOptions
+- [x] EhlersHighPassFilterV1SpecOptions
+- [x] EhlersHighPassFilterV2SpecOptions
+- [x] DistanceWeightedMovingAverageSpecOptions
+- [x] EhlersFilterSpecOptions
+- [x] EhlersFirFilterSpecOptions
+- [x] EhlersIirFilterSpecOptions
+
+**Batch 7 - Cycle indicators:**
+- [x] SimpleCycleSpecOptions
+- [x] SimpleLinesSpecOptions
+- [x] DoubleExponentialSmoothingSpecOptions
+- [x] DetrendedSyntheticPriceSpecOptions
+
+**Batch 7 - Timing/Setup indicators:**
+- [x] BelkhayateTimingSpecOptions
+- [x] DemarkSetupIndicatorSpecOptions
+- [x] PerformanceIndexSpecOptions
+- [x] PsychologicalLineSpecOptions
+
+**Batch 7 - Market indicators:**
+- [x] MoveTrackerSpecOptions
+- [x] MultiLevelIndicatorSpecOptions
+- [x] MarketDirectionIndicatorSpecOptions
+- [x] MorphedSineWaveSpecOptions
+
+**Batch 7 - Price/Statistical indicators:**
+- [x] FullTypicalPriceSpecOptions
+- [x] InternalBarStrengthIndicatorSpecOptions
+- [x] ZScoreSpecOptions
+- [x] FastZScoreSpecOptions
+- [x] KurtosisIndicatorSpecOptions
+
+**Batch 7 - Demark indicators:**
+- [x] DemarkRangeExpansionIndexSpecOptions
+- [x] DemarkPressureRatioV1SpecOptions
+- [x] DemarkPressureRatioV2SpecOptions
+- [x] DemarkReversalPointsSpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -538,17 +645,17 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **332** |
-| TryComputeFast Routes | Wired | **327** |
-| **Effective Fast Path Coverage** | | **~42.3%** |
+| SpecOptions Classes | Implemented | **407** |
+| TryComputeFast Routes | Wired | **402** |
+| **Effective Fast Path Coverage** | | **~52%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 327 indicators**
-3. **Continue creating SpecOptions** for remaining ~84 indicators
-4. **Focus on categories with most ComputeFast methods**: More Ehlers filters, MAs, Ichimoku, Williams, Demark
-5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 402 indicators**
+3. **Create remaining ~9 SpecOptions** for final indicators (if any)
+4. **Fast path coverage now at ~52%** (402/773 Calculate methods)
+5. **Consider source generation** to auto-create SpecOptions from Calculate signatures for remaining indicators
 
 ## Notes
 

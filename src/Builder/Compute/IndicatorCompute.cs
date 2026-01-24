@@ -480,6 +480,113 @@ internal static partial class IndicatorCompute
             // Batch 6 - Mass Thrust oscillator
             MassThrustOscillatorSpecOptions mto => ComputeMassThrustOscillatorFast(data, context, mto.Length),
 
+            // Batch 7 - Moving averages
+            UltimateMovingAverageSpecOptions uma => ComputeUltimateMovingAverageFast(data, context, uma.Length),
+            SymmetricallyWeightedMovingAverageSpecOptions swma2 => ComputeSymmetricallyWeightedMovingAverageFast(data, context, swma2.Length),
+            SquareRootWeightedMovingAverageSpecOptions srwma => ComputeSquareRootWeightedMovingAverageFast(data, context, srwma.Length),
+            Spencer15PointMovingAverageSpecOptions sp15 => ComputeSpencer15PointMovingAverageFast(data, context, sp15.Length),
+            Spencer21PointMovingAverageSpecOptions sp21 => ComputeSpencer21PointMovingAverageFast(data, context, sp21.Length),
+            SlowSmoothedMovingAverageSpecOptions ssma => ComputeSlowSmoothedMovingAverageFast(data, context, ssma.Length),
+            RepulsionMovingAverageSpecOptions rema => ComputeRepulsionMovingAverageFast(data, context, rema.Length),
+            QuickMovingAverageSpecOptions qma => ComputeQuickMovingAverageFast(data, context, qma.Length),
+
+            // Batch 7 - Ehlers MAs
+            EhlersBetterExponentialMovingAverageSpecOptions ebema => ComputeEhlersBetterExponentialMovingAverageFast(data, context, ebema.Length),
+            EhlersDeviationScaledMovingAverageSpecOptions edsma => ComputeEhlersDeviationScaledMovingAverageFast(data, context, edsma.Length),
+            EhlersHannMovingAverageSpecOptions ehma => ComputeEhlersHannMovingAverageFast(data, context, ehma.Length),
+            EhlersTriangleMovingAverageSpecOptions etma => ComputeEhlersTriangleMovingAverageFast(data, context, etma.Length),
+
+            // Batch 7 - Volume weighted/exponential MAs
+            ElasticVolumeWeightedMovingAverageV1SpecOptions evwma => ComputeElasticVolumeWeightedMovingAverageV1Fast(data, context, evwma.Length),
+            HoltExponentialMovingAverageSpecOptions hema => ComputeHoltExponentialMovingAverageFast(data, context, hema.Length),
+            PentupleExponentialMovingAverageSpecOptions pema => ComputePentupleExponentialMovingAverageFast(data, context, pema.Length),
+            QuadrupleExponentialMovingAverageSpecOptions qema => ComputeQuadrupleExponentialMovingAverageFast(data, context, qema.Length),
+
+            // Batch 7 - Ichimoku components
+            IchimokuSenkouSpanASpecOptions issa => ComputeIchimokuSenkouSpanAFast(data, context, issa.Length),
+            IchimokuSenkouSpanBSpecOptions issb => ComputeIchimokuSenkouSpanBFast(data, context, issb.Length),
+            IchimokuChikouSpanSpecOptions icsp => ComputeIchimokuChikouSpanFast(data, context, icsp.Length),
+
+            // Batch 7 - Williams fractals
+            WilliamsFractalUpSpecOptions wfu => ComputeWilliamsFractalUpFast(data, context, wfu.Length),
+            WilliamsFractalDownSpecOptions wfd => ComputeWilliamsFractalDownFast(data, context, wfd.Length),
+
+            // Batch 7 - Alligator components
+            AlligatorJawSpecOptions aj => ComputeAlligatorJawFast(data, context, aj.Length),
+            AlligatorTeethSpecOptions at => ComputeAlligatorTeethFast(data, context, at.Length),
+            AlligatorLipsSpecOptions al2 => ComputeAlligatorLipsFast(data, context, al2.Length),
+
+            // Batch 7 - Ehlers Laguerre
+            EhlersLaguerreFilterSpecOptions elf => ComputeEhlersLaguerreFilterFast(data, context, elf.Length),
+            EhlersLaguerreRsiSpecOptions elrsi => ComputeEhlersLaguerreRsiFast(data, context, elrsi.Length),
+            EhlersZeroLagEmaSpecOptions ezle => ComputeEhlersZeroLagEmaFast(data, context, ezle.Length),
+            EhlersFramaSpecOptions eframa => ComputeEhlersFramaFast(data, context, eframa.Length),
+            EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length),
+            EhlersCyberCycleSpecOptions ecc => ComputeEhlersCyberCycleFast(data, context, ecc.Length),
+            EhlersStochasticSpecOptions esto => ComputeEhlersStochasticFast(data, context, esto.Length),
+            EhlersAdaptiveLaguerreFilterSpecOptions ealf => ComputeEhlersAdaptiveLaguerreFilterFast(data, context, ealf.Length),
+
+            // Batch 7 - Trend/Filter indicators
+            CoralTrendIndicatorSpecOptions cti => ComputeCoralTrendIndicatorFast(data, context, cti.Length),
+            DampedSineWaveWeightedFilterSpecOptions dswf => ComputeDampedSineWaveWeightedFilterFast(data, context, dswf.Length),
+            FibonacciWeightedMovingAverageSpecOptions fwma => ComputeFibonacciWeightedMovingAverageFast(data, context, fwma.Length),
+            GeneralizedDoubleEmaSpecOptions gdema => ComputeGeneralizedDoubleEmaFast(data, context, gdema.Length),
+            GeometricMeanMovingAverageSpecOptions gmma => ComputeGeometricMeanMovingAverageFast(data, context, gmma.Length),
+            HarmonicMeanMovingAverageSpecOptions hmma => ComputeHarmonicMeanMovingAverageFast(data, context, hmma.Length),
+
+            // Batch 7 - Ehlers Butterworth filters
+            Ehlers2PoleButterworthFilterV1SpecOptions e2pbv1 => ComputeEhlers2PoleButterworthFilterV1Fast(data, context, e2pbv1.Length),
+            Ehlers2PoleButterworthFilterV2SpecOptions e2pbv2 => ComputeEhlers2PoleButterworthFilterV2Fast(data, context, e2pbv2.Length),
+            Ehlers3PoleButterworthFilterV1SpecOptions e3pbv1 => ComputeEhlers3PoleButterworthFilterV1Fast(data, context, e3pbv1.Length),
+            Ehlers3PoleButterworthFilterV2SpecOptions e3pbv2 => ComputeEhlers3PoleButterworthFilterV2Fast(data, context, e3pbv2.Length),
+
+            // Batch 7 - Ehlers Super Smoother filters
+            Ehlers2PoleSuperSmootherFilterV1SpecOptions e2pssv1 => ComputeEhlers2PoleSuperSmootherFilterV1Fast(data, context, e2pssv1.Length),
+            Ehlers2PoleSuperSmootherFilterV2SpecOptions e2pssv2 => ComputeEhlers2PoleSuperSmootherFilterV2Fast(data, context, e2pssv2.Length),
+            Ehlers3PoleSuperSmootherFilterSpecOptions e3pss => ComputeEhlers3PoleSuperSmootherFilterFast(data, context, e3pss.Length),
+
+            // Batch 7 - More Ehlers filters
+            EhlersDecyclerSpecOptions edec => ComputeEhlersDecyclerFast(data, context, edec.Length),
+            EhlersHammingMovingAverageSpecOptions ehmma => ComputeEhlersHammingMovingAverageFast(data, context, ehmma.Length),
+            EhlersLeadingIndicatorSpecOptions eli => ComputeEhlersLeadingIndicatorFast(data, context, eli.Length),
+            EhlersHighPassFilterV1SpecOptions ehpv1 => ComputeEhlersHighPassFilterV1Fast(data, context, ehpv1.Length),
+            EhlersHighPassFilterV2SpecOptions ehpv2 => ComputeEhlersHighPassFilterV2Fast(data, context, ehpv2.Length),
+            DistanceWeightedMovingAverageSpecOptions dwma => ComputeDistanceWeightedMovingAverageFast(data, context, dwma.Length),
+            EhlersFilterSpecOptions efilter => ComputeEhlersFilterFast(data, context, efilter.Length),
+            EhlersFirFilterSpecOptions efir => ComputeEhlersFirFilterFast(data, context, efir.Length),
+            EhlersIirFilterSpecOptions eiir => ComputeEhlersIirFilterFast(data, context, eiir.Length),
+
+            // Batch 7 - Cycle indicators
+            SimpleCycleSpecOptions scyc => ComputeSimpleCycleFast(data, context, scyc.Length),
+            SimpleLinesSpecOptions slines => ComputeSimpleLinesFast(data, context, slines.Length, slines.Multiplier),
+            DoubleExponentialSmoothingSpecOptions des => ComputeDoubleExponentialSmoothingFast(data, context, des.Length),
+            DetrendedSyntheticPriceSpecOptions dsp => ComputeDetrendedSyntheticPriceFast(data, context, dsp.Length),
+
+            // Batch 7 - Timing/Setup indicators
+            BelkhayateTimingSpecOptions beltim => ComputeBelkhayateTimingFast(data, context, beltim.Length),
+            DemarkSetupIndicatorSpecOptions dmksetup => ComputeDemarkSetupIndicatorFast(data, context, dmksetup.Length),
+            PerformanceIndexSpecOptions perfidx => ComputePerformanceIndexFast(data, context, perfidx.Length),
+            PsychologicalLineSpecOptions psyline => ComputePsychologicalLineFast(data, context, psyline.Length),
+
+            // Batch 7 - Market indicators
+            MoveTrackerSpecOptions mvtrk => ComputeMoveTrackerFast(data, context, mvtrk.Length),
+            MultiLevelIndicatorSpecOptions mli => ComputeMultiLevelIndicatorFast(data, context, mli.Length),
+            MarketDirectionIndicatorSpecOptions mdi => ComputeMarketDirectionIndicatorFast(data, context, mdi.Length),
+            MorphedSineWaveSpecOptions msw => ComputeMorphedSineWaveFast(data, context, msw.Length),
+
+            // Batch 7 - Price/Statistical indicators
+            FullTypicalPriceSpecOptions ftp => ComputeFullTypicalPriceFast(data, context, ftp.Length),
+            InternalBarStrengthIndicatorSpecOptions ibs => ComputeInternalBarStrengthIndicatorFast(data, context, ibs.Length),
+            ZScoreSpecOptions zscore => ComputeZScoreFast(data, context, zscore.Length),
+            FastZScoreSpecOptions fzscore => ComputeFastZScoreFast(data, context, fzscore.Length),
+            KurtosisIndicatorSpecOptions kurtosis => ComputeKurtosisIndicatorFast(data, context, kurtosis.Length),
+
+            // Batch 7 - Demark indicators
+            DemarkRangeExpansionIndexSpecOptions dmkrei => ComputeDemarkRangeExpansionIndexFast(data, context, dmkrei.Length),
+            DemarkPressureRatioV1SpecOptions dmkprv1 => ComputeDemarkPressureRatioV1Fast(data, context, dmkprv1.Length),
+            DemarkPressureRatioV2SpecOptions dmkprv2 => ComputeDemarkPressureRatioV2Fast(data, context, dmkprv2.Length),
+            DemarkReversalPointsSpecOptions dmkrp => ComputeDemarkReversalPointsFast(data, context, dmkrp.Length1, dmkrp.Length2),
+
             _ => null
         };
     }
