@@ -34,10 +34,44 @@ internal static partial class IndicatorCompute
 
         return spec.Options switch
         {
+            // Moving Averages
             SmaSpecOptions sma => ComputeSmaFast(data, context, sma.Length),
             EmaSpecOptions ema => ComputeEmaFast(data, context, ema.Length),
+            WmaSpecOptions wma => ComputeWmaFast(data, context, wma.Length),
+            DemaSpecOptions dema => ComputeDemaFast(data, context, dema.Length),
+            TemaSpecOptions tema => ComputeTemaFast(data, context, tema.Length),
+            HmaSpecOptions hma => ComputeHmaFast(data, context, hma.Length),
+            TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length),
+            WwmaSpecOptions wwma => ComputeWwmaFast(data, context, wwma.Length),
+            LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length),
+            KamaSpecOptions kama => ComputeKamaFast(data, context, kama.Length),
+            ZlemaSpecOptions zlema => ComputeZlemaFast(data, context, zlema.Length),
+
+            // Oscillators
             RsiSpecOptions rsi => ComputeRsiFast(data, context, rsi.Length),
+            RocSpecOptions roc => ComputeRocFast(data, context, roc.Length),
+            MomentumSpecOptions mom => ComputeMomentumFast(data, context, mom.Length),
+            WilliamsRSpecOptions willr => ComputeWilliamsRFast(data, context, willr.Length),
+            CciSpecOptions cci => ComputeCciFast(data, context, cci.Length),
+            CmoSpecOptions cmo => ComputeCmoFast(data, context, cmo.Length),
+            PpoSpecOptions ppo => ComputePpoFast(data, context, ppo.FastLength, ppo.SlowLength),
+            ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength),
+            UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
+            TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength),
+            StochRsiSpecOptions srsi => ComputeStochRsiFast(data, context, srsi.RsiLength, srsi.StochLength),
+            AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
+            DpoSpecOptions dpo => ComputeDpoFast(data, context, dpo.Length),
+            TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
+            MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.SumLength),
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length),
+            AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length),
+
+            // Volume
+            ObvSpecOptions obv => ComputeObvFast(data, context, obv.Length),
+            AdlSpecOptions adl => ComputeAdlFast(data, context, adl.Length),
+            CmfSpecOptions cmf => ComputeCmfFast(data, context, cmf.Length),
+            ForceIndexSpecOptions fi => ComputeForceIndexFast(data, context, fi.Length),
+
             _ => null
         };
     }

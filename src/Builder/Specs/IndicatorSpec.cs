@@ -111,6 +111,222 @@ public static class IndicatorSpecs
     }
 
     /// <summary>
+    /// Creates a WMA specification.
+    /// </summary>
+    public static IndicatorSpec Wma(int length)
+    {
+        return new IndicatorSpec(IndicatorName.WeightedMovingAverage, new WmaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a DEMA specification.
+    /// </summary>
+    public static IndicatorSpec Dema(int length)
+    {
+        return new IndicatorSpec(IndicatorName.DoubleExponentialMovingAverage, new DemaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a TEMA specification.
+    /// </summary>
+    public static IndicatorSpec Tema(int length)
+    {
+        return new IndicatorSpec(IndicatorName.TripleExponentialMovingAverage, new TemaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a HMA specification.
+    /// </summary>
+    public static IndicatorSpec Hma(int length)
+    {
+        return new IndicatorSpec(IndicatorName.HullMovingAverage, new HmaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a TMA specification.
+    /// </summary>
+    public static IndicatorSpec Tma(int length)
+    {
+        return new IndicatorSpec(IndicatorName.TriangularMovingAverage, new TmaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a WWMA (Welles Wilder Moving Average) specification.
+    /// </summary>
+    public static IndicatorSpec Wwma(int length)
+    {
+        return new IndicatorSpec(IndicatorName.WellesWilderMovingAverage, new WwmaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Linear Regression specification.
+    /// </summary>
+    public static IndicatorSpec LinReg(int length)
+    {
+        return new IndicatorSpec(IndicatorName.LinearRegression, new LinRegSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a KAMA specification.
+    /// </summary>
+    public static IndicatorSpec Kama(int length)
+    {
+        return new IndicatorSpec(IndicatorName.KaufmanAdaptiveMovingAverage, new KamaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a ZLEMA specification.
+    /// </summary>
+    public static IndicatorSpec Zlema(int length)
+    {
+        return new IndicatorSpec(IndicatorName.ZeroLagExponentialMovingAverage, new ZlemaSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a ROC specification.
+    /// </summary>
+    public static IndicatorSpec Roc(int length)
+    {
+        return new IndicatorSpec(IndicatorName.RateOfChange, new RocSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Momentum specification.
+    /// </summary>
+    public static IndicatorSpec Momentum(int length)
+    {
+        return new IndicatorSpec(IndicatorName.MomentumOscillator, new MomentumSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Williams %R specification.
+    /// </summary>
+    public static IndicatorSpec WilliamsR(int length)
+    {
+        return new IndicatorSpec(IndicatorName.WilliamsR, new WilliamsRSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a CCI specification.
+    /// </summary>
+    public static IndicatorSpec Cci(int length)
+    {
+        return new IndicatorSpec(IndicatorName.CommodityChannelIndex, new CciSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a CMO specification.
+    /// </summary>
+    public static IndicatorSpec Cmo(int length)
+    {
+        return new IndicatorSpec(IndicatorName.ChandeMomentumOscillator, new CmoSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a PPO specification.
+    /// </summary>
+    public static IndicatorSpec Ppo(int fastLength, int slowLength)
+    {
+        return new IndicatorSpec(IndicatorName.PercentagePriceOscillator, new PpoSpecOptions(fastLength, slowLength), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an APO specification.
+    /// </summary>
+    public static IndicatorSpec Apo(int fastLength, int slowLength)
+    {
+        return new IndicatorSpec(IndicatorName.AbsolutePriceOscillator, new ApoSpecOptions(fastLength, slowLength), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an Ultimate Oscillator specification.
+    /// </summary>
+    public static IndicatorSpec UltimateOscillator(int length1, int length2, int length3)
+    {
+        return new IndicatorSpec(IndicatorName.UltimateOscillator, new UltimateOscillatorSpecOptions(length1, length2, length3), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a TSI specification.
+    /// </summary>
+    public static IndicatorSpec Tsi(int longLength, int shortLength)
+    {
+        return new IndicatorSpec(IndicatorName.TrueStrengthIndex, new TsiSpecOptions(longLength, shortLength), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Stochastic RSI specification.
+    /// </summary>
+    public static IndicatorSpec StochRsi(int rsiLength, int stochLength)
+    {
+        return new IndicatorSpec(IndicatorName.StochasticRelativeStrengthIndex, new StochRsiSpecOptions(rsiLength, stochLength), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an Aroon specification.
+    /// </summary>
+    public static IndicatorSpec Aroon(int length, IndicatorOutput output)
+    {
+        return new IndicatorSpec(IndicatorName.AroonOscillator, new AroonSpecOptions(length), output);
+    }
+
+    /// <summary>
+    /// Creates a DPO specification.
+    /// </summary>
+    public static IndicatorSpec Dpo(int length)
+    {
+        return new IndicatorSpec(IndicatorName.DetrendedPriceOscillator, new DpoSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a TRIX specification.
+    /// </summary>
+    public static IndicatorSpec Trix(int length)
+    {
+        return new IndicatorSpec(IndicatorName.Trix, new TrixSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Mass Index specification.
+    /// </summary>
+    public static IndicatorSpec MassIndex(int emaLength, int sumLength)
+    {
+        return new IndicatorSpec(IndicatorName.MassIndex, new MassIndexSpecOptions(emaLength, sumLength), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an OBV specification.
+    /// </summary>
+    public static IndicatorSpec Obv()
+    {
+        return new IndicatorSpec(IndicatorName.OnBalanceVolume, new ObvSpecOptions(), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an ADL specification.
+    /// </summary>
+    public static IndicatorSpec Adl()
+    {
+        return new IndicatorSpec(IndicatorName.AccumulationDistributionLine, new AdlSpecOptions(), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a CMF specification.
+    /// </summary>
+    public static IndicatorSpec Cmf(int length)
+    {
+        return new IndicatorSpec(IndicatorName.ChaikinMoneyFlow, new CmfSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates a Force Index specification.
+    /// </summary>
+    public static IndicatorSpec ForceIndex(int length)
+    {
+        return new IndicatorSpec(IndicatorName.ForceIndex, new ForceIndexSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
     /// Creates a generic indicator specification.
     /// </summary>
     public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options, IndicatorOutput output = IndicatorOutput.Primary)
@@ -225,6 +441,371 @@ public sealed class StochasticSpecOptions : IIndicatorSpecOptions
 public sealed class AdxSpecOptions : IIndicatorSpecOptions
 {
     public AdxSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// WMA indicator options.
+/// </summary>
+public sealed class WmaSpecOptions : IIndicatorSpecOptions
+{
+    public WmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DEMA indicator options.
+/// </summary>
+public sealed class DemaSpecOptions : IIndicatorSpecOptions
+{
+    public DemaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// TEMA indicator options.
+/// </summary>
+public sealed class TemaSpecOptions : IIndicatorSpecOptions
+{
+    public TemaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// HMA indicator options.
+/// </summary>
+public sealed class HmaSpecOptions : IIndicatorSpecOptions
+{
+    public HmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// TMA indicator options.
+/// </summary>
+public sealed class TmaSpecOptions : IIndicatorSpecOptions
+{
+    public TmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// WWMA (Welles Wilder Moving Average) indicator options.
+/// </summary>
+public sealed class WwmaSpecOptions : IIndicatorSpecOptions
+{
+    public WwmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression indicator options.
+/// </summary>
+public sealed class LinRegSpecOptions : IIndicatorSpecOptions
+{
+    public LinRegSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// KAMA indicator options.
+/// </summary>
+public sealed class KamaSpecOptions : IIndicatorSpecOptions
+{
+    public KamaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ZLEMA indicator options.
+/// </summary>
+public sealed class ZlemaSpecOptions : IIndicatorSpecOptions
+{
+    public ZlemaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ROC indicator options.
+/// </summary>
+public sealed class RocSpecOptions : IIndicatorSpecOptions
+{
+    public RocSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Momentum indicator options.
+/// </summary>
+public sealed class MomentumSpecOptions : IIndicatorSpecOptions
+{
+    public MomentumSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams %R indicator options.
+/// </summary>
+public sealed class WilliamsRSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsRSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// CCI indicator options.
+/// </summary>
+public sealed class CciSpecOptions : IIndicatorSpecOptions
+{
+    public CciSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// CMO (Chande Momentum Oscillator) indicator options.
+/// </summary>
+public sealed class CmoSpecOptions : IIndicatorSpecOptions
+{
+    public CmoSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// PPO indicator options.
+/// </summary>
+public sealed class PpoSpecOptions : IIndicatorSpecOptions
+{
+    public PpoSpecOptions(int fastLength, int slowLength)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// APO indicator options.
+/// </summary>
+public sealed class ApoSpecOptions : IIndicatorSpecOptions
+{
+    public ApoSpecOptions(int fastLength, int slowLength)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Ultimate Oscillator indicator options.
+/// </summary>
+public sealed class UltimateOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public UltimateOscillatorSpecOptions(int length1, int length2, int length3)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+}
+
+/// <summary>
+/// TSI indicator options.
+/// </summary>
+public sealed class TsiSpecOptions : IIndicatorSpecOptions
+{
+    public TsiSpecOptions(int longLength, int shortLength)
+    {
+        LongLength = Math.Max(1, longLength);
+        ShortLength = Math.Max(1, shortLength);
+    }
+
+    public int LongLength { get; }
+    public int ShortLength { get; }
+}
+
+/// <summary>
+/// Stochastic RSI indicator options.
+/// </summary>
+public sealed class StochRsiSpecOptions : IIndicatorSpecOptions
+{
+    public StochRsiSpecOptions(int rsiLength, int stochLength)
+    {
+        RsiLength = Math.Max(1, rsiLength);
+        StochLength = Math.Max(1, stochLength);
+    }
+
+    public int RsiLength { get; }
+    public int StochLength { get; }
+}
+
+/// <summary>
+/// Aroon indicator options.
+/// </summary>
+public sealed class AroonSpecOptions : IIndicatorSpecOptions
+{
+    public AroonSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DPO indicator options.
+/// </summary>
+public sealed class DpoSpecOptions : IIndicatorSpecOptions
+{
+    public DpoSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// TRIX indicator options.
+/// </summary>
+public sealed class TrixSpecOptions : IIndicatorSpecOptions
+{
+    public TrixSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mass Index indicator options.
+/// </summary>
+public sealed class MassIndexSpecOptions : IIndicatorSpecOptions
+{
+    public MassIndexSpecOptions(int emaLength, int sumLength)
+    {
+        EmaLength = Math.Max(1, emaLength);
+        SumLength = Math.Max(1, sumLength);
+    }
+
+    public int EmaLength { get; }
+    public int SumLength { get; }
+}
+
+/// <summary>
+/// OBV indicator options.
+/// </summary>
+public sealed class ObvSpecOptions : IIndicatorSpecOptions
+{
+    public ObvSpecOptions(int length = 14)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ADL indicator options.
+/// </summary>
+public sealed class AdlSpecOptions : IIndicatorSpecOptions
+{
+    public AdlSpecOptions(int length = 14)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// CMF indicator options.
+/// </summary>
+public sealed class CmfSpecOptions : IIndicatorSpecOptions
+{
+    public CmfSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Force Index indicator options.
+/// </summary>
+public sealed class ForceIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ForceIndexSpecOptions(int length)
     {
         Length = Math.Max(1, length);
     }
