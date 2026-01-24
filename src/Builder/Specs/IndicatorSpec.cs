@@ -7454,3 +7454,49 @@ public sealed class EhlersClassicHilbertTransformerSpecOptions : IIndicatorSpecO
     public int Length1 { get; }
     public int Length2 { get; }
 }
+
+/// <summary>
+/// Ehlers Zero Mean Roofing Filter options.
+/// </summary>
+public sealed class EhlersZeroMeanRoofingFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersZeroMeanRoofingFilterSpecOptions(int length1 = 48, int length2 = 10)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Ehlers Super Passband Filter options.
+/// </summary>
+public sealed class EhlersSuperPassbandFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersSuperPassbandFilterSpecOptions(int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Ehlers Roofing Filter V2 options.
+/// </summary>
+public sealed class EhlersRoofingFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersRoofingFilterV2SpecOptions(int upperLength = 80, int lowerLength = 40)
+    {
+        UpperLength = Math.Max(1, upperLength);
+        LowerLength = Math.Max(1, lowerLength);
+    }
+    public int UpperLength { get; }
+    public int LowerLength { get; }
+}

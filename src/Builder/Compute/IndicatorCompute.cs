@@ -789,6 +789,9 @@ internal static partial class IndicatorCompute
             EhlersEarlyOnsetTrendIndicatorSpecOptions eeoti => ComputeEhlersEarlyOnsetTrendIndicatorFast(data, context, eeoti.Length1, eeoti.Length2, eeoti.K),
             EhlersDetrendedLeadingIndicatorSpecOptions edli => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length),
             EhlersClassicHilbertTransformerSpecOptions echt => ComputeEhlersClassicHilbertTransformerFast(data, context, echt.Length1, echt.Length2),
+            EhlersZeroMeanRoofingFilterSpecOptions ezmrf => ComputeEhlersZeroMeanRoofingFilterFast(data, context, ezmrf.Length1, ezmrf.Length2),
+            EhlersSuperPassbandFilterSpecOptions espf => ComputeEhlersSuperPassbandFilterFast(data, context, espf.FastLength, espf.SlowLength, espf.Length1, espf.Length2),
+            EhlersRoofingFilterV2SpecOptions erfv2 => ComputeEhlersRoofingFilterV2Fast(data, context, erfv2.UpperLength, erfv2.LowerLength),
 
             _ => null
         };
@@ -8366,6 +8369,42 @@ internal static partial class IndicatorCompute
             imagBuffer.Dispose(); // Only return real component
         }
         return realBuffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Zero Mean Roofing Filter using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersZeroMeanRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersZeroMeanRoofingFilter(inputSpan, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Super Passband Filter using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(StockData data, ComputeContext context, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSuperPassbandFilter(inputSpan, buffer.WritableSpan, fastLength, slowLength, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Roofing Filter V2 using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersRoofingFilterV2Fast(StockData data, ComputeContext context, int upperLength = 80, int lowerLength = 40)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersRoofingFilterV2(inputSpan, buffer.WritableSpan, upperLength, lowerLength);
+        return buffer;
     }
 
     #endregion

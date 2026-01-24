@@ -11400,6 +11400,134 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates Ehlers Zero Mean Roofing Filter.
+    /// </summary>
+    internal static void EhlersZeroMeanRoofingFilter(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+
+        var pool = ArrayPool<double>.Shared;
+        var rfArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rf = rfArray.AsSpan(0, close.Length);
+
+            // Apply HP-LP roofing filter first
+            EhlersHpLpRoofingFilter(close, rf, length1, length2);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentRf = rf[i];
+                var prevRf = i >= 1 ? rf[i - 1] : 0;
+                var prevZmr1 = i >= 1 ? output[i - 1] : 0;
+
+                output[i] = ((1 - (alpha1 / 2)) * (currentRf - prevRf)) + ((1 - alpha1) * prevZmr1);
+            }
+        }
+        finally
+        {
+            pool.Return(rfArray);
+        }
+    }
+
+    /// <summary>
+    /// Calculates Ehlers Super Passband Filter.
+    /// </summary>
+    internal static void EhlersSuperPassbandFilter(ReadOnlySpan<double> close, Span<double> output, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var a1 = Math.Max(0.01, Math.Min(0.99, (double)length1 / fastLength));
+        var a2 = Math.Max(0.01, Math.Min(0.99, (double)length1 / slowLength));
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentValue = close[i];
+            var prevValue1 = i >= 1 ? close[i - 1] : 0;
+            var prevEspf1 = i >= 1 ? output[i - 1] : 0;
+            var prevEspf2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = ((a1 - a2) * currentValue) + (((a2 * (1 - a1)) - (a1 * (1 - a2))) * prevValue1) +
+                        ((1 - a1 + (1 - a2)) * prevEspf1) - ((1 - a1) * (1 - a2) * prevEspf2);
+        }
+    }
+
+    /// <summary>
+    /// Calculates Ehlers Roofing Filter V2.
+    /// </summary>
+    internal static void EhlersRoofingFilterV2(ReadOnlySpan<double> close, Span<double> output, int upperLength = 80, int lowerLength = 40)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        upperLength = Math.Max(1, upperLength);
+        lowerLength = Math.Max(1, lowerLength);
+
+        var sqrt2 = Math.Sqrt(2);
+        var alphaArg = Math.Min(sqrt2 * Math.PI / upperLength, 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        var a1 = Math.Exp(-sqrt2 * Math.PI / lowerLength);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(sqrt2 * Math.PI / lowerLength, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue1 = i >= 1 ? close[i - 1] : 0;
+                var prevValue2 = i >= 2 ? close[i - 2] : 0;
+                var prevHp1 = i >= 1 ? hp[i - 1] : 0;
+                var prevHp2 = i >= 2 ? hp[i - 2] : 0;
+                var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+                var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+                var test1 = Math.Pow((1 - alpha1) / 2, 2);
+                var test2 = currentValue - (2 * prevValue1) + prevValue2;
+                var v1 = test1 * test2;
+                var v2 = 2 * (1 - alpha1) * prevHp1;
+                var v3 = Math.Pow(1 - alpha1, 2) * prevHp2;
+
+                hp[i] = v1 + v2 - v3;
+                output[i] = (c1 * ((hp[i] + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+        }
+    }
+
     #endregion
 
     #endregion
