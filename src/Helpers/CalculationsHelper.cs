@@ -403,7 +403,35 @@ public static class CalculationsHelper
             or MovingAvgType.HullEstimate or MovingAvgType.InverseDistanceWeightedMovingAverage
             or MovingAvgType.Trimean or MovingAvgType.WellRoundedMovingAverage
             or MovingAvgType.LinearRegressionLine or MovingAvgType.LinearExtrapolation
-            or MovingAvgType.JsaMovingAverage)
+            or MovingAvgType.JsaMovingAverage
+            // Phase 2 fast path types (58 additional Core methods)
+            or MovingAvgType.SelfWeightedMovingAverage or MovingAvgType.HendersonWeightedMovingAverage
+            or MovingAvgType.FareySequenceWeightedMovingAverage or MovingAvgType.RightSidedRickerMovingAverage
+            or MovingAvgType.HampelFilter or MovingAvgType.SequentiallyFilteredMovingAverage
+            or MovingAvgType.KalmanSmoother or MovingAvgType.ModularFilter
+            or MovingAvgType.RetentionAccelerationFilter or MovingAvgType.SettingLessTrendStepFiltering
+            or MovingAvgType.ShapeshiftingMovingAverage or MovingAvgType.VariableLengthMovingAverage
+            or MovingAvgType.EhlersGaussianFilter or MovingAvgType.EhlersRecursiveMedianFilter
+            or MovingAvgType._1LCLeastSquaresMovingAverage or MovingAvgType.EhlersDeviationScaledSuperSmoother
+            or MovingAvgType.EhlersOptimumEllipticFilter or MovingAvgType.EhlersModifiedOptimumEllipticFilter
+            or MovingAvgType.EhlersChebyshevLowPassFilter or MovingAvgType.EhlersAverageErrorFilter
+            or MovingAvgType.EhlersAllPassPhaseShifter or MovingAvgType.PolynomialLeastSquaresMovingAverage
+            or MovingAvgType.QuadraticLeastSquaresMovingAverage or MovingAvgType.QuadraticRegression
+            or MovingAvgType.FollowingAdaptiveMovingAverage or MovingAvgType.VariableAdaptiveMovingAverage
+            or MovingAvgType.VerticalHorizontalMovingAverage or MovingAvgType.EdgePreservingFilter
+            or MovingAvgType.AutoFilter or MovingAvgType.FallingRisingFilter
+            or MovingAvgType.HybridConvolutionFilter or MovingAvgType.IIRLeastSquaresEstimate
+            or MovingAvgType.GeneralFilterEstimator or MovingAvgType.MovingAverageV3
+            or MovingAvgType.MovingAverageAdaptiveQ or MovingAvgType.TStepLeastSquaresMovingAverage
+            or MovingAvgType.ParametricCorrectiveLinearMovingAverage or MovingAvgType.ParametricKalmanFilter
+            or MovingAvgType.R2AdaptiveRegression or MovingAvgType.Svama
+            or MovingAvgType.VolatilityMovingAverage or MovingAvgType.VolatilityWaveMovingAverage
+            or MovingAvgType.PoweredKaufmanAdaptiveMovingAverage or MovingAvgType.EhlersLeadingIndicator
+            or MovingAvgType.EhlersMedianAverageAdaptiveFilter or MovingAvgType.EhlersDistanceCoefficientFilter
+            or MovingAvgType.EhlersNoiseEliminationTechnology or MovingAvgType.BryantAdaptiveMovingAverage
+            or MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage or MovingAvgType.EhlersVariableIndexDynamicAverage
+            or MovingAvgType.EhlersKaufmanAdaptiveMovingAverage or MovingAvgType.EhlersMesaAdaptiveMovingAverage
+            or MovingAvgType.AdaptiveMovingAverage or MovingAvgType.EhlersLaguerreFilter)
         {
             var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
             var count = inputList.Count;
@@ -683,6 +711,169 @@ public static class CalculationsHelper
                     break;
                 case MovingAvgType.JsaMovingAverage:
                     MovingAverageCore.JsaMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                // Phase 2 fast path cases (58 additional Core methods)
+                case MovingAvgType.SelfWeightedMovingAverage:
+                    MovingAverageCore.SelfWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HendersonWeightedMovingAverage:
+                    MovingAverageCore.HendersonWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FareySequenceWeightedMovingAverage:
+                    MovingAverageCore.FareySequenceWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RightSidedRickerMovingAverage:
+                    MovingAverageCore.RightSidedRickerMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HampelFilter:
+                    MovingAverageCore.HampelFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SequentiallyFilteredMovingAverage:
+                    MovingAverageCore.SequentiallyFilteredMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.KalmanSmoother:
+                    MovingAverageCore.KalmanSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ModularFilter:
+                    MovingAverageCore.ModularFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RetentionAccelerationFilter:
+                    MovingAverageCore.RetentionAccelerationFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SettingLessTrendStepFiltering:
+                    MovingAverageCore.SettingLessTrendStepFiltering(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ShapeshiftingMovingAverage:
+                    MovingAverageCore.ShapeshiftingMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableLengthMovingAverage:
+                    MovingAverageCore.VariableLengthMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersGaussianFilter:
+                    MovingAverageCore.EhlersGaussianFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersRecursiveMedianFilter:
+                    MovingAverageCore.EhlersRecursiveMedianFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType._1LCLeastSquaresMovingAverage:
+                    MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDeviationScaledSuperSmoother:
+                    MovingAverageCore.EhlersDeviationScaledSuperSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersOptimumEllipticFilter:
+                    MovingAverageCore.EhlersOptimumEllipticFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersModifiedOptimumEllipticFilter:
+                    MovingAverageCore.EhlersModifiedOptimumEllipticFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersChebyshevLowPassFilter:
+                    MovingAverageCore.EhlersChebyshevLowPassFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersAverageErrorFilter:
+                    MovingAverageCore.EhlersAverageErrorFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersAllPassPhaseShifter:
+                    MovingAverageCore.EhlersAllPassPhaseShifter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.PolynomialLeastSquaresMovingAverage:
+                    MovingAverageCore.PolynomialLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadraticLeastSquaresMovingAverage:
+                    MovingAverageCore.QuadraticLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadraticRegression:
+                    MovingAverageCore.QuadraticRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FollowingAdaptiveMovingAverage:
+                    MovingAverageCore.FollowingAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableAdaptiveMovingAverage:
+                    MovingAverageCore.VariableAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VerticalHorizontalMovingAverage:
+                    MovingAverageCore.VerticalHorizontalMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EdgePreservingFilter:
+                    MovingAverageCore.EdgePreservingFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AutoFilter:
+                    MovingAverageCore.AutoFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FallingRisingFilter:
+                    MovingAverageCore.FallingRisingFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HybridConvolutionFilter:
+                    MovingAverageCore.HybridConvolutionFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.IIRLeastSquaresEstimate:
+                    MovingAverageCore.IIRLeastSquaresEstimate(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.GeneralFilterEstimator:
+                    MovingAverageCore.GeneralFilterEstimator(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MovingAverageV3:
+                    MovingAverageCore.MovingAverageV3(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MovingAverageAdaptiveQ:
+                    MovingAverageCore.MovingAverageAdaptiveQ(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TStepLeastSquaresMovingAverage:
+                    MovingAverageCore.TStepLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ParametricCorrectiveLinearMovingAverage:
+                    MovingAverageCore.ParametricCorrectiveLinearMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ParametricKalmanFilter:
+                    MovingAverageCore.ParametricKalmanFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.R2AdaptiveRegression:
+                    MovingAverageCore.R2AdaptiveRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Svama:
+                    MovingAverageCore.Svama(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolatilityMovingAverage:
+                    MovingAverageCore.VolatilityMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolatilityWaveMovingAverage:
+                    MovingAverageCore.VolatilityWaveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.PoweredKaufmanAdaptiveMovingAverage:
+                    MovingAverageCore.PoweredKaufmanAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersLeadingIndicator:
+                    MovingAverageCore.EhlersLeadingIndicator(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersMedianAverageAdaptiveFilter:
+                    MovingAverageCore.EhlersMedianAverageAdaptiveFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDistanceCoefficientFilter:
+                    MovingAverageCore.EhlersDistanceCoefficientFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersNoiseEliminationTechnology:
+                    MovingAverageCore.EhlersNoiseEliminationTechnology(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.BryantAdaptiveMovingAverage:
+                    MovingAverageCore.BryantAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage:
+                    MovingAverageCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersVariableIndexDynamicAverage:
+                    MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersKaufmanAdaptiveMovingAverage:
+                    MovingAverageCore.EhlersKaufmanAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersMesaAdaptiveMovingAverage:
+                    MovingAverageCore.EhlersMesaAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveMovingAverage:
+                    MovingAverageCore.AdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersLaguerreFilter:
+                    MovingAverageCore.EhlersLaguerreFilter(inputSpan, outputSpan);
                     break;
             }
 
