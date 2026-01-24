@@ -10136,6 +10136,174 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Range Action Verification Index (RAVI).
+    /// </summary>
+    internal static void RangeActionVerificationIndex(ReadOnlySpan<double> close, Span<double> output, int fastLength = 7, int slowLength = 65)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+
+        var pool = ArrayPool<double>.Shared;
+        var fastSmaArray = pool.Rent(close.Length);
+        var slowSmaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var fastSma = fastSmaArray.AsSpan(0, close.Length);
+            var slowSma = slowSmaArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.SimpleMovingAverage(close, fastSma, fastLength);
+            MovingAverageCore.SimpleMovingAverage(close, slowSma, slowLength);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = slowSma[i] != 0 ? (fastSma[i] - slowSma[i]) / slowSma[i] * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(fastSmaArray);
+            pool.Return(slowSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Williams Accumulation Distribution.
+    /// </summary>
+    internal static void WilliamsAccumulationDistribution(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double wad = 0;
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevClose = i >= 1 ? close[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+
+            if (close[i] > prevClose)
+            {
+                wad += close[i] - prevLow;
+            }
+            else if (close[i] < prevClose)
+            {
+                wad += close[i] - prevHigh;
+            }
+
+            output[i] = wad;
+        }
+    }
+
+    /// <summary>
+    /// Computes Total Power Indicator.
+    /// </summary>
+    internal static void TotalPowerIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> bullOutput, Span<double> bearOutput, int length1 = 45, int length2 = 10)
+    {
+        if (bullOutput.Length < close.Length || bearOutput.Length < close.Length)
+        {
+            throw new ArgumentException("Output spans must be at least input length.");
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(close, ema, length2);
+
+            var bullCountSum = new RollingSum();
+            var bearCountSum = new RollingSum();
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var bullPower = high[i] - ema[i];
+                var bearPower = low[i] - ema[i];
+
+                var bullCount = bullPower > 0 ? 1.0 : 0.0;
+                var bearCount = bearPower < 0 ? 1.0 : 0.0;
+
+                bullCountSum.Add(bullCount);
+                bearCountSum.Add(bearCount);
+
+                bullOutput[i] = length1 != 0 ? 100 * bullCountSum.Sum(length1) / length1 : 0;
+                bearOutput[i] = length1 != 0 ? 100 * bearCountSum.Sum(length1) / length1 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes TurboTrigger.
+    /// </summary>
+    internal static void TurboTrigger(ReadOnlySpan<double> close, Span<double> output, int length = 100, double pctMultiplier = 1.0)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, close.Length);
+            MovingAverageCore.SimpleMovingAverage(close, sma, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var pct = sma[i] != 0 ? (close[i] - sma[i]) / sma[i] * 100 * pctMultiplier : 0;
+                output[i] = pct;
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes TurboScaler.
+    /// </summary>
+    internal static void TurboScaler(ReadOnlySpan<double> close, Span<double> output, int length = 50, double pctMultiplier = 1.0)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var window = new RollingMinMax(length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            window.Add(close[i]);
+            var highest = window.Max;
+            var lowest = window.Min;
+            var range = highest - lowest;
+
+            output[i] = range != 0 ? ((close[i] - lowest) / range * 100 - 50) * pctMultiplier : 0;
+        }
+    }
+
     #endregion
 
     #endregion

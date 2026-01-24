@@ -759,6 +759,11 @@ internal static partial class IndicatorCompute
             RecursiveStochasticSpecOptions rs => ComputeRecursiveStochasticFast(data, context, rs.Length, rs.Alpha),
             ShinoharaIntensityRatioASpecOptions sira => ComputeShinoharaIntensityRatioAFast(data, context, sira.Length),
             ShinoharaIntensityRatioBSpecOptions sirb => ComputeShinoharaIntensityRatioBFast(data, context, sirb.Length),
+            RangeActionVerificationIndexSpecOptions ravi => ComputeRangeActionVerificationIndexFast(data, context, ravi.FastLength, ravi.SlowLength),
+            WilliamsAccumulationDistributionSpecOptions _ => ComputeWilliamsAccumulationDistributionFast(data, context),
+            TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2),
+            TurboTriggerSpecOptions tt => ComputeTurboTriggerFast(data, context, tt.Length, tt.PctMultiplier),
+            TurboScalerSpecOptions ts => ComputeTurboScalerFast(data, context, ts.Length, ts.PctMultiplier),
 
             _ => null
         };
@@ -7957,6 +7962,67 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.ShinoharaIntensityRatioB(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Range Action Verification Index (RAVI) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7, int slowLength = 65)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.RangeActionVerificationIndex(close, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Accumulation Distribution using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsAccumulationDistributionFast(StockData data, ComputeContext context)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.WilliamsAccumulationDistribution(close, high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Total Power Indicator (bull power output) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTotalPowerIndicatorFast(StockData data, ComputeContext context, int length1 = 45, int length2 = 10)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var bullBuffer = context.Rent(data.Count);
+        var bearBuffer = context.Rent(data.Count);
+        OscillatorCore.TotalPowerIndicator(close, high, low, bullBuffer.WritableSpan, bearBuffer.WritableSpan, length1, length2);
+        bearBuffer.Dispose();
+        return bullBuffer;
+    }
+
+    /// <summary>
+    /// Computes TurboTrigger using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, double pctMultiplier = 1.0)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TurboTrigger(close, buffer.WritableSpan, length, pctMultiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TurboScaler using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTurboScalerFast(StockData data, ComputeContext context, int length = 50, double pctMultiplier = 1.0)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TurboScaler(close, buffer.WritableSpan, length, pctMultiplier);
         return buffer;
     }
 

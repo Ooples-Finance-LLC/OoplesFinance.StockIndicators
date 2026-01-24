@@ -7097,3 +7097,67 @@ public sealed class ShinoharaIntensityRatioBSpecOptions : IIndicatorSpecOptions
     public ShinoharaIntensityRatioBSpecOptions(int length = 14) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Range Action Verification Index (RAVI) indicator options.
+/// </summary>
+public sealed class RangeActionVerificationIndexSpecOptions : IIndicatorSpecOptions
+{
+    public RangeActionVerificationIndexSpecOptions(int fastLength = 7, int slowLength = 65)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Williams Accumulation Distribution indicator options.
+/// </summary>
+public sealed class WilliamsAccumulationDistributionSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsAccumulationDistributionSpecOptions() { }
+}
+
+/// <summary>
+/// Total Power Indicator options.
+/// </summary>
+public sealed class TotalPowerIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public TotalPowerIndicatorSpecOptions(int length1 = 45, int length2 = 10)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// TurboTrigger indicator options.
+/// </summary>
+public sealed class TurboTriggerSpecOptions : IIndicatorSpecOptions
+{
+    public TurboTriggerSpecOptions(int length = 100, double pctMultiplier = 1.0)
+    {
+        Length = Math.Max(1, length);
+        PctMultiplier = pctMultiplier;
+    }
+    public int Length { get; }
+    public double PctMultiplier { get; }
+}
+
+/// <summary>
+/// TurboScaler indicator options.
+/// </summary>
+public sealed class TurboScalerSpecOptions : IIndicatorSpecOptions
+{
+    public TurboScalerSpecOptions(int length = 50, double pctMultiplier = 1.0)
+    {
+        Length = Math.Max(1, length);
+        PctMultiplier = pctMultiplier;
+    }
+    public int Length { get; }
+    public double PctMultiplier { get; }
+}
