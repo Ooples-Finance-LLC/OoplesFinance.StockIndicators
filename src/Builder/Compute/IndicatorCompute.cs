@@ -749,6 +749,10 @@ internal static partial class IndicatorCompute
             EhlersTrendflexSpecOptions etf => ComputeEhlersTrendflexFast(data, context, etf.Length),
             EhlersReflexSpecOptions erf => ComputeEhlersReflexFast(data, context, erf.Length),
             EhlersCorrelationTrendIndicatorSpecOptions ecti => ComputeEhlersCorrelationTrendIndicatorFast(data, context, ecti.Length),
+            TrendTriggerFactorSpecOptions ttf => ComputeTrendTriggerFactorFast(data, context, ttf.Length),
+            TrendDetectionIndexSpecOptions tdi => ComputeTrendDetectionIndexFast(data, context, tdi.Length1, tdi.Length2),
+            UberTrendIndicatorSpecOptions uti => ComputeUberTrendIndicatorFast(data, context, uti.Length),
+            PercentageTrendSpecOptions pt => ComputePercentageTrendFast(data, context, pt.Length, pt.Pct),
 
             _ => null
         };
@@ -7825,6 +7829,54 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersCorrelationTrendIndicator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Trend Trigger Factor using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrendTriggerFactorFast(StockData data, ComputeContext context, int length = 15)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TrendTriggerFactor(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Trend Detection Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrendDetectionIndexFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 40)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.TrendDetectionIndex(inputSpan, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Uber Trend Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeUberTrendIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.UberTrendIndicator(close, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Percentage Trend using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePercentageTrendFast(StockData data, ComputeContext context, int length = 20, double pct = 0.15)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PercentageTrend(inputSpan, buffer.WritableSpan, length, pct);
         return buffer;
     }
 

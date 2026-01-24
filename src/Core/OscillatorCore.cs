@@ -9783,6 +9783,163 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Trend Trigger Factor.
+    /// </summary>
+    internal static void TrendTriggerFactor(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 15)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        var pool = ArrayPool<double>.Shared;
+        var highestArray = pool.Rent(high.Length);
+        var lowestArray = pool.Rent(high.Length);
+
+        try
+        {
+            // First pass: compute highest and lowest values at each point
+            for (var i = 0; i < high.Length; i++)
+            {
+                highWindow.Add(high[i]);
+                lowWindow.Add(low[i]);
+                highestArray[i] = highWindow.Max;
+                lowestArray[i] = lowWindow.Min;
+            }
+
+            // Second pass: compute TTF
+            for (var i = 0; i < high.Length; i++)
+            {
+                var highest = highestArray[i];
+                var lowest = lowestArray[i];
+                var prevHighest = i >= length ? highestArray[i - length] : 0;
+                var prevLowest = i >= length ? lowestArray[i - length] : 0;
+                var buyPower = highest - prevLowest;
+                var sellPower = prevHighest - lowest;
+
+                output[i] = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(highestArray);
+            pool.Return(lowestArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Trend Detection Index.
+    /// </summary>
+    internal static void TrendDetectionIndex(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 40)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(length1, length2);
+        var momSum = new RollingSum();
+        var momAbsSum = new RollingSum();
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevValue = i >= length1 ? close[i - length1] : 0;
+            var mom = close[i] - prevValue;
+            momSum.Add(mom);
+            momAbsSum.Add(Math.Abs(mom));
+
+            var tdiDirection = momSum.Sum(length1);
+            var momAbsSum1 = momAbsSum.Sum(length1);
+            var momAbsSum2 = momAbsSum.Sum(length2);
+
+            output[i] = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
+        }
+    }
+
+    /// <summary>
+    /// Computes Uber Trend Indicator.
+    /// </summary>
+    internal static void UberTrendIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var advSum = new RollingSum();
+        var decSum = new RollingSum();
+        var advVolSum = new RollingSum();
+        var decVolSum = new RollingSum();
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentValue = close[i];
+            var prevValue = i >= 1 ? close[i - 1] : 0;
+            var currentVolume = volume[i];
+
+            var adv = i >= 1 && currentValue > prevValue ? currentValue - prevValue : 0.0;
+            advSum.Add(adv);
+
+            var dec = i >= 1 && currentValue < prevValue ? prevValue - currentValue : 0.0;
+            decSum.Add(dec);
+
+            var advSumVal = advSum.Sum(length);
+            var decSumVal = decSum.Sum(length);
+
+            var advVol = i >= 1 && currentValue > prevValue && advSumVal != 0 ? currentVolume / advSumVal : 0.0;
+            advVolSum.Add(advVol);
+
+            var decVol = i >= 1 && currentValue < prevValue && decSumVal != 0 ? currentVolume / decSumVal : 0.0;
+            decVolSum.Add(decVol);
+
+            var advVolSumVal = advVolSum.Sum(length);
+            var decVolSumVal = decVolSum.Sum(length);
+            var top = decSumVal != 0 ? advSumVal / decSumVal : 0;
+            var bot = decVolSumVal != 0 ? advVolSumVal / decVolSumVal : 0;
+            var ut = bot != 0 ? top / bot : 0;
+
+            output[i] = ut + 1 != 0 ? (ut - 1) / (ut + 1) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Percentage Trend.
+    /// </summary>
+    internal static void PercentageTrend(ReadOnlySpan<double> close, Span<double> output, int length = 20, double pct = 0.15)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        double prevTrend = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            highWindow.Add(close[i]);
+            lowWindow.Add(close[i]);
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var pctValue = close[i] * pct;
+
+            var newTrend = close[i] >= prevTrend + pctValue ? highest :
+                          close[i] <= prevTrend - pctValue ? lowest : prevTrend;
+
+            prevTrend = i > 0 ? newTrend : close[i];
+            output[i] = prevTrend;
+        }
+    }
+
     #endregion
 
     #endregion

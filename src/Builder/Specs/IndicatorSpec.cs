@@ -6992,3 +6992,49 @@ public sealed class EhlersCorrelationTrendIndicatorSpecOptions : IIndicatorSpecO
     public EhlersCorrelationTrendIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Trend Trigger Factor indicator options.
+/// </summary>
+public sealed class TrendTriggerFactorSpecOptions : IIndicatorSpecOptions
+{
+    public TrendTriggerFactorSpecOptions(int length = 15) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trend Detection Index indicator options.
+/// </summary>
+public sealed class TrendDetectionIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TrendDetectionIndexSpecOptions(int length1 = 20, int length2 = 40)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(length1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Uber Trend Indicator options.
+/// </summary>
+public sealed class UberTrendIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public UberTrendIndicatorSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percentage Trend indicator options.
+/// </summary>
+public sealed class PercentageTrendSpecOptions : IIndicatorSpecOptions
+{
+    public PercentageTrendSpecOptions(int length = 20, double pct = 0.15)
+    {
+        Length = Math.Max(1, length);
+        Pct = pct;
+    }
+    public int Length { get; }
+    public double Pct { get; }
+}
