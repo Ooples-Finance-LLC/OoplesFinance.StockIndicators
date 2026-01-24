@@ -8386,6 +8386,47 @@ internal static class OscillatorCore
     }
 
     /// <summary>
+    /// Computes the Detrended Synthetic Price oscillator using dual EMA.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">EMA period.</param>
+    internal static void DetrendedSyntheticPrice(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var alpha = length > 2 ? 2.0 / (length + 1) : 0.67;
+        var alpha2 = alpha / 2;
+
+        // Initialize with first price
+        var prevHigh = high.Length > 0 ? high[0] : 0;
+        var prevLow = low.Length > 0 ? low[0] : 0;
+        var price0 = (Math.Max(high[0], prevHigh) + Math.Min(low[0], prevLow)) / 2;
+        var ema1 = price0;
+        var ema2 = price0;
+        output[0] = 0;
+
+        for (var i = 1; i < high.Length; i++)
+        {
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            prevHigh = high[i - 1];
+            prevLow = low[i - 1];
+            var h = Math.Max(currentHigh, prevHigh);
+            var l = Math.Min(currentLow, prevLow);
+            var price = (h + l) / 2;
+
+            ema1 = (alpha * price) + ((1 - alpha) * ema1);
+            ema2 = (alpha2 * price) + ((1 - alpha2) * ema2);
+            output[i] = ema1 - ema2;
+        }
+    }
+
+    /// <summary>
     /// Computes the Belkhayate Timing oscillator using a 5-bar HL midpoint with scaling.
     /// </summary>
     /// <param name="close">Close prices.</param>

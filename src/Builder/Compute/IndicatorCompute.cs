@@ -5272,6 +5272,18 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
+    /// Computes Detrended Synthetic Price oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDetrendedSyntheticPriceFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DetrendedSyntheticPrice(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
     /// Computes Belkhayate Timing oscillator using zero-allocation fast path.
     /// </summary>
     /// <param name="data">Stock data.</param>
