@@ -7656,3 +7656,34 @@ public sealed class DetrendedPriceOscillatorSpecOptions : IIndicatorSpecOptions
     }
     public int Length { get; }
 }
+
+/// <summary>
+/// Polarized Fractal Efficiency options.
+/// </summary>
+public sealed class PolarizedFractalEfficiencySpecOptions : IIndicatorSpecOptions
+{
+    public PolarizedFractalEfficiencySpecOptions(int length = 10, int smoothLength = 5)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+    }
+    public int Length { get; }
+    public int SmoothLength { get; }
+}
+
+/// <summary>
+/// Schaff Trend Cycle options.
+/// </summary>
+public sealed class SchaffTrendCycleSpecOptions : IIndicatorSpecOptions
+{
+    public SchaffTrendCycleSpecOptions(int cycleLength = 10, int fastLength = 23, int slowLength = 50)
+    {
+        CycleLength = Math.Max(1, cycleLength);
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+    public int CycleLength { get; }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
