@@ -5826,6 +5826,20 @@ public sealed class EhlersInfiniteImpulseResponseFilterSpecOptions : IIndicatorS
 }
 
 /// <summary>
+/// Volume Adjusted Moving Average indicator options.
+/// </summary>
+public sealed class VolumeAdjustedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeAdjustedMovingAverageSpecOptions(int length = 14, double factor = 0.67)
+    {
+        Length = Math.Max(1, length);
+        Factor = factor;
+    }
+    public int Length { get; }
+    public double Factor { get; }
+}
+
+/// <summary>
 /// Corrected Moving Average indicator options.
 /// </summary>
 public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions

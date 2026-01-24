@@ -732,6 +732,7 @@ internal static partial class IndicatorCompute
             GeneralizedDoubleExponentialMovingAverageSpecOptions gdema => ComputeGeneralizedDoubleExponentialMovingAverageFast(data, context, gdema.Length, gdema.VolumeFactor),
             EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context, efirf.Length),
             EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
+            VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length, vama.Factor),
 
             _ => null
         };
@@ -7590,6 +7591,18 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.EhlersInfiniteImpulseResponseFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Adjusted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(StockData data, ComputeContext context, int length = 14, double factor = 0.67)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.VolumeAdjustedMovingAverage(close, volume, buffer.WritableSpan, length, factor);
         return buffer;
     }
 
