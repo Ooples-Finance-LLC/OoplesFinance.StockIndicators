@@ -8385,6 +8385,42 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes the Belkhayate Timing oscillator using a 5-bar HL midpoint with scaling.
+    /// </summary>
+    /// <param name="close">Close prices.</param>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="output">Output span for results.</param>
+    internal static void BelkhayateTiming(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            var prevHigh1 = i >= 1 ? high[i - 1] : 0;
+            var prevLow1 = i >= 1 ? low[i - 1] : 0;
+            var prevHigh2 = i >= 2 ? high[i - 2] : 0;
+            var prevLow2 = i >= 2 ? low[i - 2] : 0;
+            var prevHigh3 = i >= 3 ? high[i - 3] : 0;
+            var prevLow3 = i >= 3 ? low[i - 3] : 0;
+            var prevHigh4 = i >= 4 ? high[i - 4] : 0;
+            var prevLow4 = i >= 4 ? low[i - 4] : 0;
+
+            var middle = (((currentHigh + currentLow) / 2) + ((prevHigh1 + prevLow1) / 2) + ((prevHigh2 + prevLow2) / 2) +
+                          ((prevHigh3 + prevLow3) / 2) + ((prevHigh4 + prevLow4) / 2)) / 5;
+            var scale = ((currentHigh - currentLow + (prevHigh1 - prevLow1) + (prevHigh2 - prevLow2) + (prevHigh3 - prevLow3) +
+                          (prevHigh4 - prevLow4)) / 5) * 0.2;
+
+            output[i] = scale != 0 ? (close[i] - middle) / scale : 0;
+        }
+    }
+
     #endregion
 
     #endregion

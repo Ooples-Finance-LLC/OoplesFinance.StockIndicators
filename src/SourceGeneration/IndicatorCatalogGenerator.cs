@@ -523,6 +523,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         // Batch 21 - Simple Oscillators
         "SimpleCycle",
         "SimpleLines",
+        "BelkhayateTiming",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1363,6 +1364,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             // Batch 21 - Simple Oscillators
             "SimpleCycle" => "ComputeSimpleCycleFast",
             "SimpleLines" => "ComputeSimpleLinesFast",
+            "BelkhayateTiming" => "ComputeBelkhayateTimingFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

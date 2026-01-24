@@ -5271,6 +5271,23 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Belkhayate Timing oscillator using zero-allocation fast path.
+    /// </summary>
+    /// <param name="data">Stock data.</param>
+    /// <param name="context">Compute context for buffer pooling.</param>
+    /// <param name="length">Unused parameter for source generator compatibility.</param>
+    public static ComputeBuffer ComputeBelkhayateTimingFast(StockData data, ComputeContext context, int length = 5)
+    {
+        _ = length; // Indicator has no configurable parameters
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.BelkhayateTiming(close, high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
     #endregion
 
     #endregion
