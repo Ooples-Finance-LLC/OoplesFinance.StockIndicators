@@ -3317,5 +3317,947 @@ internal static class MovingAverageCore
         }
     }
 
+    /// <summary>
+    /// Computes Ahrens Moving Average using span-based computation.
+    /// Formula: ahma = prevAhma + ((currentValue - ((prevAhma + priorAhma) / 2)) / length)
+    /// </summary>
+    internal static void AhrensMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 9)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevAhma = i >= 1 ? output[i - 1] : 0;
+            var priorAhma = i >= length ? output[i - length] : currentValue;
+
+            output[i] = prevAhma + ((currentValue - ((prevAhma + priorAhma) / 2)) / length);
+        }
+    }
+
+    /// <summary>
+    /// Computes Double Exponential Smoothing using span-based computation.
+    /// </summary>
+    internal static void DoubleExponentialSmoothing(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.01, double gamma = 0.9)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var x = input[i];
+            var prevS = i >= 1 ? output[i - 1] : 0;
+            var prevS2 = i >= 2 ? output[i - 2] : 0;
+            var sChg = prevS - prevS2;
+
+            output[i] = (alpha * x) + ((1 - alpha) * (prevS + (gamma * (sChg + ((1 - gamma) * sChg)))));
+        }
+    }
+
+    /// <summary>
+    /// Computes Compound Ratio Moving Average using span-based computation.
+    /// Uses geometric weighting based on length.
+    /// </summary>
+    internal static void CompoundRatioMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var r = Math.Pow(length, (1.0 / (length - 1)) - 1);
+        var bas = 1 + (r * 2);
+        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
+
+        // First pass: compute raw weighted average
+        var rawBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var raw = rawBuffer.AsSpan(0, input.Length);
+            for (var i = 0; i < input.Length; i++)
+            {
+                double sum = 0, weightedSum = 0;
+                for (var j = 0; j <= length - 1; j++)
+                {
+                    var weight = Math.Pow(bas, length - j);
+                    var prevValue = i >= j ? input[i - j] : 0;
+                    sum += prevValue * weight;
+                    weightedSum += weight;
+                }
+                raw[i] = weightedSum != 0 ? sum / weightedSum : 0;
+            }
+
+            // Second pass: smooth with WMA
+            WeightedMovingAverage(raw, output, smoothLength);
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(rawBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Corrected Moving Average using span-based computation.
+    /// Uses SMA + variance with iterative k calculation.
+    /// </summary>
+    internal static void CorrectedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 35)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // First compute SMA
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var varianceBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var sma = smaBuffer.AsSpan(0, input.Length);
+            var variance = varianceBuffer.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma, length);
+
+            // Compute variance
+            double sum = 0, sqSum = 0;
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var oldValue = i >= length ? input[i - length] : 0;
+                sum += currentValue - oldValue;
+                sqSum += (currentValue * currentValue) - (oldValue * oldValue);
+
+                var n = Math.Min(i + 1, length);
+                var mean = n > 0 ? sum / n : 0;
+                var meanSq = n > 0 ? sqSum / n : 0;
+                variance[i] = meanSq - (mean * mean);
+                variance[i] = Math.Max(0, variance[i]);
+            }
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var smaVal = sma[i];
+                var prevCma = i >= 1 ? output[i - 1] : smaVal;
+                var v1 = variance[i];
+                var v2 = Math.Pow(prevCma - smaVal, 2);
+                var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
+
+                // Iterative k calculation
+                double tolerance = Math.Pow(10, -5), err = 1, kPrev = 1, k = 1;
+                for (var j = 0; j <= 5000 && err > tolerance; j++)
+                {
+                    k = v3 * kPrev * (2 - kPrev);
+                    err = Math.Abs(kPrev - k);
+                    kPrev = k;
+                }
+
+                output[i] = prevCma + (k * (smaVal - prevCma));
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(smaBuffer);
+            ArrayPool<double>.Shared.Return(varianceBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Dynamically Adjustable Filter using span-based computation.
+    /// </summary>
+    internal static void DynamicallyAdjustableFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var srcBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var kBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var src = srcBuffer.AsSpan(0, input.Length);
+            var kList = kBuffer.AsSpan(0, input.Length);
+            double sum = 0, sqSum = 0;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var prevOut = i >= 1 ? output[i - 1] : currentValue;
+                var prevK = i >= 1 ? kList[i - 1] : 0;
+
+                var srcVal = currentValue + (currentValue - prevOut);
+                src[i] = srcVal;
+
+                // Rolling stddev calculation
+                var oldSrc = i >= length ? src[i - length] : 0;
+                sum += srcVal - oldSrc;
+                sqSum += (srcVal * srcVal) - (oldSrc * oldSrc);
+
+                var n = Math.Min(i + 1, length);
+                var srcSma = n > 0 ? sum / n : 0;
+                var meanSq = n > 0 ? sqSum / n : 0;
+                var variance = Math.Max(0, meanSq - (srcSma * srcSma));
+                var srcStdDev = Math.Sqrt(variance);
+
+                var outVal = prevOut + (prevK * (srcVal - prevOut));
+                output[i] = outVal;
+
+                var diff = Math.Abs(srcVal - outVal);
+                var k = diff != 0 ? diff / (diff + (srcStdDev * length)) : 0;
+                kList[i] = k;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(srcBuffer);
+            ArrayPool<double>.Shared.Return(kBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Dynamically Adjustable Moving Average using span-based computation.
+    /// </summary>
+    internal static void DynamicallyAdjustableMovingAverage(ReadOnlySpan<double> input, Span<double> output, int fastLength = 6, int slowLength = 200)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Compute short and long standard deviations
+        var shortStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var longStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var cumSumBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var shortStdDev = shortStdDevBuffer.AsSpan(0, input.Length);
+            var longStdDev = longStdDevBuffer.AsSpan(0, input.Length);
+            var cumSum = cumSumBuffer.AsSpan(0, input.Length);
+
+            // Compute rolling stddev for both windows
+            ComputeRollingStdDev(input, shortStdDev, fastLength);
+            ComputeRollingStdDev(input, longStdDev, slowLength);
+
+            // Compute cumulative sum
+            double cs = 0;
+            for (var i = 0; i < input.Length; i++)
+            {
+                cs += input[i];
+                cumSum[i] = cs;
+            }
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var a = shortStdDev[i];
+                var b = longStdDev[i];
+                var v = a != 0 ? (b / a) + fastLength : fastLength;
+                var p = (int)Math.Round(Math.Min(Math.Max(v, fastLength), slowLength));
+
+                var prevCumSum = i >= p ? cumSum[i - p] : 0;
+                output[i] = p != 0 ? (cumSum[i] - prevCumSum) / p : 0;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(shortStdDevBuffer);
+            ArrayPool<double>.Shared.Return(longStdDevBuffer);
+            ArrayPool<double>.Shared.Return(cumSumBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Helper method to compute rolling standard deviation.
+    /// </summary>
+    private static void ComputeRollingStdDev(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        double sum = 0, sqSum = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var oldValue = i >= length ? input[i - length] : 0;
+            sum += currentValue - oldValue;
+            sqSum += (currentValue * currentValue) - (oldValue * oldValue);
+
+            var n = Math.Min(i + 1, length);
+            var mean = n > 0 ? sum / n : 0;
+            var meanSq = n > 0 ? sqSum / n : 0;
+            var variance = Math.Max(0, meanSq - (mean * mean));
+            output[i] = Math.Sqrt(variance);
+        }
+    }
+
+    /// <summary>
+    /// Computes Linear Weighted Moving Average (same as WMA).
+    /// </summary>
+    internal static void LinearWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        WeightedMovingAverage(input, output, length);
+    }
+
+    /// <summary>
+    /// Computes Leo Moving Average using span-based computation.
+    /// Formula: 2 * WMA - SMA
+    /// </summary>
+    internal static void LeoMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var wma = wmaBuffer.AsSpan(0, input.Length);
+            var sma = smaBuffer.AsSpan(0, input.Length);
+
+            WeightedMovingAverage(input, wma, length);
+            SimpleMovingAverage(input, sma, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (2 * wma[i]) - sma[i];
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(wmaBuffer);
+            ArrayPool<double>.Shared.Return(smaBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes McNicholl Moving Average using span-based computation.
+    /// </summary>
+    internal static void McNichollMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var ema = emaBuffer.AsSpan(0, input.Length);
+            ExponentialMovingAverage(input, ema, length);
+
+            // Compute difference and EMA of difference
+            var diffBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+            var diffEmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+            try
+            {
+                var diff = diffBuffer.AsSpan(0, input.Length);
+                var diffEma = diffEmaBuffer.AsSpan(0, input.Length);
+
+                for (var i = 0; i < input.Length; i++)
+                {
+                    diff[i] = input[i] - ema[i];
+                }
+
+                ExponentialMovingAverage(diff, diffEma, length);
+
+                for (var i = 0; i < input.Length; i++)
+                {
+                    output[i] = ema[i] + diffEma[i];
+                }
+            }
+            finally
+            {
+                ArrayPool<double>.Shared.Return(diffBuffer);
+                ArrayPool<double>.Shared.Return(diffEmaBuffer);
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(emaBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes _3HMA (Three Hull Moving Average) using span-based computation.
+    /// </summary>
+    internal static void ThreeHMA(ReadOnlySpan<double> input, Span<double> output, int length = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var p = Math.Max((int)Math.Ceiling((double)length / 2), 1);
+        var p1 = Math.Max((int)Math.Ceiling((double)p / 3), 1);
+        var p2 = Math.Max((int)Math.Ceiling((double)p / 2), 1);
+
+        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var wma3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var midBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var wma1 = wma1Buffer.AsSpan(0, input.Length);
+            var wma2 = wma2Buffer.AsSpan(0, input.Length);
+            var wma3 = wma3Buffer.AsSpan(0, input.Length);
+            var mid = midBuffer.AsSpan(0, input.Length);
+
+            WeightedMovingAverage(input, wma1, p1);
+            WeightedMovingAverage(input, wma2, p2);
+            WeightedMovingAverage(input, wma3, p);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
+            }
+
+            WeightedMovingAverage(mid, output, p);
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(wma1Buffer);
+            ArrayPool<double>.Shared.Return(wma2Buffer);
+            ArrayPool<double>.Shared.Return(wma3Buffer);
+            ArrayPool<double>.Shared.Return(midBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Zero Lag Triple Exponential Moving Average using span-based computation.
+    /// </summary>
+    internal static void ZeroLagTripleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // First compute TEMA
+        var temaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var tema = temaBuffer.AsSpan(0, input.Length);
+            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+
+            TripleExponentialMovingAverage(input, tema, length);
+            ExponentialMovingAverage(tema, ema1, length);
+
+            // Zero lag = 2*TEMA - EMA(TEMA)
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (2 * tema[i]) - ema1[i];
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(temaBuffer);
+            ArrayPool<double>.Shared.Return(ema1Buffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Zero Low Lag Moving Average using span-based computation.
+    /// </summary>
+    internal static void ZeroLowLagMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 32)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Lag-compensated input
+        var lag = (length - 1) / 2;
+        var alpha = 2.0 / (length + 1);
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var lagValue = i >= lag ? input[i - lag] : input[0];
+            var compensatedInput = (2 * currentValue) - lagValue;
+
+            var prevOut = i >= 1 ? output[i - 1] : compensatedInput;
+            output[i] = (alpha * compensatedInput) + ((1 - alpha) * prevOut);
+        }
+    }
+
+    /// <summary>
+    /// Computes Wilders Summation Method using span-based computation.
+    /// </summary>
+    internal static void WildersSummationMethod(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevSum = i >= 1 ? output[i - 1] : 0;
+
+            if (i < length)
+            {
+                output[i] = prevSum + currentValue;
+            }
+            else
+            {
+                output[i] = prevSum - (prevSum / length) + currentValue;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes Simplified Weighted Moving Average using span-based computation.
+    /// </summary>
+    internal static void SimplifiedWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var priorValue = i >= length ? input[i - length] : 0;
+            var prevSwma = i >= 1 ? output[i - 1] : currentValue;
+
+            output[i] = prevSwma + ((currentValue - priorValue) / length);
+        }
+    }
+
+    /// <summary>
+    /// Computes Simplified Least Squares Moving Average using span-based computation.
+    /// </summary>
+    internal static void SimplifiedLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 25)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var wma = wmaBuffer.AsSpan(0, input.Length);
+            var sma = smaBuffer.AsSpan(0, input.Length);
+
+            WeightedMovingAverage(input, wma, length);
+            SimpleMovingAverage(input, sma, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (2 * wma[i]) - sma[i];
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(wmaBuffer);
+            ArrayPool<double>.Shared.Return(smaBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Sharp Modified Moving Average using span-based computation.
+    /// </summary>
+    internal static void SharpModifiedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double factor = 0.7)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var sma = smaBuffer.AsSpan(0, input.Length);
+            SimpleMovingAverage(input, sma, length);
+
+            var alpha = 2.0 / (length + 1);
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var smaVal = sma[i];
+                var prevSmma = i >= 1 ? output[i - 1] : currentValue;
+                var diff = currentValue - smaVal;
+
+                output[i] = prevSmma + (alpha * diff * factor);
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(smaBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Tillson IE2 using span-based computation.
+    /// </summary>
+    internal static void TillsonIE2(ReadOnlySpan<double> input, Span<double> output, int length = 15, double vFactor = 0.7)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+            var ema2 = ema2Buffer.AsSpan(0, input.Length);
+
+            ExponentialMovingAverage(input, ema1, length);
+            ExponentialMovingAverage(ema1, ema2, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var dema = (2 * ema1[i]) - ema2[i];
+                output[i] = ((1 - vFactor) * ema1[i]) + (vFactor * dema);
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(ema1Buffer);
+            ArrayPool<double>.Shared.Return(ema2Buffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Recursive Moving Trend Average using span-based computation.
+    /// </summary>
+    internal static void RecursiveMovingTrendAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var alpha = 2.0 / (length + 1);
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevRmta = i >= 1 ? output[i - 1] : currentValue;
+            var priorRmta = i >= length ? output[i - length] : currentValue;
+
+            var rmtaTrend = (prevRmta - priorRmta) / length;
+            output[i] = (alpha * currentValue) + ((1 - alpha) * (prevRmta + rmtaTrend));
+        }
+    }
+
+    /// <summary>
+    /// Computes Quadratic Moving Average using span-based computation.
+    /// </summary>
+    internal static void QuadraticMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var sma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var sma1 = sma1Buffer.AsSpan(0, input.Length);
+            var sma2 = sma2Buffer.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma1, length);
+            SimpleMovingAverage(sma1, sma2, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (2 * sma1[i]) - sma2[i];
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(sma1Buffer);
+            ArrayPool<double>.Shared.Return(sma2Buffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Multi-Depth Zero Lag EMA using span-based computation.
+    /// </summary>
+    internal static void MultiDepthZeroLagExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 32, int depth = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var alpha = 2.0 / (length + 1);
+        var lag = (length - 1) / 2;
+
+        // Apply zero-lag EMA multiple times based on depth
+        var tempBuffer1 = ArrayPool<double>.Shared.Rent(input.Length);
+        var tempBuffer2 = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            // Copy input to first temp buffer
+            input.CopyTo(tempBuffer1.AsSpan(0, input.Length));
+            var current = tempBuffer1.AsSpan(0, input.Length);
+            var next = tempBuffer2.AsSpan(0, input.Length);
+
+            for (var d = 0; d < depth; d++)
+            {
+                for (var i = 0; i < input.Length; i++)
+                {
+                    var currentValue = current[i];
+                    var lagValue = i >= lag ? current[i - lag] : current[0];
+                    var compensatedInput = (2 * currentValue) - lagValue;
+
+                    var prevOut = i >= 1 ? next[i - 1] : compensatedInput;
+                    next[i] = (alpha * compensatedInput) + ((1 - alpha) * prevOut);
+                }
+
+                // Swap buffers
+                var temp = current;
+                current = next;
+                next = temp;
+            }
+
+            // Copy result to output
+            current.CopyTo(output);
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(tempBuffer1);
+            ArrayPool<double>.Shared.Return(tempBuffer2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Hull Estimate using span-based computation.
+    /// </summary>
+    internal static void HullEstimate(ReadOnlySpan<double> input, Span<double> output, int length = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var halfLength = Math.Max(length / 2, 1);
+
+        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var wma1 = wma1Buffer.AsSpan(0, input.Length);
+            var wma2 = wma2Buffer.AsSpan(0, input.Length);
+
+            WeightedMovingAverage(input, wma1, halfLength);
+            WeightedMovingAverage(input, wma2, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (3 * wma1[i]) - (2 * wma2[i]);
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(wma1Buffer);
+            ArrayPool<double>.Shared.Return(wma2Buffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Inverse Distance Weighted Moving Average using span-based computation.
+    /// </summary>
+    internal static void InverseDistanceWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevValue = i >= j ? input[i - j] : 0;
+                var weight = 1.0 / (j + 1);
+                sum += prevValue * weight;
+                weightedSum += weight;
+            }
+            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Trimean using span-based computation.
+    /// </summary>
+    internal static void Trimean(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var windowBuffer = ArrayPool<double>.Shared.Rent(length);
+        try
+        {
+            for (var i = 0; i < input.Length; i++)
+            {
+                var n = Math.Min(i + 1, length);
+                for (var j = 0; j < n; j++)
+                {
+                    windowBuffer[j] = input[i - j];
+                }
+
+                // Sort window for quartile calculation
+                Array.Sort(windowBuffer, 0, n);
+
+                // Calculate Q1, Median, Q3
+                var q1Idx = (n - 1) * 0.25;
+                var medIdx = (n - 1) * 0.5;
+                var q3Idx = (n - 1) * 0.75;
+
+                var q1 = InterpolateQuartile(windowBuffer, n, q1Idx);
+                var median = InterpolateQuartile(windowBuffer, n, medIdx);
+                var q3 = InterpolateQuartile(windowBuffer, n, q3Idx);
+
+                // Trimean = (Q1 + 2*Median + Q3) / 4
+                output[i] = (q1 + (2 * median) + q3) / 4;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(windowBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Helper method to interpolate quartile values.
+    /// </summary>
+    private static double InterpolateQuartile(double[] sorted, int length, double index)
+    {
+        var lower = (int)Math.Floor(index);
+        var upper = (int)Math.Ceiling(index);
+        if (lower == upper || upper >= length)
+        {
+            return sorted[Math.Min(lower, length - 1)];
+        }
+        var fraction = index - lower;
+        return sorted[lower] + (fraction * (sorted[upper] - sorted[lower]));
+    }
+
+    /// <summary>
+    /// Computes Well Rounded Moving Average using span-based computation.
+    /// </summary>
+    internal static void WellRoundedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var sma = smaBuffer.AsSpan(0, input.Length);
+            var ema = emaBuffer.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma, length);
+            ExponentialMovingAverage(input, ema, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (sma[i] + ema[i]) / 2;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(smaBuffer);
+            ArrayPool<double>.Shared.Return(emaBuffer);
+        }
+    }
+
+    /// <summary>
+    /// Computes Linear Regression Line using span-based computation.
+    /// </summary>
+    internal static void LinearRegressionLine(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Linear regression line is the same as LSMA
+        LinearRegression(input, output, length);
+    }
+
+    /// <summary>
+    /// Computes Linear Extrapolation using span-based computation.
+    /// </summary>
+    internal static void LinearExtrapolation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            // Simple linear extrapolation: 2*current - prior
+            var n = Math.Min(i + 1, length);
+            var currentValue = input[i];
+            var priorValue = i >= n ? input[i - n + 1] : input[0];
+            var slope = (currentValue - priorValue) / (n - 1);
+
+            output[i] = currentValue + slope;
+        }
+    }
+
+    /// <summary>
+    /// Computes JSA Moving Average using span-based computation.
+    /// </summary>
+    internal static void JsaMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        try
+        {
+            var sma = smaBuffer.AsSpan(0, input.Length);
+            var ema = emaBuffer.AsSpan(0, input.Length);
+            var wma = wmaBuffer.AsSpan(0, input.Length);
+
+            SimpleMovingAverage(input, sma, length);
+            ExponentialMovingAverage(input, ema, length);
+            WeightedMovingAverage(input, wma, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (sma[i] + ema[i] + wma[i]) / 3;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(smaBuffer);
+            ArrayPool<double>.Shared.Return(emaBuffer);
+            ArrayPool<double>.Shared.Return(wmaBuffer);
+        }
+    }
+
     #endregion
 }
