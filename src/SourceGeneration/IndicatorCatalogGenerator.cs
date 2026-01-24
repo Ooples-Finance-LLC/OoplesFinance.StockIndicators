@@ -526,6 +526,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "BelkhayateTiming",
         "DetrendedSyntheticPrice",
         "DoubleExponentialSmoothing",
+
+        // Batch 22 - Counting and Performance Oscillators
+        "DemarkSetupIndicator",
+        "PerformanceIndex",
+        "PsychologicalLine",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1369,6 +1374,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "BelkhayateTiming" => "ComputeBelkhayateTimingFast",
             "DetrendedSyntheticPrice" => "ComputeDetrendedSyntheticPriceFast",
             "DoubleExponentialSmoothing" => "ComputeDoubleExponentialSmoothingFast",
+
+            // Batch 22 - Counting and Performance Oscillators
+            "DemarkSetupIndicator" => "ComputeDemarkSetupIndicatorFast",
+            "PerformanceIndex" => "ComputePerformanceIndexFast",
+            "PsychologicalLine" => "ComputePsychologicalLineFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

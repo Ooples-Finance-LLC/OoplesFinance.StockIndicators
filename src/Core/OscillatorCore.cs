@@ -8492,5 +8492,108 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Batch 22 - Counting and Performance Oscillators
+
+    /// <summary>
+    /// Computes the Demark Setup Indicator - counts up/down patterns.
+    /// </summary>
+    /// <param name="input">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Lookback length.</param>
+    internal static void DemarkSetupIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 4)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            double uCount = 0, dCount = 0;
+
+            for (var j = 0; j < length; j++)
+            {
+                var value = i >= j ? input[i - j] : 0;
+                var prevValue = i >= j + length ? input[i - (j + length)] : 0;
+
+                if (value > prevValue) uCount++;
+                if (value < prevValue) dCount++;
+            }
+
+            double drp = dCount == length ? 1 : uCount == length ? -1 : 0;
+            output[i] = drp != 0 ? currentValue : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes the Performance Index - percent change from length bars ago.
+    /// </summary>
+    /// <param name="input">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Lookback length.</param>
+    internal static void PerformanceIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= length ? input[i - length] : 0;
+
+            // MinPastValues equivalent: only compute if we have enough history
+            var change = i >= length ? currentValue - prevValue : 0;
+            output[i] = prevValue != 0 ? change * 100 / prevValue : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes the Psychological Line - percent of up days in a window.
+    /// </summary>
+    /// <param name="input">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Window length.</param>
+    internal static void PsychologicalLine(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Use a rolling window to count up days
+        Span<double> conditions = stackalloc double[Math.Min(length, input.Length)];
+        var condSum = 0.0;
+        var windowIdx = 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            double cond = currentValue > prevValue ? 1 : 0;
+
+            if (i < length)
+            {
+                // Building up the window
+                conditions[i] = cond;
+                condSum += cond;
+            }
+            else
+            {
+                // Rolling window - remove oldest, add newest
+                condSum -= conditions[windowIdx];
+                conditions[windowIdx] = cond;
+                condSum += cond;
+                windowIdx = (windowIdx + 1) % length;
+            }
+
+            output[i] = length != 0 ? condSum / length * 100 : 0;
+        }
+    }
+
+    #endregion
+
     #endregion
 }

@@ -5314,5 +5314,42 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 22 - Counting and Performance Oscillators
+
+    /// <summary>
+    /// Computes Demark Setup Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDemarkSetupIndicatorFast(StockData data, ComputeContext context, int length = 4)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DemarkSetupIndicator(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Performance Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePerformanceIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.PerformanceIndex(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Psychological Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePsychologicalLineFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.PsychologicalLine(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }
