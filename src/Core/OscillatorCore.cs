@@ -8737,5 +8737,336 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Batch 23 - Simple Price and Volume Indicators
+
+    /// <summary>
+    /// Computes Internal Bar Strength (IBS).
+    /// IBS = (Close - Low) / (High - Low) * 100, averaged over length.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Averaging period length.</param>
+    internal static void InternalBarStrength(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        Span<double> ibs = stackalloc double[close.Length > 1024 ? 0 : close.Length];
+        var ibsArray = close.Length > 1024 ? new double[close.Length] : null;
+        var ibsSpan = ibsArray is not null ? ibsArray.AsSpan() : ibs;
+
+        // Calculate raw IBS for each bar
+        for (var i = 0; i < close.Length; i++)
+        {
+            var range = high[i] - low[i];
+            ibsSpan[i] = range != 0 ? (close[i] - low[i]) / range * 100 : 50;
+        }
+
+        // Calculate rolling average of IBS
+        double sum = 0;
+        for (var i = 0; i < close.Length; i++)
+        {
+            sum += ibsSpan[i];
+            if (i >= length)
+            {
+                sum -= ibsSpan[i - length];
+            }
+            var count = Math.Min(i + 1, length);
+            output[i] = sum / count;
+        }
+    }
+
+    /// <summary>
+    /// Computes Full Typical Price (OHLC4).
+    /// FullTypicalPrice = (Open + High + Low + Close) / 4
+    /// </summary>
+    /// <param name="open">Open prices.</param>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    internal static void FullTypicalPrice(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+        }
+    }
+
+    /// <summary>
+    /// Computes Z-Score.
+    /// ZScore = (Value - SMA) / StdDev
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void ZScore(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate SMA
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+            var sma = sum / length;
+
+            // Calculate standard deviation
+            double sumSquaredDev = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var dev = input[j] - sma;
+                sumSquaredDev += dev * dev;
+            }
+            var stdDev = Math.Sqrt(sumSquaredDev / length);
+
+            // Calculate Z-Score
+            output[i] = stdDev != 0 ? (input[i] - sma) / stdDev : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Inverse Fisher Transform of a value.
+    /// InverseFisher = (Exp(2*x) - 1) / (Exp(2*x) + 1)
+    /// </summary>
+    /// <param name="input">Input values (typically normalized RSI or other oscillator).</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period for scaling.</param>
+    internal static void InverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var x = input[i];
+            // Normalize to -5 to 5 range for better transform behavior
+            var normalized = x * 0.1;
+            var exp2x = Math.Exp(2 * normalized);
+            output[i] = (exp2x - 1) / (exp2x + 1);
+        }
+    }
+
+    /// <summary>
+    /// Computes Fast Z-Score using shorter period calculation.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void FastZScore(ReadOnlySpan<double> input, Span<double> output, int length = 5)
+    {
+        // FastZScore uses same formula as ZScore but with shorter default period
+        ZScore(input, output, length);
+    }
+
+    /// <summary>
+    /// Computes Skewness indicator.
+    /// Measures asymmetry of the distribution of values.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void Skewness(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate mean
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+            var mean = sum / length;
+
+            // Calculate variance and third moment
+            double sumSquaredDev = 0;
+            double sumCubedDev = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var dev = input[j] - mean;
+                sumSquaredDev += dev * dev;
+                sumCubedDev += dev * dev * dev;
+            }
+            var variance = sumSquaredDev / length;
+            var stdDev = Math.Sqrt(variance);
+
+            // Skewness = E[(X-μ)³] / σ³
+            output[i] = stdDev != 0 ? (sumCubedDev / length) / (stdDev * stdDev * stdDev) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Kurtosis indicator.
+    /// Measures the "tailedness" of the distribution.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void Kurtosis(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate mean
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+            var mean = sum / length;
+
+            // Calculate variance and fourth moment
+            double sumSquaredDev = 0;
+            double sumFourthDev = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var dev = input[j] - mean;
+                var devSq = dev * dev;
+                sumSquaredDev += devSq;
+                sumFourthDev += devSq * devSq;
+            }
+            var variance = sumSquaredDev / length;
+
+            // Kurtosis = E[(X-μ)⁴] / σ⁴ - 3 (excess kurtosis)
+            output[i] = variance != 0 ? (sumFourthDev / length) / (variance * variance) - 3 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Price Zone Oscillator simplified version.
+    /// </summary>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void SimplePriceZone(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double sumUp = 0;
+        double sumDn = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var change = close[i] - close[i - 1];
+            var up = change > 0 ? change : 0;
+            var dn = change < 0 ? -change : 0;
+
+            sumUp += up;
+            sumDn += dn;
+
+            if (i >= length)
+            {
+                var prevChange = close[i - length] - (i > length ? close[i - length - 1] : 0);
+                var prevUp = prevChange > 0 ? prevChange : 0;
+                var prevDn = prevChange < 0 ? -prevChange : 0;
+                sumUp -= prevUp;
+                sumDn -= prevDn;
+            }
+
+            var total = sumUp + sumDn;
+            output[i] = total != 0 ? 100 * (sumUp - sumDn) / total : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Typical Price Volatility.
+    /// Standard deviation of typical price over period.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Period length.</param>
+    internal static void TypicalPriceVolatility(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            // Calculate mean of typical prices
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var tp = (high[j] + low[j] + close[j]) / 3;
+                sum += tp;
+            }
+            var mean = sum / length;
+
+            // Calculate standard deviation
+            double sumSquaredDev = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var tp = (high[j] + low[j] + close[j]) / 3;
+                var dev = tp - mean;
+                sumSquaredDev += dev * dev;
+            }
+            output[i] = Math.Sqrt(sumSquaredDev / length);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

@@ -5402,5 +5402,70 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 23 - Simple Price, Volume, and Statistical Indicators
+
+    /// <summary>
+    /// Computes Full Typical Price (OHLC4) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFullTypicalPriceFast(StockData data, ComputeContext context, int length = 14)
+    {
+        _ = length; // Indicator has no configurable parameters
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.FullTypicalPrice(open, high, low, close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Internal Bar Strength Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeInternalBarStrengthIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.InternalBarStrength(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Z-Score using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ZScore(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fast Z-Score using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFastZScoreFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.FastZScore(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kurtosis Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.Kurtosis(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }
