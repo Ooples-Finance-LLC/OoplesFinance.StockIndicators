@@ -14,10 +14,11 @@ The v2 fast path has three layers:
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | ~530 | Span-based implementations |
+| Core Methods | 510 | Span-based implementations |
 | ComputeFast Wrappers | ~515 | Buffer wrappers in IndicatorCompute.cs |
 | SpecOptions Classes | **517** | Typed indicator options |
-| TryComputeFast Dispatch | **513** | Routed to fast path methods |
+| TryComputeFast Dispatch | **516** | Routed to fast path methods |
+| IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
 
@@ -26,12 +27,33 @@ The v2 fast path has three layers:
 - **Batch 26**: Added 36 new ComputeFast methods for additional Core methods
 - **Batch 27**: Added 12 new multi-input ComputeFast methods (DeMarker, Vortex, Klinger, etc.)
 - **Batch 28**: Added 15 final Core method wrappers (Reverse Engineering RSI, PPO MA, etc.)
-- **Total**: 517 SpecOptions, 513 dispatch routes (~67% coverage of 773 Calculate methods)
+- **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
+- **Total**: 517 SpecOptions, 516 dispatch routes
 
-### Remaining Unwired Core Methods (~2)
+### Coverage Analysis
 
-These Core methods exist but don't have ComputeFast wrappers yet:
-- BollingerBands (multi-output: upper/middle/lower - requires special handling)
+| Metric | Count | Percentage |
+|--------|-------|------------|
+| Indicators with Core methods | 510 | 66% |
+| Indicators without Core methods | 263 | 34% |
+| Current fast path coverage | 510 | 66% |
+
+### Remaining Work for 100% Coverage
+
+263 indicators need Core method implementations:
+- _1LCLeastSquaresMovingAverage
+- _3HMA
+- _4MovingAverageConvergenceDivergence
+- AdaptiveErgodicCandlestickOscillator
+- ChandelierExit
+- ... (full list: 263 indicators)
+
+Each Core method implementation requires:
+1. Understanding the algorithm from Calculations
+2. Converting List-based code to Span-based
+3. Handling dependencies on other Core methods
+4. Creating SpecOptions and dispatch routing
+5. Testing
 
 ## What's Already Complete
 
