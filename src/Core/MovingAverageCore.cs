@@ -3045,4 +3045,219 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Batch 20 - Additional Ehlers Filters and Moving Averages
+
+    /// <summary>
+    /// Computes Ehlers Hamming Moving Average using span-based computation.
+    /// </summary>
+    internal static void EhlersHammingMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20, double pedestal = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double filtSum = 0, coefSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevV = i >= j ? input[i - j] : 0;
+                var sine = Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
+                filtSum += sine * prevV;
+                coefSum += sine;
+            }
+
+            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Leading Indicator using span-based computation.
+    /// </summary>
+    internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, double alpha1 = 0.25, double alpha2 = 0.33)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        Span<double> lead = stackalloc double[input.Length];
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevLead = i >= 1 ? lead[i - 1] : 0;
+
+            lead[i] = (2 * currentValue) + ((alpha1 - 2) * prevValue) + ((1 - alpha1) * prevLead);
+
+            var prevLeadIndicator = i >= 1 ? output[i - 1] : 0;
+            output[i] = (alpha2 * lead[i]) + ((1 - alpha2) * prevLeadIndicator);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers High Pass Filter V1 using span-based computation.
+    /// </summary>
+    internal static void EhlersHighPassFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 125, double mult = 1)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(length, 1);
+        var sqrt2 = Math.Sqrt(2);
+        var alphaArg = Math.Min(Math.Max(2 * Math.PI / (mult * length * sqrt2), 0.01), 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevValue2 = i >= 2 ? input[i - 2] : 0;
+            var prevHp1 = i >= 1 ? output[i - 1] : 0;
+            var prevHp2 = i >= 2 ? output[i - 2] : 0;
+            var pow1 = Math.Pow(1 - (alpha / 2), 2);
+            var pow2 = Math.Pow(1 - alpha, 2);
+
+            output[i] = (pow1 * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) - (pow2 * prevHp2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers High Pass Filter V2 using span-based computation.
+    /// </summary>
+    internal static void EhlersHighPassFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 48)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(length, 1);
+        var alphaArg = Math.Min(Math.Max(2 * Math.PI / length, 0.01), 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevHp = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = ((1 - (alpha / 2)) * (currentValue - prevValue1)) + ((1 - alpha) * prevHp);
+        }
+    }
+
+    /// <summary>
+    /// Computes Distance Weighted Moving Average using span-based computation.
+    /// </summary>
+    internal static void DistanceWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevValue = i >= j ? input[i - j] : 0;
+
+                double distanceSum = 0;
+                for (var k = 0; k < length; k++)
+                {
+                    var prevValue2 = i >= k ? input[i - k] : 0;
+                    distanceSum += Math.Abs(prevValue - prevValue2);
+                }
+
+                var weight = distanceSum != 0 ? 1 / distanceSum : 0;
+                sum += prevValue * weight;
+                weightedSum += weight;
+            }
+
+            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Filter using span-based computation.
+    /// </summary>
+    internal static void EhlersFilter(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrt2 = Math.Sqrt(2);
+        var a = Math.Exp(-sqrt2 * Math.PI / length);
+        var b = 2 * a * Math.Cos(sqrt2 * Math.PI / length);
+        var c2 = b;
+        var c3 = -a * a;
+        var c1 = 1 - c2 - c3;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (c1 * currentValue) + (c2 * prevFilter1) + (c3 * prevFilter2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Finite Impulse Response Filter using span-based computation.
+    /// </summary>
+    internal static void EhlersFiniteImpulseResponseFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0, coefSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevValue = i >= j ? input[i - j] : 0;
+                var coef = 1 - ((double)j / length);
+                sum += coef * prevValue;
+                coefSum += coef;
+            }
+
+            output[i] = coefSum != 0 ? sum / coefSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Infinite Impulse Response Filter using span-based computation.
+    /// </summary>
+    internal static void EhlersInfiniteImpulseResponseFilter(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var alpha = 2.0 / (length + 1);
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = (alpha * currentValue) + ((1 - alpha) * prevFilter);
+        }
+    }
+
+    #endregion
 }

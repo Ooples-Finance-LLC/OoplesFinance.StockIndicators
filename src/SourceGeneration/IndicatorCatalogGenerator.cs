@@ -283,6 +283,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "Ehlers3PoleSuperSmootherFilter",
         "EhlersDecycler",
 
+        // Moving Averages - MovingAverageCore (Batch 20 - Additional Ehlers Filters and MAs)
+        "EhlersHammingMovingAverage",
+        "EhlersLeadingIndicator",
+        "EhlersHighPassFilterV1",
+        "EhlersHighPassFilterV2",
+        "DistanceWeightedMovingAverage",
+        "EhlersFilter",
+        "EhlersFiniteImpulseResponseFilter",
+        "EhlersInfiniteImpulseResponseFilter",
+
         // Volume - VolumeCore (Additional Batch 3)
         "WilliamsAD",
         "NetVolume",
@@ -1107,6 +1117,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "Ehlers2PoleSuperSmootherFilterV2" => "ComputeEhlers2PoleSuperSmootherFilterV2Fast",
             "Ehlers3PoleSuperSmootherFilter" => "ComputeEhlers3PoleSuperSmootherFilterFast",
             "EhlersDecycler" => "ComputeEhlersDecyclerFast",
+
+            // Moving Averages (Batch 20 - Additional Ehlers Filters and MAs)
+            "EhlersHammingMovingAverage" => "ComputeEhlersHammingMovingAverageFast",
+            "EhlersLeadingIndicator" => "ComputeEhlersLeadingIndicatorFast",
+            "EhlersHighPassFilterV1" => "ComputeEhlersHighPassFilterV1Fast",
+            "EhlersHighPassFilterV2" => "ComputeEhlersHighPassFilterV2Fast",
+            "DistanceWeightedMovingAverage" => "ComputeDistanceWeightedMovingAverageFast",
+            "EhlersFilter" => "ComputeEhlersFilterFast",
+            "EhlersFiniteImpulseResponseFilter" => "ComputeEhlersFirFilterFast",
+            "EhlersInfiniteImpulseResponseFilter" => "ComputeEhlersIirFilterFast",
 
             // Volume (Additional Batch 3)
             "WilliamsAD" => "ComputeWilliamsADFast",

@@ -5159,5 +5159,97 @@ internal static partial class IndicatorCompute
 
     #endregion
 
+    #region Batch 20 - Additional Ehlers Filters and Moving Averages
+
+    /// <summary>
+    /// Computes Ehlers Hamming Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersHammingMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersHammingMovingAverage(close, buffer.WritableSpan, length, 3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Leading Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersLeadingIndicator(close, buffer.WritableSpan, 0.25, 0.33);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers High Pass Filter V1 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersHighPassFilterV1Fast(StockData data, ComputeContext context, int length = 125)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersHighPassFilterV1(close, buffer.WritableSpan, length, 1);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers High Pass Filter V2 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersHighPassFilterV2Fast(StockData data, ComputeContext context, int length = 48)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersHighPassFilterV2(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Distance Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.DistanceWeightedMovingAverage(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length = 15)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersFilter(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersFirFilterFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersFiniteImpulseResponseFilter(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersIirFilterFast(StockData data, ComputeContext context, int length = 15)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.EhlersInfiniteImpulseResponseFilter(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
     #endregion
 }
