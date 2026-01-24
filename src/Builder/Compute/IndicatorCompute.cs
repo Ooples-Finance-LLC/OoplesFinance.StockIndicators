@@ -773,6 +773,10 @@ internal static partial class IndicatorCompute
             EhlersFisherTransformSpecOptions eft => ComputeEhlersFisherTransformFast(data, context, eft.Length),
             EhlersVossPredictiveFilterSpecOptions evpf => ComputeEhlersVossPredictiveFilterFast(data, context, evpf.Length, evpf.Predict, evpf.Bandwidth),
             EhlersSpearmanRankIndicatorSpecOptions esri => ComputeEhlersSpearmanRankIndicatorFast(data, context, esri.Length),
+            EhlersCorrelationCycleIndicatorSpecOptions ecci => ComputeEhlersCorrelationCycleIndicatorFast(data, context, ecci.Length),
+            EhlersCorrelationAngleIndicatorSpecOptions ecai => ComputeEhlersCorrelationAngleIndicatorFast(data, context, ecai.Length),
+            EhlersTruncatedBandPassFilterSpecOptions etbpf => ComputeEhlersTruncatedBandPassFilterFast(data, context, etbpf.Length1, etbpf.Length2, etbpf.Bandwidth),
+            EhlersSimpleDecyclerSpecOptions esd => ComputeEhlersSimpleDecyclerFast(data, context, esd.Length),
 
             _ => null
         };
@@ -8146,6 +8150,56 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersSpearmanRankIndicator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Correlation Cycle Indicator (Real) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCorrelationCycleIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var realBuffer = context.Rent(inputList.Count);
+        var imagBuffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCorrelationCycleIndicator(inputSpan, realBuffer.WritableSpan, imagBuffer.WritableSpan, length);
+        imagBuffer.Dispose();
+        return realBuffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Correlation Angle Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCorrelationAngleIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCorrelationAngleIndicator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Truncated BandPass Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersTruncatedBandPassFilterFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, double bw = 0.1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersTruncatedBandPassFilter(inputSpan, buffer.WritableSpan, length1, length2, bw);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Simple Decycler using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSimpleDecyclerFast(StockData data, ComputeContext context, int length = 125)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSimpleDecycler(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 

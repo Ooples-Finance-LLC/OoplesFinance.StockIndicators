@@ -7258,3 +7258,46 @@ public sealed class EhlersSpearmanRankIndicatorSpecOptions : IIndicatorSpecOptio
     public EhlersSpearmanRankIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Ehlers Correlation Cycle Indicator options.
+/// </summary>
+public sealed class EhlersCorrelationCycleIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCorrelationCycleIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Correlation Angle Indicator options.
+/// </summary>
+public sealed class EhlersCorrelationAngleIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCorrelationAngleIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Truncated BandPass Filter options.
+/// </summary>
+public sealed class EhlersTruncatedBandPassFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersTruncatedBandPassFilterSpecOptions(int length1 = 20, int length2 = 10, double bw = 0.1)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Bandwidth = bw;
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double Bandwidth { get; }
+}
+
+/// <summary>
+/// Ehlers Simple Decycler options.
+/// </summary>
+public sealed class EhlersSimpleDecyclerSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersSimpleDecyclerSpecOptions(int length = 125) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

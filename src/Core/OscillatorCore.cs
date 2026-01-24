@@ -10690,6 +10690,156 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers Correlation Cycle Indicator (Real output).
+    /// </summary>
+    internal static void EhlersCorrelationCycleIndicator(ReadOnlySpan<double> close, Span<double> realOutput, Span<double> imagOutput, int length = 20)
+    {
+        if (realOutput.Length < close.Length || imagOutput.Length < close.Length)
+        {
+            throw new ArgumentException("Output spans must be at least input length.");
+        }
+
+        length = Math.Max(1, length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            double sx = 0, sy = 0, nsy = 0, sxx = 0, syy = 0, nsyy = 0, sxy = 0, nsxy = 0;
+
+            for (var j = 1; j <= length; j++)
+            {
+                var idx = i - (j - 1);
+                var x = idx >= 0 ? close[idx] : 0;
+                var v = Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ((double)(j - 1) / length)));
+                var y = Math.Cos(v);
+                var ny = -Math.Sin(v);
+                sx += x;
+                sy += y;
+                nsy += ny;
+                sxx += x * x;
+                syy += y * y;
+                nsyy += ny * ny;
+                sxy += x * y;
+                nsxy += x * ny;
+            }
+
+            var realDenom1 = (length * sxx) - (sx * sx);
+            var realDenom2 = (length * syy) - (sy * sy);
+            realOutput[i] = realDenom1 > 0 && realDenom2 > 0
+                ? ((length * sxy) - (sx * sy)) / Math.Sqrt(realDenom1 * realDenom2)
+                : 0;
+
+            var imagDenom2 = (length * nsyy) - (nsy * nsy);
+            imagOutput[i] = realDenom1 > 0 && imagDenom2 > 0
+                ? ((length * nsxy) - (sx * nsy)) / Math.Sqrt(realDenom1 * imagDenom2)
+                : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Correlation Angle Indicator.
+    /// </summary>
+    internal static void EhlersCorrelationAngleIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var realArray = pool.Rent(close.Length);
+        var imagArray = pool.Rent(close.Length);
+
+        try
+        {
+            var real = realArray.AsSpan(0, close.Length);
+            var imag = imagArray.AsSpan(0, close.Length);
+
+            EhlersCorrelationCycleIndicator(close, real, imag, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var prevAngle = i >= 1 ? output[i - 1] : 0;
+                var angle = imag[i] != 0 ? 90 + (Math.Atan(real[i] / imag[i]) * 180 / Math.PI) : 90;
+                angle = imag[i] > 0 ? angle - 180 : angle;
+                angle = prevAngle - angle < 270 && angle < prevAngle ? prevAngle : angle;
+                output[i] = angle;
+            }
+        }
+        finally
+        {
+            pool.Return(realArray);
+            pool.Return(imagArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Truncated BandPass Filter.
+    /// </summary>
+    internal static void EhlersTruncatedBandPassFilter(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 10, double bw = 0.1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var l1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length1)));
+        var g1 = Math.Cos(bw * 2 * Math.PI / length1);
+        var s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var trunArray = new double[length2 + 3];
+
+            for (var j = length2; j > 0; j--)
+            {
+                var idx1 = i - (j - 1);
+                var idx2 = i - (j + 1);
+                var prevValue1 = idx1 >= 0 ? close[idx1] : 0;
+                var prevValue2 = idx2 >= 0 ? close[idx2] : 0;
+                trunArray[j] = (0.5 * (1 - s1) * (prevValue1 - prevValue2)) + (l1 * (1 + s1) * trunArray[j + 1]) - (s1 * trunArray[j + 2]);
+            }
+
+            output[i] = trunArray[1];
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Simple Decycler.
+    /// </summary>
+    internal static void EhlersSimpleDecycler(ReadOnlySpan<double> close, Span<double> output, int length = 125)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length, 1);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = close[i] - hp[i];
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+        }
+    }
+
     #endregion
 
     #endregion
