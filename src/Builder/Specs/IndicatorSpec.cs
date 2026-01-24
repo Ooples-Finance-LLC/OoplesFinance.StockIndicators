@@ -7516,3 +7516,31 @@ public sealed class EhlersImpulseReactionSpecOptions : IIndicatorSpecOptions
     public int Length2 { get; }
     public double Q { get; }
 }
+
+/// <summary>
+/// Ehlers Reverse Exponential Moving Average Indicator V1 options.
+/// </summary>
+public sealed class EhlersReverseEmaIndicatorV1SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersReverseEmaIndicatorV1SpecOptions(double alpha = 0.1)
+    {
+        Alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+    }
+    public double Alpha { get; }
+}
+
+/// <summary>
+/// Ehlers Squelch Indicator options.
+/// </summary>
+public sealed class EhlersSquelchIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersSquelchIndicatorSpecOptions(int length1 = 6, int length2 = 20, int length3 = 40)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+}

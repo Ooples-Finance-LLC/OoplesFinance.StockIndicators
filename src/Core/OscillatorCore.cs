@@ -11569,6 +11569,182 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates Ehlers Reverse Exponential Moving Average Indicator V1.
+    /// </summary>
+    internal static void EhlersReverseEmaIndicatorV1(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+        var cc = 1 - alpha;
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+        var re1Array = pool.Rent(close.Length);
+        var re2Array = pool.Rent(close.Length);
+        var re3Array = pool.Rent(close.Length);
+        var re4Array = pool.Rent(close.Length);
+        var re5Array = pool.Rent(close.Length);
+        var re6Array = pool.Rent(close.Length);
+        var re7Array = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            var re1 = re1Array.AsSpan(0, close.Length);
+            var re2 = re2Array.AsSpan(0, close.Length);
+            var re3 = re3Array.AsSpan(0, close.Length);
+            var re4 = re4Array.AsSpan(0, close.Length);
+            var re5 = re5Array.AsSpan(0, close.Length);
+            var re6 = re6Array.AsSpan(0, close.Length);
+            var re7 = re7Array.AsSpan(0, close.Length);
+
+            var cc2 = cc * cc;
+            var cc4 = cc2 * cc2;
+            var cc8 = cc4 * cc4;
+            var cc16 = cc8 * cc8;
+            var cc32 = cc16 * cc16;
+            var cc64 = cc32 * cc32;
+            var cc128 = cc64 * cc64;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevEma = i >= 1 ? ema[i - 1] : 0;
+                ema[i] = (alpha * currentValue) + (cc * prevEma);
+
+                var prevRe1 = i >= 1 ? re1[i - 1] : 0;
+                re1[i] = (cc * ema[i]) + prevEma;
+
+                var prevRe2 = i >= 1 ? re2[i - 1] : 0;
+                re2[i] = (cc2 * re1[i]) + prevRe1;
+
+                var prevRe3 = i >= 1 ? re3[i - 1] : 0;
+                re3[i] = (cc4 * re2[i]) + prevRe2;
+
+                var prevRe4 = i >= 1 ? re4[i - 1] : 0;
+                re4[i] = (cc8 * re3[i]) + prevRe3;
+
+                var prevRe5 = i >= 1 ? re5[i - 1] : 0;
+                re5[i] = (cc16 * re4[i]) + prevRe4;
+
+                var prevRe6 = i >= 1 ? re6[i - 1] : 0;
+                re6[i] = (cc32 * re5[i]) + prevRe5;
+
+                var prevRe7 = i >= 1 ? re7[i - 1] : 0;
+                re7[i] = (cc64 * re6[i]) + prevRe6;
+
+                var re8 = (cc128 * re7[i]) + prevRe7;
+                output[i] = ema[i] - (alpha * re8);
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(re1Array);
+            pool.Return(re2Array);
+            pool.Return(re3Array);
+            pool.Return(re4Array);
+            pool.Return(re5Array);
+            pool.Return(re6Array);
+            pool.Return(re7Array);
+        }
+    }
+
+    /// <summary>
+    /// Calculates Ehlers Squelch Indicator.
+    /// </summary>
+    internal static void EhlersSquelchIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 6, int length2 = 20, int length3 = 40)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
+
+        var pool = ArrayPool<double>.Shared;
+        var v1Array = pool.Rent(close.Length);
+        var ipArray = pool.Rent(close.Length);
+        var quArray = pool.Rent(close.Length);
+        var phaseArray = pool.Rent(close.Length);
+        var dPhaseArray = pool.Rent(close.Length);
+        var dcPeriodArray = pool.Rent(close.Length);
+
+        try
+        {
+            var v1 = v1Array.AsSpan(0, close.Length);
+            var ip = ipArray.AsSpan(0, close.Length);
+            var qu = quArray.AsSpan(0, close.Length);
+            var phase = phaseArray.AsSpan(0, close.Length);
+            var dPhase = dPhaseArray.AsSpan(0, close.Length);
+            var dcPeriod = dcPeriodArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= length1 ? close[i - length1] : 0;
+                var priorV1 = i >= length1 ? v1[i - length1] : 0;
+                var prevV12 = i >= 2 ? v1[i - 2] : 0;
+                var prevV14 = i >= 4 ? v1[i - 4] : 0;
+
+                v1[i] = i >= length1 ? currentValue - prevValue : 0;
+
+                var v2 = i >= 3 ? v1[i - 3] : 0;
+                var v3 = (0.75 * (v1[i] - priorV1)) + (0.25 * (prevV12 - prevV14));
+
+                var prevIp = i >= 1 ? ip[i - 1] : 0;
+                ip[i] = (0.33 * v2) + (0.67 * prevIp);
+
+                var prevQu = i >= 1 ? qu[i - 1] : 0;
+                qu[i] = (0.2 * v3) + (0.8 * prevQu);
+
+                var prevPhase = i >= 1 ? phase[i - 1] : 0;
+                var ipSum = ip[i] + prevIp;
+                var quSum = qu[i] + prevQu;
+                phase[i] = Math.Abs(ipSum) > 0 ? Math.Atan(Math.Abs(quSum / ipSum)) * (180.0 / Math.PI) : 0;
+                phase[i] = ip[i] < 0 && qu[i] > 0 ? 180 - phase[i] : phase[i];
+                phase[i] = ip[i] < 0 && qu[i] < 0 ? 180 + phase[i] : phase[i];
+                phase[i] = ip[i] > 0 && qu[i] < 0 ? 360 - phase[i] : phase[i];
+
+                var rawDPhase = prevPhase - phase[i];
+                rawDPhase = prevPhase < 90 && phase[i] > 270 ? 360 + prevPhase - phase[i] : rawDPhase;
+                dPhase[i] = Math.Max(1, Math.Min(60, rawDPhase));
+
+                double instPeriod = 0, v4 = 0;
+                for (var j = 0; j <= length3; j++)
+                {
+                    var prevDPhase = i >= j ? dPhase[i - j] : 0;
+                    v4 += prevDPhase;
+                    if (v4 > 360 && instPeriod == 0)
+                    {
+                        instPeriod = j;
+                    }
+                }
+
+                var prevDcPeriod = i >= 1 ? dcPeriod[i - 1] : 0;
+                dcPeriod[i] = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
+
+                output[i] = dcPeriod[i] < length2 ? 0 : 1;
+            }
+        }
+        finally
+        {
+            pool.Return(v1Array);
+            pool.Return(ipArray);
+            pool.Return(quArray);
+            pool.Return(phaseArray);
+            pool.Return(dPhaseArray);
+            pool.Return(dcPeriodArray);
+        }
+    }
+
     #endregion
 
     #endregion

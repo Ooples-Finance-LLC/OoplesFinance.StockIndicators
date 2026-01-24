@@ -793,6 +793,8 @@ internal static partial class IndicatorCompute
             EhlersSuperPassbandFilterSpecOptions espf => ComputeEhlersSuperPassbandFilterFast(data, context, espf.FastLength, espf.SlowLength, espf.Length1, espf.Length2),
             EhlersRoofingFilterV2SpecOptions erfv2 => ComputeEhlersRoofingFilterV2Fast(data, context, erfv2.UpperLength, erfv2.LowerLength),
             EhlersImpulseReactionSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length1, eir.Length2, eir.Q),
+            EhlersReverseEmaIndicatorV1SpecOptions erema => ComputeEhlersReverseEmaIndicatorV1Fast(data, context, erema.Alpha),
+            EhlersSquelchIndicatorSpecOptions esqe => ComputeEhlersSquelchIndicatorFast(data, context, esqe.Length1, esqe.Length2, esqe.Length3),
 
             _ => null
         };
@@ -8417,6 +8419,30 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersImpulseReaction(inputSpan, buffer.WritableSpan, length1, length2, q);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Reverse Exponential Moving Average Indicator V1 using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersReverseEmaIndicatorV1Fast(StockData data, ComputeContext context, double alpha = 0.1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersReverseEmaIndicatorV1(inputSpan, buffer.WritableSpan, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Squelch Indicator using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSquelchIndicatorFast(StockData data, ComputeContext context, int length1 = 6, int length2 = 20, int length3 = 40)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSquelchIndicator(inputSpan, buffer.WritableSpan, length1, length2, length3);
         return buffer;
     }
 
