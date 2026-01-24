@@ -728,6 +728,11 @@ internal static partial class IndicatorCompute
             // Batch 29 - Additional Missing Indicators
             TripleHullMovingAverageSpecOptions thma => ComputeTripleHullMovingAverageFast(data, context, thma.Length),
 
+            // Batch 30 - Additional Missing Core Methods
+            GeneralizedDoubleExponentialMovingAverageSpecOptions gdema => ComputeGeneralizedDoubleExponentialMovingAverageFast(data, context, gdema.Length, gdema.VolumeFactor),
+            EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context, efirf.Length),
+            EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
+
             _ => null
         };
     }
@@ -7545,6 +7550,46 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         TrendCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, buffer.WritableSpan, length, lambda);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 30 - Additional Missing Core Methods
+
+    /// <summary>
+    /// Computes Generalized Double Exponential Moving Average (GDEMA) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeGeneralizedDoubleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double volumeFactor = 1.0)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.GeneralizedDoubleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length, volumeFactor);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersFiniteImpulseResponseFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 15)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersInfiniteImpulseResponseFilter(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 

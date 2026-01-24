@@ -5791,6 +5791,40 @@ public sealed class TripleHullMovingAverageSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 30 SpecOptions (Additional Missing Core Methods) ==========
+
+/// <summary>
+/// Generalized Double Exponential Moving Average (GDEMA) indicator options.
+/// </summary>
+public sealed class GeneralizedDoubleExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public GeneralizedDoubleExponentialMovingAverageSpecOptions(int length = 14, double volumeFactor = 1.0)
+    {
+        Length = Math.Max(1, length);
+        VolumeFactor = volumeFactor;
+    }
+    public int Length { get; }
+    public double VolumeFactor { get; }
+}
+
+/// <summary>
+/// Ehlers Finite Impulse Response Filter indicator options.
+/// </summary>
+public sealed class EhlersFiniteImpulseResponseFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFiniteImpulseResponseFilterSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Infinite Impulse Response Filter indicator options.
+/// </summary>
+public sealed class EhlersInfiniteImpulseResponseFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersInfiniteImpulseResponseFilterSpecOptions(int length = 15) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
 /// <summary>
 /// Corrected Moving Average indicator options.
 /// </summary>
