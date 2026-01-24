@@ -8492,7 +8492,7 @@ internal static class OscillatorCore
 
     #endregion
 
-    #region Batch 22 - Counting and Performance Oscillators
+    #region Batch 22 - Counting and Performance Oscillators + Market Direction Indicators
 
     /// <summary>
     /// Computes the Demark Setup Indicator - counts up/down patterns.
@@ -8592,6 +8592,122 @@ internal static class OscillatorCore
             output[i] = length != 0 ? condSum / length * 100 : 0;
         }
     }
+
+    /// <summary>
+    /// Computes the Move Tracker - simple price change tracking.
+    /// </summary>
+    /// <param name="input">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    internal static void MoveTracker(ReadOnlySpan<double> input, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+
+            // MinPastValues equivalent: only compute change if we have history
+            output[i] = i >= 1 ? currentValue - prevValue : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes the Multi Level Indicator - scaled open/close difference.
+    /// </summary>
+    /// <param name="close">Close prices.</param>
+    /// <param name="open">Open prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="length">Lookback length.</param>
+    /// <param name="factor">Scaling factor.</param>
+    internal static void MultiLevelIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14, double factor = 10000)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevOpen = i >= length ? open[i - length] : 0;
+            var currentOpen = open[i];
+            var currentClose = close[i];
+
+            output[i] = (currentClose - currentOpen - (currentClose - prevOpen)) * factor;
+        }
+    }
+
+    /// <summary>
+    /// Computes the Market Direction Indicator using rolling sums.
+    /// </summary>
+    /// <param name="input">Close prices.</param>
+    /// <param name="output">Output span for results.</param>
+    /// <param name="fastLength">Fast period.</param>
+    /// <param name="slowLength">Slow period.</param>
+    internal static void MarketDirectionIndicator(ReadOnlySpan<double> input, Span<double> output, int fastLength = 13, int slowLength = 55)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-allocate rolling sum buffer
+        Span<double> sumBuffer = stackalloc double[Math.Min(slowLength, input.Length)];
+        var bufferIdx = 0;
+        var totalSum = 0.0;
+        var prevCp2 = 0.0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+
+            // Maintain rolling sum for slowLength
+            if (i < slowLength)
+            {
+                sumBuffer[i] = currentValue;
+                totalSum += currentValue;
+            }
+            else
+            {
+                totalSum -= sumBuffer[bufferIdx];
+                sumBuffer[bufferIdx] = currentValue;
+                totalSum += currentValue;
+                bufferIdx = (bufferIdx + 1) % slowLength;
+            }
+
+            // Calculate partial sums for fast and slow lengths
+            var len1Sum = 0.0; // fastLength - 1
+            var len2Sum = 0.0; // slowLength - 1
+
+            var count1 = Math.Min(fastLength - 1, i + 1);
+            var count2 = Math.Min(slowLength - 1, i + 1);
+
+            for (var j = 0; j < count2; j++)
+            {
+                var idx = i - j;
+                if (idx >= 0)
+                {
+                    var val = input[idx];
+                    len2Sum += val;
+                    if (j < count1)
+                    {
+                        len1Sum += val;
+                    }
+                }
+            }
+
+            var cp2 = slowLength != fastLength ? ((fastLength * len2Sum) - (slowLength * len1Sum)) / (slowLength - fastLength) : 0;
+            var avg = (currentValue + prevValue) / 2;
+            output[i] = avg != 0 ? 100 * (prevCp2 - cp2) / avg : 0;
+            prevCp2 = cp2;
+        }
+    }
+
+    // NthOrderDifferencingOscillator already implemented above in Batch 11
 
     #endregion
 

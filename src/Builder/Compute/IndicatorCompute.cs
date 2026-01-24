@@ -5349,6 +5349,44 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Move Tracker using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMoveTrackerFast(StockData data, ComputeContext context, int length = 14)
+    {
+        _ = length; // Indicator has no configurable parameters
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MoveTracker(close, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Multi Level Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMultiLevelIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.MultiLevelIndicator(close, open, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Market Direction Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMarketDirectionIndicatorFast(StockData data, ComputeContext context, int length = 13)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        // Default fastLength=13, slowLength=55
+        OscillatorCore.MarketDirectionIndicator(close, buffer.WritableSpan, length, 55);
+        return buffer;
+    }
+
+    // ComputeNthOrderDifferencingOscillatorFast already implemented in Batch 11
+
     #endregion
 
     #endregion
