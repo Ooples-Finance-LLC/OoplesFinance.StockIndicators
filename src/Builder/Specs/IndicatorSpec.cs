@@ -6965,3 +6965,30 @@ public sealed class GuppyCountBackLineSpecOptions : IIndicatorSpecOptions
     public GuppyCountBackLineSpecOptions(int length = 21) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Ehlers Trendflex indicator options.
+/// </summary>
+public sealed class EhlersTrendflexSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersTrendflexSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Reflex indicator options.
+/// </summary>
+public sealed class EhlersReflexSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersReflexSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Correlation Trend Indicator options.
+/// </summary>
+public sealed class EhlersCorrelationTrendIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCorrelationTrendIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

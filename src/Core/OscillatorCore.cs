@@ -9640,6 +9640,149 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers Trendflex Indicator.
+    /// </summary>
+    internal static void EhlersTrendflex(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var period = 0.5 * length;
+        var a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(Math.Sqrt(2) * Math.PI / period);
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var filterArray = pool.Rent(close.Length);
+
+        try
+        {
+            var filter = filterArray.AsSpan(0, close.Length);
+            double ms = 0;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
+                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
+
+                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+
+                double sum = 0;
+                for (var j = 1; j <= length; j++)
+                {
+                    var prevFilterCount = i >= j ? filter[i - j] : 0;
+                    sum += filter[i] - prevFilterCount;
+                }
+                sum /= length;
+
+                ms = (0.04 * sum * sum) + (0.96 * ms);
+                output[i] = ms > 0 ? sum / Math.Sqrt(ms) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(filterArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Reflex Indicator.
+    /// </summary>
+    internal static void EhlersReflex(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var period = 0.5 * length;
+        var a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / period);
+        var b1 = 2 * a1 * Math.Cos(Math.Sqrt(2) * Math.PI / period);
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var filterArray = pool.Rent(close.Length);
+        var slopeArray = pool.Rent(close.Length);
+
+        try
+        {
+            var filter = filterArray.AsSpan(0, close.Length);
+            var slope = slopeArray.AsSpan(0, close.Length);
+            double ms = 0;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
+                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
+
+                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+
+                var prevFilterLength = i >= length ? filter[i - length] : 0;
+                slope[i] = length > 0 ? (filter[i] - prevFilterLength) / length : 0;
+
+                double sum = 0;
+                for (var j = 1; j <= length; j++)
+                {
+                    var slopeCount = i >= j ? slope[i - j] : 0;
+                    var filterCount = i >= j ? filter[i - j] : 0;
+                    sum += filter[i] + (j * slopeCount) - filterCount;
+                }
+                sum /= length;
+
+                ms = (0.04 * sum * sum) + (0.96 * ms);
+                output[i] = ms > 0 ? sum / Math.Sqrt(ms) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(filterArray);
+            pool.Return(slopeArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Correlation Trend Indicator.
+    /// </summary>
+    internal static void EhlersCorrelationTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var prevValue = i >= j ? close[i - j] : 0;
+                sx += j;
+                sy += prevValue;
+                sxx += j * j;
+                sxy += j * prevValue;
+                syy += prevValue * prevValue;
+            }
+
+            var denom = Math.Sqrt((length * sxx - sx * sx) * (length * syy - sy * sy));
+            output[i] = denom != 0 ? (length * sxy - sx * sy) / denom : 0;
+        }
+    }
+
     #endregion
 
     #endregion

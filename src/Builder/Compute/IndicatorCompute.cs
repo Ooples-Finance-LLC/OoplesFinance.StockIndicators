@@ -746,6 +746,9 @@ internal static partial class IndicatorCompute
             VortexIndicatorPlusSpecOptions vip => ComputeVortexIndicatorPlusFast(data, context, vip.Length),
             VortexIndicatorMinusSpecOptions vim => ComputeVortexIndicatorMinusFast(data, context, vim.Length),
             GuppyCountBackLineSpecOptions gcbl => ComputeGuppyCountBackLineFast(data, context, gcbl.Length),
+            EhlersTrendflexSpecOptions etf => ComputeEhlersTrendflexFast(data, context, etf.Length),
+            EhlersReflexSpecOptions erf => ComputeEhlersReflexFast(data, context, erf.Length),
+            EhlersCorrelationTrendIndicatorSpecOptions ecti => ComputeEhlersCorrelationTrendIndicatorFast(data, context, ecti.Length),
 
             _ => null
         };
@@ -7786,6 +7789,42 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.GuppyCountBackLine(close, high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Trendflex using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersTrendflexFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersTrendflex(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Reflex using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersReflexFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersReflex(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Correlation Trend Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCorrelationTrendIndicator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
