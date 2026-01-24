@@ -9278,6 +9278,46 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Chande Intraday Momentum Index.
+    /// Measures the relationship between open and close prices.
+    /// </summary>
+    internal static void ChandeIntradayMomentumIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double gainsSum = 0;
+        double lossesSum = 0;
+        var gainsQueue = new Queue<double>(length);
+        var lossesQueue = new Queue<double>(length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentClose = close[i];
+            var currentOpen = open[i];
+
+            var gain = currentClose > currentOpen ? currentClose - currentOpen : 0;
+            var loss = currentClose < currentOpen ? currentOpen - currentClose : 0;
+
+            gainsSum += gain;
+            lossesSum += loss;
+            gainsQueue.Enqueue(gain);
+            lossesQueue.Enqueue(loss);
+
+            if (gainsQueue.Count > length)
+            {
+                gainsSum -= gainsQueue.Dequeue();
+                lossesSum -= lossesQueue.Dequeue();
+            }
+
+            var total = gainsSum + lossesSum;
+            output[i] = total != 0 ? Math.Min(Math.Max(100 * gainsSum / total, 0), 100) : 0;
+        }
+    }
+
     #endregion
 
     #endregion

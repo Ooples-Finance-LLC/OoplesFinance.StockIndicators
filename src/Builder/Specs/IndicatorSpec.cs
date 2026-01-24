@@ -5849,6 +5849,15 @@ public sealed class AverageDayRangeSpecOptions : IIndicatorSpecOptions
 }
 
 /// <summary>
+/// Chande Intraday Momentum Index indicator options.
+/// </summary>
+public sealed class ChandeIntradayMomentumIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeIntradayMomentumIndexSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
 /// Corrected Moving Average indicator options.
 /// </summary>
 public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions

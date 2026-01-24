@@ -734,6 +734,7 @@ internal static partial class IndicatorCompute
             EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
             VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length, vama.Factor),
             AverageDayRangeSpecOptions adr => ComputeAverageDayRangeFast(data, context, adr.Length),
+            ChandeIntradayMomentumIndexSpecOptions cimi => ComputeChandeIntradayMomentumIndexFast(data, context, cimi.Length),
 
             _ => null
         };
@@ -7616,6 +7617,18 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         VolatilityCore.AverageDayRange(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chande Intraday Momentum Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ChandeIntradayMomentumIndex(open, close, buffer.WritableSpan, length);
         return buffer;
     }
 
