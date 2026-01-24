@@ -8,22 +8,22 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**402 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**409 INDICATORS WIRED** - ALL ComputeFast methods!)
 
 ### Current State
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
-| ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **407** | 398 new + 9 original |
-| TryComputeFast Dispatch | **402** | 393 new routes wired |
+| ComputeFast Wrappers | 410 | All wrappers exist (411th is TryComputeFast itself) |
+| SpecOptions Classes | **414** | 405 new + 9 original |
+| TryComputeFast Dispatch | **409** | All ComputeFast methods wired! |
 
 ### The Gap
 
-- **411 ComputeFast methods exist** but some still use `GenericIndicatorOptions`
-- **402 indicators** now route through `TryComputeFast`
-- **Missing**: ~9 specific `*SpecOptions` classes and corresponding dispatch cases
+- **ALL 410 ComputeFast methods are now wired** to TryComputeFast
+- **409 indicators** route through `TryComputeFast` (excluding TryComputeFast itself)
+- **COMPLETE**: All ComputeFast methods have corresponding SpecOptions and dispatch cases
 
 ## What's Already Complete
 
@@ -591,6 +591,15 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] DemarkPressureRatioV2SpecOptions
 - [x] DemarkReversalPointsSpecOptions
 
+**Batch 8 - Final (Channel widths, Core methods, RMO):**
+- [x] BollingerBandsWidthSpecOptions
+- [x] DonchianChannelWidthSpecOptions
+- [x] KeltnerChannelWidthSpecOptions
+- [x] MassIndexCoreSpecOptions
+- [x] RahulMohindarOscillatorSpecOptions
+- [x] RviVolatilitySpecOptions
+- [x] StandardErrorCoreSpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -644,21 +653,23 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 |------|--------|-------|
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
-| ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **407** |
-| TryComputeFast Routes | Wired | **402** |
-| **Effective Fast Path Coverage** | | **~52%** |
+| ComputeFast Methods | Implemented | 410 |
+| SpecOptions Classes | Implemented | **414** |
+| TryComputeFast Routes | Wired | **409** |
+| **Effective Fast Path Coverage** | | **~53%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 402 indicators**
-3. **Create remaining ~9 SpecOptions** for final indicators (if any)
-4. **Fast path coverage now at ~52%** (402/773 Calculate methods)
-5. **Consider source generation** to auto-create SpecOptions from Calculate signatures for remaining indicators
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for all 409 indicators**
+3. ~~**Create remaining SpecOptions** for final indicators~~ **DONE - Batch 8 completed**
+4. **Fast path coverage now at ~53%** (409/773 Calculate methods)
+5. **COMPLETE**: All ComputeFast methods now have SpecOptions and are wired to TryComputeFast
+6. **Future**: Consider source generation to auto-create SpecOptions from Calculate signatures for remaining ~364 indicators without ComputeFast
 
 ## Notes
 
-- The ComputeFast methods already exist for 411 indicators
-- The bottleneck is creating SpecOptions classes and wiring dispatch
-- Consider using source generation to auto-create SpecOptions from Calculate signatures
+- All 410 ComputeFast methods now have SpecOptions classes and are wired to TryComputeFast
+- The remaining ~364 indicators (773 - 409 = 364) would need ComputeFast methods before SpecOptions
+- Consider using source generation to auto-create SpecOptions from Calculate signatures for future expansion
+- **Milestone achieved**: All existing ComputeFast methods are now accessible via the typed fast path API

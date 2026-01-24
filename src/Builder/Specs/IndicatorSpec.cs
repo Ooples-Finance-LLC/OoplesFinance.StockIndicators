@@ -5677,6 +5677,99 @@ public sealed class DemarkReversalPointsSpecOptions : IIndicatorSpecOptions
     public int Length2 { get; }
 }
 
+// ========== Batch 8 SpecOptions (Final) ==========
+
+/// <summary>
+/// Bollinger Bands Width indicator options.
+/// </summary>
+public sealed class BollingerBandsWidthSpecOptions : IIndicatorSpecOptions
+{
+    public BollingerBandsWidthSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Donchian Channel Width indicator options.
+/// </summary>
+public sealed class DonchianChannelWidthSpecOptions : IIndicatorSpecOptions
+{
+    public DonchianChannelWidthSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Keltner Channel Width indicator options.
+/// </summary>
+public sealed class KeltnerChannelWidthSpecOptions : IIndicatorSpecOptions
+{
+    public KeltnerChannelWidthSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mass Index Core indicator options.
+/// </summary>
+public sealed class MassIndexCoreSpecOptions : IIndicatorSpecOptions
+{
+    public MassIndexCoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Rahul Mohindar Oscillator indicator options.
+/// </summary>
+public sealed class RahulMohindarOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RahulMohindarOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// RVI Volatility indicator options.
+/// </summary>
+public sealed class RviVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public RviVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Standard Error Core indicator options.
+/// </summary>
+public sealed class StandardErrorCoreSpecOptions : IIndicatorSpecOptions
+{
+    public StandardErrorCoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.

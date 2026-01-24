@@ -587,6 +587,15 @@ internal static partial class IndicatorCompute
             DemarkPressureRatioV2SpecOptions dmkprv2 => ComputeDemarkPressureRatioV2Fast(data, context, dmkprv2.Length),
             DemarkReversalPointsSpecOptions dmkrp => ComputeDemarkReversalPointsFast(data, context, dmkrp.Length1, dmkrp.Length2),
 
+            // Batch 8 - Final (Channel widths, Core methods, RMO)
+            BollingerBandsWidthSpecOptions bbw => ComputeBollingerBandsWidthFast(data, context, bbw.Length),
+            DonchianChannelWidthSpecOptions dcw => ComputeDonchianChannelWidthFast(data, context, dcw.Length),
+            KeltnerChannelWidthSpecOptions kcw => ComputeKeltnerChannelWidthFast(data, context, kcw.Length),
+            MassIndexCoreSpecOptions mic => ComputeMassIndexCoreFast(data, context, mic.Length),
+            RahulMohindarOscillatorSpecOptions rmo => ComputeRahulMohindarOscillatorFast(data, context, rmo.Length),
+            RviVolatilitySpecOptions rviv => ComputeRviVolatilityFast(data, context, rviv.Length),
+            StandardErrorCoreSpecOptions sec => ComputeStandardErrorCoreFast(data, context, sec.Length),
+
             _ => null
         };
     }
