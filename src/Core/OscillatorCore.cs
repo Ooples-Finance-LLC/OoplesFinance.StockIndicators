@@ -9068,5 +9068,217 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Demark Indicators
+
+    /// <summary>
+    /// Computes Demark Range Expansion Index using rolling sums.
+    /// </summary>
+    internal static void DemarkRangeExpansionIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 5)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var s1Array = pool.Rent(close.Length);
+        var s2Array = pool.Rent(close.Length);
+
+        try
+        {
+            var s1 = s1Array.AsSpan(0, close.Length);
+            var s2 = s2Array.AsSpan(0, close.Length);
+
+            // Calculate s1 and s2 values
+            for (var i = 0; i < close.Length; i++)
+            {
+                var prevHigh2 = i >= 2 ? high[i - 2] : 0;
+                var prevHigh5 = i >= 5 ? high[i - 5] : 0;
+                var prevHigh6 = i >= 6 ? high[i - 6] : 0;
+                var prevLow2 = i >= 2 ? low[i - 2] : 0;
+                var prevLow5 = i >= 5 ? low[i - 5] : 0;
+                var prevLow6 = i >= 6 ? low[i - 6] : 0;
+                var prevClose7 = i >= 7 ? close[i - 7] : 0;
+                var prevClose8 = i >= 8 ? close[i - 8] : 0;
+
+                double n = (high[i] >= prevLow5 || high[i] >= prevLow6) && (low[i] <= prevHigh5 || low[i] <= prevHigh6) ? 0 : 1;
+                double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
+                var sVal = high[i] - prevHigh2 + (low[i] - prevLow2);
+
+                s1[i] = n * m * sVal;
+                s2[i] = Math.Abs(sVal);
+            }
+
+            // Calculate rolling sums and REI
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
+                double s1Sum = 0, s2Sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    s1Sum += s1[j];
+                    s2Sum += s2[j];
+                }
+
+                output[i] = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(s1Array);
+            pool.Return(s2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Demark Pressure Ratio V1 using rolling sums.
+    /// </summary>
+    internal static void DemarkPressureRatioV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var bpArray = pool.Rent(close.Length);
+        var spArray = pool.Rent(close.Length);
+
+        try
+        {
+            var bp = bpArray.AsSpan(0, close.Length);
+            var sp = spArray.AsSpan(0, close.Length);
+
+            // Calculate buying and selling pressure
+            for (var i = 0; i < close.Length; i++)
+            {
+                var prevClose = i >= 1 ? close[i - 1] : 0;
+                var gapup = prevClose != 0 ? (open[i] - prevClose) / prevClose : 0;
+                var gapdown = open[i] != 0 ? (prevClose - open[i]) / open[i] : 0;
+
+                bp[i] = gapup > 0.15 ? (high[i] - prevClose + close[i] - low[i]) * volume[i] :
+                    close[i] > open[i] ? (close[i] - open[i]) * volume[i] : 0;
+
+                sp[i] = gapdown > 0.15 ? (prevClose - low[i] + high[i] - close[i]) * volume[i] :
+                    close[i] < open[i] ? (close[i] - open[i]) * volume[i] : 0;
+            }
+
+            // Calculate rolling sums and pressure ratio
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
+                double bpSum = 0, spSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    bpSum += bp[j];
+                    spSum += sp[j];
+                }
+
+                output[i] = bpSum - spSum != 0 ? Math.Min(Math.Max(100 * bpSum / (bpSum - spSum), 0), 100) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(bpArray);
+            pool.Return(spArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Demark Pressure Ratio V2 using rolling sums.
+    /// </summary>
+    internal static void DemarkPressureRatioV2(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var bpArray = pool.Rent(close.Length);
+        var spArray = pool.Rent(close.Length);
+
+        try
+        {
+            var bp = bpArray.AsSpan(0, close.Length);
+            var sp = spArray.AsSpan(0, close.Length);
+
+            // Calculate buying and selling pressure
+            for (var i = 0; i < close.Length; i++)
+            {
+                var delta = close[i] - open[i];
+                var trueRange = high[i] - low[i];
+                var ratio = trueRange != 0 ? delta / trueRange : 0;
+
+                bp[i] = delta > 0 ? ratio * volume[i] : 0;
+                sp[i] = delta < 0 ? ratio * volume[i] : 0;
+            }
+
+            // Calculate rolling sums and pressure ratio
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    output[i] = 50;  // Default neutral value
+                    continue;
+                }
+
+                double bpSum = 0, spSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    bpSum += bp[j];
+                    spSum += sp[j];
+                }
+
+                var denom = bpSum + Math.Abs(spSum);
+                output[i] = denom != 0 ? Math.Min(Math.Max(100 * bpSum / denom, 0), 100) : 50;
+            }
+        }
+        finally
+        {
+            pool.Return(bpArray);
+            pool.Return(spArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Demark Reversal Points using nested loop counting.
+    /// </summary>
+    internal static void DemarkReversalPoints(ReadOnlySpan<double> close, Span<double> output, int length1 = 9, int length2 = 4)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            int uCount = 0, dCount = 0;
+            for (var j = 0; j < length1; j++)
+            {
+                var value = i >= j ? close[i - j] : 0;
+                var prevValue = i >= j + length2 ? close[i - (j + length2)] : 0;
+
+                if (value > prevValue) uCount++;
+                if (value < prevValue) dCount++;
+            }
+
+            double drp = dCount == length1 ? 1 : uCount == length1 ? -1 : 0;
+            output[i] = drp != 0 ? close[i] : 0;
+        }
+    }
+
+    #endregion
+
     #endregion
 }

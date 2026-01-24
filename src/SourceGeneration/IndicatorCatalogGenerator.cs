@@ -544,6 +544,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "ZScore",
         "FastZScore",
         "KurtosisIndicator",
+
+        // Batch 24 - Demark Indicators
+        "DemarkRangeExpansionIndex",
+        "DemarkPressureRatioV1",
+        "DemarkPressureRatioV2",
+        "DemarkReversalPoints",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1404,6 +1410,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "ZScore" => "ComputeZScoreFast",
             "FastZScore" => "ComputeFastZScoreFast",
             "KurtosisIndicator" => "ComputeKurtosisIndicatorFast",
+
+            // Batch 24 - Demark Indicators
+            "DemarkRangeExpansionIndex" => "ComputeDemarkRangeExpansionIndexFast",
+            "DemarkPressureRatioV1" => "ComputeDemarkPressureRatioV1Fast",
+            "DemarkPressureRatioV2" => "ComputeDemarkPressureRatioV2Fast",
+            "DemarkReversalPoints" => "ComputeDemarkReversalPointsFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
