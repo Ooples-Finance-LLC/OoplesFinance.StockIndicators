@@ -733,6 +733,7 @@ internal static partial class IndicatorCompute
             EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context, efirf.Length),
             EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
             VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length, vama.Factor),
+            AverageDayRangeSpecOptions adr => ComputeAverageDayRangeFast(data, context, adr.Length),
 
             _ => null
         };
@@ -7603,6 +7604,18 @@ internal static partial class IndicatorCompute
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
         MovingAverageCore.VolumeAdjustedMovingAverage(close, volume, buffer.WritableSpan, length, factor);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Average Day Range using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAverageDayRangeFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.AverageDayRange(high, low, buffer.WritableSpan, length);
         return buffer;
     }
 

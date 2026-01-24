@@ -5840,6 +5840,15 @@ public sealed class VolumeAdjustedMovingAverageSpecOptions : IIndicatorSpecOptio
 }
 
 /// <summary>
+/// Average Day Range indicator options.
+/// </summary>
+public sealed class AverageDayRangeSpecOptions : IIndicatorSpecOptions
+{
+    public AverageDayRangeSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
 /// Corrected Moving Average indicator options.
 /// </summary>
 public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions
