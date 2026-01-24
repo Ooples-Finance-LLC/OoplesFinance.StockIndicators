@@ -7608,3 +7608,15 @@ public sealed class EhlersTrendflexIndicatorSpecOptions : IIndicatorSpecOptions
     }
     public int Length { get; }
 }
+
+/// <summary>
+/// JMA RSX Clone options.
+/// </summary>
+public sealed class JmaRsxCloneSpecOptions : IIndicatorSpecOptions
+{
+    public JmaRsxCloneSpecOptions(int length = 14)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}

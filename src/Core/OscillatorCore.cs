@@ -11992,6 +11992,139 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates JMA RSX Clone indicator.
+    /// A momentum oscillator that is a clone of the Jurik RSX indicator.
+    /// </summary>
+    internal static void JmaRsxClone(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var f8Array = pool.Rent(close.Length);
+        var f28Array = pool.Rent(close.Length);
+        var f30Array = pool.Rent(close.Length);
+        var f38Array = pool.Rent(close.Length);
+        var f40Array = pool.Rent(close.Length);
+        var f48Array = pool.Rent(close.Length);
+        var f50Array = pool.Rent(close.Length);
+        var f58Array = pool.Rent(close.Length);
+        var f60Array = pool.Rent(close.Length);
+        var f68Array = pool.Rent(close.Length);
+        var f70Array = pool.Rent(close.Length);
+        var f78Array = pool.Rent(close.Length);
+        var f80Array = pool.Rent(close.Length);
+        var f88Array = pool.Rent(close.Length);
+        var f90Array = pool.Rent(close.Length);
+
+        try
+        {
+            var f8 = f8Array.AsSpan(0, close.Length);
+            var f28 = f28Array.AsSpan(0, close.Length);
+            var f30 = f30Array.AsSpan(0, close.Length);
+            var f38 = f38Array.AsSpan(0, close.Length);
+            var f40 = f40Array.AsSpan(0, close.Length);
+            var f48 = f48Array.AsSpan(0, close.Length);
+            var f50 = f50Array.AsSpan(0, close.Length);
+            var f58 = f58Array.AsSpan(0, close.Length);
+            var f60 = f60Array.AsSpan(0, close.Length);
+            var f68 = f68Array.AsSpan(0, close.Length);
+            var f70 = f70Array.AsSpan(0, close.Length);
+            var f78 = f78Array.AsSpan(0, close.Length);
+            var f80 = f80Array.AsSpan(0, close.Length);
+            var f88 = f88Array.AsSpan(0, close.Length);
+            var f90 = f90Array.AsSpan(0, close.Length);
+
+            var f18 = (double)3 / (length + 2);
+            var f20 = 1 - f18;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevF8 = i >= 1 ? f8[i - 1] : 0;
+                f8[i] = 100 * currentValue;
+
+                var f10 = prevF8;
+                var v8 = f8[i] - f10;
+
+                var prevF28 = i >= 1 ? f28[i - 1] : 0;
+                f28[i] = (f20 * prevF28) + (f18 * v8);
+
+                var prevF30 = i >= 1 ? f30[i - 1] : 0;
+                f30[i] = (f18 * f28[i]) + (f20 * prevF30);
+
+                var vC = (f28[i] * 1.5) - (f30[i] * 0.5);
+                var prevF38 = i >= 1 ? f38[i - 1] : 0;
+                f38[i] = (f20 * prevF38) + (f18 * vC);
+
+                var prevF40 = i >= 1 ? f40[i - 1] : 0;
+                f40[i] = (f18 * f38[i]) + (f20 * prevF40);
+
+                var v10 = (f38[i] * 1.5) - (f40[i] * 0.5);
+                var prevF48 = i >= 1 ? f48[i - 1] : 0;
+                f48[i] = (f20 * prevF48) + (f18 * v10);
+
+                var prevF50 = i >= 1 ? f50[i - 1] : 0;
+                f50[i] = (f18 * f48[i]) + (f20 * prevF50);
+
+                var v14 = (f48[i] * 1.5) - (f50[i] * 0.5);
+                var prevF58 = i >= 1 ? f58[i - 1] : 0;
+                f58[i] = (f20 * prevF58) + (f18 * Math.Abs(v8));
+
+                var prevF60 = i >= 1 ? f60[i - 1] : 0;
+                f60[i] = (f18 * f58[i]) + (f20 * prevF60);
+
+                var v18 = (f58[i] * 1.5) - (f60[i] * 0.5);
+                var prevF68 = i >= 1 ? f68[i - 1] : 0;
+                f68[i] = (f20 * prevF68) + (f18 * v18);
+
+                var prevF70 = i >= 1 ? f70[i - 1] : 0;
+                f70[i] = (f18 * f68[i]) + (f20 * prevF70);
+
+                var v1C = (f68[i] * 1.5) - (f70[i] * 0.5);
+                var prevF78 = i >= 1 ? f78[i - 1] : 0;
+                f78[i] = (f20 * prevF78) + (f18 * v1C);
+
+                var prevF80 = i >= 1 ? f80[i - 1] : 0;
+                f80[i] = (f18 * f78[i]) + (f20 * prevF80);
+
+                var v20 = (f78[i] * 1.5) - (f80[i] * 0.5);
+                var prevF88 = i >= 1 ? f88[i - 1] : 0;
+                var prevF90 = i >= 1 ? f90[i - 1] : 0;
+                f90[i] = prevF90 == 0 ? 1 : prevF88 <= prevF90 ? prevF88 + 1 : prevF90 + 1;
+
+                f88[i] = prevF90 == 0 && length - 1 >= 5 ? length - 1 : 5;
+                double f0 = f88[i] >= f90[i] && f8[i] != f10 ? 1 : 0;
+                var f90Val = f88[i] == f90[i] && f0 == 0 ? 0 : f90[i];
+                var v4 = f88[i] < f90Val && v20 > 0 ? Math.Max(0, Math.Min(100, ((v14 / v20) + 1) * 50)) : 50;
+                output[i] = Math.Max(0, Math.Min(100, v4));
+            }
+        }
+        finally
+        {
+            pool.Return(f8Array);
+            pool.Return(f28Array);
+            pool.Return(f30Array);
+            pool.Return(f38Array);
+            pool.Return(f40Array);
+            pool.Return(f48Array);
+            pool.Return(f50Array);
+            pool.Return(f58Array);
+            pool.Return(f60Array);
+            pool.Return(f68Array);
+            pool.Return(f70Array);
+            pool.Return(f78Array);
+            pool.Return(f80Array);
+            pool.Return(f88Array);
+            pool.Return(f90Array);
+        }
+    }
+
     #endregion
 
     #endregion
