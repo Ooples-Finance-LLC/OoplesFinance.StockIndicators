@@ -14,10 +14,10 @@ The v2 fast path has three layers:
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | 510 | Span-based implementations |
-| ComputeFast Wrappers | ~515 | Buffer wrappers in IndicatorCompute.cs |
-| SpecOptions Classes | **517** | Typed indicator options |
-| TryComputeFast Dispatch | **516** | Routed to fast path methods |
+| Core Methods | 532 | Span-based implementations |
+| ComputeFast Wrappers | ~520 | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **520** | Typed indicator options |
+| TryComputeFast Dispatch | **520** | Routed to fast path methods |
 | IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
@@ -27,16 +27,18 @@ The v2 fast path has three layers:
 - **Batch 26**: Added 36 new ComputeFast methods for additional Core methods
 - **Batch 27**: Added 12 new multi-input ComputeFast methods (DeMarker, Vortex, Klinger, etc.)
 - **Batch 28**: Added 15 final Core method wrappers (Reverse Engineering RSI, PPO MA, etc.)
+- **Batch 29**: Added TripleHullMovingAverage, AdaptiveAutonomousRecursiveMovingAverage Core methods
+- **Batch 30**: Added GeneralizedDoubleExponentialMovingAverage, Ehlers FIR/IIR Filter SpecOptions and dispatch
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
-- **Total**: 517 SpecOptions, 516 dispatch routes
+- **Total**: 520 SpecOptions, 520 dispatch routes
 
 ### Coverage Analysis
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| Indicators with Core methods | 510 | 66% |
-| Indicators without Core methods | 263 | 34% |
-| Current fast path coverage | 510 | 66% |
+| Core Methods | 532 | ~69% of 773 |
+| SpecOptions/Dispatch | 520 | ~67% of 773 |
+| Remaining indicators | ~253 | ~33% |
 
 ### Remaining Work for 100% Coverage
 
