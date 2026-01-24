@@ -26,14 +26,32 @@ internal static partial class IndicatorCompute
     /// <returns>A ComputeBuffer containing the indicator result, or null if fast path unavailable.</returns>
     public static ComputeBuffer? TryComputeFast(StockData data, IndicatorSpec spec, ComputeContext context)
     {
-        // Only use fast path for single-output indicators with typed options
-        if (spec.Output != IndicatorOutput.Primary)
-        {
-            return null;
-        }
-
         return spec.Options switch
         {
+            // Multi-output indicators with nested switch
+            MacdSpecOptions macd => spec.Output switch
+            {
+                IndicatorOutput.Primary => ComputeMacdLineFast(data, context, macd.FastLength, macd.SlowLength),
+                IndicatorOutput.Signal => ComputeMacdSignalFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
+                IndicatorOutput.Histogram => ComputeMacdHistogramFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
+                _ => null
+            },
+            BollingerBandsSpecOptions bb => spec.Output switch
+            {
+                IndicatorOutput.UpperBand => ComputeBollingerUpperFast(data, context, bb.Length, bb.StdDevMult),
+                IndicatorOutput.MiddleBand => ComputeBollingerMiddleFast(data, context, bb.Length),
+                IndicatorOutput.LowerBand => ComputeBollingerLowerFast(data, context, bb.Length, bb.StdDevMult),
+                IndicatorOutput.Primary => ComputeBollingerMiddleFast(data, context, bb.Length), // Primary defaults to middle
+                _ => null
+            },
+            StochasticSpecOptions stoch => spec.Output switch
+            {
+                IndicatorOutput.Primary => ComputeStochasticKFast(data, context, stoch.KLength),
+                IndicatorOutput.Signal => ComputeStochasticDFast(data, context, stoch.KLength, stoch.DLength),
+                _ => null
+            },
+
+            // Single-output indicators (Primary only)
             // Moving Averages
             SmaSpecOptions sma => ComputeSmaFast(data, context, sma.Length),
             EmaSpecOptions ema => ComputeEmaFast(data, context, ema.Length),
@@ -1836,6 +1854,49 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Bollinger Bands Middle band using zero-allocation fast path.
+    /// Alias for ComputeBollingerBandsFast (middle band is SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerMiddleFast(StockData data, ComputeContext context, int length = 20)
+    {
+        return ComputeBollingerBandsFast(data, context, length);
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands Upper band using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerUpperFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        // Rent temp buffers for middle and lower that we don't need
+        var middleBuffer = context.Rent(inputList.Count);
+        var lowerBuffer = context.Rent(inputList.Count);
+        VolatilityCore.BollingerBands(inputSpan, buffer.WritableSpan, middleBuffer.WritableSpan, lowerBuffer.WritableSpan, length, multiplier);
+        middleBuffer.Dispose();
+        lowerBuffer.Dispose();
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands Lower band using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerLowerFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        // Rent temp buffers for upper and middle that we don't need
+        var upperBuffer = context.Rent(inputList.Count);
+        var middleBuffer = context.Rent(inputList.Count);
+        VolatilityCore.BollingerBands(inputSpan, upperBuffer.WritableSpan, middleBuffer.WritableSpan, buffer.WritableSpan, length, multiplier);
+        upperBuffer.Dispose();
+        middleBuffer.Dispose();
+        return buffer;
+    }
+
     #endregion
 
     #region Additional Volume Indicators
@@ -2046,19 +2107,19 @@ internal static partial class IndicatorCompute
     /// </summary>
     public static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int length = 14)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
-        var buffer = context.Rent(count);
-        OscillatorCore.StochasticD(high, low, close, buffer.WritableSpan, length, 3);
+        return ComputeStochasticDFast(data, context, length, 3);
+    }
+
+    /// <summary>
+    /// Computes Stochastic D using zero-allocation fast path with configurable K and D lengths.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int kLength, int dLength)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.StochasticD(high, low, close, buffer.WritableSpan, kLength, dLength);
         return buffer;
     }
 
