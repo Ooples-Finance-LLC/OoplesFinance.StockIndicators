@@ -742,6 +742,10 @@ internal static partial class IndicatorCompute
             TFSTetherLineSpecOptions tether => ComputeTFSTetherLineFast(data, context, tether.Length),
             WilliamsFractalsUpSpecOptions wfu => ComputeWilliamsFractalsUpFast(data, context, wfu.Length),
             WilliamsFractalsDownSpecOptions wfd => ComputeWilliamsFractalsDownFast(data, context, wfd.Length),
+            UpsideDownsideVolumeSpecOptions udv => ComputeUpsideDownsideVolumeFast(data, context, udv.Length),
+            VortexIndicatorPlusSpecOptions vip => ComputeVortexIndicatorPlusFast(data, context, vip.Length),
+            VortexIndicatorMinusSpecOptions vim => ComputeVortexIndicatorMinusFast(data, context, vim.Length),
+            GuppyCountBackLineSpecOptions gcbl => ComputeGuppyCountBackLineFast(data, context, gcbl.Length),
 
             _ => null
         };
@@ -7732,6 +7736,57 @@ internal static partial class IndicatorCompute
         var downBuffer = context.Rent(data.Count);
         OscillatorCore.WilliamsFractals(high, low, upBuffer, downBuffer.WritableSpan, length);
         return downBuffer;
+    }
+
+    /// <summary>
+    /// Computes Upside Downside Volume using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeUpsideDownsideVolumeFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.UpsideDownsideVolume(close, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vortex Indicator Plus using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVortexIndicatorPlusFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VortexIndicatorPlus(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vortex Indicator Minus using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVortexIndicatorMinusFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VortexIndicatorMinus(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Guppy Count Back Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeGuppyCountBackLineFast(StockData data, ComputeContext context, int length = 21)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.GuppyCountBackLine(close, high, low, buffer.WritableSpan, length);
+        return buffer;
     }
 
     #endregion

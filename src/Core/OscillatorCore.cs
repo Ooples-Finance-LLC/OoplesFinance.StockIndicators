@@ -9482,6 +9482,164 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Upside Downside Volume ratio.
+    /// </summary>
+    internal static void UpsideDownsideVolume(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 50)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var upVolSum = new RollingSum();
+        var downVolSum = new RollingSum();
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentClose = close[i];
+            var prevClose = i >= 1 ? close[i - 1] : 0;
+            var currentVolume = volume[i];
+
+            var upVol = currentClose > prevClose ? currentVolume : 0;
+            var downVol = currentClose < prevClose ? -currentVolume : 0;
+
+            upVolSum.Add(upVol);
+            downVolSum.Add(downVol);
+
+            var upSum = upVolSum.Sum(length);
+            var downSum = downVolSum.Sum(length);
+
+            output[i] = downSum != 0 ? upSum / downSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Vortex Indicator Plus component.
+    /// </summary>
+    internal static void VortexIndicatorPlus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var vmPlusSum = new RollingSum();
+        var trSum = new RollingSum();
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            var prevClose = i >= 1 ? close[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+
+            var vmPlus = Math.Abs(currentHigh - prevLow);
+            vmPlusSum.Add(vmPlus);
+
+            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
+            trSum.Add(tr);
+
+            var vmPlusSumVal = vmPlusSum.Sum(length);
+            var trSumVal = trSum.Sum(length);
+
+            output[i] = trSumVal != 0 ? vmPlusSumVal / trSumVal : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Vortex Indicator Minus component.
+    /// </summary>
+    internal static void VortexIndicatorMinus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var vmMinusSum = new RollingSum();
+        var trSum = new RollingSum();
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            var prevClose = i >= 1 ? close[i - 1] : 0;
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+
+            var vmMinus = Math.Abs(currentLow - prevHigh);
+            vmMinusSum.Add(vmMinus);
+
+            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
+            trSum.Add(tr);
+
+            var vmMinusSumVal = vmMinusSum.Sum(length);
+            var trSumVal = trSum.Sum(length);
+
+            output[i] = trSumVal != 0 ? vmMinusSumVal / trSumVal : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Guppy Count Back Line indicator.
+    /// </summary>
+    internal static void GuppyCountBackLine(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 21)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var hh = highWindow.Max;
+            var ll = lowWindow.Min;
+            var cbl = close[i];
+            int hCount = 0, lCount = 0;
+
+            for (var j = 0; j <= length && i >= j; j++)
+            {
+                var currentLow = low[i - j];
+                var currentHigh = high[i - j];
+
+                if (currentLow == ll)
+                {
+                    for (var k = j + 1; k <= j + length && i >= k; k++)
+                    {
+                        var prevHigh = high[i - k];
+                        lCount += prevHigh > currentHigh ? 1 : 0;
+                        if (lCount == 2)
+                        {
+                            cbl = prevHigh;
+                            break;
+                        }
+                    }
+                }
+
+                if (currentHigh == hh)
+                {
+                    for (var k = j + 1; k <= j + length && i >= k; k++)
+                    {
+                        var prevLow = low[i - k];
+                        hCount += prevLow > currentLow ? 1 : 0;
+                        if (hCount == 2)
+                        {
+                            cbl = prevLow;
+                            break;
+                        }
+                    }
+                }
+            }
+            output[i] = cbl;
+        }
+    }
+
     #endregion
 
     #endregion

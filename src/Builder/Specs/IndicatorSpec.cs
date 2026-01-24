@@ -6929,3 +6929,39 @@ public sealed class WilliamsFractalsDownSpecOptions : IIndicatorSpecOptions
     public WilliamsFractalsDownSpecOptions(int length = 2) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Upside Downside Volume indicator options.
+/// </summary>
+public sealed class UpsideDownsideVolumeSpecOptions : IIndicatorSpecOptions
+{
+    public UpsideDownsideVolumeSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vortex Indicator Plus options.
+/// </summary>
+public sealed class VortexIndicatorPlusSpecOptions : IIndicatorSpecOptions
+{
+    public VortexIndicatorPlusSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vortex Indicator Minus options.
+/// </summary>
+public sealed class VortexIndicatorMinusSpecOptions : IIndicatorSpecOptions
+{
+    public VortexIndicatorMinusSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Guppy Count Back Line indicator options.
+/// </summary>
+public sealed class GuppyCountBackLineSpecOptions : IIndicatorSpecOptions
+{
+    public GuppyCountBackLineSpecOptions(int length = 21) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
