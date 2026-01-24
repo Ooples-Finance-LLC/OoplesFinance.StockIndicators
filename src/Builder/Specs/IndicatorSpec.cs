@@ -7215,3 +7215,46 @@ public sealed class TFSTetherLineIndicatorSpecOptions : IIndicatorSpecOptions
     public TFSTetherLineIndicatorSpecOptions(int length = 50) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Ehlers Simple Cycle Indicator options.
+/// </summary>
+public sealed class EhlersSimpleCycleIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersSimpleCycleIndicatorSpecOptions(double alpha = 0.07) { Alpha = alpha; }
+    public double Alpha { get; }
+}
+
+/// <summary>
+/// Ehlers Fisher Transform options.
+/// </summary>
+public sealed class EhlersFisherTransformSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFisherTransformSpecOptions(int length = 10) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Voss Predictive Filter options.
+/// </summary>
+public sealed class EhlersVossPredictiveFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersVossPredictiveFilterSpecOptions(int length = 20, double predict = 3, double bw = 0.25)
+    {
+        Length = Math.Max(1, length);
+        Predict = predict;
+        Bandwidth = bw;
+    }
+    public int Length { get; }
+    public double Predict { get; }
+    public double Bandwidth { get; }
+}
+
+/// <summary>
+/// Ehlers Spearman Rank Indicator options.
+/// </summary>
+public sealed class EhlersSpearmanRankIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersSpearmanRankIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

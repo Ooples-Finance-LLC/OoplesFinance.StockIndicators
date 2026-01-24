@@ -10492,6 +10492,204 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers Simple Cycle Indicator.
+    /// </summary>
+    internal static void EhlersSimpleCycleIndicator(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(close.Length);
+        var cycleArray = pool.Rent(close.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, close.Length);
+            var cycle_ = cycleArray.AsSpan(0, close.Length);
+
+            var alphaFactor = 1 - (0.5 * alpha);
+            var alphaFactorSq = alphaFactor * alphaFactor;
+            var oneMinusAlpha = 1 - alpha;
+            var oneMinusAlphaSq = oneMinusAlpha * oneMinusAlpha;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue1 = i >= 1 ? close[i - 1] : 0;
+                var prevValue2 = i >= 2 ? close[i - 2] : 0;
+                var prevValue3 = i >= 3 ? close[i - 3] : 0;
+                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
+                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
+                var prevCycle1 = i >= 1 ? cycle_[i - 1] : 0;
+                var prevCycle2 = i >= 2 ? cycle_[i - 2] : 0;
+
+                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
+
+                cycle_[i] = (alphaFactorSq * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
+                           (2 * oneMinusAlpha * prevCycle1) - (oneMinusAlphaSq * prevCycle2);
+
+                output[i] = i < 7 ? (currentValue - (2 * prevValue1) + prevValue2) / 4 : cycle_[i];
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+            pool.Return(cycleArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Fisher Transform.
+    /// </summary>
+    internal static void EhlersFisherTransform(ReadOnlySpan<double> close, Span<double> output, int length = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var minMax = new RollingMinMax(length);
+
+        var pool = ArrayPool<double>.Shared;
+        var nValueArray = pool.Rent(close.Length);
+
+        try
+        {
+            var nValue = nValueArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                minMax.Add(close[i]);
+                var maxH = minMax.Max;
+                var minL = minMax.Min;
+                var ratio = maxH - minL != 0 ? (close[i] - minL) / (maxH - minL) : 0;
+                var prevNValue = i >= 1 ? nValue[i - 1] : 0;
+                var prevFisher = i >= 1 ? output[i - 1] : 0;
+
+                // Clamp nValue to avoid log(0) or log(negative)
+                var nVal = (0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue);
+                nValue[i] = Math.Max(-0.999, Math.Min(0.999, nVal));
+
+                output[i] = (0.5 * Math.Log((1 + nValue[i]) / (1 - nValue[i]))) + (0.5 * prevFisher);
+            }
+        }
+        finally
+        {
+            pool.Return(nValueArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Voss Predictive Filter.
+    /// </summary>
+    internal static void EhlersVossPredictiveFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double predict = 3, double bw = 0.25)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var order = (int)Math.Max(1, Math.Min(Math.Ceiling(3 * predict), int.MaxValue));
+        var f1 = Math.Cos(2 * Math.PI / length);
+        var g1 = Math.Cos(bw * 2 * Math.PI / length);
+        var s1 = g1 != 0 ? (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1) : 0;
+
+        var pool = ArrayPool<double>.Shared;
+        var filtArray = pool.Rent(close.Length);
+        var vossArray = pool.Rent(close.Length);
+
+        try
+        {
+            var filt = filtArray.AsSpan(0, close.Length);
+            var voss = vossArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevFilt1 = i >= 1 ? filt[i - 1] : 0;
+                var prevFilt2 = i >= 2 ? filt[i - 2] : 0;
+                var prevValue = i >= 2 ? close[i - 2] : 0;
+
+                filt[i] = i <= 5 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (f1 * (1 + s1) * prevFilt1) - (s1 * prevFilt2);
+
+                double sumC = 0;
+                for (var j = 0; j <= order - 1; j++)
+                {
+                    var idx = i - (order - j);
+                    var prevVoss = idx >= 0 ? voss[idx] : 0;
+                    sumC += (double)(j + 1) / order * prevVoss;
+                }
+
+                voss[i] = ((double)(3 + order) / 2 * filt[i]) - sumC;
+                output[i] = voss[i];
+            }
+        }
+        finally
+        {
+            pool.Return(filtArray);
+            pool.Return(vossArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Spearman Rank Indicator.
+    /// </summary>
+    internal static void EhlersSpearmanRankIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var priceArray = new double[length + 1];
+            var rankArray = new double[length + 1];
+
+            for (var j = 1; j <= length; j++)
+            {
+                var idx = i - (j - 1);
+                priceArray[j] = idx >= 0 ? close[idx] : 0;
+                rankArray[j] = j;
+            }
+
+            // Bubble sort to rank prices
+            for (var j = 1; j <= length; j++)
+            {
+                var count = length + 1 - j;
+                for (var k = 1; k <= length - count; k++)
+                {
+                    if (priceArray[k + 1] < priceArray[k])
+                    {
+                        var tempPrice = priceArray[k];
+                        var tempRank = rankArray[k];
+                        priceArray[k] = priceArray[k + 1];
+                        rankArray[k] = rankArray[k + 1];
+                        priceArray[k + 1] = tempPrice;
+                        rankArray[k + 1] = tempRank;
+                    }
+                }
+            }
+
+            double sum = 0;
+            for (var j = 1; j <= length; j++)
+            {
+                sum += Math.Pow(j - rankArray[j], 2);
+            }
+
+            var denom = length * (Math.Pow(length, 2) - 1);
+            output[i] = denom != 0 ? 2 * (0.5 - (1 - (6 * sum / denom))) : 0;
+        }
+    }
+
     #endregion
 
     #endregion

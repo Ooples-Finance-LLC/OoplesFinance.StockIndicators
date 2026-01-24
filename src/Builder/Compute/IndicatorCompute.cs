@@ -769,6 +769,10 @@ internal static partial class IndicatorCompute
             ValueChartIndicatorSpecOptions vci => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.NumAtrs),
             SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length),
             TFSTetherLineIndicatorSpecOptions tfs => ComputeTFSTetherLineIndicatorFast(data, context, tfs.Length),
+            EhlersSimpleCycleIndicatorSpecOptions esci => ComputeEhlersSimpleCycleIndicatorFast(data, context, esci.Alpha),
+            EhlersFisherTransformSpecOptions eft => ComputeEhlersFisherTransformFast(data, context, eft.Length),
+            EhlersVossPredictiveFilterSpecOptions evpf => ComputeEhlersVossPredictiveFilterFast(data, context, evpf.Length, evpf.Predict, evpf.Bandwidth),
+            EhlersSpearmanRankIndicatorSpecOptions esri => ComputeEhlersSpearmanRankIndicatorFast(data, context, esri.Length),
 
             _ => null
         };
@@ -8094,6 +8098,54 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.TFSTetherLineIndicator(close, high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Simple Cycle Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSimpleCycleIndicatorFast(StockData data, ComputeContext context, double alpha = 0.07)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSimpleCycleIndicator(inputSpan, buffer.WritableSpan, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Fisher Transform using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersFisherTransformFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersFisherTransform(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Voss Predictive Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersVossPredictiveFilterFast(StockData data, ComputeContext context, int length = 20, double predict = 3, double bw = 0.25)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersVossPredictiveFilter(inputSpan, buffer.WritableSpan, length, predict, bw);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Spearman Rank Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSpearmanRankIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSpearmanRankIndicator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
