@@ -9354,6 +9354,134 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Oscar Indicator - a smoothed stochastic-like oscillator.
+    /// </summary>
+    internal static void OscarIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 8)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var range = highest - lowest;
+            var rough = range != 0 ? Math.Min(Math.Max((close[i] - lowest) / range * 100, 0), 100) : 0;
+            var prevOscar = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = (prevOscar / 6) + (rough / 3);
+        }
+    }
+
+    /// <summary>
+    /// Computes Narrow Bandpass Filter using Blackman-Harris window.
+    /// </summary>
+    internal static void NarrowBandpassFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var prevValue = i >= j ? input[i - j] : 0;
+                var x = j / (double)(length - 1);
+                var win = 0.42 - (0.5 * Math.Cos(2 * Math.PI * x)) + (0.08 * Math.Cos(4 * Math.PI * x));
+                var w = Math.Sin(2 * Math.PI * j / length) * win;
+                sum += prevValue * w;
+            }
+            output[i] = sum;
+        }
+    }
+
+    /// <summary>
+    /// Computes TFS Tether Line Indicator - midpoint of highest high and lowest low.
+    /// </summary>
+    internal static void TFSTetherLineIndicator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 50)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            output[i] = (highest + lowest) / 2;
+        }
+    }
+
+    /// <summary>
+    /// Computes Williams Fractals - identifies swing highs and lows.
+    /// Returns 1 for up fractal, -1 for down fractal, 0 otherwise.
+    /// </summary>
+    internal static void WilliamsFractals(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> upFractalOutput, Span<double> downFractalOutput, int length = 2)
+    {
+        if (upFractalOutput.Length < high.Length || downFractalOutput.Length < high.Length)
+        {
+            throw new ArgumentException("Output spans must be at least input length.", nameof(upFractalOutput));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            var prevHigh = i >= length - 2 ? high[i - (length - 2)] : 0;
+            var prevHigh1 = i >= length - 1 ? high[i - (length - 1)] : 0;
+            var prevHigh2 = i >= length ? high[i - length] : 0;
+            var prevHigh3 = i >= length + 1 ? high[i - (length + 1)] : 0;
+            var prevHigh4 = i >= length + 2 ? high[i - (length + 2)] : 0;
+            var prevHigh5 = i >= length + 3 ? high[i - (length + 3)] : 0;
+            var prevHigh6 = i >= length + 4 ? high[i - (length + 4)] : 0;
+            var prevHigh7 = i >= length + 5 ? high[i - (length + 5)] : 0;
+            var prevHigh8 = i >= length + 8 ? high[i - (length + 6)] : 0;
+            var prevLow = i >= length - 2 ? low[i - (length - 2)] : 0;
+            var prevLow1 = i >= length - 1 ? low[i - (length - 1)] : 0;
+            var prevLow2 = i >= length ? low[i - length] : 0;
+            var prevLow3 = i >= length + 1 ? low[i - (length + 1)] : 0;
+            var prevLow4 = i >= length + 2 ? low[i - (length + 2)] : 0;
+            var prevLow5 = i >= length + 3 ? low[i - (length + 3)] : 0;
+            var prevLow6 = i >= length + 4 ? low[i - (length + 4)] : 0;
+            var prevLow7 = i >= length + 5 ? low[i - (length + 5)] : 0;
+            var prevLow8 = i >= length + 8 ? low[i - (length + 6)] : 0;
+
+            double upFractal = (prevHigh4 < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) ||
+                (prevHigh5 < prevHigh2 && prevHigh4 < prevHigh2 && prevHigh3 == prevHigh2 && prevHigh1 < prevHigh2) ||
+                (prevHigh6 < prevHigh2 && prevHigh5 < prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
+                prevHigh < prevHigh2) || (prevHigh7 < prevHigh2 && prevHigh6 < prevHigh2 && prevHigh5 == prevHigh2 && prevHigh4 == prevHigh2 &&
+                prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) || (prevHigh8 < prevHigh2 && prevHigh7 < prevHigh2 &&
+                prevHigh6 == prevHigh2 && prevHigh5 <= prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
+                prevHigh < prevHigh2) ? 1 : 0;
+            upFractalOutput[i] = upFractal;
+
+            double dnFractal = (prevLow4 > prevLow2 && prevLow3 > prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow5 > prevLow2 &&
+                prevLow4 > prevLow2 && prevLow3 == prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow6 > prevLow2 &&
+                prevLow5 > prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ||
+                (prevLow7 > prevLow2 && prevLow6 > prevLow2 && prevLow5 == prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 &&
+                prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow8 > prevLow2 && prevLow7 > prevLow2 && prevLow6 == prevLow2 &&
+                prevLow5 >= prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ? 1 : 0;
+            downFractalOutput[i] = dnFractal;
+        }
+    }
+
     #endregion
 
     #endregion

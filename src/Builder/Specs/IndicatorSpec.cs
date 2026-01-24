@@ -6884,3 +6884,48 @@ public sealed class GenericIndicatorOptions : IIndicatorSpecOptions
     /// </summary>
     public double Multiplier => GetParameter(1, 2.0);
 }
+
+/// <summary>
+/// Oscar Indicator options.
+/// </summary>
+public sealed class OscarIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public OscarIndicatorSpecOptions(int length = 8) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Narrow Bandpass Filter indicator options.
+/// </summary>
+public sealed class NarrowBandpassFilterSpecOptions : IIndicatorSpecOptions
+{
+    public NarrowBandpassFilterSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// TFS Tether Line indicator options.
+/// </summary>
+public sealed class TFSTetherLineSpecOptions : IIndicatorSpecOptions
+{
+    public TFSTetherLineSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams Fractals Up indicator options.
+/// </summary>
+public sealed class WilliamsFractalsUpSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsFractalsUpSpecOptions(int length = 2) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams Fractals Down indicator options.
+/// </summary>
+public sealed class WilliamsFractalsDownSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsFractalsDownSpecOptions(int length = 2) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

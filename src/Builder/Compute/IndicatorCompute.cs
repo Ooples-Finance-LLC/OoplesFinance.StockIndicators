@@ -737,6 +737,11 @@ internal static partial class IndicatorCompute
             ChandeIntradayMomentumIndexSpecOptions cimi => ComputeChandeIntradayMomentumIndexFast(data, context, cimi.Length),
             ContractHighSpecOptions _ => ComputeContractHighFast(data, context),
             ContractLowSpecOptions _ => ComputeContractLowFast(data, context),
+            OscarIndicatorSpecOptions oscar => ComputeOscarIndicatorFast(data, context, oscar.Length),
+            NarrowBandpassFilterSpecOptions nbpf => ComputeNarrowBandpassFilterFast(data, context, nbpf.Length),
+            TFSTetherLineSpecOptions tether => ComputeTFSTetherLineFast(data, context, tether.Length),
+            WilliamsFractalsUpSpecOptions wfu => ComputeWilliamsFractalsUpFast(data, context, wfu.Length),
+            WilliamsFractalsDownSpecOptions wfd => ComputeWilliamsFractalsDownFast(data, context, wfd.Length),
 
             _ => null
         };
@@ -7654,6 +7659,79 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(data.Count);
         OscillatorCore.ContractLow(low, buffer.WritableSpan);
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Oscar Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOscarIndicatorFast(StockData data, ComputeContext context, int length = 8)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.OscarIndicator(close, high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Narrow Bandpass Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNarrowBandpassFilterFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.NarrowBandpassFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TFS Tether Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTFSTetherLineFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TFSTetherLineIndicator(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Fractals Up using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsFractalsUpFast(StockData data, ComputeContext context, int length = 2)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var upBuffer = context.Rent(data.Count);
+        Span<double> downBuffer = stackalloc double[data.Count > 8192 ? 0 : data.Count];
+        if (downBuffer.Length == 0)
+        {
+            var tempArray = new double[data.Count];
+            downBuffer = tempArray.AsSpan();
+        }
+        OscillatorCore.WilliamsFractals(high, low, upBuffer.WritableSpan, downBuffer, length);
+        return upBuffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Fractals Down using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsFractalsDownFast(StockData data, ComputeContext context, int length = 2)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        Span<double> upBuffer = stackalloc double[data.Count > 8192 ? 0 : data.Count];
+        if (upBuffer.Length == 0)
+        {
+            var tempArray = new double[data.Count];
+            upBuffer = tempArray.AsSpan();
+        }
+        var downBuffer = context.Rent(data.Count);
+        OscillatorCore.WilliamsFractals(high, low, upBuffer, downBuffer.WritableSpan, length);
+        return downBuffer;
     }
 
     #endregion
