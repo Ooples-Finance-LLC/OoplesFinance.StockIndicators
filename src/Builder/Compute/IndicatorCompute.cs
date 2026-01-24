@@ -227,6 +227,133 @@ internal static partial class IndicatorCompute
             ParkinsonVolatilitySpecOptions pkv => ComputeParkinsonVolatilityFast(data, context, pkv.Length),
             GarmanKlassVolatilitySpecOptions gkv => ComputeGarmanKlassVolatilityFast(data, context, gkv.Length),
 
+            // Batch 5 - Price/Range indicators
+            AdrSpecOptions adr => ComputeAdrFast(data, context, adr.Length),
+            BollingerBandsMiddleSpecOptions bbm => ComputeBollingerBandsFast(data, context, bbm.Length),
+            VpciSpecOptions vpci => ComputeVpciFast(data, context, vpci.Length),
+            KeltnerChannelMiddleSpecOptions kcm => ComputeKeltnerChannelMiddleFast(data, context, kcm.Length),
+            TrendDetectionSpecOptions td => ComputeTrendDetectionFast(data, context, td.Length),
+            PriceChannelMiddleSpecOptions pcm => ComputePriceChannelMiddleFast(data, context, pcm.Length),
+            SwingIndexSpecOptions swi => ComputeSwingIndexFast(data, context, swi.LimitMove),
+            AccumulativeSwingIndexSpecOptions asi => ComputeAccumulativeSwingIndexFast(data, context, asi.LimitMove),
+            ZigZagSpecOptions zz => ComputeZigZagFast(data, context, zz.Length),
+            PivotPointSpecOptions pp => ComputePivotPointFast(data, context, pp.Length),
+            RangeSpecOptions rng => ComputeRangeFast(data, context, rng.Length),
+            PriceMomentumSpecOptions pmom => ComputePriceMomentumFast(data, context, pmom.Length),
+
+            // Batch 5 - Volume indicators
+            MfiCoreSpecOptions mfic => ComputeMfiCoreFast(data, context, mfic.Length),
+            TwiggsMoneyFlowSpecOptions tmf => ComputeTwiggsMoneyFlowFast(data, context, tmf.Length),
+            DemandIndexSpecOptions dmidx => ComputeDemandIndexFast(data, context, dmidx.Length),
+            WilliamsADSpecOptions wad => ComputeWilliamsADFast(data, context, wad.Length),
+            CumulativeVolumeIndexSpecOptions cvi => ComputeCumulativeVolumeIndexFast(data, context, cvi.Length),
+            VolumePriceTrendSpecOptions vpt => ComputeVolumePriceTrendFast(data, context, vpt.Length),
+            ElderRayBullPowerSpecOptions erbp => ComputeElderRayBullPowerFast(data, context, erbp.Length),
+            ElderRayBearPowerSpecOptions erbrp => ComputeElderRayBearPowerFast(data, context, erbrp.Length),
+            VolumeWeightedRsiSpecOptions vwrsi => ComputeVolumeWeightedRsiFast(data, context, vwrsi.Length),
+
+            // Batch 5 - Trend indicators
+            DirectionalTrendIndexSpecOptions dti => ComputeDirectionalTrendIndexFast(data, context, dti.Length),
+            LinRegInterceptSpecOptions lri => ComputeLinRegInterceptFast(data, context, lri.Length),
+            ElderImpulseSystemSpecOptions eis => ComputeElderImpulseSystemFast(data, context, eis.Length),
+            MassThrustSpecOptions mt => ComputeMassThrustFast(data, context, mt.Length),
+
+            // Batch 5 - Chande indicators
+            ChandeCompositeMomentumIndexSpecOptions ccmi => ComputeChandeCompositeMomentumIndexFast(data, context, ccmi.ShortLength, ccmi.LongLength),
+            ChandeKrollRSquaredIndexSpecOptions ckrsi => ComputeChandeKrollRSquaredIndexFast(data, context, ckrsi.Length),
+            ChandeTrendScoreSpecOptions cts => ComputeChandeTrendScoreFast(data, context, cts.Length),
+            ChandeMomentumOscillatorAbsoluteSpecOptions cmoa => ComputeChandeMomentumOscillatorAbsoluteFast(data, context, cmoa.Length),
+
+            // Batch 5 - Oscillators
+            ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context, eco.Length),
+            BayesianOscillatorSpecOptions bayes => ComputeBayesianOscillatorFast(data, context, bayes.Length),
+            AnchoredMomentumSpecOptions amom => ComputeAnchoredMomentumFast(data, context, amom.Length),
+            ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length),
+            CenterOfLinearitySpecOptions col => ComputeCenterOfLinearityFast(data, context, col.Length),
+            BreakoutRsiSpecOptions brsi => ComputeBreakoutRsiFast(data, context, brsi.Length),
+            ChopZoneSpecOptions cz => ComputeChopZoneFast(data, context, cz.Length),
+            ForecastOscillatorSpecOptions fco2 => ComputeForecastOscillatorFast(data, context, fco2.Length),
+
+            // Batch 5 - Adaptive indicators
+            AsymmetricalRsiSpecOptions arsi => ComputeAsymmetricalRsiFast(data, context, arsi.UpLength, arsi.DownLength),
+            AdaptiveStochasticSpecOptions adstoch => ComputeAdaptiveStochasticFast(data, context, adstoch.MinLength, adstoch.MaxLength),
+            AdaptiveRsiSpecOptions adrisi => ComputeAdaptiveRsiFast(data, context, adrisi.MinLength, adrisi.MaxLength),
+
+            // Batch 5 - Moving averages
+            AutoLineSpecOptions al => ComputeAutoLineFast(data, context, al.Length),
+            AutoLineWithDriftSpecOptions alwd => ComputeAutoLineWithDriftFast(data, context, alwd.Length),
+            AutoFilterSpecOptions af => ComputeAutoFilterFast(data, context, af.Length),
+            BuffAverageSpecOptions ba => ComputeBuffAverageFast(data, context, ba.Length),
+            BryantAdaptiveMovingAverageSpecOptions bama => ComputeBryantAdaptiveMovingAverageFast(data, context, bama.Length),
+            CompoundRatioMovingAverageSpecOptions crma => ComputeCompoundRatioMovingAverageFast(data, context, crma.Length),
+            ConditionalAccumulatorSpecOptions ca => ComputeConditionalAccumulatorFast(data, context, ca.Length),
+            AhrensMovingAverageSpecOptions ahma => ComputeAhrensMovingAverageFast(data, context, ahma.Length),
+            AlphaDecreasingEmaSpecOptions adema => ComputeAlphaDecreasingEmaFast(data, context, adema.Length),
+            AdaptiveEmaSpecOptions aema => ComputeAdaptiveEmaFast(data, context, aema.Length),
+            AutonomousRecursiveMaSpecOptions arma => ComputeAutonomousRecursiveMaFast(data, context, arma.Length),
+            AdaptiveLeastSquaresSpecOptions als => ComputeAdaptiveLeastSquaresFast(data, context, als.Length),
+            AtrFilteredEmaSpecOptions afema => ComputeAtrFilteredEmaFast(data, context, afema.Length),
+            MedianMaSpecOptions medma => ComputeMedianMaFast(data, context, medma.Length),
+            VolumeAdjustedMaSpecOptions vama => ComputeVolumeAdjustedMaFast(data, context, vama.Length),
+            QuadraticWmaSpecOptions qwma => ComputeQuadraticWmaFast(data, context, qwma.Length),
+            ParabolicWmaSpecOptions pwma => ComputeParabolicWmaFast(data, context, pwma.Length),
+
+            // Batch 5 - Volatility indicators
+            RogersSatchellVolatilitySpecOptions rsv => ComputeRogersSatchellVolatilityFast(data, context, rsv.Length),
+            YangZhangVolatilitySpecOptions yzv => ComputeYangZhangVolatilityFast(data, context, yzv.Length),
+            DownsideDeviationSpecOptions dd => ComputeDownsideDeviationFast(data, context, dd.Length),
+            StandardDeviationChannelSpecOptions sdch => ComputeStandardDeviationChannelFast(data, context, sdch.Length),
+            StandardDeviationVolatilitySpecOptions sdv => ComputeStandardDeviationVolatilityFast(data, context, sdv.Length, sdv.AnnualizationFactor),
+            VolatilityRatioSpecOptions vr => ComputeVolatilityRatioFast(data, context, vr.Length),
+
+            // Batch 5 - Bands/Channels
+            AtrTrailingStopsSpecOptions ats => ComputeAtrTrailingStopsFast(data, context, ats.Length, ats.Multiplier),
+            AtrChannelWidthSpecOptions acw => ComputeAtrChannelWidthFast(data, context, acw.Length, acw.Multiplier),
+            AverageTrueRangeChannelSpecOptions atrc => ComputeAverageTrueRangeChannelFast(data, context, atrc.Length, atrc.Multiplier),
+            VolatilityStopSpecOptions vs => ComputeVolatilityStopFast(data, context, vs.Length, vs.Multiplier),
+            BollingerBandsPercentBSpecOptions bbpb => ComputeBollingerBandsPercentBFast(data, context, bbpb.Length, bbpb.Multiplier),
+            BollingerBandsAtrSpecOptions bbatr => ComputeBollingerBandsAtrFast(data, context, bbatr.Length, bbatr.Multiplier),
+
+            // Batch 5 - Ratio/Performance
+            CalmarRatioSpecOptions cr => ComputeCalmarRatioFast(data, context, cr.Length),
+            CommoditySelectionIndexSpecOptions csi => ComputeCommoditySelectionIndexFast(data, context, csi.Length),
+
+            // Batch 5 - Smoothed oscillators
+            SmoothedWilliamsRSpecOptions swillr => ComputeSmoothedWilliamsRFast(data, context, swillr.Length, swillr.SmoothLength),
+            PriceOscillatorPercentSpecOptions pop => ComputePriceOscillatorPercentFast(data, context, pop.ShortLength, pop.LongLength),
+            NormalizedMacdSpecOptions nmacd => ComputeNormalizedMacdFast(data, context, nmacd.FastLength, nmacd.SlowLength),
+            RelativeVigorIndexSignalSpecOptions rvis => ComputeRelativeVigorIndexSignalFast(data, context, rvis.Length, rvis.SignalLength),
+            VolumeMomentumOscillatorSpecOptions vmo => ComputeVolumeMomentumOscillatorFast(data, context, vmo.ShortLength, vmo.LongLength),
+            TrendContinuationFactorSpecOptions tcf => ComputeTrendContinuationFactorFast(data, context, tcf.Length),
+            TrendPersistenceRateSpecOptions tpr => ComputeTrendPersistenceRateFast(data, context, tpr.Length),
+            InertiaSpecOptions inertia => ComputeInertiaFast(data, context, inertia.RviLength, inertia.SmoothLength),
+
+            // Batch 5 - Price calculations
+            PercentChangeSpecOptions pchg => ComputePercentChangeFast(data, context, pchg.Length),
+            PriceChangeSpecOptions prc => ComputePriceChangeFast(data, context),
+            MidRangeSpecOptions mr => ComputeMidRangeFast(data, context),
+            OhlcAverageSpecOptions ohlc => ComputeOhlcAverageFast(data, context),
+            HlcAverageSpecOptions hlc => ComputeHlcAverageFast(data, context),
+            DoubleSmoothedMomentaSpecOptions dsm => ComputeDoubleSmoothedMomentaFast(data, context, dsm.MomentumLength, dsm.FirstSmooth, dsm.SecondSmooth),
+
+            // Batch 5 - Statistical indicators
+            HighLowIndexSpecOptions hli => ComputeHighLowIndexFast(data, context, hli.Length),
+            MarketFacilitationIndexSpecOptions mfidx => ComputeMarketFacilitationIndexFast(data, context, mfidx.Length),
+            TrendScoreSpecOptions ts => ComputeTrendScoreFast(data, context, ts.Length),
+            MedianValueSpecOptions mv => ComputeMedianValueFast(data, context, mv.Length),
+            LogReturnsSpecOptions lr => ComputeLogReturnsFast(data, context, lr.Length),
+            SimpleReturnsSpecOptions sr => ComputeSimpleReturnsFast(data, context, sr.Length),
+            CumulativeSumSpecOptions csum => ComputeCumulativeSumFast(data, context),
+            RollingMaxSpecOptions rmax => ComputeRollingMaxFast(data, context, rmax.Length),
+            RollingMinSpecOptions rmin => ComputeRollingMinFast(data, context, rmin.Length),
+            PricePositionSpecOptions ppos => ComputePricePositionFast(data, context, ppos.Length),
+            AtrPercentSpecOptions atrp => ComputeAtrPercentFast(data, context, atrp.Length),
+
+            // Batch 5 - Trend/Activator indicators
+            RepulseSpecOptions rep => ComputeRepulseFast(data, context, rep.Length),
+            GannHiLoActivatorSpecOptions ghla => ComputeGannHiLoActivatorFast(data, context, ghla.Length),
+            HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length),
+
             _ => null
         };
     }

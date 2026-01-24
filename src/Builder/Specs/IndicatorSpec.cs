@@ -2300,6 +2300,1308 @@ public sealed class GarmanKlassVolatilitySpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 5 SpecOptions ==========
+
+/// <summary>
+/// Average Daily Range indicator options.
+/// </summary>
+public sealed class AdrSpecOptions : IIndicatorSpecOptions
+{
+    public AdrSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Bollinger Bands Middle Band indicator options.
+/// </summary>
+public sealed class BollingerBandsMiddleSpecOptions : IIndicatorSpecOptions
+{
+    public BollingerBandsMiddleSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// VPCI (Volume Price Confirmation Indicator) options.
+/// </summary>
+public sealed class VpciSpecOptions : IIndicatorSpecOptions
+{
+    public VpciSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Keltner Channel Middle indicator options.
+/// </summary>
+public sealed class KeltnerChannelMiddleSpecOptions : IIndicatorSpecOptions
+{
+    public KeltnerChannelMiddleSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trend Detection indicator options.
+/// </summary>
+public sealed class TrendDetectionSpecOptions : IIndicatorSpecOptions
+{
+    public TrendDetectionSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Channel Middle indicator options.
+/// </summary>
+public sealed class PriceChannelMiddleSpecOptions : IIndicatorSpecOptions
+{
+    public PriceChannelMiddleSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Swing Index indicator options.
+/// </summary>
+public sealed class SwingIndexSpecOptions : IIndicatorSpecOptions
+{
+    public SwingIndexSpecOptions(double limitMove = 0)
+    {
+        LimitMove = limitMove;
+    }
+
+    public double LimitMove { get; }
+}
+
+/// <summary>
+/// Accumulative Swing Index indicator options.
+/// </summary>
+public sealed class AccumulativeSwingIndexSpecOptions : IIndicatorSpecOptions
+{
+    public AccumulativeSwingIndexSpecOptions(double limitMove = 0)
+    {
+        LimitMove = limitMove;
+    }
+
+    public double LimitMove { get; }
+}
+
+/// <summary>
+/// ZigZag indicator options.
+/// </summary>
+public sealed class ZigZagSpecOptions : IIndicatorSpecOptions
+{
+    public ZigZagSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Pivot Point indicator options.
+/// </summary>
+public sealed class PivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public PivotPointSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Range indicator options.
+/// </summary>
+public sealed class RangeSpecOptions : IIndicatorSpecOptions
+{
+    public RangeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Momentum indicator options.
+/// </summary>
+public sealed class PriceMomentumSpecOptions : IIndicatorSpecOptions
+{
+    public PriceMomentumSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// MFI Core indicator options.
+/// </summary>
+public sealed class MfiCoreSpecOptions : IIndicatorSpecOptions
+{
+    public MfiCoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Twiggs Money Flow indicator options.
+/// </summary>
+public sealed class TwiggsMoneyFlowSpecOptions : IIndicatorSpecOptions
+{
+    public TwiggsMoneyFlowSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demand Index indicator options.
+/// </summary>
+public sealed class DemandIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DemandIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Directional Trend Index indicator options.
+/// </summary>
+public sealed class DirectionalTrendIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DirectionalTrendIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ergodic Candlestick Oscillator indicator options.
+/// </summary>
+public sealed class ErgodicCandlestickOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ErgodicCandlestickOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression Intercept indicator options.
+/// </summary>
+public sealed class LinRegInterceptSpecOptions : IIndicatorSpecOptions
+{
+    public LinRegInterceptSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Elder Impulse System indicator options.
+/// </summary>
+public sealed class ElderImpulseSystemSpecOptions : IIndicatorSpecOptions
+{
+    public ElderImpulseSystemSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mass Thrust indicator options.
+/// </summary>
+public sealed class MassThrustSpecOptions : IIndicatorSpecOptions
+{
+    public MassThrustSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams AD indicator options.
+/// </summary>
+public sealed class WilliamsADSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsADSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Cumulative Volume Index indicator options.
+/// </summary>
+public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
+{
+    public CumulativeVolumeIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Price Trend indicator options.
+/// </summary>
+public sealed class VolumePriceTrendSpecOptions : IIndicatorSpecOptions
+{
+    public VolumePriceTrendSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Elder Ray Bull Power indicator options.
+/// </summary>
+public sealed class ElderRayBullPowerSpecOptions : IIndicatorSpecOptions
+{
+    public ElderRayBullPowerSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Elder Ray Bear Power indicator options.
+/// </summary>
+public sealed class ElderRayBearPowerSpecOptions : IIndicatorSpecOptions
+{
+    public ElderRayBearPowerSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Weighted RSI indicator options.
+/// </summary>
+public sealed class VolumeWeightedRsiSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeWeightedRsiSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chande Composite Momentum Index indicator options.
+/// </summary>
+public sealed class ChandeCompositeMomentumIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeCompositeMomentumIndexSpecOptions(int shortLength = 3, int longLength = 10)
+    {
+        ShortLength = Math.Max(1, shortLength);
+        LongLength = Math.Max(1, longLength);
+    }
+
+    public int ShortLength { get; }
+    public int LongLength { get; }
+}
+
+/// <summary>
+/// Chande Kroll R-Squared Index indicator options.
+/// </summary>
+public sealed class ChandeKrollRSquaredIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeKrollRSquaredIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Bayesian Oscillator indicator options.
+/// </summary>
+public sealed class BayesianOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public BayesianOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Anchored Momentum indicator options.
+/// </summary>
+public sealed class AnchoredMomentumSpecOptions : IIndicatorSpecOptions
+{
+    public AnchoredMomentumSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chartmill Value Indicator options.
+/// </summary>
+public sealed class ChartmillValueIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public ChartmillValueIndicatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Center of Linearity indicator options.
+/// </summary>
+public sealed class CenterOfLinearitySpecOptions : IIndicatorSpecOptions
+{
+    public CenterOfLinearitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Breakout RSI indicator options.
+/// </summary>
+public sealed class BreakoutRsiSpecOptions : IIndicatorSpecOptions
+{
+    public BreakoutRsiSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Asymmetrical RSI indicator options.
+/// </summary>
+public sealed class AsymmetricalRsiSpecOptions : IIndicatorSpecOptions
+{
+    public AsymmetricalRsiSpecOptions(int upLength = 14, int downLength = 7)
+    {
+        UpLength = Math.Max(1, upLength);
+        DownLength = Math.Max(1, downLength);
+    }
+
+    public int UpLength { get; }
+    public int DownLength { get; }
+}
+
+/// <summary>
+/// Adaptive Stochastic indicator options.
+/// </summary>
+public sealed class AdaptiveStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveStochasticSpecOptions(int minLength = 5, int maxLength = 20)
+    {
+        MinLength = Math.Max(1, minLength);
+        MaxLength = Math.Max(1, maxLength);
+    }
+
+    public int MinLength { get; }
+    public int MaxLength { get; }
+}
+
+/// <summary>
+/// Adaptive RSI indicator options.
+/// </summary>
+public sealed class AdaptiveRsiSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveRsiSpecOptions(int minLength = 5, int maxLength = 20)
+    {
+        MinLength = Math.Max(1, minLength);
+        MaxLength = Math.Max(1, maxLength);
+    }
+
+    public int MinLength { get; }
+    public int MaxLength { get; }
+}
+
+/// <summary>
+/// Chande Trend Score indicator options.
+/// </summary>
+public sealed class ChandeTrendScoreSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeTrendScoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chop Zone indicator options.
+/// </summary>
+public sealed class ChopZoneSpecOptions : IIndicatorSpecOptions
+{
+    public ChopZoneSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Auto Line indicator options.
+/// </summary>
+public sealed class AutoLineSpecOptions : IIndicatorSpecOptions
+{
+    public AutoLineSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Auto Line With Drift indicator options.
+/// </summary>
+public sealed class AutoLineWithDriftSpecOptions : IIndicatorSpecOptions
+{
+    public AutoLineWithDriftSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Auto Filter indicator options.
+/// </summary>
+public sealed class AutoFilterSpecOptions : IIndicatorSpecOptions
+{
+    public AutoFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Buff Average indicator options.
+/// </summary>
+public sealed class BuffAverageSpecOptions : IIndicatorSpecOptions
+{
+    public BuffAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Bryant Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class BryantAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public BryantAdaptiveMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ATR Trailing Stops indicator options.
+/// </summary>
+public sealed class AtrTrailingStopsSpecOptions : IIndicatorSpecOptions
+{
+    public AtrTrailingStopsSpecOptions(int length = 14, double multiplier = 3)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Compound Ratio Moving Average indicator options.
+/// </summary>
+public sealed class CompoundRatioMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public CompoundRatioMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Conditional Accumulator indicator options.
+/// </summary>
+public sealed class ConditionalAccumulatorSpecOptions : IIndicatorSpecOptions
+{
+    public ConditionalAccumulatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ahrens Moving Average indicator options.
+/// </summary>
+public sealed class AhrensMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public AhrensMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Rogers-Satchell Volatility indicator options.
+/// </summary>
+public sealed class RogersSatchellVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public RogersSatchellVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Yang-Zhang Volatility indicator options.
+/// </summary>
+public sealed class YangZhangVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public YangZhangVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Calmar Ratio indicator options.
+/// </summary>
+public sealed class CalmarRatioSpecOptions : IIndicatorSpecOptions
+{
+    public CalmarRatioSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Downside Deviation indicator options.
+/// </summary>
+public sealed class DownsideDeviationSpecOptions : IIndicatorSpecOptions
+{
+    public DownsideDeviationSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ATR Channel Width indicator options.
+/// </summary>
+public sealed class AtrChannelWidthSpecOptions : IIndicatorSpecOptions
+{
+    public AtrChannelWidthSpecOptions(int length = 14, double multiplier = 2)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Commodity Selection Index indicator options.
+/// </summary>
+public sealed class CommoditySelectionIndexSpecOptions : IIndicatorSpecOptions
+{
+    public CommoditySelectionIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Alpha Decreasing EMA indicator options.
+/// </summary>
+public sealed class AlphaDecreasingEmaSpecOptions : IIndicatorSpecOptions
+{
+    public AlphaDecreasingEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Adaptive EMA indicator options.
+/// </summary>
+public sealed class AdaptiveEmaSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Autonomous Recursive MA indicator options.
+/// </summary>
+public sealed class AutonomousRecursiveMaSpecOptions : IIndicatorSpecOptions
+{
+    public AutonomousRecursiveMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Adaptive Least Squares indicator options.
+/// </summary>
+public sealed class AdaptiveLeastSquaresSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveLeastSquaresSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ATR Filtered EMA indicator options.
+/// </summary>
+public sealed class AtrFilteredEmaSpecOptions : IIndicatorSpecOptions
+{
+    public AtrFilteredEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Median MA indicator options.
+/// </summary>
+public sealed class MedianMaSpecOptions : IIndicatorSpecOptions
+{
+    public MedianMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Adjusted MA indicator options.
+/// </summary>
+public sealed class VolumeAdjustedMaSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeAdjustedMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quadratic WMA indicator options.
+/// </summary>
+public sealed class QuadraticWmaSpecOptions : IIndicatorSpecOptions
+{
+    public QuadraticWmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Parabolic WMA indicator options.
+/// </summary>
+public sealed class ParabolicWmaSpecOptions : IIndicatorSpecOptions
+{
+    public ParabolicWmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Smoothed Williams %R indicator options.
+/// </summary>
+public sealed class SmoothedWilliamsRSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedWilliamsRSpecOptions(int length = 14, int smoothLength = 3)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+}
+
+/// <summary>
+/// Price Oscillator Percent indicator options.
+/// </summary>
+public sealed class PriceOscillatorPercentSpecOptions : IIndicatorSpecOptions
+{
+    public PriceOscillatorPercentSpecOptions(int shortLength = 10, int longLength = 20)
+    {
+        ShortLength = Math.Max(1, shortLength);
+        LongLength = Math.Max(1, longLength);
+    }
+
+    public int ShortLength { get; }
+    public int LongLength { get; }
+}
+
+/// <summary>
+/// Normalized MACD indicator options.
+/// </summary>
+public sealed class NormalizedMacdSpecOptions : IIndicatorSpecOptions
+{
+    public NormalizedMacdSpecOptions(int fastLength = 12, int slowLength = 26)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Relative Vigor Index Signal indicator options.
+/// </summary>
+public sealed class RelativeVigorIndexSignalSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVigorIndexSignalSpecOptions(int length = 10, int signalLength = 4)
+    {
+        Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+    }
+
+    public int Length { get; }
+    public int SignalLength { get; }
+}
+
+/// <summary>
+/// Volume Momentum Oscillator indicator options.
+/// </summary>
+public sealed class VolumeMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeMomentumOscillatorSpecOptions(int shortLength = 5, int longLength = 20)
+    {
+        ShortLength = Math.Max(1, shortLength);
+        LongLength = Math.Max(1, longLength);
+    }
+
+    public int ShortLength { get; }
+    public int LongLength { get; }
+}
+
+/// <summary>
+/// Trend Continuation Factor indicator options.
+/// </summary>
+public sealed class TrendContinuationFactorSpecOptions : IIndicatorSpecOptions
+{
+    public TrendContinuationFactorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trend Persistence Rate indicator options.
+/// </summary>
+public sealed class TrendPersistenceRateSpecOptions : IIndicatorSpecOptions
+{
+    public TrendPersistenceRateSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Inertia indicator options.
+/// </summary>
+public sealed class InertiaSpecOptions : IIndicatorSpecOptions
+{
+    public InertiaSpecOptions(int rviLength = 14, int smoothLength = 20)
+    {
+        RviLength = Math.Max(1, rviLength);
+        SmoothLength = Math.Max(1, smoothLength);
+    }
+
+    public int RviLength { get; }
+    public int SmoothLength { get; }
+}
+
+/// <summary>
+/// Standard Deviation Channel indicator options.
+/// </summary>
+public sealed class StandardDeviationChannelSpecOptions : IIndicatorSpecOptions
+{
+    public StandardDeviationChannelSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Standard Deviation Volatility indicator options.
+/// </summary>
+public sealed class StandardDeviationVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public StandardDeviationVolatilitySpecOptions(int length = 20, int annualizationFactor = 252)
+    {
+        Length = Math.Max(1, length);
+        AnnualizationFactor = Math.Max(1, annualizationFactor);
+    }
+
+    public int Length { get; }
+    public int AnnualizationFactor { get; }
+}
+
+/// <summary>
+/// Average True Range Channel indicator options.
+/// </summary>
+public sealed class AverageTrueRangeChannelSpecOptions : IIndicatorSpecOptions
+{
+    public AverageTrueRangeChannelSpecOptions(int length = 14, double multiplier = 2)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Volatility Ratio indicator options.
+/// </summary>
+public sealed class VolatilityRatioSpecOptions : IIndicatorSpecOptions
+{
+    public VolatilityRatioSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volatility Stop indicator options.
+/// </summary>
+public sealed class VolatilityStopSpecOptions : IIndicatorSpecOptions
+{
+    public VolatilityStopSpecOptions(int length = 14, double multiplier = 2)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Bollinger Bands Percent B indicator options.
+/// </summary>
+public sealed class BollingerBandsPercentBSpecOptions : IIndicatorSpecOptions
+{
+    public BollingerBandsPercentBSpecOptions(int length = 20, double multiplier = 2)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Bollinger Bands ATR indicator options.
+/// </summary>
+public sealed class BollingerBandsAtrSpecOptions : IIndicatorSpecOptions
+{
+    public BollingerBandsAtrSpecOptions(int length = 20, double multiplier = 2)
+    {
+        Length = Math.Max(1, length);
+        Multiplier = multiplier;
+    }
+
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Chande Momentum Oscillator Absolute indicator options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorAbsoluteSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorAbsoluteSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percent Change indicator options.
+/// </summary>
+public sealed class PercentChangeSpecOptions : IIndicatorSpecOptions
+{
+    public PercentChangeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Change indicator options (no length parameter variant).
+/// </summary>
+public sealed class PriceChangeSpecOptions : IIndicatorSpecOptions
+{
+    public PriceChangeSpecOptions() { }
+}
+
+/// <summary>
+/// Mid Range indicator options (no length parameter variant).
+/// </summary>
+public sealed class MidRangeSpecOptions : IIndicatorSpecOptions
+{
+    public MidRangeSpecOptions() { }
+}
+
+/// <summary>
+/// OHLC Average indicator options (no length parameter variant).
+/// </summary>
+public sealed class OhlcAverageSpecOptions : IIndicatorSpecOptions
+{
+    public OhlcAverageSpecOptions() { }
+}
+
+/// <summary>
+/// HLC Average indicator options (no length parameter variant).
+/// </summary>
+public sealed class HlcAverageSpecOptions : IIndicatorSpecOptions
+{
+    public HlcAverageSpecOptions() { }
+}
+
+/// <summary>
+/// Double Smoothed Momenta indicator options.
+/// </summary>
+public sealed class DoubleSmoothedMomentaSpecOptions : IIndicatorSpecOptions
+{
+    public DoubleSmoothedMomentaSpecOptions(int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    {
+        MomentumLength = Math.Max(1, momentumLength);
+        FirstSmooth = Math.Max(1, firstSmooth);
+        SecondSmooth = Math.Max(1, secondSmooth);
+    }
+
+    public int MomentumLength { get; }
+    public int FirstSmooth { get; }
+    public int SecondSmooth { get; }
+}
+
+/// <summary>
+/// High Low Index indicator options.
+/// </summary>
+public sealed class HighLowIndexSpecOptions : IIndicatorSpecOptions
+{
+    public HighLowIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Market Facilitation Index indicator options.
+/// </summary>
+public sealed class MarketFacilitationIndexSpecOptions : IIndicatorSpecOptions
+{
+    public MarketFacilitationIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trend Score indicator options.
+/// </summary>
+public sealed class TrendScoreSpecOptions : IIndicatorSpecOptions
+{
+    public TrendScoreSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Median Value indicator options.
+/// </summary>
+public sealed class MedianValueSpecOptions : IIndicatorSpecOptions
+{
+    public MedianValueSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Log Returns indicator options.
+/// </summary>
+public sealed class LogReturnsSpecOptions : IIndicatorSpecOptions
+{
+    public LogReturnsSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Simple Returns indicator options.
+/// </summary>
+public sealed class SimpleReturnsSpecOptions : IIndicatorSpecOptions
+{
+    public SimpleReturnsSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Cumulative Sum indicator options (no length parameter variant).
+/// </summary>
+public sealed class CumulativeSumSpecOptions : IIndicatorSpecOptions
+{
+    public CumulativeSumSpecOptions() { }
+}
+
+/// <summary>
+/// Rolling Max indicator options.
+/// </summary>
+public sealed class RollingMaxSpecOptions : IIndicatorSpecOptions
+{
+    public RollingMaxSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Rolling Min indicator options.
+/// </summary>
+public sealed class RollingMinSpecOptions : IIndicatorSpecOptions
+{
+    public RollingMinSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Position indicator options.
+/// </summary>
+public sealed class PricePositionSpecOptions : IIndicatorSpecOptions
+{
+    public PricePositionSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// ATR Percent indicator options.
+/// </summary>
+public sealed class AtrPercentSpecOptions : IIndicatorSpecOptions
+{
+    public AtrPercentSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Forecast Oscillator indicator options.
+/// </summary>
+public sealed class ForecastOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ForecastOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Repulse indicator options.
+/// </summary>
+public sealed class RepulseSpecOptions : IIndicatorSpecOptions
+{
+    public RepulseSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Gann Hi-Lo Activator indicator options.
+/// </summary>
+public sealed class GannHiLoActivatorSpecOptions : IIndicatorSpecOptions
+{
+    public GannHiLoActivatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Half Trend indicator options.
+/// </summary>
+public sealed class HalfTrendSpecOptions : IIndicatorSpecOptions
+{
+    public HalfTrendSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.

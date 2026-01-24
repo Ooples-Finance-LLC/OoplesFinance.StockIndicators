@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**147 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**243 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **152** | 143 new + 9 original |
-| TryComputeFast Dispatch | **147** | 138 new routes wired |
+| SpecOptions Classes | **248** | 239 new + 9 original |
+| TryComputeFast Dispatch | **243** | 234 new routes wired |
 
 ### The Gap
 
-- **411 ComputeFast methods exist** but many still use `GenericIndicatorOptions`
-- **147 indicators** now route through `TryComputeFast`
-- **Missing**: ~260+ specific `*SpecOptions` classes and corresponding dispatch cases
+- **411 ComputeFast methods exist** but some still use `GenericIndicatorOptions`
+- **243 indicators** now route through `TryComputeFast`
+- **Missing**: ~168 specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -231,6 +231,133 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] ParkinsonVolatilitySpecOptions
 - [x] GarmanKlassVolatilitySpecOptions
 
+**Batch 5 - Price/Range indicators:**
+- [x] AdrSpecOptions
+- [x] BollingerBandsMiddleSpecOptions
+- [x] VpciSpecOptions
+- [x] KeltnerChannelMiddleSpecOptions
+- [x] TrendDetectionSpecOptions
+- [x] PriceChannelMiddleSpecOptions
+- [x] SwingIndexSpecOptions
+- [x] AccumulativeSwingIndexSpecOptions
+- [x] ZigZagSpecOptions
+- [x] PivotPointSpecOptions
+- [x] RangeSpecOptions
+- [x] PriceMomentumSpecOptions
+
+**Batch 5 - Volume indicators:**
+- [x] MfiCoreSpecOptions
+- [x] TwiggsMoneyFlowSpecOptions
+- [x] DemandIndexSpecOptions
+- [x] WilliamsADSpecOptions
+- [x] CumulativeVolumeIndexSpecOptions
+- [x] VolumePriceTrendSpecOptions
+- [x] ElderRayBullPowerSpecOptions
+- [x] ElderRayBearPowerSpecOptions
+- [x] VolumeWeightedRsiSpecOptions
+
+**Batch 5 - Trend/Directional indicators:**
+- [x] DirectionalTrendIndexSpecOptions
+- [x] LinRegInterceptSpecOptions
+- [x] ElderImpulseSystemSpecOptions
+- [x] MassThrustSpecOptions
+
+**Batch 5 - Chande indicators:**
+- [x] ChandeCompositeMomentumIndexSpecOptions
+- [x] ChandeKrollRSquaredIndexSpecOptions
+- [x] ChandeTrendScoreSpecOptions
+- [x] ChandeMomentumOscillatorAbsoluteSpecOptions
+
+**Batch 5 - Oscillators:**
+- [x] ErgodicCandlestickOscillatorSpecOptions
+- [x] BayesianOscillatorSpecOptions
+- [x] AnchoredMomentumSpecOptions
+- [x] ChartmillValueIndicatorSpecOptions
+- [x] CenterOfLinearitySpecOptions
+- [x] BreakoutRsiSpecOptions
+- [x] ChopZoneSpecOptions
+- [x] ForecastOscillatorSpecOptions
+
+**Batch 5 - Adaptive indicators:**
+- [x] AsymmetricalRsiSpecOptions
+- [x] AdaptiveStochasticSpecOptions
+- [x] AdaptiveRsiSpecOptions
+
+**Batch 5 - Moving averages:**
+- [x] AutoLineSpecOptions
+- [x] AutoLineWithDriftSpecOptions
+- [x] AutoFilterSpecOptions
+- [x] BuffAverageSpecOptions
+- [x] BryantAdaptiveMovingAverageSpecOptions
+- [x] CompoundRatioMovingAverageSpecOptions
+- [x] ConditionalAccumulatorSpecOptions
+- [x] AhrensMovingAverageSpecOptions
+- [x] AlphaDecreasingEmaSpecOptions
+- [x] AdaptiveEmaSpecOptions
+- [x] AutonomousRecursiveMaSpecOptions
+- [x] AdaptiveLeastSquaresSpecOptions
+- [x] AtrFilteredEmaSpecOptions
+- [x] MedianMaSpecOptions
+- [x] VolumeAdjustedMaSpecOptions
+- [x] QuadraticWmaSpecOptions
+- [x] ParabolicWmaSpecOptions
+
+**Batch 5 - Volatility indicators:**
+- [x] RogersSatchellVolatilitySpecOptions
+- [x] YangZhangVolatilitySpecOptions
+- [x] DownsideDeviationSpecOptions
+- [x] StandardDeviationChannelSpecOptions
+- [x] StandardDeviationVolatilitySpecOptions
+- [x] VolatilityRatioSpecOptions
+
+**Batch 5 - Bands/Channels:**
+- [x] AtrTrailingStopsSpecOptions
+- [x] AtrChannelWidthSpecOptions
+- [x] AverageTrueRangeChannelSpecOptions
+- [x] VolatilityStopSpecOptions
+- [x] BollingerBandsPercentBSpecOptions
+- [x] BollingerBandsAtrSpecOptions
+
+**Batch 5 - Ratio/Performance:**
+- [x] CalmarRatioSpecOptions
+- [x] CommoditySelectionIndexSpecOptions
+
+**Batch 5 - Smoothed oscillators:**
+- [x] SmoothedWilliamsRSpecOptions
+- [x] PriceOscillatorPercentSpecOptions
+- [x] NormalizedMacdSpecOptions
+- [x] RelativeVigorIndexSignalSpecOptions
+- [x] VolumeMomentumOscillatorSpecOptions
+- [x] TrendContinuationFactorSpecOptions
+- [x] TrendPersistenceRateSpecOptions
+- [x] InertiaSpecOptions
+
+**Batch 5 - Price calculations:**
+- [x] PercentChangeSpecOptions
+- [x] PriceChangeSpecOptions
+- [x] MidRangeSpecOptions
+- [x] OhlcAverageSpecOptions
+- [x] HlcAverageSpecOptions
+- [x] DoubleSmoothedMomentaSpecOptions
+
+**Batch 5 - Statistical indicators:**
+- [x] HighLowIndexSpecOptions
+- [x] MarketFacilitationIndexSpecOptions
+- [x] TrendScoreSpecOptions
+- [x] MedianValueSpecOptions
+- [x] LogReturnsSpecOptions
+- [x] SimpleReturnsSpecOptions
+- [x] CumulativeSumSpecOptions
+- [x] RollingMaxSpecOptions
+- [x] RollingMinSpecOptions
+- [x] PricePositionSpecOptions
+- [x] AtrPercentSpecOptions
+
+**Batch 5 - Trend/Activator indicators:**
+- [x] RepulseSpecOptions
+- [x] GannHiLoActivatorSpecOptions
+- [x] HalfTrendSpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -285,16 +412,16 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **152** |
-| TryComputeFast Routes | Wired | **147** |
-| **Effective Fast Path Coverage** | | **~19.0%** |
+| SpecOptions Classes | Implemented | **248** |
+| TryComputeFast Routes | Wired | **243** |
+| **Effective Fast Path Coverage** | | **~31.4%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 147 indicators**
-3. **Continue creating SpecOptions** for remaining ~260 indicators
-4. **Focus on categories with most ComputeFast methods**: Ehlers (~60 remaining), RSI variants (~20 remaining), Chande indicators (~15 remaining)
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 243 indicators**
+3. **Continue creating SpecOptions** for remaining ~168 indicators
+4. **Focus on categories with most ComputeFast methods**: Ehlers (~60 remaining), more oscillators (~100 remaining)
 5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
 
 ## Notes
