@@ -3602,6 +3602,1100 @@ public sealed class HalfTrendSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 6 SpecOptions ==========
+
+/// <summary>
+/// Chande Momentum Oscillator Absolute Average indicator options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorAbsoluteAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorAbsoluteAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chande Momentum Oscillator Average indicator options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Double Stochastic Oscillator indicator options.
+/// </summary>
+public sealed class DoubleStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DoubleStochasticOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DT Oscillator indicator options.
+/// </summary>
+public sealed class DTOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DTOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Compare Price Momentum Oscillator indicator options.
+/// </summary>
+public sealed class ComparePriceMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ComparePriceMomentumOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Daily Average Price Delta indicator options.
+/// </summary>
+public sealed class DailyAveragePriceDeltaSpecOptions : IIndicatorSpecOptions
+{
+    public DailyAveragePriceDeltaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Demand Oscillator indicator options.
+/// </summary>
+public sealed class DemandOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DemandOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Double Smoothed Relative Strength Index indicator options.
+/// </summary>
+public sealed class DoubleSmoothedRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DoubleSmoothedRelativeStrengthIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Dynamic Momentum Oscillator indicator options.
+/// </summary>
+public sealed class DynamicMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DynamicMomentumOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Average Money Flow Oscillator indicator options.
+/// </summary>
+public sealed class AverageMoneyFlowOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public AverageMoneyFlowOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DMI Stochastic indicator options.
+/// </summary>
+public sealed class DMIStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public DMIStochasticSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// CCT Stoch Relative Strength Index indicator options.
+/// </summary>
+public sealed class CCTStochRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public CCTStochRelativeStrengthIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Bilateral Stochastic Oscillator indicator options.
+/// </summary>
+public sealed class BilateralStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public BilateralStochasticOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chande Momentum Oscillator Average Disparity Index indicator options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorAverageDisparityIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorAverageDisparityIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chande Momentum Oscillator Filter indicator options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorFilterSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorFilterSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DiNapoli Percentage Price Oscillator indicator options.
+/// </summary>
+public sealed class DiNapoliPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DiNapoliPercentagePriceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DiNapoli Preferred Stochastic Oscillator indicator options.
+/// </summary>
+public sealed class DiNapoliPreferredStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DiNapoliPreferredStochasticOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ergodic Percentage Price Oscillator indicator options.
+/// </summary>
+public sealed class ErgodicPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ErgodicPercentagePriceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fast Slow Kurtosis Oscillator indicator options.
+/// </summary>
+public sealed class FastSlowKurtosisOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FastSlowKurtosisOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fast Slow RSI Oscillator indicator options.
+/// </summary>
+public sealed class FastSlowRsiOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FastSlowRsiOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fast Slow Stochastic Oscillator indicator options.
+/// </summary>
+public sealed class FastSlowStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FastSlowStochasticOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// G Oscillator indicator options.
+/// </summary>
+public sealed class GOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public GOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Gann Swing Oscillator indicator options.
+/// </summary>
+public sealed class GannSwingOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public GannSwingOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Gann Trend Oscillator indicator options.
+/// </summary>
+public sealed class GannTrendOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public GannTrendOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Firefly Oscillator indicator options.
+/// </summary>
+public sealed class FireflyOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FireflyOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fisher Transform Stochastic Oscillator indicator options.
+/// </summary>
+public sealed class FisherTransformStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FisherTransformStochasticOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Karobein Oscillator indicator options.
+/// </summary>
+public sealed class KarobeinOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public KarobeinOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Grover Llorens Cycle Oscillator indicator options.
+/// </summary>
+public sealed class GroverLlorensCycleOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public GroverLlorensCycleOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Impulse Percentage Price Oscillator indicator options.
+/// </summary>
+public sealed class ImpulsePercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ImpulsePercentagePriceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linda Raschke 3-10 Oscillator indicator options.
+/// </summary>
+public sealed class LindaRaschke310OscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public LindaRaschke310OscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Midpoint Oscillator indicator options.
+/// </summary>
+public sealed class MidpointOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public MidpointOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mirrored Percentage Price Oscillator indicator options.
+/// </summary>
+public sealed class MirroredPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public MirroredPercentagePriceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mobility Oscillator indicator options.
+/// </summary>
+public sealed class MobilityOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public MobilityOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percent Change Oscillator indicator options.
+/// </summary>
+public sealed class PercentChangeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PercentChangeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Cycle Oscillator indicator options.
+/// </summary>
+public sealed class PriceCycleOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PriceCycleOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Volume Oscillator indicator options.
+/// </summary>
+public sealed class PriceVolumeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PriceVolumeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Projection Oscillator indicator options.
+/// </summary>
+public sealed class ProjectionOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ProjectionOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Rainbow Oscillator indicator options.
+/// </summary>
+public sealed class RainbowOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RainbowOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Regression Oscillator indicator options.
+/// </summary>
+public sealed class RegressionOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RegressionOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Rex Oscillator indicator options.
+/// </summary>
+public sealed class RexOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RexOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Sentiment Zone Oscillator indicator options.
+/// </summary>
+public sealed class SentimentZoneOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public SentimentZoneOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Wave Trend Oscillator indicator options.
+/// </summary>
+public sealed class WaveTrendOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public WaveTrendOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// WAMI Oscillator indicator options.
+/// </summary>
+public sealed class WamiOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public WamiOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Accumulation Oscillator indicator options.
+/// </summary>
+public sealed class VolumeAccumulationOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeAccumulationOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kase Peak Oscillator V1 indicator options.
+/// </summary>
+public sealed class KasePeakOscillatorV1SpecOptions : IIndicatorSpecOptions
+{
+    public KasePeakOscillatorV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Varadi Oscillator indicator options.
+/// </summary>
+public sealed class VaradiOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VaradiOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Prime Number Oscillator indicator options.
+/// </summary>
+public sealed class PrimeNumberOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PrimeNumberOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trigonometric Oscillator indicator options.
+/// </summary>
+public sealed class TrigonometricOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public TrigonometricOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ultimate Trader Oscillator indicator options.
+/// </summary>
+public sealed class UltimateTraderOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public UltimateTraderOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Smoothed Delta Ratio Oscillator indicator options.
+/// </summary>
+public sealed class SmoothedDeltaRatioOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedDeltaRatioOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fast Slow Degree Oscillator indicator options.
+/// </summary>
+public sealed class FastSlowDegreeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FastSlowDegreeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Robust Weighting Oscillator indicator options.
+/// </summary>
+public sealed class RobustWeightingOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RobustWeightingOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kase Peak Oscillator V2 indicator options.
+/// </summary>
+public sealed class KasePeakOscillatorV2SpecOptions : IIndicatorSpecOptions
+{
+    public KasePeakOscillatorV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stochastic Custom Oscillator indicator options.
+/// </summary>
+public sealed class StochasticCustomOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticCustomOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Pivot Detector Oscillator indicator options.
+/// </summary>
+public sealed class PivotDetectorOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PivotDetectorOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Tick Line Momentum Oscillator indicator options.
+/// </summary>
+public sealed class TickLineMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public TickLineMomentumOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Support And Resistance Oscillator indicator options.
+/// </summary>
+public sealed class SupportAndResistanceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public SupportAndResistanceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trading Made More Simpler Oscillator indicator options.
+/// </summary>
+public sealed class TradingMadeMoreSimplerOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public TradingMadeMoreSimplerOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Nth Order Differencing Oscillator indicator options.
+/// </summary>
+public sealed class NthOrderDifferencingOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public NthOrderDifferencingOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Osc Oscillator indicator options.
+/// </summary>
+public sealed class OscOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public OscOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Center Of Gravity Oscillator indicator options.
+/// </summary>
+public sealed class EhlersCenterOfGravityOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCenterOfGravityOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Decycler Oscillator V1 indicator options.
+/// </summary>
+public sealed class EhlersDecyclerOscillatorV1SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDecyclerOscillatorV1SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Hilbert Oscillator indicator options.
+/// </summary>
+public sealed class EhlersHilbertOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHilbertOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Universal Oscillator indicator options.
+/// </summary>
+public sealed class EhlersUniversalOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersUniversalOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Recursive Median Oscillator indicator options.
+/// </summary>
+public sealed class EhlersRecursiveMedianOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersRecursiveMedianOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Stochastic Center Of Gravity Oscillator indicator options.
+/// </summary>
+public sealed class EhlersStochasticCenterOfGravityOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersStochasticCenterOfGravityOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Fisherized Deviation Scaled Oscillator indicator options.
+/// </summary>
+public sealed class EhlersFisherizedDeviationScaledOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersFisherizedDeviationScaledOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Adaptive Center Of Gravity Oscillator indicator options.
+/// </summary>
+public sealed class EhlersAdaptiveCenterOfGravityOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersAdaptiveCenterOfGravityOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vervoort Smoothed Oscillator indicator options.
+/// </summary>
+public sealed class VervoortSmoothedOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VervoortSmoothedOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Relative Difference Of Squares Oscillator indicator options.
+/// </summary>
+public sealed class RelativeDifferenceOfSquaresOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeDifferenceOfSquaresOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Quadratic Convergence Divergence Oscillator indicator options.
+/// </summary>
+public sealed class LinearQuadraticConvergenceDivergenceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public LinearQuadraticConvergenceDivergenceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stationary Extrapolated Levels Oscillator indicator options.
+/// </summary>
+public sealed class StationaryExtrapolatedLevelsOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StationaryExtrapolatedLevelsOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percentage Price Oscillator Leader indicator options.
+/// </summary>
+public sealed class PercentagePriceOscillatorLeaderSpecOptions : IIndicatorSpecOptions
+{
+    public PercentagePriceOscillatorLeaderSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kaufman Adaptive Correlation Oscillator indicator options.
+/// </summary>
+public sealed class KaufmanAdaptiveCorrelationOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public KaufmanAdaptiveCorrelationOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stochastic MACD Oscillator indicator options.
+/// </summary>
+public sealed class StochasticMacdOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticMacdOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// McClellan Oscillator indicator options.
+/// </summary>
+public sealed class McClellanOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public McClellanOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Decycler Oscillator V2 indicator options.
+/// </summary>
+public sealed class EhlersDecyclerOscillatorV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDecyclerOscillatorV2SpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vervoort Heiken Ashi Candlestick Oscillator indicator options.
+/// </summary>
+public sealed class VervoortHeikenAshiCandlestickOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VervoortHeikenAshiCandlestickOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vervoort Heiken Ashi Long Term Candlestick Oscillator indicator options.
+/// </summary>
+public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Decision Point Breadth Swenlin Trading Oscillator indicator options.
+/// </summary>
+public sealed class DecisionPointBreadthSwenlinTradingOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DecisionPointBreadthSwenlinTradingOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Decision Point Price Momentum Oscillator indicator options.
+/// </summary>
+public sealed class DecisionPointPriceMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DecisionPointPriceMomentumOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// TFS MBO Percentage Price Oscillator indicator options.
+/// </summary>
+public sealed class TFSMboPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public TFSMboPercentagePriceOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// TFS Volume Oscillator indicator options.
+/// </summary>
+public sealed class TFSVolumeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public TFSVolumeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Mass Thrust Oscillator indicator options.
+/// </summary>
+public sealed class MassThrustOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public MassThrustOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.

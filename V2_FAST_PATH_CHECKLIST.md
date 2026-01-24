@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**243 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**327 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **248** | 239 new + 9 original |
-| TryComputeFast Dispatch | **243** | 234 new routes wired |
+| SpecOptions Classes | **332** | 323 new + 9 original |
+| TryComputeFast Dispatch | **327** | 318 new routes wired |
 
 ### The Gap
 
 - **411 ComputeFast methods exist** but some still use `GenericIndicatorOptions`
-- **243 indicators** now route through `TryComputeFast`
-- **Missing**: ~168 specific `*SpecOptions` classes and corresponding dispatch cases
+- **327 indicators** now route through `TryComputeFast`
+- **Missing**: ~84 specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -358,6 +358,132 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] GannHiLoActivatorSpecOptions
 - [x] HalfTrendSpecOptions
 
+**Batch 6 - Chande oscillators:**
+- [x] ChandeMomentumOscillatorAbsoluteAverageSpecOptions
+- [x] ChandeMomentumOscillatorAverageSpecOptions
+- [x] ChandeMomentumOscillatorAverageDisparityIndexSpecOptions
+- [x] ChandeMomentumOscillatorFilterSpecOptions
+
+**Batch 6 - Stochastic variants:**
+- [x] DoubleStochasticOscillatorSpecOptions
+- [x] BilateralStochasticOscillatorSpecOptions
+- [x] FisherTransformStochasticOscillatorSpecOptions
+- [x] StochasticCustomOscillatorSpecOptions
+- [x] FastSlowStochasticOscillatorSpecOptions
+- [x] DiNapoliPreferredStochasticOscillatorSpecOptions
+- [x] DMIStochasticSpecOptions
+- [x] CCTStochRelativeStrengthIndexSpecOptions
+
+**Batch 6 - DT/Dynamic oscillators:**
+- [x] DTOscillatorSpecOptions
+- [x] DynamicMomentumOscillatorSpecOptions
+
+**Batch 6 - Price/Momentum oscillators:**
+- [x] ComparePriceMomentumOscillatorSpecOptions
+- [x] DailyAveragePriceDeltaSpecOptions
+- [x] PriceCycleOscillatorSpecOptions
+- [x] PriceVolumeOscillatorSpecOptions
+- [x] PercentChangeOscillatorSpecOptions
+- [x] DecisionPointPriceMomentumOscillatorSpecOptions
+
+**Batch 6 - Demand/Volume oscillators:**
+- [x] DemandOscillatorSpecOptions
+- [x] AverageMoneyFlowOscillatorSpecOptions
+- [x] VolumeAccumulationOscillatorSpecOptions
+- [x] TFSVolumeOscillatorSpecOptions
+
+**Batch 6 - RSI variants:**
+- [x] DoubleSmoothedRelativeStrengthIndexSpecOptions
+- [x] FastSlowRsiOscillatorSpecOptions
+
+**Batch 6 - DiNapoli/Ergodic/PPO oscillators:**
+- [x] DiNapoliPercentagePriceOscillatorSpecOptions
+- [x] ErgodicPercentagePriceOscillatorSpecOptions
+- [x] ImpulsePercentagePriceOscillatorSpecOptions
+- [x] MirroredPercentagePriceOscillatorSpecOptions
+- [x] PercentagePriceOscillatorLeaderSpecOptions
+- [x] TFSMboPercentagePriceOscillatorSpecOptions
+
+**Batch 6 - Kurtosis/Degree oscillators:**
+- [x] FastSlowKurtosisOscillatorSpecOptions
+- [x] FastSlowDegreeOscillatorSpecOptions
+
+**Batch 6 - Gann oscillators:**
+- [x] GOscillatorSpecOptions
+- [x] GannSwingOscillatorSpecOptions
+- [x] GannTrendOscillatorSpecOptions
+
+**Batch 6 - Special oscillators:**
+- [x] FireflyOscillatorSpecOptions
+- [x] KarobeinOscillatorSpecOptions
+- [x] GroverLlorensCycleOscillatorSpecOptions
+- [x] LindaRaschke310OscillatorSpecOptions
+- [x] MidpointOscillatorSpecOptions
+- [x] MobilityOscillatorSpecOptions
+
+**Batch 6 - Projection/Regression oscillators:**
+- [x] ProjectionOscillatorSpecOptions
+- [x] RainbowOscillatorSpecOptions
+- [x] RegressionOscillatorSpecOptions
+- [x] RexOscillatorSpecOptions
+
+**Batch 6 - Sentiment/Zone oscillators:**
+- [x] SentimentZoneOscillatorSpecOptions
+- [x] WaveTrendOscillatorSpecOptions
+- [x] WamiOscillatorSpecOptions
+
+**Batch 6 - Kase oscillators:**
+- [x] KasePeakOscillatorV1SpecOptions
+- [x] KasePeakOscillatorV2SpecOptions
+
+**Batch 6 - Mathematical oscillators:**
+- [x] VaradiOscillatorSpecOptions
+- [x] PrimeNumberOscillatorSpecOptions
+- [x] TrigonometricOscillatorSpecOptions
+- [x] UltimateTraderOscillatorSpecOptions
+- [x] SmoothedDeltaRatioOscillatorSpecOptions
+- [x] RobustWeightingOscillatorSpecOptions
+
+**Batch 6 - Detector/Pivot oscillators:**
+- [x] PivotDetectorOscillatorSpecOptions
+- [x] TickLineMomentumOscillatorSpecOptions
+- [x] SupportAndResistanceOscillatorSpecOptions
+- [x] TradingMadeMoreSimplerOscillatorSpecOptions
+- [x] NthOrderDifferencingOscillatorSpecOptions
+- [x] OscOscillatorSpecOptions
+
+**Batch 6 - Ehlers oscillators:**
+- [x] EhlersCenterOfGravityOscillatorSpecOptions
+- [x] EhlersDecyclerOscillatorV1SpecOptions
+- [x] EhlersDecyclerOscillatorV2SpecOptions
+- [x] EhlersHilbertOscillatorSpecOptions
+- [x] EhlersUniversalOscillatorSpecOptions
+- [x] EhlersRecursiveMedianOscillatorSpecOptions
+- [x] EhlersStochasticCenterOfGravityOscillatorSpecOptions
+- [x] EhlersFisherizedDeviationScaledOscillatorSpecOptions
+- [x] EhlersAdaptiveCenterOfGravityOscillatorSpecOptions
+
+**Batch 6 - Vervoort oscillators:**
+- [x] VervoortSmoothedOscillatorSpecOptions
+- [x] VervoortHeikenAshiCandlestickOscillatorSpecOptions
+- [x] VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions
+
+**Batch 6 - Convergence/Divergence oscillators:**
+- [x] RelativeDifferenceOfSquaresOscillatorSpecOptions
+- [x] LinearQuadraticConvergenceDivergenceOscillatorSpecOptions
+- [x] StationaryExtrapolatedLevelsOscillatorSpecOptions
+
+**Batch 6 - Kaufman/MACD oscillators:**
+- [x] KaufmanAdaptiveCorrelationOscillatorSpecOptions
+- [x] StochasticMacdOscillatorSpecOptions
+- [x] McClellanOscillatorSpecOptions
+
+**Batch 6 - Decision Point/Swenlin oscillators:**
+- [x] DecisionPointBreadthSwenlinTradingOscillatorSpecOptions
+
+**Batch 6 - Mass Thrust oscillator:**
+- [x] MassThrustOscillatorSpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -412,16 +538,16 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **248** |
-| TryComputeFast Routes | Wired | **243** |
-| **Effective Fast Path Coverage** | | **~31.4%** |
+| SpecOptions Classes | Implemented | **332** |
+| TryComputeFast Routes | Wired | **327** |
+| **Effective Fast Path Coverage** | | **~42.3%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 243 indicators**
-3. **Continue creating SpecOptions** for remaining ~168 indicators
-4. **Focus on categories with most ComputeFast methods**: Ehlers (~60 remaining), more oscillators (~100 remaining)
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 327 indicators**
+3. **Continue creating SpecOptions** for remaining ~84 indicators
+4. **Focus on categories with most ComputeFast methods**: More Ehlers filters, MAs, Ichimoku, Williams, Demark
 5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
 
 ## Notes
