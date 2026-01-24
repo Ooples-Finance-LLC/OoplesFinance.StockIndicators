@@ -5260,6 +5260,17 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Simple Lines filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimpleLinesFast(StockData data, ComputeContext context, int length = 10, double mult = 10)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.SimpleLines(close, buffer.WritableSpan, length, mult);
+        return buffer;
+    }
+
     #endregion
 
     #endregion

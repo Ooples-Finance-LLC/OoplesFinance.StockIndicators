@@ -8284,6 +8284,46 @@ internal static class OscillatorCore
     }
 
     /// <summary>
+    /// Computes Simple Lines filter.
+    /// Adaptive step-based smoothing filter.
+    /// </summary>
+    internal static void SimpleLines(ReadOnlySpan<double> close, Span<double> output, int length = 10, double mult = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var s = 0.01 * 100 * (1.0 / length);
+
+        // Initialize first value
+        output[0] = close[0];
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var prevA = output[i - 1];
+            var prevA2 = i >= 2 ? output[i - 2] : close[0];
+
+            // x = currentValue + ((prevA - prevA2) * mult)
+            var x = close[i] + ((prevA - prevA2) * mult);
+
+            // a = x > prevA + s ? prevA + s : x < prevA - s ? prevA - s : prevA
+            if (x > prevA + s)
+            {
+                output[i] = prevA + s;
+            }
+            else if (x < prevA - s)
+            {
+                output[i] = prevA - s;
+            }
+            else
+            {
+                output[i] = prevA;
+            }
+        }
+    }
+
+    /// <summary>
     /// Computes Simple Cycle oscillator.
     /// Uses EMA-smoothed difference with period-based momentum.
     /// </summary>
