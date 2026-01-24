@@ -801,6 +801,8 @@ internal static partial class IndicatorCompute
             EhlersReflexIndicatorSpecOptions eri => ComputeEhlersReflexIndicatorFast(data, context, eri.Length),
             EhlersTrendflexIndicatorSpecOptions eti => ComputeEhlersTrendflexIndicatorFast(data, context, eti.Length),
             JmaRsxCloneSpecOptions jrsx => ComputeJmaRsxCloneFast(data, context, jrsx.Length),
+            RateOfChangeSpecOptions roc => ComputeRateOfChangeFast(data, context, roc.Length),
+            WilliamsFractalsSpecOptions wf => ComputeWilliamsFractalsFast(data, context, wf.Length),
 
             _ => null
         };
@@ -8521,6 +8523,38 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.JmaRsxClone(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rate of Change using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRateOfChangeFast(StockData data, ComputeContext context, int length = 12)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RateOfChange(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Williams Fractals (Up Fractal) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWilliamsFractalsFast(StockData data, ComputeContext context, int length = 2)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        var downBuffer = context.Rent(data.Count);
+        try
+        {
+            OscillatorCore.WilliamsFractals(highSpan, lowSpan, buffer.WritableSpan, downBuffer.WritableSpan, length);
+        }
+        finally
+        {
+            downBuffer.Dispose();
+        }
         return buffer;
     }
 

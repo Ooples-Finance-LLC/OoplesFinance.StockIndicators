@@ -7620,3 +7620,27 @@ public sealed class JmaRsxCloneSpecOptions : IIndicatorSpecOptions
     }
     public int Length { get; }
 }
+
+/// <summary>
+/// Rate of Change options.
+/// </summary>
+public sealed class RateOfChangeSpecOptions : IIndicatorSpecOptions
+{
+    public RateOfChangeSpecOptions(int length = 12)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Williams Fractals options.
+/// </summary>
+public sealed class WilliamsFractalsSpecOptions : IIndicatorSpecOptions
+{
+    public WilliamsFractalsSpecOptions(int length = 2)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}
