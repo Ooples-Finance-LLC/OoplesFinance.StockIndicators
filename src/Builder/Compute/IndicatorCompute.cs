@@ -690,6 +690,23 @@ internal static partial class IndicatorCompute
             EhlersRecursiveMedianFilterSpecOptions ermf => ComputeEhlersRecursiveMedianFilterFast(data, context, ermf.Length, ermf.Alpha),
             EhlersRoofingFilterSpecOptions eroof => ComputeEhlersRoofingFilterFast(data, context, eroof.HpLength, eroof.LpLength),
 
+            // Batch 28
+            EhlersDeviationScaledSuperSmootherSpecOptions edsss => ComputeEhlersDeviationScaledSuperSmootherFast(data, context, edsss.Length, edsss.Poles),
+            PpoMaSpecOptions ppoma => ComputePpoMaFast(data, context, ppoma.FastLength, ppoma.SlowLength),
+            PriceOscillatorSpecOptions posc => ComputePriceOscillatorFast(data, context, posc.ShortLength, posc.LongLength),
+            ReverseEngineeringRsiSpecOptions rersi => ComputeReverseEngineeringRsiFast(data, context, rersi.Length, rersi.RsiLevel),
+            ReverseMovingAverageConvergenceDivergenceSpecOptions rmacd => ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel),
+            SimplePriceZoneSpecOptions spz => ComputeSimplePriceZoneFast(data, context, spz.Length),
+            StochasticRsiOscillatorSpecOptions srsio => ComputeStochasticRsiOscillatorFast(data, context, srsio.RsiLength, srsio.StochLength),
+            ElasticVolumeWeightedMovingAverageV2SpecOptions evwma2 => ComputeElasticVolumeWeightedMovingAverageV2Fast(data, context, evwma2.Length),
+            WindowedVolumeWeightedMovingAverageSpecOptions wvwma => ComputeWindowedVolumeWeightedMovingAverageFast(data, context, wvwma.Length),
+            AtrFilteredExponentialMovingAverageSpecOptions atrfema => ComputeAtrFilteredExponentialMovingAverageFast(data, context, atrfema.Length, atrfema.AtrLength, atrfema.StdDevLength, atrfema.LbLength, atrfema.Min),
+            TrueRangeAdjustedExponentialMovingAverageSpecOptions trema => ComputeTrueRangeAdjustedExponentialMovingAverageFast(data, context, trema.Length, trema.Mult),
+            RelativeVolatilityIndexHighSpecOptions rvih => ComputeRelativeVolatilityIndexHighFast(data, context, rvih.Length, rvih.StdDevLength),
+            RelativeVolatilityIndexLowSpecOptions rvil => ComputeRelativeVolatilityIndexLowFast(data, context, rvil.Length, rvil.StdDevLength),
+            TypicalPriceVolatilitySpecOptions tpv => ComputeTypicalPriceVolatilityFast(data, context, tpv.Length),
+            RatioOchlAveragerSpecOptions _ => ComputeRatioOchlAveragerFast(data, context),
+
             _ => null
         };
     }
@@ -7246,6 +7263,196 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 28 - Final Unwired Core Methods
+
+    /// <summary>
+    /// Computes Ehlers Deviation Scaled Super Smoother using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(StockData data, ComputeContext context, int length = 20, int poles = 2)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersDeviationScaledSuperSmoother(inputSpan, buffer.WritableSpan, length, poles);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes PPO MA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePpoMaFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.PpoMa(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceOscillatorFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PriceOscillator(inputSpan, buffer.WritableSpan, shortLength, longLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Reverse Engineering RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeReverseEngineeringRsiFast(StockData data, ComputeContext context, int length = 14, double rsiLevel = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ReverseEngineeringRsi(inputSpan, buffer.WritableSpan, length, rsiLevel);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Reverse Moving Average Convergence Divergence using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, double macdLevel = 0)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ReverseMovingAverageConvergenceDivergence(inputSpan, buffer.WritableSpan, fastLength, slowLength, macdLevel);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Simple Price Zone using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimplePriceZoneFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.SimplePriceZone(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stochastic RSI Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticRsiOscillatorFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.StochasticRsiOscillator(inputSpan, buffer.WritableSpan, rsiLength, stochLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Elastic Volume Weighted Moving Average V2 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV2Fast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ElasticVolumeWeightedMovingAverageV2(inputSpan, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Windowed Volume Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWindowedVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WindowedVolumeWeightedMovingAverage(inputSpan, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes ATR Filtered Exponential Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.AtrFilteredExponentialMovingAverage(inputSpan, high, low, buffer.WritableSpan, length, atrLength, stdDevLength, lbLength, min);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes True Range Adjusted Exponential Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrueRangeAdjustedExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double mult = 1.5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TrueRangeAdjustedExponentialMovingAverage(inputSpan, high, low, buffer.WritableSpan, length, mult);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Relative Volatility Index High using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRelativeVolatilityIndexHighFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.RelativeVolatilityIndexHigh(high, buffer.WritableSpan, length, stdDevLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Relative Volatility Index Low using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRelativeVolatilityIndexLowFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
+    {
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        VolatilityCore.RelativeVolatilityIndexLow(low, buffer.WritableSpan, length, stdDevLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Typical Price Volatility using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTypicalPriceVolatilityFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TypicalPriceVolatility(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ratio OCHL Averager using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRatioOchlAveragerFast(StockData data, ComputeContext context)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.RatioOchlAverager(open, close, high, low, buffer.WritableSpan);
         return buffer;
     }
 

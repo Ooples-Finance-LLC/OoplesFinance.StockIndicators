@@ -6582,6 +6582,156 @@ public sealed class EhlersRoofingFilterSpecOptions : IIndicatorSpecOptions
     public int LpLength { get; }
 }
 
+// === Batch 28 SpecOptions ===
+
+/// <summary>
+/// Ehlers Deviation Scaled Super Smoother indicator options.
+/// </summary>
+public sealed class EhlersDeviationScaledSuperSmootherSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDeviationScaledSuperSmootherSpecOptions(int length, int poles = 2) { Length = Math.Max(1, length); Poles = poles; }
+    public int Length { get; }
+    public int Poles { get; }
+}
+
+/// <summary>
+/// PPO MA indicator options.
+/// </summary>
+public sealed class PpoMaSpecOptions : IIndicatorSpecOptions
+{
+    public PpoMaSpecOptions(int fastLength, int slowLength = 26) { FastLength = Math.Max(1, fastLength); SlowLength = Math.Max(1, slowLength); }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Price Oscillator indicator options.
+/// </summary>
+public sealed class PriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PriceOscillatorSpecOptions(int shortLength, int longLength = 20) { ShortLength = Math.Max(1, shortLength); LongLength = Math.Max(1, longLength); }
+    public int ShortLength { get; }
+    public int LongLength { get; }
+}
+
+/// <summary>
+/// Reverse Engineering RSI indicator options.
+/// </summary>
+public sealed class ReverseEngineeringRsiSpecOptions : IIndicatorSpecOptions
+{
+    public ReverseEngineeringRsiSpecOptions(int length, double rsiLevel = 50) { Length = Math.Max(1, length); RsiLevel = rsiLevel; }
+    public int Length { get; }
+    public double RsiLevel { get; }
+}
+
+/// <summary>
+/// Reverse MACD indicator options.
+/// </summary>
+public sealed class ReverseMovingAverageConvergenceDivergenceSpecOptions : IIndicatorSpecOptions
+{
+    public ReverseMovingAverageConvergenceDivergenceSpecOptions(int fastLength, int slowLength = 26, double macdLevel = 0) { FastLength = Math.Max(1, fastLength); SlowLength = Math.Max(1, slowLength); MacdLevel = macdLevel; }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public double MacdLevel { get; }
+}
+
+/// <summary>
+/// Simple Price Zone indicator options.
+/// </summary>
+public sealed class SimplePriceZoneSpecOptions : IIndicatorSpecOptions
+{
+    public SimplePriceZoneSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stochastic RSI Oscillator indicator options.
+/// </summary>
+public sealed class StochasticRsiOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticRsiOscillatorSpecOptions(int rsiLength, int stochLength = 14) { RsiLength = Math.Max(1, rsiLength); StochLength = Math.Max(1, stochLength); }
+    public int RsiLength { get; }
+    public int StochLength { get; }
+}
+
+/// <summary>
+/// Elastic Volume Weighted Moving Average V2 indicator options.
+/// </summary>
+public sealed class ElasticVolumeWeightedMovingAverageV2SpecOptions : IIndicatorSpecOptions
+{
+    public ElasticVolumeWeightedMovingAverageV2SpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Windowed Volume Weighted Moving Average indicator options.
+/// </summary>
+public sealed class WindowedVolumeWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public WindowedVolumeWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// ATR Filtered Exponential Moving Average indicator options.
+/// </summary>
+public sealed class AtrFilteredExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public AtrFilteredExponentialMovingAverageSpecOptions(int length, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5) { Length = Math.Max(1, length); AtrLength = Math.Max(1, atrLength); StdDevLength = Math.Max(1, stdDevLength); LbLength = Math.Max(1, lbLength); Min = min; }
+    public int Length { get; }
+    public int AtrLength { get; }
+    public int StdDevLength { get; }
+    public int LbLength { get; }
+    public double Min { get; }
+}
+
+/// <summary>
+/// True Range Adjusted Exponential Moving Average indicator options.
+/// </summary>
+public sealed class TrueRangeAdjustedExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public TrueRangeAdjustedExponentialMovingAverageSpecOptions(int length, double mult = 1.5) { Length = Math.Max(1, length); Mult = mult; }
+    public int Length { get; }
+    public double Mult { get; }
+}
+
+/// <summary>
+/// Relative Volatility Index High indicator options.
+/// </summary>
+public sealed class RelativeVolatilityIndexHighSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVolatilityIndexHighSpecOptions(int length, int stdDevLength = 10) { Length = Math.Max(1, length); StdDevLength = Math.Max(1, stdDevLength); }
+    public int Length { get; }
+    public int StdDevLength { get; }
+}
+
+/// <summary>
+/// Relative Volatility Index Low indicator options.
+/// </summary>
+public sealed class RelativeVolatilityIndexLowSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVolatilityIndexLowSpecOptions(int length, int stdDevLength = 10) { Length = Math.Max(1, length); StdDevLength = Math.Max(1, stdDevLength); }
+    public int Length { get; }
+    public int StdDevLength { get; }
+}
+
+/// <summary>
+/// Typical Price Volatility indicator options.
+/// </summary>
+public sealed class TypicalPriceVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public TypicalPriceVolatilitySpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ratio OCHL Averager indicator options.
+/// </summary>
+public sealed class RatioOchlAveragerSpecOptions : IIndicatorSpecOptions
+{
+    public RatioOchlAveragerSpecOptions() { }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.
