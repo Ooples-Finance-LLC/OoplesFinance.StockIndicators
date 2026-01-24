@@ -7572,3 +7572,27 @@ public sealed class EhlersStochasticCyberCycleSpecOptions : IIndicatorSpecOption
     public int Length { get; }
     public double Alpha { get; }
 }
+
+/// <summary>
+/// Ehlers Center of Gravity Oscillator options.
+/// </summary>
+public sealed class EhlersCenterofGravityOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCenterofGravityOscillatorSpecOptions(int length = 10)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Reflex Indicator options.
+/// </summary>
+public sealed class EhlersReflexIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersReflexIndicatorSpecOptions(int length = 20)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}

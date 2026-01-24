@@ -797,6 +797,8 @@ internal static partial class IndicatorCompute
             EhlersSquelchIndicatorSpecOptions esqe => ComputeEhlersSquelchIndicatorFast(data, context, esqe.Length1, esqe.Length2, esqe.Length3),
             EhlersReverseEmaIndicatorV2SpecOptions eremav2 => ComputeEhlersReverseEmaIndicatorV2Fast(data, context, eremav2.TrendAlpha, eremav2.CycleAlpha),
             EhlersStochasticCyberCycleSpecOptions escc => ComputeEhlersStochasticCyberCycleFast(data, context, escc.Length, escc.Alpha),
+            EhlersCenterofGravityOscillatorSpecOptions ecog => ComputeEhlersCenterofGravityOscillatorFast(data, context, ecog.Length),
+            EhlersReflexIndicatorSpecOptions eri => ComputeEhlersReflexIndicatorFast(data, context, eri.Length),
 
             _ => null
         };
@@ -8469,6 +8471,30 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersStochasticCyberCycle(inputSpan, buffer.WritableSpan, length, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Center of Gravity Oscillator using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCenterofGravityOscillatorFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCenterofGravityOscillator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Reflex Indicator using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersReflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersReflexIndicator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
