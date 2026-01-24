@@ -785,6 +785,10 @@ internal static partial class IndicatorCompute
             EhlersBandPassFilterV2SpecOptions ebpfv2 => ComputeEhlersBandPassFilterV2Fast(data, context, ebpfv2.Length, ebpfv2.Bw),
             EhlersCycleBandPassFilterSpecOptions ecbpf => ComputeEhlersCycleBandPassFilterFast(data, context, ecbpf.Length, ecbpf.Delta),
             EhlersCycleAmplitudeSpecOptions eca => ComputeEhlersCycleAmplitudeFast(data, context, eca.Length, eca.Delta),
+            EhlersHpLpRoofingFilterSpecOptions ehplprf => ComputeEhlersHpLpRoofingFilterFast(data, context, ehplprf.Length1, ehplprf.Length2),
+            EhlersEarlyOnsetTrendIndicatorSpecOptions eeoti => ComputeEhlersEarlyOnsetTrendIndicatorFast(data, context, eeoti.Length1, eeoti.Length2, eeoti.K),
+            EhlersDetrendedLeadingIndicatorSpecOptions edli => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length),
+            EhlersClassicHilbertTransformerSpecOptions echt => ComputeEhlersClassicHilbertTransformerFast(data, context, echt.Length1, echt.Length2),
 
             _ => null
         };
@@ -8305,6 +8309,63 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersCycleAmplitude(inputSpan, buffer.WritableSpan, length, delta);
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers HP/LP Roofing Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersHpLpRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersHpLpRoofingFilter(inputSpan, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Early Onset Trend Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersEarlyOnsetTrendIndicatorFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 100, double k = 0.85)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersEarlyOnsetTrendIndicator(inputSpan, buffer.WritableSpan, length1, length2, k);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Detrended Leading Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.EhlersDetrendedLeadingIndicator(highSpan, lowSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Classic Hilbert Transformer using zero-allocation fast path.
+    /// Returns the real component (imaginary available via second buffer).
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var realBuffer = context.Rent(inputList.Count);
+        var imagBuffer = context.Rent(inputList.Count);
+        try
+        {
+            OscillatorCore.EhlersClassicHilbertTransformer(inputSpan, realBuffer.WritableSpan, imagBuffer.WritableSpan, length1, length2);
+        }
+        finally
+        {
+            imagBuffer.Dispose(); // Only return real component
+        }
+        return realBuffer;
     }
 
     #endregion

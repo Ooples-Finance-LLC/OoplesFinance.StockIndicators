@@ -11182,6 +11182,224 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers HP/LP Roofing Filter.
+    /// Combines high-pass and low-pass filtering.
+    /// </summary>
+    internal static void EhlersHpLpRoofingFilter(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        var sqrt2 = Math.Sqrt(2);
+        var a1 = Math.Exp(-sqrt2 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(sqrt2 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+                var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+                var prevHp = i >= 1 ? hp[i - 1] : 0;
+
+                var diff = currentValue - prevValue;
+                var minPastDiff = i >= 1 ? diff : 0;
+                hp[i] = ((1 - (alpha1 / 2)) * minPastDiff) + ((1 - alpha1) * prevHp);
+
+                output[i] = (c1 * ((hp[i] + prevHp) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Early Onset Trend Indicator.
+    /// Uses high-pass filter and super smoother.
+    /// </summary>
+    internal static void EhlersEarlyOnsetTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 30, int length2 = 100, double k = 0.85)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+        var ssfArray = pool.Rent(close.Length);
+        var peakArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            var ssf = ssfArray.AsSpan(0, close.Length);
+            var peak = peakArray.AsSpan(0, close.Length);
+
+            // Apply high-pass filter
+            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length2, 1);
+
+            // Apply super smoother to HP output
+            MovingAverageCore.Ehlers2PoleSuperSmootherFilterV2(hp, ssf, length1);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var filter = ssf[i];
+
+                var prevPeak = i >= 1 ? peak[i - 1] : 0;
+                peak[i] = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
+
+                var ratio = peak[i] != 0 ? filter / peak[i] : 0;
+                output[i] = (k * ratio) + 1 != 0 ? (ratio + k) / ((k * ratio) + 1) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(ssfArray);
+            pool.Return(peakArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Detrended Leading Indicator using high and low prices.
+    /// </summary>
+    internal static void EhlersDetrendedLeadingIndicator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
+        var alpha2 = alpha / 2;
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1Array = pool.Rent(high.Length);
+        var ema2Array = pool.Rent(high.Length);
+        var dspArray = pool.Rent(high.Length);
+        var tempArray = pool.Rent(high.Length);
+
+        try
+        {
+            var ema1 = ema1Array.AsSpan(0, high.Length);
+            var ema2 = ema2Array.AsSpan(0, high.Length);
+            var dsp = dspArray.AsSpan(0, high.Length);
+            var temp = tempArray.AsSpan(0, high.Length);
+
+            for (var i = 0; i < high.Length; i++)
+            {
+                var prevHigh = i >= 1 ? high[i - 1] : 0;
+                var prevLow = i >= 1 ? low[i - 1] : 0;
+                var currentHigh = Math.Max(prevHigh, high[i]);
+                var currentLow = Math.Min(prevLow, low[i]);
+                var currentPrice = (currentHigh + currentLow) / 2;
+
+                var prevEma1 = i >= 1 ? ema1[i - 1] : currentPrice;
+                var prevEma2 = i >= 1 ? ema2[i - 1] : currentPrice;
+
+                ema1[i] = (alpha * currentPrice) + ((1 - alpha) * prevEma1);
+                ema2[i] = (alpha2 * currentPrice) + ((1 - alpha2) * prevEma2);
+
+                dsp[i] = ema1[i] - ema2[i];
+
+                var prevTemp = i >= 1 ? temp[i - 1] : 0;
+                temp[i] = (alpha * dsp[i]) + ((1 - alpha) * prevTemp);
+
+                output[i] = dsp[i] - temp[i];
+            }
+        }
+        finally
+        {
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
+            pool.Return(dspArray);
+            pool.Return(tempArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Classic Hilbert Transformer.
+    /// </summary>
+    internal static void EhlersClassicHilbertTransformer(ReadOnlySpan<double> close, Span<double> real, Span<double> imag, int length1 = 48, int length2 = 10)
+    {
+        if (real.Length < close.Length || imag.Length < close.Length)
+        {
+            throw new ArgumentException("Output spans must be at least input length.");
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var rfArray = pool.Rent(close.Length);
+        var peakArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rf = rfArray.AsSpan(0, close.Length);
+            var peak = peakArray.AsSpan(0, close.Length);
+
+            // Apply roofing filter
+            MovingAverageCore.EhlersRoofingFilter(close, rf, length2, length1);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var roofingFilter = rf[i];
+
+                var prevPeak = i >= 1 ? peak[i - 1] : 0;
+                peak[i] = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
+
+                real[i] = peak[i] != 0 ? roofingFilter / peak[i] : 0;
+
+                // Hilbert Transform coefficients
+                var prevReal2 = i >= 2 ? real[i - 2] : 0;
+                var prevReal4 = i >= 4 ? real[i - 4] : 0;
+                var prevReal6 = i >= 6 ? real[i - 6] : 0;
+                var prevReal8 = i >= 8 ? real[i - 8] : 0;
+                var prevReal10 = i >= 10 ? real[i - 10] : 0;
+                var prevReal12 = i >= 12 ? real[i - 12] : 0;
+                var prevReal14 = i >= 14 ? real[i - 14] : 0;
+                var prevReal16 = i >= 16 ? real[i - 16] : 0;
+                var prevReal18 = i >= 18 ? real[i - 18] : 0;
+                var prevReal20 = i >= 20 ? real[i - 20] : 0;
+                var prevReal22 = i >= 22 ? real[i - 22] : 0;
+
+                imag[i] = ((0.091 * real[i]) + (0.111 * prevReal2) + (0.143 * prevReal4) + (0.2 * prevReal6) + (0.333 * prevReal8) + prevReal10 -
+                           prevReal12 - (0.333 * prevReal14) - (0.2 * prevReal16) - (0.143 * prevReal18) - (0.111 * prevReal20) - (0.091 * prevReal22)) / 1.865;
+            }
+        }
+        finally
+        {
+            pool.Return(rfArray);
+            pool.Return(peakArray);
+        }
+    }
+
     #endregion
 
     #endregion

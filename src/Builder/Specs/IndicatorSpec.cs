@@ -7398,3 +7398,59 @@ public sealed class EhlersCycleAmplitudeSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
     public double Delta { get; }
 }
+
+/// <summary>
+/// Ehlers HP/LP Roofing Filter options.
+/// </summary>
+public sealed class EhlersHpLpRoofingFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersHpLpRoofingFilterSpecOptions(int length1 = 48, int length2 = 10)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Ehlers Early Onset Trend Indicator options.
+/// </summary>
+public sealed class EhlersEarlyOnsetTrendIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersEarlyOnsetTrendIndicatorSpecOptions(int length1 = 30, int length2 = 100, double k = 0.85)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        K = k;
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double K { get; }
+}
+
+/// <summary>
+/// Ehlers Detrended Leading Indicator options.
+/// </summary>
+public sealed class EhlersDetrendedLeadingIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDetrendedLeadingIndicatorSpecOptions(int length = 14)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Classic Hilbert Transformer options.
+/// </summary>
+public sealed class EhlersClassicHilbertTransformerSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersClassicHilbertTransformerSpecOptions(int length1 = 48, int length2 = 10)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
