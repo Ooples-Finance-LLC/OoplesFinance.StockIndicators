@@ -431,7 +431,12 @@ public static class CalculationsHelper
             or MovingAvgType.EhlersNoiseEliminationTechnology or MovingAvgType.BryantAdaptiveMovingAverage
             or MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage or MovingAvgType.EhlersVariableIndexDynamicAverage
             or MovingAvgType.EhlersKaufmanAdaptiveMovingAverage or MovingAvgType.EhlersMesaAdaptiveMovingAverage
-            or MovingAvgType.AdaptiveMovingAverage or MovingAvgType.EhlersLaguerreFilter)
+            or MovingAvgType.AdaptiveMovingAverage or MovingAvgType.EhlersLaguerreFilter
+            // Phase 3 fast path types (7 additional Core methods for remaining single-input types)
+            or MovingAvgType.ReverseEngineeringRelativeStrengthIndex or MovingAvgType.ReverseMovingAverageConvergenceDivergence
+            or MovingAvgType.OptimalWeightedMovingAverage or MovingAvgType.LightLeastSquaresMovingAverage
+            or MovingAvgType.FisherLeastSquaresMovingAverage or MovingAvgType.OvershootReductionMovingAverage
+            or MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage)
         {
             var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
             var count = inputList.Count;
@@ -874,6 +879,28 @@ public static class CalculationsHelper
                     break;
                 case MovingAvgType.EhlersLaguerreFilter:
                     MovingAverageCore.EhlersLaguerreFilter(inputSpan, outputSpan);
+                    break;
+                // Phase 3: Remaining single-input complex types
+                case MovingAvgType.ReverseEngineeringRelativeStrengthIndex:
+                    MovingAverageCore.ReverseEngineeringRsi(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ReverseMovingAverageConvergenceDivergence:
+                    MovingAverageCore.ReverseMovingAverageConvergenceDivergence(inputSpan, outputSpan, fastLength ?? 12, slowLength ?? 26);
+                    break;
+                case MovingAvgType.OptimalWeightedMovingAverage:
+                    MovingAverageCore.OptimalWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LightLeastSquaresMovingAverage:
+                    MovingAverageCore.LightLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FisherLeastSquaresMovingAverage:
+                    MovingAverageCore.FisherLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.OvershootReductionMovingAverage:
+                    MovingAverageCore.OvershootReductionMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage:
+                    MovingAverageCore.KaufmanAdaptiveLeastSquaresMovingAverage(inputSpan, outputSpan, length);
                     break;
             }
 

@@ -5989,4 +5989,574 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Remaining MovingAvgType Fast Path Methods
+
+    /// <summary>
+    /// Computes Reverse Engineering RSI - calculates the price needed to reach a specific RSI level.
+    /// </summary>
+    internal static void ReverseEngineeringRsi(ReadOnlySpan<double> input, Span<double> output, int length = 14, double rsiLevel = 50)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        double expPeriod = (2 * length) - 1;
+        var k = 2 / (expPeriod + 1);
+        double prevAuc = 1;
+        double prevAdc = 1;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var change = currentValue - prevValue;
+
+            double auc, adc;
+            if (currentValue > prevValue)
+            {
+                var gain = i >= 1 ? change : 0;
+                auc = (k * gain) + ((1 - k) * prevAuc);
+                adc = (1 - k) * prevAdc;
+            }
+            else
+            {
+                var loss = i >= 1 ? Math.Abs(change) : 0;
+                auc = (1 - k) * prevAuc;
+                adc = (k * loss) + ((1 - k) * prevAdc);
+            }
+
+            var rsiValue = (length - 1) * ((adc * rsiLevel / (100 - rsiLevel)) - auc);
+            var revRsi = rsiValue >= 0 ? currentValue + rsiValue : currentValue + (rsiValue * (100 - rsiLevel) / rsiLevel);
+            output[i] = revRsi;
+
+            prevAuc = auc;
+            prevAdc = adc;
+        }
+    }
+
+    /// <summary>
+    /// Computes Reverse MACD - calculates the price needed to reach a specific MACD level.
+    /// </summary>
+    internal static void ReverseMovingAverageConvergenceDivergence(ReadOnlySpan<double> input, Span<double> output, int fastLength = 12, int slowLength = 26, double macdLevel = 0)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var fastAlpha = 2.0 / (1 + fastLength);
+        var slowAlpha = 2.0 / (1 + slowLength);
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(input.Length);
+        var slowEmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, input.Length);
+            var slowEma = slowEmaArray.AsSpan(0, input.Length);
+
+            ExponentialMovingAverage(input, fastEma, fastLength);
+            ExponentialMovingAverage(input, slowEma, slowLength);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var prevFastEma = i >= 1 ? fastEma[i - 1] : 0;
+                var prevSlowEma = i >= 1 ? slowEma[i - 1] : 0;
+
+                var pMacdEq = fastAlpha - slowAlpha != 0
+                    ? ((prevFastEma * fastAlpha) - (prevSlowEma * slowAlpha)) / (fastAlpha - slowAlpha)
+                    : 0;
+                output[i] = pMacdEq;
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Optimal Weighted Moving Average.
+    /// </summary>
+    internal static void OptimalWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        // Rolling correlation state
+        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+        var corrWindow = new double[length * 2]; // Store x,y pairs
+        var corrIndex = 0;
+        var corrCount = 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevOwma = i >= 1 ? output[i - 1] : 0;
+
+            // Update rolling correlation (input vs prevOwma)
+            var oldIdx = corrIndex;
+            if (corrCount >= length)
+            {
+                // Remove oldest values
+                var oldX = corrWindow[oldIdx * 2];
+                var oldY = corrWindow[oldIdx * 2 + 1];
+                sumX -= oldX;
+                sumY -= oldY;
+                sumXY -= oldX * oldY;
+                sumX2 -= oldX * oldX;
+                sumY2 -= oldY * oldY;
+            }
+
+            // Add new values
+            corrWindow[corrIndex * 2] = currentValue;
+            corrWindow[corrIndex * 2 + 1] = prevOwma;
+            sumX += currentValue;
+            sumY += prevOwma;
+            sumXY += currentValue * prevOwma;
+            sumX2 += currentValue * currentValue;
+            sumY2 += prevOwma * prevOwma;
+
+            corrIndex = (corrIndex + 1) % length;
+            if (corrCount < length) corrCount++;
+
+            // Calculate correlation
+            var n = corrCount;
+            var numerator = (n * sumXY) - (sumX * sumY);
+            var denomX = (n * sumX2) - (sumX * sumX);
+            var denomY = (n * sumY2) - (sumY * sumY);
+            var denominator = Math.Sqrt(denomX * denomY);
+            var corr = denominator != 0 ? numerator / denominator : 0;
+            if (double.IsNaN(corr) || double.IsInfinity(corr)) corr = 0;
+
+            // Calculate weighted sum
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j <= length - 1 && i >= j; j++)
+            {
+                var weight = Math.Pow(length - j, corr);
+                var prevValue = input[i - j];
+                sum += prevValue * weight;
+                weightedSum += weight;
+            }
+
+            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Light Least Squares Moving Average.
+    /// Uses SMA, half-length SMA, and standard deviations of both input and index.
+    /// </summary>
+    internal static void LightLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 250)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var length1 = Math.Max(1, (int)Math.Ceiling((double)length / 2));
+
+        var pool = ArrayPool<double>.Shared;
+        var sma1Array = pool.Rent(input.Length);
+        var sma2Array = pool.Rent(input.Length);
+        var indexArray = pool.Rent(input.Length);
+        var indexSmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var sma1 = sma1Array.AsSpan(0, input.Length);
+            var sma2 = sma2Array.AsSpan(0, input.Length);
+            var indexSpan = indexArray.AsSpan(0, input.Length);
+            var indexSma = indexSmaArray.AsSpan(0, input.Length);
+
+            // Create index array
+            for (var i = 0; i < input.Length; i++)
+                indexSpan[i] = i;
+
+            // Calculate SMAs
+            SimpleMovingAverage(input, sma1, length);
+            SimpleMovingAverage(input, sma2, length1);
+            SimpleMovingAverage(indexSpan, indexSma, length);
+
+            // Calculate standard deviations manually for each point
+            for (var i = 0; i < input.Length; i++)
+            {
+                var n = Math.Min(i + 1, length);
+
+                // StdDev of input
+                double inputSum = 0, inputSum2 = 0;
+                for (var j = 0; j < n; j++)
+                {
+                    var val = input[i - j];
+                    inputSum += val;
+                    inputSum2 += val * val;
+                }
+                var inputMean = inputSum / n;
+                var inputVariance = (inputSum2 / n) - (inputMean * inputMean);
+                var stdDev = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
+
+                // StdDev of index
+                double indexSum = 0, indexSum2 = 0;
+                for (var j = 0; j < n; j++)
+                {
+                    var val = (double)(i - j);
+                    indexSum += val;
+                    indexSum2 += val * val;
+                }
+                var indexMean = indexSum / n;
+                var indexVariance = (indexSum2 / n) - (indexMean * indexMean);
+                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
+
+                var c = stdDev != 0 ? (sma2[i] - sma1[i]) / stdDev : 0;
+                var z = indexStdDev != 0 && c != 0 ? (i - indexSma[i]) / indexStdDev * c : 0;
+
+                output[i] = sma1[i] + (z * stdDev);
+            }
+        }
+        finally
+        {
+            pool.Return(sma1Array);
+            pool.Return(sma2Array);
+            pool.Return(indexArray);
+            pool.Return(indexSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Fisher Least Squares Moving Average.
+    /// </summary>
+    internal static void FisherLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 100)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(input.Length);
+        var indexArray = pool.Rent(input.Length);
+        var indexSmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, input.Length);
+            var indexSpan = indexArray.AsSpan(0, input.Length);
+            var indexSma = indexSmaArray.AsSpan(0, input.Length);
+
+            // Create index array
+            for (var i = 0; i < input.Length; i++)
+                indexSpan[i] = i;
+
+            // Calculate SMAs
+            SimpleMovingAverage(input, sma, length);
+            SimpleMovingAverage(indexSpan, indexSma, length);
+
+            double prevB = input.Length > 0 ? input[0] : 0;
+            double diffSum = 0, absDiffSum = 0;
+            var diffWindow = new double[length];
+            var absDiffWindow = new double[length];
+            var windowIdx = 0;
+            var windowCount = 0;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var diff = currentValue - prevB;
+                var absDiff = Math.Abs(diff);
+
+                // Update rolling sums
+                if (windowCount >= length)
+                {
+                    diffSum -= diffWindow[windowIdx];
+                    absDiffSum -= absDiffWindow[windowIdx];
+                }
+                diffWindow[windowIdx] = diff;
+                absDiffWindow[windowIdx] = absDiff;
+                diffSum += diff;
+                absDiffSum += absDiff;
+                windowIdx = (windowIdx + 1) % length;
+                if (windowCount < length) windowCount++;
+
+                var n = Math.Min(i + 1, length);
+
+                // StdDev of input
+                double inputSum = 0, inputSum2 = 0;
+                for (var j = 0; j < n; j++)
+                {
+                    var val = input[i - j];
+                    inputSum += val;
+                    inputSum2 += val * val;
+                }
+                var inputMean = inputSum / n;
+                var inputVariance = (inputSum2 / n) - (inputMean * inputMean);
+                var stdDevSrc = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
+
+                // StdDev of index
+                double indexSum = 0, indexSum2 = 0;
+                for (var j = 0; j < n; j++)
+                {
+                    var val = (double)(i - j);
+                    indexSum += val;
+                    indexSum2 += val * val;
+                }
+                var indexMeanVal = indexSum / n;
+                var indexVariance = (indexSum2 / n) - (indexMeanVal * indexMeanVal);
+                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
+
+                var e = absDiffSum / windowCount;
+                var z = e != 0 ? (diffSum / windowCount) / e : 0;
+                var expVal = Math.Exp(2 * z);
+                var r = expVal + 1 != 0 ? (expVal - 1) / (expVal + 1) : 0;
+                var a = indexStdDev != 0 && r != 0 ? (i - indexSma[i]) / indexStdDev * r : 0;
+
+                var b = sma[i] + (a * stdDevSrc);
+                output[i] = b;
+                prevB = b;
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+            pool.Return(indexArray);
+            pool.Return(indexSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Overshoot Reduction Moving Average.
+    /// </summary>
+    internal static void OvershootReductionMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var length1 = (int)Math.Ceiling((double)length / 2);
+
+        var pool = ArrayPool<double>.Shared;
+        var smaArray = pool.Rent(input.Length);
+        var indexArray = pool.Rent(input.Length);
+        var indexSmaArray = pool.Rent(input.Length);
+        var bSmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var sma = smaArray.AsSpan(0, input.Length);
+            var indexSpan = indexArray.AsSpan(0, input.Length);
+            var indexSma = indexSmaArray.AsSpan(0, input.Length);
+            var bSma = bSmaArray.AsSpan(0, input.Length);
+
+            // Create index array
+            for (var i = 0; i < input.Length; i++)
+                indexSpan[i] = i;
+
+            // Calculate SMAs
+            SimpleMovingAverage(input, sma, length);
+            SimpleMovingAverage(indexSpan, indexSma, length);
+
+            // Rolling correlation state
+            double corrSumX = 0, corrSumY = 0, corrSumXY = 0, corrSumX2 = 0, corrSumY2 = 0;
+            var corrWindowX = new double[length];
+            var corrWindowY = new double[length];
+            var corrIdx = 0;
+            var corrCount = 0;
+
+            // Rolling sum for b
+            double bSum = 0;
+            var bWindow = new double[length1];
+            var bIdx = 0;
+            var bCount = 0;
+
+            // Max tracking for bSma
+            var bSmaMax = new double[length];
+            var bSmaIdx = 0;
+            var bSmaCount = 0;
+
+            double prevD = input.Length > 0 ? input[0] : 0;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var index = (double)i;
+
+                // Update rolling correlation (index vs input)
+                if (corrCount >= length)
+                {
+                    corrSumX -= corrWindowX[corrIdx];
+                    corrSumY -= corrWindowY[corrIdx];
+                    corrSumXY -= corrWindowX[corrIdx] * corrWindowY[corrIdx];
+                    corrSumX2 -= corrWindowX[corrIdx] * corrWindowX[corrIdx];
+                    corrSumY2 -= corrWindowY[corrIdx] * corrWindowY[corrIdx];
+                }
+                corrWindowX[corrIdx] = index;
+                corrWindowY[corrIdx] = currentValue;
+                corrSumX += index;
+                corrSumY += currentValue;
+                corrSumXY += index * currentValue;
+                corrSumX2 += index * index;
+                corrSumY2 += currentValue * currentValue;
+                corrIdx = (corrIdx + 1) % length;
+                if (corrCount < length) corrCount++;
+
+                // Calculate correlation
+                var n = corrCount;
+                var numerator = (n * corrSumXY) - (corrSumX * corrSumY);
+                var denomX = (n * corrSumX2) - (corrSumX * corrSumX);
+                var denomY = (n * corrSumY2) - (corrSumY * corrSumY);
+                var denominator = Math.Sqrt(denomX * denomY);
+                var corr = denominator != 0 ? numerator / denominator : 0;
+                if (double.IsNaN(corr) || double.IsInfinity(corr)) corr = 0;
+
+                // StdDev of input
+                var nStd = Math.Min(i + 1, length);
+                double inputSum = 0, inputSum2 = 0;
+                for (var j = 0; j < nStd; j++)
+                {
+                    var val = input[i - j];
+                    inputSum += val;
+                    inputSum2 += val * val;
+                }
+                var inputMean = inputSum / nStd;
+                var inputVariance = (inputSum2 / nStd) - (inputMean * inputMean);
+                var stdDev = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
+
+                // StdDev of index
+                double indexSum = 0, indexSum2 = 0;
+                for (var j = 0; j < nStd; j++)
+                {
+                    var val = (double)(i - j);
+                    indexSum += val;
+                    indexSum2 += val * val;
+                }
+                var indexMeanVal = indexSum / nStd;
+                var indexVariance = (indexSum2 / nStd) - (indexMeanVal * indexMeanVal);
+                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
+
+                var a = indexStdDev != 0 && corr != 0 ? (index - indexSma[i]) / indexStdDev * corr : 0;
+
+                var b = Math.Abs(prevD - currentValue);
+
+                // Update b rolling sum
+                if (bCount >= length1)
+                {
+                    bSum -= bWindow[bIdx];
+                }
+                bWindow[bIdx] = b;
+                bSum += b;
+                bIdx = (bIdx + 1) % length1;
+                if (bCount < length1) bCount++;
+
+                var bSmaVal = bSum / bCount;
+                bSma[i] = bSmaVal;
+
+                // Track max of bSma over length window
+                if (bSmaCount >= length)
+                {
+                    // Need to recalculate max if we removed the max
+                    bSmaMax[bSmaIdx] = bSmaVal;
+                }
+                else
+                {
+                    bSmaMax[bSmaCount] = bSmaVal;
+                }
+                bSmaIdx = (bSmaIdx + 1) % length;
+                if (bSmaCount < length) bSmaCount++;
+
+                var highest = double.MinValue;
+                for (var j = 0; j < bSmaCount; j++)
+                {
+                    if (bSmaMax[j] > highest) highest = bSmaMax[j];
+                }
+
+                var c = highest > 0 ? b / highest : 0;
+                var d = sma[i] + (a * (stdDev * c));
+                output[i] = d;
+                prevD = d != 0 ? d : currentValue;
+            }
+        }
+        finally
+        {
+            pool.Return(smaArray);
+            pool.Return(indexArray);
+            pool.Return(indexSmaArray);
+            pool.Return(bSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Kaufman Adaptive Least Squares Moving Average.
+    /// Combines KAMA efficiency ratio with LSMA regression.
+    /// </summary>
+    internal static void KaufmanAdaptiveLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 100)
+    {
+        if (output.Length < input.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var kamaArray = pool.Rent(input.Length);
+        var smaArray = pool.Rent(input.Length);
+        var indexArray = pool.Rent(input.Length);
+        var kamaSmaArray = pool.Rent(input.Length);
+
+        try
+        {
+            var kama = kamaArray.AsSpan(0, input.Length);
+            var sma = smaArray.AsSpan(0, input.Length);
+            var indexSpan = indexArray.AsSpan(0, input.Length);
+            var kamaSma = kamaSmaArray.AsSpan(0, input.Length);
+
+            // Create index array
+            for (var i = 0; i < input.Length; i++)
+                indexSpan[i] = i;
+
+            // Calculate KAMA and SMA
+            KaufmanAdaptiveMovingAverage(input, kama, length);
+            SimpleMovingAverage(input, sma, length);
+            SimpleMovingAverage(indexSpan, kamaSma, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var n = Math.Min(i + 1, length);
+
+                // Calculate KACO-like statistics (correlation between input and index, weighted by KAMA)
+                double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+                for (var j = 0; j < n; j++)
+                {
+                    var x = (double)(i - j);
+                    var y = input[i - j];
+                    sumX += x;
+                    sumY += y;
+                    sumXY += x * y;
+                    sumX2 += x * x;
+                    sumY2 += y * y;
+                }
+
+                // Correlation
+                var numerator = (n * sumXY) - (sumX * sumY);
+                var denomX = (n * sumX2) - (sumX * sumX);
+                var denomY = (n * sumY2) - (sumY * sumY);
+                var denominator = Math.Sqrt(denomX * denomY);
+                var r = denominator != 0 ? numerator / denominator : 0;
+                if (double.IsNaN(r) || double.IsInfinity(r)) r = 0;
+
+                // StdDev calculations
+                var inputMean = sumY / n;
+                var inputVariance = (sumY2 / n) - (inputMean * inputMean);
+                var srcSt = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
+
+                var indexMean = sumX / n;
+                var indexVariance = (sumX2 / n) - (indexMean * indexMean);
+                var indexSt = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
+
+                var alpha = indexSt != 0 ? srcSt / indexSt * r : 0;
+                var beta = sma[i] - (alpha * kamaSma[i]);
+
+                output[i] = (alpha * i) + beta;
+            }
+        }
+        finally
+        {
+            pool.Return(kamaArray);
+            pool.Return(smaArray);
+            pool.Return(indexArray);
+            pool.Return(kamaSmaArray);
+        }
+    }
+
+    #endregion
 }
