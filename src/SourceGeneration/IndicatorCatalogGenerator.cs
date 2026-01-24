@@ -84,6 +84,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "DetrendedPriceOscillator",
         "Trix",
         "MassIndex",
+        "MovingAverageConvergenceDivergence",
 
         // Volume - VolumeCore
         "OnBalanceVolume",
