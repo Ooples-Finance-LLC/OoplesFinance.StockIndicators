@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**62 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**103 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **66** | 57 new + 9 original |
-| TryComputeFast Dispatch | **62** | 53 new routes wired |
+| SpecOptions Classes | **113** | 104 new + 9 original |
+| TryComputeFast Dispatch | **103** | 94 new routes wired |
 
 ### The Gap
 
 - **411 ComputeFast methods exist** but many still use `GenericIndicatorOptions`
-- **62 indicators** now route through `TryComputeFast`
-- **Missing**: ~340+ specific `*SpecOptions` classes and corresponding dispatch cases
+- **103 indicators** now route through `TryComputeFast`
+- **Missing**: ~300+ specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -107,6 +107,70 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] PercentRankSpecOptions
 - [x] ChoppinessIndexSpecOptions
 
+**Moving Averages (Batch 3):**
+- [x] SmmaSpecOptions (Smoothed MA)
+- [x] McGinleyDynamicSpecOptions
+- [x] T3SpecOptions
+- [x] VidyaSpecOptions (Variable Index Dynamic Average)
+- [x] VmaSpecOptions (Variable MA)
+- [x] AlmaSpecOptions (Arnaud Legoux MA)
+- [x] LsmaSpecOptions (Least Squares MA)
+- [x] FramaSpecOptions (Fractal Adaptive MA)
+- [x] AmaSpecOptions (Adaptive MA)
+- [x] JmaSpecOptions (Jurik MA)
+- [x] SuperSmootherSpecOptions
+- [x] ButterworthFilterSpecOptions
+
+**MACD Variants (Batch 3):**
+- [x] MacdLineSpecOptions
+- [x] MacdSignalSpecOptions
+- [x] MacdHistogramSpecOptions
+
+**Trend Indicators (Batch 3):**
+- [x] ParabolicSarSpecOptions
+- [x] SuperTrendSpecOptions
+- [x] ChandelierExitLongSpecOptions
+- [x] ChandelierExitShortSpecOptions
+
+**Volume/Power Indicators (Batch 3):**
+- [x] BalanceOfPowerSpecOptions
+- [x] RviSpecOptions (Relative Vigor Index) - SpecOptions only, no ComputeFast
+- [x] PvoSpecOptions (Percentage Volume Oscillator)
+
+**More Oscillators (Batch 3):**
+- [x] CoppockCurveSpecOptions
+- [x] ChandeForecastOscillatorSpecOptions
+- [x] BullPowerSpecOptions
+- [x] BearPowerSpecOptions
+- [x] PfeSpecOptions (Polarized Fractal Efficiency) - SpecOptions only, no ComputeFast
+- [x] StcSpecOptions (Schaff Trend Cycle) - SpecOptions only, no ComputeFast
+- [x] PzoSpecOptions (Price Zone Oscillator) - SpecOptions only, no ComputeFast
+- [x] ElderForceIndexSpecOptions
+- [x] PgoSpecOptions (Pretty Good Oscillator) - SpecOptions only, no ComputeFast
+- [x] RelativeVolatilityIndexSpecOptions
+- [x] QstickSpecOptions
+- [x] SpecialKSpecOptions
+
+**Vortex and Trend Indicators (Batch 3):**
+- [x] VortexPositiveSpecOptions
+- [x] VortexNegativeSpecOptions
+- [x] TrendIntensityIndexSpecOptions
+- [x] AbsoluteStrengthIndexSpecOptions
+- [x] RelativeMomentumIndexSpecOptions
+- [x] IntradayMomentumIndexSpecOptions
+
+**Volume Weighted MAs (Batch 3):**
+- [x] VwmaSpecOptions (Volume Weighted MA)
+- [x] VwapSpecOptions (Volume Weighted Average Price)
+
+**Complex Oscillators (Batch 3):**
+- [x] ElliottWaveOscillatorSpecOptions
+- [x] GatorOscillatorSpecOptions
+
+**Ichimoku (Batch 3):**
+- [x] IchimokuTenkanSenSpecOptions
+- [x] IchimokuKijunSenSpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -151,7 +215,7 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 ## Testing
 
 - Streaming parity tests verify Core methods match Calculate methods
-- All 708 current tests pass
+- All 707 current tests pass
 - Each new SpecOptions type should have corresponding tests
 
 ## Progress Summary
@@ -161,17 +225,18 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **66** |
-| TryComputeFast Routes | Wired | **62** |
-| **Effective Fast Path Coverage** | | **~8.0%** |
+| SpecOptions Classes | Implemented | **113** |
+| TryComputeFast Routes | Wired | **103** |
+| **Effective Fast Path Coverage** | | **~13.3%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 62 indicators**
-3. **Continue creating SpecOptions** for remaining ~340 indicators
-4. **Focus on categories with most ComputeFast methods**: Oscillators (~70 remaining), Ehlers (~60), MovingAverages (~40 remaining)
-5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 103 indicators**
+3. **Continue creating SpecOptions** for remaining ~300 indicators
+4. **Create ComputeFast methods** for SpecOptions that exist but lack ComputeFast (Pfe, Stc, Pzo, Pgo, Rvi)
+5. **Focus on categories with most ComputeFast methods**: Oscillators (~60 remaining), Ehlers (~60), MovingAverages (~30 remaining)
+6. **Consider source generation** to auto-create SpecOptions from Calculate signatures
 
 ## Notes
 

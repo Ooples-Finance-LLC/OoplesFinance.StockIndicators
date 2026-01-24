@@ -108,6 +108,65 @@ internal static partial class IndicatorCompute
             PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
             ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length),
 
+            // Batch 3 - Moving Averages
+            SmmaSpecOptions smma => ComputeSmmaFast(data, context, smma.Length),
+            McGinleyDynamicSpecOptions mgd => ComputeMcGinleyDynamicFast(data, context, mgd.Length),
+            T3SpecOptions t3 => ComputeT3Fast(data, context, t3.Length),
+            VidyaSpecOptions vidya => ComputeVidyaFast(data, context, vidya.Length),
+            VmaSpecOptions vma => ComputeVmaFast(data, context, vma.Length),
+            AlmaSpecOptions alma => ComputeAlmaFast(data, context, alma.Length),
+            LsmaSpecOptions lsma => ComputeLsmaFast(data, context, lsma.Length),
+            FramaSpecOptions frama => ComputeFramaFast(data, context, frama.Length),
+            AmaSpecOptions ama => ComputeAmaFast(data, context, ama.Length),
+            JmaSpecOptions jma => ComputeJmaFast(data, context, jma.Length),
+            SuperSmootherSpecOptions ss => ComputeSuperSmootherFast(data, context, ss.Length),
+            ButterworthFilterSpecOptions bw => ComputeButterworthFilterFast(data, context, bw.Length),
+
+            // Batch 3 - MACD variants
+            MacdLineSpecOptions macdl => ComputeMacdLineFast(data, context, macdl.FastLength, macdl.SlowLength),
+            MacdSignalSpecOptions macds => ComputeMacdSignalFast(data, context, macds.FastLength, macds.SlowLength, macds.SignalLength),
+            MacdHistogramSpecOptions macdh => ComputeMacdHistogramFast(data, context, macdh.FastLength, macdh.SlowLength, macdh.SignalLength),
+
+            // Batch 3 - Trend indicators
+            ParabolicSarSpecOptions psar => ComputeParabolicSarFast(data, context, psar.Length),
+            SuperTrendSpecOptions st => ComputeSuperTrendFast(data, context, st.Length),
+            ChandelierExitLongSpecOptions cel => ComputeChandelierExitLongFast(data, context, cel.Length),
+            ChandelierExitShortSpecOptions ces => ComputeChandelierExitShortFast(data, context, ces.Length),
+
+            // Batch 3 - Volume/Power indicators
+            BalanceOfPowerSpecOptions bop => ComputeBalanceOfPowerFast(data, context, bop.Length),
+            PvoSpecOptions pvo => ComputePvoFast(data, context, pvo.Length),
+
+            // Batch 3 - More Oscillators
+            CoppockCurveSpecOptions coppock => ComputeCoppockCurveFast(data, context, coppock.Length),
+            ChandeForecastOscillatorSpecOptions cfo => ComputeChandeForecastOscillatorFast(data, context, cfo.Length),
+            BullPowerSpecOptions bp => ComputeBullPowerFast(data, context, bp.Length),
+            BearPowerSpecOptions bear => ComputeBearPowerFast(data, context, bear.Length),
+            ElderForceIndexSpecOptions efi => ComputeElderForceIndexFast(data, context, efi.Length),
+            RelativeVolatilityIndexSpecOptions rvi => ComputeRelativeVolatilityIndexFast(data, context, rvi.Length),
+            QstickSpecOptions qstick => ComputeQstickFast(data, context, qstick.Length),
+            SpecialKSpecOptions spk => ComputeSpecialKFast(data, context, spk.Length),
+
+            // Batch 3 - Vortex and Trend Intensity
+            VortexPositiveSpecOptions vp => ComputeVortexPositiveFast(data, context, vp.Length),
+            VortexNegativeSpecOptions vn => ComputeVortexNegativeFast(data, context, vn.Length),
+            TrendIntensityIndexSpecOptions tii => ComputeTrendIntensityIndexFast(data, context, tii.Length),
+            AbsoluteStrengthIndexSpecOptions asi => ComputeAbsoluteStrengthIndexFast(data, context, asi.Length),
+            RelativeMomentumIndexSpecOptions rmi => ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum),
+            IntradayMomentumIndexSpecOptions imi => ComputeIntradayMomentumIndexFast(data, context, imi.Length),
+
+            // Batch 3 - Volume weighted MAs
+            VwmaSpecOptions vwma => ComputeVwmaFast(data, context, vwma.Length),
+            VwapSpecOptions vwap => ComputeVwapFast(data, context, vwap.Length),
+
+            // Batch 3 - Complex oscillators
+            ElliottWaveOscillatorSpecOptions ewo => ComputeElliottWaveOscillatorFast(data, context, ewo.FastLength, ewo.SlowLength),
+            GatorOscillatorSpecOptions gator => ComputeGatorOscillatorFast(data, context, gator.Length),
+
+            // Batch 3 - Ichimoku
+            IchimokuTenkanSenSpecOptions its => ComputeIchimokuTenkanSenFast(data, context, its.Length),
+            IchimokuKijunSenSpecOptions iks => ComputeIchimokuKijunSenFast(data, context, iks.Length),
+
             _ => null
         };
     }
