@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**103 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**147 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **113** | 104 new + 9 original |
-| TryComputeFast Dispatch | **103** | 94 new routes wired |
+| SpecOptions Classes | **152** | 143 new + 9 original |
+| TryComputeFast Dispatch | **147** | 138 new routes wired |
 
 ### The Gap
 
 - **411 ComputeFast methods exist** but many still use `GenericIndicatorOptions`
-- **103 indicators** now route through `TryComputeFast`
-- **Missing**: ~300+ specific `*SpecOptions` classes and corresponding dispatch cases
+- **147 indicators** now route through `TryComputeFast`
+- **Missing**: ~260+ specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -171,6 +171,66 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] IchimokuTenkanSenSpecOptions
 - [x] IchimokuKijunSenSpecOptions
 
+**Additional Oscillators (Batch 3 - wired separately):**
+- [x] PfeSpecOptions (Polarized Fractal Efficiency) - WIRED
+- [x] StcSpecOptions (Schaff Trend Cycle) - WIRED
+- [x] PzoSpecOptions (Price Zone Oscillator) - WIRED
+- [x] PgoSpecOptions (Pretty Good Oscillator) - WIRED
+- [x] RviSpecOptions (Relative Vigor Index) - WIRED
+
+**Batch 4 - Price indicators:**
+- [x] TypicalPriceSpecOptions
+- [x] MedianPriceSpecOptions
+- [x] WeightedCloseSpecOptions
+- [x] AveragePriceSpecOptions
+- [x] MidpointSpecOptions
+- [x] MidpriceSpecOptions
+
+**Batch 4 - Statistical indicators:**
+- [x] VarianceSpecOptions
+- [x] CoefficientOfVariationSpecOptions
+- [x] StandardErrorSpecOptions
+
+**Batch 4 - Aroon components:**
+- [x] AroonUpSpecOptions
+- [x] AroonDownSpecOptions
+
+**Batch 4 - More oscillators:**
+- [x] DemarkerSpecOptions
+- [x] SmoothedRocSpecOptions
+- [x] DerivativeOscillatorSpecOptions
+- [x] FractalChaosOscillatorSpecOptions
+- [x] DisparityIndexSpecOptions
+- [x] DynamicMomentumIndexSpecOptions
+
+**Batch 4 - More MAs:**
+- [x] SineWmaSpecOptions
+- [x] HammingMaSpecOptions
+- [x] GeoMaSpecOptions
+- [x] RegularizedEmaSpecOptions
+- [x] ModifiedMaSpecOptions
+- [x] EndPointMovingAverageSpecOptions
+- [x] CubicWmaSpecOptions
+- [x] NaturalMaSpecOptions
+
+**Batch 4 - Volume indicators:**
+- [x] TradeVolumeIndexSpecOptions
+- [x] VolumeOscillatorSpecOptions
+- [x] VolumeZoneOscillatorSpecOptions
+- [x] NetVolumeSpecOptions
+- [x] VolumeMomentumSpecOptions
+- [x] NormalizedVolumeSpecOptions
+
+**Batch 4 - Stochastic variants:**
+- [x] StochasticDSpecOptions
+- [x] DoubleSmoothedStochasticSpecOptions
+- [x] PremierStochasticSpecOptions
+
+**Batch 4 - Volatility indicators:**
+- [x] CloseToCloseVolatilitySpecOptions
+- [x] ParkinsonVolatilitySpecOptions
+- [x] GarmanKlassVolatilitySpecOptions
+
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
 
@@ -225,18 +285,17 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **113** |
-| TryComputeFast Routes | Wired | **103** |
-| **Effective Fast Path Coverage** | | **~13.3%** |
+| SpecOptions Classes | Implemented | **152** |
+| TryComputeFast Routes | Wired | **147** |
+| **Effective Fast Path Coverage** | | **~19.0%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 103 indicators**
-3. **Continue creating SpecOptions** for remaining ~300 indicators
-4. **Create ComputeFast methods** for SpecOptions that exist but lack ComputeFast (Pfe, Stc, Pzo, Pgo, Rvi)
-5. **Focus on categories with most ComputeFast methods**: Oscillators (~60 remaining), Ehlers (~60), MovingAverages (~30 remaining)
-6. **Consider source generation** to auto-create SpecOptions from Calculate signatures
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 147 indicators**
+3. **Continue creating SpecOptions** for remaining ~260 indicators
+4. **Focus on categories with most ComputeFast methods**: Ehlers (~60 remaining), RSI variants (~20 remaining), Chande indicators (~15 remaining)
+5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
 
 ## Notes
 

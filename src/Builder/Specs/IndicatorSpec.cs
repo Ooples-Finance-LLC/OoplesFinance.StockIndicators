@@ -1817,6 +1817,489 @@ public sealed class IchimokuKijunSenSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 4 SpecOptions ==========
+
+/// <summary>
+/// Typical Price indicator options.
+/// </summary>
+public sealed class TypicalPriceSpecOptions : IIndicatorSpecOptions
+{
+    public TypicalPriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Median Price indicator options.
+/// </summary>
+public sealed class MedianPriceSpecOptions : IIndicatorSpecOptions
+{
+    public MedianPriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Weighted Close indicator options.
+/// </summary>
+public sealed class WeightedCloseSpecOptions : IIndicatorSpecOptions
+{
+    public WeightedCloseSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Average Price indicator options.
+/// </summary>
+public sealed class AveragePriceSpecOptions : IIndicatorSpecOptions
+{
+    public AveragePriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Midpoint indicator options.
+/// </summary>
+public sealed class MidpointSpecOptions : IIndicatorSpecOptions
+{
+    public MidpointSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Midprice indicator options.
+/// </summary>
+public sealed class MidpriceSpecOptions : IIndicatorSpecOptions
+{
+    public MidpriceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Variance indicator options.
+/// </summary>
+public sealed class VarianceSpecOptions : IIndicatorSpecOptions
+{
+    public VarianceSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Coefficient of Variation indicator options.
+/// </summary>
+public sealed class CoefficientOfVariationSpecOptions : IIndicatorSpecOptions
+{
+    public CoefficientOfVariationSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Standard Error indicator options.
+/// </summary>
+public sealed class StandardErrorSpecOptions : IIndicatorSpecOptions
+{
+    public StandardErrorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Aroon Up indicator options.
+/// </summary>
+public sealed class AroonUpSpecOptions : IIndicatorSpecOptions
+{
+    public AroonUpSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Aroon Down indicator options.
+/// </summary>
+public sealed class AroonDownSpecOptions : IIndicatorSpecOptions
+{
+    public AroonDownSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// DeMarker indicator options.
+/// </summary>
+public sealed class DemarkerSpecOptions : IIndicatorSpecOptions
+{
+    public DemarkerSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Smoothed ROC indicator options.
+/// </summary>
+public sealed class SmoothedRocSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedRocSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Derivative Oscillator indicator options.
+/// </summary>
+public sealed class DerivativeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DerivativeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fractal Chaos Oscillator indicator options.
+/// </summary>
+public sealed class FractalChaosOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public FractalChaosOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Disparity Index indicator options.
+/// </summary>
+public sealed class DisparityIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DisparityIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Dynamic Momentum Index indicator options.
+/// </summary>
+public sealed class DynamicMomentumIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DynamicMomentumIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Sine WMA indicator options.
+/// </summary>
+public sealed class SineWmaSpecOptions : IIndicatorSpecOptions
+{
+    public SineWmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Hamming MA indicator options.
+/// </summary>
+public sealed class HammingMaSpecOptions : IIndicatorSpecOptions
+{
+    public HammingMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Geometric MA indicator options.
+/// </summary>
+public sealed class GeoMaSpecOptions : IIndicatorSpecOptions
+{
+    public GeoMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Regularized EMA indicator options.
+/// </summary>
+public sealed class RegularizedEmaSpecOptions : IIndicatorSpecOptions
+{
+    public RegularizedEmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Modified MA indicator options.
+/// </summary>
+public sealed class ModifiedMaSpecOptions : IIndicatorSpecOptions
+{
+    public ModifiedMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// End Point Moving Average indicator options.
+/// </summary>
+public sealed class EndPointMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EndPointMovingAverageSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Cubic WMA indicator options.
+/// </summary>
+public sealed class CubicWmaSpecOptions : IIndicatorSpecOptions
+{
+    public CubicWmaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Natural MA indicator options.
+/// </summary>
+public sealed class NaturalMaSpecOptions : IIndicatorSpecOptions
+{
+    public NaturalMaSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trade Volume Index indicator options.
+/// </summary>
+public sealed class TradeVolumeIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TradeVolumeIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Oscillator indicator options.
+/// </summary>
+public sealed class VolumeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Zone Oscillator indicator options.
+/// </summary>
+public sealed class VolumeZoneOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeZoneOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Net Volume indicator options.
+/// </summary>
+public sealed class NetVolumeSpecOptions : IIndicatorSpecOptions
+{
+    public NetVolumeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Momentum indicator options.
+/// </summary>
+public sealed class VolumeMomentumSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeMomentumSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Normalized Volume indicator options.
+/// </summary>
+public sealed class NormalizedVolumeSpecOptions : IIndicatorSpecOptions
+{
+    public NormalizedVolumeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stochastic %D indicator options.
+/// </summary>
+public sealed class StochasticDSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticDSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Double Smoothed Stochastic indicator options.
+/// </summary>
+public sealed class DoubleSmoothedStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public DoubleSmoothedStochasticSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Premier Stochastic indicator options.
+/// </summary>
+public sealed class PremierStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public PremierStochasticSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Close-to-Close Volatility indicator options.
+/// </summary>
+public sealed class CloseToCloseVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public CloseToCloseVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Parkinson Volatility indicator options.
+/// </summary>
+public sealed class ParkinsonVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public ParkinsonVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Garman-Klass Volatility indicator options.
+/// </summary>
+public sealed class GarmanKlassVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public GarmanKlassVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.

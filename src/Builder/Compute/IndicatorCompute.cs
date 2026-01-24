@@ -167,6 +167,66 @@ internal static partial class IndicatorCompute
             IchimokuTenkanSenSpecOptions its => ComputeIchimokuTenkanSenFast(data, context, its.Length),
             IchimokuKijunSenSpecOptions iks => ComputeIchimokuKijunSenFast(data, context, iks.Length),
 
+            // Batch 3 - Additional oscillators (ComputeFast methods exist)
+            PfeSpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length),
+            StcSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.Length),
+            PzoSpecOptions pzo => ComputePriceZoneOscillatorFast(data, context, pzo.Length),
+            PgoSpecOptions pgo => ComputePrettyGoodOscillatorFast(data, context, pgo.Length),
+            RviSpecOptions rvi => ComputeRelativeVigorIndexFast(data, context, rvi.Length),
+
+            // Batch 4 - Price indicators
+            TypicalPriceSpecOptions tp => ComputeTypicalPriceFast(data, context, tp.Length),
+            MedianPriceSpecOptions mp => ComputeMedianPriceFast(data, context, mp.Length),
+            WeightedCloseSpecOptions wc => ComputeWeightedCloseFast(data, context, wc.Length),
+            AveragePriceSpecOptions ap => ComputeAveragePriceFast(data, context, ap.Length),
+            MidpointSpecOptions midpt => ComputeMidpointFast(data, context, midpt.Length),
+            MidpriceSpecOptions midpr => ComputeMidpriceFast(data, context, midpr.Length),
+
+            // Batch 4 - Statistical indicators
+            VarianceSpecOptions var => ComputeVarianceFast(data, context, var.Length),
+            CoefficientOfVariationSpecOptions cov => ComputeCoefficientOfVariationFast(data, context, cov.Length),
+            StandardErrorSpecOptions se => ComputeStandardErrorFast(data, context, se.Length),
+
+            // Batch 4 - Aroon components
+            AroonUpSpecOptions arup => ComputeAroonUpFast(data, context, arup.Length),
+            AroonDownSpecOptions ardn => ComputeAroonDownFast(data, context, ardn.Length),
+
+            // Batch 4 - More oscillators
+            DemarkerSpecOptions dmk => ComputeDemarkerFast(data, context, dmk.Length),
+            SmoothedRocSpecOptions sroc => ComputeSmoothedRocFast(data, context, sroc.Length),
+            DerivativeOscillatorSpecOptions dro => ComputeDerivativeOscillatorFast(data, context, dro.Length),
+            FractalChaosOscillatorSpecOptions fco => ComputeFractalChaosOscillatorFast(data, context, fco.Length),
+            DisparityIndexSpecOptions di => ComputeDisparityIndexFast(data, context, di.Length),
+            DynamicMomentumIndexSpecOptions dmi => ComputeDynamicMomentumIndexFast(data, context, dmi.Length),
+
+            // Batch 4 - More MAs
+            SineWmaSpecOptions swma => ComputeSineWmaFast(data, context, swma.Length),
+            HammingMaSpecOptions hma2 => ComputeHammingMaFast(data, context, hma2.Length),
+            GeoMaSpecOptions gma => ComputeGeoMaFast(data, context, gma.Length),
+            RegularizedEmaSpecOptions rema => ComputeRegularizedEmaFast(data, context, rema.Length),
+            ModifiedMaSpecOptions mma => ComputeModifiedMaFast(data, context, mma.Length),
+            EndPointMovingAverageSpecOptions epma => ComputeEndPointMovingAverageFast(data, context, epma.Length),
+            CubicWmaSpecOptions cwma => ComputeCubicWmaFast(data, context, cwma.Length),
+            NaturalMaSpecOptions nma => ComputeNaturalMaFast(data, context, nma.Length),
+
+            // Batch 4 - Volume indicators
+            TradeVolumeIndexSpecOptions tvi => ComputeTradeVolumeIndexFast(data, context, tvi.Length),
+            VolumeOscillatorSpecOptions vo => ComputeVolumeOscillatorFast(data, context, vo.Length),
+            VolumeZoneOscillatorSpecOptions vzo => ComputeVolumeZoneOscillatorFast(data, context, vzo.Length),
+            NetVolumeSpecOptions nv => ComputeNetVolumeFast(data, context, nv.Length),
+            VolumeMomentumSpecOptions vmom => ComputeVolumeMomentumFast(data, context, vmom.Length),
+            NormalizedVolumeSpecOptions nvol => ComputeNormalizedVolumeFast(data, context, nvol.Length),
+
+            // Batch 4 - Stochastic variants
+            StochasticDSpecOptions sd => ComputeStochasticDFast(data, context, sd.Length),
+            DoubleSmoothedStochasticSpecOptions dss => ComputeDoubleSmoothedStochasticFast(data, context, dss.Length),
+            PremierStochasticSpecOptions ps => ComputePremierStochasticFast(data, context, ps.Length),
+
+            // Batch 4 - Volatility indicators
+            CloseToCloseVolatilitySpecOptions ctc => ComputeCloseToCloseVolatilityFast(data, context, ctc.Length),
+            ParkinsonVolatilitySpecOptions pkv => ComputeParkinsonVolatilityFast(data, context, pkv.Length),
+            GarmanKlassVolatilitySpecOptions gkv => ComputeGarmanKlassVolatilityFast(data, context, gkv.Length),
+
             _ => null
         };
     }
