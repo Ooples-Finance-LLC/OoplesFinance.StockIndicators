@@ -756,6 +756,9 @@ internal static partial class IndicatorCompute
             LiquidRelativeStrengthIndexSpecOptions lrsi => ComputeLiquidRelativeStrengthIndexFast(data, context, lrsi.Length),
             AsymmetricalRelativeStrengthIndexSpecOptions arsi => ComputeAsymmetricalRelativeStrengthIndexFast(data, context, arsi.Length),
             AverageAbsoluteErrorNormalizationSpecOptions aaen => ComputeAverageAbsoluteErrorNormalizationFast(data, context, aaen.Length),
+            RecursiveStochasticSpecOptions rs => ComputeRecursiveStochasticFast(data, context, rs.Length, rs.Alpha),
+            ShinoharaIntensityRatioASpecOptions sira => ComputeShinoharaIntensityRatioAFast(data, context, sira.Length),
+            ShinoharaIntensityRatioBSpecOptions sirb => ComputeShinoharaIntensityRatioBFast(data, context, sirb.Length),
 
             _ => null
         };
@@ -7916,6 +7919,44 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.AverageAbsoluteErrorNormalization(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Recursive Stochastic using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200, double alpha = 0.1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.RecursiveStochastic(inputSpan, buffer.WritableSpan, length, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Shinohara Intensity Ratio A using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeShinoharaIntensityRatioAFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ShinoharaIntensityRatioA(high, low, open, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Shinohara Intensity Ratio B using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeShinoharaIntensityRatioBFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ShinoharaIntensityRatioB(high, low, close, buffer.WritableSpan, length);
         return buffer;
     }
 

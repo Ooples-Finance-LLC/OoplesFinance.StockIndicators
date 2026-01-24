@@ -7065,3 +7065,35 @@ public sealed class AverageAbsoluteErrorNormalizationSpecOptions : IIndicatorSpe
     public AverageAbsoluteErrorNormalizationSpecOptions(int length = 14) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Recursive Stochastic indicator options.
+/// </summary>
+public sealed class RecursiveStochasticSpecOptions : IIndicatorSpecOptions
+{
+    public RecursiveStochasticSpecOptions(int length = 200, double alpha = 0.1)
+    {
+        Length = Math.Max(1, length);
+        Alpha = Math.Max(0, Math.Min(1, alpha));
+    }
+    public int Length { get; }
+    public double Alpha { get; }
+}
+
+/// <summary>
+/// Shinohara Intensity Ratio A indicator options.
+/// </summary>
+public sealed class ShinoharaIntensityRatioASpecOptions : IIndicatorSpecOptions
+{
+    public ShinoharaIntensityRatioASpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Shinohara Intensity Ratio B indicator options.
+/// </summary>
+public sealed class ShinoharaIntensityRatioBSpecOptions : IIndicatorSpecOptions
+{
+    public ShinoharaIntensityRatioBSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

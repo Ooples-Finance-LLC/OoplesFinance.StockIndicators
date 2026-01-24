@@ -10043,6 +10043,99 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Recursive Stochastic.
+    /// </summary>
+    internal static void RecursiveStochastic(ReadOnlySpan<double> close, Span<double> output, int length = 200, double alpha = 0.1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        alpha = Math.Max(0, Math.Min(1, alpha));
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        var maWindow = new RollingMinMax(length);
+        double prevMa = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            highWindow.Add(close[i]);
+            lowWindow.Add(close[i]);
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var stoch = highest - lowest != 0 ? (close[i] - lowest) / (highest - lowest) * 100 : 0;
+
+            var ma = (alpha * stoch) + ((1 - alpha) * prevMa);
+            maWindow.Add(ma);
+            prevMa = ma;
+
+            var highestMa = maWindow.Max;
+            var lowestMa = maWindow.Min;
+
+            output[i] = highestMa - lowestMa != 0 ? Math.Min(Math.Max((ma - lowestMa) / (highestMa - lowestMa) * 100, 0), 100) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Shinohara Intensity Ratio (A Ratio).
+    /// </summary>
+    internal static void ShinoharaIntensityRatioA(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var highSum = new RollingSum();
+        var lowSum = new RollingSum();
+        var openSum = new RollingSum();
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            highSum.Add(high[i]);
+            lowSum.Add(low[i]);
+            openSum.Add(open[i]);
+
+            var bullA = highSum.Sum(length) - openSum.Sum(length);
+            var bearA = openSum.Sum(length) - lowSum.Sum(length);
+
+            output[i] = bearA != 0 ? bullA / bearA * 100 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Shinohara Intensity Ratio (B Ratio).
+    /// </summary>
+    internal static void ShinoharaIntensityRatioB(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var highSum = new RollingSum();
+        var lowSum = new RollingSum();
+        var prevCloseSum = new RollingSum();
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            highSum.Add(high[i]);
+            lowSum.Add(low[i]);
+            var prevClose = i >= 1 ? close[i - 1] : 0;
+            prevCloseSum.Add(prevClose);
+
+            var bullB = highSum.Sum(length) - prevCloseSum.Sum(length);
+            var bearB = prevCloseSum.Sum(length) - lowSum.Sum(length);
+
+            output[i] = bearB != 0 ? bullB / bearB * 100 : 0;
+        }
+    }
+
     #endregion
 
     #endregion
