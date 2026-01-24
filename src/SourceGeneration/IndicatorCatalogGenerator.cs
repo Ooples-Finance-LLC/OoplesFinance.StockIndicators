@@ -265,6 +265,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "EhlersStochastic",
         "EhlersAdaptiveLaguerreFilter",
 
+        // Moving Averages - MovingAverageCore (Batch 18) - Note: CubedWeightedMovingAverage and EndPointMovingAverage already in earlier batch
+        "CoralTrendIndicator",
+        "DampedSineWaveWeightedFilter",
+        "FibonacciWeightedMovingAverage",
+        "GeneralizedDoubleExponentialMovingAverage",
+        "GeometricMeanMovingAverage",
+        "HarmonicMeanMovingAverage",
+
         // Volume - VolumeCore (Additional Batch 3)
         "WilliamsAD",
         "NetVolume",
@@ -1071,6 +1079,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "EhlersCyberCycle" => "ComputeEhlersCyberCycleFast",
             "EhlersStochastic" => "ComputeEhlersStochasticFast",
             "EhlersAdaptiveLaguerreFilter" => "ComputeEhlersAdaptiveLaguerreFilterFast",
+
+            // Moving Averages (Batch 18) - Note: CubedWeightedMovingAverage and EndPointMovingAverage already in earlier batch
+            "CoralTrendIndicator" => "ComputeCoralTrendIndicatorFast",
+            "DampedSineWaveWeightedFilter" => "ComputeDampedSineWaveWeightedFilterFast",
+            "FibonacciWeightedMovingAverage" => "ComputeFibonacciWeightedMovingAverageFast",
+            "GeneralizedDoubleExponentialMovingAverage" => "ComputeGeneralizedDoubleEmaFast",
+            "GeometricMeanMovingAverage" => "ComputeGeometricMeanMovingAverageFast",
+            "HarmonicMeanMovingAverage" => "ComputeHarmonicMeanMovingAverageFast",
 
             // Volume (Additional Batch 3)
             "WilliamsAD" => "ComputeWilliamsADFast",

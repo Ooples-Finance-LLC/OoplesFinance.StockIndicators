@@ -2558,4 +2558,259 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Batch 18 - Additional Moving Averages and Filters
+
+    /// <summary>
+    /// Computes Cubed Weighted Moving Average.
+    /// </summary>
+    internal static void CubedWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j < length && i >= j; j++)
+            {
+                var weight = Math.Pow(length - j, 3);
+                sum += input[i - j] * weight;
+                weightedSum += weight;
+            }
+            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Coral Trend Indicator.
+    /// </summary>
+    internal static void CoralTrendIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 21, double cd = 0.4)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var di = ((double)(length - 1) / 2) + 1;
+        var c1 = 2 / (di + 1);
+        var c2 = 1 - c1;
+        var c3 = 3 * ((cd * cd) + (cd * cd * cd));
+        var c4 = -3 * ((2 * cd * cd) + cd + (cd * cd * cd));
+        var c5 = (3 * cd) + 1 + (cd * cd * cd) + (3 * cd * cd);
+
+        var i1 = 0.0;
+        var i2 = 0.0;
+        var i3 = 0.0;
+        var i4 = 0.0;
+        var i5 = 0.0;
+        var i6 = 0.0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            i1 = (c1 * input[i]) + (c2 * i1);
+            i2 = (c1 * i1) + (c2 * i2);
+            i3 = (c1 * i2) + (c2 * i3);
+            i4 = (c1 * i3) + (c2 * i4);
+            i5 = (c1 * i4) + (c2 * i5);
+            i6 = (c1 * i5) + (c2 * i6);
+
+            output[i] = (-cd * cd * cd * i6) + (c3 * i5) + (c4 * i4) + (c5 * i3);
+        }
+    }
+
+    /// <summary>
+    /// Computes Damped Sine Wave Weighted Filter.
+    /// </summary>
+    internal static void DampedSineWaveWeightedFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double wSum = 0, wvSum = 0;
+            for (var j = 1; j <= length && i >= j - 1; j++)
+            {
+                var ratio = (double)j / length;
+                var w = Math.Sin(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ratio))) / j;
+                wvSum += w * input[i - (j - 1)];
+                wSum += w;
+            }
+            output[i] = wSum != 0 ? wvSum / wSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes End Point Moving Average (Least Squares MA).
+    /// </summary>
+    internal static void EndPointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var x = j + 1.0;
+                var y = input[i - (length - 1 - j)];
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+            }
+
+            var slope = (length * sumXY - sumX * sumY) / (length * sumX2 - sumX * sumX);
+            var intercept = (sumY - slope * sumX) / length;
+            output[i] = intercept + slope * length; // End point value
+        }
+    }
+
+    /// <summary>
+    /// Computes Fibonacci Weighted Moving Average.
+    /// </summary>
+    internal static void FibonacciWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        // Pre-calculate Fibonacci weights
+        var fibs = new double[length];
+        fibs[0] = 1;
+        if (length > 1) fibs[1] = 1;
+        for (var j = 2; j < length; j++)
+        {
+            fibs[j] = fibs[j - 1] + fibs[j - 2];
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double sum = 0, weightSum = 0;
+            for (var j = 0; j < length && i >= j; j++)
+            {
+                var weight = fibs[length - 1 - j];
+                sum += input[i - j] * weight;
+                weightSum += weight;
+            }
+            output[i] = weightSum != 0 ? sum / weightSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Generalized Double Exponential Moving Average (GDEMA).
+    /// </summary>
+    internal static void GeneralizedDoubleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double volumeFactor = 1.0)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var ema1Array = pool.Rent(input.Length);
+        var ema2Array = pool.Rent(input.Length);
+
+        try
+        {
+            var ema1 = ema1Array.AsSpan(0, input.Length);
+            var ema2 = ema2Array.AsSpan(0, input.Length);
+
+            ExponentialMovingAverage(input, ema1, length);
+            ExponentialMovingAverage(ema1, ema2, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = ((1 + volumeFactor) * ema1[i]) - (volumeFactor * ema2[i]);
+            }
+        }
+        finally
+        {
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Geometric Mean Moving Average.
+    /// </summary>
+    internal static void GeometricMeanMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            var product = 1.0;
+            var count = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var val = input[i - j];
+                if (val > 0)
+                {
+                    product *= val;
+                    count++;
+                }
+            }
+            output[i] = count > 0 ? Math.Pow(product, 1.0 / count) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Harmonic Mean Moving Average.
+    /// </summary>
+    internal static void HarmonicMeanMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            var sum = 0.0;
+            var count = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var val = input[i - j];
+                if (val != 0)
+                {
+                    sum += 1.0 / val;
+                    count++;
+                }
+            }
+            output[i] = count > 0 && sum != 0 ? count / sum : 0;
+        }
+    }
+
+    #endregion
 }
