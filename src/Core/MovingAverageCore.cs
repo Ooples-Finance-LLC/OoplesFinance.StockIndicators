@@ -5990,6 +5990,471 @@ internal static class MovingAverageCore
 
     #endregion
 
+    #region Multi-Input MovingAvgType Fast Path Methods
+
+    /// <summary>
+    /// Computes Elastic Volume Weighted Moving Average V1.
+    /// </summary>
+    internal static void ElasticVolumeWeightedMovingAverageV1(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 40, double mult = 20)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var volumeSmaArray = pool.Rent(price.Length);
+
+        try
+        {
+            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
+            SimpleMovingAverage(volume, volumeSma, length);
+
+            double prevEvwma = price.Length > 0 ? price[0] : 0;
+            for (var i = 0; i < price.Length; i++)
+            {
+                var currentAvgVolume = volumeSma[i];
+                var currentVolume = volume[i];
+                var n = currentAvgVolume * mult;
+
+                var evwma = n > 0 ? (((n - currentVolume) * prevEvwma) + (currentVolume * price[i])) / n : 0;
+                output[i] = evwma;
+                prevEvwma = evwma;
+            }
+        }
+        finally
+        {
+            pool.Return(volumeSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Elastic Volume Weighted Moving Average V2.
+    /// </summary>
+    internal static void ElasticVolumeWeightedMovingAverageV2(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        double volumeSum = 0;
+        double evwma = price.Length > 0 ? price[0] : 0;
+
+        for (var i = 0; i < price.Length; i++)
+        {
+            var currentVolume = volume[i];
+            volumeSum += currentVolume;
+
+            if (i >= length)
+                volumeSum -= volume[i - length];
+
+            var nbv = Math.Min(volumeSum, currentVolume);
+            evwma = volumeSum > 0 ? (((volumeSum - nbv) * evwma) + (nbv * price[i])) / volumeSum : 0;
+            output[i] = evwma;
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Adjusted Moving Average.
+    /// </summary>
+    internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14, double factor = 0.67)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var volumeSmaArray = pool.Rent(price.Length);
+
+        try
+        {
+            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
+            SimpleMovingAverage(volume, volumeSma, length);
+
+            double volumeRatioSum = 0;
+            double priceVolumeRatioSum = 0;
+            var volumeRatioWindow = new double[length];
+            var priceVolumeRatioWindow = new double[length];
+            var windowIdx = 0;
+            var windowCount = 0;
+
+            for (var i = 0; i < price.Length; i++)
+            {
+                var currentVolume = volume[i];
+                var volumeIncrement = volumeSma[i] * factor;
+                var volumeRatio = volumeIncrement != 0 ? currentVolume / volumeIncrement : 0;
+                var priceVolumeRatio = price[i] * volumeRatio;
+
+                // Update rolling sums
+                if (windowCount >= length)
+                {
+                    volumeRatioSum -= volumeRatioWindow[windowIdx];
+                    priceVolumeRatioSum -= priceVolumeRatioWindow[windowIdx];
+                }
+                volumeRatioWindow[windowIdx] = volumeRatio;
+                priceVolumeRatioWindow[windowIdx] = priceVolumeRatio;
+                volumeRatioSum += volumeRatio;
+                priceVolumeRatioSum += priceVolumeRatio;
+                windowIdx = (windowIdx + 1) % length;
+                if (windowCount < length) windowCount++;
+
+                output[i] = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(volumeSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Windowed Volume Weighted Moving Average.
+    /// </summary>
+    internal static void WindowedVolumeWeightedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        double pvSum = 0;
+        double vSum = 0;
+
+        for (var i = 0; i < price.Length; i++)
+        {
+            var n = Math.Min(i + 1, length);
+            var currentPv = price[i] * volume[i];
+            pvSum += currentPv;
+            vSum += volume[i];
+
+            if (i >= length)
+            {
+                pvSum -= price[i - length] * volume[i - length];
+                vSum -= volume[i - length];
+            }
+
+            output[i] = vSum != 0 ? pvSum / vSum : price[i];
+        }
+    }
+
+    /// <summary>
+    /// Computes Middle High Low Moving Average.
+    /// </summary>
+    internal static void MiddleHighLowMovingAverage(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length1 = 14, int length2 = 10)
+    {
+        if (output.Length < high.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var midpointArray = pool.Rent(high.Length);
+        var midpointSmaArray = pool.Rent(high.Length);
+
+        try
+        {
+            var midpoint = midpointArray.AsSpan(0, high.Length);
+            var midpointSma = midpointSmaArray.AsSpan(0, high.Length);
+
+            // Calculate midpoint (high + low) / 2 with rolling min/max
+            double highestHigh = double.MinValue;
+            double lowestLow = double.MaxValue;
+            var highWindow = new double[length2];
+            var lowWindow = new double[length2];
+
+            for (var i = 0; i < high.Length; i++)
+            {
+                highWindow[i % length2] = high[i];
+                lowWindow[i % length2] = low[i];
+
+                var windowSize = Math.Min(i + 1, length2);
+                highestHigh = double.MinValue;
+                lowestLow = double.MaxValue;
+                for (var j = 0; j < windowSize; j++)
+                {
+                    var idx = (i - j + length2) % length2;
+                    if (j <= i)
+                    {
+                        if (highWindow[idx] > highestHigh) highestHigh = highWindow[idx];
+                        if (lowWindow[idx] < lowestLow) lowestLow = lowWindow[idx];
+                    }
+                }
+                midpoint[i] = (highestHigh + lowestLow) / 2;
+            }
+
+            // Apply EMA to midpoint
+            ExponentialMovingAverage(midpoint, output, length1);
+        }
+        finally
+        {
+            pool.Return(midpointArray);
+            pool.Return(midpointSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Equity Moving Average.
+    /// </summary>
+    internal static void EquityMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var buyPowerArray = pool.Rent(price.Length);
+        var totalPowerArray = pool.Rent(price.Length);
+
+        try
+        {
+            var buyPower = buyPowerArray.AsSpan(0, price.Length);
+            var totalPower = totalPowerArray.AsSpan(0, price.Length);
+
+            double buyPowerSum = 0, totalPowerSum = 0;
+
+            for (var i = 0; i < price.Length; i++)
+            {
+                var currentVolume = volume[i];
+                var prevPrice = i >= 1 ? price[i - 1] : price[i];
+                var change = price[i] - prevPrice;
+
+                var bp = change > 0 ? currentVolume * change : 0;
+                var tp = currentVolume * Math.Abs(change);
+
+                buyPowerSum += bp;
+                totalPowerSum += tp;
+
+                if (i >= length)
+                {
+                    var oldChange = price[i - length + 1] - (i >= length ? price[i - length] : price[i - length + 1]);
+                    var oldBp = oldChange > 0 ? volume[i - length + 1] * oldChange : 0;
+                    var oldTp = volume[i - length + 1] * Math.Abs(oldChange);
+                    buyPowerSum -= oldBp;
+                    totalPowerSum -= oldTp;
+                }
+
+                var emv = totalPowerSum != 0 ? (2 * buyPowerSum / totalPowerSum) - 1 : 0;
+                output[i] = emv;
+            }
+        }
+        finally
+        {
+            pool.Return(buyPowerArray);
+            pool.Return(totalPowerArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ratio OCHL Averager.
+    /// </summary>
+    internal static void RatioOchlAverager(ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var o = open[i];
+            var c = close[i];
+            var h = high[i];
+            var l = low[i];
+
+            var oc = Math.Abs(o - c);
+            var hl = h - l;
+
+            var ratio = hl != 0 ? oc / hl : 0;
+            var avg = (o + c + h + l) / 4;
+
+            output[i] = avg * (1 + ratio);
+        }
+    }
+
+    /// <summary>
+    /// Computes Volume Weighted Average Price.
+    /// </summary>
+    internal static void VolumeWeightedAveragePrice(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output)
+    {
+        if (output.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        double tpvSum = 0;
+        double volumeSum = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var typicalPrice = (close[i] + high[i] + low[i]) / 3;
+            var currentVolume = volume[i];
+
+            tpvSum += typicalPrice * currentVolume;
+            volumeSum += currentVolume;
+
+            output[i] = volumeSum != 0 ? tpvSum / volumeSum : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes True Range Adjusted Exponential Moving Average.
+    /// </summary>
+    internal static void TrueRangeAdjustedExponentialMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double mult = 1.5)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var trArray = pool.Rent(price.Length);
+        var atrArray = pool.Rent(price.Length);
+        var emaArray = pool.Rent(price.Length);
+
+        try
+        {
+            var tr = trArray.AsSpan(0, price.Length);
+            var atr = atrArray.AsSpan(0, price.Length);
+            var ema = emaArray.AsSpan(0, price.Length);
+
+            // Calculate True Range
+            for (var i = 0; i < price.Length; i++)
+            {
+                var prevClose = i >= 1 ? price[i - 1] : price[i];
+                var highLow = high[i] - low[i];
+                var highPrevClose = Math.Abs(high[i] - prevClose);
+                var lowPrevClose = Math.Abs(low[i] - prevClose);
+                tr[i] = Math.Max(highLow, Math.Max(highPrevClose, lowPrevClose));
+            }
+
+            // Calculate ATR
+            ExponentialMovingAverage(tr, atr, length);
+
+            // Calculate base EMA
+            ExponentialMovingAverage(price, ema, length);
+
+            // Apply TR adjustment
+            for (var i = 0; i < price.Length; i++)
+            {
+                var currentTr = tr[i];
+                var currentAtr = atr[i];
+                var ratio = currentAtr != 0 ? currentTr / currentAtr : 1;
+                var adjustedAlpha = 2.0 / (length + 1) * Math.Min(ratio * mult, 2);
+
+                if (i == 0)
+                {
+                    output[i] = price[i];
+                }
+                else
+                {
+                    output[i] = output[i - 1] + adjustedAlpha * (price[i] - output[i - 1]);
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(trArray);
+            pool.Return(atrArray);
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes ATR Filtered Exponential Moving Average.
+    /// </summary>
+    internal static void AtrFilteredExponentialMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
+    {
+        if (output.Length < price.Length)
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+
+        var pool = ArrayPool<double>.Shared;
+        var trValArray = pool.Rent(price.Length);
+        var atrValArray = pool.Rent(price.Length);
+        var atrValPowArray = pool.Rent(price.Length);
+        var stdDevAArray = pool.Rent(price.Length);
+
+        try
+        {
+            var trVal = trValArray.AsSpan(0, price.Length);
+            var atrVal = atrValArray.AsSpan(0, price.Length);
+            var atrValPow = atrValPowArray.AsSpan(0, price.Length);
+            var stdDevA = stdDevAArray.AsSpan(0, price.Length);
+
+            // Calculate TR/price ratio
+            for (var i = 0; i < price.Length; i++)
+            {
+                var prevClose = i >= 1 ? price[i - 1] : 0;
+                var highLow = high[i] - low[i];
+                var highPrevClose = Math.Abs(high[i] - prevClose);
+                var lowPrevClose = Math.Abs(low[i] - prevClose);
+                var tr = Math.Max(highLow, Math.Max(highPrevClose, lowPrevClose));
+                trVal[i] = price[i] != 0 ? tr / price[i] : tr;
+            }
+
+            // Calculate ATR of normalized TR
+            SimpleMovingAverage(trVal, atrVal, atrLength);
+
+            // Calculate squared ATR values
+            for (var i = 0; i < price.Length; i++)
+            {
+                atrValPow[i] = atrVal[i] * atrVal[i];
+            }
+
+            // Calculate SMA of squared ATR
+            SimpleMovingAverage(atrValPow, stdDevA, stdDevLength);
+
+            // Calculate adaptive EMA
+            double atrValSum = 0;
+            var atrValWindow = new double[stdDevLength];
+            var stdDevWindow = new double[lbLength];
+            var windowIdx = 0;
+            var windowCount = 0;
+            var stdDevIdx = 0;
+            var stdDevCount = 0;
+
+            double emaAFP = price.Length > 0 ? price[0] : 0;
+            double emaCTP = price.Length > 0 ? price[0] : 0;
+
+            for (var i = 0; i < price.Length; i++)
+            {
+                // Rolling ATR sum
+                if (windowCount >= stdDevLength)
+                    atrValSum -= atrValWindow[windowIdx];
+                atrValWindow[windowIdx] = atrVal[i];
+                atrValSum += atrVal[i];
+                windowIdx = (windowIdx + 1) % stdDevLength;
+                if (windowCount < stdDevLength) windowCount++;
+
+                var stdDevB = windowCount > 0 ? (atrValSum * atrValSum) / (windowCount * windowCount) : 0;
+                var stdDev = stdDevA[i] - stdDevB >= 0 ? Math.Sqrt(stdDevA[i] - stdDevB) : 0;
+
+                // Track stdDev for min/max
+                if (stdDevCount >= lbLength)
+                {
+                    // Recalculate min
+                }
+                stdDevWindow[stdDevIdx] = stdDev;
+                stdDevIdx = (stdDevIdx + 1) % lbLength;
+                if (stdDevCount < lbLength) stdDevCount++;
+
+                var lowestStdDev = double.MaxValue;
+                for (var j = 0; j < stdDevCount; j++)
+                {
+                    if (stdDevWindow[j] < lowestStdDev) lowestStdDev = stdDevWindow[j];
+                }
+
+                var atrP = lowestStdDev != 0 ? stdDev / lowestStdDev : 0;
+                var afP = Math.Max(atrP, min) / min;
+                var ctP = afP != 0 ? 1 / afP : 0;
+
+                var prevEmaAFP = emaAFP;
+                var prevEmaCTP = emaCTP;
+
+                var scAFP = afP != 0 ? 2.0 / (1 + (length * afP)) : 0;
+                var scCTP = ctP != 0 ? 2.0 / (1 + (length * ctP)) : 0;
+
+                emaAFP = prevEmaAFP + (scAFP * (price[i] - prevEmaAFP));
+                emaCTP = prevEmaCTP + (scCTP * (price[i] - prevEmaCTP));
+
+                output[i] = (emaAFP + emaCTP) / 2;
+            }
+        }
+        finally
+        {
+            pool.Return(trValArray);
+            pool.Return(atrValArray);
+            pool.Return(atrValPowArray);
+            pool.Return(stdDevAArray);
+        }
+    }
+
+    #endregion
+
     #region Remaining MovingAvgType Fast Path Methods
 
     /// <summary>

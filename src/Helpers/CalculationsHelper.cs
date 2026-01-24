@@ -909,6 +909,66 @@ public static class CalculationsHelper
             return movingAvgList;
         }
 
+        // Fast path for multi-input moving averages (require OHLC/volume data)
+        if (movingAvgType is MovingAvgType.ElasticVolumeWeightedMovingAverageV1 or MovingAvgType.ElasticVolumeWeightedMovingAverageV2
+            or MovingAvgType.VolumeAdjustedMovingAverage or MovingAvgType.WindowedVolumeWeightedMovingAverage
+            or MovingAvgType.VolumeWeightedMovingAverage or MovingAvgType.MiddleHighLowMovingAverage
+            or MovingAvgType.EquityMovingAverage or MovingAvgType.RatioOCHLAverager
+            or MovingAvgType.VolumeWeightedAveragePrice or MovingAvgType.TrueRangeAdjustedExponentialMovingAverage
+            or MovingAvgType.AtrFilteredExponentialMovingAverage)
+        {
+            var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
+            var count = inputList.Count;
+            var inputSpan = SpanCompat.AsReadOnlySpan(customValuesList ?? inputList);
+            var highSpan = SpanCompat.AsReadOnlySpan(highList);
+            var lowSpan = SpanCompat.AsReadOnlySpan(lowList);
+            var openSpan = SpanCompat.AsReadOnlySpan(openList);
+            var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
+            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+            var outputSpan = outputBuffer.Span;
+
+            switch (movingAvgType)
+            {
+                case MovingAvgType.ElasticVolumeWeightedMovingAverageV1:
+                    MovingAverageCore.ElasticVolumeWeightedMovingAverageV1(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ElasticVolumeWeightedMovingAverageV2:
+                    MovingAverageCore.ElasticVolumeWeightedMovingAverageV2(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolumeAdjustedMovingAverage:
+                    MovingAverageCore.VolumeAdjustedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WindowedVolumeWeightedMovingAverage:
+                    MovingAverageCore.WindowedVolumeWeightedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolumeWeightedMovingAverage:
+                    MovingAverageCore.VolumeWeightedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MiddleHighLowMovingAverage:
+                    MovingAverageCore.MiddleHighLowMovingAverage(highSpan, lowSpan, outputSpan, slowLength ?? length, fastLength ?? 10);
+                    break;
+                case MovingAvgType.EquityMovingAverage:
+                    MovingAverageCore.EquityMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RatioOCHLAverager:
+                    MovingAverageCore.RatioOchlAverager(openSpan, inputSpan, highSpan, lowSpan, outputSpan);
+                    break;
+                case MovingAvgType.VolumeWeightedAveragePrice:
+                    MovingAverageCore.VolumeWeightedAveragePrice(inputSpan, highSpan, lowSpan, volumeSpan, outputSpan);
+                    break;
+                case MovingAvgType.TrueRangeAdjustedExponentialMovingAverage:
+                    MovingAverageCore.TrueRangeAdjustedExponentialMovingAverage(inputSpan, highSpan, lowSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AtrFilteredExponentialMovingAverage:
+                    MovingAverageCore.AtrFilteredExponentialMovingAverage(inputSpan, highSpan, lowSpan, outputSpan, length);
+                    break;
+            }
+
+            movingAvgList = outputBuffer.ToList();
+            stockData.SetCustomValues(movingAvgList);
+            return movingAvgList;
+        }
+
         switch (movingAvgType)
         {
             case MovingAvgType._1LCLeastSquaresMovingAverage:
