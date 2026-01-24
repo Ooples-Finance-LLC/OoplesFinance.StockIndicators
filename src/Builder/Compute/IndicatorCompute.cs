@@ -806,6 +806,7 @@ internal static partial class IndicatorCompute
             DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
             PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength),
             SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
+            SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength, sroc.SmoothLength),
 
             _ => null
         };
@@ -8593,6 +8594,18 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.SchaffTrendCycle(inputSpan, buffer.WritableSpan, cycleLength, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Smoothed Rate of Change using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSmoothedRateOfChangeFast(StockData data, ComputeContext context, int rocLength = 12, int smoothLength = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.SmoothedRateOfChange(inputSpan, buffer.WritableSpan, rocLength, smoothLength);
         return buffer;
     }
 

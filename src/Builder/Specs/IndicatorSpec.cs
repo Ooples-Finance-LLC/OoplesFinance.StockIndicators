@@ -7687,3 +7687,17 @@ public sealed class SchaffTrendCycleSpecOptions : IIndicatorSpecOptions
     public int SlowLength { get; }
 }
 
+/// <summary>
+/// Smoothed Rate of Change options.
+/// </summary>
+public sealed class SmoothedRateOfChangeSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedRateOfChangeSpecOptions(int rocLength = 12, int smoothLength = 3)
+    {
+        RocLength = Math.Max(1, rocLength);
+        SmoothLength = Math.Max(1, smoothLength);
+    }
+    public int RocLength { get; }
+    public int SmoothLength { get; }
+}
+
