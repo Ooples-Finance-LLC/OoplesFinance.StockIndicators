@@ -7301,3 +7301,44 @@ public sealed class EhlersSimpleDecyclerSpecOptions : IIndicatorSpecOptions
     public EhlersSimpleDecyclerSpecOptions(int length = 125) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
+
+/// <summary>
+/// Ehlers Even Better Sine Wave Indicator options.
+/// </summary>
+public sealed class EhlersEvenBetterSineWaveIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersEvenBetterSineWaveIndicatorSpecOptions(int length1 = 40, int length2 = 10)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Ehlers Market State Indicator options.
+/// </summary>
+public sealed class EhlersMarketStateIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersMarketStateIndicatorSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Instantaneous Trendline V2 options.
+/// </summary>
+public sealed class EhlersInstantaneousTrendlineV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersInstantaneousTrendlineV2SpecOptions(double alpha = 0.07) { Alpha = alpha; }
+    public double Alpha { get; }
+}
+
+/// <summary>
+/// Ehlers CyberCycle Oscillator options.
+/// </summary>
+public sealed class EhlersCyberCycleOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCyberCycleOscillatorSpecOptions(double alpha = 0.07) { Alpha = alpha; }
+    public double Alpha { get; }
+}

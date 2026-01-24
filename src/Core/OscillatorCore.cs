@@ -10840,6 +10840,185 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers Even Better Sine Wave Indicator.
+    /// </summary>
+    internal static void EhlersEvenBetterSineWaveIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 40, int length2 = 10)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var piHp = Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length1));
+        var a1 = (1 - Math.Sin(piHp)) / Math.Cos(piHp);
+        var a2 = Math.Exp(Math.Max(-0.99, Math.Min(-0.01, -1.414 * Math.PI / length2)));
+        var b = 2 * a2 * Math.Cos(Math.Max(0.01, Math.Min(0.99, 1.414 * Math.PI / length2)));
+        var c2 = b;
+        var c3 = -a2 * a2;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+        var filtArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            var filt = filtArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevHp = i >= 1 ? hp[i - 1] : 0;
+                var prevFilt1 = i >= 1 ? filt[i - 1] : 0;
+                var prevFilt2 = i >= 2 ? filt[i - 2] : 0;
+
+                var diff = currentValue - prevValue;
+                var minPastDiff = i >= 1 ? diff : 0;
+                hp[i] = ((0.5 * (1 + a1)) * minPastDiff) + (a1 * prevHp);
+
+                filt[i] = (c1 * ((hp[i] + prevHp) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
+
+                var wave = (filt[i] + prevFilt1 + prevFilt2) / 3;
+                var pwr = (filt[i] * filt[i] + prevFilt1 * prevFilt1 + prevFilt2 * prevFilt2) / 3;
+                output[i] = pwr > 0 ? wave / Math.Sqrt(pwr) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(filtArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Market State Indicator.
+    /// </summary>
+    internal static void EhlersMarketStateIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var angleArray = pool.Rent(close.Length);
+
+        try
+        {
+            var angle = angleArray.AsSpan(0, close.Length);
+            EhlersCorrelationAngleIndicator(close, angle, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentAngle = angle[i];
+                var prevAngle = i >= 1 ? angle[i - 1] : 0;
+
+                double state;
+                if (Math.Abs(currentAngle - prevAngle) < 9 && currentAngle < 0)
+                {
+                    state = -1;
+                }
+                else if (Math.Abs(currentAngle - prevAngle) < 9 && currentAngle >= 0)
+                {
+                    state = 1;
+                }
+                else
+                {
+                    state = 0;
+                }
+                output[i] = state;
+            }
+        }
+        finally
+        {
+            pool.Return(angleArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Instantaneous Trendline V2.
+    /// </summary>
+    internal static void EhlersInstantaneousTrendlineV2(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentValue = close[i];
+            var prevValue1 = i >= 1 ? close[i - 1] : 0;
+            var prevValue2 = i >= 2 ? close[i - 2] : 0;
+            var prevIt1 = i >= 1 ? output[i - 1] : 0;
+            var prevIt2 = i >= 2 ? output[i - 2] : 0;
+
+            var it = i < 7
+                ? (currentValue + (2 * prevValue1) + prevValue2) / 4
+                : (((alpha - ((alpha * alpha) / 4)) * currentValue) + ((0.5 * alpha * alpha) * prevValue1) -
+                   (((alpha - ((3 * alpha * alpha) / 4)) * prevValue2)) + ((2 * (1 - alpha)) * prevIt1) -
+                   (((1 - alpha) * (1 - alpha)) * prevIt2));
+
+            output[i] = it;
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers CyberCycle.
+    /// </summary>
+    internal static void EhlersCyberCycleOscillator(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(close.Length);
+        var cycleArray = pool.Rent(close.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, close.Length);
+            var cycle = cycleArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue1 = i >= 1 ? close[i - 1] : 0;
+                var prevValue2 = i >= 2 ? close[i - 2] : 0;
+                var prevValue3 = i >= 3 ? close[i - 3] : 0;
+                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
+                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
+                var prevCycle1 = i >= 1 ? cycle[i - 1] : 0;
+                var prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
+
+                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
+
+                var cycleVal = i < 7
+                    ? (currentValue - (2 * prevValue1) + prevValue2) / 4
+                    : ((1 - (0.5 * alpha)) * (1 - (0.5 * alpha)) * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
+                      (2 * (1 - alpha) * prevCycle1) - ((1 - alpha) * (1 - alpha) * prevCycle2);
+
+                cycle[i] = cycleVal;
+                output[i] = cycleVal;
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+            pool.Return(cycleArray);
+        }
+    }
+
     #endregion
 
     #endregion
