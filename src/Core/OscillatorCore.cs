@@ -9279,6 +9279,42 @@ internal static class OscillatorCore
     }
 
     /// <summary>
+    /// Computes Contract High - running maximum of highs.
+    /// </summary>
+    internal static void ContractHigh(ReadOnlySpan<double> high, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double maxHigh = double.MinValue;
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (high[i] > maxHigh) maxHigh = high[i];
+            output[i] = maxHigh;
+        }
+    }
+
+    /// <summary>
+    /// Computes Contract Low - running minimum of lows.
+    /// </summary>
+    internal static void ContractLow(ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < low.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double minLow = double.MaxValue;
+        for (var i = 0; i < low.Length; i++)
+        {
+            if (low[i] < minLow) minLow = low[i];
+            output[i] = minLow;
+        }
+    }
+
+    /// <summary>
     /// Computes Chande Intraday Momentum Index.
     /// Measures the relationship between open and close prices.
     /// </summary>

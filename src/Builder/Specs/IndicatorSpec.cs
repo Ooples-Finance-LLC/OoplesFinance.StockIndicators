@@ -5858,6 +5858,22 @@ public sealed class ChandeIntradayMomentumIndexSpecOptions : IIndicatorSpecOptio
 }
 
 /// <summary>
+/// Contract High indicator options (running maximum).
+/// </summary>
+public sealed class ContractHighSpecOptions : IIndicatorSpecOptions
+{
+    public ContractHighSpecOptions() { }
+}
+
+/// <summary>
+/// Contract Low indicator options (running minimum).
+/// </summary>
+public sealed class ContractLowSpecOptions : IIndicatorSpecOptions
+{
+    public ContractLowSpecOptions() { }
+}
+
+/// <summary>
 /// Corrected Moving Average indicator options.
 /// </summary>
 public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions

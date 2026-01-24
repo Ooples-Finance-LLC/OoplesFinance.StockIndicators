@@ -735,6 +735,8 @@ internal static partial class IndicatorCompute
             VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length, vama.Factor),
             AverageDayRangeSpecOptions adr => ComputeAverageDayRangeFast(data, context, adr.Length),
             ChandeIntradayMomentumIndexSpecOptions cimi => ComputeChandeIntradayMomentumIndexFast(data, context, cimi.Length),
+            ContractHighSpecOptions _ => ComputeContractHighFast(data, context),
+            ContractLowSpecOptions _ => ComputeContractLowFast(data, context),
 
             _ => null
         };
@@ -7629,6 +7631,28 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.ChandeIntradayMomentumIndex(open, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Contract High (running maximum) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeContractHighFast(StockData data, ComputeContext context)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ContractHigh(high, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Contract Low (running minimum) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeContractLowFast(StockData data, ComputeContext context)
+    {
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ContractLow(low, buffer.WritableSpan);
         return buffer;
     }
 
