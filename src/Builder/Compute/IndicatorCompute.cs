@@ -795,6 +795,8 @@ internal static partial class IndicatorCompute
             EhlersImpulseReactionSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length1, eir.Length2, eir.Q),
             EhlersReverseEmaIndicatorV1SpecOptions erema => ComputeEhlersReverseEmaIndicatorV1Fast(data, context, erema.Alpha),
             EhlersSquelchIndicatorSpecOptions esqe => ComputeEhlersSquelchIndicatorFast(data, context, esqe.Length1, esqe.Length2, esqe.Length3),
+            EhlersReverseEmaIndicatorV2SpecOptions eremav2 => ComputeEhlersReverseEmaIndicatorV2Fast(data, context, eremav2.TrendAlpha, eremav2.CycleAlpha),
+            EhlersStochasticCyberCycleSpecOptions escc => ComputeEhlersStochasticCyberCycleFast(data, context, escc.Length, escc.Alpha),
 
             _ => null
         };
@@ -8443,6 +8445,30 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersSquelchIndicator(inputSpan, buffer.WritableSpan, length1, length2, length3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Reverse EMA Indicator V2 using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast(StockData data, ComputeContext context, double trendAlpha = 0.05, double cycleAlpha = 0.3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersReverseEmaIndicatorV2(inputSpan, buffer.WritableSpan, trendAlpha, cycleAlpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Stochastic Cyber Cycle using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersStochasticCyberCycleFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.7)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersStochasticCyberCycle(inputSpan, buffer.WritableSpan, length, alpha);
         return buffer;
     }
 

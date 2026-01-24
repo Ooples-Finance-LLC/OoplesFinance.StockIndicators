@@ -11745,6 +11745,111 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates Ehlers Reverse Exponential Moving Average Indicator V2.
+    /// Outputs the cycle component (uses cycleAlpha).
+    /// </summary>
+    internal static void EhlersReverseEmaIndicatorV2(ReadOnlySpan<double> close, Span<double> output, double trendAlpha = 0.05, double cycleAlpha = 0.3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        trendAlpha = Math.Max(0.01, Math.Min(0.99, trendAlpha));
+        cycleAlpha = Math.Max(0.01, Math.Min(0.99, cycleAlpha));
+
+        var pool = ArrayPool<double>.Shared;
+        var trendArray = pool.Rent(close.Length);
+        var cycleArray = pool.Rent(close.Length);
+
+        try
+        {
+            var trend = trendArray.AsSpan(0, close.Length);
+            var cycle = cycleArray.AsSpan(0, close.Length);
+
+            // Compute both V1 indicators with different alphas
+            EhlersReverseEmaIndicatorV1(close, trend, trendAlpha);
+            EhlersReverseEmaIndicatorV1(close, cycle, cycleAlpha);
+
+            // Output the cycle component (difference shows trend direction)
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = cycle[i];
+            }
+        }
+        finally
+        {
+            pool.Return(trendArray);
+            pool.Return(cycleArray);
+        }
+    }
+
+    /// <summary>
+    /// Calculates Ehlers Stochastic Cyber Cycle.
+    /// </summary>
+    internal static void EhlersStochasticCyberCycle(ReadOnlySpan<double> close, Span<double> output, int length = 14, double alpha = 0.7)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        length = Math.Max(1, length);
+        alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+
+        var pool = ArrayPool<double>.Shared;
+        var cyberCycleArray = pool.Rent(close.Length);
+        var stochArray = pool.Rent(close.Length);
+
+        try
+        {
+            var cyberCycle = cyberCycleArray.AsSpan(0, close.Length);
+            var stoch = stochArray.AsSpan(0, close.Length);
+
+            // First compute Ehlers CyberCycle
+            MovingAverageCore.EhlersCyberCycle(close, cyberCycle, alpha);
+
+            // Compute stochastic of cyber cycle
+            for (var i = 0; i < close.Length; i++)
+            {
+                // Rolling max/min over length period
+                var maxCycle = double.MinValue;
+                var minCycle = double.MaxValue;
+                var lookback = Math.Min(i + 1, length);
+
+                for (var j = 0; j < lookback; j++)
+                {
+                    var idx = i - j;
+                    var val = cyberCycle[idx];
+                    if (val > maxCycle) maxCycle = val;
+                    if (val < minCycle) minCycle = val;
+                }
+
+                var range = maxCycle - minCycle;
+                var rawStoch = range != 0 ? (cyberCycle[i] - minCycle) / range : 0;
+                stoch[i] = Math.Max(0, Math.Min(1, rawStoch));
+            }
+
+            // Apply weighted smoothing and scale to -1 to 1
+            for (var i = 0; i < close.Length; i++)
+            {
+                var prevStoch1 = i >= 1 ? stoch[i - 1] : 0;
+                var prevStoch2 = i >= 2 ? stoch[i - 2] : 0;
+                var prevStoch3 = i >= 3 ? stoch[i - 3] : 0;
+
+                var smoothed = ((4 * stoch[i]) + (3 * prevStoch1) + (2 * prevStoch2) + prevStoch3) / 10;
+                var stochCC = 2 * (smoothed - 0.5);
+                output[i] = Math.Max(-1, Math.Min(1, stochCC));
+            }
+        }
+        finally
+        {
+            pool.Return(cyberCycleArray);
+            pool.Return(stochArray);
+        }
+    }
+
     #endregion
 
     #endregion

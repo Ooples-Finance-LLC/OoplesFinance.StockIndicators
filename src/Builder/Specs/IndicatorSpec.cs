@@ -7544,3 +7544,31 @@ public sealed class EhlersSquelchIndicatorSpecOptions : IIndicatorSpecOptions
     public int Length2 { get; }
     public int Length3 { get; }
 }
+
+/// <summary>
+/// Ehlers Reverse Exponential Moving Average Indicator V2 options.
+/// </summary>
+public sealed class EhlersReverseEmaIndicatorV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersReverseEmaIndicatorV2SpecOptions(double trendAlpha = 0.05, double cycleAlpha = 0.3)
+    {
+        TrendAlpha = Math.Max(0.01, Math.Min(0.99, trendAlpha));
+        CycleAlpha = Math.Max(0.01, Math.Min(0.99, cycleAlpha));
+    }
+    public double TrendAlpha { get; }
+    public double CycleAlpha { get; }
+}
+
+/// <summary>
+/// Ehlers Stochastic Cyber Cycle options.
+/// </summary>
+public sealed class EhlersStochasticCyberCycleSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersStochasticCyberCycleSpecOptions(int length = 14, double alpha = 0.7)
+    {
+        Length = Math.Max(1, length);
+        Alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+    }
+    public int Length { get; }
+    public double Alpha { get; }
+}
