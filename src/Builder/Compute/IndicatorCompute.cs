@@ -615,7 +615,7 @@ internal static partial class IndicatorCompute
             StandardErrorCoreSpecOptions sec => ComputeStandardErrorCoreFast(data, context, sec.Length),
 
             // Batch 25 - Additional Moving Averages (Unwired Core Methods)
-            AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length),
+            AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length, aarmao.Lambda),
             CorrectedMovingAverageSpecOptions cma => ComputeCorrectedMovingAverageFast(data, context, cma.Length),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
@@ -724,6 +724,9 @@ internal static partial class IndicatorCompute
             RelativeVolatilityIndexLowSpecOptions rvil => ComputeRelativeVolatilityIndexLowFast(data, context, rvil.Length, rvil.StdDevLength),
             TypicalPriceVolatilitySpecOptions tpv => ComputeTypicalPriceVolatilityFast(data, context, tpv.Length),
             RatioOchlAveragerSpecOptions _ => ComputeRatioOchlAveragerFast(data, context),
+
+            // Batch 29 - Additional Missing Indicators
+            TripleHullMovingAverageSpecOptions thma => ComputeTripleHullMovingAverageFast(data, context, thma.Length),
 
             _ => null
         };
@@ -7514,6 +7517,34 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         MovingAverageCore.RatioOchlAverager(open, close, high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 29 - Additional Missing Indicators
+
+    /// <summary>
+    /// Computes Triple Hull Moving Average (3HMA) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTripleHullMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.TripleHullMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, buffer.WritableSpan, length, lambda);
         return buffer;
     }
 

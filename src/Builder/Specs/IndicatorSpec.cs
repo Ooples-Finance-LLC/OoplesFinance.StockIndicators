@@ -5777,7 +5777,17 @@ public sealed class StandardErrorCoreSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class AdaptiveAutonomousRecursiveMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public AdaptiveAutonomousRecursiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public AdaptiveAutonomousRecursiveMovingAverageSpecOptions(int length, double lambda = 1) { Length = Math.Max(1, length); Lambda = lambda; }
+    public int Length { get; }
+    public double Lambda { get; }
+}
+
+/// <summary>
+/// Triple Hull Moving Average (3HMA) indicator options.
+/// </summary>
+public sealed class TripleHullMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public TripleHullMovingAverageSpecOptions(int length = 50) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
 
