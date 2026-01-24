@@ -753,6 +753,9 @@ internal static partial class IndicatorCompute
             TrendDetectionIndexSpecOptions tdi => ComputeTrendDetectionIndexFast(data, context, tdi.Length1, tdi.Length2),
             UberTrendIndicatorSpecOptions uti => ComputeUberTrendIndicatorFast(data, context, uti.Length),
             PercentageTrendSpecOptions pt => ComputePercentageTrendFast(data, context, pt.Length, pt.Pct),
+            LiquidRelativeStrengthIndexSpecOptions lrsi => ComputeLiquidRelativeStrengthIndexFast(data, context, lrsi.Length),
+            AsymmetricalRelativeStrengthIndexSpecOptions arsi => ComputeAsymmetricalRelativeStrengthIndexFast(data, context, arsi.Length),
+            AverageAbsoluteErrorNormalizationSpecOptions aaen => ComputeAverageAbsoluteErrorNormalizationFast(data, context, aaen.Length),
 
             _ => null
         };
@@ -7877,6 +7880,42 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.PercentageTrend(inputSpan, buffer.WritableSpan, length, pct);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Liquid Relative Strength Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.LiquidRelativeStrengthIndex(close, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Asymmetrical Relative Strength Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAsymmetricalRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.AsymmetricalRelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Average Absolute Error Normalization using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAverageAbsoluteErrorNormalizationFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.AverageAbsoluteErrorNormalization(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 

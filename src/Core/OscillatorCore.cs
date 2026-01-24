@@ -9940,6 +9940,109 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Liquid Relative Strength Index.
+    /// </summary>
+    internal static void LiquidRelativeStrengthIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var k = 1.0 / length;
+        double numEma = 0, denEma = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevValue = i >= 1 ? close[i - 1] : 0;
+            var prevVolume = i >= 1 ? volume[i - 1] : 0;
+            var a = close[i] - prevValue;
+            var b = volume[i] - prevVolume;
+            var num = Math.Max(a, 0) * Math.Max(b, 0);
+            var den = Math.Abs(a) * Math.Abs(b);
+
+            numEma = (num * k) + (numEma * (1 - k));
+            denEma = (den * k) + (denEma * (1 - k));
+
+            output[i] = denEma != 0 ? Math.Min(Math.Max(100 * numEma / denEma, 0), 100) : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Asymmetrical Relative Strength Index.
+    /// </summary>
+    internal static void AsymmetricalRelativeStrengthIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var upCountSum = new RollingSum();
+        double upSum = 0, downSum = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevValue = i >= 1 ? close[i - 1] : 0;
+            var roc = prevValue != 0 ? (close[i] - prevValue) / prevValue * 100 : 0;
+
+            var upFlag = roc >= 0 ? 1.0 : 0.0;
+            upCountSum.Add(upFlag);
+            var upCount = upCountSum.Sum(length);
+            var upAlpha = upCount != 0 ? 1 / upCount : 0;
+            var posRoc = roc > 0 ? roc : 0;
+            var negRoc = roc < 0 ? Math.Abs(roc) : 0;
+
+            upSum = (upAlpha * posRoc) + ((1 - upAlpha) * upSum);
+
+            var downCount = length - upCount;
+            var downAlpha = downCount != 0 ? 1 / downCount : 0;
+            downSum = (downAlpha * negRoc) + ((1 - downAlpha) * downSum);
+
+            var ars = downSum != 0 ? upSum / downSum : 0;
+            output[i] = downSum == 0 ? 100 : upSum == 0 ? 0 : Math.Min(Math.Max(100 - (100 / (1 + ars)), 0), 100);
+        }
+    }
+
+    /// <summary>
+    /// Computes Average Absolute Error Normalization.
+    /// </summary>
+    internal static void AverageAbsoluteErrorNormalization(ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var eAbsSum = new RollingSum();
+        var eSum = new RollingSum();
+        double prevY = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i == 0)
+            {
+                prevY = close[i];
+            }
+
+            var e = close[i] - prevY;
+            eSum.Add(e);
+            eAbsSum.Add(Math.Abs(e));
+
+            var eAbsSma = eAbsSum.Average(length);
+            var eSma = eSum.Average(length);
+
+            var a = eAbsSma != 0 ? Math.Min(Math.Max(eSma / eAbsSma, -1), 1) : 0;
+            output[i] = a;
+
+            prevY = close[i] + (a * eAbsSma);
+        }
+    }
+
     #endregion
 
     #endregion

@@ -7038,3 +7038,30 @@ public sealed class PercentageTrendSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
     public double Pct { get; }
 }
+
+/// <summary>
+/// Liquid Relative Strength Index indicator options.
+/// </summary>
+public sealed class LiquidRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public LiquidRelativeStrengthIndexSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Asymmetrical Relative Strength Index indicator options.
+/// </summary>
+public sealed class AsymmetricalRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public AsymmetricalRelativeStrengthIndexSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Average Absolute Error Normalization indicator options.
+/// </summary>
+public sealed class AverageAbsoluteErrorNormalizationSpecOptions : IIndicatorSpecOptions
+{
+    public AverageAbsoluteErrorNormalizationSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
