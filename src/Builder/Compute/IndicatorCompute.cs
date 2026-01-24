@@ -803,6 +803,7 @@ internal static partial class IndicatorCompute
             JmaRsxCloneSpecOptions jrsx => ComputeJmaRsxCloneFast(data, context, jrsx.Length),
             RateOfChangeSpecOptions roc => ComputeRateOfChangeFast(data, context, roc.Length),
             WilliamsFractalsSpecOptions wf => ComputeWilliamsFractalsFast(data, context, wf.Length),
+            DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
 
             _ => null
         };
@@ -8555,6 +8556,18 @@ internal static partial class IndicatorCompute
         {
             downBuffer.Dispose();
         }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Detrended Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDetrendedPriceOscillatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.DetrendedPriceOscillator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 

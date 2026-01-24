@@ -7644,3 +7644,15 @@ public sealed class WilliamsFractalsSpecOptions : IIndicatorSpecOptions
     }
     public int Length { get; }
 }
+
+/// <summary>
+/// Detrended Price Oscillator options.
+/// </summary>
+public sealed class DetrendedPriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public DetrendedPriceOscillatorSpecOptions(int length = 20)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}
