@@ -11935,6 +11935,63 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates Ehlers Trendflex Indicator.
+    /// </summary>
+    internal static void EhlersTrendflexIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var filterArray = pool.Rent(close.Length);
+        var msArray = pool.Rent(close.Length);
+
+        try
+        {
+            var filter = filterArray.AsSpan(0, close.Length);
+            var ms = msArray.AsSpan(0, close.Length);
+
+            var period = 0.5 * length;
+            var a1 = Math.Exp(-MathHelper.Sqrt2 * Math.PI / period);
+            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
+            var c2 = b1;
+            var c3 = -a1 * a1;
+            var c1 = 1 - c2 - c3;
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevFilter1 = i >= 1 ? filter[i - 1] : 0;
+                var prevFilter2 = i >= 2 ? filter[i - 2] : 0;
+                var prevMs = i >= 1 ? ms[i - 1] : 0;
+
+                filter[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+
+                double sum = 0;
+                for (var j = 1; j <= length; j++)
+                {
+                    var prevFilterCount = i >= j ? filter[i - j] : 0;
+                    sum += filter[i] - prevFilterCount;
+                }
+                sum /= length;
+
+                ms[i] = (0.04 * sum * sum) + (0.96 * prevMs);
+                output[i] = ms[i] > 0 ? sum / Math.Sqrt(ms[i]) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(filterArray);
+            pool.Return(msArray);
+        }
+    }
+
     #endregion
 
     #endregion

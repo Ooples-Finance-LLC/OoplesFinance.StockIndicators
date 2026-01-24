@@ -7596,3 +7596,15 @@ public sealed class EhlersReflexIndicatorSpecOptions : IIndicatorSpecOptions
     }
     public int Length { get; }
 }
+
+/// <summary>
+/// Ehlers Trendflex Indicator options.
+/// </summary>
+public sealed class EhlersTrendflexIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersTrendflexIndicatorSpecOptions(int length = 20)
+    {
+        Length = Math.Max(1, length);
+    }
+    public int Length { get; }
+}

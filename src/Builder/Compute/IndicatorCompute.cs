@@ -799,6 +799,7 @@ internal static partial class IndicatorCompute
             EhlersStochasticCyberCycleSpecOptions escc => ComputeEhlersStochasticCyberCycleFast(data, context, escc.Length, escc.Alpha),
             EhlersCenterofGravityOscillatorSpecOptions ecog => ComputeEhlersCenterofGravityOscillatorFast(data, context, ecog.Length),
             EhlersReflexIndicatorSpecOptions eri => ComputeEhlersReflexIndicatorFast(data, context, eri.Length),
+            EhlersTrendflexIndicatorSpecOptions eti => ComputeEhlersTrendflexIndicatorFast(data, context, eti.Length),
 
             _ => null
         };
@@ -8495,6 +8496,18 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersReflexIndicator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Trendflex Indicator using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersTrendflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersTrendflexIndicator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
