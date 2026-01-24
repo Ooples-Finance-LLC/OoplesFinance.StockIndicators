@@ -235,19 +235,17 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var halfLength = (length + 1) / 2;
-
         var pool = ArrayPool<double>.Shared;
         var sma1Array = pool.Rent(input.Length);
         try
         {
             var sma1 = sma1Array.AsSpan(0, input.Length);
 
-            // First SMA
-            SimpleMovingAverage(input, sma1, halfLength);
+            // First SMA with full length
+            SimpleMovingAverage(input, sma1, length);
 
-            // Second SMA (SMA of SMA)
-            SimpleMovingAverage(sma1, output, halfLength);
+            // Second SMA (SMA of SMA) with full length
+            SimpleMovingAverage(sma1, output, length);
         }
         finally
         {
@@ -293,35 +291,43 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // Rolling sums for incremental computation
+        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
+            var currentY = input[i];
+            var currentX = (double)i;
+
+            // Add current values to sums
+            sumX += currentX;
+            sumY += currentY;
+            sumXY += currentX * currentY;
+            sumX2 += currentX * currentX;
+
+            // Remove old values if window is full
+            if (i >= length)
             {
-                output[i] = 0;
-                continue;
+                var oldX = (double)(i - length);
+                var oldY = input[i - length];
+                sumX -= oldX;
+                sumY -= oldY;
+                sumXY -= oldX * oldY;
+                sumX2 -= oldX * oldX;
             }
 
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j;
-                var y = input[i - length + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
+            var n = Math.Min(i + 1, length);
+            var denominator = (n * sumX2) - (sumX * sumX);
 
-            var denominator = (length * sumX2) - (sumX * sumX);
             if (denominator == 0)
             {
-                output[i] = sumY / length;
+                output[i] = n > 0 ? sumY / n : 0;
             }
             else
             {
-                var slope = ((length * sumXY) - (sumX * sumY)) / denominator;
-                var intercept = (sumY - (slope * sumX)) / length;
-                output[i] = intercept + (slope * (length - 1));
+                var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
+                var intercept = (sumY - (slope * sumX)) / n;
+                output[i] = intercept + (slope * currentX);
             }
         }
     }
@@ -376,27 +382,30 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var lag = (length - 1) / 2;
-
         var pool = ArrayPool<double>.Shared;
-        var adjustedArray = pool.Rent(input.Length);
+        var ema1Array = pool.Rent(input.Length);
+        var ema2Array = pool.Rent(input.Length);
         try
         {
-            var adjusted = adjustedArray.AsSpan(0, input.Length);
+            var ema1 = ema1Array.AsSpan(0, input.Length);
+            var ema2 = ema2Array.AsSpan(0, input.Length);
 
-            // Create lag-adjusted series
+            // First EMA of input
+            ExponentialMovingAverage(input, ema1, length);
+
+            // Second EMA of first EMA
+            ExponentialMovingAverage(ema1, ema2, length);
+
+            // ZEMA = 2*ema1 - ema2
             for (var i = 0; i < input.Length; i++)
             {
-                var lagIdx = Math.Max(i - lag, 0);
-                adjusted[i] = (2 * input[i]) - input[lagIdx];
+                output[i] = (2 * ema1[i]) - ema2[i];
             }
-
-            // Final EMA on adjusted series
-            ExponentialMovingAverage(adjusted, output, length);
         }
         finally
         {
-            pool.Return(adjustedArray);
+            pool.Return(ema1Array);
+            pool.Return(ema2Array);
         }
     }
 
@@ -1559,7 +1568,7 @@ internal static class MovingAverageCore
 
     /// <summary>
     /// Computes Symmetrically Weighted Moving Average.
-    /// Weights are symmetric around the center.
+    /// Weights are symmetric around the center, handles partial data.
     /// </summary>
     internal static void SymmetricallyWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
@@ -1568,30 +1577,51 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Calculate symmetric triangular weights
-        var halfLen = (length + 1) / 2;
-        double weightSum = 0;
-        for (var w = 1; w <= halfLen; w++)
-        {
-            weightSum += w * (w <= length - w + 1 ? 2 : 1);
-        }
+        var floorLength = length / 2;
+        var roundLength = (length + 1) / 2;
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
+            double nr = 0, nl = 0, sr = 0, sl = 0;
+
+            if (floorLength == roundLength)
             {
-                output[i] = 0;
-                continue;
+                for (var j = 0; j <= floorLength - 1; j++)
+                {
+                    double wr = (length - (length - 1 - j)) * length;
+                    var prevVal = i >= j ? input[i - j] : 0;
+                    nr += wr;
+                    sr += prevVal * wr;
+                }
+
+                for (var j = floorLength; j <= length - 1; j++)
+                {
+                    double wl = (length - j) * length;
+                    var prevVal = i >= j ? input[i - j] : 0;
+                    nl += wl;
+                    sl += prevVal * wl;
+                }
+            }
+            else
+            {
+                for (var j = 0; j <= floorLength; j++)
+                {
+                    double wr = (length - (length - 1 - j)) * length;
+                    var prevVal = i >= j ? input[i - j] : 0;
+                    nr += wr;
+                    sr += prevVal * wr;
+                }
+
+                for (var j = roundLength; j <= length - 1; j++)
+                {
+                    double wl = (length - j) * length;
+                    var prevVal = i >= j ? input[i - j] : 0;
+                    nl += wl;
+                    sl += prevVal * wl;
+                }
             }
 
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var pos = j + 1;
-                var weight = pos <= halfLen ? pos : length - pos + 1;
-                sum += input[i - length + 1 + j] * weight;
-            }
-            output[i] = sum / weightSum;
+            output[i] = nr + nl != 0 ? (sr + sl) / (nr + nl) : 0;
         }
     }
 
@@ -1733,7 +1763,7 @@ internal static class MovingAverageCore
 
     /// <summary>
     /// Computes Repulsion Moving Average.
-    /// Combines multiple EMAs with repulsion weighting.
+    /// Combines SMA1, SMA2, SMA3 with formula: sma3 + sma2 - sma1
     /// </summary>
     internal static void RepulsionMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
@@ -1743,35 +1773,32 @@ internal static class MovingAverageCore
         }
 
         var pool = ArrayPool<double>.Shared;
-        var ema1Array = pool.Rent(input.Length);
-        var ema2Array = pool.Rent(input.Length);
-        var ema3Array = pool.Rent(input.Length);
+        var sma1Array = pool.Rent(input.Length);
+        var sma2Array = pool.Rent(input.Length);
+        var sma3Array = pool.Rent(input.Length);
 
         try
         {
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-            var ema2 = ema2Array.AsSpan(0, input.Length);
-            var ema3 = ema3Array.AsSpan(0, input.Length);
+            var sma1 = sma1Array.AsSpan(0, input.Length);
+            var sma2 = sma2Array.AsSpan(0, input.Length);
+            var sma3 = sma3Array.AsSpan(0, input.Length);
 
-            var len1 = Math.Max(1, length / 2);
-            var len2 = length;
-            var len3 = length * 2;
+            // SMA periods: length, length*2, length*3
+            SimpleMovingAverage(input, sma1, length);
+            SimpleMovingAverage(input, sma2, length * 2);
+            SimpleMovingAverage(input, sma3, length * 3);
 
-            ExponentialMovingAverage(input, ema1, len1);
-            ExponentialMovingAverage(input, ema2, len2);
-            ExponentialMovingAverage(input, ema3, len3);
-
-            // Repulsion = 3 * EMA1 - 2 * EMA2 + EMA3 / 2
+            // RMA = sma3 + sma2 - sma1
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = 3 * ema1[i] - 2 * ema2[i] + ema3[i] / 2;
+                output[i] = sma3[i] + sma2[i] - sma1[i];
             }
         }
         finally
         {
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-            pool.Return(ema3Array);
+            pool.Return(sma1Array);
+            pool.Return(sma2Array);
+            pool.Return(sma3Array);
         }
     }
 
@@ -1894,7 +1921,7 @@ internal static class MovingAverageCore
 
     /// <summary>
     /// Computes Ehlers Hann Moving Average.
-    /// Uses Hann window for smoothing.
+    /// Uses Hann window: cos = 1 - cos(2*pi*j/(length+1)) for j=1 to length.
     /// </summary>
     internal static void EhlersHannMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
@@ -1903,35 +1930,25 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Pre-calculate Hann weights
-        var weights = new double[length];
-        double weightSum = 0;
-        for (var i = 0; i < length; i++)
-        {
-            weights[i] = 0.5 * (1 - Math.Cos(2 * Math.PI * i / (length - 1)));
-            weightSum += weights[i];
-        }
-
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
+            double filtSum = 0, coefSum = 0;
+
+            for (var j = 1; j <= length; j++)
             {
-                output[i] = 0;
-                continue;
+                var prevV = i >= j - 1 ? input[i - (j - 1)] : 0;
+                var cos = 1 - Math.Cos(2 * Math.PI * ((double)j / (length + 1)));
+                filtSum += cos * prevV;
+                coefSum += cos;
             }
 
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                sum += input[i - length + 1 + j] * weights[j];
-            }
-            output[i] = sum / weightSum;
+            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
         }
     }
 
     /// <summary>
     /// Computes Ehlers Triangle Moving Average.
-    /// Uses triangular window coefficients.
+    /// Uses triangular window coefficients with partial data handling.
     /// </summary>
     internal static void EhlersTriangleMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
@@ -1940,31 +1957,21 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var halfLen = (length + 1) / 2;
-
-        // Pre-calculate triangular weights
-        var weights = new double[length];
-        double weightSum = 0;
-        for (var i = 0; i < length; i++)
-        {
-            weights[i] = i < halfLen ? i + 1 : length - i;
-            weightSum += weights[i];
-        }
+        var l2 = (double)length / 2;
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
+            double filtSum = 0, coefSum = 0;
+
+            for (var j = 1; j <= length; j++)
             {
-                output[i] = 0;
-                continue;
+                var prevV = i >= j - 1 ? input[i - (j - 1)] : 0;
+                var c = j < l2 ? j : j > l2 ? length + 1 - j : l2;
+                filtSum += c * prevV;
+                coefSum += c;
             }
 
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                sum += input[i - length + 1 + j] * weights[j];
-            }
-            output[i] = sum / weightSum;
+            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
         }
     }
 

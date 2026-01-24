@@ -382,7 +382,11 @@ public static class CalculationsHelper
             or MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 or MovingAvgType.Ehlers3PoleSuperSmootherFilter
             or MovingAvgType.EhlersSimpleDecycler or MovingAvgType.EhlersHammingMovingAverage
             or MovingAvgType.DistanceWeightedMovingAverage or MovingAvgType.EhlersFilter
-            or MovingAvgType.EhlersFiniteImpulseResponseFilter or MovingAvgType.EhlersInfiniteImpulseResponseFilter)
+            or MovingAvgType.EhlersFiniteImpulseResponseFilter or MovingAvgType.EhlersInfiniteImpulseResponseFilter
+            or MovingAvgType.TriangularMovingAverage or MovingAvgType.LinearRegression
+            or MovingAvgType.SymmetricallyWeightedMovingAverage or MovingAvgType.RepulsionMovingAverage
+            or MovingAvgType.EhlersHannMovingAverage or MovingAvgType.EhlersTriangleMovingAverage
+            or MovingAvgType.ZeroLagExponentialMovingAverage)
         {
             var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
             var count = inputList.Count;
@@ -547,6 +551,27 @@ public static class CalculationsHelper
                     break;
                 case MovingAvgType.EhlersInfiniteImpulseResponseFilter:
                     MovingAverageCore.EhlersInfiniteImpulseResponseFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TriangularMovingAverage:
+                    MovingAverageCore.TriangularMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LinearRegression:
+                    MovingAverageCore.LinearRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SymmetricallyWeightedMovingAverage:
+                    MovingAverageCore.SymmetricallyWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RepulsionMovingAverage:
+                    MovingAverageCore.RepulsionMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersHannMovingAverage:
+                    MovingAverageCore.EhlersHannMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersTriangleMovingAverage:
+                    MovingAverageCore.EhlersTriangleMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ZeroLagExponentialMovingAverage:
+                    MovingAverageCore.ZeroLagEma(inputSpan, outputSpan, length);
                     break;
             }
 
