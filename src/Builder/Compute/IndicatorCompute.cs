@@ -781,6 +781,10 @@ internal static partial class IndicatorCompute
             EhlersMarketStateIndicatorSpecOptions emsi => ComputeEhlersMarketStateIndicatorFast(data, context, emsi.Length),
             EhlersInstantaneousTrendlineV2SpecOptions eitv2 => ComputeEhlersInstantaneousTrendlineV2Fast(data, context, eitv2.Alpha),
             EhlersCyberCycleOscillatorSpecOptions ecco => ComputeEhlersCyberCycleOscillatorFast(data, context, ecco.Alpha),
+            EhlersBandPassFilterV1SpecOptions ebpfv1 => ComputeEhlersBandPassFilterV1Fast(data, context, ebpfv1.Length, ebpfv1.Bw),
+            EhlersBandPassFilterV2SpecOptions ebpfv2 => ComputeEhlersBandPassFilterV2Fast(data, context, ebpfv2.Length, ebpfv2.Bw),
+            EhlersCycleBandPassFilterSpecOptions ecbpf => ComputeEhlersCycleBandPassFilterFast(data, context, ecbpf.Length, ecbpf.Delta),
+            EhlersCycleAmplitudeSpecOptions eca => ComputeEhlersCycleAmplitudeFast(data, context, eca.Length, eca.Delta),
 
             _ => null
         };
@@ -8252,6 +8256,54 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersCyberCycleOscillator(inputSpan, buffer.WritableSpan, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Band Pass Filter V1 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersBandPassFilterV1Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersBandPassFilterV1(inputSpan, buffer.WritableSpan, length, bw);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Band Pass Filter V2 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersBandPassFilterV2Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersBandPassFilterV2(inputSpan, buffer.WritableSpan, length, bw);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cycle Band Pass Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCycleBandPassFilterFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCycleBandPassFilter(inputSpan, buffer.WritableSpan, length, delta);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cycle Amplitude using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersCycleAmplitudeFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersCycleAmplitude(inputSpan, buffer.WritableSpan, length, delta);
         return buffer;
     }
 

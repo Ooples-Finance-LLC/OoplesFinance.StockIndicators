@@ -7342,3 +7342,59 @@ public sealed class EhlersCyberCycleOscillatorSpecOptions : IIndicatorSpecOption
     public EhlersCyberCycleOscillatorSpecOptions(double alpha = 0.07) { Alpha = alpha; }
     public double Alpha { get; }
 }
+
+/// <summary>
+/// Ehlers Band Pass Filter V1 options.
+/// </summary>
+public sealed class EhlersBandPassFilterV1SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersBandPassFilterV1SpecOptions(int length = 20, double bw = 0.3)
+    {
+        Length = Math.Max(1, length);
+        Bw = bw;
+    }
+    public int Length { get; }
+    public double Bw { get; }
+}
+
+/// <summary>
+/// Ehlers Band Pass Filter V2 options.
+/// </summary>
+public sealed class EhlersBandPassFilterV2SpecOptions : IIndicatorSpecOptions
+{
+    public EhlersBandPassFilterV2SpecOptions(int length = 20, double bw = 0.3)
+    {
+        Length = Math.Max(1, length);
+        Bw = bw;
+    }
+    public int Length { get; }
+    public double Bw { get; }
+}
+
+/// <summary>
+/// Ehlers Cycle Band Pass Filter options.
+/// </summary>
+public sealed class EhlersCycleBandPassFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCycleBandPassFilterSpecOptions(int length = 20, double delta = 0.1)
+    {
+        Length = Math.Max(1, length);
+        Delta = delta;
+    }
+    public int Length { get; }
+    public double Delta { get; }
+}
+
+/// <summary>
+/// Ehlers Cycle Amplitude options.
+/// </summary>
+public sealed class EhlersCycleAmplitudeSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersCycleAmplitudeSpecOptions(int length = 20, double delta = 0.1)
+    {
+        Length = Math.Max(1, length);
+        Delta = delta;
+    }
+    public int Length { get; }
+    public double Delta { get; }
+}

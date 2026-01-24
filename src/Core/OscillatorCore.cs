@@ -11019,6 +11019,169 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Ehlers Band Pass Filter V1.
+    /// </summary>
+    internal static void EhlersBandPassFilterV1(ReadOnlySpan<double> close, Span<double> output, int length = 20, double bw = 0.3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var twoPiPrd1 = Math.Max(0.01, Math.Min(0.99, 0.25 * bw * 2 * Math.PI / length));
+        var twoPiPrd2 = Math.Max(0.01, Math.Min(0.99, 1.5 * bw * 2 * Math.PI / length));
+        var beta = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
+        var gamma = 1 / Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * bw / length)));
+        var alpha1 = gamma - Math.Sqrt((gamma * gamma) - 1);
+        var alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
+        var alpha3 = (Math.Cos(twoPiPrd2) + Math.Sin(twoPiPrd2) - 1) / Math.Cos(twoPiPrd2);
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+        var bpArray = pool.Rent(close.Length);
+        var peakArray = pool.Rent(close.Length);
+        var signalArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            var bp = bpArray.AsSpan(0, close.Length);
+            var peak = peakArray.AsSpan(0, close.Length);
+            var signal = signalArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var prevValue = i >= 1 ? close[i - 1] : 0;
+                var prevHp1 = i >= 1 ? hp[i - 1] : 0;
+                var prevHp2 = i >= 2 ? hp[i - 2] : 0;
+                var prevBp1 = i >= 1 ? bp[i - 1] : 0;
+                var prevBp2 = i >= 2 ? bp[i - 2] : 0;
+
+                var diff = currentValue - prevValue;
+                var minPastDiff = i >= 1 ? diff : 0;
+                hp[i] = ((1 + (alpha2 / 2)) * minPastDiff) + ((1 - alpha2) * prevHp1);
+
+                bp[i] = i > 2 ? (0.5 * (1 - alpha1) * (hp[i] - prevHp2)) + (beta * (1 + alpha1) * prevBp1) - (alpha1 * prevBp2) : 0;
+
+                var prevPeak = i >= 1 ? peak[i - 1] : 0;
+                peak[i] = Math.Max(0.991 * prevPeak, Math.Abs(bp[i]));
+
+                var prevSig = i >= 1 ? signal[i - 1] : 0;
+                signal[i] = peak[i] != 0 ? bp[i] / peak[i] : 0;
+
+                var prevTrigger = i >= 1 ? output[i - 1] : 0;
+                output[i] = ((1 + (alpha3 / 2)) * (signal[i] - prevSig)) + ((1 - alpha3) * prevTrigger);
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(bpArray);
+            pool.Return(peakArray);
+            pool.Return(signalArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Band Pass Filter V2.
+    /// </summary>
+    internal static void EhlersBandPassFilterV2(ReadOnlySpan<double> close, Span<double> output, int length = 20, double bw = 0.3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var l1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
+        var g1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, bw * 2 * Math.PI / length)));
+        var s1 = (1 / g1) - Math.Sqrt(1 / (g1 * g1) - 1);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentValue = close[i];
+            var prevValue = i >= 2 ? close[i - 2] : 0;
+            var prevBp1 = i >= 1 ? output[i - 1] : 0;
+            var prevBp2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cycle Band Pass Filter.
+    /// </summary>
+    internal static void EhlersCycleBandPassFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double delta = 0.1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var beta = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length)));
+        var gamma = 1 / Math.Cos(Math.Max(0.01, Math.Min(0.99, 4 * Math.PI * delta / length)));
+        var alpha = gamma - Math.Sqrt((gamma * gamma) - 1);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentValue = close[i];
+            var prevValue = i >= 2 ? close[i - 2] : 0;
+            var prevBp1 = i >= 1 ? output[i - 1] : 0;
+            var prevBp2 = i >= 2 ? output[i - 2] : 0;
+
+            var diff = currentValue - prevValue;
+            var minPastDiff = i >= 2 ? diff : 0;
+            output[i] = (0.5 * (1 - alpha) * minPastDiff) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Cycle Amplitude.
+    /// </summary>
+    internal static void EhlersCycleAmplitude(ReadOnlySpan<double> close, Span<double> output, int length = 20, double delta = 0.1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var lbLength = (int)Math.Ceiling((double)length / 4);
+
+        var pool = ArrayPool<double>.Shared;
+        var bpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var bp = bpArray.AsSpan(0, close.Length);
+            EhlersCycleBandPassFilter(close, bp, length, delta);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                double power = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var prevBp1 = i >= j ? bp[i - j] : 0;
+                    var prevBp2 = i >= j + lbLength ? bp[i - (j + lbLength)] : 0;
+                    power += (prevBp1 * prevBp1) + (prevBp2 * prevBp2);
+                }
+
+                output[i] = 2 * 1.414 * Math.Sqrt(power / length);
+            }
+        }
+        finally
+        {
+            pool.Return(bpArray);
+        }
+    }
+
     #endregion
 
     #endregion
