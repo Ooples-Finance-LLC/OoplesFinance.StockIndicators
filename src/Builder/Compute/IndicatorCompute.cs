@@ -596,6 +596,86 @@ internal static partial class IndicatorCompute
             RviVolatilitySpecOptions rviv => ComputeRviVolatilityFast(data, context, rviv.Length),
             StandardErrorCoreSpecOptions sec => ComputeStandardErrorCoreFast(data, context, sec.Length),
 
+            // Batch 25 - Additional Moving Averages (Unwired Core Methods)
+            AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length),
+            CorrectedMovingAverageSpecOptions cma => ComputeCorrectedMovingAverageFast(data, context, cma.Length),
+            CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
+            DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
+            EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length),
+            EhlersAllPassPhaseShifterSpecOptions eapps => ComputeEhlersAllPassPhaseShifterFast(data, context, eapps.Length),
+            EhlersAverageErrorFilterSpecOptions eaef => ComputeEhlersAverageErrorFilterFast(data, context, eaef.Length),
+            EhlersDistanceCoefficientFilterSpecOptions edcf => ComputeEhlersDistanceCoefficientFilterFast(data, context, edcf.Length),
+            EhlersKaufmanAdaptiveMovingAverageSpecOptions ekama => ComputeEhlersKaufmanAdaptiveMovingAverageFast(data, context, ekama.Length),
+            EhlersModifiedOptimumEllipticFilterSpecOptions emoef => ComputeEhlersModifiedOptimumEllipticFilterFast(data, context, emoef.Length),
+            EhlersNoiseEliminationTechnologySpecOptions enet => ComputeEhlersNoiseEliminationTechnologyFast(data, context, enet.Length),
+            EhlersOptimumEllipticFilterSpecOptions eoef => ComputeEhlersOptimumEllipticFilterFast(data, context, eoef.Length),
+            EhlersVariableIndexDynamicAverageSpecOptions evidao => ComputeEhlersVariableIndexDynamicAverageFast(data, context, evidao.Length),
+            FallingRisingFilterSpecOptions frf => ComputeFallingRisingFilterFast(data, context, frf.Length),
+            FareySequenceWeightedMovingAverageSpecOptions fswma => ComputeFareySequenceWeightedMovingAverageFast(data, context, fswma.Length),
+            FisherLeastSquaresMovingAverageSpecOptions flsma => ComputeFisherLeastSquaresMovingAverageFast(data, context, flsma.Length),
+            FollowingAdaptiveMovingAverageSpecOptions fama => ComputeFollowingAdaptiveMovingAverageFast(data, context, fama.Length),
+            GeneralFilterEstimatorSpecOptions gfe => ComputeGeneralFilterEstimatorFast(data, context, gfe.Length),
+            HendersonWeightedMovingAverageSpecOptions hwma => ComputeHendersonWeightedMovingAverageFast(data, context, hwma.Length),
+            HullEstimateSpecOptions hest => ComputeHullEstimateFast(data, context, hest.Length),
+            HybridConvolutionFilterSpecOptions hcf => ComputeHybridConvolutionFilterFast(data, context, hcf.Length),
+            IIRLeastSquaresEstimateSpecOptions iirls => ComputeIIRLeastSquaresEstimateFast(data, context, iirls.Length),
+            InverseDistanceWeightedMovingAverageSpecOptions idwma => ComputeInverseDistanceWeightedMovingAverageFast(data, context, idwma.Length),
+            InverseFisherTransformCoreSpecOptions iftc => ComputeInverseFisherTransformCoreFast(data, context, iftc.Length),
+            JsaMovingAverageSpecOptions jsama => ComputeJsaMovingAverageFast(data, context, jsama.Length),
+            KalmanSmootherSpecOptions ksmo => ComputeKalmanSmootherFast(data, context, ksmo.Length),
+            KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions kalsma => ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(data, context, kalsma.Length),
+            LeoMovingAverageSpecOptions leoma => ComputeLeoMovingAverageFast(data, context, leoma.Length),
+            LightLeastSquaresMovingAverageSpecOptions llsma => ComputeLightLeastSquaresMovingAverageFast(data, context, llsma.Length),
+            LinearExtrapolationSpecOptions lextra => ComputeLinearExtrapolationFast(data, context, lextra.Length),
+            LinearRegressionLineSpecOptions lrline => ComputeLinearRegressionLineFast(data, context, lrline.Length),
+            LinearWeightedMovingAverageCoreSpecOptions lwmac => ComputeLinearWeightedMovingAverageCoreFast(data, context, lwmac.Length),
+            McNichollMovingAverageSpecOptions mcnma => ComputeMcNichollMovingAverageFast(data, context, mcnma.Length),
+            MovingAverageAdaptiveQSpecOptions maaq => ComputeMovingAverageAdaptiveQFast(data, context, maaq.Length),
+            MovingAverageV3SpecOptions mav3 => ComputeMovingAverageV3Fast(data, context, mav3.Length),
+            OneLCLeastSquaresMovingAverageSpecOptions olclsma => ComputeOneLCLeastSquaresMovingAverageFast(data, context, olclsma.Length),
+            OptimalWeightedMovingAverageSpecOptions owma => ComputeOptimalWeightedMovingAverageFast(data, context, owma.Length),
+            OvershootReductionMovingAverageSpecOptions orma => ComputeOvershootReductionMovingAverageFast(data, context, orma.Length),
+            ParametricCorrectiveLinearMovingAverageSpecOptions pclma => ComputeParametricCorrectiveLinearMovingAverageFast(data, context, pclma.Length),
+            ParametricKalmanFilterSpecOptions pkf => ComputeParametricKalmanFilterFast(data, context, pkf.Length),
+
+            // Batch 26 - Additional Unwired Core Methods
+            ZeroLowLagMovingAverageSpecOptions zllma => ComputeZeroLowLagMovingAverageFast(data, context, zllma.Length),
+            RecursiveMovingTrendAverageSpecOptions rmta => ComputeRecursiveMovingTrendAverageFast(data, context, rmta.Length),
+            TrimeanSpecOptions trimean => ComputeTrimeanFast(data, context, trimean.Length),
+            SkewnessSpecOptions skew => ComputeSkewnessFast(data, context, skew.Length),
+            HampelFilterSpecOptions hampel => ComputeHampelFilterFast(data, context, hampel.Length, hampel.ScalingFactor),
+            ModularFilterSpecOptions modf => ComputeModularFilterFast(data, context, modf.Length, modf.Beta, modf.Z),
+            DynamicallyAdjustableMovingAverageSpecOptions dama => ComputeDynamicallyAdjustableMovingAverageFast(data, context, dama.FastLength, dama.SlowLength),
+            EquityMovingAverageSpecOptions eqma => ComputeEquityMovingAverageFast(data, context, eqma.Length),
+            MultiDepthZeroLagExponentialMovingAverageSpecOptions mdzlema => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, mdzlema.Length),
+            PolynomialLeastSquaresMovingAverageSpecOptions plsma => ComputePolynomialLeastSquaresMovingAverageFast(data, context, plsma.Length),
+            PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
+            QuadraticLeastSquaresMovingAverageSpecOptions qlsma => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
+            QuadraticMovingAverageSpecOptions qma => ComputeQuadraticMovingAverageFast(data, context, qma.Length),
+            QuadraticRegressionSpecOptions qreg => ComputeQuadraticRegressionFast(data, context, qreg.Length),
+            R2AdaptiveRegressionSpecOptions r2ar => ComputeR2AdaptiveRegressionFast(data, context, r2ar.Length),
+            RetentionAccelerationFilterSpecOptions raf => ComputeRetentionAccelerationFilterFast(data, context, raf.Length),
+            RightSidedRickerMovingAverageSpecOptions rsrma => ComputeRightSidedRickerMovingAverageFast(data, context, rsrma.Length),
+            SelfWeightedMovingAverageSpecOptions swma => ComputeSelfWeightedMovingAverageFast(data, context, swma.Length),
+            SequentiallyFilteredMovingAverageSpecOptions sfma => ComputeSequentiallyFilteredMovingAverageFast(data, context, sfma.Length),
+            SettingLessTrendStepFilteringSpecOptions sltsf => ComputeSettingLessTrendStepFilteringFast(data, context, sltsf.Length),
+            ShapeshiftingMovingAverageSpecOptions ssma => ComputeShapeshiftingMovingAverageFast(data, context, ssma.Length),
+            SharpModifiedMovingAverageSpecOptions shpma => ComputeSharpModifiedMovingAverageFast(data, context, shpma.Length),
+            SimplifiedLeastSquaresMovingAverageSpecOptions slsma => ComputeSimplifiedLeastSquaresMovingAverageFast(data, context, slsma.Length),
+            SimplifiedWeightedMovingAverageSpecOptions simpwma => ComputeSimplifiedWeightedMovingAverageFast(data, context, simpwma.Length),
+            SvamaSpecOptions svama => ComputeSvamaFast(data, context, svama.Length),
+            ThreeHMASpecOptions thma => ComputeThreeHMAFast(data, context, thma.Length),
+            TillsonIE2SpecOptions tie2 => ComputeTillsonIE2Fast(data, context, tie2.Length),
+            TStepLeastSquaresMovingAverageSpecOptions tslsma => ComputeTStepLeastSquaresMovingAverageFast(data, context, tslsma.Length),
+            VariableAdaptiveMovingAverageSpecOptions vama => ComputeVariableAdaptiveMovingAverageFast(data, context, vama.Length),
+            VariableLengthMovingAverageSpecOptions vlma => ComputeVariableLengthMovingAverageFast(data, context, vlma.Length),
+            VerticalHorizontalMovingAverageSpecOptions vhma => ComputeVerticalHorizontalMovingAverageFast(data, context, vhma.Length),
+            VolatilityMovingAverageSpecOptions volma => ComputeVolatilityMovingAverageFast(data, context, volma.Length),
+            VolatilityWaveMovingAverageSpecOptions vwma => ComputeVolatilityWaveMovingAverageFast(data, context, vwma.Length),
+            WellRoundedMovingAverageSpecOptions wrma => ComputeWellRoundedMovingAverageFast(data, context, wrma.Length),
+            WildersSummationMethodSpecOptions wsm => ComputeWildersSummationMethodFast(data, context, wsm.Length),
+            ZeroLagTripleExponentialMovingAverageSpecOptions zltema => ComputeZeroLagTripleExponentialMovingAverageFast(data, context, zltema.Length),
+
             _ => null
         };
     }
@@ -6078,6 +6158,927 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.DemarkReversalPoints(close, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 25 - Additional Moving Averages (Unwired Core Methods)
+
+    /// <summary>
+    /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Corrected Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context, int length = 35)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.CorrectedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Cubed Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCubedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.CubedWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Dynamically Adjustable Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.DynamicallyAdjustableFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Edge Preserving Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EdgePreservingFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers All Pass Phase Shifter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersAllPassPhaseShifter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Average Error Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersAverageErrorFilterFast(StockData data, ComputeContext context, int length = 27)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersAverageErrorFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Distance Coefficient Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersDistanceCoefficientFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Kaufman Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersKaufmanAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Modified Optimum Elliptic Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersModifiedOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersModifiedOptimumEllipticFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Noise Elimination Technology using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersNoiseEliminationTechnologyFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersNoiseEliminationTechnology(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Optimum Elliptic Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersOptimumEllipticFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Variable Index Dynamic Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Falling Rising Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFallingRisingFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.FallingRisingFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Farey Sequence Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFareySequenceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.FareySequenceWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fisher Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFisherLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.FisherLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Following Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFollowingAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.FollowingAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes General Filter Estimator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.GeneralFilterEstimator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Henderson Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHendersonWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HendersonWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hull Estimate using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHullEstimateFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HullEstimate(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hybrid Convolution Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHybridConvolutionFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HybridConvolutionFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes IIR Least Squares Estimate using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeIIRLeastSquaresEstimateFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.IIRLeastSquaresEstimate(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Inverse Distance Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeInverseDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.InverseDistanceWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Inverse Fisher Transform using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.InverseFisherTransform(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Jsa Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeJsaMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.JsaMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kalman Smoother using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKalmanSmootherFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.KalmanSmoother(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kaufman Adaptive Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.KaufmanAdaptiveLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Leo Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLeoMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LeoMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Light Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 250)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LightLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Extrapolation using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearExtrapolationFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LinearExtrapolation(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Regression Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LinearRegressionLine(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Weighted Moving Average (Core) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearWeightedMovingAverageCoreFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.LinearWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes McNicholl Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMcNichollMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.McNichollMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Moving Average Adaptive Q using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMovingAverageAdaptiveQFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.MovingAverageAdaptiveQ(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Moving Average V3 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMovingAverageV3Fast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.MovingAverageV3(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes One LC Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Optimal Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOptimalWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.OptimalWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Overshoot Reduction Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.OvershootReductionMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Parametric Corrective Linear Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ParametricCorrectiveLinearMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Parametric Kalman Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeParametricKalmanFilterFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ParametricKalmanFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 26 - Additional Unwired Core Methods
+
+    /// <summary>
+    /// Computes Zero Low Lag Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ZeroLowLagMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Recursive Moving Trend Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRecursiveMovingTrendAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.RecursiveMovingTrendAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Trimean using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.Trimean(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Skewness using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSkewnessFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.Skewness(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hampel Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHampelFilterFast(StockData data, ComputeContext context, int length = 14, double scalingFactor = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HampelFilter(inputSpan, buffer.WritableSpan, length, scalingFactor);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Modular Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8, double z = 0.5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ModularFilter(inputSpan, buffer.WritableSpan, length, beta, z);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Dynamically Adjustable Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 200)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.DynamicallyAdjustableMovingAverage(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Equity Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEquityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EquityMovingAverage(inputSpan, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Multi Depth Zero Lag Exponential Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.MultiDepthZeroLagExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Polynomial Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.PolynomialLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Powered Kaufman Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.PoweredKaufmanAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Quadratic Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.QuadraticLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Quadratic Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeQuadraticMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.QuadraticMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Quadratic Regression using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.QuadraticRegression(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes R2 Adaptive Regression using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.R2AdaptiveRegression(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Retention Acceleration Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRetentionAccelerationFilterFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.RetentionAccelerationFilter(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Right Sided Ricker Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.RightSidedRickerMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Self Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSelfWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SelfWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Sequentially Filtered Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SequentiallyFilteredMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Setting Less Trend Step Filtering using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context, int length = 100)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SettingLessTrendStepFiltering(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Shapeshifting Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeShapeshiftingMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ShapeshiftingMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Sharp Modified Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSharpModifiedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SharpModifiedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Simplified Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimplifiedLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 25)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SimplifiedLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Simplified Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimplifiedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SimplifiedWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Svama using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.Svama(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Three HMA using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeThreeHMAFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ThreeHMA(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Tillson IE2 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTillsonIE2Fast(StockData data, ComputeContext context, int length = 15)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TillsonIE2(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes T-Step Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TStepLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Variable Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 6)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VariableAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Variable Length Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVariableLengthMovingAverageFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VariableLengthMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vertical Horizontal Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVerticalHorizontalMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VerticalHorizontalMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volatility Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolatilityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VolatilityMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volatility Wave Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VolatilityWaveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Well Rounded Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWellRoundedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WellRoundedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Wilders Summation Method using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWildersSummationMethodFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WildersSummationMethod(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Zero Lag Triple Exponential Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeZeroLagTripleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ZeroLagTripleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 

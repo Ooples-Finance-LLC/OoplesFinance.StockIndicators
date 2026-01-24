@@ -5770,6 +5770,698 @@ public sealed class StandardErrorCoreSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+// ========== Batch 25 SpecOptions (Additional Unwired Core Methods) ==========
+
+/// <summary>
+/// Adaptive Autonomous Recursive Moving Average indicator options.
+/// </summary>
+public sealed class AdaptiveAutonomousRecursiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveAutonomousRecursiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Corrected Moving Average indicator options.
+/// </summary>
+public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public CorrectedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Cubed Weighted Moving Average indicator options.
+/// </summary>
+public sealed class CubedWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public CubedWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Dynamically Adjustable Filter indicator options.
+/// </summary>
+public sealed class DynamicallyAdjustableFilterSpecOptions : IIndicatorSpecOptions
+{
+    public DynamicallyAdjustableFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Edge Preserving Filter indicator options.
+/// </summary>
+public sealed class EdgePreservingFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EdgePreservingFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers All Pass Phase Shifter indicator options.
+/// </summary>
+public sealed class EhlersAllPassPhaseShifterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersAllPassPhaseShifterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Average Error Filter indicator options.
+/// </summary>
+public sealed class EhlersAverageErrorFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersAverageErrorFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Distance Coefficient Filter indicator options.
+/// </summary>
+public sealed class EhlersDistanceCoefficientFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersDistanceCoefficientFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Kaufman Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class EhlersKaufmanAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersKaufmanAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Modified Optimum Elliptic Filter indicator options.
+/// </summary>
+public sealed class EhlersModifiedOptimumEllipticFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersModifiedOptimumEllipticFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Noise Elimination Technology indicator options.
+/// </summary>
+public sealed class EhlersNoiseEliminationTechnologySpecOptions : IIndicatorSpecOptions
+{
+    public EhlersNoiseEliminationTechnologySpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Optimum Elliptic Filter indicator options.
+/// </summary>
+public sealed class EhlersOptimumEllipticFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersOptimumEllipticFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ehlers Variable Index Dynamic Average indicator options.
+/// </summary>
+public sealed class EhlersVariableIndexDynamicAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersVariableIndexDynamicAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Falling Rising Filter indicator options.
+/// </summary>
+public sealed class FallingRisingFilterSpecOptions : IIndicatorSpecOptions
+{
+    public FallingRisingFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Farey Sequence Weighted Moving Average indicator options.
+/// </summary>
+public sealed class FareySequenceWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public FareySequenceWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fisher Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class FisherLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public FisherLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Following Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class FollowingAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public FollowingAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// General Filter Estimator indicator options.
+/// </summary>
+public sealed class GeneralFilterEstimatorSpecOptions : IIndicatorSpecOptions
+{
+    public GeneralFilterEstimatorSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Henderson Weighted Moving Average indicator options.
+/// </summary>
+public sealed class HendersonWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public HendersonWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Hull Estimate indicator options.
+/// </summary>
+public sealed class HullEstimateSpecOptions : IIndicatorSpecOptions
+{
+    public HullEstimateSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Hybrid Convolution Filter indicator options.
+/// </summary>
+public sealed class HybridConvolutionFilterSpecOptions : IIndicatorSpecOptions
+{
+    public HybridConvolutionFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// IIR Least Squares Estimate indicator options.
+/// </summary>
+public sealed class IIRLeastSquaresEstimateSpecOptions : IIndicatorSpecOptions
+{
+    public IIRLeastSquaresEstimateSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Inverse Distance Weighted Moving Average indicator options.
+/// </summary>
+public sealed class InverseDistanceWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public InverseDistanceWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Inverse Fisher Transform Core indicator options.
+/// </summary>
+public sealed class InverseFisherTransformCoreSpecOptions : IIndicatorSpecOptions
+{
+    public InverseFisherTransformCoreSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Jsa Moving Average indicator options.
+/// </summary>
+public sealed class JsaMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public JsaMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kalman Smoother indicator options.
+/// </summary>
+public sealed class KalmanSmootherSpecOptions : IIndicatorSpecOptions
+{
+    public KalmanSmootherSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Kaufman Adaptive Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Leo Moving Average indicator options.
+/// </summary>
+public sealed class LeoMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public LeoMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Light Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class LightLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public LightLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Extrapolation indicator options.
+/// </summary>
+public sealed class LinearExtrapolationSpecOptions : IIndicatorSpecOptions
+{
+    public LinearExtrapolationSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression Line indicator options.
+/// </summary>
+public sealed class LinearRegressionLineSpecOptions : IIndicatorSpecOptions
+{
+    public LinearRegressionLineSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Weighted Moving Average Core indicator options.
+/// </summary>
+public sealed class LinearWeightedMovingAverageCoreSpecOptions : IIndicatorSpecOptions
+{
+    public LinearWeightedMovingAverageCoreSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// McNicholl Moving Average indicator options.
+/// </summary>
+public sealed class McNichollMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public McNichollMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Moving Average Adaptive Q indicator options.
+/// </summary>
+public sealed class MovingAverageAdaptiveQSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageAdaptiveQSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Moving Average V3 indicator options.
+/// </summary>
+public sealed class MovingAverageV3SpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageV3SpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// One LC Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class OneLCLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public OneLCLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Optimal Weighted Moving Average indicator options.
+/// </summary>
+public sealed class OptimalWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public OptimalWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Overshoot Reduction Moving Average indicator options.
+/// </summary>
+public sealed class OvershootReductionMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public OvershootReductionMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Parametric Corrective Linear Moving Average indicator options.
+/// </summary>
+public sealed class ParametricCorrectiveLinearMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ParametricCorrectiveLinearMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Parametric Kalman Filter indicator options.
+/// </summary>
+public sealed class ParametricKalmanFilterSpecOptions : IIndicatorSpecOptions
+{
+    public ParametricKalmanFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+// ========== Batch 26 SpecOptions (Additional Unwired Core Methods) ==========
+
+/// <summary>
+/// Zero Low Lag Moving Average indicator options.
+/// </summary>
+public sealed class ZeroLowLagMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ZeroLowLagMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Recursive Moving Trend Average indicator options.
+/// </summary>
+public sealed class RecursiveMovingTrendAverageSpecOptions : IIndicatorSpecOptions
+{
+    public RecursiveMovingTrendAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Trimean indicator options.
+/// </summary>
+public sealed class TrimeanSpecOptions : IIndicatorSpecOptions
+{
+    public TrimeanSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Skewness indicator options.
+/// </summary>
+public sealed class SkewnessSpecOptions : IIndicatorSpecOptions
+{
+    public SkewnessSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Hampel Filter indicator options.
+/// </summary>
+public sealed class HampelFilterSpecOptions : IIndicatorSpecOptions
+{
+    public HampelFilterSpecOptions(int length, double scalingFactor = 3) { Length = Math.Max(1, length); ScalingFactor = scalingFactor; }
+    public int Length { get; }
+    public double ScalingFactor { get; }
+}
+
+/// <summary>
+/// Modular Filter indicator options.
+/// </summary>
+public sealed class ModularFilterSpecOptions : IIndicatorSpecOptions
+{
+    public ModularFilterSpecOptions(int length, double beta = 0.8, double z = 0.5) { Length = Math.Max(1, length); Beta = beta; Z = z; }
+    public int Length { get; }
+    public double Beta { get; }
+    public double Z { get; }
+}
+
+/// <summary>
+/// Dynamically Adjustable Moving Average indicator options.
+/// </summary>
+public sealed class DynamicallyAdjustableMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public DynamicallyAdjustableMovingAverageSpecOptions(int fastLength, int slowLength = 200) { FastLength = Math.Max(1, fastLength); SlowLength = Math.Max(1, slowLength); }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Equity Moving Average indicator options.
+/// </summary>
+public sealed class EquityMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EquityMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Multi Depth Zero Lag Exponential Moving Average indicator options.
+/// </summary>
+public sealed class MultiDepthZeroLagExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public MultiDepthZeroLagExponentialMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Polynomial Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class PolynomialLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public PolynomialLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Powered Kaufman Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class PoweredKaufmanAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public PoweredKaufmanAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quadratic Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class QuadraticLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public QuadraticLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quadratic Moving Average indicator options.
+/// </summary>
+public sealed class QuadraticMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public QuadraticMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Quadratic Regression indicator options.
+/// </summary>
+public sealed class QuadraticRegressionSpecOptions : IIndicatorSpecOptions
+{
+    public QuadraticRegressionSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// R2 Adaptive Regression indicator options.
+/// </summary>
+public sealed class R2AdaptiveRegressionSpecOptions : IIndicatorSpecOptions
+{
+    public R2AdaptiveRegressionSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Retention Acceleration Filter indicator options.
+/// </summary>
+public sealed class RetentionAccelerationFilterSpecOptions : IIndicatorSpecOptions
+{
+    public RetentionAccelerationFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Right Sided Ricker Moving Average indicator options.
+/// </summary>
+public sealed class RightSidedRickerMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public RightSidedRickerMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Self Weighted Moving Average indicator options.
+/// </summary>
+public sealed class SelfWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SelfWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Sequentially Filtered Moving Average indicator options.
+/// </summary>
+public sealed class SequentiallyFilteredMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SequentiallyFilteredMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Setting Less Trend Step Filtering indicator options.
+/// </summary>
+public sealed class SettingLessTrendStepFilteringSpecOptions : IIndicatorSpecOptions
+{
+    public SettingLessTrendStepFilteringSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Shapeshifting Moving Average indicator options.
+/// </summary>
+public sealed class ShapeshiftingMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ShapeshiftingMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Sharp Modified Moving Average indicator options.
+/// </summary>
+public sealed class SharpModifiedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SharpModifiedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Simplified Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class SimplifiedLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SimplifiedLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Simplified Weighted Moving Average indicator options.
+/// </summary>
+public sealed class SimplifiedWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public SimplifiedWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Svama indicator options.
+/// </summary>
+public sealed class SvamaSpecOptions : IIndicatorSpecOptions
+{
+    public SvamaSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Three HMA indicator options.
+/// </summary>
+public sealed class ThreeHMASpecOptions : IIndicatorSpecOptions
+{
+    public ThreeHMASpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Tillson IE2 indicator options.
+/// </summary>
+public sealed class TillsonIE2SpecOptions : IIndicatorSpecOptions
+{
+    public TillsonIE2SpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// T-Step Least Squares Moving Average indicator options.
+/// </summary>
+public sealed class TStepLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public TStepLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Variable Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class VariableAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VariableAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Variable Length Moving Average indicator options.
+/// </summary>
+public sealed class VariableLengthMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VariableLengthMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vertical Horizontal Moving Average indicator options.
+/// </summary>
+public sealed class VerticalHorizontalMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VerticalHorizontalMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volatility Moving Average indicator options.
+/// </summary>
+public sealed class VolatilityMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VolatilityMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volatility Wave Moving Average indicator options.
+/// </summary>
+public sealed class VolatilityWaveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VolatilityWaveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Well Rounded Moving Average indicator options.
+/// </summary>
+public sealed class WellRoundedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public WellRoundedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Wilders Summation Method indicator options.
+/// </summary>
+public sealed class WildersSummationMethodSpecOptions : IIndicatorSpecOptions
+{
+    public WildersSummationMethodSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Zero Lag Triple Exponential Moving Average indicator options.
+/// </summary>
+public sealed class ZeroLagTripleExponentialMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public ZeroLagTripleExponentialMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.
