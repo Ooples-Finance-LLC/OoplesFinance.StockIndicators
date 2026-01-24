@@ -14,16 +14,36 @@ The v2 fast path has three layers:
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | ~530 | Most calculations implemented |
-| ComputeFast Wrappers | 410 | All wrappers exist (411th is TryComputeFast itself) |
-| SpecOptions Classes | **414** | 405 new + 9 original |
-| TryComputeFast Dispatch | **409** | All ComputeFast methods wired! |
+| Core Methods | ~510 | Span-based implementations |
+| ComputeFast Wrappers | ~500 | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **501** | Typed indicator options |
+| TryComputeFast Dispatch | **498** | Routed to fast path methods |
 
-### The Gap
+### Progress Summary
 
-- **ALL 410 ComputeFast methods are now wired** to TryComputeFast
-- **409 indicators** route through `TryComputeFast` (excluding TryComputeFast itself)
-- **COMPLETE**: All ComputeFast methods have corresponding SpecOptions and dispatch cases
+- **Batches 1-24**: Original 409 ComputeFast methods wired
+- **Batch 25**: Added 40 new ComputeFast methods for unwired Core methods
+- **Batch 26**: Added 36 new ComputeFast methods for additional Core methods
+- **Batch 27**: Added 12 new multi-input ComputeFast methods (DeMarker, Vortex, Klinger, etc.)
+- **Total**: 501 SpecOptions, 498 dispatch routes (~65% coverage of 773 Calculate methods)
+
+### Remaining Unwired Core Methods (~17)
+
+These Core methods exist but don't have ComputeFast wrappers yet:
+- AtrFilteredExponentialMovingAverage (complex multi-input)
+- BollingerBands (multi-output: upper/middle/lower)
+- EhlersDeviationScaledSuperSmoother
+- ElasticVolumeWeightedMovingAverageV2
+- PpoMa, PriceOscillator
+- RatioOchlAverager
+- RelativeVolatilityIndexHigh/Low
+- ReverseEngineeringRsi
+- ReverseMovingAverageConvergenceDivergence
+- SimplePriceZone
+- StochasticRsiOscillator
+- TrueRangeAdjustedExponentialMovingAverage
+- TypicalPriceVolatility
+- WindowedVolumeWeightedMovingAverage
 
 ## What's Already Complete
 
