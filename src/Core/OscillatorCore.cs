@@ -8283,6 +8283,68 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes Simple Cycle oscillator.
+    /// Uses EMA-smoothed difference with period-based momentum.
+    /// </summary>
+    internal static void SimpleCycle(ReadOnlySpan<double> close, Span<double> output, int length = 50)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var srcArray = pool.Rent(close.Length);
+        var cEmaArray = pool.Rent(close.Length);
+        var cArray = pool.Rent(close.Length);
+
+        try
+        {
+            var src = srcArray.AsSpan(0, close.Length);
+            var cEma = cEmaArray.AsSpan(0, close.Length);
+            var c = cArray.AsSpan(0, close.Length);
+
+            var a = 1.0 / length;
+            var alpha = 2.0 / (length + 1);
+
+            // Initialize
+            src[0] = close[0];
+            c[0] = 0;
+            cEma[0] = 0;
+
+            for (var i = 1; i < close.Length; i++)
+            {
+                var prevC = c[i - 1];
+                var prevSrc = i >= length ? src[i - length] : 0;
+
+                // src = currentValue + prevC
+                src[i] = close[i] + prevC;
+
+                // cEma = EMA of prevC
+                cEma[i] = (alpha * prevC) + ((1 - alpha) * cEma[i - 1]);
+
+                // b = prevC - cEma
+                var b = prevC - cEma[i];
+
+                // c = (a * (src - prevSrc)) + ((1 - a) * b)
+                c[i] = (a * (src[i] - prevSrc)) + ((1 - a) * b);
+            }
+
+            // Copy to output
+            for (var i = 0; i < close.Length; i++)
+            {
+                output[i] = c[i];
+            }
+        }
+        finally
+        {
+            pool.Return(srcArray);
+            pool.Return(cEmaArray);
+            pool.Return(cArray);
+        }
+    }
+
     #endregion
 
     #endregion

@@ -519,6 +519,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "HoltExponentialMovingAverage",
         "PentupleExponentialMovingAverage",
         "QuadrupleExponentialMovingAverage",
+
+        // Batch 21 - Simple Oscillators
+        "SimpleCycle",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1355,6 +1358,9 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "HoltExponentialMovingAverage" => "ComputeHoltExponentialMovingAverageFast",
             "PentupleExponentialMovingAverage" => "ComputePentupleExponentialMovingAverageFast",
             "QuadrupleExponentialMovingAverage" => "ComputeQuadrupleExponentialMovingAverageFast",
+
+            // Batch 21 - Simple Oscillators
+            "SimpleCycle" => "ComputeSimpleCycleFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };

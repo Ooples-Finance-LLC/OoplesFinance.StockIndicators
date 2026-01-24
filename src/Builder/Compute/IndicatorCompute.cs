@@ -5249,6 +5249,17 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Computes Simple Cycle oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSimpleCycleFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.SimpleCycle(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
     #endregion
 
     #endregion
