@@ -4857,20 +4857,17 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var a1 = 0.19022;
-        var a2 = -0.05365;
-        var b1 = 1.1732;
-        var b2 = -0.5469;
-
         for (var i = 0; i < input.Length; i++)
         {
             var currentValue = input[i];
-            var prev1 = i >= 1 ? input[i - 1] : currentValue;
-            var prev2 = i >= 2 ? input[i - 2] : currentValue;
-            var prevEf1 = i >= 1 ? output[i - 1] : currentValue;
-            var prevEf2 = i >= 2 ? output[i - 2] : currentValue;
+            var prevValue1 = i >= 1 ? input[i - 1] : currentValue;
+            var prevValue2 = i >= 2 ? input[i - 2] : prevValue1;
+            var prevValue3 = i >= 3 ? input[i - 3] : prevValue2;
+            var prevMoef1 = i >= 1 ? output[i - 1] : currentValue;
+            var prevMoef2 = i >= 2 ? output[i - 2] : prevMoef1;
 
-            output[i] = (a1 * (currentValue + prev1)) + (a2 * prev2) + (b1 * prevEf1) + (b2 * prevEf2);
+            output[i] = (0.13785 * ((2 * currentValue) - prevValue1)) + (0.0007 * ((2 * prevValue1) - prevValue2)) +
+                (0.13785 * ((2 * prevValue2) - prevValue3)) + (1.2103 * prevMoef1) - (0.4867 * prevMoef2);
         }
     }
 

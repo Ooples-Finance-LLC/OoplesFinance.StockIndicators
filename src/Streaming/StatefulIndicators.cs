@@ -3063,9 +3063,9 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
         var sumXY = isFinal ? _xySum.Add(x * value, out _) : _xySum.Preview(x * value, out _);
         var sumX2 = isFinal ? _x2Sum.Add(x * x, out _) : _x2Sum.Preview(x * x, out _);
 
-        var top = (_length * sumXY) - (sumX * sumY);
+        // Use full length to match batch CalculateLinearRegression behavior
         var bottom = (_length * sumX2) - (sumX * sumX);
-        var slope = bottom != 0 ? top / bottom : 0;
+        var slope = bottom != 0 ? ((_length * sumXY) - (sumX * sumY)) / bottom : 0;
         var intercept = _length != 0 ? (sumY - (slope * sumX)) / _length : 0;
         var predictedToday = intercept + (slope * x);
         var predictedTomorrow = intercept + (slope * (x + 1));
@@ -16277,6 +16277,79 @@ internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverag
     }
 }
 
+/// <summary>
+/// Linear regression smoother that matches MovingAverageCore.LinearRegression behavior.
+/// Uses actual sample count n = Min(index+1, length) instead of always using length.
+/// </summary>
+internal sealed class LinearRegressionCoreSmoother : IMovingAverageSmoother
+{
+    private readonly int _length;
+    private readonly RollingWindowSum _xSum;
+    private readonly RollingWindowSum _ySum;
+    private readonly RollingWindowSum _xySum;
+    private readonly RollingWindowSum _x2Sum;
+    private int _index;
+
+    public LinearRegressionCoreSmoother(int length)
+    {
+        _length = Math.Max(1, length);
+        _xSum = new RollingWindowSum(_length);
+        _ySum = new RollingWindowSum(_length);
+        _xySum = new RollingWindowSum(_length);
+        _x2Sum = new RollingWindowSum(_length);
+    }
+
+    public double Next(double value, bool isFinal)
+    {
+        var x = (double)_index;
+
+        var sumX = isFinal ? _xSum.Add(x, out _) : _xSum.Preview(x, out _);
+        var sumY = isFinal ? _ySum.Add(value, out _) : _ySum.Preview(value, out _);
+        var sumXY = isFinal ? _xySum.Add(x * value, out _) : _xySum.Preview(x * value, out _);
+        var sumX2 = isFinal ? _x2Sum.Add(x * x, out _) : _x2Sum.Preview(x * x, out _);
+
+        // Use actual sample count to match MovingAverageCore.LinearRegression behavior
+        var n = Math.Min(_index + 1, _length);
+        var denominator = (n * sumX2) - (sumX * sumX);
+
+        double predictedToday;
+        if (denominator == 0)
+        {
+            predictedToday = n > 0 ? sumY / n : 0;
+        }
+        else
+        {
+            var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
+            var intercept = (sumY - (slope * sumX)) / n;
+            predictedToday = intercept + (slope * x);
+        }
+
+        if (isFinal)
+        {
+            _index++;
+        }
+
+        return predictedToday;
+    }
+
+    public void Reset()
+    {
+        _xSum.Reset();
+        _ySum.Reset();
+        _xySum.Reset();
+        _x2Sum.Reset();
+        _index = 0;
+    }
+
+    public void Dispose()
+    {
+        _xSum.Dispose();
+        _ySum.Dispose();
+        _xySum.Dispose();
+        _x2Sum.Dispose();
+    }
+}
+
 internal static class MovingAverageSmootherFactory
 {
     public static IMovingAverageSmoother Create(MovingAvgType maType, int length)
@@ -16299,6 +16372,7 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.EhlersTriangleMovingAverage => new EhlersTriangleMovingAverageSmoother(length),
             MovingAvgType.EhlersModifiedOptimumEllipticFilter => new EhlersModifiedOptimumEllipticFilterSmoother(length),
             MovingAvgType.SymmetricallyWeightedMovingAverage => new SymmetricallyWeightedMovingAverageSmoother(length),
+            MovingAvgType.LinearRegression => new LinearRegressionCoreSmoother(length),
             _ => throw new NotSupportedException($"MovingAvgType {maType} is not supported in streaming stateful indicators.")
         };
     }

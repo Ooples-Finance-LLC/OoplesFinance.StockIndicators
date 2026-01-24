@@ -98,25 +98,14 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
 {
     private readonly RelativeVolatilityIndexEngine _rviHigh;
     private readonly RelativeVolatilityIndexEngine _rviLow;
-    private readonly IMovingAverageSmoother? _smoother;
-    private readonly LinearRegressionState? _linreg;
-    private double _rviValue;
-    private readonly bool _useLinearRegression;
+    private readonly IMovingAverageSmoother _smoother;
 
     public InertiaIndicatorState(MovingAvgType maType = MovingAvgType.LinearRegression, int length = 20)
     {
         var resolved = Math.Max(1, length);
         _rviHigh = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, 14);
         _rviLow = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, 14);
-        _useLinearRegression = maType == MovingAvgType.LinearRegression;
-        if (_useLinearRegression)
-        {
-            _linreg = new LinearRegressionState(resolved, _ => _rviValue);
-        }
-        else
-        {
-            _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        }
+        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
     }
 
     public IndicatorName Name => IndicatorName.InertiaIndicator;
@@ -125,9 +114,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     {
         _rviHigh.Reset();
         _rviLow.Reset();
-        _smoother?.Reset();
-        _linreg?.Reset();
-        _rviValue = 0;
+        _smoother.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -136,16 +123,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
         var rviLow = _rviLow.Next(bar.Low, bar, isFinal);
         var rvi = (rviHigh + rviLow) / 2;
 
-        double inertia;
-        if (_useLinearRegression)
-        {
-            _rviValue = rvi;
-            inertia = _linreg!.Update(bar, isFinal, includeOutputs: false).Value;
-        }
-        else
-        {
-            inertia = _smoother!.Next(rvi, isFinal);
-        }
+        var inertia = _smoother.Next(rvi, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -163,8 +141,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     {
         _rviHigh.Dispose();
         _rviLow.Dispose();
-        _smoother?.Dispose();
-        _linreg?.Dispose();
+        _smoother.Dispose();
     }
 }
 
@@ -2401,26 +2378,43 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
 
 internal sealed class KaufmanAdaptiveMovingAverageEngine : IMovingAverageSmoother
 {
+    private readonly int _length;
     private readonly EfficiencyRatioState _er;
     private readonly double _fastAlpha;
     private readonly double _slowAlpha;
     private double _prevKama;
+    private int _index;
 
     public KaufmanAdaptiveMovingAverageEngine(int length, int fastLength = 2, int slowLength = 30)
     {
-        _er = new EfficiencyRatioState(Math.Max(1, length));
+        _length = Math.Max(1, length);
+        _er = new EfficiencyRatioState(_length);
         _fastAlpha = 2d / (fastLength + 1);
         _slowAlpha = 2d / (slowLength + 1);
     }
 
     public double Next(double value, bool isFinal)
     {
+        // Always call ER to build up history, even during warmup
         var er = _er.Next(value, isFinal);
+
+        // Match Core behavior: during warmup (index < length), just return the input value
+        if (_index < _length)
+        {
+            if (isFinal)
+            {
+                _prevKama = value;
+                _index++;
+            }
+            return value;
+        }
+
         var sc = MathHelper.Pow((er * (_fastAlpha - _slowAlpha)) + _slowAlpha, 2);
-        var kama = (sc * value) + ((1 - sc) * _prevKama);
+        var kama = _prevKama + (sc * (value - _prevKama));
         if (isFinal)
         {
             _prevKama = kama;
+            _index++;
         }
 
         return kama;
@@ -2430,6 +2424,7 @@ internal sealed class KaufmanAdaptiveMovingAverageEngine : IMovingAverageSmoothe
     {
         _er.Reset();
         _prevKama = 0;
+        _index = 0;
     }
 
     public void Dispose()
