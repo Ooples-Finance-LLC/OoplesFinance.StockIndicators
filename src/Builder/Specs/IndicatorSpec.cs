@@ -7161,3 +7161,57 @@ public sealed class TurboScalerSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
     public double PctMultiplier { get; }
 }
+
+/// <summary>
+/// TTM Scalper Indicator options.
+/// </summary>
+public sealed class TTMScalperIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public TTMScalperIndicatorSpecOptions() { }
+}
+
+/// <summary>
+/// Strength of Movement indicator options.
+/// </summary>
+public sealed class StrengthOfMovementSpecOptions : IIndicatorSpecOptions
+{
+    public StrengthOfMovementSpecOptions(int length1 = 10, int length2 = 3)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Value Chart Indicator options.
+/// </summary>
+public sealed class ValueChartIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public ValueChartIndicatorSpecOptions(int length = 5, int numAtrs = 8)
+    {
+        Length = Math.Max(1, length);
+        NumAtrs = Math.Max(1, numAtrs);
+    }
+    public int Length { get; }
+    public int NumAtrs { get; }
+}
+
+/// <summary>
+/// Sell Gravitation Index indicator options.
+/// </summary>
+public sealed class SellGravitationIndexSpecOptions : IIndicatorSpecOptions
+{
+    public SellGravitationIndexSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// TFS Tether Line Indicator options.
+/// </summary>
+public sealed class TFSTetherLineIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public TFSTetherLineIndicatorSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}

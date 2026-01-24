@@ -764,6 +764,11 @@ internal static partial class IndicatorCompute
             TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2),
             TurboTriggerSpecOptions tt => ComputeTurboTriggerFast(data, context, tt.Length, tt.PctMultiplier),
             TurboScalerSpecOptions ts => ComputeTurboScalerFast(data, context, ts.Length, ts.PctMultiplier),
+            TTMScalperIndicatorSpecOptions _ => ComputeTTMScalperIndicatorFast(data, context),
+            StrengthOfMovementSpecOptions som => ComputeStrengthOfMovementFast(data, context, som.Length1, som.Length2),
+            ValueChartIndicatorSpecOptions vci => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.NumAtrs),
+            SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length),
+            TFSTetherLineIndicatorSpecOptions tfs => ComputeTFSTetherLineIndicatorFast(data, context, tfs.Length),
 
             _ => null
         };
@@ -8023,6 +8028,72 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.TurboScaler(close, buffer.WritableSpan, length, pctMultiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TTM Scalper Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTTMScalperIndicatorFast(StockData data, ComputeContext context)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TTMScalperIndicator(close, high, low, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Strength of Movement using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStrengthOfMovementFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 3)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.StrengthOfMovement(close, high, low, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Value Chart Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5, int numAtrs = 8)
+    {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.ValueChartIndicator(open, high, low, close, buffer.WritableSpan, length, numAtrs);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Sell Gravitation Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.SellGravitationIndex(close, high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes TFS Tether Line Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTFSTetherLineIndicatorFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.TFSTetherLineIndicator(close, high, low, buffer.WritableSpan, length);
         return buffer;
     }
 

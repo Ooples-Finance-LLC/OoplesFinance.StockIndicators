@@ -10304,6 +10304,194 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Computes TTM Scalper Indicator.
+    /// </summary>
+    internal static void TTMScalperIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double prevBuySellSwitch = 0;
+        double prevSbs = 0;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevClose1 = i >= 1 ? close[i - 1] : 0;
+            var prevClose2 = i >= 2 ? close[i - 2] : 0;
+            var prevClose3 = i >= 3 ? close[i - 3] : 0;
+
+            var triggerSell = prevClose1 < close[i] && (prevClose2 < prevClose1 || prevClose3 < prevClose1) ? 1.0 : 0.0;
+            var triggerBuy = prevClose1 > close[i] && (prevClose2 > prevClose1 || prevClose3 > prevClose1) ? 1.0 : 0.0;
+
+            var buySellSwitch = triggerSell == 1 ? 1 : triggerBuy == 1 ? 0 : prevBuySellSwitch;
+            var sbs = triggerSell == 1 && prevBuySellSwitch == 0 ? high[i] : triggerBuy == 1 && prevBuySellSwitch == 1 ? low[i] : prevSbs;
+
+            output[i] = sbs;
+            prevBuySellSwitch = buySellSwitch;
+            prevSbs = sbs;
+        }
+    }
+
+    /// <summary>
+    /// Computes Strength of Movement.
+    /// </summary>
+    internal static void StrengthOfMovement(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length1 = 10, int length2 = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var somArray = pool.Rent(close.Length);
+
+        try
+        {
+            var som = somArray.AsSpan(0, close.Length);
+            var wmaSum = new RollingSum();
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var trueRange = Math.Max(high[i] - low[i], Math.Max(Math.Abs(high[i] - (i >= 1 ? close[i - 1] : 0)), Math.Abs(low[i] - (i >= 1 ? close[i - 1] : 0))));
+                var prevClose = i >= length1 ? close[i - length1] : 0;
+                var numerator = close[i] - prevClose;
+                som[i] = trueRange != 0 ? numerator / trueRange : 0;
+            }
+
+            MovingAverageCore.WeightedMovingAverage(som, output, length2);
+        }
+        finally
+        {
+            pool.Return(somArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Value Chart Indicator.
+    /// </summary>
+    internal static void ValueChartIndicator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 5, int numAtrs = 8)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var smaCloseArray = pool.Rent(close.Length);
+        var trArray = pool.Rent(close.Length);
+        var smaRangeArray = pool.Rent(close.Length);
+
+        try
+        {
+            var smaClose = smaCloseArray.AsSpan(0, close.Length);
+            var tr = trArray.AsSpan(0, close.Length);
+            var smaRange = smaRangeArray.AsSpan(0, close.Length);
+
+            MovingAverageCore.SimpleMovingAverage(close, smaClose, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var prevClose = i >= 1 ? close[i - 1] : 0;
+                tr[i] = Math.Max(high[i] - low[i], Math.Max(Math.Abs(high[i] - prevClose), Math.Abs(low[i] - prevClose)));
+            }
+
+            MovingAverageCore.SimpleMovingAverage(tr, smaRange, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var floatAxis = (smaClose[i] + (i >= 1 ? smaClose[i - 1] : 0)) / 2;
+                var volatilityUnit = smaRange[i] * 0.2;
+
+                output[i] = volatilityUnit != 0 ? (close[i] - floatAxis) / volatilityUnit : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(smaCloseArray);
+            pool.Return(trArray);
+            pool.Return(smaRangeArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Sell Gravitation Index.
+    /// </summary>
+    internal static void SellGravitationIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 20)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ema = emaArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
+
+            var bullSum = new RollingSum();
+            var bearSum = new RollingSum();
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var bullDistance = close[i] > ema[i] ? high[i] - ema[i] : 0;
+                var bearDistance = close[i] < ema[i] ? ema[i] - low[i] : 0;
+
+                bullSum.Add(bullDistance);
+                bearSum.Add(bearDistance);
+
+                var totalBull = bullSum.Sum(length);
+                var totalBear = bearSum.Sum(length);
+                var totalSum = totalBull + totalBear;
+
+                output[i] = totalSum != 0 ? (totalBull - totalBear) / totalSum * 100 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(emaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes TFS Tether Line Indicator.
+    /// </summary>
+    internal static void TFSTetherLineIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 50)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var range = highest - lowest;
+
+            output[i] = range != 0 ? (close[i] - lowest) / range * 100 : 0;
+        }
+    }
+
     #endregion
 
     #endregion
