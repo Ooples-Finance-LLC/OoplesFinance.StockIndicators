@@ -14,10 +14,10 @@ The v2 fast path has three layers:
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | 532 | Span-based implementations |
-| ComputeFast Wrappers | ~520 | Buffer wrappers in IndicatorCompute.cs |
-| SpecOptions Classes | **520** | Typed indicator options |
-| TryComputeFast Dispatch | **520** | Routed to fast path methods |
+| Core Methods | 511 unique | Span-based implementations (some have aliases) |
+| ComputeFast Wrappers | 522 | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **522** | Typed indicator options |
+| TryComputeFast Dispatch | **522** | Routed to fast path methods |
 | IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
@@ -28,17 +28,23 @@ The v2 fast path has three layers:
 - **Batch 27**: Added 12 new multi-input ComputeFast methods (DeMarker, Vortex, Klinger, etc.)
 - **Batch 28**: Added 15 final Core method wrappers (Reverse Engineering RSI, PPO MA, etc.)
 - **Batch 29**: Added TripleHullMovingAverage, AdaptiveAutonomousRecursiveMovingAverage Core methods
-- **Batch 30**: Added GeneralizedDoubleExponentialMovingAverage, Ehlers FIR/IIR Filter SpecOptions and dispatch
+- **Batch 30**: Added GDEMA, Ehlers FIR/IIR Filter, VolumeAdjustedMovingAverage, AverageDayRange
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
-- **Total**: 520 SpecOptions, 520 dispatch routes
+- **Total**: 522 SpecOptions, 522 dispatch routes
 
 ### Coverage Analysis
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| Core Methods | 532 | ~69% of 773 |
-| SpecOptions/Dispatch | 520 | ~67% of 773 |
-| Remaining indicators | ~253 | ~33% |
+| Core Methods | 511 unique | ~66% of 773 |
+| SpecOptions/Dispatch | 522 | ~68% of 773 |
+| Remaining indicators | ~251 | ~32% |
+
+### Notes on Coverage Calculation
+
+- Core methods have abbreviations (e.g., ExponentialMovingAverage in Core → EmaSpecOptions)
+- 79 Core method names don't have exact SpecOptions match due to aliasing
+- All Core methods with aliases are already wired through abbreviated SpecOptions
 
 ### Remaining Work for 100% Coverage
 
