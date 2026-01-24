@@ -814,6 +814,398 @@ public sealed class ForceIndexSpecOptions : IIndicatorSpecOptions
 }
 
 /// <summary>
+/// Volume ROC (VROC) indicator options.
+/// </summary>
+public sealed class VrocSpecOptions : IIndicatorSpecOptions
+{
+    public VrocSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Negative Volume Index (NVI) indicator options.
+/// </summary>
+public sealed class NviSpecOptions : IIndicatorSpecOptions
+{
+    public NviSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Positive Volume Index (PVI) indicator options.
+/// </summary>
+public sealed class PviSpecOptions : IIndicatorSpecOptions
+{
+    public PviSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Volume Trend (PVT) indicator options.
+/// </summary>
+public sealed class PvtSpecOptions : IIndicatorSpecOptions
+{
+    public PvtSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chaikin Oscillator indicator options.
+/// </summary>
+public sealed class ChaikinOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public ChaikinOscillatorSpecOptions(int fastLength, int slowLength)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+}
+
+/// <summary>
+/// Ease of Movement (EMV) indicator options.
+/// </summary>
+public sealed class EmvSpecOptions : IIndicatorSpecOptions
+{
+    public EmvSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Klinger Volume Oscillator (KVO) indicator options.
+/// </summary>
+public sealed class KvoSpecOptions : IIndicatorSpecOptions
+{
+    public KvoSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Money Flow Index (MFI) indicator options.
+/// </summary>
+public sealed class MfiSpecOptions : IIndicatorSpecOptions
+{
+    public MfiSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Standard Deviation (StdDev) indicator options.
+/// </summary>
+public sealed class StdDevSpecOptions : IIndicatorSpecOptions
+{
+    public StdDevSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Historical Volatility indicator options.
+/// </summary>
+public sealed class HistoricalVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public HistoricalVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Chaikin Volatility indicator options.
+/// </summary>
+public sealed class ChaikinVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public ChaikinVolatilitySpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Ulcer Index indicator options.
+/// </summary>
+public sealed class UlcerIndexSpecOptions : IIndicatorSpecOptions
+{
+    public UlcerIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Normalized ATR (NATR) indicator options.
+/// </summary>
+public sealed class NatrSpecOptions : IIndicatorSpecOptions
+{
+    public NatrSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Donchian Channel indicator options.
+/// </summary>
+public sealed class DonchianChannelSpecOptions : IIndicatorSpecOptions
+{
+    public DonchianChannelSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Highest High indicator options.
+/// </summary>
+public sealed class HighestHighSpecOptions : IIndicatorSpecOptions
+{
+    public HighestHighSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Lowest Low indicator options.
+/// </summary>
+public sealed class LowestLowSpecOptions : IIndicatorSpecOptions
+{
+    public LowestLowSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percentage Change indicator options.
+/// </summary>
+public sealed class PercentageChangeSpecOptions : IIndicatorSpecOptions
+{
+    public PercentageChangeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression Slope indicator options.
+/// </summary>
+public sealed class LinRegSlopeSpecOptions : IIndicatorSpecOptions
+{
+    public LinRegSlopeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// R-Squared indicator options.
+/// </summary>
+public sealed class RSquaredSpecOptions : IIndicatorSpecOptions
+{
+    public RSquaredSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vertical Horizontal Filter (VHF) indicator options.
+/// </summary>
+public sealed class VhfSpecOptions : IIndicatorSpecOptions
+{
+    public VhfSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// True Range indicator options.
+/// </summary>
+public sealed class TrueRangeSpecOptions : IIndicatorSpecOptions
+{
+    public TrueRangeSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Awesome Oscillator indicator options.
+/// </summary>
+public sealed class AwesomeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public AwesomeOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Accelerator Oscillator indicator options.
+/// </summary>
+public sealed class AcceleratorOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public AcceleratorOscillatorSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Stochastic Fast K indicator options.
+/// </summary>
+public sealed class StochasticKSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticKSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Fisher Transform indicator options.
+/// </summary>
+public sealed class FisherTransformSpecOptions : IIndicatorSpecOptions
+{
+    public FisherTransformSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Connors RSI indicator options.
+/// </summary>
+public sealed class ConnorsRsiSpecOptions : IIndicatorSpecOptions
+{
+    public ConnorsRsiSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Momentum Oscillator (PMO) indicator options.
+/// </summary>
+public sealed class PmoSpecOptions : IIndicatorSpecOptions
+{
+    public PmoSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Know Sure Thing (KST) indicator options.
+/// </summary>
+public sealed class KstSpecOptions : IIndicatorSpecOptions
+{
+    public KstSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Percent Rank indicator options.
+/// </summary>
+public sealed class PercentRankSpecOptions : IIndicatorSpecOptions
+{
+    public PercentRankSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
+/// Choppiness Index indicator options.
+/// </summary>
+public sealed class ChoppinessIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ChoppinessIndexSpecOptions(int length)
+    {
+        Length = Math.Max(1, length);
+    }
+
+    public int Length { get; }
+}
+
+/// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.
 /// </summary>

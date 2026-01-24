@@ -71,6 +71,42 @@ internal static partial class IndicatorCompute
             AdlSpecOptions adl => ComputeAdlFast(data, context, adl.Length),
             CmfSpecOptions cmf => ComputeCmfFast(data, context, cmf.Length),
             ForceIndexSpecOptions fi => ComputeForceIndexFast(data, context, fi.Length),
+            VrocSpecOptions vroc => ComputeVrocFast(data, context, vroc.Length),
+            NviSpecOptions nvi => ComputeNviFast(data, context, nvi.Length),
+            PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length),
+            PvtSpecOptions pvt => ComputePvtFast(data, context, pvt.Length),
+            ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength),
+            EmvSpecOptions emv => ComputeEmvFast(data, context, emv.Length),
+            KvoSpecOptions kvo => ComputeKlingerVolumeFast(data, context, kvo.Length),
+            MfiSpecOptions mfi => ComputeMoneyFlowIndexFast(data, context, mfi.Length),
+
+            // Volatility
+            StdDevSpecOptions stddev => ComputeStdDevFast(data, context, stddev.Length),
+            HistoricalVolatilitySpecOptions hv => ComputeHistoricalVolatilityFast(data, context, hv.Length),
+            ChaikinVolatilitySpecOptions cv => ComputeChaikinVolatilityFast(data, context, cv.Length),
+            UlcerIndexSpecOptions ui => ComputeUlcerIndexFast(data, context, ui.Length),
+            NatrSpecOptions natr => ComputeNormalizedAtrFast(data, context, natr.Length),
+            TrueRangeSpecOptions tr => ComputeTrueRangeFast(data, context, tr.Length),
+
+            // Price/Trend
+            DonchianChannelSpecOptions dc => ComputeDonchianChannelFast(data, context, dc.Length),
+            HighestHighSpecOptions hh => ComputeHighestHighFast(data, context, hh.Length),
+            LowestLowSpecOptions ll => ComputeLowestLowFast(data, context, ll.Length),
+            PercentageChangeSpecOptions pct => ComputePercentageChangeFast(data, context, pct.Length),
+            LinRegSlopeSpecOptions lrs => ComputeLinRegSlopeFast(data, context, lrs.Length),
+            RSquaredSpecOptions rsq => ComputeRSquaredFast(data, context, rsq.Length),
+            VhfSpecOptions vhf => ComputeVhfFast(data, context, vhf.Length),
+
+            // Additional Oscillators
+            AwesomeOscillatorSpecOptions ao => ComputeAwesomeOscillatorFast(data, context, ao.Length),
+            AcceleratorOscillatorSpecOptions aco => ComputeAcceleratorOscillatorFast(data, context, aco.Length),
+            StochasticKSpecOptions sk => ComputeStochasticKFast(data, context, sk.Length),
+            FisherTransformSpecOptions ft => ComputeFisherTransformFast(data, context, ft.Length),
+            ConnorsRsiSpecOptions crsi => ComputeConnorsRsiFast(data, context, crsi.Length),
+            PmoSpecOptions pmo => ComputePmoFast(data, context, pmo.Length),
+            KstSpecOptions kst => ComputeKstFast(data, context, kst.Length),
+            PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
+            ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length),
 
             _ => null
         };

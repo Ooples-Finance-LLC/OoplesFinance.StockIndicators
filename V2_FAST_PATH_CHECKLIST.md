@@ -8,7 +8,7 @@ The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (~530 methods)
 2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (411 methods)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**32 INDICATORS WIRED**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**62 INDICATORS WIRED**)
 
 ### Current State
 
@@ -16,14 +16,14 @@ The v2 fast path has three layers:
 |-------|-------------|-------|
 | Core Methods | ~530 | Most calculations implemented |
 | ComputeFast Wrappers | 411 | Most wrappers exist |
-| SpecOptions Classes | **36** | 27 new + 9 original |
-| TryComputeFast Dispatch | **32** | 27 new routes wired |
+| SpecOptions Classes | **66** | 57 new + 9 original |
+| TryComputeFast Dispatch | **62** | 53 new routes wired |
 
 ### The Gap
 
 - **411 ComputeFast methods exist** but many still use `GenericIndicatorOptions`
-- **32 indicators** now route through `TryComputeFast`
-- **Missing**: ~370+ specific `*SpecOptions` classes and corresponding dispatch cases
+- **62 indicators** now route through `TryComputeFast`
+- **Missing**: ~340+ specific `*SpecOptions` classes and corresponding dispatch cases
 
 ## What's Already Complete
 
@@ -68,6 +68,44 @@ Each indicator that should use fast path needs a dedicated `*SpecOptions` class.
 - [x] AdlSpecOptions (Accumulation/Distribution Line)
 - [x] CmfSpecOptions (Chaikin Money Flow)
 - [x] ForceIndexSpecOptions
+
+**Volume Indicators (Batch 2):**
+- [x] VrocSpecOptions (Volume ROC)
+- [x] NviSpecOptions (Negative Volume Index)
+- [x] PviSpecOptions (Positive Volume Index)
+- [x] PvtSpecOptions (Price Volume Trend)
+- [x] ChaikinOscillatorSpecOptions
+- [x] EmvSpecOptions (Ease of Movement)
+- [x] KvoSpecOptions (Klinger Volume Oscillator)
+- [x] MfiSpecOptions (Money Flow Index)
+
+**Volatility Indicators (Batch 2):**
+- [x] StdDevSpecOptions (Standard Deviation)
+- [x] HistoricalVolatilitySpecOptions
+- [x] ChaikinVolatilitySpecOptions
+- [x] UlcerIndexSpecOptions
+- [x] NatrSpecOptions (Normalized ATR)
+- [x] TrueRangeSpecOptions
+
+**Price/Trend Indicators (Batch 2):**
+- [x] DonchianChannelSpecOptions
+- [x] HighestHighSpecOptions
+- [x] LowestLowSpecOptions
+- [x] PercentageChangeSpecOptions
+- [x] LinRegSlopeSpecOptions
+- [x] RSquaredSpecOptions
+- [x] VhfSpecOptions (Vertical Horizontal Filter)
+
+**Additional Oscillators (Batch 2):**
+- [x] AwesomeOscillatorSpecOptions
+- [x] AcceleratorOscillatorSpecOptions
+- [x] StochasticKSpecOptions (Fast K)
+- [x] FisherTransformSpecOptions
+- [x] ConnorsRsiSpecOptions
+- [x] PmoSpecOptions (Price Momentum Oscillator)
+- [x] KstSpecOptions (Know Sure Thing)
+- [x] PercentRankSpecOptions
+- [x] ChoppinessIndexSpecOptions
 
 ### Phase 2: Wire TryComputeFast Dispatch
 Add each new SpecOptions to the switch expression in `TryComputeFast`.
@@ -123,16 +161,16 @@ Add each new SpecOptions to the switch expression in `TryComputeFast`.
 | Calculate Methods | Total | 773 |
 | Core Methods | Implemented | ~530 |
 | ComputeFast Methods | Implemented | 411 |
-| SpecOptions Classes | Implemented | **36** |
-| TryComputeFast Routes | Wired | **32** |
-| **Effective Fast Path Coverage** | | **~4.1%** |
+| SpecOptions Classes | Implemented | **66** |
+| TryComputeFast Routes | Wired | **62** |
+| **Effective Fast Path Coverage** | | **~8.0%** |
 
 ## Next Steps
 
 1. ~~**Create high-priority SpecOptions classes** (WMA, DEMA, CCI, etc.)~~ **DONE**
-2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 32 indicators**
-3. **Continue creating SpecOptions** for remaining ~370 indicators
-4. **Focus on categories with most ComputeFast methods**: Oscillators (~100), Ehlers (~60), MovingAverages (~50)
+2. ~~**Add dispatch cases** to TryComputeFast~~ **DONE for 62 indicators**
+3. **Continue creating SpecOptions** for remaining ~340 indicators
+4. **Focus on categories with most ComputeFast methods**: Oscillators (~70 remaining), Ehlers (~60), MovingAverages (~40 remaining)
 5. **Consider source generation** to auto-create SpecOptions from Calculate signatures
 
 ## Notes

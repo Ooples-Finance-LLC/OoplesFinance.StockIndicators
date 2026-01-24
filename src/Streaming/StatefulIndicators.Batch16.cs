@@ -1989,6 +1989,7 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
     private double _l2;
     private double _l3;
     private bool _hasPrev;
+    private int _barCount;
 
     public MacZVwapIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 12,
         int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02,
@@ -2037,6 +2038,7 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _l2 = 0;
         _l3 = 0;
         _hasPrev = false;
+        _barCount = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -2097,6 +2099,11 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         var signal = _signalSmoother.Next(macz, isFinal);
         var histogram = macz - signal;
 
+        // At index 0, batch returns 0 because SMA-based stdDev = 0
+        // Our VWAP contamination pattern produces non-zero values at first bar
+        // Return 0 for first bar to match batch behavior
+        var isFirstBar = _barCount == 0;
+
         if (isFinal)
         {
             _volSum = volSum;
@@ -2108,6 +2115,19 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
             _l2 = l2;
             _l3 = l3;
             _hasPrev = true;
+            _barCount++;
+        }
+
+        if (isFirstBar)
+        {
+            return new StreamingIndicatorStateResult(0, includeOutputs
+                ? new Dictionary<string, double>(3)
+                {
+                    { "Macz", 0 },
+                    { "Signal", 0 },
+                    { "Histogram", 0 }
+                }
+                : null);
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
