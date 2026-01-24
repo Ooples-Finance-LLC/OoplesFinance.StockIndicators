@@ -7500,3 +7500,19 @@ public sealed class EhlersRoofingFilterV2SpecOptions : IIndicatorSpecOptions
     public int UpperLength { get; }
     public int LowerLength { get; }
 }
+
+/// <summary>
+/// Ehlers Impulse Reaction options.
+/// </summary>
+public sealed class EhlersImpulseReactionSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersImpulseReactionSpecOptions(int length1 = 2, int length2 = 20, double q = 0.9)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Q = q;
+    }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double Q { get; }
+}

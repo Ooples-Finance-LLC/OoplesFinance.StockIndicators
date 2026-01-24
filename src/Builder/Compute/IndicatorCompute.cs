@@ -792,6 +792,7 @@ internal static partial class IndicatorCompute
             EhlersZeroMeanRoofingFilterSpecOptions ezmrf => ComputeEhlersZeroMeanRoofingFilterFast(data, context, ezmrf.Length1, ezmrf.Length2),
             EhlersSuperPassbandFilterSpecOptions espf => ComputeEhlersSuperPassbandFilterFast(data, context, espf.FastLength, espf.SlowLength, espf.Length1, espf.Length2),
             EhlersRoofingFilterV2SpecOptions erfv2 => ComputeEhlersRoofingFilterV2Fast(data, context, erfv2.UpperLength, erfv2.LowerLength),
+            EhlersImpulseReactionSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length1, eir.Length2, eir.Q),
 
             _ => null
         };
@@ -8404,6 +8405,18 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.EhlersRoofingFilterV2(inputSpan, buffer.WritableSpan, upperLength, lowerLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Impulse Reaction using fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 20, double q = 0.9)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersImpulseReaction(inputSpan, buffer.WritableSpan, length1, length2, q);
         return buffer;
     }
 

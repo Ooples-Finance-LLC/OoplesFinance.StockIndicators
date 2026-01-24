@@ -11528,6 +11528,47 @@ internal static class OscillatorCore
         }
     }
 
+    /// <summary>
+    /// Calculates Ehlers Impulse Reaction.
+    /// </summary>
+    internal static void EhlersImpulseReaction(ReadOnlySpan<double> close, Span<double> output, int length1 = 2, int length2 = 20, double q = 0.9)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.");
+        }
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var c2 = 2 * q * Math.Cos(2 * Math.PI / length2);
+        var c3 = -q * q;
+        var c1 = (1 + c3) / 2;
+
+        var pool = ArrayPool<double>.Shared;
+        var reactionArray = pool.Rent(close.Length);
+
+        try
+        {
+            var reaction = reactionArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentValue = close[i];
+                var priorValue = i >= length1 ? close[i - length1] : 0;
+                var prevReaction1 = i >= 1 ? reaction[i - 1] : 0;
+                var prevReaction2 = i >= 2 ? reaction[i - 2] : 0;
+
+                reaction[i] = (c1 * (currentValue - priorValue)) + (c2 * prevReaction1) + (c3 * prevReaction2);
+                output[i] = currentValue != 0 ? 100 * reaction[i] / currentValue : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(reactionArray);
+        }
+    }
+
     #endregion
 
     #endregion
