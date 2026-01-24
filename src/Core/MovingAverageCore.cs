@@ -1872,50 +1872,101 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersDeviationScaledMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
+        // For GetMovingAverageList compatibility, use fastLength=length, slowLength=length*2
+        EhlersDeviationScaledMovingAverage(input, output, fastLength: length, slowLength: length * 2);
+    }
+
+    /// <summary>
+    /// Computes Ehlers Deviation Scaled Moving Average with explicit parameters.
+    /// </summary>
+    internal static void EhlersDeviationScaledMovingAverage(ReadOnlySpan<double> input, Span<double> output, int fastLength, int slowLength)
+    {
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
         var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-        var devArray = pool.Rent(input.Length);
+        var zerosArray = pool.Rent(input.Length);
+        var avgZerosArray = pool.Rent(input.Length);
+        var ssfArray = pool.Rent(input.Length);
+        var stdDevArray = pool.Rent(input.Length);
 
         try
         {
-            var sma = smaArray.AsSpan(0, input.Length);
-            var dev = devArray.AsSpan(0, input.Length);
+            var zeros = zerosArray.AsSpan(0, input.Length);
+            var avgZeros = avgZerosArray.AsSpan(0, input.Length);
+            var ssf = ssfArray.AsSpan(0, input.Length);
+            var stdDev = stdDevArray.AsSpan(0, input.Length);
 
-            SimpleMovingAverage(input, sma, length);
-
-            // Calculate deviation
+            // Step 1: Compute zeros = input[i] - input[i-2] (with warmup handling)
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    dev[i] = 0;
-                    output[i] = input[i];
-                    continue;
-                }
+                var prevValue = i >= 2 ? input[i - 2] : 0;
+                zeros[i] = i >= 2 ? input[i] - prevValue : 0;
+            }
 
-                double sumSq = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var diff = input[i - j] - sma[i];
-                    sumSq += diff * diff;
-                }
-                dev[i] = Math.Sqrt(sumSq / length);
+            // Step 2: Compute avgZeros = (zeros + prevZeros) / 2
+            for (var i = 0; i < input.Length; i++)
+            {
+                var prevZeros = i > 0 ? zeros[i - 1] : 0;
+                avgZeros[i] = (zeros[i] + prevZeros) / 2;
+            }
 
-                // Scale factor based on deviation
-                var scale = dev[i] > 0 ? (input[i] - sma[i]) / dev[i] : 0;
-                var alpha = Math.Abs(scale) / (Math.Abs(scale) + 1);
-                output[i] = alpha * input[i] + (1 - alpha) * (i > 0 ? output[i - 1] : input[i]);
+            // Step 3: Apply Ehlers 2-Pole Super Smoother Filter V2 to avgZeros
+            Ehlers2PoleSuperSmootherFilterV2(avgZeros, ssf, fastLength);
+
+            // Step 4: Compute standard deviation of ssf using rolling window
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < slowLength - 1)
+                {
+                    stdDev[i] = 0;
+                }
+                else
+                {
+                    double sum = 0, sumSq = 0;
+                    for (var j = 0; j < slowLength; j++)
+                    {
+                        var val = ssf[i - j];
+                        sum += val;
+                        sumSq += val * val;
+                    }
+                    var mean = sum / slowLength;
+                    var variance = (sumSq / slowLength) - (mean * mean);
+                    stdDev[i] = Math.Sqrt(Math.Max(0, variance));
+                }
+            }
+
+            // Step 5: Compute scaled filter, alpha, and EDSMA
+            double prevScaledFilter = 0;
+            double prevEdsma = 0;
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentSsf = ssf[i];
+                var currentStdDev = stdDev[i];
+
+                // Scaled filter = ssf / stdDev (with fallback to previous)
+                var scaledFilter = currentStdDev != 0 ? currentSsf / currentStdDev : prevScaledFilter;
+                prevScaledFilter = scaledFilter;
+
+                // Alpha = clamp(5 * |scaledFilter| / slowLength, 0.01, 0.99)
+                var alpha = 5 * Math.Abs(scaledFilter) / slowLength;
+                alpha = Math.Max(0.01, Math.Min(0.99, alpha));
+
+                // EDSMA = alpha * input + (1 - alpha) * prevEdsma
+                var edsma = (alpha * input[i]) + ((1 - alpha) * prevEdsma);
+                output[i] = edsma;
+                prevEdsma = edsma;
             }
         }
         finally
         {
-            pool.Return(smaArray);
-            pool.Return(devArray);
+            pool.Return(zerosArray);
+            pool.Return(avgZerosArray);
+            pool.Return(ssfArray);
+            pool.Return(stdDevArray);
         }
     }
 

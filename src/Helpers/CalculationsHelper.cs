@@ -387,7 +387,8 @@ public static class CalculationsHelper
             or MovingAvgType.SymmetricallyWeightedMovingAverage or MovingAvgType.RepulsionMovingAverage
             or MovingAvgType.EhlersHannMovingAverage or MovingAvgType.EhlersTriangleMovingAverage
             or MovingAvgType.ZeroLagExponentialMovingAverage or MovingAvgType.HoltExponentialMovingAverage
-            or MovingAvgType.KaufmanAdaptiveMovingAverage or MovingAvgType.EhlersSuperSmootherFilter)
+            or MovingAvgType.KaufmanAdaptiveMovingAverage or MovingAvgType.EhlersSuperSmootherFilter
+            or MovingAvgType.EhlersDeviationScaledMovingAverage)
         {
             var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
             var count = inputList.Count;
@@ -582,6 +583,9 @@ public static class CalculationsHelper
                     break;
                 case MovingAvgType.EhlersSuperSmootherFilter:
                     MovingAverageCore.SuperSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDeviationScaledMovingAverage:
+                    MovingAverageCore.EhlersDeviationScaledMovingAverage(inputSpan, outputSpan, length);
                     break;
             }
 
