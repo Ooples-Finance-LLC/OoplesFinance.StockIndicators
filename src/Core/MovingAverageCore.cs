@@ -2813,4 +2813,236 @@ internal static class MovingAverageCore
     }
 
     #endregion
+
+    #region Batch 19 - Ehlers Butterworth and Super Smoother Filters
+
+    /// <summary>
+    /// Computes Ehlers 2-Pole Butterworth Filter V1 using span-based computation.
+    /// </summary>
+    internal static void Ehlers2PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrt2 = Math.Sqrt(2);
+        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
+        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * 1.25 * Math.PI / length, 0.01), 0.99));
+        var c2 = b;
+        var c3 = -a * a;
+        var c1 = 1 - c2 - c3;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (c1 * currentValue) + (c2 * prevFilter1) + (c3 * prevFilter2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 2-Pole Butterworth Filter V2 using span-based computation.
+    /// </summary>
+    internal static void Ehlers2PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrt2 = Math.Sqrt(2);
+        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
+        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
+        var c2 = b;
+        var c3 = -a * a;
+        var c1 = (1 - b + Math.Pow(a, 2)) / 4;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevValue3 = i >= 3 ? input[i - 3] : 0;
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue3)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 3-Pole Butterworth Filter V1 using span-based computation.
+    /// </summary>
+    internal static void Ehlers3PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var a = Math.Exp(Math.Max(Math.Min(-Math.PI / length, -0.01), -0.99));
+        var b = 2 * a * Math.Cos(Math.Min(Math.Max(1.738 * Math.PI / length, 0.01), 0.99));
+        var c = a * a;
+        var d2 = b + c;
+        var d3 = -(c + (b * c));
+        var d4 = c * c;
+        var d1 = 1 - d2 - d3 - d4;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
+
+            output[i] = (d1 * currentValue) + (d2 * prevFilter1) + (d3 * prevFilter2) + (d4 * prevFilter3);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 3-Pole Butterworth Filter V2 using span-based computation.
+    /// </summary>
+    internal static void Ehlers3PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var a1 = Math.Exp(Math.Max(Math.Min(-Math.PI / length, -0.01), -0.99));
+        var b1 = 2 * a1 * Math.Cos(Math.Min(Math.Max(1.738 * Math.PI / length, 0.01), 0.99));
+        var c1 = a1 * a1;
+        var coef2 = b1 + c1;
+        var coef3 = -(c1 + (b1 * c1));
+        var coef4 = c1 * c1;
+        var coef1 = (1 - b1 + c1) * (1 - c1) / 8;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevValue2 = i >= 2 ? input[i - 2] : 0;
+            var prevValue3 = i >= 3 ? input[i - 3] : 0;
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
+
+            output[i] = i < 4 ? currentValue : (coef1 * (currentValue + (3 * prevValue1) + (3 * prevValue2) + prevValue3)) +
+                                               (coef2 * prevFilter1) + (coef3 * prevFilter2) + (coef4 * prevFilter3);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 2-Pole Super Smoother Filter V1 using span-based computation.
+    /// </summary>
+    internal static void Ehlers2PoleSuperSmootherFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 15)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrt2 = Math.Sqrt(2);
+        var a1 = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
+        var b1 = 2 * a1 * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
+        var coef2 = b1;
+        var coef3 = -a1 * a1;
+        var coef1 = 1 - coef2 - coef3;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = i < 3 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 2-Pole Super Smoother Filter V2 using span-based computation.
+    /// </summary>
+    internal static void Ehlers2PoleSuperSmootherFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 10)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var sqrt2 = Math.Sqrt(2);
+        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
+        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
+        var c2 = b;
+        var c3 = -a * a;
+        var c1 = 1 - c2 - c3;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers 3-Pole Super Smoother Filter using span-based computation.
+    /// </summary>
+    internal static void Ehlers3PoleSuperSmootherFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var arg = Math.Min(Math.Max(Math.PI / length, 0.01), 0.99);
+        var a1 = Math.Exp(-arg);
+        var b1 = 2 * a1 * Math.Cos(1.738 * arg);
+        var c1 = a1 * a1;
+        var coef2 = b1 + c1;
+        var coef3 = -(c1 + (b1 * c1));
+        var coef4 = c1 * c1;
+        var coef1 = 1 - coef2 - coef3 - coef4;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
+            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
+            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
+
+            output[i] = i < 4 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2) + (coef4 * prevFilter3);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Decycler using span-based computation.
+    /// </summary>
+    internal static void EhlersDecycler(ReadOnlySpan<double> input, Span<double> output, int length = 60)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(length, 1);
+        var alphaArg = Math.Min(2 * Math.PI / length, 0.99);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevDec = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = (alpha1 / 2 * (currentValue + prevValue1)) + ((1 - alpha1) * prevDec);
+        }
+    }
+
+    #endregion
 }

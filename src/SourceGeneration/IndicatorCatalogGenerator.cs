@@ -273,6 +273,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "GeometricMeanMovingAverage",
         "HarmonicMeanMovingAverage",
 
+        // Moving Averages - MovingAverageCore (Batch 19 - Ehlers Butterworth and Super Smoother Filters)
+        "Ehlers2PoleButterworthFilterV1",
+        "Ehlers2PoleButterworthFilterV2",
+        "Ehlers3PoleButterworthFilterV1",
+        "Ehlers3PoleButterworthFilterV2",
+        "Ehlers2PoleSuperSmootherFilterV1",
+        "Ehlers2PoleSuperSmootherFilterV2",
+        "Ehlers3PoleSuperSmootherFilter",
+        "EhlersDecycler",
+
         // Volume - VolumeCore (Additional Batch 3)
         "WilliamsAD",
         "NetVolume",
@@ -1087,6 +1097,16 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "GeneralizedDoubleExponentialMovingAverage" => "ComputeGeneralizedDoubleEmaFast",
             "GeometricMeanMovingAverage" => "ComputeGeometricMeanMovingAverageFast",
             "HarmonicMeanMovingAverage" => "ComputeHarmonicMeanMovingAverageFast",
+
+            // Moving Averages (Batch 19 - Ehlers Butterworth and Super Smoother Filters)
+            "Ehlers2PoleButterworthFilterV1" => "ComputeEhlers2PoleButterworthFilterV1Fast",
+            "Ehlers2PoleButterworthFilterV2" => "ComputeEhlers2PoleButterworthFilterV2Fast",
+            "Ehlers3PoleButterworthFilterV1" => "ComputeEhlers3PoleButterworthFilterV1Fast",
+            "Ehlers3PoleButterworthFilterV2" => "ComputeEhlers3PoleButterworthFilterV2Fast",
+            "Ehlers2PoleSuperSmootherFilterV1" => "ComputeEhlers2PoleSuperSmootherFilterV1Fast",
+            "Ehlers2PoleSuperSmootherFilterV2" => "ComputeEhlers2PoleSuperSmootherFilterV2Fast",
+            "Ehlers3PoleSuperSmootherFilter" => "ComputeEhlers3PoleSuperSmootherFilterFast",
+            "EhlersDecycler" => "ComputeEhlersDecyclerFast",
 
             // Volume (Additional Batch 3)
             "WilliamsAD" => "ComputeWilliamsADFast",
