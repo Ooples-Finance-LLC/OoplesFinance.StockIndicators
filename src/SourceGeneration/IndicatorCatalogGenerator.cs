@@ -302,6 +302,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "VolumePriceTrend",
         "ElderRayBullPower",
         "ElderRayBearPower",
+        "ElderRayIndex",
         "NormalizedVolume",
         "VolumeWeightedRsi",
 
@@ -1137,6 +1138,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "VolumePriceTrend" => "ComputeVolumePriceTrendFast",
             "ElderRayBullPower" => "ComputeElderRayBullPowerFast",
             "ElderRayBearPower" => "ComputeElderRayBearPowerFast",
+            "ElderRayIndex" => "ComputeElderRayBullPowerFast",
             "NormalizedVolume" => "ComputeNormalizedVolumeFast",
             "VolumeWeightedRsi" => "ComputeVolumeWeightedRsiFast",
 
