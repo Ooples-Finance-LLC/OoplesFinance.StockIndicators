@@ -676,6 +676,20 @@ internal static partial class IndicatorCompute
             WildersSummationMethodSpecOptions wsm => ComputeWildersSummationMethodFast(data, context, wsm.Length),
             ZeroLagTripleExponentialMovingAverageSpecOptions zltema => ComputeZeroLagTripleExponentialMovingAverageFast(data, context, zltema.Length),
 
+            // Batch 27 - Multi-Input Core Methods
+            DeMarkerSpecOptions dem => ComputeDeMarkerFast(data, context, dem.Length),
+            MiddleHighLowMovingAverageSpecOptions mhlma => ComputeMiddleHighLowMovingAverageFast(data, context, mhlma.Length1, mhlma.Length2),
+            VortexMinusSpecOptions vminus => ComputeVortexMinusFast(data, context, vminus.Length),
+            VortexPlusSpecOptions vplus => ComputeVortexPlusFast(data, context, vplus.Length),
+            VolumeWeightedMovingAverageSpecOptions vwma27 => ComputeVolumeWeightedMovingAverageFast(data, context, vwma27.Length),
+            KlingerSignalSpecOptions ksig => ComputeKlingerSignalFast(data, context, ksig.FastLength, ksig.SlowLength, ksig.SignalLength),
+            EhlersChebyshevLowPassFilterSpecOptions eclpf => ComputeEhlersChebyshevLowPassFilterFast(data, context, eclpf.Length, eclpf.Ripple),
+            EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
+            EhlersMedianAverageAdaptiveFilterSpecOptions emaaf => ComputeEhlersMedianAverageAdaptiveFilterFast(data, context, emaaf.Length, emaaf.Threshold),
+            EhlersMesaAdaptiveMovingAverageSpecOptions emama => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.Length, emama.FastLimit, emama.SlowLimit),
+            EhlersRecursiveMedianFilterSpecOptions ermf => ComputeEhlersRecursiveMedianFilterFast(data, context, ermf.Length, ermf.Alpha),
+            EhlersRoofingFilterSpecOptions eroof => ComputeEhlersRoofingFilterFast(data, context, eroof.HpLength, eroof.LpLength),
+
             _ => null
         };
     }
@@ -7079,6 +7093,159 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.ZeroLagTripleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 27 - Multi-Input Core Methods
+
+    /// <summary>
+    /// Computes DeMarker using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DeMarker(high, low, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Middle High Low Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMiddleHighLowMovingAverageFast(StockData data, ComputeContext context, int length1 = 14, int length2 = 10)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.MiddleHighLowMovingAverage(high, low, buffer.WritableSpan, length1, length2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vortex Minus using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVortexMinusFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VortexMinus(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vortex Plus using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVortexPlusFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.VortexPlus(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Weighted Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.VolumeWeightedMovingAverage(inputSpan, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Klinger Signal using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKlingerSignalFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55, int signalLength = 13)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.KlingerSignal(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength, signalLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Chebyshev Low Pass Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context, int length = 14, double ripple = 0.5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersChebyshevLowPassFilter(inputSpan, buffer.WritableSpan, length, ripple);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Gaussian Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersGaussianFilterFast(StockData data, ComputeContext context, int length = 14, int poles = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersGaussianFilter(inputSpan, buffer.WritableSpan, length, poles);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Median Average Adaptive Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context, int length = 39, double threshold = 0.002)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersMedianAverageAdaptiveFilter(inputSpan, buffer.WritableSpan, length, threshold);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Mesa Adaptive Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersMesaAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double fastLimit = 0.5, double slowLimit = 0.05)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersMesaAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length, fastLimit, slowLimit);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Recursive Median Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length = 5, double alpha = 0.5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersRecursiveMedianFilter(inputSpan, buffer.WritableSpan, length, alpha);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Roofing Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersRoofingFilterFast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
         return buffer;
     }
 

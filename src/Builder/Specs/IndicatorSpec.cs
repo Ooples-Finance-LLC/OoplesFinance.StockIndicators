@@ -6462,6 +6462,126 @@ public sealed class ZeroLagTripleExponentialMovingAverageSpecOptions : IIndicato
     public int Length { get; }
 }
 
+// ========== Batch 27 SpecOptions (Multi-Input Core Methods) ==========
+
+/// <summary>
+/// DeMarker indicator options.
+/// </summary>
+public sealed class DeMarkerSpecOptions : IIndicatorSpecOptions
+{
+    public DeMarkerSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Middle High Low Moving Average indicator options.
+/// </summary>
+public sealed class MiddleHighLowMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public MiddleHighLowMovingAverageSpecOptions(int length1, int length2 = 10) { Length1 = Math.Max(1, length1); Length2 = Math.Max(1, length2); }
+    public int Length1 { get; }
+    public int Length2 { get; }
+}
+
+/// <summary>
+/// Vortex Minus indicator options.
+/// </summary>
+public sealed class VortexMinusSpecOptions : IIndicatorSpecOptions
+{
+    public VortexMinusSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Vortex Plus indicator options.
+/// </summary>
+public sealed class VortexPlusSpecOptions : IIndicatorSpecOptions
+{
+    public VortexPlusSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Volume Weighted Moving Average indicator options.
+/// </summary>
+public sealed class VolumeWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Klinger Signal indicator options.
+/// </summary>
+public sealed class KlingerSignalSpecOptions : IIndicatorSpecOptions
+{
+    public KlingerSignalSpecOptions(int fastLength, int slowLength = 55, int signalLength = 13) { FastLength = Math.Max(1, fastLength); SlowLength = Math.Max(1, slowLength); SignalLength = Math.Max(1, signalLength); }
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+}
+
+/// <summary>
+/// Ehlers Chebyshev Low Pass Filter indicator options.
+/// </summary>
+public sealed class EhlersChebyshevLowPassFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersChebyshevLowPassFilterSpecOptions(int length, double ripple = 0.5) { Length = Math.Max(1, length); Ripple = ripple; }
+    public int Length { get; }
+    public double Ripple { get; }
+}
+
+/// <summary>
+/// Ehlers Gaussian Filter indicator options.
+/// </summary>
+public sealed class EhlersGaussianFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersGaussianFilterSpecOptions(int length, int poles = 3) { Length = Math.Max(1, length); Poles = poles; }
+    public int Length { get; }
+    public int Poles { get; }
+}
+
+/// <summary>
+/// Ehlers Median Average Adaptive Filter indicator options.
+/// </summary>
+public sealed class EhlersMedianAverageAdaptiveFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersMedianAverageAdaptiveFilterSpecOptions(int length, double threshold = 0.002) { Length = Math.Max(1, length); Threshold = threshold; }
+    public int Length { get; }
+    public double Threshold { get; }
+}
+
+/// <summary>
+/// Ehlers Mesa Adaptive Moving Average indicator options.
+/// </summary>
+public sealed class EhlersMesaAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersMesaAdaptiveMovingAverageSpecOptions(int length, double fastLimit = 0.5, double slowLimit = 0.05) { Length = Math.Max(1, length); FastLimit = fastLimit; SlowLimit = slowLimit; }
+    public int Length { get; }
+    public double FastLimit { get; }
+    public double SlowLimit { get; }
+}
+
+/// <summary>
+/// Ehlers Recursive Median Filter indicator options.
+/// </summary>
+public sealed class EhlersRecursiveMedianFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersRecursiveMedianFilterSpecOptions(int length, double alpha = 0.5) { Length = Math.Max(1, length); Alpha = alpha; }
+    public int Length { get; }
+    public double Alpha { get; }
+}
+
+/// <summary>
+/// Ehlers Roofing Filter indicator options.
+/// </summary>
+public sealed class EhlersRoofingFilterSpecOptions : IIndicatorSpecOptions
+{
+    public EhlersRoofingFilterSpecOptions(int hpLength, int lpLength = 48) { HpLength = Math.Max(1, hpLength); LpLength = Math.Max(1, lpLength); }
+    public int HpLength { get; }
+    public int LpLength { get; }
+}
+
 /// <summary>
 /// Generic indicator options that stores parameters as an array.
 /// Used for reflection-based indicator dispatch.
