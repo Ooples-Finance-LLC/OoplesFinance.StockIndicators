@@ -5272,6 +5272,18 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
+    /// Computes Double Exponential Smoothing using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDoubleExponentialSmoothingFast(StockData data, ComputeContext context, int length = 14)
+    {
+        _ = length; // Uses alpha/gamma parameters instead
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.DoubleExponentialSmoothing(close, buffer.WritableSpan, 0.01, 0.9);
+        return buffer;
+    }
+
+    /// <summary>
     /// Computes Detrended Synthetic Price oscillator using zero-allocation fast path.
     /// </summary>
     public static ComputeBuffer ComputeDetrendedSyntheticPriceFast(StockData data, ComputeContext context, int length = 14)

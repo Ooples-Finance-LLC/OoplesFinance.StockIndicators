@@ -525,6 +525,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "SimpleLines",
         "BelkhayateTiming",
         "DetrendedSyntheticPrice",
+        "DoubleExponentialSmoothing",
     };
 
     // Indicators that have non-standard naming and need special handling or should be skipped
@@ -1367,6 +1368,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             "SimpleLines" => "ComputeSimpleLinesFast",
             "BelkhayateTiming" => "ComputeBelkhayateTimingFast",
             "DetrendedSyntheticPrice" => "ComputeDetrendedSyntheticPriceFast",
+            "DoubleExponentialSmoothing" => "ComputeDoubleExponentialSmoothingFast",
 
             _ => $"Compute{GetMethodName(indicatorName)}Fast"
         };
