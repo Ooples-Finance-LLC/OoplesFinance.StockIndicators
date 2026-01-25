@@ -13506,11 +13506,47 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage)
     {
+        // V1 Algorithm: Vortex Bands
+        // 1. Calculate MA of price (basis)
+        // 2. Calculate diff = price - basis
+        // 3. Calculate MA of diff
+        // 4. dev = 2 * diffMa
+        // 5. upper = basis + dev (primary output)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Calculate basis (MA of close)
+        var basisBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, basisBuffer.WritableSpan, length);
+
+        // Calculate diff (close - basis)
+        var diffBuffer = context.Rent(count);
+        var diffSpan = diffBuffer.WritableSpan;
+        var basisSpan = basisBuffer.Span;
+        for (int i = 0; i < count; i++)
+        {
+            diffSpan[i] = close[i] - basisSpan[i];
+        }
+
+        // Calculate MA of diff
+        var diffMaBuffer = context.Rent(count);
+        maCore.Compute(diffBuffer.Span, diffMaBuffer.WritableSpan, length);
+
+        // Calculate upper band: basis + 2*diffMa
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        var diffMaSpan = diffMaBuffer.Span;
+        for (int i = 0; i < count; i++)
+        {
+            double dev = 2 * diffMaSpan[i];
+            resultSpan[i] = basisSpan[i] + dev;
+        }
+
+        basisBuffer.Dispose();
+        diffBuffer.Dispose();
+        diffMaBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
@@ -13726,11 +13762,23 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Traders Dynamic Index
+        // 1. Calculate RSI with length1 period
+        // 2. Calculate fast MA (mab) of RSI with length3 (primary output - TDI line)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Calculate RSI
+        var rsiBuffer = context.Rent(count);
+        OscillatorCore.RelativeStrengthIndex(close, rsiBuffer.WritableSpan, length1);
+
+        // Calculate fast MA of RSI (mab - the TDI primary output)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length4);
-        return buffer;
+        maCore.Compute(rsiBuffer.Span, result.WritableSpan, length3);
+
+        rsiBuffer.Dispose();
+        return result;
     }
 
     // Batch 32 - Remaining Indicators (Part 1)
