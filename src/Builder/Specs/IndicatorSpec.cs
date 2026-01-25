@@ -809,11 +809,18 @@ public sealed class DpoSpecOptions : IIndicatorSpecOptions
 public sealed class TrixSpecOptions : IIndicatorSpecOptions
 {
     public TrixSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TrixSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1171,11 +1178,18 @@ public sealed class TrueRangeSpecOptions : IIndicatorSpecOptions
 public sealed class AwesomeOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public AwesomeOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public AwesomeOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1184,11 +1198,18 @@ public sealed class AwesomeOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class AcceleratorOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public AcceleratorOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public AcceleratorOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -2424,11 +2445,18 @@ public sealed class VpciSpecOptions : IIndicatorSpecOptions
 public sealed class KeltnerChannelMiddleSpecOptions : IIndicatorSpecOptions
 {
     public KeltnerChannelMiddleSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public KeltnerChannelMiddleSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5788,11 +5816,18 @@ public sealed class DonchianChannelWidthSpecOptions : IIndicatorSpecOptions
 public sealed class KeltnerChannelWidthSpecOptions : IIndicatorSpecOptions
 {
     public KeltnerChannelWidthSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public KeltnerChannelWidthSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
