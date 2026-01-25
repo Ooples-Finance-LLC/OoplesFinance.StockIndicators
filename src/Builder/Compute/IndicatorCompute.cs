@@ -930,6 +930,7 @@ internal static partial class IndicatorCompute
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
             GainLossMovingAverageSpecOptions glma => ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.SignalLength, glma.MaType),
+            ErgodicMeanDeviationIndicatorSpecOptions emdi => ComputeErgodicMeanDeviationIndicatorFast(data, context, emdi.Length1, emdi.Length2, emdi.Length3, emdi.SignalLength, emdi.MaType),
 
             _ => null
         };
@@ -10174,6 +10175,102 @@ internal static partial class IndicatorCompute
         {
             pool.Return(gainLossArray);
             pool.Return(gainLossAvgArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ergodic Mean Deviation Indicator with signal line.
+    /// </summary>
+    public static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var count = data.Count;
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var pool = ArrayPool<double>.Shared;
+        var emaArray = pool.Rent(count);
+        var deviationArray = pool.Rent(count);
+        var deviationEma1Array = pool.Rent(count);
+        var emdiArray = pool.Rent(count);
+        try
+        {
+            var emaSpan = emaArray.AsSpan(0, count);
+            var deviationSpan = deviationArray.AsSpan(0, count);
+            var deviationEma1Span = deviationEma1Array.AsSpan(0, count);
+            var emdiSpan = emdiArray.AsSpan(0, count);
+
+            // Step 1: Compute EMA of input (length1)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(inputSpan, emaSpan, length1);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, emaSpan, length1);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, emaSpan, length1);
+                    break;
+            }
+
+            // Step 2: Compute deviation from EMA
+            ReadOnlySpan<double> emaReadOnly = emaSpan;
+            OscillatorCore.DeviationFromMa(inputSpan, emaReadOnly, deviationSpan);
+            ReadOnlySpan<double> deviationReadOnly = deviationSpan;
+
+            // Step 3: First smoothing (length2)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(deviationReadOnly, deviationEma1Span, length2);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(deviationReadOnly, deviationEma1Span, length2);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(deviationReadOnly, deviationEma1Span, length2);
+                    break;
+            }
+
+            // Step 4: Second smoothing (length3) = EMDI
+            ReadOnlySpan<double> deviationEma1ReadOnly = deviationEma1Span;
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
+                    break;
+            }
+
+            // Step 5: Signal line (signalLength)
+            ReadOnlySpan<double> emdiReadOnly = emdiSpan;
+            var buffer = context.Rent(count);
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(emaArray);
+            pool.Return(deviationArray);
+            pool.Return(deviationEma1Array);
+            pool.Return(emdiArray);
         }
     }
 

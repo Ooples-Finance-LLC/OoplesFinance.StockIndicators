@@ -12701,6 +12701,29 @@ internal static class OscillatorCore
     }
 
     /// <summary>
+    /// Computes deviation from moving average.
+    /// deviation = input - ma
+    /// Used for Ergodic Mean Deviation Indicator.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="ma">Moving average values.</param>
+    /// <param name="output">Output span for deviation values.</param>
+    internal static void DeviationFromMa(ReadOnlySpan<double> input, ReadOnlySpan<double> ma, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            output[i] = input[i] - ma[i];
+        }
+    }
+
+    /// <summary>
     /// Computes Gain Loss raw values.
     /// gainLoss = ((current - prev) / ((current + prev) / 2)) * 100
     /// Apply moving averages externally for smoothing and signal.
