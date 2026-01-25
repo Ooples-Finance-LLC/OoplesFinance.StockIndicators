@@ -1027,6 +1027,16 @@ internal static partial class IndicatorCompute
             OCHistogramSpecOptions och => ComputeOCHistogramFast(data, context, och.Length, och.MaType),
             OnBalanceVolumeModifiedSpecOptions obvmod => ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType),
 
+            // Batch 23 - Volume and Statistical Indicators
+            OnBalanceVolumeReflexSpecOptions obvr => ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length, obvr.SignalLength, obvr.MaType),
+            PivotPointAverageSpecOptions ppa => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType),
+            PriceVolumeRankSpecOptions pvr => ComputePriceVolumeRankFast(data, context, pvr.FastLength, pvr.SlowLength, pvr.MaType),
+            PringSpecialKSpecOptions psk => ComputePringSpecialKFast(data, context, psk.SmoothLength, psk.MaType),
+            ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length, pb.MaType),
+            QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor, qwn.MaType),
+            RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length, rrsi.MaType),
+            ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.SmoothLength, rsi2.MaType),
+
             _ => null
         };
     }
@@ -12809,6 +12819,142 @@ internal static partial class IndicatorCompute
                 break;
             default:
                 MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+        return buffer;
+    }
+
+    // Batch 23 - Volume and Statistical Indicators
+
+    public static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, signalLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, signalLength);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePriceVolumeRankFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, slowLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, slowLength);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int smoothLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.WildersSmoothingMethod:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeReallySimpleIndicatorFast(StockData data, ComputeContext context, int length = 21, int smoothLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
                 break;
         }
         return buffer;
