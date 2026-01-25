@@ -929,6 +929,7 @@ internal static partial class IndicatorCompute
             EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.SignalLength, ervi.MaType),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
+            GainLossMovingAverageSpecOptions glma => ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.SignalLength, glma.MaType),
 
             _ => null
         };
@@ -10107,6 +10108,73 @@ internal static partial class IndicatorCompute
         }
 
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Gain Loss Moving Average with signal line.
+    /// </summary>
+    public static ComputeBuffer ComputeGainLossMovingAverageFast(StockData data, ComputeContext context, int length = 14, int signalLength = 7, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var count = data.Count;
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var pool = ArrayPool<double>.Shared;
+        var gainLossArray = pool.Rent(count);
+        var gainLossAvgArray = pool.Rent(count);
+        try
+        {
+            var gainLossSpan = gainLossArray.AsSpan(0, count);
+            var gainLossAvgSpan = gainLossAvgArray.AsSpan(0, count);
+
+            // Compute raw gain/loss percentage
+            OscillatorCore.GainLoss(inputSpan, gainLossSpan);
+            ReadOnlySpan<double> gainLossReadOnly = gainLossSpan;
+
+            // First MA smoothing (length)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(gainLossReadOnly, gainLossAvgSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(gainLossReadOnly, gainLossAvgSpan, length);
+                    break;
+                case MovingAvgType.WildersSmoothingMethod:
+                    MovingAverageCore.WellesWilderMovingAverage(gainLossReadOnly, gainLossAvgSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.WellesWilderMovingAverage(gainLossReadOnly, gainLossAvgSpan, length);
+                    break;
+            }
+
+            ReadOnlySpan<double> gainLossAvgReadOnly = gainLossAvgSpan;
+            var buffer = context.Rent(count);
+
+            // Second MA for signal line (signalLength)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(gainLossAvgReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(gainLossAvgReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.WildersSmoothingMethod:
+                    MovingAverageCore.WellesWilderMovingAverage(gainLossAvgReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                default:
+                    MovingAverageCore.WellesWilderMovingAverage(gainLossAvgReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(gainLossArray);
+            pool.Return(gainLossAvgArray);
+        }
     }
 
     #endregion

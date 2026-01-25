@@ -12701,6 +12701,32 @@ internal static class OscillatorCore
     }
 
     /// <summary>
+    /// Computes Gain Loss raw values.
+    /// gainLoss = ((current - prev) / ((current + prev) / 2)) * 100
+    /// Apply moving averages externally for smoothing and signal.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for gain/loss percentage values.</param>
+    internal static void GainLoss(ReadOnlySpan<double> input, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        output[0] = 0;
+        for (var i = 1; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = input[i - 1];
+            var avg = (currentValue + prevValue) / 2;
+            output[i] = avg != 0 ? (currentValue - prevValue) / avg * 100 : 0;
+        }
+    }
+
+    /// <summary>
     /// Computes Moving Average Difference indicator.
     /// MAD = 100 * (fastMA - slowMA) / slowMA
     /// </summary>
