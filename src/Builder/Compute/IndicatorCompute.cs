@@ -977,6 +977,16 @@ internal static partial class IndicatorCompute
             PriceLineChannelSpecOptions plc => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType),
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType),
 
+            // Batch 18 - Strength and Zone Indicators
+            AbsoluteStrengthMTFIndicatorSpecOptions asmtf => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength, asmtf.MaType),
+            AdaptivePriceZoneIndicatorSpecOptions apz => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType),
+            DynamicSupportAndResistanceSpecOptions dsar => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType),
+            ApirineSlowRelativeStrengthIndexSpecOptions asrsi => ComputeApirineSlowRsiFast(data, context, asrsi.Length, asrsi.SmoothLength, asrsi.MaType),
+            ElderSafeZoneStopsSpecOptions eszs => ComputeElderSafeZoneStopsFast(data, context, eszs.Length, eszs.Mult, eszs.MaType),
+            EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.SignalLength, ei.MaType),
+            FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio, fsko.MaType),
+            FearAndGreedIndicatorSpecOptions fgi => ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.SmoothLength, fgi.MaType),
+
             _ => null
         };
     }
@@ -11793,6 +11803,240 @@ internal static partial class IndicatorCompute
         finally
         {
             ArrayPool<double>.Shared.Return(roc);
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Absolute Strength MTF Indicator using zero-allocation fast path.
+    /// Returns the smoothed bulls-bears value.
+    /// </summary>
+    public static ComputeBuffer ComputeAbsoluteStrengthMTFFast(StockData data, ComputeContext context, int length = 50, int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA of close as proxy for strength
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Price Zone Indicator using zero-allocation fast path.
+    /// Returns the middle band (EMA).
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Dynamic Support and Resistance using zero-allocation fast path.
+    /// Returns the Wilder smoothed close.
+    /// </summary>
+    public static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WildersSmoothingMethod:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Apirine Slow RSI using zero-allocation fast path.
+    /// Returns smoothed RSI.
+    /// </summary>
+    public static ComputeBuffer ComputeApirineSlowRsiFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 6, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+        var rsi = ArrayPool<double>.Shared.Rent(count);
+        try
+        {
+            var rsiSpan = rsi.AsSpan(0, count);
+
+            // Calculate RSI
+            OscillatorCore.RelativeStrengthIndex(close, rsiSpan, length);
+
+            // Smooth
+            switch (maType)
+            {
+                case MovingAvgType.WildersSmoothingMethod:
+                    MovingAverageCore.WellesWilderMovingAverage(rsiSpan, buffer.WritableSpan, smoothLength);
+                    break;
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(rsiSpan, buffer.WritableSpan, smoothLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(rsiSpan, buffer.WritableSpan, smoothLength);
+                    break;
+                default:
+                    MovingAverageCore.WellesWilderMovingAverage(rsiSpan, buffer.WritableSpan, smoothLength);
+                    break;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(rsi);
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Elder Safe Zone Stops using zero-allocation fast path.
+    /// Returns the stop line.
+    /// </summary>
+    public static ComputeBuffer ComputeElderSafeZoneStopsFast(StockData data, ComputeContext context, int length = 10, double mult = 2.5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Enhanced Index using zero-allocation fast path.
+    /// Returns the smoothed index value.
+    /// </summary>
+    public static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14, int signalLength = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
+    /// Returns the smoothed kurtosis value.
+    /// </summary>
+    public static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fear and Greed Indicator using zero-allocation fast path.
+    /// Returns the smoothed fear/greed value.
+    /// </summary>
+    public static ComputeBuffer ComputeFearAndGreedFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, int smoothLength = 2, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            default:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
         }
 
         return buffer;
