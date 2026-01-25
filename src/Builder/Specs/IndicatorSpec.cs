@@ -10919,3 +10919,181 @@ public sealed class ChandeMomentumOscillatorSignalSpecOptions : IIndicatorSpecOp
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Klinger Volume Oscillator options.
+/// </summary>
+public sealed class KlingerVolumeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public KlingerVolumeOscillatorSpecOptions(int fastLength = 34, int slowLength = 55, int signalLength = 13)
+        : this(fastLength, slowLength, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public KlingerVolumeOscillatorSpecOptions(int fastLength, int slowLength, int signalLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Finite Volume Elements options.
+/// </summary>
+public sealed class FiniteVolumeElementsSpecOptions : IIndicatorSpecOptions
+{
+    public FiniteVolumeElementsSpecOptions(int length = 22, double factor = 0.3)
+        : this(length, factor, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public FiniteVolumeElementsSpecOptions(int length, double factor, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Factor = factor;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Factor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// On Balance Volume Modified options.
+/// </summary>
+public sealed class OnBalanceVolumeModifiedSpecOptions : IIndicatorSpecOptions
+{
+    public OnBalanceVolumeModifiedSpecOptions(int length1 = 7, int length2 = 10)
+        : this(length1, length2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public OnBalanceVolumeModifiedSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// On Balance Volume Reflex options.
+/// </summary>
+public sealed class OnBalanceVolumeReflexSpecOptions : IIndicatorSpecOptions
+{
+    public OnBalanceVolumeReflexSpecOptions(int length = 4, int signalLength = 14)
+        : this(length, signalLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public OnBalanceVolumeReflexSpecOptions(int length, int signalLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Negative Volume Disparity Indicator options.
+/// </summary>
+public sealed class NegativeVolumeDisparityIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public NegativeVolumeDisparityIndicatorSpecOptions(int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
+        : this(length, signalLength, top, bottom, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public NegativeVolumeDisparityIndicatorSpecOptions(int length, int signalLength, double top, double bottom, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        Top = top;
+        Bottom = bottom;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SignalLength { get; }
+    public double Top { get; }
+    public double Bottom { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Relative Volume Indicator options.
+/// </summary>
+public sealed class RelativeVolumeIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVolumeIndicatorSpecOptions(int length = 60)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RelativeVolumeIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Price Volume Rank options.
+/// </summary>
+public sealed class PriceVolumeRankSpecOptions : IIndicatorSpecOptions
+{
+    public PriceVolumeRankSpecOptions(int fastLength = 5, int slowLength = 10)
+        : this(fastLength, slowLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PriceVolumeRankSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Multi Vote On Balance Volume options.
+/// </summary>
+public sealed class MultiVoteOnBalanceVolumeSpecOptions : IIndicatorSpecOptions
+{
+    public MultiVoteOnBalanceVolumeSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MultiVoteOnBalanceVolumeSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
