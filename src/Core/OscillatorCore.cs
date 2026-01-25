@@ -12490,6 +12490,46 @@ internal static class OscillatorCore
     #region Batch 25 - Additional Ehlers Indicators (New Core Methods)
 
     /// <summary>
+    /// Computes Elder Market Thermometer raw values.
+    /// Apply a moving average externally for the signal line.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="output">Output span for thermometer values.</param>
+    internal static void ElderMarketThermometer(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (high.Length == 0) return;
+
+        output[0] = 0;
+        for (var i = 1; i < high.Length; i++)
+        {
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            var prevHigh = high[i - 1];
+            var prevLow = low[i - 1];
+
+            // EMT = 0 if inside bar, else max of |high - prevHigh| or |prevLow - low|
+            if (currentHigh < prevHigh && currentLow > prevLow)
+            {
+                output[i] = 0;
+            }
+            else if (currentHigh - prevHigh > prevLow - currentLow)
+            {
+                output[i] = Math.Abs(currentHigh - prevHigh);
+            }
+            else
+            {
+                output[i] = Math.Abs(prevLow - currentLow);
+            }
+        }
+    }
+
+    /// <summary>
     /// Computes Ehlers Simple Clip Indicator raw values (z3).
     /// Output is the sum of last 4 clipped derivative values.
     /// Apply a moving average externally for the signal line.
@@ -12625,6 +12665,62 @@ internal static class OscillatorCore
         finally
         {
             pool.Return(derivArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Relative Vigor Index raw values.
+    /// RVI = (close - open) / (high - low)
+    /// Apply moving averages externally for smoothing and signal.
+    /// </summary>
+    /// <param name="open">Open prices.</param>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Close prices.</param>
+    /// <param name="output">Output span for raw RVI values.</param>
+    internal static void EhlersRelativeVigorIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0) return;
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var currentClose = close[i];
+            var currentOpen = open[i];
+            var currentHigh = high[i];
+            var currentLow = low[i];
+
+            var range = currentHigh - currentLow;
+            output[i] = range != 0 ? (currentClose - currentOpen) / range : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Moving Average Difference indicator.
+    /// MAD = 100 * (fastMA - slowMA) / slowMA
+    /// </summary>
+    /// <param name="fastMa">Fast moving average values.</param>
+    /// <param name="slowMa">Slow moving average values.</param>
+    /// <param name="output">Output span for MAD values.</param>
+    internal static void MovingAverageDifference(ReadOnlySpan<double> fastMa, ReadOnlySpan<double> slowMa, Span<double> output)
+    {
+        if (output.Length < fastMa.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (fastMa.Length == 0) return;
+
+        for (var i = 0; i < fastMa.Length; i++)
+        {
+            var shortMa = fastMa[i];
+            var longMa = slowMa[i];
+            output[i] = longMa != 0 ? 100 * (shortMa - longMa) / longMa : 0;
         }
     }
 

@@ -925,6 +925,10 @@ internal static partial class IndicatorCompute
             // Batch 12 - New Core Methods for Previously Unimplemented Indicators
             EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length, esdi.SignalLength, esdi.MaType),
             EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3, esci.SignalLength, esci.MaType),
+            ElderMarketThermometerSpecOptions emt => ComputeElderMarketThermometerFast(data, context, emt.Length, emt.MaType),
+            EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.SignalLength, ervi.MaType),
+            EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
+            Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
 
             _ => null
         };
@@ -9869,6 +9873,240 @@ internal static partial class IndicatorCompute
         {
             pool.Return(z3Array);
         }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Relative Vigor Index with signal line.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var count = data.Count;
+        var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+
+        var pool = ArrayPool<double>.Shared;
+        var rviArray = pool.Rent(count);
+        var rviSmaArray = pool.Rent(count);
+        try
+        {
+            var rviSpan = rviArray.AsSpan(0, count);
+            var rviSmaSpan = rviSmaArray.AsSpan(0, count);
+
+            // Compute raw RVI values
+            OscillatorCore.EhlersRelativeVigorIndex(openSpan, highSpan, lowSpan, closeSpan, rviSpan);
+            ReadOnlySpan<double> rviReadOnly = rviSpan;
+
+            // First MA smoothing (length)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(rviReadOnly, rviSmaSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(rviReadOnly, rviSmaSpan, length);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(rviReadOnly, rviSmaSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(rviReadOnly, rviSmaSpan, length);
+                    break;
+            }
+
+            ReadOnlySpan<double> rviSmaReadOnly = rviSmaSpan;
+            var buffer = context.Rent(count);
+
+            // Second MA for signal line (signalLength)
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(rviArray);
+            pool.Return(rviSmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Moving Average Difference Indicator.
+    /// MAD = 100 * (fastMA - slowMA) / slowMA
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast(StockData data, ComputeContext context, int fastLength = 8, int slowLength = 23, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var count = data.Count;
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var pool = ArrayPool<double>.Shared;
+        var fastMaArray = pool.Rent(count);
+        var slowMaArray = pool.Rent(count);
+        try
+        {
+            var fastMaSpan = fastMaArray.AsSpan(0, count);
+            var slowMaSpan = slowMaArray.AsSpan(0, count);
+
+            // Compute fast and slow MAs
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(inputSpan, fastMaSpan, fastLength);
+                    MovingAverageCore.SimpleMovingAverage(inputSpan, slowMaSpan, slowLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, fastMaSpan, fastLength);
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, slowMaSpan, slowLength);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, fastMaSpan, fastLength);
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, slowMaSpan, slowLength);
+                    break;
+                default:
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, fastMaSpan, fastLength);
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, slowMaSpan, slowLength);
+                    break;
+            }
+
+            ReadOnlySpan<double> fastMaReadOnly = fastMaSpan;
+            ReadOnlySpan<double> slowMaReadOnly = slowMaSpan;
+            var buffer = context.Rent(count);
+
+            // Compute MAD = 100 * (fastMA - slowMA) / slowMA
+            OscillatorCore.MovingAverageDifference(fastMaReadOnly, slowMaReadOnly, buffer.WritableSpan);
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(fastMaArray);
+            pool.Return(slowMaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Elder Market Thermometer with signal line.
+    /// </summary>
+    public static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context, int length = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var count = data.Count;
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        var pool = ArrayPool<double>.Shared;
+        var emtArray = pool.Rent(count);
+        try
+        {
+            var emtSpan = emtArray.AsSpan(0, count);
+            OscillatorCore.ElderMarketThermometer(highSpan, lowSpan, emtSpan);
+            ReadOnlySpan<double> emtReadOnly = emtSpan;
+
+            var buffer = context.Rent(count);
+
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+                case MovingAvgType.DoubleExponentialMovingAverage:
+                    MovingAverageCore.DoubleExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+                case MovingAvgType.TripleExponentialMovingAverage:
+                    MovingAverageCore.TripleExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+                default:
+                    // Fallback to EMA for unsupported types
+                    MovingAverageCore.ExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(emtArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes DEMA 2 Lines indicator (fast DEMA line).
+    /// Returns the fast DEMA line for crossover signals.
+    /// </summary>
+    public static ComputeBuffer ComputeDema2LinesFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var count = data.Count;
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(count);
+
+        // Compute fast DEMA (double smoothed)
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                {
+                    var pool = ArrayPool<double>.Shared;
+                    var tempArray = pool.Rent(count);
+                    try
+                    {
+                        var tempSpan = tempArray.AsSpan(0, count);
+                        MovingAverageCore.SimpleMovingAverage(inputSpan, tempSpan, fastLength);
+                        ReadOnlySpan<double> tempReadOnly = tempSpan;
+                        MovingAverageCore.SimpleMovingAverage(tempReadOnly, buffer.WritableSpan, fastLength);
+                    }
+                    finally
+                    {
+                        pool.Return(tempArray);
+                    }
+                }
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.DoubleExponentialMovingAverage(inputSpan, buffer.WritableSpan, fastLength);
+                break;
+            case MovingAvgType.WeightedMovingAverage:
+                {
+                    var pool = ArrayPool<double>.Shared;
+                    var tempArray = pool.Rent(count);
+                    try
+                    {
+                        var tempSpan = tempArray.AsSpan(0, count);
+                        MovingAverageCore.WeightedMovingAverage(inputSpan, tempSpan, fastLength);
+                        ReadOnlySpan<double> tempReadOnly = tempSpan;
+                        MovingAverageCore.WeightedMovingAverage(tempReadOnly, buffer.WritableSpan, fastLength);
+                    }
+                    finally
+                    {
+                        pool.Return(tempArray);
+                    }
+                }
+                break;
+            default:
+                MovingAverageCore.DoubleExponentialMovingAverage(inputSpan, buffer.WritableSpan, fastLength);
+                break;
+        }
+
+        return buffer;
     }
 
     #endregion
