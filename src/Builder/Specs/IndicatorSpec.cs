@@ -6797,8 +6797,19 @@ public sealed class ThreeHMASpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class TillsonIE2SpecOptions : IIndicatorSpecOptions
 {
-    public TillsonIE2SpecOptions(int length) { Length = Math.Max(1, length); }
+    public TillsonIE2SpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TillsonIE2SpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6806,8 +6817,19 @@ public sealed class TillsonIE2SpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class TStepLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public TStepLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public TStepLeastSquaresMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TStepLeastSquaresMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7512,12 +7534,20 @@ public sealed class TotalPowerIndicatorSpecOptions : IIndicatorSpecOptions
 public sealed class TurboTriggerSpecOptions : IIndicatorSpecOptions
 {
     public TurboTriggerSpecOptions(int length = 100, double pctMultiplier = 1.0)
+        : this(length, pctMultiplier, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TurboTriggerSpecOptions(int length, double pctMultiplier, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         PctMultiplier = pctMultiplier;
+        MaType = maType;
     }
+
     public int Length { get; }
     public double PctMultiplier { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7526,12 +7556,20 @@ public sealed class TurboTriggerSpecOptions : IIndicatorSpecOptions
 public sealed class TurboScalerSpecOptions : IIndicatorSpecOptions
 {
     public TurboScalerSpecOptions(int length = 50, double pctMultiplier = 1.0)
+        : this(length, pctMultiplier, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TurboScalerSpecOptions(int length, double pctMultiplier, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         PctMultiplier = pctMultiplier;
+        MaType = maType;
     }
+
     public int Length { get; }
     public double PctMultiplier { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
