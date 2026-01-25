@@ -14054,29 +14054,142 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Polynomial morphing with MA smoothing
+        // 1. Compute morphed k values with lookback to length and 2*length
+        // 2. Apply MA to k values to get k1 (middle band)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Calculate k values with morphing
+        var kBuffer = context.Rent(count);
+        var kSpan = kBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double y = close[i];
+            double prevK = i >= length ? kSpan[i - length] : y;
+            double prevK2 = i >= length * 2 ? kSpan[i - (length * 2)] : y;
+            double prevIndex = i >= length ? (i - length) : 0;
+            double prevIndex2 = i >= length * 2 ? (i - (length * 2)) : 0;
+
+            double ky = (morph * prevK) + ((1 - morph) * y);
+            double ky2 = (morph * prevK2) + ((1 - morph) * y);
+
+            double k = prevIndex2 - prevIndex != 0 ? ky + ((i - prevIndex) / (prevIndex2 - prevIndex) * (ky2 - ky)) : 0;
+            kSpan[i] = k;
+        }
+
+        // Apply MA to k values to get k1 (middle band = primary output)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(kBuffer.Span, result.WritableSpan, length);
+
+        kBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeRecursiveDifferenciatorFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Smoothed RSI-based differenciator
+        // 1. Apply MA to input, then calculate RSI on that
+        // 2. Compute b = alpha * (rsi/100) + (1-alpha) * prevB
+        // 3. Returns smoothed b value
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Apply MA to input
+        var emaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, emaBuffer.WritableSpan, length);
+
+        // Calculate RSI on the MA
+        var rsiBuffer = context.Rent(count);
+        OscillatorCore.RelativeStrengthIndex(emaBuffer.Span, rsiBuffer.WritableSpan, length);
+
+        // Calculate smoothed b values
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        var rsiSpan = rsiBuffer.Span;
+        double prevB = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double rsi = rsiSpan[i];
+            double a = rsi / 100.0;
+
+            // b = alpha * a + (1-alpha) * prevB
+            double b = (alpha * a) + ((1 - alpha) * prevB);
+            resultSpan[i] = b;
+            prevB = b;
+        }
+
+        emaBuffer.Dispose();
+        rsiBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeReversalPointsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Volatility-based reversal point detection
+        // 1. Compute a = max(val, prevVal) - min(val, prevVal) for each bar
+        // 2. Double MA smooth a to get aEma1, aEma2
+        // 3. b = aEma1 / aEma2, then sum b over length periods
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+        int length1 = Math.Max((int)Math.Ceiling(length / 2.0), 1);
+
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+
+        // Calculate a values (difference between max and min of current and previous)
+        var aBuffer = context.Rent(count);
+        var aSpan = aBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 1 ? close[i - 1] : currentValue;
+            double max = Math.Max(currentValue, prevValue);
+            double min = Math.Min(currentValue, prevValue);
+            aSpan[i] = max - min;
+        }
+
+        // First MA pass on a values
+        var aEma1Buffer = context.Rent(count);
+        maCore.Compute(aBuffer.Span, aEma1Buffer.WritableSpan, length1);
+
+        // Second MA pass (double smoothing)
+        var aEma2Buffer = context.Rent(count);
+        maCore.Compute(aEma1Buffer.Span, aEma2Buffer.WritableSpan, length1);
+
+        // Calculate b = aEma1 / aEma2, then rolling sum over length
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        var aEma1Span = aEma1Buffer.Span;
+        var aEma2Span = aEma2Buffer.Span;
+
+        for (int i = 0; i < count; i++)
+        {
+            double aEma1 = aEma1Span[i];
+            double aEma2 = aEma2Span[i];
+            double b = aEma2 != 0 ? aEma1 / aEma2 : 0;
+
+            // Rolling sum of b over length periods
+            double bSum = b;
+            for (int j = 1; j < length && i - j >= 0; j++)
+            {
+                double prevAEma1 = aEma1Span[i - j];
+                double prevAEma2 = aEma2Span[i - j];
+                double prevB = prevAEma2 != 0 ? prevAEma1 / prevAEma2 : 0;
+                bSum += prevB;
+            }
+            resultSpan[i] = bSum;
+        }
+
+        aBuffer.Dispose();
+        aEma1Buffer.Dispose();
+        aEma2Buffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
