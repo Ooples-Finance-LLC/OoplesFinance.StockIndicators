@@ -940,6 +940,14 @@ internal static partial class IndicatorCompute
             MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length, mmi.MaType),
             SharpeRatioSpecOptions sr => ComputeSharpeRatioFast(data, context, sr.Length, sr.Bmk, sr.MaType),
 
+            // Batch 14 - More Risk Ratios and Trend Indicators
+            SortinoRatioSpecOptions sortr => ComputeSortinoRatioFast(data, context, sortr.Length, sortr.Bmk, sortr.MaType),
+            MartinRatioSpecOptions martr => ComputeMartinRatioFast(data, context, martr.Length, martr.Bmk, martr.MaType),
+            InformationRatioSpecOptions ir => ComputeInformationRatioFast(data, context, ir.Length, ir.Bmk, ir.MaType),
+            OptimizedTrendTrackerSpecOptions ott => ComputeOptimizedTrendTrackerFast(data, context, ott.Length, ott.Percent, ott.MaType),
+            RandomWalkIndexSpecOptions rwi => ComputeRandomWalkIndexFast(data, context, rwi.Length, rwi.MaType),
+            PriceChannelSpecOptions pc => ComputePriceChannelFast(data, context, pc.Length, pc.Pct, pc.MaType),
+
             _ => null
         };
     }
@@ -10657,6 +10665,378 @@ internal static partial class IndicatorCompute
             pool.Return(returnsArray);
             pool.Return(avgReturnsArray);
             pool.Return(stdDevArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Sortino Ratio using zero-allocation fast path.
+    /// SortinoRatio = (returns - benchmark) / downsideDeviation
+    /// </summary>
+    public static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var returnsArray = pool.Rent(count);
+        var avgReturnsArray = pool.Rent(count);
+        var downsideDevArray = pool.Rent(count);
+        var downsideSqArray = pool.Rent(count);
+
+        try
+        {
+            var returnsSpan = returnsArray.AsSpan(0, count);
+            var avgReturnsSpan = avgReturnsArray.AsSpan(0, count);
+            var downsideDevSpan = downsideDevArray.AsSpan(0, count);
+            var downsideSqSpan = downsideSqArray.AsSpan(0, count);
+
+            // Calculate returns
+            var dailyBmk = bmk / 252;
+            returnsSpan[0] = 0;
+            for (var i = 1; i < count; i++)
+            {
+                var prevClose = close[i - 1];
+                returnsSpan[i] = prevClose != 0 ? (close[i] - prevClose) / prevClose - dailyBmk : 0;
+            }
+
+            ReadOnlySpan<double> returnsReadOnly = returnsSpan;
+
+            // Calculate average returns
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+            }
+
+            // Calculate downside deviation squared (only negative deviations)
+            for (var i = 0; i < count; i++)
+            {
+                var deviation = Math.Min(returnsSpan[i] - avgReturnsSpan[i], 0);
+                downsideSqSpan[i] = deviation * deviation;
+            }
+
+            // Smooth downside deviation squared
+            ReadOnlySpan<double> downsideSqReadOnly = downsideSqSpan;
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
+                    break;
+            }
+
+            // Calculate Sortino Ratio
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                var downsideStdDev = Math.Sqrt(downsideDevSpan[i]);
+                buffer.WritableSpan[i] = downsideStdDev != 0 ? avgReturnsSpan[i] / downsideStdDev : 0;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(returnsArray);
+            pool.Return(avgReturnsArray);
+            pool.Return(downsideDevArray);
+            pool.Return(downsideSqArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Martin Ratio using zero-allocation fast path.
+    /// MartinRatio = returns / ulcerIndex
+    /// </summary>
+    public static ComputeBuffer ComputeMartinRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var returnsArray = pool.Rent(count);
+        var avgReturnsArray = pool.Rent(count);
+        var ulcerArray = pool.Rent(count);
+
+        try
+        {
+            var returnsSpan = returnsArray.AsSpan(0, count);
+            var avgReturnsSpan = avgReturnsArray.AsSpan(0, count);
+            var ulcerSpan = ulcerArray.AsSpan(0, count);
+
+            // Calculate returns
+            var dailyBmk = bmk / 252;
+            returnsSpan[0] = 0;
+            for (var i = 1; i < count; i++)
+            {
+                var prevClose = close[i - 1];
+                returnsSpan[i] = prevClose != 0 ? 100 * ((close[i] / prevClose) - 1 - dailyBmk) : 0;
+            }
+
+            ReadOnlySpan<double> returnsReadOnly = returnsSpan;
+
+            // Calculate average returns
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
+                    break;
+            }
+
+            // Calculate Ulcer Index on returns
+            VolatilityCore.UlcerIndex(close, ulcerSpan, length);
+
+            // Calculate Martin Ratio
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                buffer.WritableSpan[i] = ulcerSpan[i] != 0 ? avgReturnsSpan[i] / ulcerSpan[i] : 0;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(returnsArray);
+            pool.Return(avgReturnsArray);
+            pool.Return(ulcerArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Information Ratio using zero-allocation fast path.
+    /// InformationRatio = excessReturns / trackingError
+    /// </summary>
+    public static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var excessArray = pool.Rent(count);
+        var avgExcessArray = pool.Rent(count);
+        var trackingErrorArray = pool.Rent(count);
+
+        try
+        {
+            var excessSpan = excessArray.AsSpan(0, count);
+            var avgExcessSpan = avgExcessArray.AsSpan(0, count);
+            var trackingErrorSpan = trackingErrorArray.AsSpan(0, count);
+
+            // Calculate excess returns
+            var dailyBmk = bmk / 252;
+            excessSpan[0] = 0;
+            for (var i = 1; i < count; i++)
+            {
+                var prevClose = close[i - 1];
+                excessSpan[i] = prevClose != 0 ? (close[i] - prevClose) / prevClose - dailyBmk : 0;
+            }
+
+            ReadOnlySpan<double> excessReadOnly = excessSpan;
+
+            // Calculate average excess returns
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(excessReadOnly, avgExcessSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(excessReadOnly, avgExcessSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(excessReadOnly, avgExcessSpan, length);
+                    break;
+            }
+
+            // Calculate tracking error (stddev of excess returns)
+            VolatilityCore.StandardDeviation(excessReadOnly, trackingErrorSpan, length);
+
+            // Calculate Information Ratio
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                buffer.WritableSpan[i] = trackingErrorSpan[i] != 0 ? avgExcessSpan[i] / trackingErrorSpan[i] : 0;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(excessArray);
+            pool.Return(avgExcessArray);
+            pool.Return(trackingErrorArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Optimized Trend Tracker using zero-allocation fast path.
+    /// OTT is a trend-following indicator based on MA with percentage bands.
+    /// </summary>
+    public static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2, double percent = 1.4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var maArray = pool.Rent(count);
+        var longStopArray = pool.Rent(count);
+        var shortStopArray = pool.Rent(count);
+
+        try
+        {
+            var maSpan = maArray.AsSpan(0, count);
+            var longStopSpan = longStopArray.AsSpan(0, count);
+            var shortStopSpan = shortStopArray.AsSpan(0, count);
+
+            // Calculate MA
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(input, maSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(input, maSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.SimpleMovingAverage(input, maSpan, length);
+                    break;
+            }
+
+            // Calculate OTT
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                var ma = maSpan[i];
+                var fark = ma * percent * 0.01;
+
+                var prevLongStop = i >= 1 ? longStopSpan[i - 1] : 0;
+                var longStop = ma - fark;
+                longStop = ma > prevLongStop ? Math.Max(longStop, prevLongStop) : longStop;
+                longStopSpan[i] = longStop;
+
+                var prevShortStop = i >= 1 ? shortStopSpan[i - 1] : 0;
+                var shortStop = ma + fark;
+                shortStopSpan[i] = shortStop;
+
+                var mt = ma > prevShortStop ? longStop : ma < prevLongStop ? shortStop : 0;
+                var ott = ma > mt ? mt * (200 + percent) / 200 : mt * (200 - percent) / 200;
+                buffer.WritableSpan[i] = ott;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(maArray);
+            pool.Return(longStopArray);
+            pool.Return(shortStopArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Random Walk Index using zero-allocation fast path.
+    /// RWI measures trend strength using ATR-normalized price movement.
+    /// </summary>
+    public static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(count);
+
+        try
+        {
+            var atrSpan = atrArray.AsSpan(0, count);
+
+            // Calculate ATR
+            VolatilityCore.AverageTrueRange(high, low, close, atrSpan, length);
+
+            var sqrt = Math.Sqrt(length);
+
+            // Calculate RWI High (returns this by default)
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                if (i < length)
+                {
+                    buffer.WritableSpan[i] = 0;
+                    continue;
+                }
+
+                var currentAtr = atrSpan[i];
+                var currentHigh = high[i];
+                var prevLow = low[i - length];
+                var bottom = currentAtr * sqrt;
+
+                buffer.WritableSpan[i] = bottom != 0 ? (currentHigh - prevLow) / bottom : 0;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Price Channel using zero-allocation fast path.
+    /// Price Channel = MA +/- percentage bands.
+    /// </summary>
+    public static ComputeBuffer ComputePriceChannelFast(StockData data, ComputeContext context, int length = 21, double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var pool = ArrayPool<double>.Shared;
+        var maArray = pool.Rent(count);
+
+        try
+        {
+            var maSpan = maArray.AsSpan(0, count);
+
+            // Calculate MA
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
+                    break;
+            }
+
+            // Return middle band (MA)
+            var buffer = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                buffer.WritableSpan[i] = maSpan[i];
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(maArray);
         }
     }
 
