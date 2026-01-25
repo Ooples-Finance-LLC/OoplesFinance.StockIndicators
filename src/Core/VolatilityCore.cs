@@ -1581,4 +1581,68 @@ internal static class VolatilityCore
     }
 
     #endregion
+
+    #region Highest/Lowest
+
+    /// <summary>
+    /// Computes the highest value over a rolling window.
+    /// </summary>
+    /// <param name="input">Input values.</param>
+    /// <param name="output">Output span for highest values.</param>
+    /// <param name="length">Lookback period.</param>
+    internal static void Highest(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0)
+        {
+            return;
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double highest = input[i];
+            int startIdx = Math.Max(0, i - length + 1);
+            for (var j = startIdx; j < i; j++)
+            {
+                if (input[j] > highest) highest = input[j];
+            }
+            output[i] = highest;
+        }
+    }
+
+    /// <summary>
+    /// Computes the lowest value over a rolling window.
+    /// </summary>
+    /// <param name="input">Input values.</param>
+    /// <param name="output">Output span for lowest values.</param>
+    /// <param name="length">Lookback period.</param>
+    internal static void Lowest(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0)
+        {
+            return;
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            double lowest = input[i];
+            int startIdx = Math.Max(0, i - length + 1);
+            for (var j = startIdx; j < i; j++)
+            {
+                if (input[j] < lowest) lowest = input[j];
+            }
+            output[i] = lowest;
+        }
+    }
+
+    #endregion
 }

@@ -13551,11 +13551,63 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // V1 Algorithm: Rolling sum of median and range, compute thresholds, apply level filters
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
+
+        // Compute WMA of close for trend filter
+        var wmaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
-        return buffer;
+        maCore.Compute(close, wmaBuffer.WritableSpan, length2);
+
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        // Rolling sums for median and range
+        double medianSum = 0, rangeSum = 0;
+        double prevBuff116 = 0, prevBuff112 = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double median = close[i];
+            double range = high[i] - low[i];
+
+            // Add current values to rolling sums
+            medianSum += median;
+            rangeSum += range;
+
+            // Remove old values from rolling sums
+            if (i >= length1)
+            {
+                medianSum -= close[i - length1];
+                rangeSum -= high[i - length1] - low[i - length1];
+            }
+
+            double gd128 = medianSum * 0.2; // sum * (1/length1) for length1=5
+            double gd136 = rangeSum * 0.04; // sum * 0.2 * 0.2
+
+            double buff116 = gd136 != 0 ? (low[i] - gd128) / gd136 : 0;
+            double buff112 = gd136 != 0 ? (high[i] - gd128) / gd136 : 0;
+
+            double wma = wmaBuffer.Span[i];
+
+            // Apply level thresholds
+            double buff108 = buff112 > level && high[i] > wma ? 90 :
+                             buff116 < -level && low[i] < wma ? -90 : 0;
+
+            // Filter consecutive signals
+            double buff109 = (buff112 > level && prevBuff112 > level) ||
+                             (buff116 < -level && prevBuff116 < -level) ? 0 : buff108;
+
+            resultSpan[i] = buff109;
+            prevBuff116 = buff116;
+            prevBuff112 = buff112;
+        }
+
+        wmaBuffer.Dispose();
+        return result;
     }
 
     // Batch 29 - Ergodic and Momentum Indicators
@@ -13803,11 +13855,46 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Compute momentum, gradient line deviation, sum positive/negative, ratio
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // First pass: compute raw PCI values
+        var pciBuffer = context.Rent(count);
+        var pciSpan = pciBuffer.WritableSpan;
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= length ? close[i - length] : 0;
+            double mom = i >= length ? currentValue - prevValue : 0;
+
+            double positiveSum = 0, negativeSum = 0;
+            for (int j = 0; j <= length - 1; j++)
+            {
+                int idx = i - (length - j);
+                if (idx < 0) continue;
+
+                double prevValue2 = close[idx];
+                double gradient = prevValue + (mom * (length - j) / (length - 1));
+                double deviation = prevValue2 - gradient;
+
+                if (deviation > 0) positiveSum += deviation;
+                else if (deviation < 0) negativeSum -= deviation;
+            }
+
+            double sum = positiveSum + negativeSum;
+            double pciRaw = sum != 0 ? 100 * positiveSum / sum : 0;
+            pciSpan[i] = pciRaw < 0 ? 0 : (pciRaw > 100 ? 100 : pciRaw);
+        }
+
+        // Apply MA smoothing
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
-        return buffer;
+        maCore.Compute(pciBuffer.Span, result.WritableSpan, smoothLength);
+
+        pciBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
@@ -13948,11 +14035,62 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        // V1 Algorithm: high/low changes, highest/lowest range, bulls/bears calculation, net smoothing
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
-        return buffer;
+
+        // Compute highest/lowest over length2
+        var highestBuffer = context.Rent(count);
+        var lowestBuffer = context.Rent(count);
+        VolatilityCore.Highest(high, highestBuffer.WritableSpan, length2);
+        VolatilityCore.Lowest(low, lowestBuffer.WritableSpan, length2);
+
+        // Compute bulls and bears
+        var bullsBuffer = context.Rent(count);
+        var bearsBuffer = context.Rent(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            double prevHigh = i >= 1 ? high[i - 1] : 0;
+            double prevLow = i >= 1 ? low[i - 1] : 0;
+            double hiup = Math.Max(high[i] - prevHigh, 0);
+            double loup = Math.Max(low[i] - prevLow, 0);
+            double hidn = Math.Min(high[i] - prevHigh, 0);
+            double lodn = Math.Min(low[i] - prevLow, 0);
+            double range = highestBuffer.Span[i] - lowestBuffer.Span[i];
+
+            bullsBuffer.WritableSpan[i] = range != 0 ? Math.Min((hiup + loup) / range, 1) * 100 : 0;
+            bearsBuffer.WritableSpan[i] = range != 0 ? Math.Max((hidn + lodn) / range, -1) * -100 : 0;
+        }
+
+        // Average bulls and bears over length1
+        var avgBullsBuffer = context.Rent(count);
+        var avgBearsBuffer = context.Rent(count);
+        maCore.Compute(bullsBuffer.Span, avgBullsBuffer.WritableSpan, length1);
+        maCore.Compute(bearsBuffer.Span, avgBearsBuffer.WritableSpan, length1);
+
+        // Compute net
+        var netBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            netBuffer.WritableSpan[i] = avgBullsBuffer.Span[i] - avgBearsBuffer.Span[i];
+        }
+
+        // Smooth net
+        var result = context.Rent(count);
+        maCore.Compute(netBuffer.Span, result.WritableSpan, smoothLength);
+
+        highestBuffer.Dispose();
+        lowestBuffer.Dispose();
+        bullsBuffer.Dispose();
+        bearsBuffer.Dispose();
+        avgBullsBuffer.Dispose();
+        avgBearsBuffer.Dispose();
+        netBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeUhlMaCrossoverSystemFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
@@ -13966,11 +14104,35 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: abs(close - open) rolling sum averaged
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        int count = data.Count;
+
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        // Rolling sum of abs(close - open)
+        double absSum = 0;
+        double invLength = 1.0 / length;
+
+        for (int i = 0; i < count; i++)
+        {
+            double absVal = Math.Abs(close[i] - open[i]);
+            absSum += absVal;
+
+            // Remove old value from rolling sum
+            if (i >= length)
+            {
+                double oldAbs = Math.Abs(close[i - length] - open[i - length]);
+                absSum -= oldAbs;
+            }
+
+            // UVI = average of abs values over length
+            resultSpan[i] = invLength * absSum;
+        }
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
