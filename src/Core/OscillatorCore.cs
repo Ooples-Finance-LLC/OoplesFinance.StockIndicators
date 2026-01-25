@@ -12775,5 +12775,233 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Ehlers Signal Processing
+
+    /// <summary>
+    /// Computes Ehlers Simple Hilbert Transform (outputs InPhase and Quad).
+    /// </summary>
+    internal static void EhlersHilbertTransformSimple(ReadOnlySpan<double> close, Span<double> inPhase, Span<double> quad, int length = 7, double iMult = 0.635, double qMult = 0.338)
+    {
+        if (inPhase.Length < close.Length || quad.Length < close.Length)
+            throw new ArgumentException("Output spans must be at least input length.");
+
+        length = Math.Max(1, length);
+        var pool = ArrayPool<double>.Shared;
+        var v1Array = pool.Rent(close.Length);
+
+        try
+        {
+            var v1 = v1Array.AsSpan(0, close.Length);
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double currentValue = close[i];
+                double prevValue = i >= length ? close[i - length] : 0;
+                double v2 = i >= 2 ? v1[i - 2] : 0;
+                double v4 = i >= 4 ? v1[i - 4] : 0;
+                double inPhase3 = i >= 3 ? inPhase[i - 3] : 0;
+                double quad2 = i >= 2 ? quad[i - 2] : 0;
+
+                v1[i] = i >= length ? currentValue - prevValue : 0;
+                inPhase[i] = (1.25 * (v4 - (iMult * v2))) + (iMult * inPhase3);
+                quad[i] = v2 - (qMult * v1[i]) + (qMult * quad2);
+            }
+        }
+        finally
+        {
+            pool.Return(v1Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Mother of Adaptive Moving Averages internal values (I1, Q1, MAMA).
+    /// </summary>
+    internal static void EhlersMamaInternal(ReadOnlySpan<double> close, Span<double> i1Output, Span<double> q1Output, Span<double> mamaOutput, double fastAlpha = 0.5, double slowAlpha = 0.05)
+    {
+        if (i1Output.Length < close.Length || q1Output.Length < close.Length || mamaOutput.Length < close.Length)
+            throw new ArgumentException("Output spans must be at least input length.");
+
+        const double HilbertTransformCoeff1 = 0.0962;
+        const double HilbertTransformCoeff2 = 0.5769;
+        const double PeriodCorrectionFactor = 0.075;
+        const double PeriodCorrectionOffset = 0.54;
+
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(close.Length);
+        var detArray = pool.Rent(close.Length);
+        var i2Array = pool.Rent(close.Length);
+        var q2Array = pool.Rent(close.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, close.Length);
+            var det = detArray.AsSpan(0, close.Length);
+            var i2 = i2Array.AsSpan(0, close.Length);
+            var q2 = q2Array.AsSpan(0, close.Length);
+
+            double prevPeriod = 0, prevPhase = 0;
+            double prevRe = 0, prevIm = 0;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double currentValue = close[i];
+                double prevPrice1 = i >= 1 ? close[i - 1] : 0;
+                double previ2 = i >= 1 ? i2[i - 1] : 0;
+                double prevq2 = i >= 1 ? q2[i - 1] : 0;
+                double prevPrice2 = i >= 2 ? close[i - 2] : 0;
+                double prevs2 = i >= 2 ? smooth[i - 2] : 0;
+                double prevd2 = i >= 2 ? det[i - 2] : 0;
+                double prevq1x2 = i >= 2 ? q1Output[i - 2] : 0;
+                double previ1x2 = i >= 2 ? i1Output[i - 2] : 0;
+                double prevPrice3 = i >= 3 ? close[i - 3] : 0;
+                double prevd3 = i >= 3 ? det[i - 3] : 0;
+                double prevs4 = i >= 4 ? smooth[i - 4] : 0;
+                double prevd4 = i >= 4 ? det[i - 4] : 0;
+                double prevq1x4 = i >= 4 ? q1Output[i - 4] : 0;
+                double previ1x4 = i >= 4 ? i1Output[i - 4] : 0;
+                double prevs6 = i >= 6 ? smooth[i - 6] : 0;
+                double prevd6 = i >= 6 ? det[i - 6] : 0;
+                double prevq1x6 = i >= 6 ? q1Output[i - 6] : 0;
+                double previ1x6 = i >= 6 ? i1Output[i - 6] : 0;
+                double prevMama = i >= 1 ? mamaOutput[i - 1] : 0;
+
+                smooth[i] = ((4 * currentValue) + (3 * prevPrice1) + (2 * prevPrice2) + prevPrice3) / 10;
+                det[i] = ((HilbertTransformCoeff1 * smooth[i]) + (HilbertTransformCoeff2 * prevs2) - (HilbertTransformCoeff2 * prevs4) - (HilbertTransformCoeff1 * prevs6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
+                q1Output[i] = ((HilbertTransformCoeff1 * det[i]) + (HilbertTransformCoeff2 * prevd2) - (HilbertTransformCoeff2 * prevd4) - (HilbertTransformCoeff1 * prevd6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
+                i1Output[i] = prevd3;
+
+                double j1 = ((HilbertTransformCoeff1 * i1Output[i]) + (HilbertTransformCoeff2 * previ1x2) - (HilbertTransformCoeff2 * previ1x4) - (HilbertTransformCoeff1 * previ1x6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
+                double jq = ((HilbertTransformCoeff1 * q1Output[i]) + (HilbertTransformCoeff2 * prevq1x2) - (HilbertTransformCoeff2 * prevq1x4) - (HilbertTransformCoeff1 * prevq1x6)) * ((PeriodCorrectionFactor * prevPeriod) + PeriodCorrectionOffset);
+
+                i2[i] = (0.2 * (i1Output[i] - jq)) + (0.8 * previ2);
+                q2[i] = (0.2 * (q1Output[i] + j1)) + (0.8 * prevq2);
+
+                double re = (0.2 * ((i2[i] * previ2) + (q2[i] * prevq2))) + (0.8 * prevRe);
+                prevRe = re;
+                double im = (0.2 * ((i2[i] * prevq2) - (q2[i] * previ2))) + (0.8 * prevIm);
+                prevIm = im;
+
+                double atan = re != 0 ? Math.Atan(im / re) : 0;
+                double period = atan != 0 ? 2 * Math.PI / atan : 0;
+                if (prevPeriod != 0) period = Math.Min(Math.Max(period, 0.67 * prevPeriod), 1.5 * prevPeriod);
+                period = Math.Min(Math.Max(period, 6), 50);
+                period = (0.2 * period) + (0.8 * prevPeriod);
+                prevPeriod = period;
+
+                double phase = i1Output[i] != 0 ? Math.Atan(q1Output[i] / i1Output[i]) * (180 / Math.PI) : 0;
+                double deltaPhase = prevPhase - phase < 1 ? 1 : prevPhase - phase;
+                prevPhase = phase;
+
+                double alpha = deltaPhase != 0 ? fastAlpha / deltaPhase : 0;
+                alpha = alpha < slowAlpha ? slowAlpha : alpha;
+
+                mamaOutput[i] = (alpha * currentValue) + ((1 - alpha) * prevMama);
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+            pool.Return(detArray);
+            pool.Return(i2Array);
+            pool.Return(q2Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Signal to Noise Ratio V1.
+    /// </summary>
+    internal static void EhlersSignalToNoiseRatioV1(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 7)
+    {
+        if (output.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.");
+
+        length = Math.Max(1, length);
+        var pool = ArrayPool<double>.Shared;
+        var inPhaseArray = pool.Rent(close.Length);
+        var quadArray = pool.Rent(close.Length);
+
+        try
+        {
+            var inPhase = inPhaseArray.AsSpan(0, close.Length);
+            var quad = quadArray.AsSpan(0, close.Length);
+
+            EhlersHilbertTransformSimple(close, inPhase, quad, length);
+
+            double prevV2 = 0, prevRange = 0, prevAmp = 0;
+            for (int i = 0; i < close.Length; i++)
+            {
+                double v2 = (0.2 * ((inPhase[i] * inPhase[i]) + (quad[i] * quad[i]))) + (0.8 * prevV2);
+                prevV2 = v2;
+
+                double range = (0.2 * (high[i] - low[i])) + (0.8 * prevRange);
+                prevRange = range;
+
+                double amp = 0;
+                if (range != 0)
+                {
+                    double temp = v2 / (range * range);
+                    double logTemp = temp > 0 ? Math.Log10(temp) : 0;
+                    amp = (0.25 * ((10 * logTemp) + 1.9)) + (0.75 * prevAmp);
+                }
+                prevAmp = amp;
+                output[i] = amp;
+            }
+        }
+        finally
+        {
+            pool.Return(inPhaseArray);
+            pool.Return(quadArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Signal to Noise Ratio V2.
+    /// </summary>
+    internal static void EhlersSignalToNoiseRatioV2(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 6)
+    {
+        if (output.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.");
+
+        length = Math.Max(1, length);
+        var pool = ArrayPool<double>.Shared;
+        var i1Array = pool.Rent(close.Length);
+        var q1Array = pool.Rent(close.Length);
+        var mamaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var i1 = i1Array.AsSpan(0, close.Length);
+            var q1 = q1Array.AsSpan(0, close.Length);
+            var mama = mamaArray.AsSpan(0, close.Length);
+
+            EhlersMamaInternal(close, i1, q1, mama);
+
+            double prevRange = 0, prevSnr = 0;
+            for (int i = 0; i < close.Length; i++)
+            {
+                double range = (0.1 * (high[i] - low[i])) + (0.9 * prevRange);
+                prevRange = range;
+
+                double snr = 0;
+                if (range > 0)
+                {
+                    double temp = ((i1[i] * i1[i]) + (q1[i] * q1[i])) / (range * range);
+                    double logTemp = temp > 0 ? Math.Log10(temp) : 0;
+                    snr = (0.25 * ((10 * logTemp) + length)) + (0.75 * prevSnr);
+                }
+                prevSnr = snr;
+                output[i] = snr;
+            }
+        }
+        finally
+        {
+            pool.Return(i1Array);
+            pool.Return(q1Array);
+            pool.Return(mamaArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

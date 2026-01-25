@@ -1043,7 +1043,7 @@ internal static partial class IndicatorCompute
             ConstanceBrownCompositeIndexSpecOptions cbci => ComputeConstanceBrownCompositeIndexFast(data, context, cbci.SmoothLength, cbci.MaType),
             EhlersAMDetectorSpecOptions eamd => ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType),
             EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType),
-            EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length3, eacr.MaType),
+            EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length1, eacr.Length2, eacr.Length3, eacr.MaType),
             EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.Length2, eemd.Delta, eemd.Fraction, eemd.MaType),
             EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.FastLength, efmd.SlowLength, efmd.MaType),
 
@@ -13169,20 +13169,145 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
+        // V1 Algorithm: Anticipate indicator using impulse response correlation
+        // 1. Compute bandpass filter (from EhlersImpulseResponse)
+        // 2. Apply MA to bandpass
+        // 3. Correlate with sine wave to find best phase, output predict
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(1, length);
+        double bw = 1.0;
+
+        // Step 1: Compute bandpass filter coefficients
+        int hannLength = Math.Max(1, (int)Math.Ceiling(length / 1.4));
+        double l1 = Math.Cos(Math.Min(Math.Max(2 * Math.PI / length, 0.01), 0.99));
+        double g1 = Math.Cos(Math.Min(Math.Max(bw * 2 * Math.PI / length, 0.01), 0.99));
+        double s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
+
+        // Step 2: Calculate bandpass filter
+        var bpBuffer = context.Rent(count);
+        var bpSpan = bpBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 2 ? close[i - 2] : 0;
+            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
+            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
+            bpSpan[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
+        }
+
+        // Step 3: Apply MA to bandpass (hFilt)
+        var hFiltBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(bpBuffer.Span, hFiltBuffer.WritableSpan, hannLength);
+        bpBuffer.Dispose();
+        var hFiltSpan = hFiltBuffer.Span;
+
+        // Step 4: Correlate with sine wave to find predict
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double maxCorr = -1, start = 0;
+            for (int j = 0; j < length; j++)
+            {
+                double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+                for (int k = 0; k < length; k++)
+                {
+                    double x = i >= k ? hFiltSpan[i - k] : 0;
+                    double angle = Math.Min(Math.Max(2 * Math.PI * ((double)(j + k) / length), 0.01), 0.99);
+                    double y = -Math.Sin(angle);
+                    sx += x; sy += y; sxx += x * x; sxy += x * y; syy += y * y;
+                }
+                double denom = ((length * sxx) - (sx * sx)) * ((length * syy) - (sy * sy));
+                double corr = denom > 0 ? ((length * sxy) - (sx * sy)) / Math.Sqrt(denom) : 0;
+                if (corr > maxCorr) { maxCorr = corr; start = length - j; }
+            }
+            double predictAngle = Math.Min(Math.Max(2 * Math.PI * start / length, 0.01), 0.99);
+            resultSpan[i] = Math.Sin(predictAngle);
+        }
+
+        hFiltBuffer.Dispose();
+        return result;
     }
 
-    internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Count correlation 0.5 threshold crossings
+        // 1. Compute RoofingFilterV2 (high-pass + smoothing)
+        // 2. Compute AutoCorrelation (correlation of roofing filter with lagged version)
+        // 3. Count 0.5 crossings, output reversal = 1 if delta > length1/2
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
-        return buffer;
+        int count = data.Count;
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        // Step 1: Compute RoofingFilterV2
+        double alphaArg = Math.Min(Math.Sqrt(2) * Math.PI / length1, 0.99);
+        double alphaCos = Math.Cos(alphaArg);
+        double alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        double a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / length2);
+        double b1 = 2 * a1 * Math.Cos(Math.Min(Math.Sqrt(2) * Math.PI / length2, 0.99));
+        double c2 = b1;
+        double c3 = -a1 * a1;
+        double c1 = 1 - c2 - c3;
+
+        var hpBuffer = context.Rent(count);
+        var rfBuffer = context.Rent(count);
+        var hpSpan = hpBuffer.WritableSpan;
+        var rfSpan = rfBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double v = close[i];
+            double v1 = i >= 1 ? close[i - 1] : 0;
+            double v2 = i >= 2 ? close[i - 2] : 0;
+            double hp1 = i >= 1 ? hpSpan[i - 1] : 0;
+            double hp2 = i >= 2 ? hpSpan[i - 2] : 0;
+            double rf1 = i >= 1 ? rfSpan[i - 1] : 0;
+            double rf2 = i >= 2 ? rfSpan[i - 2] : 0;
+
+            double test1 = Math.Pow((1 - alpha1) / 2, 2);
+            double hp = test1 * (v - 2 * v1 + v2) + 2 * (1 - alpha1) * hp1 - Math.Pow(1 - alpha1, 2) * hp2;
+            hpSpan[i] = hp;
+            rfSpan[i] = (c1 * ((hp + hp1) / 2)) + (c2 * rf1) + (c3 * rf2);
+        }
+        hpBuffer.Dispose();
+
+        // Step 2: Compute AutoCorrelation
+        var corrBuffer = context.Rent(count);
+        var corrSpan = corrBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+            int n = Math.Min(i + 1, length1);
+            for (int k = 0; k < n; k++)
+            {
+                double x = rfSpan[i - k];
+                double y = i - k >= length1 ? rfSpan[i - k - length1] : 0;
+                sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y;
+            }
+            double denom = ((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy));
+            corrSpan[i] = denom > 0 ? 0.5 * (((n * sxy) - (sx * sy)) / Math.Sqrt(denom) + 1) : 0;
+        }
+        rfBuffer.Dispose();
+
+        // Step 3: Count 0.5 crossings
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double delta = 0;
+            for (int j = length3; j <= length1; j++)
+            {
+                double corr = i >= j ? corrSpan[i - j] : 0;
+                double prevCorr = i >= j - 1 ? corrSpan[i - (j - 1)] : 0;
+                if ((corr > 0.5 && prevCorr < 0.5) || (corr < 0.5 && prevCorr > 0.5)) delta += 1;
+            }
+            resultSpan[i] = delta > (double)length1 / 2 ? 1 : 0;
+        }
+
+        corrBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 50, double delta = 0.5, double fraction = 0.1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
@@ -13661,18 +13786,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.EhlersSignalToNoiseRatioV1(close, high, low, buffer.WritableSpan, length);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.EhlersSignalToNoiseRatioV2(close, high, low, buffer.WritableSpan, length);
         return buffer;
     }
 
