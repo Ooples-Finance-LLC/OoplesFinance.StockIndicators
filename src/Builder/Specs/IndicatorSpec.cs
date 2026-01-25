@@ -541,11 +541,18 @@ public sealed class HmaSpecOptions : IIndicatorSpecOptions
 public sealed class TmaSpecOptions : IIndicatorSpecOptions
 {
     public TmaSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TmaSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -3072,11 +3079,18 @@ public sealed class AtrTrailingStopsSpecOptions : IIndicatorSpecOptions
 public sealed class CompoundRatioMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public CompoundRatioMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public CompoundRatioMovingAverageSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6137,8 +6151,19 @@ public sealed class ContractLowSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class CorrectedMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public CorrectedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public CorrectedMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public CorrectedMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6784,8 +6809,19 @@ public sealed class VerticalHorizontalMovingAverageSpecOptions : IIndicatorSpecO
 /// </summary>
 public sealed class VolatilityMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public VolatilityMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public VolatilityMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VolatilityMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
