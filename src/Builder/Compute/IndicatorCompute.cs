@@ -919,6 +919,9 @@ internal static partial class IndicatorCompute
             EhlersImpulseResponseSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length),
             EhlersModifiedStochasticIndicatorSpecOptions emsi => ComputeEhlersModifiedStochasticFast(data, context, emsi.Length1, emsi.Length2, emsi.Length3),
 
+            // Batch 11 - Additional Moving Averages with Core methods
+            VariableIndexDynamicAverageSpecOptions vida => ComputeVariableIndexDynamicAverageFast(data, context, vida.Length),
+
             _ => null
         };
     }
@@ -9731,6 +9734,18 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         // Use EhlersStochastic as a close approximation
         MovingAverageCore.EhlersStochastic(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Variable Index Dynamic Average (VIDYA) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
