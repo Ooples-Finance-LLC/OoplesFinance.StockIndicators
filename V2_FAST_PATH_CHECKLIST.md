@@ -6,18 +6,18 @@ This checklist tracks progress on implementing the v2 Builder fast path for all 
 
 The v2 fast path has three layers:
 
-1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (**615 methods**)
-2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (**610 methods**)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**607 INDICATORS WIRED**)
+1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (**620 methods**)
+2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (**617 methods**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**614 INDICATORS WIRED**)
 
 ### Current State (Updated 2026-01-24)
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
-| Core Methods | **615** | Span-based implementations (Osc:287 MA:193 Trend:71 Vol:35 Volume:29) |
-| ComputeFast Wrappers | **610** | Buffer wrappers in IndicatorCompute.cs |
-| SpecOptions Classes | **607** | Typed indicator options |
-| TryComputeFast Dispatch | **607** | Routed to fast path methods |
+| Core Methods | **620** | Span-based implementations (Osc:287 MA:198 Trend:71 Vol:35 Volume:29) |
+| ComputeFast Wrappers | **617** | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **614** | Typed indicator options |
+| TryComputeFast Dispatch | **614** | Routed to fast path methods |
 | IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
@@ -32,16 +32,18 @@ The v2 fast path has three layers:
 - **Batches 31-32**: Added Ehlers CenterofGravity, Reflex, Trendflex, StochasticCyberCycle Core methods
 - **Batch 33**: Added Pivot Points (Floor, Camarilla, Woodie, Fibonacci, Demark), Channels (Price, Donchian, Linear)
 - **Batch 34**: Added ThreeHma, AlphaDecreasingEMA, AdaptiveAutonomousRecursiveTrailingStop, AdaptiveTrailingStop, AtrTrailingStops
+- **Batch 35**: Added trailing stop wiring
+- **Batch 36**: Added WellesWilderSummation, DampingIndex, DidiIndex Core methods
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
-- **Total**: 607 SpecOptions, 607 dispatch routes
+- **Total**: 614 SpecOptions, 614 dispatch routes
 
 ### Coverage Analysis
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| Core Methods | **615** | **79.6%** of 773 |
-| SpecOptions/Dispatch | **607** | **78.5%** of 773 |
-| Remaining indicators | **158** | **20.4%** |
+| Core Methods | **620** | **80.2%** of 773 |
+| SpecOptions/Dispatch | **614** | **79.4%** of 773 |
+| Remaining indicators | **153** | **19.8%** |
 
 ### Notes on Coverage Calculation
 
