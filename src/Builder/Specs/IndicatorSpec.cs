@@ -1932,13 +1932,20 @@ public sealed class VwapSpecOptions : IIndicatorSpecOptions
 public sealed class ElliottWaveOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public ElliottWaveOscillatorSpecOptions(int fastLength, int slowLength)
+        : this(fastLength, slowLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ElliottWaveOscillatorSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
     {
         FastLength = Math.Max(1, fastLength);
         SlowLength = Math.Max(1, slowLength);
+        MaType = maType;
     }
 
     public int FastLength { get; }
     public int SlowLength { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -2538,11 +2545,18 @@ public sealed class ParkinsonVolatilitySpecOptions : IIndicatorSpecOptions
 public sealed class GarmanKlassVolatilitySpecOptions : IIndicatorSpecOptions
 {
     public GarmanKlassVolatilitySpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public GarmanKlassVolatilitySpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 // ========== Batch 5 SpecOptions ==========
@@ -4044,11 +4058,18 @@ public sealed class ChandeMomentumOscillatorAverageSpecOptions : IIndicatorSpecO
 public sealed class DoubleStochasticOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public DoubleStochasticOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public DoubleStochasticOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4295,11 +4316,18 @@ public sealed class DiNapoliPreferredStochasticOscillatorSpecOptions : IIndicato
 public sealed class ErgodicPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public ErgodicPercentagePriceOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public ErgodicPercentagePriceOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4815,11 +4843,18 @@ public sealed class SmoothedDeltaRatioOscillatorSpecOptions : IIndicatorSpecOpti
 public sealed class FastSlowDegreeOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public FastSlowDegreeOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public FastSlowDegreeOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4881,11 +4916,18 @@ public sealed class StochasticCustomOscillatorSpecOptions : IIndicatorSpecOption
 public sealed class PivotDetectorOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public PivotDetectorOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PivotDetectorOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4953,11 +4995,18 @@ public sealed class NthOrderDifferencingOscillatorSpecOptions : IIndicatorSpecOp
 public sealed class OscOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public OscOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public OscOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -8973,8 +9022,19 @@ public sealed class VerticalHorizontalFilterSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class PrettyGoodOscillatorSpecOptions : IIndicatorSpecOptions
 {
-    public PrettyGoodOscillatorSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public PrettyGoodOscillatorSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PrettyGoodOscillatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
