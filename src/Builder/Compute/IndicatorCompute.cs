@@ -13934,11 +13934,50 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Sign(close - sma) * price change, rolling sum
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Compute SMA
+        var smaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, smaBuffer.WritableSpan, length);
+
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        // Rolling sum of (price change * prevX)
+        double prevX = 0;
+        double chgXSum = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 1 ? close[i - 1] : 0;
+            double sma = smaBuffer.Span[i];
+
+            double x = Math.Sign(currentValue - sma);
+            double chgX = i >= 1 ? (currentValue - prevValue) * prevX : 0;
+
+            // Add to rolling sum
+            chgXSum += chgX;
+
+            // Remove old value from rolling sum
+            if (i >= length)
+            {
+                int oldIdx = i - length;
+                double oldX = oldIdx >= 1 ? Math.Sign(close[oldIdx] - smaBuffer.Span[oldIdx]) : 0;
+                double oldPrevX = oldIdx >= 2 ? Math.Sign(close[oldIdx - 1] - smaBuffer.Span[oldIdx - 1]) : 0;
+                double oldChgX = oldIdx >= 1 ? (close[oldIdx] - close[oldIdx - 1]) * oldPrevX : 0;
+                chgXSum -= oldChgX;
+            }
+
+            resultSpan[i] = chgXSum;
+            prevX = x;
+        }
+
+        smaBuffer.Dispose();
+        return result;
     }
 
     // Batch 33 - Remaining Indicators (Part 2)
@@ -13997,11 +14036,29 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25, int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Fast MA - Slow MA = mob
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
-        return buffer;
+
+        // Compute fast and slow MAs
+        var fastMaBuffer = context.Rent(count);
+        var slowMaBuffer = context.Rent(count);
+        maCore.Compute(close, fastMaBuffer.WritableSpan, fastLength);
+        maCore.Compute(close, slowMaBuffer.WritableSpan, slowLength);
+
+        // Compute mob = fast - slow
+        var mobBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            mobBuffer.WritableSpan[i] = fastMaBuffer.Span[i] - slowMaBuffer.Span[i];
+        }
+
+        fastMaBuffer.Dispose();
+        slowMaBuffer.Dispose();
+
+        // Return mob (primary output is the mob line, not the histogram)
+        return mobBuffer;
     }
 
     internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -14137,20 +14194,51 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: SMA with upper/lower bands based on percentage factors
+        // Returns the middle band (SMA) as the primary output
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, result.WritableSpan, length);
+
+        // The primary output is the middle band (SMA)
+        // Upper and lower bands would be computed as:
+        // ub = type1 ? sma + ubFac : sma * (1 + ubFac)
+        // lb = type1 ? sma - lbFac : sma * (1 - lbFac)
+        return result;
     }
 
     internal static ComputeBuffer ComputeVixTradingSystemFast(StockData data, ComputeContext context, int length = 50, double maxCount = 11, double minCount = -11, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Count consecutive closes above/below SMA
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Compute SMA
+        var smaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, smaBuffer.WritableSpan, length);
+
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        double prevCount = 0;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double sma = smaBuffer.Span[i];
+
+            // Count: +1 each close above SMA, -1 each close below, reset on cross
+            double cnt = currentValue > sma && prevCount >= 0 ? prevCount + 1 :
+                         currentValue <= sma && prevCount <= 0 ? prevCount - 1 : prevCount;
+            resultSpan[i] = cnt;
+            prevCount = cnt;
+        }
+
+        smaBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
