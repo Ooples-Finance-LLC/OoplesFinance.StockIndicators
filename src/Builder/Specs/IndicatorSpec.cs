@@ -4775,11 +4775,18 @@ public sealed class TrigonometricOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class UltimateTraderOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public UltimateTraderOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public UltimateTraderOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4788,11 +4795,18 @@ public sealed class UltimateTraderOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class SmoothedDeltaRatioOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public SmoothedDeltaRatioOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SmoothedDeltaRatioOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5102,11 +5116,18 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorSpecOptions : 
 public sealed class StationaryExtrapolatedLevelsOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public StationaryExtrapolatedLevelsOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StationaryExtrapolatedLevelsOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7086,8 +7107,19 @@ public sealed class QuadraticMovingAverageSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class QuadraticRegressionSpecOptions : IIndicatorSpecOptions
 {
-    public QuadraticRegressionSpecOptions(int length) { Length = Math.Max(1, length); }
+    public QuadraticRegressionSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public QuadraticRegressionSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7095,8 +7127,19 @@ public sealed class QuadraticRegressionSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class R2AdaptiveRegressionSpecOptions : IIndicatorSpecOptions
 {
-    public R2AdaptiveRegressionSpecOptions(int length) { Length = Math.Max(1, length); }
+    public R2AdaptiveRegressionSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public R2AdaptiveRegressionSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7979,12 +8022,20 @@ public sealed class WilliamsAccumulationDistributionSpecOptions : IIndicatorSpec
 public sealed class TotalPowerIndicatorSpecOptions : IIndicatorSpecOptions
 {
     public TotalPowerIndicatorSpecOptions(int length1 = 45, int length2 = 10)
+        : this(length1, length2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TotalPowerIndicatorSpecOptions(int length1, int length2, MovingAvgType maType)
     {
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
+        MaType = maType;
     }
+
     public int Length1 { get; }
     public int Length2 { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -8045,12 +8096,20 @@ public sealed class TTMScalperIndicatorSpecOptions : IIndicatorSpecOptions
 public sealed class StrengthOfMovementSpecOptions : IIndicatorSpecOptions
 {
     public StrengthOfMovementSpecOptions(int length1 = 10, int length2 = 3)
+        : this(length1, length2, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public StrengthOfMovementSpecOptions(int length1, int length2, MovingAvgType maType)
     {
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
+        MaType = maType;
     }
+
     public int Length1 { get; }
     public int Length2 { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -8080,8 +8139,19 @@ public sealed class ValueChartIndicatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class SellGravitationIndexSpecOptions : IIndicatorSpecOptions
 {
-    public SellGravitationIndexSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public SellGravitationIndexSpecOptions(int length = 20)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public SellGravitationIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -8594,12 +8664,20 @@ public sealed class SchaffTrendCycleSpecOptions : IIndicatorSpecOptions
 public sealed class SmoothedRateOfChangeSpecOptions : IIndicatorSpecOptions
 {
     public SmoothedRateOfChangeSpecOptions(int rocLength = 12, int smoothLength = 3)
+        : this(rocLength, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public SmoothedRateOfChangeSpecOptions(int rocLength, int smoothLength, MovingAvgType maType)
     {
         RocLength = Math.Max(1, rocLength);
         SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
     }
+
     public int RocLength { get; }
     public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
