@@ -13207,11 +13207,53 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Fourier-based phase calculation
+        // 1. For each bar, compute Fourier real/imag parts weighted by price
+        // 2. Convert to phase angle in degrees with quadrant adjustments
+        // 3. Apply MA to phase for smoothing (primary output)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 2);
+
+        // Calculate phase angles using Fourier transform
+        var phaseBuffer = context.Rent(count);
+        var phaseSpan = phaseBuffer.WritableSpan;
+        double twoPiOverLen = 2.0 * Math.PI / length;
+
+        for (int i = 0; i < count; i++)
+        {
+            double realPart = 0, imagPart = 0;
+            for (int j = 0; j < length; j++)
+            {
+                double weight = i >= j ? close[i - j] : 0;
+                realPart += Math.Cos(twoPiOverLen * j) * weight;
+                imagPart += Math.Sin(twoPiOverLen * j) * weight;
+            }
+
+            // Calculate phase with quadrant adjustments
+            double phase;
+            if (Math.Abs(realPart) > 0.001)
+            {
+                phase = Math.Atan(imagPart / realPart) * (180.0 / Math.PI); // Convert to degrees
+            }
+            else
+            {
+                phase = 90 * Math.Sign(imagPart);
+            }
+            if (realPart < 0) phase += 180;
+            phase += 90;
+            if (phase < 0) phase += 360;
+            if (phase > 360) phase -= 360;
+            phaseSpan[i] = phase;
+        }
+
+        // Apply MA to phase for signal (primary output is smoothed phase)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(phaseBuffer.Span, result.WritableSpan, length);
+
+        phaseBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -13234,11 +13276,41 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Triple-pass MA on close-open derivative
+        // 1. Calculate deriv = close - open
+        // 2. Apply MA three times for heavy smoothing (filt -> filt2 -> filt3)
+        // 3. Primary output is the triple-smoothed filter
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+
+        // Calculate derivative (close - open)
+        var derivBuffer = context.Rent(count);
+        var derivSpan = derivBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            derivSpan[i] = close[i] - open[i];
+        }
+
+        // First MA pass
+        var filt1Buffer = context.Rent(count);
+        maCore.Compute(derivBuffer.Span, filt1Buffer.WritableSpan, length);
+
+        // Second MA pass
+        var filt2Buffer = context.Rent(count);
+        maCore.Compute(filt1Buffer.Span, filt2Buffer.WritableSpan, length);
+
+        // Third MA pass (primary output)
+        var result = context.Rent(count);
+        maCore.Compute(filt2Buffer.Span, result.WritableSpan, length);
+
+        derivBuffer.Dispose();
+        filt1Buffer.Dispose();
+        filt2Buffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -13259,22 +13331,105 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double delta = 0.1)
     {
+        // V1 Algorithm: Bandpass filter followed by MA smoothing
+        // 1. Compute bandpass filter coefficients from length and delta
+        // 2. Calculate recursive bandpass: bp = 0.5*(1-alpha)*(value-prevValue2) + beta*(1+alpha)*prevBp1 - alpha*prevBp2
+        // 3. Apply MA over 2*length to get trend (primary output)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Calculate bandpass filter coefficients
+        double twoPiOverLen = 2.0 * Math.PI / length;
+        double fourPiDeltaOverLen = 4.0 * Math.PI * delta / length;
+        double beta = Math.Cos(Math.Min(Math.Max(twoPiOverLen, 0.01), 0.99));
+        double gamma = 1.0 / Math.Cos(Math.Min(Math.Max(fourPiDeltaOverLen, 0.01), 0.99));
+        double alpha = Math.Min(Math.Max(gamma - Math.Sqrt((gamma * gamma) - 1), 0.01), 0.99);
+
+        // Calculate bandpass filter
+        var bpBuffer = context.Rent(count);
+        var bpSpan = bpBuffer.WritableSpan;
+        double halfOneMinusAlpha = 0.5 * (1 - alpha);
+        double betaOnePlusAlpha = beta * (1 + alpha);
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 2 ? close[i - 2] : 0;
+            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
+            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
+
+            // Bandpass formula with MinPastValues logic (use 0 for early bars)
+            double valueDiff = i >= 2 ? (currentValue - prevValue) : 0;
+            bpSpan[i] = (halfOneMinusAlpha * valueDiff) + (betaOnePlusAlpha * prevBp1) - (alpha * prevBp2);
+        }
+
+        // Apply MA over 2*length to get trend (primary output)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(bpBuffer.Span, result.WritableSpan, length * 2);
+
+        bpBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
     {
+        // V1 Algorithm: Triple delay line detrender
+        // 1. tmp1 = value + 0.088 * prevTmp1_6
+        // 2. tmp2 = tmp1 - prevTmp1_6 + 1.2 * prevTmp2_6 - 0.7 * prevTmp2_12
+        // 3. detrender = prevTmp2_12 - 2 * prevTmp2_6 + tmp2
+        // 4. Apply MA twice (MA then MA of result) for output
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Calculate tmp1 delay line
+        var tmp1Buffer = context.Rent(count);
+        var tmp1Span = tmp1Buffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double prevTmp1_6 = i >= 6 ? tmp1Span[i - 6] : 0;
+            tmp1Span[i] = close[i] + (0.088 * prevTmp1_6);
+        }
+
+        // Calculate tmp2 delay line
+        var tmp2Buffer = context.Rent(count);
+        var tmp2Span = tmp2Buffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double prevTmp1_6 = i >= 6 ? tmp1Span[i - 6] : 0;
+            double prevTmp2_6 = i >= 6 ? tmp2Span[i - 6] : 0;
+            double prevTmp2_12 = i >= 12 ? tmp2Span[i - 12] : 0;
+            tmp2Span[i] = tmp1Span[i] - prevTmp1_6 + (1.2 * prevTmp2_6) - (0.7 * prevTmp2_12);
+        }
+
+        // Calculate detrender
+        var detrenderBuffer = context.Rent(count);
+        var detrenderSpan = detrenderBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double prevTmp2_6 = i >= 6 ? tmp2Span[i - 6] : 0;
+            double prevTmp2_12 = i >= 12 ? tmp2Span[i - 12] : 0;
+            detrenderSpan[i] = prevTmp2_12 - (2 * prevTmp2_6) + tmp2Span[i];
+        }
+
+        // First MA pass on detrender
+        var tdldBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(detrenderBuffer.Span, tdldBuffer.WritableSpan, length);
+
+        // Second MA pass for signal (primary output)
+        var result = context.Rent(count);
+        maCore.Compute(tdldBuffer.Span, result.WritableSpan, length);
+
+        tmp1Buffer.Dispose();
+        tmp2Buffer.Dispose();
+        detrenderBuffer.Dispose();
+        tdldBuffer.Dispose();
+        return result;
     }
 
     // Batch 26 - Ehlers V2 and Universal Trading Filter
