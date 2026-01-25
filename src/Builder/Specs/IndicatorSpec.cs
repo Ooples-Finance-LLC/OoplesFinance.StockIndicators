@@ -7701,3 +7701,104 @@ public sealed class SmoothedRateOfChangeSpecOptions : IIndicatorSpecOptions
     public int SmoothLength { get; }
 }
 
+/// <summary>
+/// Floor Pivot Point options.
+/// </summary>
+public sealed class FloorPivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public FloorPivotPointSpecOptions() { }
+}
+
+/// <summary>
+/// Floor Pivot Point Support Level 1 options.
+/// </summary>
+public sealed class FloorPivotPointS1SpecOptions : IIndicatorSpecOptions
+{
+    public FloorPivotPointS1SpecOptions() { }
+}
+
+/// <summary>
+/// Floor Pivot Point Resistance Level 1 options.
+/// </summary>
+public sealed class FloorPivotPointR1SpecOptions : IIndicatorSpecOptions
+{
+    public FloorPivotPointR1SpecOptions() { }
+}
+
+/// <summary>
+/// Camarilla Pivot Point options.
+/// </summary>
+public sealed class CamarillaPivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public CamarillaPivotPointSpecOptions() { }
+}
+
+/// <summary>
+/// Woodie Pivot Point options.
+/// </summary>
+public sealed class WoodiePivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public WoodiePivotPointSpecOptions() { }
+}
+
+/// <summary>
+/// Fibonacci Pivot Point options.
+/// </summary>
+public sealed class FibonacciPivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public FibonacciPivotPointSpecOptions() { }
+}
+
+/// <summary>
+/// Demark Pivot Point options.
+/// </summary>
+public sealed class DemarkPivotPointSpecOptions : IIndicatorSpecOptions
+{
+    public DemarkPivotPointSpecOptions() { }
+}
+
+/// <summary>
+/// Linear Channel Middle options.
+/// </summary>
+public sealed class LinearChannelMiddleSpecOptions : IIndicatorSpecOptions
+{
+    public LinearChannelMiddleSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Channel Upper options.
+/// </summary>
+public sealed class PriceChannelUpperSpecOptions : IIndicatorSpecOptions
+{
+    public PriceChannelUpperSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Price Channel Lower options.
+/// </summary>
+public sealed class PriceChannelLowerSpecOptions : IIndicatorSpecOptions
+{
+    public PriceChannelLowerSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Donchian Channel Upper options.
+/// </summary>
+public sealed class DonchianChannelUpperSpecOptions : IIndicatorSpecOptions
+{
+    public DonchianChannelUpperSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Donchian Channel Lower options.
+/// </summary>
+public sealed class DonchianChannelLowerSpecOptions : IIndicatorSpecOptions
+{
+    public DonchianChannelLowerSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+

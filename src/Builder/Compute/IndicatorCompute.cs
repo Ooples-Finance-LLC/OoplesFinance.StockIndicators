@@ -807,6 +807,18 @@ internal static partial class IndicatorCompute
             PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength),
             SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
             SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength, sroc.SmoothLength),
+            FloorPivotPointSpecOptions _ => ComputeFloorPivotPointFast(data, context),
+            FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointS1Fast(data, context),
+            FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointR1Fast(data, context),
+            CamarillaPivotPointSpecOptions _ => ComputeCamarillaPivotPointFast(data, context),
+            WoodiePivotPointSpecOptions _ => ComputeWoodiePivotPointFast(data, context),
+            FibonacciPivotPointSpecOptions _ => ComputeFibonacciPivotPointFast(data, context),
+            DemarkPivotPointSpecOptions _ => ComputeDemarkPivotPointFast(data, context),
+            LinearChannelMiddleSpecOptions lcm => ComputeLinearChannelMiddleFast(data, context, lcm.Length),
+            PriceChannelUpperSpecOptions pcu => ComputePriceChannelUpperFast(data, context, pcu.Length),
+            PriceChannelLowerSpecOptions pcl => ComputePriceChannelLowerFast(data, context, pcl.Length),
+            DonchianChannelUpperSpecOptions dcu => ComputeDonchianChannelUpperFast(data, context, dcu.Length),
+            DonchianChannelLowerSpecOptions dcl => ComputeDonchianChannelLowerFast(data, context, dcl.Length),
 
             _ => null
         };
@@ -8606,6 +8618,154 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.SmoothedRateOfChange(inputSpan, buffer.WritableSpan, rocLength, smoothLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Floor Pivot Point using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.FloorPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Floor Pivot Point Support Level 1 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFloorPivotPointS1Fast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.FloorPivotPointS1(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Floor Pivot Point Resistance Level 1 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFloorPivotPointR1Fast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.FloorPivotPointR1(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Camarilla Pivot Point using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.CamarillaPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Woodie Pivot Point using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWoodiePivotPointFast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.WoodiePivotPoint(highSpan, lowSpan, openSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Fibonacci Pivot Point using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFibonacciPivotPointFast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.FibonacciPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Demark Pivot Point using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDemarkPivotPointFast(StockData data, ComputeContext context)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.DemarkPivotPoint(highSpan, lowSpan, openSpan, closeSpan, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Channel Middle using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearChannelMiddleFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.LinearChannelMiddle(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Channel Upper using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceChannelUpperFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.PriceChannelUpper(highSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Channel Lower using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceChannelLowerFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.PriceChannelLower(lowSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Donchian Channel Upper using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDonchianChannelUpperFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.DonchianChannelUpper(highSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Donchian Channel Lower using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDonchianChannelLowerFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.DonchianChannelLower(lowSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
