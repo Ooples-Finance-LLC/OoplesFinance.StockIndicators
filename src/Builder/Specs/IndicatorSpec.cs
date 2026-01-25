@@ -12753,3 +12753,325 @@ public sealed class InverseFisherFastZScoreSpecOptions : IIndicatorSpecOptions
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Inverse Fisher Z Score options.
+/// </summary>
+public sealed class InverseFisherZScoreSpecOptions : IIndicatorSpecOptions
+{
+    public InverseFisherZScoreSpecOptions(int length = 100)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public InverseFisherZScoreSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Japanese Correlation Coefficient options.
+/// </summary>
+public sealed class JapaneseCorrelationCoefficientSpecOptions : IIndicatorSpecOptions
+{
+    public JapaneseCorrelationCoefficientSpecOptions(int length = 50)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public JapaneseCorrelationCoefficientSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// JRC Fractal Dimension options.
+/// </summary>
+public sealed class JrcFractalDimensionSpecOptions : IIndicatorSpecOptions
+{
+    public JrcFractalDimensionSpecOptions(int length1 = 20, int length2 = 5, int smoothLength = 5)
+        : this(length1, length2, smoothLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public JrcFractalDimensionSpecOptions(int length1, int length2, int smoothLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Kase Convergence Divergence options.
+/// </summary>
+public sealed class KaseConvergenceDivergenceSpecOptions : IIndicatorSpecOptions
+{
+    public KaseConvergenceDivergenceSpecOptions(int length1 = 30, int length2 = 3, int length3 = 8)
+        : this(length1, length2, length3, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public KaseConvergenceDivergenceSpecOptions(int length1, int length2, int length3, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Kase Indicator options.
+/// </summary>
+public sealed class KaseIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public KaseIndicatorSpecOptions(int length = 10)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public KaseIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Keltner Channels options.
+/// </summary>
+public sealed class KeltnerChannelsSpecOptions : IIndicatorSpecOptions
+{
+    public KeltnerChannelsSpecOptions(int length1 = 20, int length2 = 10, double multFactor = 2)
+        : this(length1, length2, multFactor, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public KeltnerChannelsSpecOptions(int length1, int length2, double multFactor, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MultFactor = multFactor;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double MultFactor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Kirshenbaum Bands options.
+/// </summary>
+public sealed class KirshenbaumBandsSpecOptions : IIndicatorSpecOptions
+{
+    public KirshenbaumBandsSpecOptions(int length1 = 30, int length2 = 20, double stdDevFactor = 1)
+        : this(length1, length2, stdDevFactor, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public KirshenbaumBandsSpecOptions(int length1, int length2, double stdDevFactor, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        StdDevFactor = stdDevFactor;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double StdDevFactor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Know Sure Thing options.
+/// </summary>
+public sealed class KnowSureThingSpecOptions : IIndicatorSpecOptions
+{
+    public KnowSureThingSpecOptions(int length1 = 10, int length2 = 10, int length3 = 10, int length4 = 15, int rocLength1 = 10, int rocLength2 = 15, int rocLength3 = 20, int rocLength4 = 30, int signalLength = 9)
+        : this(length1, length2, length3, length4, rocLength1, rocLength2, rocLength3, rocLength4, signalLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public KnowSureThingSpecOptions(int length1, int length2, int length3, int length4, int rocLength1, int rocLength2, int rocLength3, int rocLength4, int signalLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        RocLength1 = Math.Max(1, rocLength1);
+        RocLength2 = Math.Max(1, rocLength2);
+        RocLength3 = Math.Max(1, rocLength3);
+        RocLength4 = Math.Max(1, rocLength4);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public int RocLength1 { get; }
+    public int RocLength2 { get; }
+    public int RocLength3 { get; }
+    public int RocLength4 { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Kwan Indicator options.
+/// </summary>
+public sealed class KwanIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public KwanIndicatorSpecOptions(int length = 9, int smoothLength = 2)
+        : this(length, smoothLength, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public KwanIndicatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// LBR Paint Bars options.
+/// </summary>
+public sealed class LBRPaintBarsSpecOptions : IIndicatorSpecOptions
+{
+    public LBRPaintBarsSpecOptions(int length = 9, int lbLength = 16, double atrMult = 2.5)
+        : this(length, lbLength, atrMult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public LBRPaintBarsSpecOptions(int length, int lbLength, double atrMult, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        LbLength = Math.Max(1, lbLength);
+        AtrMult = atrMult;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int LbLength { get; }
+    public double AtrMult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Linda Raschke 3/10 Oscillator options.
+/// </summary>
+public sealed class LindaRaschke310OscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public LindaRaschke310OscillatorSpecOptions(int fastLength = 3, int slowLength = 10, int smoothLength = 16)
+        : this(fastLength, slowLength, smoothLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public LindaRaschke310OscillatorSpecOptions(int fastLength, int slowLength, int smoothLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Mac Z Indicator options.
+/// </summary>
+public sealed class MacZIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public MacZIndicatorSpecOptions(int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
+        : this(fastLength, slowLength, signalLength, length, gamma, mult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MacZIndicatorSpecOptions(int fastLength, int slowLength, int signalLength, int length, double gamma, double mult, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        Length = Math.Max(1, length);
+        Gamma = gamma;
+        Mult = mult;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public int Length { get; }
+    public double Gamma { get; }
+    public double Mult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Mac Z VWAP Indicator options.
+/// </summary>
+public sealed class MacZVwapIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public MacZVwapIndicatorSpecOptions(int fastLength = 12, int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02)
+        : this(fastLength, slowLength, signalLength, length1, length2, gamma, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MacZVwapIndicatorSpecOptions(int fastLength, int slowLength, int signalLength, int length1, int length2, double gamma, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Gamma = gamma;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double Gamma { get; }
+    public MovingAvgType MaType { get; }
+}
+
