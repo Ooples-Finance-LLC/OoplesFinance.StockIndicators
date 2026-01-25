@@ -4516,19 +4516,6 @@ public sealed class ImpulsePercentagePriceOscillatorSpecOptions : IIndicatorSpec
 }
 
 /// <summary>
-/// Linda Raschke 3-10 Oscillator indicator options.
-/// </summary>
-public sealed class LindaRaschke310OscillatorSpecOptions : IIndicatorSpecOptions
-{
-    public LindaRaschke310OscillatorSpecOptions(int length)
-    {
-        Length = Math.Max(1, length);
-    }
-
-    public int Length { get; }
-}
-
-/// <summary>
 /// Midpoint Oscillator indicator options.
 /// </summary>
 public sealed class MidpointOscillatorSpecOptions : IIndicatorSpecOptions
@@ -5271,26 +5258,6 @@ public sealed class McClellanOscillatorSpecOptions : IIndicatorSpecOptions
     }
 
     public McClellanOscillatorSpecOptions(int length, MovingAvgType maType)
-    {
-        Length = Math.Max(1, length);
-        MaType = maType;
-    }
-
-    public int Length { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Decycler Oscillator V2 indicator options.
-/// </summary>
-public sealed class EhlersDecyclerOscillatorV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersDecyclerOscillatorV2SpecOptions(int length)
-        : this(length, MovingAvgType.WeightedMovingAverage)
-    {
-    }
-
-    public EhlersDecyclerOscillatorV2SpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         MaType = maType;
@@ -6084,26 +6051,6 @@ public sealed class EhlersHighPassFilterV1SpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
-}
-
-/// <summary>
-/// Ehlers High Pass Filter V2 indicator options.
-/// </summary>
-public sealed class EhlersHighPassFilterV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersHighPassFilterV2SpecOptions(int length)
-        : this(length, MovingAvgType.WeightedMovingAverage)
-    {
-    }
-
-    public EhlersHighPassFilterV2SpecOptions(int length, MovingAvgType maType)
-    {
-        Length = Math.Max(1, length);
-        MaType = maType;
-    }
-
-    public int Length { get; }
-    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7800,7 +7747,7 @@ public sealed class StochasticRsiOscillatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class ElasticVolumeWeightedMovingAverageV2SpecOptions : IIndicatorSpecOptions
 {
-    public ElasticVolumeWeightedMovingAverageV2SpecOptions(int length) { Length = Math.Max(1, length); }
+    public ElasticVolumeWeightedMovingAverageV2SpecOptions(int length = 14) { Length = Math.Max(1, length); }
     public int Length { get; }
 }
 
@@ -11970,102 +11917,6 @@ public sealed class EhlersHighPassFilterV2SpecOptions : IIndicatorSpecOptions
 }
 
 /// <summary>
-/// Ehlers Adaptive Relative Strength Index V2 options.
-/// </summary>
-public sealed class EhlersAdaptiveRelativeStrengthIndexV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersAdaptiveRelativeStrengthIndexV2SpecOptions(int length1 = 48, int length2 = 10, int length3 = 3)
-        : this(length1, length2, length3, MovingAvgType.ExponentialMovingAverage)
-    {
-    }
-
-    public EhlersAdaptiveRelativeStrengthIndexV2SpecOptions(int length1, int length2, int length3, MovingAvgType maType)
-    {
-        Length1 = Math.Max(1, length1);
-        Length2 = Math.Max(1, length2);
-        Length3 = Math.Max(1, length3);
-        MaType = maType;
-    }
-
-    public int Length1 { get; }
-    public int Length2 { get; }
-    public int Length3 { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Adaptive RSI Fisher Transform V2 options.
-/// </summary>
-public sealed class EhlersAdaptiveRsiFisherTransformV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersAdaptiveRsiFisherTransformV2SpecOptions(int length1 = 48, int length2 = 10, int length3 = 3)
-        : this(length1, length2, length3, MovingAvgType.ExponentialMovingAverage)
-    {
-    }
-
-    public EhlersAdaptiveRsiFisherTransformV2SpecOptions(int length1, int length2, int length3, MovingAvgType maType)
-    {
-        Length1 = Math.Max(1, length1);
-        Length2 = Math.Max(1, length2);
-        Length3 = Math.Max(1, length3);
-        MaType = maType;
-    }
-
-    public int Length1 { get; }
-    public int Length2 { get; }
-    public int Length3 { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Adaptive Stochastic Indicator V2 options.
-/// </summary>
-public sealed class EhlersAdaptiveStochasticIndicatorV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersAdaptiveStochasticIndicatorV2SpecOptions(int length1 = 48, int length2 = 10, int length3 = 3)
-        : this(length1, length2, length3, MovingAvgType.ExponentialMovingAverage)
-    {
-    }
-
-    public EhlersAdaptiveStochasticIndicatorV2SpecOptions(int length1, int length2, int length3, MovingAvgType maType)
-    {
-        Length1 = Math.Max(1, length1);
-        Length2 = Math.Max(1, length2);
-        Length3 = Math.Max(1, length3);
-        MaType = maType;
-    }
-
-    public int Length1 { get; }
-    public int Length2 { get; }
-    public int Length3 { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Adaptive Commodity Channel Index V2 options.
-/// </summary>
-public sealed class EhlersAdaptiveCommodityChannelIndexV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersAdaptiveCommodityChannelIndexV2SpecOptions(int length1 = 48, int length2 = 10, int length3 = 3)
-        : this(length1, length2, length3, MovingAvgType.ExponentialMovingAverage)
-    {
-    }
-
-    public EhlersAdaptiveCommodityChannelIndexV2SpecOptions(int length1, int length2, int length3, MovingAvgType maType)
-    {
-        Length1 = Math.Max(1, length1);
-        Length2 = Math.Max(1, length2);
-        Length3 = Math.Max(1, length3);
-        MaType = maType;
-    }
-
-    public int Length1 { get; }
-    public int Length2 { get; }
-    public int Length3 { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
 /// Ehlers Signal To Noise Ratio V2 options.
 /// </summary>
 public sealed class EhlersSignalToNoiseRatioV2SpecOptions : IIndicatorSpecOptions
@@ -12076,68 +11927,6 @@ public sealed class EhlersSignalToNoiseRatioV2SpecOptions : IIndicatorSpecOption
     }
 
     public EhlersSignalToNoiseRatioV2SpecOptions(int length, MovingAvgType maType)
-    {
-        Length = Math.Max(1, length);
-        MaType = maType;
-    }
-
-    public int Length { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Mesa Predict Indicator V2 options.
-/// </summary>
-public sealed class EhlersMesaPredictIndicatorV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersMesaPredictIndicatorV2SpecOptions(int length = 14)
-        : this(length, MovingAvgType.WeightedMovingAverage)
-    {
-    }
-
-    public EhlersMesaPredictIndicatorV2SpecOptions(int length, MovingAvgType maType)
-    {
-        Length = Math.Max(1, length);
-        MaType = maType;
-    }
-
-    public int Length { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Ehlers Roofing Filter V2 options.
-/// </summary>
-public sealed class EhlersRoofingFilterV2SpecOptions : IIndicatorSpecOptions
-{
-    public EhlersRoofingFilterV2SpecOptions(int length1 = 10, int length2 = 48)
-        : this(length1, length2, MovingAvgType.WeightedMovingAverage)
-    {
-    }
-
-    public EhlersRoofingFilterV2SpecOptions(int length1, int length2, MovingAvgType maType)
-    {
-        Length1 = Math.Max(1, length1);
-        Length2 = Math.Max(1, length2);
-        MaType = maType;
-    }
-
-    public int Length1 { get; }
-    public int Length2 { get; }
-    public MovingAvgType MaType { get; }
-}
-
-/// <summary>
-/// Elastic Volume Weighted Moving Average V2 options.
-/// </summary>
-public sealed class ElasticVolumeWeightedMovingAverageV2SpecOptions : IIndicatorSpecOptions
-{
-    public ElasticVolumeWeightedMovingAverageV2SpecOptions(int length = 40)
-        : this(length, MovingAvgType.SimpleMovingAverage)
-    {
-    }
-
-    public ElasticVolumeWeightedMovingAverageV2SpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         MaType = maType;
@@ -13072,6 +12861,1335 @@ public sealed class MacZVwapIndicatorSpecOptions : IIndicatorSpecOptions
     public int Length1 { get; }
     public int Length2 { get; }
     public double Gamma { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MassThrustIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public MassThrustIndicatorSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MassThrustIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class ModifiedGannHiloActivatorSpecOptions : IIndicatorSpecOptions
+{
+    public ModifiedGannHiloActivatorSpecOptions(int lookbackLength = 3, int length = 10)
+        : this(lookbackLength, length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ModifiedGannHiloActivatorSpecOptions(int lookbackLength, int length, MovingAvgType maType)
+    {
+        LookbackLength = Math.Max(1, lookbackLength);
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int LookbackLength { get; }
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public MomentumOscillatorSpecOptions(int length = 10, int smoothLength = 3)
+        : this(length, smoothLength, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public MomentumOscillatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MovingAverageBandsSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageBandsSpecOptions(int fastLength = 10, int slowLength = 50, double mult = 1)
+        : this(fastLength, slowLength, mult, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MovingAverageBandsSpecOptions(int fastLength, int slowLength, double mult, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        Mult = mult;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public double Mult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MovingAverageChannelSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageChannelSpecOptions(int length = 20)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MovingAverageChannelSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MovingAverageEnvelopeSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageEnvelopeSpecOptions(int length = 20, double pct = 0.025)
+        : this(length, pct, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MovingAverageEnvelopeSpecOptions(int length, double pct, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Pct = pct;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Pct { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class MovingAverageSupportResistanceSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageSupportResistanceSpecOptions(int length = 10)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MovingAverageSupportResistanceSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class NarrowSidewaysChannelSpecOptions : IIndicatorSpecOptions
+{
+    public NarrowSidewaysChannelSpecOptions(int length = 20, double pct = 0.03)
+        : this(length, pct, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public NarrowSidewaysChannelSpecOptions(int length, double pct, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Pct = pct;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Pct { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class NaturalStochasticIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public NaturalStochasticIndicatorSpecOptions(int length = 20, int smoothLength = 3)
+        : this(length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public NaturalStochasticIndicatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class NegativeVolumeIndexSpecOptions : IIndicatorSpecOptions
+{
+    public NegativeVolumeIndexSpecOptions(int length = 255, int initialValue = 1000)
+        : this(length, initialValue, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public NegativeVolumeIndexSpecOptions(int length, int initialValue, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        InitialValue = initialValue;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int InitialValue { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class OceanIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public OceanIndicatorSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public OceanIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class OnBalanceVolumeSpecOptions : IIndicatorSpecOptions
+{
+    public OnBalanceVolumeSpecOptions(int length = 20)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public OnBalanceVolumeSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PeakValleyEstimationSpecOptions : IIndicatorSpecOptions
+{
+    public PeakValleyEstimationSpecOptions(int length = 500, int smoothLength = 100)
+        : this(length, smoothLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PeakValleyEstimationSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PercentagePriceOscillatorSpecOptions(int fastLength = 12, int slowLength = 26, int signalLength = 9)
+        : this(fastLength, slowLength, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PercentagePriceOscillatorSpecOptions(int fastLength, int slowLength, int signalLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PercentageVolumeOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PercentageVolumeOscillatorSpecOptions(int fastLength = 12, int slowLength = 26, int signalLength = 9)
+        : this(fastLength, slowLength, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PercentageVolumeOscillatorSpecOptions(int fastLength, int slowLength, int signalLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PhaseChangeIndexSpecOptions : IIndicatorSpecOptions
+{
+    public PhaseChangeIndexSpecOptions(int length = 35, int smoothLength = 3)
+        : this(length, smoothLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PhaseChangeIndexSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PivotPointAverageSpecOptions : IIndicatorSpecOptions
+{
+    public PivotPointAverageSpecOptions(int length = 3, InputLength inputLength = InputLength.Day)
+        : this(length, inputLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PivotPointAverageSpecOptions(int length, InputLength inputLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        InputLength = inputLength;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public InputLength InputLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PositiveVolumeIndexSpecOptions : IIndicatorSpecOptions
+{
+    public PositiveVolumeIndexSpecOptions(int length = 255, int initialValue = 1000)
+        : this(length, initialValue, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PositiveVolumeIndexSpecOptions(int length, int initialValue, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        InitialValue = initialValue;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int InitialValue { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PremierStochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PremierStochasticOscillatorSpecOptions(int length = 8, int smoothLength = 25)
+        : this(length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PremierStochasticOscillatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceChannelSpecOptions : IIndicatorSpecOptions
+{
+    public PriceChannelSpecOptions(int length = 21, double pct = 0.06)
+        : this(length, pct, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PriceChannelSpecOptions(int length, double pct, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Pct = pct;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Pct { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceCurveChannelSpecOptions : IIndicatorSpecOptions
+{
+    public PriceCurveChannelSpecOptions(int length = 100)
+        : this(length, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public PriceCurveChannelSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceHeadleyAccelerationBandsSpecOptions : IIndicatorSpecOptions
+{
+    public PriceHeadleyAccelerationBandsSpecOptions(int length = 20, double factor = 0.001)
+        : this(length, factor, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PriceHeadleyAccelerationBandsSpecOptions(int length, double factor, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Factor = factor;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Factor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceLineChannelSpecOptions : IIndicatorSpecOptions
+{
+    public PriceLineChannelSpecOptions(int length = 100)
+        : this(length, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public PriceLineChannelSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceMomentumOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PriceMomentumOscillatorSpecOptions(int length1 = 35, int length2 = 20, int signalLength = 10)
+        : this(length1, length2, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PriceMomentumOscillatorSpecOptions(int length1, int length2, int signalLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PriceZoneOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PriceZoneOscillatorSpecOptions(int length = 20)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public PriceZoneOscillatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PringSpecialKSpecOptions : IIndicatorSpecOptions
+{
+    public PringSpecialKSpecOptions(int length1 = 10, int length2 = 15, int length3 = 20, int length4 = 30, int length5 = 40,
+        int length6 = 50, int length7 = 65, int length8 = 75, int length9 = 100, int length10 = 130, int length11 = 195,
+        int length12 = 265, int length13 = 390, int length14 = 530, int smoothLength = 10)
+        : this(length1, length2, length3, length4, length5, length6, length7, length8, length9, length10, length11, length12, length13, length14, smoothLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PringSpecialKSpecOptions(int length1, int length2, int length3, int length4, int length5, int length6, int length7,
+        int length8, int length9, int length10, int length11, int length12, int length13, int length14, int smoothLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        Length5 = Math.Max(1, length5);
+        Length6 = Math.Max(1, length6);
+        Length7 = Math.Max(1, length7);
+        Length8 = Math.Max(1, length8);
+        Length9 = Math.Max(1, length9);
+        Length10 = Math.Max(1, length10);
+        Length11 = Math.Max(1, length11);
+        Length12 = Math.Max(1, length12);
+        Length13 = Math.Max(1, length13);
+        Length14 = Math.Max(1, length14);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public int Length5 { get; }
+    public int Length6 { get; }
+    public int Length7 { get; }
+    public int Length8 { get; }
+    public int Length9 { get; }
+    public int Length10 { get; }
+    public int Length11 { get; }
+    public int Length12 { get; }
+    public int Length13 { get; }
+    public int Length14 { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class PseudoPolynomialChannelSpecOptions : IIndicatorSpecOptions
+{
+    public PseudoPolynomialChannelSpecOptions(int length = 14, double morph = 0.9)
+        : this(length, morph, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public PseudoPolynomialChannelSpecOptions(int length, double morph, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Morph = morph;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Morph { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class QuasiWhiteNoiseSpecOptions : IIndicatorSpecOptions
+{
+    public QuasiWhiteNoiseSpecOptions(int length = 20, int noiseLength = 500, double divisor = 40)
+        : this(length, noiseLength, divisor, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public QuasiWhiteNoiseSpecOptions(int length, int noiseLength, double divisor, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        NoiseLength = Math.Max(1, noiseLength);
+        Divisor = divisor;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int NoiseLength { get; }
+    public double Divisor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RandomWalkIndexSpecOptions : IIndicatorSpecOptions
+{
+    public RandomWalkIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public RandomWalkIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RateOfChangeBandsSpecOptions : IIndicatorSpecOptions
+{
+    public RateOfChangeBandsSpecOptions(int length = 12, int smoothLength = 3)
+        : this(length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public RateOfChangeBandsSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class ReallySimpleIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public ReallySimpleIndicatorSpecOptions(int length = 21, int smoothLength = 10)
+        : this(length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public ReallySimpleIndicatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RelativeSpreadStrengthSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeSpreadStrengthSpecOptions(int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5)
+        : this(fastLength, slowLength, length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public RelativeSpreadStrengthSpecOptions(int fastLength, int slowLength, int length, int smoothLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RelativeVigorIndexSpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVigorIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RelativeVigorIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RelativeVolatilityIndexV2SpecOptions : IIndicatorSpecOptions
+{
+    public RelativeVolatilityIndexV2SpecOptions(int length = 10, int smoothLength = 14)
+        : this(length, smoothLength, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public RelativeVolatilityIndexV2SpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class ReversalPointsSpecOptions : IIndicatorSpecOptions
+{
+    public ReversalPointsSpecOptions(int length = 100)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public ReversalPointsSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class RSINGIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public RSINGIndicatorSpecOptions(int length = 20)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public RSINGIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class SMIErgodicIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public SMIErgodicIndicatorSpecOptions(int fastLength = 5, int slowLength = 20, int signalLength = 5)
+        : this(fastLength, slowLength, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public SMIErgodicIndicatorSpecOptions(int fastLength, int slowLength, int signalLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class SmoothedWilliamsAccumulationDistributionSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedWilliamsAccumulationDistributionSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SmoothedWilliamsAccumulationDistributionSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class SpearmanIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public SpearmanIndicatorSpecOptions(int length = 10, int signalLength = 3)
+        : this(length, signalLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SpearmanIndicatorSpecOptions(int length, int signalLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class SqueezeMomentumIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public SqueezeMomentumIndicatorSpecOptions(int length = 20)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SqueezeMomentumIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StiffnessIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public StiffnessIndicatorSpecOptions(int length1 = 100, int length2 = 60, int smoothingLength = 3, double threshold = 90)
+        : this(length1, length2, smoothingLength, threshold, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StiffnessIndicatorSpecOptions(int length1, int length2, int smoothingLength, double threshold, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SmoothingLength = Math.Max(1, smoothingLength);
+        Threshold = threshold;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SmoothingLength { get; }
+    public double Threshold { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StochasticFastOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticFastOscillatorSpecOptions(int length = 14, int smoothLength1 = 3, int smoothLength2 = 2)
+        : this(length, smoothLength1, smoothLength2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public StochasticFastOscillatorSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StochasticMomentumIndexSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticMomentumIndexSpecOptions(int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
+        : this(length1, length2, smoothLength1, smoothLength2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public StochasticMomentumIndexSpecOptions(int length1, int length2, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StochasticOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticOscillatorSpecOptions(int length = 14, int smoothLength1 = 3, int smoothLength2 = 3)
+        : this(length, smoothLength1, smoothLength2, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StochasticOscillatorSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StochasticRegularSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticRegularSpecOptions(int length1 = 5, int length2 = 3)
+        : this(length1, length2, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StochasticRegularSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class StochasticRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticRelativeStrengthIndexSpecOptions(int length = 14, int smoothLength1 = 3, int smoothLength2 = 3)
+        : this(length, smoothLength1, smoothLength2, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public StochasticRelativeStrengthIndexSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TFSMboIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public TFSMboIndicatorSpecOptions(int fastLength = 25, int slowLength = 200, int signalLength = 18)
+        : this(fastLength, slowLength, signalLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TFSMboIndicatorSpecOptions(int fastLength, int slowLength, int signalLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TillsonT3MovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public TillsonT3MovingAverageSpecOptions(int length = 5, double vFactor = 0.7)
+        : this(length, vFactor, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TillsonT3MovingAverageSpecOptions(int length, double vFactor, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        VFactor = vFactor;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double VFactor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TriangularMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public TriangularMovingAverageSpecOptions(int length = 20)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TriangularMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TrueStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TrueStrengthIndexSpecOptions(int length1 = 25, int length2 = 13, int signalLength = 7)
+        : this(length1, length2, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TrueStrengthIndexSpecOptions(int length1, int length2, int signalLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TurboStochasticsFastSpecOptions : IIndicatorSpecOptions
+{
+    public TurboStochasticsFastSpecOptions(int length1 = 20, int length2 = 10, int turboLength = 2)
+        : this(length1, length2, turboLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TurboStochasticsFastSpecOptions(int length1, int length2, int turboLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        TurboLength = Math.Max(1, turboLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int TurboLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class TurboStochasticsSlowSpecOptions : IIndicatorSpecOptions
+{
+    public TurboStochasticsSlowSpecOptions(int length1 = 20, int length2 = 10, int turboLength = 2)
+        : this(length1, length2, turboLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TurboStochasticsSlowSpecOptions(int length1, int length2, int turboLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        TurboLength = Math.Max(1, turboLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int TurboLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class VariableIndexDynamicAverageSpecOptions : IIndicatorSpecOptions
+{
+    public VariableIndexDynamicAverageSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public VariableIndexDynamicAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class VolumeFlowIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeFlowIndicatorSpecOptions(InputName inputName = InputName.TypicalPrice, int length1 = 130, int length2 = 30,
+        int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5)
+        : this(inputName, length1, length2, signalLength, smoothLength, coef, vcoef, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VolumeFlowIndicatorSpecOptions(InputName inputName, int length1, int length2, int signalLength, int smoothLength,
+        double coef, double vcoef, MovingAvgType maType)
+    {
+        InputName = inputName;
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SignalLength = Math.Max(1, signalLength);
+        SmoothLength = Math.Max(1, smoothLength);
+        Coef = coef;
+        Vcoef = vcoef;
+        MaType = maType;
+    }
+
+    public InputName InputName { get; }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SignalLength { get; }
+    public int SmoothLength { get; }
+    public double Coef { get; }
+    public double Vcoef { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class _1LCLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public _1LCLeastSquaresMovingAverageSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public _1LCLeastSquaresMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class _3HMASpecOptions : IIndicatorSpecOptions
+{
+    public _3HMASpecOptions(int length = 50)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public _3HMASpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class Dema2LinesSpecOptions : IIndicatorSpecOptions
+{
+    public Dema2LinesSpecOptions(int fastLength = 10, int slowLength = 40)
+        : this(fastLength, slowLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public Dema2LinesSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class GuppyDistanceIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public GuppyDistanceIndicatorSpecOptions(int length1 = 3, int length2 = 5, int length3 = 8, int length4 = 10,
+        int length5 = 12, int length6 = 15, int length7 = 30, int length8 = 35, int length9 = 40, int length10 = 45,
+        int length11 = 11, int length12 = 60)
+        : this(length1, length2, length3, length4, length5, length6, length7, length8, length9, length10, length11, length12, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public GuppyDistanceIndicatorSpecOptions(int length1, int length2, int length3, int length4, int length5, int length6,
+        int length7, int length8, int length9, int length10, int length11, int length12, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        Length5 = Math.Max(1, length5);
+        Length6 = Math.Max(1, length6);
+        Length7 = Math.Max(1, length7);
+        Length8 = Math.Max(1, length8);
+        Length9 = Math.Max(1, length9);
+        Length10 = Math.Max(1, length10);
+        Length11 = Math.Max(1, length11);
+        Length12 = Math.Max(1, length12);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public int Length5 { get; }
+    public int Length6 { get; }
+    public int Length7 { get; }
+    public int Length8 { get; }
+    public int Length9 { get; }
+    public int Length10 { get; }
+    public int Length11 { get; }
+    public int Length12 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class GuppyMultipleMovingAverageSpecOptions : IIndicatorSpecOptions
+{
+    public GuppyMultipleMovingAverageSpecOptions(int length1 = 3, int length2 = 5, int length3 = 7, int length4 = 8,
+        int length5 = 9, int length6 = 10, int length7 = 11, int length8 = 12, int length9 = 13, int length10 = 15,
+        int length11 = 17, int length12 = 19, int length13 = 21, int length14 = 23, int length15 = 25, int length16 = 28,
+        int length17 = 30, int length18 = 31, int length19 = 34, int length20 = 35, int length21 = 37, int length22 = 40,
+        int length23 = 43, int length24 = 45, int length25 = 50, int length26 = 55, int length27 = 60)
+        : this(length1, length2, length3, length4, length5, length6, length7, length8, length9, length10, length11, length12,
+            length13, length14, length15, length16, length17, length18, length19, length20, length21, length22, length23,
+            length24, length25, length26, length27, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public GuppyMultipleMovingAverageSpecOptions(int length1, int length2, int length3, int length4, int length5, int length6,
+        int length7, int length8, int length9, int length10, int length11, int length12, int length13, int length14, int length15,
+        int length16, int length17, int length18, int length19, int length20, int length21, int length22, int length23,
+        int length24, int length25, int length26, int length27, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        Length5 = Math.Max(1, length5);
+        Length6 = Math.Max(1, length6);
+        Length7 = Math.Max(1, length7);
+        Length8 = Math.Max(1, length8);
+        Length9 = Math.Max(1, length9);
+        Length10 = Math.Max(1, length10);
+        Length11 = Math.Max(1, length11);
+        Length12 = Math.Max(1, length12);
+        Length13 = Math.Max(1, length13);
+        Length14 = Math.Max(1, length14);
+        Length15 = Math.Max(1, length15);
+        Length16 = Math.Max(1, length16);
+        Length17 = Math.Max(1, length17);
+        Length18 = Math.Max(1, length18);
+        Length19 = Math.Max(1, length19);
+        Length20 = Math.Max(1, length20);
+        Length21 = Math.Max(1, length21);
+        Length22 = Math.Max(1, length22);
+        Length23 = Math.Max(1, length23);
+        Length24 = Math.Max(1, length24);
+        Length25 = Math.Max(1, length25);
+        Length26 = Math.Max(1, length26);
+        Length27 = Math.Max(1, length27);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public int Length5 { get; }
+    public int Length6 { get; }
+    public int Length7 { get; }
+    public int Length8 { get; }
+    public int Length9 { get; }
+    public int Length10 { get; }
+    public int Length11 { get; }
+    public int Length12 { get; }
+    public int Length13 { get; }
+    public int Length14 { get; }
+    public int Length15 { get; }
+    public int Length16 { get; }
+    public int Length17 { get; }
+    public int Length18 { get; }
+    public int Length19 { get; }
+    public int Length20 { get; }
+    public int Length21 { get; }
+    public int Length22 { get; }
+    public int Length23 { get; }
+    public int Length24 { get; }
+    public int Length25 { get; }
+    public int Length26 { get; }
+    public int Length27 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class InsyncIndexSpecOptions : IIndicatorSpecOptions
+{
+    public InsyncIndexSpecOptions(int fastLength = 12, int slowLength = 26, int signalLength = 9, int emoLength = 14,
+        int mfiLength = 20, int bbLength = 20, int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14,
+        int stochLength = 14, int stochKLength = 1, int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
+        : this(fastLength, slowLength, signalLength, emoLength, mfiLength, bbLength, cciLength, dpoLength, rocLength, rsiLength,
+            stochLength, stochKLength, stochDLength, smaLength, stdDevMult, divisor, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public InsyncIndexSpecOptions(int fastLength, int slowLength, int signalLength, int emoLength, int mfiLength, int bbLength,
+        int cciLength, int dpoLength, int rocLength, int rsiLength, int stochLength, int stochKLength, int stochDLength,
+        int smaLength, double stdDevMult, double divisor, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        SignalLength = Math.Max(1, signalLength);
+        EmoLength = Math.Max(1, emoLength);
+        MfiLength = Math.Max(1, mfiLength);
+        BbLength = Math.Max(1, bbLength);
+        CciLength = Math.Max(1, cciLength);
+        DpoLength = Math.Max(1, dpoLength);
+        RocLength = Math.Max(1, rocLength);
+        RsiLength = Math.Max(1, rsiLength);
+        StochLength = Math.Max(1, stochLength);
+        StochKLength = Math.Max(1, stochKLength);
+        StochDLength = Math.Max(1, stochDLength);
+        SmaLength = Math.Max(1, smaLength);
+        StdDevMult = stdDevMult;
+        Divisor = divisor;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int SignalLength { get; }
+    public int EmoLength { get; }
+    public int MfiLength { get; }
+    public int BbLength { get; }
+    public int CciLength { get; }
+    public int DpoLength { get; }
+    public int RocLength { get; }
+    public int RsiLength { get; }
+    public int StochLength { get; }
+    public int StochKLength { get; }
+    public int StochDLength { get; }
+    public int SmaLength { get; }
+    public double StdDevMult { get; }
+    public double Divisor { get; }
+    public MovingAvgType MaType { get; }
+}
+
+public sealed class KaseDevStopV2SpecOptions : IIndicatorSpecOptions
+{
+    public KaseDevStopV2SpecOptions(int fastLength = 10, int slowLength = 21, int length = 20,
+        double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
+        : this(fastLength, slowLength, length, stdDev1, stdDev2, stdDev3, stdDev4, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public KaseDevStopV2SpecOptions(int fastLength, int slowLength, int length,
+        double stdDev1, double stdDev2, double stdDev3, double stdDev4, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        Length = Math.Max(1, length);
+        StdDev1 = stdDev1;
+        StdDev2 = stdDev2;
+        StdDev3 = stdDev3;
+        StdDev4 = stdDev4;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public int Length { get; }
+    public double StdDev1 { get; }
+    public double StdDev2 { get; }
+    public double StdDev3 { get; }
+    public double StdDev4 { get; }
     public MovingAvgType MaType { get; }
 }
 
