@@ -1047,6 +1047,98 @@ internal static partial class IndicatorCompute
             EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.MaType),
             EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.SlowLength, efmd.MaType),
 
+            // Batch 25 - More Ehlers Indicators
+            EhlersPhaseCalculationSpecOptions epc => ComputeEhlersPhaseCalculationFast(data, context, epc.Length, epc.MaType),
+            EhlersRestoringPullIndicatorSpecOptions erpi => ComputeEhlersRestoringPullIndicatorFast(data, context, erpi.Length2, erpi.MaType),
+            EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1, errsi.MaType),
+            EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
+            EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length2, esam.MaType),
+            EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length2, esutf.MaType),
+            EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.MaType),
+            EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
+
+            // Batch 26 - Ehlers V2 and Universal Trading Filter
+            EhlersUniversalTradingFilterSpecOptions eutf => ComputeEhlersUniversalTradingFilterFast(data, context, eutf.Length1, eutf.Length2, eutf.Mult, eutf.MaType),
+            EhlersAdaptiveCommodityChannelIndexV2SpecOptions eacciv2 => ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(data, context, eacciv2.Length1, eacciv2.Length2, eacciv2.Length3, eacciv2.MaType),
+            EhlersAdaptiveRelativeStrengthIndexV2SpecOptions earsiv2 => ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(data, context, earsiv2.Length1, earsiv2.Length2, earsiv2.Length3, earsiv2.MaType),
+            EhlersAdaptiveRsiFisherTransformV2SpecOptions earftv2 => ComputeEhlersAdaptiveRsiFisherTransformV2Fast(data, context, earftv2.Length1, earftv2.Length2, earftv2.Length3, earftv2.MaType),
+            EhlersAdaptiveStochasticIndicatorV2SpecOptions easiv2 => ComputeEhlersAdaptiveStochasticIndicatorV2Fast(data, context, easiv2.Length1, easiv2.Length2, easiv2.Length3, easiv2.MaType),
+            EhlersMesaPredictIndicatorV2SpecOptions empiv2 => ComputeEhlersMesaPredictIndicatorV2Fast(data, context, empiv2.Length1, empiv2.Length2, empiv2.Length3, empiv2.Length4, empiv2.MaType),
+            EhlersSignalToNoiseRatioV1SpecOptions esnrv1 => ComputeEhlersSignalToNoiseRatioV1Fast(data, context, esnrv1.Length, esnrv1.MaType),
+            EhlersSignalToNoiseRatioV2SpecOptions esnrv2 => ComputeEhlersSignalToNoiseRatioV2Fast(data, context, esnrv2.Length, esnrv2.MaType),
+
+            // Batch 27 - Trend and Volatility Indicators
+            TrendExhaustionIndicatorSpecOptions tei => ComputeTrendExhaustionIndicatorFast(data, context, tei.Length, tei.MaType),
+            TrendImpulseFilterSpecOptions tif => ComputeTrendImpulseFilterFast(data, context, tif.Length1, tif.Length2, tif.MaType),
+            TrendDirectionForceIndexSpecOptions tdfi => ComputeTrendDirectionForceIndexFast(data, context, tdfi.Length1, tdfi.Length2, tdfi.MaType),
+            TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType),
+            TrendAnalysisIndicatorSpecOptions tai2 => ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType),
+            TrenderSpecOptions tr => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType),
+            TurboStochasticsFastSpecOptions tsf => ComputeTurboStochasticsFastFast(data, context, tsf.Length1, tsf.Length2, tsf.TurboLength, tsf.MaType),
+
+            // Batch 28 - Volume and Volatility Indicators
+            TurboStochasticsSlowSpecOptions tss => ComputeTurboStochasticsSlowFast(data, context, tss.Length1, tss.Length2, tss.TurboLength, tss.MaType),
+            VolumeFlowIndicatorSpecOptions vfi => ComputeVolumeFlowIndicatorFast(data, context, vfi.Length1, vfi.Length2, vfi.SignalLength, vfi.SmoothLength, vfi.MaType),
+            VolatilityQualityIndexSpecOptions vqi => ComputeVolatilityQualityIndexFast(data, context, vqi.FastLength, vqi.SlowLength, vqi.MaType),
+            VolatilityBasedMomentumSpecOptions vbm => ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
+            VolatilitySwitchIndicatorSpecOptions vsi => ComputeVolatilitySwitchIndicatorFast(data, context, vsi.Length, vsi.MaType),
+            VortexBandsSpecOptions vb => ComputeVortexBandsFast(data, context, vb.Length, vb.MaType),
+            VostroIndicatorSpecOptions vi => ComputeVostroIndicatorFast(data, context, vi.Length1, vi.Length2, vi.Level, vi.MaType),
+
+            // Batch 29 - Ergodic and Momentum Indicators
+            ErgodicCommoditySelectionIndexSpecOptions ecsi => ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType),
+            ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
+            ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1, etsiv1.Length2, etsiv1.Length3, etsiv1.SignalLength, etsiv1.MaType),
+            ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length1, etsiv2.Length2, etsiv2.Length3, etsiv2.SignalLength, etsiv2.MaType),
+            SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength, smie.SlowLength, smie.SignalLength, smie.MaType),
+            InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength, ii.SignalLength, ii.MaType),
+            SqueezeMomentumIndicatorSpecOptions smi => ComputeSqueezeMomentumIndicatorFast(data, context, smi.Length, smi.MaType),
+            StochasticConnorsRelativeStrengthIndexSpecOptions scrsi => ComputeStochasticConnorsRsiFast(data, context, scrsi.Length1, scrsi.Length2, scrsi.Length3, scrsi.SmoothLength1, scrsi.SmoothLength2, scrsi.MaType),
+
+            // Batch 30 - Stochastic Regular
+            StochasticRegularSpecOptions sr => ComputeStochasticRegularFast(data, context, sr.Length1, sr.Length2, sr.MaType),
+
+            // Batch 31 - Relative and Statistical Indicators
+            RecursiveRelativeStrengthIndexSpecOptions rrsi => ComputeRecursiveRelativeStrengthIndexFast(data, context, rrsi.Length, rrsi.MaType),
+            RelativeSpreadStrengthSpecOptions rss => ComputeRelativeSpreadStrengthFast(data, context, rss.FastLength, rss.SlowLength, rss.Length, rss.SmoothLength, rss.MaType),
+            RelativeVolatilityIndexV2SpecOptions rviv2 => ComputeRelativeVolatilityIndexV2Fast(data, context, rviv2.Length, rviv2.SmoothLength, rviv2.MaType),
+            RelativeVolumeIndicatorSpecOptions rvi => ComputeRelativeVolumeIndicatorFast(data, context, rvi.Length, rvi.MaType),
+            SelfAdjustingRelativeStrengthIndexSpecOptions sarsi => ComputeSelfAdjustingRsiFast(data, context, sarsi.Length, sarsi.SmoothingLength, sarsi.Mult, sarsi.MaType),
+            SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType),
+            StatisticalVolatilitySpecOptions sv => ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2, sv.MaType),
+            TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length2, tdi.Length3, tdi.Length4, tdi.MaType),
+
+            // Batch 32 - Remaining Indicators (Part 1)
+            FunctionToCandlesSpecOptions ftc => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType),
+            PeakValleyEstimationSpecOptions pve => ComputePeakValleyEstimationFast(data, context, pve.Length, pve.SmoothLength, pve.MaType),
+            PhaseChangeIndexSpecOptions pci => ComputePhaseChangeIndexFast(data, context, pci.Length, pci.SmoothLength, pci.MaType),
+            PseudoPolynomialChannelSpecOptions ppc => ComputePseudoPolynomialChannelFast(data, context, ppc.Length, ppc.Morph, ppc.MaType),
+            RecursiveDifferenciatorSpecOptions rd => ComputeRecursiveDifferenciatorFast(data, context, rd.Length, rd.Alpha, rd.MaType),
+            ReversalPointsSpecOptions rp => ComputeReversalPointsFast(data, context, rp.Length, rp.MaType),
+            RSINGIndicatorSpecOptions rsing => ComputeRSINGIndicatorFast(data, context, rsing.Length, rsing.MaType),
+            RunningEquitySpecOptions re => ComputeRunningEquityFast(data, context, re.Length, re.MaType),
+
+            // Batch 33 - Remaining Indicators (Part 2)
+            SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length, ss.MaType),
+            StandardDevationSpecOptions sd => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
+            StationaryExtrapolatedLevelsSpecOptions sel => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType),
+            SupportResistanceSpecOptions sr2 => ComputeSupportResistanceFast(data, context, sr2.Length, sr2.MaType),
+            SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length, sre.MaType),
+            TechnicalRatingsSpecOptions tr => ComputeTechnicalRatingsFast(data, context, tr.AoLength1, tr.AoLength2, tr.RsiLength, tr.StochLength1, tr.StochLength2, tr.StochLength3, tr.MaType),
+            TFSMboIndicatorSpecOptions tfsm => ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType),
+            TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.SmoothLength, tri.MaType),
+
+            // Batch 34 - Remaining Indicators (Part 3)
+            TimeAndMoneyChannelSpecOptions tmc => ComputeTimeAndMoneyChannelFast(data, context, tmc.Length1, tmc.Length2, tmc.MaType),
+            TopsAndBottomsFinderSpecOptions tbf => ComputeTopsAndBottomsFinderFast(data, context, tbf.Length, tbf.MaType),
+            TraderPressureIndexSpecOptions tpi => ComputeTraderPressureIndexFast(data, context, tpi.Length1, tpi.Length2, tpi.SmoothLength, tpi.MaType),
+            UhlMaCrossoverSystemSpecOptions umcs => ComputeUhlMaCrossoverSystemFast(data, context, umcs.Length, umcs.MaType),
+            UltimateVolatilityIndicatorSpecOptions uvi => ComputeUltimateVolatilityIndicatorFast(data, context, uvi.Length, uvi.MaType),
+            UniChannelSpecOptions uc => ComputeUniChannelFast(data, context, uc.Length, uc.UbFac, uc.LbFac, uc.Type1, uc.MaType),
+            VixTradingSystemSpecOptions vts => ComputeVixTradingSystemFast(data, context, vts.Length, vts.MaxCount, vts.MinCount, vts.MaType),
+            WilsonRelativePriceChannelSpecOptions wrpc => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength, wrpc.MaType),
+            WoodieCommodityChannelIndexSpecOptions wcci => ComputeWoodieCommodityChannelIndexFast(data, context, wcci.FastLength, wcci.SlowLength, wcci.MaType),
+
             _ => null
         };
     }
@@ -12834,21 +12926,14 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    // Batch 23 - Volume and Statistical Indicators
+    // Batch 23 - Volume and Statistical Indicators (using registry pattern)
 
     public static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, signalLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, signalLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
         return buffer;
     }
 
@@ -12856,15 +12941,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -12872,15 +12950,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, slowLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, slowLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, slowLength);
         return buffer;
     }
 
@@ -12888,15 +12959,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
         return buffer;
     }
 
@@ -12904,18 +12968,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -12923,18 +12977,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -12942,15 +12986,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        // Note: This is an RSI variant, uses RSI computation
+        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -12958,15 +12995,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
         return buffer;
     }
 
@@ -12976,15 +13006,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, signalLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, signalLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
         return buffer;
     }
 
@@ -12992,15 +13015,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13008,15 +13024,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
         return buffer;
     }
 
@@ -13024,15 +13033,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length2);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length2);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
         return buffer;
     }
 
@@ -13040,15 +13042,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13056,15 +13051,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length3);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length3);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
         return buffer;
     }
 
@@ -13072,15 +13060,8 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13088,15 +13069,676 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, slowLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, slowLength);
-                break;
-        }
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, slowLength);
+        return buffer;
+    }
+
+    // Batch 25 - More Ehlers Indicators
+
+    public static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length2 = 50, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    // Batch 26 - Ehlers V2 and Universal Trading Filter
+
+    public static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 16, int length2 = 50, double mult = 2, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length4);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    // Batch 27 - Trend and Volatility Indicators
+
+    public static ComputeBuffer ComputeTrendExhaustionIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTrendImpulseFilterFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTrendDirectionForceIndexFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 30, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21, int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTrenderFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, turboLength);
+        return buffer;
+    }
+
+    // Batch 28 - Volume and Volatility Indicators
+
+    public static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, turboLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context, int fastLength = 9, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, fastLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVolatilityBasedMomentumFast(StockData data, ComputeContext context, int length1 = 22, int length2 = 65, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
+        return buffer;
+    }
+
+    // Batch 29 - Ergodic and Momentum Indicators
+
+    public static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 32, int smoothLength = 5, double pointValue = 1, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length3);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeErgodicTsiV1Fast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length1 = 21, int length2 = 9, int length3 = 9, int signalLength = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 20, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength2);
+        return buffer;
+    }
+
+    // Batch 30 - Stochastic Regular
+
+    public static ComputeBuffer ComputeStochasticRegularFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length2);
+        return buffer;
+    }
+
+    // Batch 31 - Relative and Statistical Indicators
+
+    public static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRelativeSpreadStrengthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRelativeVolatilityIndexV2Fast(StockData data, ComputeContext context, int length = 10, int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRelativeVolumeIndicatorFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14, int smoothingLength = 21, double mult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothingLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeStatisticalVolatilityFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 253, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length4);
+        return buffer;
+    }
+
+    // Batch 32 - Remaining Indicators (Part 1)
+
+    public static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500, int smoothLength = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRecursiveDifferenciatorFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeReversalPointsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    // Batch 33 - Remaining Indicators (Part 2)
+
+    public static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, rsiLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25, int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    // Batch 34 - Remaining Indicators (Part 3)
+
+    public static ComputeBuffer ComputeTimeAndMoneyChannelFast(StockData data, ComputeContext context, int length1 = 41, int length2 = 82, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length1);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeUhlMaCrossoverSystemFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeVixTradingSystemFast(StockData data, ComputeContext context, int length = 50, double maxCount = 11, double minCount = -11, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(close, buffer.WritableSpan, fastLength);
         return buffer;
     }
 
