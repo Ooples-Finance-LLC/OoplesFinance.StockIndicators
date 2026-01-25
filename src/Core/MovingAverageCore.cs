@@ -7023,5 +7023,218 @@ internal static class MovingAverageCore
         }
     }
 
+    /// <summary>
+    /// Computes 3HMA (Triple Hull Moving Average).
+    /// </summary>
+    internal static void ThreeHma(ReadOnlySpan<double> input, Span<double> output, int length = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var p = Math.Max(1, (int)Math.Ceiling((double)length / 2));
+        var p1 = Math.Max(1, (int)Math.Ceiling((double)p / 3));
+        var p2 = Math.Max(1, (int)Math.Ceiling((double)p / 2));
+        var sqrtP = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(p)));
+
+        var wma1Array = pool.Rent(input.Length);
+        var wma2Array = pool.Rent(input.Length);
+        var wma3Array = pool.Rent(input.Length);
+        var midArray = pool.Rent(input.Length);
+
+        try
+        {
+            var wma1 = wma1Array.AsSpan(0, input.Length);
+            var wma2 = wma2Array.AsSpan(0, input.Length);
+            var wma3 = wma3Array.AsSpan(0, input.Length);
+            var mid = midArray.AsSpan(0, input.Length);
+
+            WeightedMovingAverage(input, wma1, p1);
+            WeightedMovingAverage(input, wma2, p2);
+            WeightedMovingAverage(input, wma3, p);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                mid[i] = (3 * wma1[i]) - wma2[i] - wma3[i];
+            }
+
+            WeightedMovingAverage(mid, output, sqrtP);
+        }
+        finally
+        {
+            pool.Return(wma1Array);
+            pool.Return(wma2Array);
+            pool.Return(wma3Array);
+            pool.Return(midArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Alpha Decreasing Exponential Moving Average.
+    /// </summary>
+    internal static void AlphaDecreasingExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var alpha = i > 0 ? (double)length / (length + i) : 1;
+            var prevEma = i > 0 ? output[i - 1] : input[i];
+            output[i] = (alpha * input[i]) + ((1 - alpha) * prevEma);
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive Autonomous Recursive Trailing Stop.
+    /// </summary>
+    internal static void AdaptiveAutonomousRecursiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double lambda = 1)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var armaArray = pool.Rent(close.Length);
+
+        try
+        {
+            var arma = armaArray.AsSpan(0, close.Length);
+            TrendCore.AdaptiveAutonomousRecursiveMovingAverage(close, arma, length, lambda);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentArma = arma[i];
+                var prevArma = i > 0 ? arma[i - 1] : currentArma;
+                var currentHigh = high[i];
+                var currentLow = low[i];
+
+                if (currentArma > prevArma)
+                {
+                    output[i] = currentLow;
+                }
+                else if (currentArma < prevArma)
+                {
+                    output[i] = currentHigh;
+                }
+                else
+                {
+                    output[i] = i > 0 ? output[i - 1] : close[i];
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(armaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Adaptive Trailing Stop.
+    /// </summary>
+    internal static void AdaptiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double multiplier = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            var trend = 1;
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentClose = close[i];
+                var currentAtr = atr[i] * multiplier;
+                var prevStop = i > 0 ? output[i - 1] : currentClose;
+
+                if (trend == 1)
+                {
+                    var newStop = currentClose - currentAtr;
+                    output[i] = Math.Max(newStop, prevStop);
+                    if (currentClose < output[i])
+                    {
+                        trend = -1;
+                        output[i] = currentClose + currentAtr;
+                    }
+                }
+                else
+                {
+                    var newStop = currentClose + currentAtr;
+                    output[i] = Math.Min(newStop, prevStop);
+                    if (currentClose > output[i])
+                    {
+                        trend = 1;
+                        output[i] = currentClose - currentAtr;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Average True Range Trailing Stops.
+    /// </summary>
+    internal static void AverageTrueRangeTrailingStops(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double multiplier = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var atrArray = pool.Rent(close.Length);
+
+        try
+        {
+            var atr = atrArray.AsSpan(0, close.Length);
+            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var currentClose = close[i];
+                var currentAtr = atr[i] * multiplier;
+                var prevStop = i > 0 ? output[i - 1] : currentClose;
+                var prevClose = i > 0 ? close[i - 1] : currentClose;
+
+                if (currentClose > prevStop && prevClose > prevStop)
+                {
+                    output[i] = Math.Max(prevStop, currentClose - currentAtr);
+                }
+                else if (currentClose < prevStop && prevClose < prevStop)
+                {
+                    output[i] = Math.Min(prevStop, currentClose + currentAtr);
+                }
+                else if (currentClose > prevStop)
+                {
+                    output[i] = currentClose - currentAtr;
+                }
+                else
+                {
+                    output[i] = currentClose + currentAtr;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(atrArray);
+        }
+    }
+
     #endregion
 }

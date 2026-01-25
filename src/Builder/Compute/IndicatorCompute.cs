@@ -819,6 +819,10 @@ internal static partial class IndicatorCompute
             PriceChannelLowerSpecOptions pcl => ComputePriceChannelLowerFast(data, context, pcl.Length),
             DonchianChannelUpperSpecOptions dcu => ComputeDonchianChannelUpperFast(data, context, dcu.Length),
             DonchianChannelLowerSpecOptions dcl => ComputeDonchianChannelLowerFast(data, context, dcl.Length),
+            ThreeHmaSpecOptions thma => ComputeThreeHmaFast(data, context, thma.Length),
+            AdaptiveAutonomousRecursiveTrailingStopSpecOptions aarts => ComputeAdaptiveAutonomousRecursiveTrailingStopFast(data, context, aarts.Length, aarts.Lambda),
+            AdaptiveTrailingStopSpecOptions ats => ComputeAdaptiveTrailingStopFast(data, context, ats.Length, ats.Multiplier),
+            AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context, atrts.Length, atrts.Multiplier),
 
             _ => null
         };
@@ -8766,6 +8770,57 @@ internal static partial class IndicatorCompute
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         TrendCore.DonchianChannelLower(lowSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Three HMA (3HMA) using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.ThreeHma(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Autonomous Recursive Trailing Stop using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    {
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AdaptiveAutonomousRecursiveTrailingStop(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, lambda);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Trailing Stop using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    {
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AdaptiveTrailingStop(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Average True Range Trailing Stops using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    {
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var buffer = context.Rent(data.Count);
+        MovingAverageCore.AverageTrueRangeTrailingStops(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, multiplier);
         return buffer;
     }
 

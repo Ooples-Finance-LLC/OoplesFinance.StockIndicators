@@ -7802,3 +7802,42 @@ public sealed class DonchianChannelLowerSpecOptions : IIndicatorSpecOptions
     public int Length { get; }
 }
 
+/// <summary>
+/// Three HMA (3HMA) options.
+/// </summary>
+public sealed class ThreeHmaSpecOptions : IIndicatorSpecOptions
+{
+    public ThreeHmaSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Adaptive Autonomous Recursive Trailing Stop options.
+/// </summary>
+public sealed class AdaptiveAutonomousRecursiveTrailingStopSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveAutonomousRecursiveTrailingStopSpecOptions(int length = 14, double lambda = 1) { Length = Math.Max(1, length); Lambda = lambda; }
+    public int Length { get; }
+    public double Lambda { get; }
+}
+
+/// <summary>
+/// Adaptive Trailing Stop options.
+/// </summary>
+public sealed class AdaptiveTrailingStopSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveTrailingStopSpecOptions(int length = 14, double multiplier = 2) { Length = Math.Max(1, length); Multiplier = multiplier; }
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
+/// <summary>
+/// Average True Range Trailing Stops options.
+/// </summary>
+public sealed class AverageTrueRangeTrailingStopsSpecOptions : IIndicatorSpecOptions
+{
+    public AverageTrueRangeTrailingStopsSpecOptions(int length = 14, double multiplier = 3) { Length = Math.Max(1, length); Multiplier = multiplier; }
+    public int Length { get; }
+    public double Multiplier { get; }
+}
+
