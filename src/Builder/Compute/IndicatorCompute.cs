@@ -1149,7 +1149,7 @@ internal static partial class IndicatorCompute
     /// Computes Simple Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeSmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1164,7 +1164,7 @@ internal static partial class IndicatorCompute
     /// Computes Exponential Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1179,7 +1179,7 @@ internal static partial class IndicatorCompute
     /// Computes Weighted Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeWmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1194,7 +1194,7 @@ internal static partial class IndicatorCompute
     /// Computes Double Exponential Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeDemaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDemaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1209,7 +1209,7 @@ internal static partial class IndicatorCompute
     /// Computes Triple Exponential Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeTemaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTemaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1224,7 +1224,7 @@ internal static partial class IndicatorCompute
     /// Computes Hull Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeHmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1239,7 +1239,7 @@ internal static partial class IndicatorCompute
     /// Computes Triangular Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeTmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1254,7 +1254,7 @@ internal static partial class IndicatorCompute
     /// Computes Welles Wilder Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeWwmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWwmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1269,7 +1269,7 @@ internal static partial class IndicatorCompute
     /// Computes Linear Regression using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeLinRegFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinRegFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1284,7 +1284,7 @@ internal static partial class IndicatorCompute
     /// Computes Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeKamaFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeKamaFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1299,7 +1299,7 @@ internal static partial class IndicatorCompute
     /// Computes Zero-Lag EMA using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeZlemaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeZlemaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1318,7 +1318,7 @@ internal static partial class IndicatorCompute
     /// Computes Relative Strength Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1333,7 +1333,7 @@ internal static partial class IndicatorCompute
     /// Computes Rate of Change using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeRocFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputeRocFast(StockData data, ComputeContext context, int length = 12)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1348,7 +1348,7 @@ internal static partial class IndicatorCompute
     /// Computes Momentum using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeMomentumFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeMomentumFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1363,7 +1363,7 @@ internal static partial class IndicatorCompute
     /// Computes Williams %R using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsRFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWilliamsRFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1390,7 +1390,7 @@ internal static partial class IndicatorCompute
     /// Computes Commodity Channel Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeCciFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeCciFast(StockData data, ComputeContext context, int length = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1417,7 +1417,7 @@ internal static partial class IndicatorCompute
     /// Computes Stochastic %K using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticKFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStochasticKFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1444,7 +1444,7 @@ internal static partial class IndicatorCompute
     /// Computes Average Directional Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1471,7 +1471,7 @@ internal static partial class IndicatorCompute
     /// Computes Chande Momentum Oscillator using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeCmoFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCmoFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1486,7 +1486,7 @@ internal static partial class IndicatorCompute
     /// Computes Percentage Price Oscillator using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputePpoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePpoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1501,7 +1501,7 @@ internal static partial class IndicatorCompute
     /// Computes Absolute Price Oscillator using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeApoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputeApoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1515,7 +1515,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ultimate Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUltimateOscillatorFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 14, int length3 = 28)
+    internal static ComputeBuffer ComputeUltimateOscillatorFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 14, int length3 = 28)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1536,7 +1536,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTsiFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
+    internal static ComputeBuffer ComputeTsiFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1548,7 +1548,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
+    internal static ComputeBuffer ComputeStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1560,7 +1560,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Aroon Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAroonOscillatorFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeAroonOscillatorFast(StockData data, ComputeContext context, int length = 25)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1579,7 +1579,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Detrended Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDpoFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDpoFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1591,7 +1591,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TRIX indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrixFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeTrixFast(StockData data, ComputeContext context, int length = 15)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1603,7 +1603,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMassIndexFast(StockData data, ComputeContext context, int emaLength = 9, int sumLength = 25)
+    internal static ComputeBuffer ComputeMassIndexFast(StockData data, ComputeContext context, int emaLength = 9, int sumLength = 25)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1626,7 +1626,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes On Balance Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeObvFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeObvFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1646,7 +1646,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accumulation/Distribution Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdlFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdlFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1670,7 +1670,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chaikin Money Flow using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCmfFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeCmfFast(StockData data, ComputeContext context, int length = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1693,7 +1693,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Force Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeForceIndexFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeForceIndexFast(StockData data, ComputeContext context, int length = 13)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1712,7 +1712,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Rate of Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVrocFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputeVrocFast(StockData data, ComputeContext context, int length = 12)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1729,7 +1729,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNviFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNviFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1749,7 +1749,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Positive Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePviFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePviFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1769,7 +1769,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePvtFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePvtFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1789,7 +1789,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes VWAP using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVwapFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVwapFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1813,7 +1813,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chaikin Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChaikinOscillatorFast(StockData data, ComputeContext context, int fastLength = 3, int slowLength = 10)
+    internal static ComputeBuffer ComputeChaikinOscillatorFast(StockData data, ComputeContext context, int fastLength = 3, int slowLength = 10)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1836,7 +1836,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ease of Movement using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEmvFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEmvFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1862,7 +1862,7 @@ internal static partial class IndicatorCompute
     /// Computes Average True Range using zero-allocation fast path.
     /// Uses VolatilityCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1889,7 +1889,7 @@ internal static partial class IndicatorCompute
     /// Computes Standard Deviation using zero-allocation fast path.
     /// Uses VolatilityCore with span-based computation directly into pooled buffer.
     /// </summary>
-    public static ComputeBuffer ComputeStdDevFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeStdDevFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1907,7 +1907,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parabolic SAR using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeParabolicSarFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParabolicSarFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -1927,7 +1927,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes SuperTrend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSuperTrendFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeSuperTrendFast(StockData data, ComputeContext context, int length = 10)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1948,7 +1948,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Donchian Channel Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDonchianChannelFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDonchianChannelFast(StockData data, ComputeContext context, int length = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1967,7 +1967,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Highest High using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHighestHighFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHighestHighFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -1984,7 +1984,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Lowest Low using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLowestLowFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLowestLowFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2001,7 +2001,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Day Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdrFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdrFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2020,7 +2020,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Typical Price using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTypicalPriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTypicalPriceFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -2042,7 +2042,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Median Price using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMedianPriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMedianPriceFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -2062,7 +2062,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Weighted Close using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWeightedCloseFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWeightedCloseFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -2084,7 +2084,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentageChangeFast(StockData data, ComputeContext context, int length = 1)
+    internal static ComputeBuffer ComputePercentageChangeFast(StockData data, ComputeContext context, int length = 1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2096,7 +2096,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Slope using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinRegSlopeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinRegSlopeFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2108,7 +2108,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes R-Squared using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRSquaredFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRSquaredFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2120,7 +2120,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Standard Error using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStandardErrorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStandardErrorFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2132,7 +2132,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vertical Horizontal Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVhfFast(StockData data, ComputeContext context, int length = 28)
+    internal static ComputeBuffer ComputeVhfFast(StockData data, ComputeContext context, int length = 28)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2148,7 +2148,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Historical Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHistoricalVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeHistoricalVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2160,7 +2160,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chaikin Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChaikinVolatilityFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeChaikinVolatilityFast(StockData data, ComputeContext context, int length = 10)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2179,7 +2179,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ulcer Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUlcerIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeUlcerIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2191,7 +2191,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Normalized ATR using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNormalizedAtrFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNormalizedAtrFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2212,7 +2212,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Variance using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVarianceFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeVarianceFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2224,7 +2224,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Coefficient of Variation using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCoefficientOfVariationFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeCoefficientOfVariationFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2236,7 +2236,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrueRangeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrueRangeFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -2258,7 +2258,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2272,7 +2272,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Middle band using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerMiddleFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerMiddleFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         return ComputeBollingerBandsFast(data, context, length, maType);
     }
@@ -2280,7 +2280,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Upper band using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerUpperFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerUpperFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2297,7 +2297,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Lower band using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerLowerFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerLowerFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2318,7 +2318,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Klinger Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKlingerVolumeFast(StockData data, ComputeContext context, int length = 34)
+    internal static ComputeBuffer ComputeKlingerVolumeFast(StockData data, ComputeContext context, int length = 34)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2341,7 +2341,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Price Confirmation Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVpciFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeVpciFast(StockData data, ComputeContext context, int length = 5)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2364,7 +2364,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Money Flow Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMoneyFlowIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMoneyFlowIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2387,7 +2387,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Balance of Power using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBalanceOfPowerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBalanceOfPowerFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
         var tickerList = data.TickerDataList;
@@ -2411,7 +2411,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Vigor Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2434,7 +2434,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Aroon Up using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAroonUpFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeAroonUpFast(StockData data, ComputeContext context, int length = 25)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2451,7 +2451,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Aroon Down using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAroonDownFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeAroonDownFast(StockData data, ComputeContext context, int length = 25)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2472,7 +2472,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Keltner Channel Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKeltnerChannelMiddleFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeKeltnerChannelMiddleFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2484,7 +2484,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Detection using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrendDetectionFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrendDetectionFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2496,7 +2496,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Channel Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceChannelMiddleFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelMiddleFast(StockData data, ComputeContext context, int length = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2519,7 +2519,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic D using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int length = 14)
     {
         return ComputeStochasticDFast(data, context, length, 3);
     }
@@ -2527,7 +2527,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic D using zero-allocation fast path with configurable K and D lengths.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int kLength, int dLength)
+    internal static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int kLength, int dLength)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -2540,7 +2540,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Awesome Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAwesomeOscillatorFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAwesomeOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2559,7 +2559,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accelerator Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAcceleratorOscillatorFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAcceleratorOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2578,7 +2578,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePvoFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputePvoFast(StockData data, ComputeContext context, int length = 12)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2595,7 +2595,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fisher Transform using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFisherTransformFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeFisherTransformFast(StockData data, ComputeContext context, int length = 10)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2614,7 +2614,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Connors RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int length = 3)
+    internal static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int length = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2626,7 +2626,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePmoFast(StockData data, ComputeContext context, int length = 35)
+    internal static ComputeBuffer ComputePmoFast(StockData data, ComputeContext context, int length = 35)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2638,7 +2638,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Know Sure Thing using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKstFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeKstFast(StockData data, ComputeContext context, int length = 10)
     {
         _ = length;
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -2651,7 +2651,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percent Rank using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentRankFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputePercentRankFast(StockData data, ComputeContext context, int length = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2663,7 +2663,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Choppiness Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChoppinessIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChoppinessIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -2688,7 +2688,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSmmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSmmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2700,7 +2700,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes McGinley Dynamic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMcGinleyDynamicFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMcGinleyDynamicFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2712,7 +2712,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes T3 Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeT3Fast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeT3Fast(StockData data, ComputeContext context, int length = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2724,7 +2724,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vidya using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVidyaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVidyaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2736,7 +2736,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Variable Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2748,7 +2748,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MACD Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMacdLineFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputeMacdLineFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2760,7 +2760,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MACD Signal using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMacdSignalFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
+    internal static ComputeBuffer ComputeMacdSignalFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2772,7 +2772,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MACD Histogram using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMacdHistogramFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
+    internal static ComputeBuffer ComputeMacdHistogramFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2784,7 +2784,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAbsoluteStrengthIndexFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -2795,7 +2795,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeMomentumIndexFast(StockData data, ComputeContext context, int length = 14, int momentum = 4)
+    internal static ComputeBuffer ComputeRelativeMomentumIndexFast(StockData data, ComputeContext context, int length = 14, int momentum = 4)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2807,7 +2807,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Intraday Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -2819,7 +2819,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Swing Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
+    internal static ComputeBuffer ComputeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -2833,7 +2833,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accumulative Swing Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAccumulativeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
+    internal static ComputeBuffer ComputeAccumulativeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -2847,7 +2847,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Coppock Curve using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCoppockCurveFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCoppockCurveFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Coppock uses fixed parameters internally
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -2860,7 +2860,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Forecast Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeForecastOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeForecastOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2872,7 +2872,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bull Power using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBullPowerFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeBullPowerFast(StockData data, ComputeContext context, int length = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -2884,7 +2884,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bear Power using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBearPowerFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeBearPowerFast(StockData data, ComputeContext context, int length = 13)
     {
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -2896,7 +2896,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Polarized Fractal Efficiency using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -2907,7 +2907,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Schaff Trend Cycle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -2919,7 +2919,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Zone Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePriceZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -2930,7 +2930,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Force Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElderForceIndexFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeElderForceIndexFast(StockData data, ComputeContext context, int length = 13)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -2942,7 +2942,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pretty Good Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePrettyGoodOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePrettyGoodOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -2955,7 +2955,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Volatility Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeVolatilityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRelativeVolatilityIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -2966,7 +2966,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Qstick using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQstickFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeQstickFast(StockData data, ComputeContext context, int length = 14)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -2978,7 +2978,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Special K using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSpecialKFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSpecialKFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Special K uses fixed parameters
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -2991,7 +2991,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Arnaud Legoux Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAlmaFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeAlmaFast(StockData data, ComputeContext context, int length = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3003,7 +3003,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLsmaFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeLsmaFast(StockData data, ComputeContext context, int length = 25)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3015,7 +3015,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fractal Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFramaFast(StockData data, ComputeContext context, int length = 16)
+    internal static ComputeBuffer ComputeFramaFast(StockData data, ComputeContext context, int length = 16)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3028,7 +3028,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAmaFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeAmaFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3040,7 +3040,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sine Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSineWmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSineWmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3052,7 +3052,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hamming Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHammingMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHammingMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3064,7 +3064,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Geometric Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGeoMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGeoMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3076,7 +3076,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Regularized EMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRegularizedEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRegularizedEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3088,7 +3088,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeModifiedMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeModifiedMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -3100,7 +3100,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ZigZag using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeZigZagFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeZigZagFast(StockData data, ComputeContext context, int length = 5)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3112,7 +3112,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chandelier Exit Long using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandelierExitLongFast(StockData data, ComputeContext context, int length = 22)
+    internal static ComputeBuffer ComputeChandelierExitLongFast(StockData data, ComputeContext context, int length = 22)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3125,7 +3125,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chandelier Exit Short using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandelierExitShortFast(StockData data, ComputeContext context, int length = 22)
+    internal static ComputeBuffer ComputeChandelierExitShortFast(StockData data, ComputeContext context, int length = 22)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3138,7 +3138,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Intensity Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrendIntensityIndexFast(StockData data, ComputeContext context, int length = 30)
+    internal static ComputeBuffer ComputeTrendIntensityIndexFast(StockData data, ComputeContext context, int length = 30)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3149,7 +3149,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Price using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAveragePriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAveragePriceFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Average price doesn't use length
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
@@ -3164,7 +3164,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePivotPointFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePivotPointFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Pivot point doesn't use length
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3178,7 +3178,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRangeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRangeFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Range doesn't use length
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3191,7 +3191,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Momentum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceMomentumFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputePriceMomentumFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3202,7 +3202,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Midpoint using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMidpointFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMidpointFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3213,7 +3213,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Midprice using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMidpriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMidpriceFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3229,7 +3229,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Money Flow Index using zero-allocation fast path via VolumeCore.
     /// </summary>
-    public static ComputeBuffer ComputeMfiCoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMfiCoreFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3243,7 +3243,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trade Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // TVI uses minTickValue, not length
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -3256,7 +3256,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -3267,7 +3267,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVwmaFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeVwmaFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3279,7 +3279,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Twiggs Money Flow using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTwiggsMoneyFlowFast(StockData data, ComputeContext context, int length = 21)
+    internal static ComputeBuffer ComputeTwiggsMoneyFlowFast(StockData data, ComputeContext context, int length = 21)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3293,7 +3293,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Zone Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3305,7 +3305,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demand Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemandIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDemandIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Demand Index doesn't use length
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3324,7 +3324,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Disparity Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3335,7 +3335,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Directional Trend Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDirectionalTrendIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDirectionalTrendIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3348,7 +3348,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Stochastic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context, int length = 10)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3361,7 +3361,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamic Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDynamicMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDynamicMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // DMI uses min/max lengths, not a single length
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -3373,7 +3373,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -3385,7 +3385,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demarker Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDemarkerFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3397,7 +3397,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Rate of Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSmoothedRocFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputeSmoothedRocFast(StockData data, ComputeContext context, int length = 12)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3412,7 +3412,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Standard Error using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStandardErrorCoreFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeStandardErrorCoreFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3423,7 +3423,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Keltner Channel Width using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKeltnerChannelWidthFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeKeltnerChannelWidthFast(StockData data, ComputeContext context, int length = 20)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3436,7 +3436,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Width using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsWidthFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeBollingerBandsWidthFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3447,7 +3447,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Volatility Index using zero-allocation fast path via VolatilityCore.
     /// </summary>
-    public static ComputeBuffer ComputeRviVolatilityFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRviVolatilityFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3458,7 +3458,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Donchian Channel Width using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDonchianChannelWidthFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDonchianChannelWidthFast(StockData data, ComputeContext context, int length = 20)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3470,7 +3470,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Index using zero-allocation fast path via VolatilityCore.
     /// </summary>
-    public static ComputeBuffer ComputeMassIndexCoreFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeMassIndexCoreFast(StockData data, ComputeContext context, int length = 25)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3482,7 +3482,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Close-to-Close Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCloseToCloseVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeCloseToCloseVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3493,7 +3493,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parkinson Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeParkinsonVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeParkinsonVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3505,7 +3505,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Garman-Klass Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGarmanKlassVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeGarmanKlassVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3523,7 +3523,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Jurik Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeJmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeJmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3534,7 +3534,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Butterworth Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeButterworthFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeButterworthFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3545,7 +3545,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes SuperSmoother Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSuperSmootherFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeSuperSmootherFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3556,7 +3556,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes EndPoint Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEndPointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEndPointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3567,7 +3567,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Cubic Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCubicWmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCubicWmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3578,7 +3578,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNaturalMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3589,7 +3589,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elliott Wave Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElliottWaveOscillatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 35)
+    internal static ComputeBuffer ComputeElliottWaveOscillatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 35)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3600,7 +3600,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Forecast Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeForecastOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeForecastOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3611,7 +3611,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Derivative Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDerivativeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDerivativeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3622,7 +3622,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gator Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGatorOscillatorFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeGatorOscillatorFast(StockData data, ComputeContext context, int length = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3634,7 +3634,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fractal Chaos Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFractalChaosOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFractalChaosOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Not used in this oscillator
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3647,7 +3647,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rahul Mohindar Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3658,7 +3658,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Premier Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8)
+    internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3671,7 +3671,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Repulse Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRepulseFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeRepulseFast(StockData data, ComputeContext context, int length = 5)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -3685,7 +3685,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gann HiLo Activator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGannHiLoActivatorFast(StockData data, ComputeContext context, int length = 3)
+    internal static ComputeBuffer ComputeGannHiLoActivatorFast(StockData data, ComputeContext context, int length = 3)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3698,7 +3698,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes HalfTrend indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHalfTrendFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeHalfTrendFast(StockData data, ComputeContext context, int length = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3711,7 +3711,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Indicator Positive using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexPositiveFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexPositiveFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3724,7 +3724,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Indicator Negative using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexNegativeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexNegativeFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3737,7 +3737,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Intercept using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinRegInterceptFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinRegInterceptFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3748,7 +3748,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Impulse System using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElderImpulseSystemFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeElderImpulseSystemFast(StockData data, ComputeContext context, int length = 13)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3759,7 +3759,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Tenkan-sen using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIchimokuTenkanSenFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeIchimokuTenkanSenFast(StockData data, ComputeContext context, int length = 9)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3771,7 +3771,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Kijun-sen using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIchimokuKijunSenFast(StockData data, ComputeContext context, int length = 26)
+    internal static ComputeBuffer ComputeIchimokuKijunSenFast(StockData data, ComputeContext context, int length = 26)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3783,7 +3783,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3799,7 +3799,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Accumulation/Distribution using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsADFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWilliamsADFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -3812,7 +3812,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Net Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNetVolumeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNetVolumeFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3824,7 +3824,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Cumulative Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCumulativeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCumulativeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3836,7 +3836,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Momentum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeMomentumFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeVolumeMomentumFast(StockData data, ComputeContext context, int length = 10)
     {
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -3847,7 +3847,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Price Trend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumePriceTrendFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumePriceTrendFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3859,7 +3859,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Ray Bull Power using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElderRayBullPowerFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeElderRayBullPowerFast(StockData data, ComputeContext context, int length = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -3871,7 +3871,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Ray Bear Power using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElderRayBearPowerFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeElderRayBearPowerFast(StockData data, ComputeContext context, int length = 13)
     {
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -3883,7 +3883,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Normalized Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNormalizedVolumeFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeNormalizedVolumeFast(StockData data, ComputeContext context, int length = 20)
     {
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -3894,7 +3894,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Weighted RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -3910,7 +3910,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Composite Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context, int shortLength = 3, int longLength = 10)
+    internal static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context, int shortLength = 3, int longLength = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3921,7 +3921,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Kroll R-Squared Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeKrollRSquaredIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeKrollRSquaredIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3932,7 +3932,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bayesian Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBayesianOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBayesianOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3943,7 +3943,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Anchored Momentum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAnchoredMomentumFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAnchoredMomentumFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3954,7 +3954,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chartmill Value Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3965,7 +3965,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Center of Linearity using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCenterOfLinearityFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCenterOfLinearityFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3976,7 +3976,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Breakout RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3987,7 +3987,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Asymmetrical RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAsymmetricalRsiFast(StockData data, ComputeContext context, int upLength = 14, int downLength = 7)
+    internal static ComputeBuffer ComputeAsymmetricalRsiFast(StockData data, ComputeContext context, int upLength = 14, int downLength = 7)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -3998,7 +3998,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Stochastic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
+    internal static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4011,7 +4011,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
+    internal static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4026,7 +4026,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Trend Score using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeTrendScoreFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeChandeTrendScoreFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4037,7 +4037,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chop Zone using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChopZoneFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChopZoneFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4050,7 +4050,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4061,7 +4061,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Line with Drift using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4072,7 +4072,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAutoFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutoFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4083,7 +4083,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Buff Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBuffAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBuffAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4094,7 +4094,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bryant Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4105,7 +4105,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Trailing Stops using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAtrTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    internal static ComputeBuffer ComputeAtrTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4118,7 +4118,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Compound Ratio Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4129,7 +4129,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Conditional Accumulator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeConditionalAccumulatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeConditionalAccumulatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4140,7 +4140,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ahrens Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAhrensMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAhrensMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4155,7 +4155,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rogers-Satchell Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRogersSatchellVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeRogersSatchellVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -4169,7 +4169,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Yang-Zhang Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeYangZhangVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeYangZhangVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -4183,7 +4183,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Calmar Ratio using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 252)
+    internal static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 252)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4194,7 +4194,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Downside Deviation using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDownsideDeviationFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDownsideDeviationFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4205,7 +4205,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Channel Width using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAtrChannelWidthFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeAtrChannelWidthFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4218,7 +4218,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Commodity Selection Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4235,7 +4235,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alpha Decreasing EMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4246,7 +4246,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive EMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdaptiveEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4257,7 +4257,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Autonomous Recursive MA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4268,7 +4268,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Least Squares using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4279,7 +4279,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Filtered EMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAtrFilteredEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAtrFilteredEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -4292,7 +4292,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Median Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMedianMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMedianMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4303,7 +4303,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Adjusted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeAdjustedMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeAdjustedMaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -4315,7 +4315,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuadraticWmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeQuadraticWmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4326,7 +4326,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parabolic Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeParabolicWmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParabolicWmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4338,7 +4338,7 @@ internal static partial class IndicatorCompute
 
     #region Oscillators - Additional Batch 8
 
-    public static ComputeBuffer ComputeSmoothedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeSmoothedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4348,7 +4348,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePriceOscillatorPercentFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
+    internal static ComputeBuffer ComputePriceOscillatorPercentFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4356,7 +4356,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeNormalizedMacdFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputeNormalizedMacdFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4364,7 +4364,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRelativeVigorIndexSignalFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4)
+    internal static ComputeBuffer ComputeRelativeVigorIndexSignalFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -4375,7 +4375,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolumeMomentumOscillatorFast(StockData data, ComputeContext context, int shortLength = 5, int longLength = 20)
+    internal static ComputeBuffer ComputeVolumeMomentumOscillatorFast(StockData data, ComputeContext context, int shortLength = 5, int longLength = 20)
     {
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -4383,7 +4383,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendContinuationFactorFast(StockData data, ComputeContext context, int length = 35)
+    internal static ComputeBuffer ComputeTrendContinuationFactorFast(StockData data, ComputeContext context, int length = 35)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4391,7 +4391,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendPersistenceRateFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeTrendPersistenceRateFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4399,7 +4399,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeInertiaFast(StockData data, ComputeContext context, int rviLength = 14, int smoothLength = 20)
+    internal static ComputeBuffer ComputeInertiaFast(StockData data, ComputeContext context, int rviLength = 14, int smoothLength = 20)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4413,7 +4413,7 @@ internal static partial class IndicatorCompute
 
     #region Volatility - Additional Batch 3
 
-    public static ComputeBuffer ComputeStandardDeviationChannelFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeStandardDeviationChannelFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4421,7 +4421,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeStandardDeviationVolatilityFast(StockData data, ComputeContext context, int length = 20, int annualizationFactor = 252)
+    internal static ComputeBuffer ComputeStandardDeviationVolatilityFast(StockData data, ComputeContext context, int length = 20, int annualizationFactor = 252)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4429,7 +4429,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeAverageTrueRangeChannelFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeAverageTrueRangeChannelFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4439,7 +4439,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolatilityRatioFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolatilityRatioFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4449,7 +4449,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolatilityStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeVolatilityStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4462,7 +4462,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands %B using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsPercentBFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    internal static ComputeBuffer ComputeBollingerBandsPercentBFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4474,7 +4474,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands with ATR using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    internal static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4491,7 +4491,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Chande Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteFast(StockData data, ComputeContext context, int length = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4503,7 +4503,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percent Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentChangeFast(StockData data, ComputeContext context, int length = 1)
+    internal static ComputeBuffer ComputePercentChangeFast(StockData data, ComputeContext context, int length = 1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4515,7 +4515,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceChangeFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePriceChangeFast(StockData data, ComputeContext context)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4527,7 +4527,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Range (High - Low) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRangeFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeRangeFast(StockData data, ComputeContext context)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4539,7 +4539,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mid-Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMidRangeFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeMidRangeFast(StockData data, ComputeContext context)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4551,7 +4551,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes OHLC Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOhlcAverageFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeOhlcAverageFast(StockData data, ComputeContext context)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -4565,7 +4565,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes HLC Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHlcAverageFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeHlcAverageFast(StockData data, ComputeContext context)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4578,7 +4578,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Momenta using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDoubleSmoothedMomentaFast(StockData data, ComputeContext context, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    internal static ComputeBuffer ComputeDoubleSmoothedMomentaFast(StockData data, ComputeContext context, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4590,7 +4590,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes High-Low Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHighLowIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHighLowIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4602,7 +4602,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Market Facilitation Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMarketFacilitationIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMarketFacilitationIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter is unused - MFI doesn't require a period
         _ = length;
@@ -4617,7 +4617,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Score using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrendScoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrendScoreFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4629,7 +4629,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rolling Median using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMedianValueFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMedianValueFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4641,7 +4641,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Log Returns using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLogReturnsFast(StockData data, ComputeContext context, int length = 1)
+    internal static ComputeBuffer ComputeLogReturnsFast(StockData data, ComputeContext context, int length = 1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4653,7 +4653,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simple Returns using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimpleReturnsFast(StockData data, ComputeContext context, int length = 1)
+    internal static ComputeBuffer ComputeSimpleReturnsFast(StockData data, ComputeContext context, int length = 1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4665,7 +4665,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Cumulative Sum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCumulativeSumFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeCumulativeSumFast(StockData data, ComputeContext context)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4677,7 +4677,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rolling Maximum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRollingMaxFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRollingMaxFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4689,7 +4689,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rolling Minimum using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRollingMinFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRollingMinFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4701,7 +4701,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Position using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePricePositionFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePricePositionFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4714,7 +4714,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Percent using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAtrPercentFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAtrPercentFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4727,7 +4727,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Absolute Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteAverageFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteAverageFast(StockData data, ComputeContext context, int length = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4739,7 +4739,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorAverageFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageFast(StockData data, ComputeContext context, int length = 9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4751,7 +4751,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDoubleStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDoubleStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4764,7 +4764,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DTOscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDTOscillatorFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeDTOscillatorFast(StockData data, ComputeContext context, int length = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4777,7 +4777,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Compare Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeComparePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 35)
+    internal static ComputeBuffer ComputeComparePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 35)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4789,7 +4789,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Daily Average Price Delta using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDailyAveragePriceDeltaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4801,7 +4801,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demand Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemandOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDemandOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4815,7 +4815,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Relative Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDoubleSmoothedRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDoubleSmoothedRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4827,7 +4827,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamic Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDynamicMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDynamicMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4839,7 +4839,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Money Flow Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageMoneyFlowOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageMoneyFlowOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4853,7 +4853,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DMI Stochastic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDMIStochasticFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDMIStochasticFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4866,7 +4866,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes CCT Stoch RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCCTStochRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCCTStochRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -4878,7 +4878,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bilateral Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBilateralStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBilateralStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4893,7 +4893,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Average Disparity Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter maps to cmoLength; smaLength uses default
         _ = length;
@@ -4906,7 +4906,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4917,7 +4917,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DiNapoli Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter is unused - DiNapoli uses fixed periods (3, 7)
         _ = length;
@@ -4930,7 +4930,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DiNapoli Preferred Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDiNapoliPreferredStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDiNapoliPreferredStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4943,7 +4943,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeErgodicPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeErgodicPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter maps to short length; others use defaults
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -4955,7 +4955,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFastSlowKurtosisOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowKurtosisOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter is unused - uses fixed fast/slow periods
         _ = length;
@@ -4968,7 +4968,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow RSI Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -4983,7 +4983,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -4996,7 +4996,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes G-Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5008,7 +5008,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gann Swing Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGannSwingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGannSwingOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter is unused - Gann Swing uses swing detection
         _ = length;
@@ -5022,7 +5022,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gann Trend Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGannTrendOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGannTrendOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5035,7 +5035,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Firefly Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFireflyOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFireflyOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5048,7 +5048,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fisher Transform Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFisherTransformStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFisherTransformStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5061,7 +5061,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Karobein Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKarobeinOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKarobeinOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5072,7 +5072,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Grover Llorens Cycle Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5087,7 +5087,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Impulse Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeImpulsePercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeImpulsePercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5098,7 +5098,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linda Raschke 3/10 Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter maps to signal length; fast/slow use 3/10
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -5110,7 +5110,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Midpoint Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMidpointOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMidpointOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5123,7 +5123,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mirrored Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMirroredPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMirroredPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         // Length parameter maps to long length
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -5135,7 +5135,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mobility Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMobilityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMobilityOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5148,7 +5148,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percent Change Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5159,7 +5159,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Cycle Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePriceCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5170,7 +5170,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePriceVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -5186,7 +5186,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Projection Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeProjectionOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeProjectionOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5199,7 +5199,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rainbow Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRainbowOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRainbowOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5210,7 +5210,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Regression Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRegressionOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRegressionOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5221,7 +5221,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rex Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRexOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRexOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -5235,7 +5235,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sentiment Zone Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSentimentZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSentimentZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -5247,7 +5247,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Wave Trend Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWaveTrendOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWaveTrendOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5260,7 +5260,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes WAMI Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWamiOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWamiOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5273,7 +5273,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Accumulation Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeAccumulationOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeAccumulationOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5291,7 +5291,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kase Peak Oscillator V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5304,7 +5304,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Varadi Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVaradiOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVaradiOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5315,7 +5315,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Prime Number Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5326,7 +5326,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trigonometric Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5337,7 +5337,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ultimate Trader Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUltimateTraderOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeUltimateTraderOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5350,7 +5350,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Delta Ratio Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5361,7 +5361,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast Slow Degree Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFastSlowDegreeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowDegreeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5372,7 +5372,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Robust Weighting Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRobustWeightingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRobustWeightingOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5387,7 +5387,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kase Peak Oscillator V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKasePeakOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKasePeakOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5400,7 +5400,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Custom Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticCustomOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStochasticCustomOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5413,7 +5413,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pivot Detector Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePivotDetectorOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePivotDetectorOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5426,7 +5426,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Tick Line Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTickLineMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTickLineMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5437,7 +5437,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Support and Resistance Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSupportAndResistanceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSupportAndResistanceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5450,7 +5450,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trading Made More Simpler Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5463,7 +5463,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Nth Order Differencing Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNthOrderDifferencingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNthOrderDifferencingOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5474,7 +5474,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Osc Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOscOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeOscOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5489,7 +5489,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Center of Gravity Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5500,7 +5500,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Decycler Oscillator V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDecyclerOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5511,7 +5511,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hilbert Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHilbertOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersHilbertOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5522,7 +5522,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Universal Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersUniversalOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersUniversalOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5533,7 +5533,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5544,7 +5544,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Stochastic Center of Gravity Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5555,7 +5555,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Fisherized Deviation Scaled Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFisherizedDeviationScaledOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersFisherizedDeviationScaledOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5566,7 +5566,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Adaptive Center of Gravity Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5581,7 +5581,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vervoort Smoothed Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVervoortSmoothedOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVervoortSmoothedOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5592,7 +5592,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Difference of Squares Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeDifferenceOfSquaresOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRelativeDifferenceOfSquaresOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5603,7 +5603,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Quadratic Convergence Divergence Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5614,7 +5614,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stationary Extrapolated Levels Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5625,7 +5625,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Price Oscillator Leader using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentagePriceOscillatorLeaderFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePercentagePriceOscillatorLeaderFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5636,7 +5636,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKaufmanAdaptiveCorrelationOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKaufmanAdaptiveCorrelationOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5647,7 +5647,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic MACD Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticMacdOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStochasticMacdOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5658,7 +5658,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes McClellan Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMcClellanOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMcClellanOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5673,7 +5673,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Decycler Oscillator V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5684,7 +5684,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vervoort Heiken Ashi Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5698,7 +5698,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vervoort Heiken Ashi Long Term Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5712,7 +5712,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Decision Point Breadth Swenlin Trading Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5723,7 +5723,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Decision Point Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5734,7 +5734,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TFS MBO Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5745,7 +5745,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TFS Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTFSVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTFSVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -5756,7 +5756,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMassThrustOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMassThrustOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5771,7 +5771,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ultimate Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUltimateMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeUltimateMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5782,7 +5782,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Symmetrically Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSymmetricallyWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSymmetricallyWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5793,7 +5793,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Square Root Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSquareRootWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSquareRootWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5804,7 +5804,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Spencer 15-Point Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSpencer15PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSpencer15PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5815,7 +5815,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Spencer 21-Point Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSpencer21PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSpencer21PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5826,7 +5826,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Slow Smoothed Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSlowSmoothedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSlowSmoothedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5837,7 +5837,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Repulsion Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRepulsionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRepulsionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5848,7 +5848,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quick Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuickMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeQuickMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5863,7 +5863,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Better Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersBetterExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersBetterExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5874,7 +5874,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Deviation Scaled Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDeviationScaledMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDeviationScaledMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5885,7 +5885,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hann Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHannMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersHannMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5896,7 +5896,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Triangle Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersTriangleMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersTriangleMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5907,7 +5907,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elastic Volume Weighted Moving Average V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV1Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV1Fast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -5919,7 +5919,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Holt Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHoltExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHoltExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5930,7 +5930,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pentuple Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePentupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePentupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5941,7 +5941,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadruple Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuadrupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeQuadrupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5956,7 +5956,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Senkou Span A using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIchimokuSenkouSpanAFast(StockData data, ComputeContext context, int length = 26)
+    internal static ComputeBuffer ComputeIchimokuSenkouSpanAFast(StockData data, ComputeContext context, int length = 26)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5968,7 +5968,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Senkou Span B using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIchimokuSenkouSpanBFast(StockData data, ComputeContext context, int length = 52)
+    internal static ComputeBuffer ComputeIchimokuSenkouSpanBFast(StockData data, ComputeContext context, int length = 52)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5980,7 +5980,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Chikou Span using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIchimokuChikouSpanFast(StockData data, ComputeContext context, int length = 26)
+    internal static ComputeBuffer ComputeIchimokuChikouSpanFast(StockData data, ComputeContext context, int length = 26)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -5991,7 +5991,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Fractal Up using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsFractalUpFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeWilliamsFractalUpFast(StockData data, ComputeContext context, int length = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var buffer = context.Rent(data.Count);
@@ -6002,7 +6002,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Fractal Down using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsFractalDownFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeWilliamsFractalDownFast(StockData data, ComputeContext context, int length = 2)
     {
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -6013,7 +6013,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alligator Jaw using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAlligatorJawFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeAlligatorJawFast(StockData data, ComputeContext context, int length = 13)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6024,7 +6024,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alligator Teeth using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAlligatorTeethFast(StockData data, ComputeContext context, int length = 8)
+    internal static ComputeBuffer ComputeAlligatorTeethFast(StockData data, ComputeContext context, int length = 8)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6035,7 +6035,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alligator Lips using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAlligatorLipsFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAlligatorLipsFast(StockData data, ComputeContext context, int length = 5)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6050,7 +6050,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Laguerre Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6062,7 +6062,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Laguerre Relative Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersLaguerreRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersLaguerreRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6074,7 +6074,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Zero Lag EMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersZeroLagEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersZeroLagEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6085,7 +6085,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Fractal Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 16)
+    internal static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 16)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6096,7 +6096,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Inverse Fisher Transform using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6107,7 +6107,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Cyber Cycle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCyberCycleFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersCyberCycleFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6119,7 +6119,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Stochastic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6130,7 +6130,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Adaptive Laguerre Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6146,7 +6146,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Coral Trend Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCoralTrendIndicatorFast(StockData data, ComputeContext context, int length = 21)
+    internal static ComputeBuffer ComputeCoralTrendIndicatorFast(StockData data, ComputeContext context, int length = 21)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6157,7 +6157,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Damped Sine Wave Weighted Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDampedSineWaveWeightedFilterFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeDampedSineWaveWeightedFilterFast(StockData data, ComputeContext context, int length = 50)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6168,7 +6168,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fibonacci Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFibonacciWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFibonacciWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6179,7 +6179,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Generalized Double Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGeneralizedDoubleEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGeneralizedDoubleEmaFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6190,7 +6190,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Geometric Mean Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGeometricMeanMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGeometricMeanMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6201,7 +6201,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Harmonic Mean Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHarmonicMeanMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHarmonicMeanMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6216,7 +6216,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 2-Pole Butterworth Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers2PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6227,7 +6227,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 2-Pole Butterworth Filter V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers2PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6238,7 +6238,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 3-Pole Butterworth Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers3PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6249,7 +6249,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 3-Pole Butterworth Filter V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers3PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6260,7 +6260,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 2-Pole Super Smoother Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV1Fast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV1Fast(StockData data, ComputeContext context, int length = 15)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6271,7 +6271,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 2-Pole Super Smoother Filter V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV2Fast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV2Fast(StockData data, ComputeContext context, int length = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6282,7 +6282,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers 3-Pole Super Smoother Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlers3PoleSuperSmootherFilterFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlers3PoleSuperSmootherFilterFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6293,7 +6293,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Decycler using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDecyclerFast(StockData data, ComputeContext context, int length = 60)
+    internal static ComputeBuffer ComputeEhlersDecyclerFast(StockData data, ComputeContext context, int length = 60)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6308,7 +6308,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hamming Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHammingMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersHammingMovingAverageFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6319,7 +6319,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Leading Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6330,7 +6330,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers High Pass Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHighPassFilterV1Fast(StockData data, ComputeContext context, int length = 125)
+    internal static ComputeBuffer ComputeEhlersHighPassFilterV1Fast(StockData data, ComputeContext context, int length = 125)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6341,7 +6341,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers High Pass Filter V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHighPassFilterV2Fast(StockData data, ComputeContext context, int length = 48)
+    internal static ComputeBuffer ComputeEhlersHighPassFilterV2Fast(StockData data, ComputeContext context, int length = 48)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6352,7 +6352,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Distance Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6363,7 +6363,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length = 15)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6374,7 +6374,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFirFilterFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersFirFilterFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6385,7 +6385,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersIirFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersIirFilterFast(StockData data, ComputeContext context, int length = 15)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6396,7 +6396,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simple Cycle oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimpleCycleFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeSimpleCycleFast(StockData data, ComputeContext context, int length = 50)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6407,7 +6407,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simple Lines filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimpleLinesFast(StockData data, ComputeContext context, int length = 10, double mult = 10)
+    internal static ComputeBuffer ComputeSimpleLinesFast(StockData data, ComputeContext context, int length = 10, double mult = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6418,7 +6418,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Exponential Smoothing using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDoubleExponentialSmoothingFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDoubleExponentialSmoothingFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Uses alpha/gamma parameters instead
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -6430,7 +6430,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Detrended Synthetic Price oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDetrendedSyntheticPriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDetrendedSyntheticPriceFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -6445,7 +6445,7 @@ internal static partial class IndicatorCompute
     /// <param name="data">Stock data.</param>
     /// <param name="context">Compute context for buffer pooling.</param>
     /// <param name="length">Unused parameter for source generator compatibility.</param>
-    public static ComputeBuffer ComputeBelkhayateTimingFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeBelkhayateTimingFast(StockData data, ComputeContext context, int length = 5)
     {
         _ = length; // Indicator has no configurable parameters
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -6463,7 +6463,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Setup Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkSetupIndicatorFast(StockData data, ComputeContext context, int length = 4)
+    internal static ComputeBuffer ComputeDemarkSetupIndicatorFast(StockData data, ComputeContext context, int length = 4)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6474,7 +6474,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Performance Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePerformanceIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePerformanceIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6485,7 +6485,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Psychological Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePsychologicalLineFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePsychologicalLineFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6496,7 +6496,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Move Tracker using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMoveTrackerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMoveTrackerFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Indicator has no configurable parameters
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -6508,7 +6508,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Multi Level Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMultiLevelIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMultiLevelIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
@@ -6520,7 +6520,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Market Direction Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMarketDirectionIndicatorFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeMarketDirectionIndicatorFast(StockData data, ComputeContext context, int length = 13)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6534,7 +6534,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Morphed Sine Wave using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMorphedSineWaveFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMorphedSineWaveFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6551,7 +6551,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Full Typical Price (OHLC4) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFullTypicalPriceFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFullTypicalPriceFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length; // Indicator has no configurable parameters
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
@@ -6566,7 +6566,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Internal Bar Strength Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeInternalBarStrengthIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeInternalBarStrengthIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -6579,7 +6579,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Z-Score using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6590,7 +6590,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast Z-Score using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFastZScoreFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeFastZScoreFast(StockData data, ComputeContext context, int length = 5)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6601,7 +6601,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kurtosis Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6616,7 +6616,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Range Expansion Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkRangeExpansionIndexFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeDemarkRangeExpansionIndexFast(StockData data, ComputeContext context, int length = 5)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -6629,7 +6629,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Pressure Ratio V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkPressureRatioV1Fast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeDemarkPressureRatioV1Fast(StockData data, ComputeContext context, int length = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -6644,7 +6644,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Pressure Ratio V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkPressureRatioV2Fast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeDemarkPressureRatioV2Fast(StockData data, ComputeContext context, int length = 10)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -6659,7 +6659,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Reversal Points using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkReversalPointsFast(StockData data, ComputeContext context, int length1 = 9, int length2 = 4)
+    internal static ComputeBuffer ComputeDemarkReversalPointsFast(StockData data, ComputeContext context, int length1 = 9, int length2 = 4)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -6674,7 +6674,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6686,7 +6686,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Corrected Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context, int length = 35)
+    internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context, int length = 35)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6698,7 +6698,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Cubed Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCubedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCubedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6710,7 +6710,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamically Adjustable Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6722,7 +6722,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Edge Preserving Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6734,7 +6734,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers All Pass Phase Shifter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6746,7 +6746,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Average Error Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersAverageErrorFilterFast(StockData data, ComputeContext context, int length = 27)
+    internal static ComputeBuffer ComputeEhlersAverageErrorFilterFast(StockData data, ComputeContext context, int length = 27)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6758,7 +6758,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Distance Coefficient Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6770,7 +6770,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6782,7 +6782,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Modified Optimum Elliptic Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersModifiedOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersModifiedOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6794,7 +6794,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Noise Elimination Technology using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersNoiseEliminationTechnologyFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersNoiseEliminationTechnologyFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6806,7 +6806,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Optimum Elliptic Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6818,7 +6818,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Variable Index Dynamic Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6830,7 +6830,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Falling Rising Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFallingRisingFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFallingRisingFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6842,7 +6842,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Farey Sequence Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFareySequenceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeFareySequenceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6854,7 +6854,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fisher Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFisherLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeFisherLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6866,7 +6866,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Following Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFollowingAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFollowingAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6878,7 +6878,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes General Filter Estimator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6890,7 +6890,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Henderson Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHendersonWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
+    internal static ComputeBuffer ComputeHendersonWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6902,7 +6902,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hull Estimate using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHullEstimateFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeHullEstimateFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6914,7 +6914,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hybrid Convolution Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHybridConvolutionFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHybridConvolutionFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6926,7 +6926,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes IIR Least Squares Estimate using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeIIRLeastSquaresEstimateFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeIIRLeastSquaresEstimateFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6938,7 +6938,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Inverse Distance Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeInverseDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeInverseDistanceWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6950,7 +6950,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Inverse Fisher Transform using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6962,7 +6962,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Jsa Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeJsaMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeJsaMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6974,7 +6974,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kalman Smoother using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKalmanSmootherFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKalmanSmootherFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6986,7 +6986,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kaufman Adaptive Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -6998,7 +6998,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Leo Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLeoMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLeoMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7010,7 +7010,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Light Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 250)
+    internal static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 250)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7022,7 +7022,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Extrapolation using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearExtrapolationFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearExtrapolationFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7034,7 +7034,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7046,7 +7046,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Weighted Moving Average (Core) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearWeightedMovingAverageCoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearWeightedMovingAverageCoreFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7058,7 +7058,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes McNicholl Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMcNichollMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeMcNichollMovingAverageFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7070,7 +7070,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Moving Average Adaptive Q using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageAdaptiveQFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMovingAverageAdaptiveQFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7082,7 +7082,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Moving Average V3 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageV3Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMovingAverageV3Fast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7094,7 +7094,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes One LC Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 32)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7106,7 +7106,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Optimal Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOptimalWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeOptimalWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7118,7 +7118,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Overshoot Reduction Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7130,7 +7130,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parametric Corrective Linear Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7142,7 +7142,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parametric Kalman Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeParametricKalmanFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParametricKalmanFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7158,7 +7158,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Zero Low Lag Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 32)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7170,7 +7170,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Recursive Moving Trend Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRecursiveMovingTrendAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRecursiveMovingTrendAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7182,7 +7182,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trimean using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7194,7 +7194,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Skewness using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSkewnessFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSkewnessFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7206,7 +7206,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hampel Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHampelFilterFast(StockData data, ComputeContext context, int length = 14, double scalingFactor = 3)
+    internal static ComputeBuffer ComputeHampelFilterFast(StockData data, ComputeContext context, int length = 14, double scalingFactor = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7218,7 +7218,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modular Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8, double z = 0.5)
+    internal static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8, double z = 0.5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7230,7 +7230,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamically Adjustable Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 200)
+    internal static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 200)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7242,7 +7242,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Equity Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEquityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEquityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7255,7 +7255,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Multi Depth Zero Lag Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7267,7 +7267,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Polynomial Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7279,7 +7279,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Powered Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7291,7 +7291,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7303,7 +7303,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuadraticMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeQuadraticMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7315,7 +7315,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Regression using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7327,7 +7327,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes R2 Adaptive Regression using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7339,7 +7339,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Retention Acceleration Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRetentionAccelerationFilterFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRetentionAccelerationFilterFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7351,7 +7351,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Right Sided Ricker Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7363,7 +7363,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Self Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSelfWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSelfWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7375,7 +7375,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sequentially Filtered Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7387,7 +7387,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Setting Less Trend Step Filtering using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context, int length = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7399,7 +7399,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Shapeshifting Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeShapeshiftingMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeShapeshiftingMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7411,7 +7411,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sharp Modified Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSharpModifiedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
+    internal static ComputeBuffer ComputeSharpModifiedMovingAverageFast(StockData data, ComputeContext context, int length = 7)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7423,7 +7423,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simplified Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimplifiedLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 25)
+    internal static ComputeBuffer ComputeSimplifiedLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 25)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7435,7 +7435,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simplified Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimplifiedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSimplifiedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7447,7 +7447,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Svama using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7459,7 +7459,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Three HMA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeThreeHMAFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeThreeHMAFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7471,7 +7471,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Tillson IE2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTillsonIE2Fast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeTillsonIE2Fast(StockData data, ComputeContext context, int length = 15)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7483,7 +7483,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes T-Step Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7495,7 +7495,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Variable Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 6)
+    internal static ComputeBuffer ComputeVariableAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 6)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7507,7 +7507,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Variable Length Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVariableLengthMovingAverageFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeVariableLengthMovingAverageFast(StockData data, ComputeContext context, int length = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7519,7 +7519,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vertical Horizontal Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVerticalHorizontalMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVerticalHorizontalMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7531,7 +7531,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volatility Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolatilityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolatilityMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7543,7 +7543,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volatility Wave Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7555,7 +7555,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Well Rounded Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWellRoundedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWellRoundedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7567,7 +7567,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Wilders Summation Method using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWildersSummationMethodFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWildersSummationMethodFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7579,7 +7579,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Zero Lag Triple Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeZeroLagTripleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeZeroLagTripleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7595,7 +7595,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DeMarker using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7607,7 +7607,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Middle High Low Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMiddleHighLowMovingAverageFast(StockData data, ComputeContext context, int length1 = 14, int length2 = 10)
+    internal static ComputeBuffer ComputeMiddleHighLowMovingAverageFast(StockData data, ComputeContext context, int length1 = 14, int length2 = 10)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7619,7 +7619,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Minus using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexMinusFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexMinusFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7632,7 +7632,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Plus using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexPlusFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexPlusFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7645,7 +7645,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7658,7 +7658,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Klinger Signal using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKlingerSignalFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55, int signalLength = 13)
+    internal static ComputeBuffer ComputeKlingerSignalFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55, int signalLength = 13)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7672,7 +7672,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Chebyshev Low Pass Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context, int length = 14, double ripple = 0.5)
+    internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context, int length = 14, double ripple = 0.5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7684,7 +7684,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Gaussian Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersGaussianFilterFast(StockData data, ComputeContext context, int length = 14, int poles = 3)
+    internal static ComputeBuffer ComputeEhlersGaussianFilterFast(StockData data, ComputeContext context, int length = 14, int poles = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7696,7 +7696,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Median Average Adaptive Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context, int length = 39, double threshold = 0.002)
+    internal static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context, int length = 39, double threshold = 0.002)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7708,7 +7708,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Mesa Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersMesaAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double fastLimit = 0.5, double slowLimit = 0.05)
+    internal static ComputeBuffer ComputeEhlersMesaAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double fastLimit = 0.5, double slowLimit = 0.05)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7720,7 +7720,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Recursive Median Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length = 5, double alpha = 0.5)
+    internal static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length = 5, double alpha = 0.5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7732,7 +7732,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Roofing Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRoofingFilterFast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    internal static ComputeBuffer ComputeEhlersRoofingFilterFast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7748,7 +7748,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Deviation Scaled Super Smoother using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(StockData data, ComputeContext context, int length = 20, int poles = 2)
+    internal static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(StockData data, ComputeContext context, int length = 20, int poles = 2)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7760,7 +7760,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes PPO MA using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePpoMaFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePpoMaFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7772,7 +7772,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceOscillatorFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
+    internal static ComputeBuffer ComputePriceOscillatorFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7784,7 +7784,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Reverse Engineering RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeReverseEngineeringRsiFast(StockData data, ComputeContext context, int length = 14, double rsiLevel = 50)
+    internal static ComputeBuffer ComputeReverseEngineeringRsiFast(StockData data, ComputeContext context, int length = 14, double rsiLevel = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7796,7 +7796,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Reverse Moving Average Convergence Divergence using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, double macdLevel = 0)
+    internal static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, double macdLevel = 0)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7808,7 +7808,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Simple Price Zone using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSimplePriceZoneFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSimplePriceZoneFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -7819,7 +7819,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic RSI Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticRsiOscillatorFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
+    internal static ComputeBuffer ComputeStochasticRsiOscillatorFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7831,7 +7831,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elastic Volume Weighted Moving Average V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV2Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV2Fast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7844,7 +7844,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Windowed Volume Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWindowedVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWindowedVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7857,7 +7857,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Filtered Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
+    internal static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7871,7 +7871,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Range Adjusted Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrueRangeAdjustedExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double mult = 1.5)
+    internal static ComputeBuffer ComputeTrueRangeAdjustedExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double mult = 1.5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7885,7 +7885,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Volatility Index High using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeVolatilityIndexHighFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
+    internal static ComputeBuffer ComputeRelativeVolatilityIndexHighFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var buffer = context.Rent(data.Count);
@@ -7896,7 +7896,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Volatility Index Low using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRelativeVolatilityIndexLowFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
+    internal static ComputeBuffer ComputeRelativeVolatilityIndexLowFast(StockData data, ComputeContext context, int length = 14, int stdDevLength = 10)
     {
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -7907,7 +7907,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Typical Price Volatility using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTypicalPriceVolatilityFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTypicalPriceVolatilityFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -7920,7 +7920,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ratio OCHL Averager using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRatioOchlAveragerFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeRatioOchlAveragerFast(StockData data, ComputeContext context)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -7938,7 +7938,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Triple Hull Moving Average (3HMA) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTripleHullMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeTripleHullMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7950,7 +7950,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7966,7 +7966,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Generalized Double Exponential Moving Average (GDEMA) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGeneralizedDoubleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double volumeFactor = 1.0)
+    internal static ComputeBuffer ComputeGeneralizedDoubleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double volumeFactor = 1.0)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7978,7 +7978,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -7990,7 +7990,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 15)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8002,7 +8002,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Adjusted Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(StockData data, ComputeContext context, int length = 14, double factor = 0.67)
+    internal static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(StockData data, ComputeContext context, int length = 14, double factor = 0.67)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -8014,7 +8014,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Day Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageDayRangeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageDayRangeFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8026,7 +8026,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Intraday Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
@@ -8038,7 +8038,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Contract High (running maximum) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeContractHighFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeContractHighFast(StockData data, ComputeContext context)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var buffer = context.Rent(data.Count);
@@ -8049,7 +8049,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Contract Low (running minimum) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeContractLowFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeContractLowFast(StockData data, ComputeContext context)
     {
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -8060,7 +8060,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Oscar Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOscarIndicatorFast(StockData data, ComputeContext context, int length = 8)
+    internal static ComputeBuffer ComputeOscarIndicatorFast(StockData data, ComputeContext context, int length = 8)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8073,7 +8073,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Narrow Bandpass Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNarrowBandpassFilterFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeNarrowBandpassFilterFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8085,7 +8085,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TFS Tether Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTFSTetherLineFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeTFSTetherLineFast(StockData data, ComputeContext context, int length = 50)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8097,7 +8097,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Fractals Up using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsFractalsUpFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeWilliamsFractalsUpFast(StockData data, ComputeContext context, int length = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8115,7 +8115,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Fractals Down using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsFractalsDownFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeWilliamsFractalsDownFast(StockData data, ComputeContext context, int length = 2)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8133,7 +8133,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Upside Downside Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUpsideDownsideVolumeFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeUpsideDownsideVolumeFast(StockData data, ComputeContext context, int length = 50)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -8145,7 +8145,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Indicator Plus using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexIndicatorPlusFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexIndicatorPlusFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8158,7 +8158,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vortex Indicator Minus using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVortexIndicatorMinusFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVortexIndicatorMinusFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8171,7 +8171,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Guppy Count Back Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeGuppyCountBackLineFast(StockData data, ComputeContext context, int length = 21)
+    internal static ComputeBuffer ComputeGuppyCountBackLineFast(StockData data, ComputeContext context, int length = 21)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8184,7 +8184,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Trendflex using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersTrendflexFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersTrendflexFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8196,7 +8196,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Reflex using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersReflexFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersReflexFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8208,7 +8208,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Correlation Trend Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8220,7 +8220,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Trigger Factor using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrendTriggerFactorFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeTrendTriggerFactorFast(StockData data, ComputeContext context, int length = 15)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8232,7 +8232,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Detection Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrendDetectionIndexFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 40)
+    internal static ComputeBuffer ComputeTrendDetectionIndexFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 40)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8244,7 +8244,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Uber Trend Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeUberTrendIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeUberTrendIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -8256,7 +8256,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Trend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentageTrendFast(StockData data, ComputeContext context, int length = 20, double pct = 0.15)
+    internal static ComputeBuffer ComputePercentageTrendFast(StockData data, ComputeContext context, int length = 20, double pct = 0.15)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8268,7 +8268,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Liquid Relative Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
@@ -8280,7 +8280,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Asymmetrical Relative Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAsymmetricalRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAsymmetricalRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8292,7 +8292,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Absolute Error Normalization using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageAbsoluteErrorNormalizationFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageAbsoluteErrorNormalizationFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8304,7 +8304,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Recursive Stochastic using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200, double alpha = 0.1)
+    internal static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200, double alpha = 0.1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8316,7 +8316,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Shinohara Intensity Ratio A using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeShinoharaIntensityRatioAFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeShinoharaIntensityRatioAFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8329,7 +8329,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Shinohara Intensity Ratio B using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeShinoharaIntensityRatioBFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeShinoharaIntensityRatioBFast(StockData data, ComputeContext context, int length = 14)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8342,7 +8342,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Range Action Verification Index (RAVI) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7, int slowLength = 65)
+    internal static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7, int slowLength = 65)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -8353,7 +8353,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Accumulation Distribution using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsAccumulationDistributionFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeWilliamsAccumulationDistributionFast(StockData data, ComputeContext context)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8366,7 +8366,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Total Power Indicator (bull power output) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTotalPowerIndicatorFast(StockData data, ComputeContext context, int length1 = 45, int length2 = 10)
+    internal static ComputeBuffer ComputeTotalPowerIndicatorFast(StockData data, ComputeContext context, int length1 = 45, int length2 = 10)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8381,7 +8381,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TurboTrigger using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, double pctMultiplier = 1.0)
+    internal static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, double pctMultiplier = 1.0)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -8392,7 +8392,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TurboScaler using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTurboScalerFast(StockData data, ComputeContext context, int length = 50, double pctMultiplier = 1.0)
+    internal static ComputeBuffer ComputeTurboScalerFast(StockData data, ComputeContext context, int length = 50, double pctMultiplier = 1.0)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -8403,7 +8403,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TTM Scalper Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTTMScalperIndicatorFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeTTMScalperIndicatorFast(StockData data, ComputeContext context)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8416,7 +8416,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Strength of Movement using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStrengthOfMovementFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 3)
+    internal static ComputeBuffer ComputeStrengthOfMovementFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 3)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8429,7 +8429,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Value Chart Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5, int numAtrs = 8)
+    internal static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5, int numAtrs = 8)
     {
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8443,7 +8443,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sell Gravitation Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8456,7 +8456,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TFS Tether Line Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTFSTetherLineIndicatorFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeTFSTetherLineIndicatorFast(StockData data, ComputeContext context, int length = 50)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -8469,7 +8469,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Simple Cycle Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSimpleCycleIndicatorFast(StockData data, ComputeContext context, double alpha = 0.07)
+    internal static ComputeBuffer ComputeEhlersSimpleCycleIndicatorFast(StockData data, ComputeContext context, double alpha = 0.07)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8481,7 +8481,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Fisher Transform using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersFisherTransformFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeEhlersFisherTransformFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8493,7 +8493,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Voss Predictive Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersVossPredictiveFilterFast(StockData data, ComputeContext context, int length = 20, double predict = 3, double bw = 0.25)
+    internal static ComputeBuffer ComputeEhlersVossPredictiveFilterFast(StockData data, ComputeContext context, int length = 20, double predict = 3, double bw = 0.25)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8505,7 +8505,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Spearman Rank Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSpearmanRankIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersSpearmanRankIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8517,7 +8517,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Correlation Cycle Indicator (Real) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCorrelationCycleIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersCorrelationCycleIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8531,7 +8531,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Correlation Angle Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCorrelationAngleIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersCorrelationAngleIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8543,7 +8543,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Truncated BandPass Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersTruncatedBandPassFilterFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, double bw = 0.1)
+    internal static ComputeBuffer ComputeEhlersTruncatedBandPassFilterFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, double bw = 0.1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8555,7 +8555,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Simple Decycler using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSimpleDecyclerFast(StockData data, ComputeContext context, int length = 125)
+    internal static ComputeBuffer ComputeEhlersSimpleDecyclerFast(StockData data, ComputeContext context, int length = 125)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8567,7 +8567,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Even Better Sine Wave Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersEvenBetterSineWaveIndicatorFast(StockData data, ComputeContext context, int length1 = 40, int length2 = 10)
+    internal static ComputeBuffer ComputeEhlersEvenBetterSineWaveIndicatorFast(StockData data, ComputeContext context, int length1 = 40, int length2 = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8579,7 +8579,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Market State Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersMarketStateIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersMarketStateIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8591,7 +8591,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Instantaneous Trendline V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersInstantaneousTrendlineV2Fast(StockData data, ComputeContext context, double alpha = 0.07)
+    internal static ComputeBuffer ComputeEhlersInstantaneousTrendlineV2Fast(StockData data, ComputeContext context, double alpha = 0.07)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8603,7 +8603,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers CyberCycle Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCyberCycleOscillatorFast(StockData data, ComputeContext context, double alpha = 0.07)
+    internal static ComputeBuffer ComputeEhlersCyberCycleOscillatorFast(StockData data, ComputeContext context, double alpha = 0.07)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8615,7 +8615,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Band Pass Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersBandPassFilterV1Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
+    internal static ComputeBuffer ComputeEhlersBandPassFilterV1Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8627,7 +8627,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Band Pass Filter V2 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersBandPassFilterV2Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
+    internal static ComputeBuffer ComputeEhlersBandPassFilterV2Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8639,7 +8639,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Cycle Band Pass Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCycleBandPassFilterFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
+    internal static ComputeBuffer ComputeEhlersCycleBandPassFilterFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8651,7 +8651,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Cycle Amplitude using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCycleAmplitudeFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
+    internal static ComputeBuffer ComputeEhlersCycleAmplitudeFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8663,7 +8663,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers HP/LP Roofing Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHpLpRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    internal static ComputeBuffer ComputeEhlersHpLpRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8675,7 +8675,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Early Onset Trend Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersEarlyOnsetTrendIndicatorFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 100, double k = 0.85)
+    internal static ComputeBuffer ComputeEhlersEarlyOnsetTrendIndicatorFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 100, double k = 0.85)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8687,7 +8687,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Detrended Leading Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8700,7 +8700,7 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Classic Hilbert Transformer using zero-allocation fast path.
     /// Returns the real component (imaginary available via second buffer).
     /// </summary>
-    public static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    internal static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8720,7 +8720,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Zero Mean Roofing Filter using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersZeroMeanRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    internal static ComputeBuffer ComputeEhlersZeroMeanRoofingFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8732,7 +8732,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Super Passband Filter using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(StockData data, ComputeContext context, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
+    internal static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(StockData data, ComputeContext context, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8744,7 +8744,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Roofing Filter V2 using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRoofingFilterV2Fast(StockData data, ComputeContext context, int upperLength = 80, int lowerLength = 40)
+    internal static ComputeBuffer ComputeEhlersRoofingFilterV2Fast(StockData data, ComputeContext context, int upperLength = 80, int lowerLength = 40)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8756,7 +8756,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Impulse Reaction using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 20, double q = 0.9)
+    internal static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 20, double q = 0.9)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8768,7 +8768,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Reverse Exponential Moving Average Indicator V1 using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersReverseEmaIndicatorV1Fast(StockData data, ComputeContext context, double alpha = 0.1)
+    internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV1Fast(StockData data, ComputeContext context, double alpha = 0.1)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8780,7 +8780,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSquelchIndicatorFast(StockData data, ComputeContext context, int length1 = 6, int length2 = 20, int length3 = 40)
+    internal static ComputeBuffer ComputeEhlersSquelchIndicatorFast(StockData data, ComputeContext context, int length1 = 6, int length2 = 20, int length3 = 40)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8792,7 +8792,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Reverse EMA Indicator V2 using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast(StockData data, ComputeContext context, double trendAlpha = 0.05, double cycleAlpha = 0.3)
+    internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast(StockData data, ComputeContext context, double trendAlpha = 0.05, double cycleAlpha = 0.3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8804,7 +8804,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Stochastic Cyber Cycle using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersStochasticCyberCycleFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.7)
+    internal static ComputeBuffer ComputeEhlersStochasticCyberCycleFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.7)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8816,7 +8816,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Center of Gravity Oscillator using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersCenterofGravityOscillatorFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeEhlersCenterofGravityOscillatorFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8828,7 +8828,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Reflex Indicator using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersReflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersReflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8840,7 +8840,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Trendflex Indicator using fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersTrendflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersTrendflexIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8852,7 +8852,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes JMA RSX Clone using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeJmaRsxCloneFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeJmaRsxCloneFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8864,7 +8864,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rate of Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeRateOfChangeFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputeRateOfChangeFast(StockData data, ComputeContext context, int length = 12)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8876,7 +8876,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Williams Fractals (Up Fractal) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWilliamsFractalsFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeWilliamsFractalsFast(StockData data, ComputeContext context, int length = 2)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8896,7 +8896,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Detrended Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDetrendedPriceOscillatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDetrendedPriceOscillatorFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8908,7 +8908,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Polarized Fractal Efficiency using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 5)
+    internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 5)
     {
         var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -8919,7 +8919,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Schaff Trend Cycle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength = 10, int fastLength = 23, int slowLength = 50)
+    internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength = 10, int fastLength = 23, int slowLength = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8931,7 +8931,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Rate of Change using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeSmoothedRateOfChangeFast(StockData data, ComputeContext context, int rocLength = 12, int smoothLength = 3)
+    internal static ComputeBuffer ComputeSmoothedRateOfChangeFast(StockData data, ComputeContext context, int rocLength = 12, int smoothLength = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -8943,7 +8943,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Floor Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8956,7 +8956,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Floor Pivot Point Support Level 1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFloorPivotPointS1Fast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeFloorPivotPointS1Fast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8969,7 +8969,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Floor Pivot Point Resistance Level 1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFloorPivotPointR1Fast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeFloorPivotPointR1Fast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8982,7 +8982,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Camarilla Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8995,7 +8995,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Woodie Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWoodiePivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeWoodiePivotPointFast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -9008,7 +9008,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fibonacci Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFibonacciPivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeFibonacciPivotPointFast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -9021,7 +9021,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Demark Pivot Point using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDemarkPivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeDemarkPivotPointFast(StockData data, ComputeContext context)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -9035,7 +9035,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Channel Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearChannelMiddleFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearChannelMiddleFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9047,7 +9047,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Channel Upper using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceChannelUpperFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelUpperFast(StockData data, ComputeContext context, int length = 20)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var buffer = context.Rent(data.Count);
@@ -9058,7 +9058,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Channel Lower using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceChannelLowerFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelLowerFast(StockData data, ComputeContext context, int length = 20)
     {
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -9069,7 +9069,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Donchian Channel Upper using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDonchianChannelUpperFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDonchianChannelUpperFast(StockData data, ComputeContext context, int length = 20)
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var buffer = context.Rent(data.Count);
@@ -9080,7 +9080,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Donchian Channel Lower using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDonchianChannelLowerFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDonchianChannelLowerFast(StockData data, ComputeContext context, int length = 20)
     {
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -9091,7 +9091,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Three HMA (3HMA) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9103,7 +9103,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Autonomous Recursive Trailing Stop using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
     {
         var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -9116,7 +9116,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Trailing Stop using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
         var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -9129,7 +9129,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average True Range Trailing Stops using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
     {
         var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -9142,7 +9142,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Welles Wilder Summation using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeWellesWilderSummationFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWellesWilderSummationFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9154,7 +9154,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Damping Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9166,7 +9166,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Didi Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDidiIndexFast(StockData data, ComputeContext context, int shortLength = 3, int mediumLength = 8, int longLength = 20)
+    internal static ComputeBuffer ComputeDidiIndexFast(StockData data, ComputeContext context, int shortLength = 3, int mediumLength = 8, int longLength = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9178,7 +9178,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vertical Horizontal Filter using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVerticalHorizontalFilterFast(StockData data, ComputeContext context, int length = 28)
+    internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(StockData data, ComputeContext context, int length = 28)
     {
         var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -9189,7 +9189,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Slope using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearRegressionSlopeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearRegressionSlopeFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9201,7 +9201,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Intercept using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeLinearRegressionInterceptFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearRegressionInterceptFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9217,7 +9217,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 20)
+    internal static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9229,7 +9229,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accumulation Distribution Line using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAccumulationDistributionLineFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeAccumulationDistributionLineFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9252,7 +9252,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeAdaptiveExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9264,7 +9264,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Directional Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageDirectionalIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageDirectionalIndexFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9285,7 +9285,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average True Range using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAverageTrueRangeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageTrueRangeFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9306,7 +9306,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9318,7 +9318,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ease of Movement using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9339,7 +9339,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hull Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9351,7 +9351,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Klinger Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKlingerVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55)
+    internal static ComputeBuffer ComputeKlingerVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9374,7 +9374,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Know Sure Thing using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKnowSureThingFast(StockData data, ComputeContext context,
+    internal static ComputeBuffer ComputeKnowSureThingFast(StockData data, ComputeContext context,
         int roc1 = 10, int roc2 = 15, int roc3 = 20, int roc4 = 30,
         int sma1 = 10, int sma2 = 10, int sma3 = 10, int sma4 = 15)
     {
@@ -9388,7 +9388,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9407,7 +9407,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes On Balance Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOnBalanceVolumeFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeOnBalanceVolumeFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9426,7 +9426,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentagePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePercentagePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9438,7 +9438,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePercentageVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePercentageVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
         var volumeSpan = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
@@ -9449,7 +9449,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Positive Volume Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9468,7 +9468,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int firstLength = 35, int secondLength = 20)
+    internal static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int firstLength = 35, int secondLength = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9480,7 +9480,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9499,7 +9499,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Triangular Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTriangularMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTriangularMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9511,7 +9511,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Strength Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTrueStrengthIndexFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
+    internal static ComputeBuffer ComputeTrueStrengthIndexFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9527,7 +9527,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Quick Stick using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeQuickStickFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeQuickStickFast(StockData data, ComputeContext context, int length = 14)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9550,7 +9550,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Delta Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 5)
+    internal static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 5)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9562,7 +9562,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Folded RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeFoldedRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFoldedRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9574,7 +9574,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Enhanced Williams %R using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9595,7 +9595,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Connors RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int rsiLength = 3, int streakLength = 2, int rankLength = 100)
+    internal static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int rsiLength = 3, int streakLength = 2, int rankLength = 100)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9607,7 +9607,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int smoothK = 3, int smoothD = 3)
+    internal static ComputeBuffer ComputeStochasticRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int smoothK = 3, int smoothD = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9619,7 +9619,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Momentum Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
+    internal static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9640,7 +9640,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes CCT Stoch RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeCCTStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
+    internal static ComputeBuffer ComputeCCTStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9652,7 +9652,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Inertia using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeInertiaFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeInertiaFast(StockData data, ComputeContext context, int length = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9673,7 +9673,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Premier Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25)
+    internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9694,7 +9694,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3)
+    internal static ComputeBuffer ComputeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9718,7 +9718,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9750,7 +9750,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Fast Oscillator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9782,7 +9782,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Keltner Channel Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeKeltnerMiddleFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeKeltnerMiddleFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9794,7 +9794,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes 1LC Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOneLCLeastSquaresFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeOneLCLeastSquaresFast(StockData data, ComputeContext context, int length = 32)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9806,7 +9806,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive RSI using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9818,7 +9818,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands ATR using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int atrLength = 22, int length = 55)
+    internal static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int atrLength = 22, int length = 55)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9839,7 +9839,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Signal using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeChandeMomentumOscillatorSignalFast(StockData data, ComputeContext context, int length = 14, int signalLength = 3)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorSignalFast(StockData data, ComputeContext context, int length = 14, int signalLength = 3)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9851,7 +9851,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Roofing Filter V1 using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRoofingFilterV1Fast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    internal static ComputeBuffer ComputeEhlersRoofingFilterV1Fast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9863,7 +9863,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Spearman Rank Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSpearmanRankFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersSpearmanRankFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9875,7 +9875,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Tillson T3 Moving Average using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeTillsonT3Fast(StockData data, ComputeContext context, int length = 5, double vFactor = 0.7)
+    internal static ComputeBuffer ComputeTillsonT3Fast(StockData data, ComputeContext context, int length = 5, double vFactor = 0.7)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9887,7 +9887,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hamming Window Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHammingWindowFast(StockData data, ComputeContext context, int length = 20, double pedestal = 10)
+    internal static ComputeBuffer ComputeEhlersHammingWindowFast(StockData data, ComputeContext context, int length = 20, double pedestal = 10)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9899,7 +9899,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hann Window Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersHannWindowFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersHannWindowFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9911,7 +9911,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Triangle Window Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersTriangleWindowFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersTriangleWindowFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9923,7 +9923,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Impulse Reaction using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length = 20)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9935,7 +9935,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Modified Stochastic Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersModifiedStochasticFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 20)
+    internal static ComputeBuffer ComputeEhlersModifiedStochasticFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 20)
     {
         var tickerList = data.TickerDataList;
         var count = tickerList.Count;
@@ -9957,7 +9957,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Variable Index Dynamic Average (VIDYA) using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -9974,7 +9974,7 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Simple Deriv Indicator using zero-allocation fast path.
     /// Returns the smoothed z3 oscillator (signal line).
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2, int signalLength = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2, int signalLength = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -10031,7 +10031,7 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Simple Clip Indicator using zero-allocation fast path.
     /// Returns the smoothed z3 oscillator (signal line).
     /// </summary>
-    public static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50, int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50, int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -10087,7 +10087,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Relative Vigor Index with signal line.
     /// </summary>
-    public static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var count = data.Count;
         var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
@@ -10157,7 +10157,7 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Moving Average Difference Indicator.
     /// MAD = 100 * (fastMA - slowMA) / slowMA
     /// </summary>
-    public static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast(StockData data, ComputeContext context, int fastLength = 8, int slowLength = 23, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast(StockData data, ComputeContext context, int fastLength = 8, int slowLength = 23, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var count = data.Count;
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -10211,7 +10211,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Market Thermometer with signal line.
     /// </summary>
-    public static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context, int length = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context, int length = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var count = data.Count;
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
@@ -10262,7 +10262,7 @@ internal static partial class IndicatorCompute
     /// Computes DEMA 2 Lines indicator (fast DEMA line).
     /// Returns the fast DEMA line for crossover signals.
     /// </summary>
-    public static ComputeBuffer ComputeDema2LinesFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeDema2LinesFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var count = data.Count;
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -10321,7 +10321,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gain Loss Moving Average with signal line.
     /// </summary>
-    public static ComputeBuffer ComputeGainLossMovingAverageFast(StockData data, ComputeContext context, int length = 14, int signalLength = 7, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeGainLossMovingAverageFast(StockData data, ComputeContext context, int length = 14, int signalLength = 7, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var count = data.Count;
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -10388,7 +10388,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Mean Deviation Indicator with signal line.
     /// </summary>
-    public static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var count = data.Count;
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
@@ -10485,7 +10485,7 @@ internal static partial class IndicatorCompute
     /// Computes Mayer Multiple using zero-allocation fast path.
     /// MayerMultiple = price / MA
     /// </summary>
-    public static ComputeBuffer ComputeMayerMultipleFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMayerMultipleFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -10527,7 +10527,7 @@ internal static partial class IndicatorCompute
     /// Computes Gopalakrishnan Range Index using zero-allocation fast path.
     /// GAPO = log(highestHigh - lowestLow) / log(length), then smoothed with MA.
     /// </summary>
-    public static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -10573,7 +10573,7 @@ internal static partial class IndicatorCompute
     /// Computes High Low Moving Average using zero-allocation fast path.
     /// Returns middle band = (MA(highest high) + MA(lowest low)) / 2.
     /// </summary>
-    public static ComputeBuffer ComputeHighLowMovingAverageFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeHighLowMovingAverageFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -10643,7 +10643,7 @@ internal static partial class IndicatorCompute
     /// Computes Stiffness Indicator using zero-allocation fast path.
     /// Measures how many closes are above MA - 0.2*StdDev over a period.
     /// </summary>
-    public static ComputeBuffer ComputeStiffnessIndicatorFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 60, int smoothingLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStiffnessIndicatorFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 60, int smoothingLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -10710,7 +10710,7 @@ internal static partial class IndicatorCompute
     /// Computes Market Meanness Index using zero-allocation fast path.
     /// Counts reversals above/below median in a lookback period.
     /// </summary>
-    public static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
@@ -10799,7 +10799,7 @@ internal static partial class IndicatorCompute
     /// Computes Sharpe Ratio using zero-allocation fast path.
     /// SharpeRatio = (returns - benchmark) / standardDeviation
     /// </summary>
-    public static ComputeBuffer ComputeSharpeRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSharpeRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -10863,7 +10863,7 @@ internal static partial class IndicatorCompute
     /// Computes Sortino Ratio using zero-allocation fast path.
     /// SortinoRatio = (returns - benchmark) / downsideDeviation
     /// </summary>
-    public static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -10950,7 +10950,7 @@ internal static partial class IndicatorCompute
     /// Computes Martin Ratio using zero-allocation fast path.
     /// MartinRatio = returns / ulcerIndex
     /// </summary>
-    public static ComputeBuffer ComputeMartinRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMartinRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11014,7 +11014,7 @@ internal static partial class IndicatorCompute
     /// Computes Information Ratio using zero-allocation fast path.
     /// InformationRatio = excessReturns / trackingError
     /// </summary>
-    public static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11078,7 +11078,7 @@ internal static partial class IndicatorCompute
     /// Computes Optimized Trend Tracker using zero-allocation fast path.
     /// OTT is a trend-following indicator based on MA with percentage bands.
     /// </summary>
-    public static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2, double percent = 1.4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2, double percent = 1.4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
@@ -11143,7 +11143,7 @@ internal static partial class IndicatorCompute
     /// Computes Random Walk Index using zero-allocation fast path.
     /// RWI measures trend strength using ATR-normalized price movement.
     /// </summary>
-    public static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -11191,7 +11191,7 @@ internal static partial class IndicatorCompute
     /// Computes Price Channel using zero-allocation fast path.
     /// Price Channel = MA +/- percentage bands.
     /// </summary>
-    public static ComputeBuffer ComputePriceChannelFast(StockData data, ComputeContext context, int length = 21, double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputePriceChannelFast(StockData data, ComputeContext context, int length = 21, double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11235,7 +11235,7 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Bands using zero-allocation fast path.
     /// Returns middle band (average of fast and slow MAs).
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageBandsFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageBandsFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11285,7 +11285,7 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Band Width using zero-allocation fast path.
     /// Returns the width between fast and slow MA bands.
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageBandWidthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageBandWidthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11336,7 +11336,7 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Channel using zero-allocation fast path.
     /// Returns the MA of high-low range.
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageChannelFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageChannelFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -11387,7 +11387,7 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Envelope using zero-allocation fast path.
     /// Returns the middle band (MA).
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageEnvelopeFast(StockData data, ComputeContext context, int length = 20, double pct = 0.025, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageEnvelopeFast(StockData data, ComputeContext context, int length = 20, double pct = 0.025, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11431,7 +11431,7 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Support/Resistance using zero-allocation fast path.
     /// Returns the MA of close.
     /// </summary>
-    public static ComputeBuffer ComputeMovingAverageSupportResistanceFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageSupportResistanceFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11458,7 +11458,7 @@ internal static partial class IndicatorCompute
     /// Computes Variable Moving Average Bands using zero-allocation fast path.
     /// Returns the middle band (VMA).
     /// </summary>
-    public static ComputeBuffer ComputeVariableMovingAverageBandsFast(StockData data, ComputeContext context, int length = 6, double mult = 1.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVariableMovingAverageBandsFast(StockData data, ComputeContext context, int length = 6, double mult = 1.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11485,7 +11485,7 @@ internal static partial class IndicatorCompute
     /// Computes Narrow Sideways Channel using zero-allocation fast path.
     /// Returns the middle band (MA).
     /// </summary>
-    public static ComputeBuffer ComputeNarrowSidewaysChannelFast(StockData data, ComputeContext context, int length = 20, double pct = 0.03, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(StockData data, ComputeContext context, int length = 20, double pct = 0.03, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11512,7 +11512,7 @@ internal static partial class IndicatorCompute
     /// Computes High Low Bands using zero-allocation fast path.
     /// Returns the middle band (SMA of close).
     /// </summary>
-    public static ComputeBuffer ComputeHighLowBandsFast(StockData data, ComputeContext context, int length = 14, double pctShift = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeHighLowBandsFast(StockData data, ComputeContext context, int length = 14, double pctShift = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11539,7 +11539,7 @@ internal static partial class IndicatorCompute
     /// Computes Auto Dispersion Bands using zero-allocation fast path.
     /// Returns the middle band (WMA of close).
     /// </summary>
-    public static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90, int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90, int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11569,7 +11569,7 @@ internal static partial class IndicatorCompute
     /// Computes Bollinger Bands Fibonacci Ratios using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsFibonacciRatiosFast(StockData data, ComputeContext context, int length = 20, double fibRatio1 = 1.618, double fibRatio2 = 2.618, double fibRatio3 = 4.236, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerBandsFibonacciRatiosFast(StockData data, ComputeContext context, int length = 20, double fibRatio1 = 1.618, double fibRatio2 = 2.618, double fibRatio3 = 4.236, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11596,7 +11596,7 @@ internal static partial class IndicatorCompute
     /// Computes Bollinger Bands with ATR Percentage using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsWithAtrPctFast(StockData data, ComputeContext context, int length = 14, int bbLength = 20, double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeBollingerBandsWithAtrPctFast(StockData data, ComputeContext context, int length = 14, int bbLength = 20, double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11623,7 +11623,7 @@ internal static partial class IndicatorCompute
     /// Computes Kirshenbaum Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    public static ComputeBuffer ComputeKirshenbaumBandsFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 20, double stdDevFactor = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeKirshenbaumBandsFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 20, double stdDevFactor = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11650,7 +11650,7 @@ internal static partial class IndicatorCompute
     /// Computes Smoothed Volatility Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    public static ComputeBuffer ComputeSmoothedVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11677,7 +11677,7 @@ internal static partial class IndicatorCompute
     /// Computes Stoller Average Range Channels (STARC) using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputeStollerAverageRangeChannelsFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStollerAverageRangeChannelsFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11704,7 +11704,7 @@ internal static partial class IndicatorCompute
     /// Computes Vervoort Volatility Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    public static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11731,7 +11731,7 @@ internal static partial class IndicatorCompute
     /// Computes Volume Adaptive Bands using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11757,7 +11757,7 @@ internal static partial class IndicatorCompute
     /// Computes Trend Trader Bands using zero-allocation fast path.
     /// Returns the middle band (WMA).
     /// </summary>
-    public static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3, double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3, double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11786,7 +11786,7 @@ internal static partial class IndicatorCompute
     /// Computes Scalpers Channel using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputeScalpersChannelFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeScalpersChannelFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11812,7 +11812,7 @@ internal static partial class IndicatorCompute
     /// Computes Hurst Cycle Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    public static ComputeBuffer ComputeHurstCycleChannelFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeHurstCycleChannelFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11841,7 +11841,7 @@ internal static partial class IndicatorCompute
     /// Computes Price Curve Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    public static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11870,7 +11870,7 @@ internal static partial class IndicatorCompute
     /// Computes Price Headley Acceleration Bands using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    public static ComputeBuffer ComputePriceHeadleyAccelerationBandsFast(StockData data, ComputeContext context, int length = 20, double factor = 0.001, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePriceHeadleyAccelerationBandsFast(StockData data, ComputeContext context, int length = 20, double factor = 0.001, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11896,7 +11896,7 @@ internal static partial class IndicatorCompute
     /// Computes Price Line Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    public static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11925,7 +11925,7 @@ internal static partial class IndicatorCompute
     /// Computes Rate of Change Bands using zero-allocation fast path.
     /// Returns the ROC smoothed value.
     /// </summary>
-    public static ComputeBuffer ComputeRateOfChangeBandsFast(StockData data, ComputeContext context, int length = 12, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeRateOfChangeBandsFast(StockData data, ComputeContext context, int length = 12, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11964,7 +11964,7 @@ internal static partial class IndicatorCompute
     /// Computes Absolute Strength MTF Indicator using zero-allocation fast path.
     /// Returns the smoothed bulls-bears value.
     /// </summary>
-    public static ComputeBuffer ComputeAbsoluteStrengthMTFFast(StockData data, ComputeContext context, int length = 50, int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast(StockData data, ComputeContext context, int length = 50, int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -11991,7 +11991,7 @@ internal static partial class IndicatorCompute
     /// Computes Adaptive Price Zone Indicator using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    public static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12017,7 +12017,7 @@ internal static partial class IndicatorCompute
     /// Computes Dynamic Support and Resistance using zero-allocation fast path.
     /// Returns the Wilder smoothed close.
     /// </summary>
-    public static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12046,7 +12046,7 @@ internal static partial class IndicatorCompute
     /// Computes Apirine Slow RSI using zero-allocation fast path.
     /// Returns smoothed RSI.
     /// </summary>
-    public static ComputeBuffer ComputeApirineSlowRsiFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 6, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeApirineSlowRsiFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 6, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12088,7 +12088,7 @@ internal static partial class IndicatorCompute
     /// Computes Elder Safe Zone Stops using zero-allocation fast path.
     /// Returns the stop line.
     /// </summary>
-    public static ComputeBuffer ComputeElderSafeZoneStopsFast(StockData data, ComputeContext context, int length = 10, double mult = 2.5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeElderSafeZoneStopsFast(StockData data, ComputeContext context, int length = 10, double mult = 2.5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12114,7 +12114,7 @@ internal static partial class IndicatorCompute
     /// Computes Enhanced Index using zero-allocation fast path.
     /// Returns the smoothed index value.
     /// </summary>
-    public static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14, int signalLength = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14, int signalLength = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12140,7 +12140,7 @@ internal static partial class IndicatorCompute
     /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
     /// Returns the smoothed kurtosis value.
     /// </summary>
-    public static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12169,7 +12169,7 @@ internal static partial class IndicatorCompute
     /// Computes Fear and Greed Indicator using zero-allocation fast path.
     /// Returns the smoothed fear/greed value.
     /// </summary>
-    public static ComputeBuffer ComputeFearAndGreedFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, int smoothLength = 2, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeFearAndGreedFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, int smoothLength = 2, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12198,7 +12198,7 @@ internal static partial class IndicatorCompute
     /// Computes Finite Volume Elements using zero-allocation fast path.
     /// Returns the smoothed FVE value.
     /// </summary>
-    public static ComputeBuffer ComputeFiniteVolumeElementsFast(StockData data, ComputeContext context, int length = 22, double factor = 0.3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFiniteVolumeElementsFast(StockData data, ComputeContext context, int length = 22, double factor = 0.3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12224,7 +12224,7 @@ internal static partial class IndicatorCompute
     /// Computes Fibonacci Retrace using zero-allocation fast path.
     /// Returns the retrace level.
     /// </summary>
-    public static ComputeBuffer ComputeFibonacciRetraceFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 50, double factor = 0.382, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeFibonacciRetraceFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 50, double factor = 0.382, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12253,7 +12253,7 @@ internal static partial class IndicatorCompute
     /// Computes Freedom of Movement using zero-allocation fast path.
     /// Returns the smoothed movement value.
     /// </summary>
-    public static ComputeBuffer ComputeFreedomOfMovementFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFreedomOfMovementFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12279,7 +12279,7 @@ internal static partial class IndicatorCompute
     /// Computes FX Sniper Indicator using zero-allocation fast path.
     /// Returns the smoothed CCI-based value.
     /// </summary>
-    public static ComputeBuffer ComputeFXSniperFast(StockData data, ComputeContext context, int cciLength = 14, int t3Length = 5, double b = 0.618, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFXSniperFast(StockData data, ComputeContext context, int cciLength = 14, int t3Length = 5, double b = 0.618, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12305,7 +12305,7 @@ internal static partial class IndicatorCompute
     /// Computes Grover Llorens Activator using zero-allocation fast path.
     /// Returns the activator line.
     /// </summary>
-    public static ComputeBuffer ComputeGroverLlorensActivatorFast(StockData data, ComputeContext context, int length = 100, double mult = 5, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeGroverLlorensActivatorFast(StockData data, ComputeContext context, int length = 100, double mult = 5, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12334,7 +12334,7 @@ internal static partial class IndicatorCompute
     /// Computes Kase Indicator using zero-allocation fast path.
     /// Returns the smoothed value.
     /// </summary>
-    public static ComputeBuffer ComputeKaseIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeKaseIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12360,7 +12360,7 @@ internal static partial class IndicatorCompute
     /// Computes Guppy Distance Indicator using zero-allocation fast path.
     /// Returns the short-term EMA.
     /// </summary>
-    public static ComputeBuffer ComputeGuppyDistanceFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeGuppyDistanceFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12386,7 +12386,7 @@ internal static partial class IndicatorCompute
     /// Computes Guppy Multiple Moving Average using zero-allocation fast path.
     /// Returns the short-term EMA.
     /// </summary>
-    public static ComputeBuffer ComputeGuppyMultipleMaFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeGuppyMultipleMaFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12412,7 +12412,7 @@ internal static partial class IndicatorCompute
     /// Computes Hirashima Sugita RS using zero-allocation fast path.
     /// Returns the smoothed value.
     /// </summary>
-    public static ComputeBuffer ComputeHirashimaSugitaRSFast(StockData data, ComputeContext context, int length = 1000, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeHirashimaSugitaRSFast(StockData data, ComputeContext context, int length = 1000, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12441,7 +12441,7 @@ internal static partial class IndicatorCompute
     /// Computes Inverse Fisher Fast Z Score using zero-allocation fast path.
     /// Returns the inverse fisher transformed value.
     /// </summary>
-    public static ComputeBuffer ComputeInverseFisherFastZScoreFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInverseFisherFastZScoreFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12467,7 +12467,7 @@ internal static partial class IndicatorCompute
     /// Computes Inverse Fisher Z Score using zero-allocation fast path.
     /// Returns the inverse fisher transformed value.
     /// </summary>
-    public static ComputeBuffer ComputeInverseFisherZScoreFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInverseFisherZScoreFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12493,7 +12493,7 @@ internal static partial class IndicatorCompute
     /// Computes Japanese Correlation Coefficient using zero-allocation fast path.
     /// Returns the correlation coefficient.
     /// </summary>
-    public static ComputeBuffer ComputeJapaneseCorrelationCoefficientFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeJapaneseCorrelationCoefficientFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12519,7 +12519,7 @@ internal static partial class IndicatorCompute
     /// Computes JRC Fractal Dimension using zero-allocation fast path.
     /// Returns the fractal dimension value.
     /// </summary>
-    public static ComputeBuffer ComputeJrcFractalDimensionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeJrcFractalDimensionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12545,7 +12545,7 @@ internal static partial class IndicatorCompute
     /// Computes Kase Convergence Divergence using zero-allocation fast path.
     /// Returns the convergence/divergence value.
     /// </summary>
-    public static ComputeBuffer ComputeKaseConvergenceDivergenceFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 3, int length3 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeKaseConvergenceDivergenceFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 3, int length3 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12571,7 +12571,7 @@ internal static partial class IndicatorCompute
     /// Computes Kwan Indicator using zero-allocation fast path.
     /// Returns the smoothed Kwan value.
     /// </summary>
-    public static ComputeBuffer ComputeKwanIndicatorFast(StockData data, ComputeContext context, int length = 9, int smoothLength = 2, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeKwanIndicatorFast(StockData data, ComputeContext context, int length = 9, int smoothLength = 2, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12600,7 +12600,7 @@ internal static partial class IndicatorCompute
     /// Computes LBR Paint Bars using zero-allocation fast path.
     /// Returns the paint bar value.
     /// </summary>
-    public static ComputeBuffer ComputeLBRPaintBarsFast(StockData data, ComputeContext context, int length = 9, int lbLength = 16, double atrMult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeLBRPaintBarsFast(StockData data, ComputeContext context, int length = 9, int lbLength = 16, double atrMult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var count = data.Count;
@@ -12625,7 +12625,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MacZ Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMacZIndicatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMacZIndicatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12644,7 +12644,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MacZ VWAP Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMacZVwapIndicatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMacZVwapIndicatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12663,7 +12663,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMassThrustIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMassThrustIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12682,7 +12682,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Gann Hilo Activator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeModifiedGannHiloActivatorFast(StockData data, ComputeContext context, int lookbackLength = 3, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeModifiedGannHiloActivatorFast(StockData data, ComputeContext context, int lookbackLength = 3, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12701,7 +12701,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context, int length = 23, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context, int length = 23, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12720,7 +12720,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Multi Vote On Balance Volume using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeMultiVoteOnBalanceVolumeFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMultiVoteOnBalanceVolumeFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12739,7 +12739,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Directional Combo using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalDirectionalComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalDirectionalComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12758,7 +12758,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Directional Index using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalDirectionalIndexFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalDirectionalIndexFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12777,7 +12777,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Market Mirror using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalMarketMirrorFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketMirrorFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12796,7 +12796,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Market River using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalMarketRiverFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketRiverFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12815,7 +12815,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Market Combo using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalMarketComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12834,7 +12834,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Stochastic Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNaturalStochasticIndicatorFast(StockData data, ComputeContext context, int length = 20, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalStochasticIndicatorFast(StockData data, ComputeContext context, int length = 20, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12853,7 +12853,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Disparity Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeNegativeVolumeDisparityFast(StockData data, ComputeContext context, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeNegativeVolumeDisparityFast(StockData data, ComputeContext context, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12872,7 +12872,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ocean Indicator using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOceanIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeOceanIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12891,7 +12891,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes OC Histogram using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOCHistogramFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeOCHistogramFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12910,7 +12910,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes On Balance Volume Modified using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeOnBalanceVolumeModifiedFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeOnBalanceVolumeModifiedFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12928,7 +12928,7 @@ internal static partial class IndicatorCompute
 
     // Batch 23 - Volume and Statistical Indicators (using registry pattern)
 
-    public static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12937,7 +12937,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12946,7 +12946,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePriceVolumeRankFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePriceVolumeRankFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12955,7 +12955,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int smoothLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int smoothLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12964,7 +12964,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12973,7 +12973,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12982,7 +12982,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -12991,7 +12991,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeReallySimpleIndicatorFast(StockData data, ComputeContext context, int length = 21, int smoothLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeReallySimpleIndicatorFast(StockData data, ComputeContext context, int length = 21, int smoothLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13002,7 +13002,7 @@ internal static partial class IndicatorCompute
 
     // Batch 24 - Complex Oscillators and Ehlers Indicators
 
-    public static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int smoothLength = 5, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int smoothLength = 5, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13011,7 +13011,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeConfluenceIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeConfluenceIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13020,7 +13020,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeConstanceBrownCompositeIndexFast(StockData data, ComputeContext context, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeConstanceBrownCompositeIndexFast(StockData data, ComputeContext context, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13029,7 +13029,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13038,7 +13038,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13047,7 +13047,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13056,7 +13056,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13065,7 +13065,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    internal static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13076,7 +13076,7 @@ internal static partial class IndicatorCompute
 
     // Batch 25 - More Ehlers Indicators
 
-    public static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13085,7 +13085,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13094,7 +13094,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13103,7 +13103,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13112,7 +13112,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13121,7 +13121,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length2 = 50, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length2 = 50, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13130,7 +13130,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13139,7 +13139,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
+    internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13150,7 +13150,7 @@ internal static partial class IndicatorCompute
 
     // Batch 26 - Ehlers V2 and Universal Trading Filter
 
-    public static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 16, int length2 = 50, double mult = 2, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    internal static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 16, int length2 = 50, double mult = 2, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13159,7 +13159,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13168,7 +13168,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13177,7 +13177,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13186,7 +13186,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13195,7 +13195,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    internal static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13204,7 +13204,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13213,7 +13213,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13224,7 +13224,7 @@ internal static partial class IndicatorCompute
 
     // Batch 27 - Trend and Volatility Indicators
 
-    public static ComputeBuffer ComputeTrendExhaustionIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendExhaustionIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13233,7 +13233,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendImpulseFilterFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTrendImpulseFilterFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13242,7 +13242,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendDirectionForceIndexFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 30, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTrendDirectionForceIndexFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 30, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13251,7 +13251,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13260,7 +13260,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21, int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21, int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13269,7 +13269,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTrenderFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTrenderFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13278,7 +13278,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13289,7 +13289,7 @@ internal static partial class IndicatorCompute
 
     // Batch 28 - Volume and Volatility Indicators
 
-    public static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13298,7 +13298,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13307,7 +13307,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context, int fastLength = 9, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context, int fastLength = 9, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13316,7 +13316,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolatilityBasedMomentumFast(StockData data, ComputeContext context, int length1 = 22, int length2 = 65, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeVolatilityBasedMomentumFast(StockData data, ComputeContext context, int length1 = 22, int length2 = 65, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13325,7 +13325,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13334,7 +13334,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage)
+    internal static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13343,7 +13343,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeVostroIndicatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 100, double level = 8, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13354,7 +13354,7 @@ internal static partial class IndicatorCompute
 
     // Batch 29 - Ergodic and Momentum Indicators
 
-    public static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 32, int smoothLength = 5, double pointValue = 1, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 32, int smoothLength = 5, double pointValue = 1, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13363,7 +13363,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13372,7 +13372,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeErgodicTsiV1Fast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicTsiV1Fast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13381,7 +13381,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length1 = 21, int length2 = 9, int length3 = 9, int signalLength = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length1 = 21, int length2 = 9, int length3 = 9, int signalLength = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13390,7 +13390,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 20, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 20, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13399,7 +13399,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13408,7 +13408,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13417,7 +13417,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13428,7 +13428,7 @@ internal static partial class IndicatorCompute
 
     // Batch 30 - Stochastic Regular
 
-    public static ComputeBuffer ComputeStochasticRegularFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStochasticRegularFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13439,7 +13439,7 @@ internal static partial class IndicatorCompute
 
     // Batch 31 - Relative and Statistical Indicators
 
-    public static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13448,7 +13448,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRelativeSpreadStrengthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeRelativeSpreadStrengthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13457,7 +13457,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRelativeVolatilityIndexV2Fast(StockData data, ComputeContext context, int length = 10, int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeRelativeVolatilityIndexV2Fast(StockData data, ComputeContext context, int length = 10, int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13466,7 +13466,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRelativeVolumeIndicatorFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRelativeVolumeIndicatorFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13475,7 +13475,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14, int smoothingLength = 21, double mult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14, int smoothingLength = 21, double mult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13484,7 +13484,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13493,7 +13493,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeStatisticalVolatilityFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 253, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeStatisticalVolatilityFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 253, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13502,7 +13502,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13513,7 +13513,7 @@ internal static partial class IndicatorCompute
 
     // Batch 32 - Remaining Indicators (Part 1)
 
-    public static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13522,7 +13522,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500, int smoothLength = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500, int smoothLength = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13531,7 +13531,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePhaseChangeIndexFast(StockData data, ComputeContext context, int length = 35, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13540,7 +13540,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13549,7 +13549,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRecursiveDifferenciatorFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeRecursiveDifferenciatorFast(StockData data, ComputeContext context, int length = 14, double alpha = 0.6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13558,7 +13558,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeReversalPointsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeReversalPointsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13567,7 +13567,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13576,7 +13576,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13587,7 +13587,7 @@ internal static partial class IndicatorCompute
 
     // Batch 33 - Remaining Indicators (Part 2)
 
-    public static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13596,7 +13596,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13605,7 +13605,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13614,7 +13614,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13623,7 +13623,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13632,7 +13632,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13641,7 +13641,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25, int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25, int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13650,7 +13650,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13661,7 +13661,7 @@ internal static partial class IndicatorCompute
 
     // Batch 34 - Remaining Indicators (Part 3)
 
-    public static ComputeBuffer ComputeTimeAndMoneyChannelFast(StockData data, ComputeContext context, int length1 = 41, int length2 = 82, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTimeAndMoneyChannelFast(StockData data, ComputeContext context, int length1 = 41, int length2 = 82, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13670,7 +13670,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13679,7 +13679,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13688,7 +13688,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeUhlMaCrossoverSystemFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeUhlMaCrossoverSystemFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13697,7 +13697,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13706,7 +13706,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeUniChannelFast(StockData data, ComputeContext context, int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13715,7 +13715,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeVixTradingSystemFast(StockData data, ComputeContext context, int length = 50, double maxCount = 11, double minCount = -11, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVixTradingSystemFast(StockData data, ComputeContext context, int length = 50, double maxCount = 11, double minCount = -11, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13724,7 +13724,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
@@ -13733,7 +13733,7 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    public static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
