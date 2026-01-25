@@ -12931,18 +12931,19 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        VolumeCore.OnBalanceVolume(close, volume, buffer.WritableSpan);
         return buffer;
     }
 
     internal static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        TrendCore.PivotPoint(high, low, close, buffer.WritableSpan);
         return buffer;
     }
 
@@ -12959,8 +12960,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        OscillatorCore.SpecialK(close, buffer.WritableSpan);
         return buffer;
     }
 
@@ -12995,8 +12995,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        OscillatorCore.RateOfChange(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13004,10 +13003,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int smoothLength = 5, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        OscillatorCore.ErgodicCandlestickOscillator(open, close, buffer.WritableSpan, smoothLength, signalLength);
         return buffer;
     }
 
@@ -13024,8 +13023,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, 14);
         return buffer;
     }
 
@@ -13179,19 +13177,20 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
+        OscillatorCore.FisherTransform(high, low, buffer.WritableSpan, length2);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
+        OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length2);
         return buffer;
     }
 
@@ -13228,8 +13227,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.Momentum(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13245,9 +13243,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTrendDirectionForceIndexFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 30, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
+        VolumeCore.ForceIndex(close, volume, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13255,8 +13253,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
+        TrendCore.LinearRegressionSlope(close, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13264,26 +13261,27 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
+        TrendCore.LinearRegressionSlope(close, buffer.WritableSpan, length1);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeTrenderFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, length);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, turboLength);
+        OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13291,28 +13289,30 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, turboLength);
+        OscillatorCore.StochasticD(high, low, close, buffer.WritableSpan, length1, length2);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        VolumeCore.PriceVolumeTrend(close, volume, buffer.WritableSpan);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeVolatilityQualityIndexFast(StockData data, ComputeContext context, int fastLength = 9, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, fastLength);
+        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, fastLength);
         return buffer;
     }
 
@@ -13320,8 +13320,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
+        OscillatorCore.ChandeMomentumOscillator(close, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13329,8 +13328,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13367,8 +13365,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
+        OscillatorCore.MacdLine(close, buffer.WritableSpan, length2, length1);
         return buffer;
     }
 
@@ -13376,8 +13373,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        OscillatorCore.TrueStrengthIndex(close, buffer.WritableSpan, length2, length1);
         return buffer;
     }
 
@@ -13385,17 +13381,17 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        OscillatorCore.TrueStrengthIndex(close, buffer.WritableSpan, length1, length2);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 20, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, signalLength);
+        OscillatorCore.DoubleSmoothedStochastic(high, low, close, buffer.WritableSpan, slowLength, fastLength);
         return buffer;
     }
 
@@ -13412,8 +13408,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.Momentum(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13421,8 +13416,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength2);
+        OscillatorCore.StochasticRsi(close, buffer.WritableSpan, length1, smoothLength1);
         return buffer;
     }
 
@@ -13430,10 +13424,11 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeStochasticRegularFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
+        OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length1);
         return buffer;
     }
 
@@ -13443,8 +13438,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13461,8 +13455,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        VolatilityCore.RelativeVolatilityIndex(close, buffer.WritableSpan, smoothLength, length);
         return buffer;
     }
 
@@ -13479,17 +13472,17 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothingLength);
+        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
         return buffer;
     }
 
     internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        VolumeCore.WilliamsAD(high, low, close, buffer.WritableSpan);
         return buffer;
     }
 
@@ -13497,8 +13490,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
+        VolatilityCore.HistoricalVolatility(close, buffer.WritableSpan, length1, length2);
         return buffer;
     }
 
@@ -13571,8 +13563,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13591,8 +13582,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13600,8 +13590,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
+        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13652,10 +13641,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        OscillatorCore.Range(high, low, buffer.WritableSpan);
         return buffer;
     }
 
@@ -13735,10 +13724,11 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, fastLength);
+        OscillatorCore.CommodityChannelIndex(high, low, close, buffer.WritableSpan, fastLength);
         return buffer;
     }
 
