@@ -4485,11 +4485,18 @@ public sealed class LindaRaschke310OscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class MidpointOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public MidpointOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MidpointOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4511,11 +4518,18 @@ public sealed class MirroredPercentagePriceOscillatorSpecOptions : IIndicatorSpe
 public sealed class MobilityOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public MobilityOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public MobilityOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4524,11 +4538,18 @@ public sealed class MobilityOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class PercentChangeOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public PercentChangeOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public PercentChangeOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4576,11 +4597,18 @@ public sealed class ProjectionOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class RainbowOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public RainbowOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RainbowOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4602,11 +4630,18 @@ public sealed class RegressionOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class RexOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public RexOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public RexOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4779,11 +4814,18 @@ public sealed class FastSlowDegreeOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class RobustWeightingOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public RobustWeightingOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RobustWeightingOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5230,11 +5272,18 @@ public sealed class TFSVolumeOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class MassThrustOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public MassThrustOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MassThrustOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 // ========== Batch 7 SpecOptions ==========
@@ -7900,12 +7949,20 @@ public sealed class ShinoharaIntensityRatioBSpecOptions : IIndicatorSpecOptions
 public sealed class RangeActionVerificationIndexSpecOptions : IIndicatorSpecOptions
 {
     public RangeActionVerificationIndexSpecOptions(int fastLength = 7, int slowLength = 65)
+        : this(fastLength, slowLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RangeActionVerificationIndexSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
     {
         FastLength = Math.Max(1, fastLength);
         SlowLength = Math.Max(1, slowLength);
+        MaType = maType;
     }
+
     public int FastLength { get; }
     public int SlowLength { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
