@@ -1439,5 +1439,146 @@ internal static class VolatilityCore
         }
     }
 
+    /// <summary>
+    /// Computes Mayer Multiple raw values.
+    /// MayerMultiple = price / MA
+    /// Apply moving average externally before calling this.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="ma">Moving average values.</param>
+    /// <param name="output">Output span for Mayer Multiple values.</param>
+    internal static void MayerMultiple(ReadOnlySpan<double> input, ReadOnlySpan<double> ma, Span<double> output)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            output[i] = ma[i] != 0 ? input[i] / ma[i] : 0;
+        }
+    }
+
+    /// <summary>
+    /// Computes Gopalakrishnan Range Index (GAPO) raw values.
+    /// GAPO = log(highestHigh - lowestLow) / log(length)
+    /// Apply moving average externally for smoothing.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="output">Output span for GAPO values.</param>
+    /// <param name="length">Lookback period.</param>
+    internal static void GopalakrishnanRangeIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var logLength = Math.Log(length);
+        if (logLength == 0) logLength = 1;
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var highestHigh = double.MinValue;
+            var lowestLow = double.MaxValue;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (high[j] > highestHigh) highestHigh = high[j];
+                if (low[j] < lowestLow) lowestLow = low[j];
+            }
+
+            var range = highestHigh - lowestLow;
+            var rangeLog = range > 0 ? Math.Log(range) : 0;
+            output[i] = rangeLog / logLength;
+        }
+    }
+
+    /// <summary>
+    /// Computes High Low Moving Average raw values.
+    /// First calculates highest high and lowest low over a length,
+    /// then returns smoothed average of upper and lower bands.
+    /// Apply moving average externally for the bands.
+    /// </summary>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="upperBand">Output for upper band (MA of highest high).</param>
+    /// <param name="lowerBand">Output for lower band (MA of lowest low).</param>
+    /// <param name="middleBand">Output for middle band ((upper + lower) / 2).</param>
+    /// <param name="length">Lookback period.</param>
+    internal static void HighLowMovingAverageRaw(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        Span<double> upperBand, Span<double> lowerBand, Span<double> middleBand, int length)
+    {
+        if (upperBand.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(upperBand));
+        }
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                upperBand[i] = 0;
+                lowerBand[i] = 0;
+                middleBand[i] = 0;
+                continue;
+            }
+
+            var highestHigh = double.MinValue;
+            var lowestLow = double.MaxValue;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                if (high[j] > highestHigh) highestHigh = high[j];
+                if (low[j] < lowestLow) lowestLow = low[j];
+            }
+
+            upperBand[i] = highestHigh;
+            lowerBand[i] = lowestLow;
+            middleBand[i] = (highestHigh + lowestLow) / 2;
+        }
+    }
+
+    /// <summary>
+    /// Computes Stiffness Indicator raw values.
+    /// Counts how many closes are above the MA minus 0.2 * StdDev over length2 period.
+    /// </summary>
+    /// <param name="close">Close prices.</param>
+    /// <param name="ma">Moving average values.</param>
+    /// <param name="stdDev">Standard deviation values.</param>
+    /// <param name="output">Output span for stiffness percentage values.</param>
+    /// <param name="length2">Lookback period for counting.</param>
+    internal static void StiffnessIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> ma,
+        ReadOnlySpan<double> stdDev, Span<double> output, int length2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            if (i < length2 - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            var bound = ma[i] - (0.2 * stdDev[i]);
+            int count = 0;
+            for (var j = i - length2 + 1; j <= i; j++)
+            {
+                if (close[j] > bound) count++;
+            }
+            output[i] = 100.0 * count / length2;
+        }
+    }
+
     #endregion
 }
