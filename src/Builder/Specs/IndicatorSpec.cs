@@ -7841,3 +7841,37 @@ public sealed class AverageTrueRangeTrailingStopsSpecOptions : IIndicatorSpecOpt
     public double Multiplier { get; }
 }
 
+/// <summary>
+/// Welles Wilder Summation options.
+/// </summary>
+public sealed class WellesWilderSummationSpecOptions : IIndicatorSpecOptions
+{
+    public WellesWilderSummationSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Damping Index options.
+/// </summary>
+public sealed class DampingIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DampingIndexSpecOptions(int length = 5) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Didi Index options.
+/// </summary>
+public sealed class DidiIndexSpecOptions : IIndicatorSpecOptions
+{
+    public DidiIndexSpecOptions(int shortLength = 3, int mediumLength = 8, int longLength = 20)
+    {
+        ShortLength = Math.Max(1, shortLength);
+        MediumLength = Math.Max(1, mediumLength);
+        LongLength = Math.Max(1, longLength);
+    }
+    public int ShortLength { get; }
+    public int MediumLength { get; }
+    public int LongLength { get; }
+}
+

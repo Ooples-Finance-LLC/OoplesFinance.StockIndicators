@@ -7236,5 +7236,140 @@ internal static class MovingAverageCore
         }
     }
 
+    /// <summary>
+    /// Computes Welles Wilder Summation.
+    /// Formula: sum = prevSum - (prevSum / length) + currentValue
+    /// </summary>
+    internal static void WellesWilderSummation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+        double sum = 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var currentValue = input[i];
+            sum = sum - (sum / length) + currentValue;
+            output[i] = sum;
+        }
+    }
+
+    /// <summary>
+    /// Computes Contract High - cumulative maximum of high prices.
+    /// </summary>
+    internal static void ContractHigh(ReadOnlySpan<double> high, Span<double> output)
+    {
+        if (output.Length < high.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double runningMax = double.MinValue;
+
+        for (var i = 0; i < high.Length; i++)
+        {
+            var currentHigh = high[i];
+            runningMax = Math.Max(runningMax, currentHigh);
+            output[i] = runningMax;
+        }
+    }
+
+    /// <summary>
+    /// Computes Contract Low - cumulative minimum of low prices.
+    /// </summary>
+    internal static void ContractLow(ReadOnlySpan<double> low, Span<double> output)
+    {
+        if (output.Length < low.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        double runningMin = double.MaxValue;
+
+        for (var i = 0; i < low.Length; i++)
+        {
+            var currentLow = low[i];
+            runningMin = Math.Min(runningMin, currentLow);
+            output[i] = runningMin;
+        }
+    }
+
+    /// <summary>
+    /// Computes Damping Index oscillator.
+    /// Formula: Measures trend persistence using cumulative direction.
+    /// </summary>
+    internal static void DampingIndex(ReadOnlySpan<double> input, Span<double> output, int length = 5)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        length = Math.Max(1, length);
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length)
+            {
+                output[i] = 0;
+                continue;
+            }
+
+            int upCount = 0;
+            int downCount = 0;
+
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var currentValue = input[j];
+                var prevValue = j > 0 ? input[j - 1] : currentValue;
+                if (currentValue > prevValue) upCount++;
+                else if (currentValue < prevValue) downCount++;
+            }
+
+            output[i] = (double)(upCount - downCount) / length;
+        }
+    }
+
+    /// <summary>
+    /// Computes Didi Index.
+    /// Formula: Compares short, medium, and long term averages.
+    /// </summary>
+    internal static void DidiIndex(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int mediumLength = 8, int longLength = 20)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        var pool = ArrayPool<double>.Shared;
+        var shortMa = pool.Rent(input.Length);
+        var mediumMa = pool.Rent(input.Length);
+        var longMa = pool.Rent(input.Length);
+
+        try
+        {
+            SimpleMovingAverage(input, shortMa.AsSpan(0, input.Length), shortLength);
+            SimpleMovingAverage(input, mediumMa.AsSpan(0, input.Length), mediumLength);
+            SimpleMovingAverage(input, longMa.AsSpan(0, input.Length), longLength);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                var medium = mediumMa[i];
+                // Didi Index: ratio of short MA to medium MA minus ratio of long MA to medium MA
+                output[i] = medium != 0 ? (shortMa[i] / medium) - (longMa[i] / medium) : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(shortMa);
+            pool.Return(mediumMa);
+            pool.Return(longMa);
+        }
+    }
+
     #endregion
 }

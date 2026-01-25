@@ -823,6 +823,9 @@ internal static partial class IndicatorCompute
             AdaptiveAutonomousRecursiveTrailingStopSpecOptions aarts => ComputeAdaptiveAutonomousRecursiveTrailingStopFast(data, context, aarts.Length, aarts.Lambda),
             AdaptiveTrailingStopSpecOptions ats => ComputeAdaptiveTrailingStopFast(data, context, ats.Length, ats.Multiplier),
             AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context, atrts.Length, atrts.Multiplier),
+            WellesWilderSummationSpecOptions wws => ComputeWellesWilderSummationFast(data, context, wws.Length),
+            DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length),
+            DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength, didi.MediumLength, didi.LongLength),
 
             _ => null
         };
@@ -8821,6 +8824,42 @@ internal static partial class IndicatorCompute
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
         MovingAverageCore.AverageTrueRangeTrailingStops(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, multiplier);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Welles Wilder Summation using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeWellesWilderSummationFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.WellesWilderSummation(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Damping Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.DampingIndex(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Didi Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDidiIndexFast(StockData data, ComputeContext context, int shortLength = 3, int mediumLength = 8, int longLength = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.DidiIndex(inputSpan, buffer.WritableSpan, shortLength, mediumLength, longLength);
         return buffer;
     }
 
