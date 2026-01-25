@@ -1037,6 +1037,16 @@ internal static partial class IndicatorCompute
             RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length, rrsi.MaType),
             ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.SmoothLength, rsi2.MaType),
 
+            // Batch 24 - Complex Oscillators and Ehlers Indicators
+            AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context, aeco.SmoothLength, aeco.SignalLength, aeco.MaType),
+            ConfluenceIndicatorSpecOptions ci2 => ComputeConfluenceIndicatorFast(data, context, ci2.Length, ci2.MaType),
+            ConstanceBrownCompositeIndexSpecOptions cbci => ComputeConstanceBrownCompositeIndexFast(data, context, cbci.SmoothLength, cbci.MaType),
+            EhlersAMDetectorSpecOptions eamd => ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType),
+            EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType),
+            EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length3, eacr.MaType),
+            EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.MaType),
+            EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.SlowLength, efmd.MaType),
+
             _ => null
         };
     }
@@ -12955,6 +12965,136 @@ internal static partial class IndicatorCompute
                 break;
             default:
                 MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+        }
+        return buffer;
+    }
+
+    // Batch 24 - Complex Oscillators and Ehlers Indicators
+
+    public static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int smoothLength = 5, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, signalLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, signalLength);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeConfluenceIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeConstanceBrownCompositeIndexFast(StockData data, ComputeContext context, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, smoothLength);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length2);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length2);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length3);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length3);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+        return buffer;
+    }
+
+    public static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, slowLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, slowLength);
                 break;
         }
         return buffer;
