@@ -1017,6 +1017,16 @@ internal static partial class IndicatorCompute
             NaturalDirectionalComboSpecOptions ndc => ComputeNaturalDirectionalComboFast(data, context, ndc.Length, ndc.SmoothLength, ndc.MaType),
             NaturalDirectionalIndexSpecOptions ndi => ComputeNaturalDirectionalIndexFast(data, context, ndi.Length, ndi.SmoothLength, ndi.MaType),
 
+            // Batch 22 - Market and Volume Indicators
+            NaturalMarketMirrorSpecOptions nmm => ComputeNaturalMarketMirrorFast(data, context, nmm.Length, nmm.MaType),
+            NaturalMarketRiverSpecOptions nmr => ComputeNaturalMarketRiverFast(data, context, nmr.Length, nmr.MaType),
+            NaturalMarketComboSpecOptions nmc => ComputeNaturalMarketComboFast(data, context, nmc.Length, nmc.SmoothLength, nmc.MaType),
+            NaturalStochasticIndicatorSpecOptions nsi => ComputeNaturalStochasticIndicatorFast(data, context, nsi.Length, nsi.SmoothLength, nsi.MaType),
+            NegativeVolumeDisparityIndicatorSpecOptions nvdi => ComputeNegativeVolumeDisparityFast(data, context, nvdi.Length, nvdi.SignalLength, nvdi.Top, nvdi.Bottom, nvdi.MaType),
+            OceanIndicatorSpecOptions oi => ComputeOceanIndicatorFast(data, context, oi.Length, oi.MaType),
+            OCHistogramSpecOptions och => ComputeOCHistogramFast(data, context, och.Length, och.MaType),
+            OnBalanceVolumeModifiedSpecOptions obvmod => ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType),
+
             _ => null
         };
     }
@@ -12647,6 +12657,158 @@ internal static partial class IndicatorCompute
                 break;
             default:
                 MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Natural Market Mirror using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNaturalMarketMirrorFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Natural Market River using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNaturalMarketRiverFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Natural Market Combo using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNaturalMarketComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Natural Stochastic Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNaturalStochasticIndicatorFast(StockData data, ComputeContext context, int length = 20, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Negative Volume Disparity Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNegativeVolumeDisparityFast(StockData data, ComputeContext context, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ocean Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOceanIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes OC Histogram using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOCHistogramFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes On Balance Volume Modified using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOnBalanceVolumeModifiedFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
                 break;
         }
         return buffer;
