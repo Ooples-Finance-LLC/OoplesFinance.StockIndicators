@@ -907,6 +907,11 @@ internal static partial class IndicatorCompute
             ChandeMomentumOscillatorSignalSpecOptions cmos => ComputeChandeMomentumOscillatorSignalFast(data, context, cmos.Length, cmos.SignalLength),
             EhlersRoofingFilterV1SpecOptions erf1 => ComputeEhlersRoofingFilterV1Fast(data, context, erf1.Length2, erf1.Length1),
 
+            // Batch 9 - More oscillators and indicators
+            SpearmanIndicatorSpecOptions spi => ComputeEhlersSpearmanRankFast(data, context, spi.Length),
+            TillsonT3MovingAverageSpecOptions tt3 => ComputeTillsonT3Fast(data, context, tt3.Length, tt3.VFactor),
+            UltimateMovingAverageBandsSpecOptions umab => ComputeUltimateMovingAverageFast(data, context, umab.MaxLength),
+
             _ => null
         };
     }
@@ -9625,6 +9630,30 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Spearman Rank Indicator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSpearmanRankFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.EhlersSpearmanRankIndicator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Tillson T3 Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTillsonT3Fast(StockData data, ComputeContext context, int length = 5, double vFactor = 0.7)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.T3MovingAverage(inputSpan, buffer.WritableSpan, length, vFactor);
         return buffer;
     }
 
