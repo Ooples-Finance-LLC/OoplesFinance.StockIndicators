@@ -922,6 +922,10 @@ internal static partial class IndicatorCompute
             // Batch 11 - Additional Moving Averages with Core methods
             VariableIndexDynamicAverageSpecOptions vida => ComputeVariableIndexDynamicAverageFast(data, context, vida.Length),
 
+            // Batch 12 - New Core Methods for Previously Unimplemented Indicators
+            EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length, esdi.SignalLength, esdi.MaType),
+            EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3, esci.SignalLength, esci.MaType),
+
             _ => null
         };
     }
@@ -9747,6 +9751,124 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, buffer.WritableSpan, length);
         return buffer;
+    }
+
+    #endregion
+
+    #region Batch 12 - New Core Methods for Previously Unimplemented Indicators
+
+    /// <summary>
+    /// Computes Ehlers Simple Deriv Indicator using zero-allocation fast path.
+    /// Returns the smoothed z3 oscillator (signal line).
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2, int signalLength = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        // Get pooled buffers
+        var pool = ArrayPool<double>.Shared;
+        var z3Array = pool.Rent(count);
+
+        try
+        {
+            var z3Span = z3Array.AsSpan(0, count);
+
+            // Compute z3 (raw oscillator)
+            OscillatorCore.EhlersSimpleDerivIndicator(inputSpan, z3Span, length);
+
+            // Create output buffer and apply smoothing
+            var buffer = context.Rent(count);
+            var z3ReadOnly = (ReadOnlySpan<double>)z3Span;
+
+            // Apply moving average for signal line
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.DoubleExponentialMovingAverage:
+                    MovingAverageCore.DoubleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.TripleExponentialMovingAverage:
+                    MovingAverageCore.TripleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                default:
+                    // Fallback to EMA for unsupported types
+                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(z3Array);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Simple Clip Indicator using zero-allocation fast path.
+    /// Returns the smoothed z3 oscillator (signal line).
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50, int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        // Get pooled buffers
+        var pool = ArrayPool<double>.Shared;
+        var z3Array = pool.Rent(count);
+
+        try
+        {
+            var z3Span = z3Array.AsSpan(0, count);
+
+            // Compute z3 (raw oscillator with clipped derivatives)
+            OscillatorCore.EhlersSimpleClipIndicator(inputSpan, z3Span, length1, length3);
+
+            // Create output buffer and apply smoothing
+            var buffer = context.Rent(count);
+            var z3ReadOnly = (ReadOnlySpan<double>)z3Span;
+
+            // Apply moving average for signal line
+            switch (maType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.DoubleExponentialMovingAverage:
+                    MovingAverageCore.DoubleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                case MovingAvgType.TripleExponentialMovingAverage:
+                    MovingAverageCore.TripleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+                default:
+                    // Fallback to EMA for unsupported types
+                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
+                    break;
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(z3Array);
+        }
     }
 
     #endregion

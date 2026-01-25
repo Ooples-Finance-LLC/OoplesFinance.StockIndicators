@@ -12487,5 +12487,148 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Batch 25 - Additional Ehlers Indicators (New Core Methods)
+
+    /// <summary>
+    /// Computes Ehlers Simple Clip Indicator raw values (z3).
+    /// Output is the sum of last 4 clipped derivative values.
+    /// Apply a moving average externally for the signal line.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for z3 values.</param>
+    /// <param name="length1">Lag period for derivative (default 2).</param>
+    /// <param name="length3">RMS period (default 50).</param>
+    internal static void EhlersSimpleClipIndicator(ReadOnlySpan<double> input, Span<double> output, int length1 = 2, int length3 = 50)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var derivArray = pool.Rent(input.Length);
+        var clipArray = pool.Rent(input.Length);
+
+        try
+        {
+            var deriv = derivArray.AsSpan(0, input.Length);
+            var clip = clipArray.AsSpan(0, input.Length);
+
+            // Calculate derivative values with lag
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var prevValue = i >= length1 ? input[i - length1] : 0;
+
+                if (i >= length1)
+                {
+                    deriv[i] = currentValue - prevValue;
+                }
+                else
+                {
+                    deriv[i] = 0;
+                }
+            }
+
+            // Calculate clip values (clipped derivative normalized by RMS)
+            for (var i = 0; i < input.Length; i++)
+            {
+                // Calculate RMS of deriv over length3 period
+                var rms = 0.0;
+                for (var j = 0; j < length3 && i >= j; j++)
+                {
+                    rms += deriv[i - j] * deriv[i - j];
+                }
+
+                // Clip = constrain(2 * deriv / sqrt(rms/length3), -1, 1)
+                if (rms != 0)
+                {
+                    var normalizedDeriv = 2 * deriv[i] / Math.Sqrt(rms / length3);
+                    clip[i] = Math.Max(-1, Math.Min(1, normalizedDeriv));
+                }
+                else
+                {
+                    clip[i] = 0;
+                }
+            }
+
+            // Calculate z3 = sum of last 4 clip values
+            for (var i = 0; i < input.Length; i++)
+            {
+                var prevClip1 = i >= 1 ? clip[i - 1] : 0;
+                var prevClip2 = i >= 2 ? clip[i - 2] : 0;
+                var prevClip3 = i >= 3 ? clip[i - 3] : 0;
+
+                output[i] = clip[i] + prevClip1 + prevClip2 + prevClip3;
+            }
+        }
+        finally
+        {
+            pool.Return(derivArray);
+            pool.Return(clipArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Simple Deriv Indicator raw values (z3).
+    /// Output is the sum of last 4 derivative values.
+    /// Apply a moving average externally for the signal line.
+    /// </summary>
+    /// <param name="input">Input prices.</param>
+    /// <param name="output">Output span for z3 values.</param>
+    /// <param name="length">Lag period for derivative (default 2).</param>
+    internal static void EhlersSimpleDerivIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 2)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var derivArray = pool.Rent(input.Length);
+
+        try
+        {
+            var deriv = derivArray.AsSpan(0, input.Length);
+
+            // Calculate derivative values with lag
+            for (var i = 0; i < input.Length; i++)
+            {
+                var currentValue = input[i];
+                var prevValue = i >= length ? input[i - length] : 0;
+
+                // deriv = currentValue - prevValue (with MinPastValues logic)
+                if (i >= length)
+                {
+                    deriv[i] = currentValue - prevValue;
+                }
+                else
+                {
+                    deriv[i] = 0;
+                }
+            }
+
+            // Calculate z3 = sum of last 4 deriv values
+            for (var i = 0; i < input.Length; i++)
+            {
+                var prevDeriv1 = i >= 1 ? deriv[i - 1] : 0;
+                var prevDeriv2 = i >= 2 ? deriv[i - 2] : 0;
+                var prevDeriv3 = i >= 3 ? deriv[i - 3] : 0;
+
+                output[i] = deriv[i] + prevDeriv1 + prevDeriv2 + prevDeriv3;
+            }
+        }
+        finally
+        {
+            pool.Return(derivArray);
+        }
+    }
+
+    #endregion
+
     #endregion
 }
