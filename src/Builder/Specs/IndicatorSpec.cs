@@ -9801,3 +9801,191 @@ public sealed class EhlersSimpleClipIndicatorSpecOptions : IIndicatorSpecOptions
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Moving Average Band Width options.
+/// </summary>
+public sealed class MovingAverageBandWidthSpecOptions : IIndicatorSpecOptions
+{
+    public MovingAverageBandWidthSpecOptions(int fastLength = 10, int slowLength = 50, double mult = 1)
+        : this(fastLength, slowLength, mult, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MovingAverageBandWidthSpecOptions(int fastLength, int slowLength, double mult, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        Mult = mult;
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public double Mult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Mayer Multiple options.
+/// </summary>
+public sealed class MayerMultipleSpecOptions : IIndicatorSpecOptions
+{
+    public MayerMultipleSpecOptions(int length = 200, double threshold = 2.4)
+        : this(length, threshold, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public MayerMultipleSpecOptions(int length, double threshold, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Threshold = threshold;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Threshold { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Market Meanness Index options.
+/// </summary>
+public sealed class MarketMeannessIndexSpecOptions : IIndicatorSpecOptions
+{
+    public MarketMeannessIndexSpecOptions(int length = 100)
+        : this(length, MovingAvgType.EhlersNoiseEliminationTechnology)
+    {
+    }
+
+    public MarketMeannessIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Projection Bandwidth options.
+/// </summary>
+public sealed class ProjectionBandwidthSpecOptions : IIndicatorSpecOptions
+{
+    public ProjectionBandwidthSpecOptions(int length = 14)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public ProjectionBandwidthSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Ultimate Volatility Indicator options.
+/// </summary>
+public sealed class UltimateVolatilityIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public UltimateVolatilityIndicatorSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public UltimateVolatilityIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Volatility Switch Indicator options.
+/// </summary>
+public sealed class VolatilitySwitchIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public VolatilitySwitchIndicatorSpecOptions(int length = 14)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public VolatilitySwitchIndicatorSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Statistical Volatility options.
+/// </summary>
+public sealed class StatisticalVolatilitySpecOptions : IIndicatorSpecOptions
+{
+    public StatisticalVolatilitySpecOptions(int length1 = 30, int length2 = 253)
+        : this(length1, length2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public StatisticalVolatilitySpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Standard Deviation options.
+/// </summary>
+public sealed class StandardDevationSpecOptions : IIndicatorSpecOptions
+{
+    public StandardDevationSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StandardDevationSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Accumulation Distribution Line options.
+/// </summary>
+public sealed class AccumulationDistributionLineSpecOptions : IIndicatorSpecOptions
+{
+    public AccumulationDistributionLineSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public AccumulationDistributionLineSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
