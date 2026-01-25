@@ -13321,11 +13321,72 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
+        // V1 Algorithm: Rocket RSI with smoothed momentum
+        // 1. Calculate mom = currentValue - prevValue (length1-1 bars ago)
+        // 2. arg = (mom + prevMom) / 2
+        // 3. Apply MA to arg
+        // 4. Calculate momentum of smoothed values
+        // 5. Sum up/down changes over length1
+        // 6. Calculate RSI-like ratio and apply log transform
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length1 = Math.Max(1, length1);
+        int length2 = 8; // Fixed per V1
+        double mult = 1.0;
+
+        // Step 1: Calculate mom and arg
+        var argBuffer = context.Rent(count);
+        var argSpan = argBuffer.WritableSpan;
+        double prevMom = 0;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= length1 - 1 ? close[i - (length1 - 1)] : 0;
+            double mom = i >= length1 - 1 ? currentValue - prevValue : 0;
+            argSpan[i] = (mom + prevMom) / 2;
+            prevMom = mom;
+        }
+
+        // Step 2: Apply MA to arg
+        var ssf2PoleBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
-        return buffer;
+        maCore.Compute(argBuffer.Span, ssf2PoleBuffer.WritableSpan, length2);
+        argBuffer.Dispose();
+        var ssf2PoleSpan = ssf2PoleBuffer.Span;
+
+        // Step 3-6: Calculate Rocket RSI
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        double prevTmp = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double ssf2Pole = ssf2PoleSpan[i];
+            double prevSsf2Pole = i >= 1 ? ssf2PoleSpan[i - 1] : 0;
+            double ssf2PoleMom = ssf2Pole - prevSsf2Pole;
+
+            // Sum up/down changes over length1
+            double upSum = 0, downSum = 0;
+            for (int j = 0; j < length1 && i - j >= 1; j++)
+            {
+                double curVal = ssf2PoleSpan[i - j];
+                double prevVal = ssf2PoleSpan[i - j - 1];
+                double chg = curVal - prevVal;
+                if (chg > 0) upSum += chg;
+                else downSum += Math.Abs(chg);
+            }
+
+            double denom = upSum + downSum;
+            double tmp = denom != 0 ? Math.Max(-0.999, Math.Min(0.999, (upSum - downSum) / denom)) : prevTmp;
+            prevTmp = tmp;
+
+            double tempLog = (1 - tmp) != 0 ? (1 + tmp) / (1 - tmp) : 0;
+            double logVal = tempLog > 0 ? Math.Log(tempLog) : 0;
+            resultSpan[i] = 0.5 * logVal * mult;
+        }
+
+        ssf2PoleBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
