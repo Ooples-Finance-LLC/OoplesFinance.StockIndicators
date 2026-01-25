@@ -899,6 +899,14 @@ internal static partial class IndicatorCompute
                 _ => null
             },
 
+            // Batch 8 - Moving Averages with existing Core methods
+            _1LCLeastSquaresMovingAverageSpecOptions olc => ComputeOneLCLeastSquaresFast(data, context, olc.Length),
+            _3HMASpecOptions thma2 => ComputeThreeHmaFast(data, context, thma2.Length),
+            AdaptiveRelativeStrengthIndexSpecOptions arsi => ComputeAdaptiveRsiFast(data, context, arsi.Length),
+            BollingerBandsAvgTrueRangeSpecOptions bbatr => ComputeBollingerBandsAtrFast(data, context, bbatr.AtrLength, bbatr.Length),
+            ChandeMomentumOscillatorSignalSpecOptions cmos => ComputeChandeMomentumOscillatorSignalFast(data, context, cmos.Length, cmos.SignalLength),
+            EhlersRoofingFilterV1SpecOptions erf1 => ComputeEhlersRoofingFilterV1Fast(data, context, erf1.Length2, erf1.Length1),
+
             _ => null
         };
     }
@@ -9548,6 +9556,75 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         TrendCore.KeltnerChannelMiddle(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes 1LC Least Squares Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOneLCLeastSquaresFast(StockData data, ComputeContext context, int length = 32)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.AdaptiveRsi(inputSpan, buffer.WritableSpan, 5, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands ATR using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int atrLength = 22, int length = 55)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        VolatilityCore.BollingerBandsAtr(high, low, close, buffer.WritableSpan, length, 2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator Signal using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeMomentumOscillatorSignalFast(StockData data, ComputeContext context, int length = 14, int signalLength = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.ChandeMomentumOscillatorAverage(inputSpan, buffer.WritableSpan, length, signalLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Roofing Filter V1 using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEhlersRoofingFilterV1Fast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
         return buffer;
     }
 
