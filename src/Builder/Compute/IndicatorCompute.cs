@@ -1,3 +1,4 @@
+using System.Buffers;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
@@ -863,6 +864,40 @@ internal static partial class IndicatorCompute
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
             StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length, srsi2.SmoothLength1, srsi2.SmoothLength2),
             StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.SmoothLength1, smi.SmoothLength2),
+
+            // Batch 7 - Additional oscillators and power indicators
+            CCTStochRSISpecOptions cctsr => ComputeCCTStochRsiFast(data, context, cctsr.Length4, cctsr.Length1, cctsr.SmoothLength1),
+            InertiaIndicatorSpecOptions inertia => ComputeInertiaFast(data, context, inertia.Length),
+            PremierStochasticOscillatorSpecOptions pso => ComputePremierStochasticFast(data, context, pso.Length, pso.SmoothLength),
+            BullPowerIndicatorSpecOptions bpi => ComputeBullPowerFast(data, context, bpi.Length),
+            BearPowerIndicatorSpecOptions beari => ComputeBearPowerFast(data, context, beari.Length),
+            MomentumOscillatorSpecOptions mosc => ComputeMomentumOscillatorFast(data, context, mosc.Length, mosc.SmoothLength),
+            StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length, stosc.SmoothLength1),
+            StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length, stfo.SmoothLength1),
+
+            // Multi-output: KeltnerChannels
+            KeltnerChannelsSpecOptions kc => spec.Output switch
+            {
+                IndicatorOutput.Primary => ComputeKeltnerMiddleFast(data, context, kc.Length1),
+                IndicatorOutput.MiddleBand => ComputeKeltnerMiddleFast(data, context, kc.Length1),
+                _ => null
+            },
+
+            // Multi-output: ElderRayIndex
+            ElderRayIndexSpecOptions eri => spec.Output switch
+            {
+                IndicatorOutput.Primary => ComputeElderRayBullPowerFast(data, context, eri.Length),
+                _ => null
+            },
+
+            // Multi-output: ChandelierExit
+            ChandelierExitSpecOptions ce => spec.Output switch
+            {
+                IndicatorOutput.Primary => ComputeChandelierExitLongFast(data, context, ce.Length),
+                IndicatorOutput.UpperBand => ComputeChandelierExitLongFast(data, context, ce.Length),
+                IndicatorOutput.LowerBand => ComputeChandelierExitShortFast(data, context, ce.Length),
+                _ => null
+            },
 
             _ => null
         };
@@ -9359,6 +9394,160 @@ internal static partial class IndicatorCompute
         }
         var buffer = context.Rent(count);
         OscillatorCore.StochasticMomentumIndex(high, low, close, buffer.WritableSpan, length, smoothLength1, smoothLength2);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes CCT Stoch RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeCCTStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.CCTStochRsi(inputSpan, buffer.WritableSpan, rsiLength, stochLength, smaLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Inertia using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeInertiaFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.Inertia(high, low, close, buffer.WritableSpan, 14, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Premier Stochastic Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.PremierStochastic(high, low, close, buffer.WritableSpan, length, smoothLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Momentum Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        // Momentum oscillator is momentum with smoothing
+        var pool = ArrayPool<double>.Shared;
+        var momArray = pool.Rent(inputList.Count);
+        try
+        {
+            var mom = momArray.AsSpan(0, inputList.Count);
+            OscillatorCore.Momentum(inputSpan, mom, length);
+            MovingAverageCore.WeightedMovingAverage(mom, buffer.WritableSpan, smoothLength);
+        }
+        finally
+        {
+            pool.Return(momArray);
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stochastic Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        var pool = ArrayPool<double>.Shared;
+        var kArray = pool.Rent(count);
+        try
+        {
+            var k = kArray.AsSpan(0, count);
+            OscillatorCore.StochasticK(high, low, close, k, length);
+            MovingAverageCore.SimpleMovingAverage(k, buffer.WritableSpan, smoothLength);
+        }
+        finally
+        {
+            pool.Return(kArray);
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stochastic Fast Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        var pool = ArrayPool<double>.Shared;
+        var kArray = pool.Rent(count);
+        try
+        {
+            var k = kArray.AsSpan(0, count);
+            OscillatorCore.StochasticK(high, low, close, k, length);
+            MovingAverageCore.ExponentialMovingAverage(k, buffer.WritableSpan, smoothLength);
+        }
+        finally
+        {
+            pool.Return(kArray);
+        }
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Keltner Channel Middle using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKeltnerMiddleFast(StockData data, ComputeContext context, int length = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.KeltnerChannelMiddle(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
