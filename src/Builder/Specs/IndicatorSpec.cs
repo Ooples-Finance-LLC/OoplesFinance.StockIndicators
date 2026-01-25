@@ -4768,11 +4768,18 @@ public sealed class PivotDetectorOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class TickLineMomentumOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public TickLineMomentumOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TickLineMomentumOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5338,11 +5345,18 @@ public sealed class EhlersTriangleMovingAverageSpecOptions : IIndicatorSpecOptio
 public sealed class ElasticVolumeWeightedMovingAverageV1SpecOptions : IIndicatorSpecOptions
 {
     public ElasticVolumeWeightedMovingAverageV1SpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ElasticVolumeWeightedMovingAverageV1SpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5833,11 +5847,18 @@ public sealed class EhlersHighPassFilterV1SpecOptions : IIndicatorSpecOptions
 public sealed class EhlersHighPassFilterV2SpecOptions : IIndicatorSpecOptions
 {
     public EhlersHighPassFilterV2SpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public EhlersHighPassFilterV2SpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6444,8 +6465,19 @@ public sealed class DynamicallyAdjustableFilterSpecOptions : IIndicatorSpecOptio
 /// </summary>
 public sealed class EdgePreservingFilterSpecOptions : IIndicatorSpecOptions
 {
-    public EdgePreservingFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public EdgePreservingFilterSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public EdgePreservingFilterSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6516,8 +6548,19 @@ public sealed class EhlersOptimumEllipticFilterSpecOptions : IIndicatorSpecOptio
 /// </summary>
 public sealed class EhlersVariableIndexDynamicAverageSpecOptions : IIndicatorSpecOptions
 {
-    public EhlersVariableIndexDynamicAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public EhlersVariableIndexDynamicAverageSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public EhlersVariableIndexDynamicAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6543,8 +6586,19 @@ public sealed class FareySequenceWeightedMovingAverageSpecOptions : IIndicatorSp
 /// </summary>
 public sealed class FisherLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public FisherLeastSquaresMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public FisherLeastSquaresMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public FisherLeastSquaresMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6678,8 +6732,19 @@ public sealed class LinearExtrapolationSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class LinearRegressionLineSpecOptions : IIndicatorSpecOptions
 {
-    public LinearRegressionLineSpecOptions(int length) { Length = Math.Max(1, length); }
+    public LinearRegressionLineSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public LinearRegressionLineSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6837,8 +6902,19 @@ public sealed class DynamicallyAdjustableMovingAverageSpecOptions : IIndicatorSp
 /// </summary>
 public sealed class EquityMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public EquityMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public EquityMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public EquityMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7225,8 +7301,19 @@ public sealed class VortexPlusSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class VolumeWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public VolumeWeightedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public VolumeWeightedMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VolumeWeightedMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7308,9 +7395,21 @@ public sealed class EhlersRoofingFilterSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class EhlersDeviationScaledSuperSmootherSpecOptions : IIndicatorSpecOptions
 {
-    public EhlersDeviationScaledSuperSmootherSpecOptions(int length, int poles = 2) { Length = Math.Max(1, length); Poles = poles; }
+    public EhlersDeviationScaledSuperSmootherSpecOptions(int length, int poles = 2)
+        : this(length, poles, MovingAvgType.EhlersHannMovingAverage)
+    {
+    }
+
+    public EhlersDeviationScaledSuperSmootherSpecOptions(int length, int poles, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Poles = poles;
+        MaType = maType;
+    }
+
     public int Length { get; }
     public int Poles { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
