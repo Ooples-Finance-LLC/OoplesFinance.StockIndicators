@@ -1989,5 +1989,202 @@ internal static class TrendCore
         }
     }
 
+    /// <summary>
+    /// Computes Floor Pivot Point.
+    /// </summary>
+    internal static void FloorPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            output[i] = (prevHigh + prevLow + prevClose) / 3;
+        }
+    }
+
+    /// <summary>
+    /// Computes Floor Pivot Point Support Level 1.
+    /// </summary>
+    internal static void FloorPivotPointS1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            output[i] = (pivot * 2) - prevHigh;
+        }
+    }
+
+    /// <summary>
+    /// Computes Floor Pivot Point Resistance Level 1.
+    /// </summary>
+    internal static void FloorPivotPointR1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            output[i] = (pivot * 2) - prevLow;
+        }
+    }
+
+    /// <summary>
+    /// Computes Camarilla Pivot Point.
+    /// </summary>
+    internal static void CamarillaPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            output[i] = (prevHigh + prevLow + prevClose) / 3;
+        }
+    }
+
+    /// <summary>
+    /// Computes Woodie Pivot Point.
+    /// </summary>
+    internal static void WoodiePivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output)
+    {
+        if (output.Length < open.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < open.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var currentOpen = open[i];
+
+            output[i] = (prevHigh + prevLow + (currentOpen * 2)) / 4;
+        }
+    }
+
+    /// <summary>
+    /// Computes Fibonacci Pivot Point.
+    /// </summary>
+    internal static void FibonacciPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            output[i] = (prevHigh + prevLow + prevClose) / 3;
+        }
+    }
+
+    /// <summary>
+    /// Computes Demark Pivot Point.
+    /// </summary>
+    internal static void DemarkPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        for (var i = 0; i < close.Length; i++)
+        {
+            var prevHigh = i >= 1 ? high[i - 1] : high[i];
+            var prevLow = i >= 1 ? low[i - 1] : low[i];
+            var prevOpen = i >= 1 ? open[i - 1] : open[i];
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+
+            double x;
+            if (prevClose < prevOpen)
+            {
+                x = prevHigh + (2 * prevLow) + prevClose;
+            }
+            else if (prevClose > prevOpen)
+            {
+                x = (2 * prevHigh) + prevLow + prevClose;
+            }
+            else
+            {
+                x = prevHigh + prevLow + (2 * prevClose);
+            }
+
+            output[i] = x / 4;
+        }
+    }
+
+    /// <summary>
+    /// Computes Linear Channel Middle line.
+    /// </summary>
+    internal static void LinearChannelMiddle(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        MovingAverageCore.LinearRegression(input, output, length);
+    }
+
+    /// <summary>
+    /// Computes Price Channel Upper (highest high over period).
+    /// </summary>
+    internal static void PriceChannelUpper(ReadOnlySpan<double> high, Span<double> output, int length = 20)
+    {
+        HighestHigh(high, output, length);
+    }
+
+    /// <summary>
+    /// Computes Price Channel Lower (lowest low over period).
+    /// </summary>
+    internal static void PriceChannelLower(ReadOnlySpan<double> low, Span<double> output, int length = 20)
+    {
+        LowestLow(low, output, length);
+    }
+
+    /// <summary>
+    /// Computes Donchian Channel Upper (highest high over period).
+    /// </summary>
+    internal static void DonchianChannelUpper(ReadOnlySpan<double> high, Span<double> output, int length = 20)
+    {
+        HighestHigh(high, output, length);
+    }
+
+    /// <summary>
+    /// Computes Donchian Channel Lower (lowest low over period).
+    /// </summary>
+    internal static void DonchianChannelLower(ReadOnlySpan<double> low, Span<double> output, int length = 20)
+    {
+        LowestLow(low, output, length);
+    }
+
     #endregion
 }
