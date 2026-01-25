@@ -1355,11 +1355,18 @@ public sealed class T3SpecOptions : IIndicatorSpecOptions
 public sealed class VidyaSpecOptions : IIndicatorSpecOptions
 {
     public VidyaSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public VidyaSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -3770,11 +3777,18 @@ public sealed class GannHiLoActivatorSpecOptions : IIndicatorSpecOptions
 public sealed class HalfTrendSpecOptions : IIndicatorSpecOptions
 {
     public HalfTrendSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public HalfTrendSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 // ========== Batch 6 SpecOptions ==========
@@ -4305,11 +4319,18 @@ public sealed class RexOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class SentimentZoneOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public SentimentZoneOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.TripleExponentialMovingAverage)
+    {
+    }
+
+    public SentimentZoneOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4331,11 +4352,18 @@ public sealed class WaveTrendOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class WamiOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public WamiOscillatorSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public WamiOscillatorSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4900,11 +4928,18 @@ public sealed class MassThrustOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class UltimateMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public UltimateMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public UltimateMovingAverageSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -5800,11 +5835,18 @@ public sealed class InternalBarStrengthIndicatorSpecOptions : IIndicatorSpecOpti
 public sealed class ZScoreSpecOptions : IIndicatorSpecOptions
 {
     public ZScoreSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ZScoreSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6704,8 +6746,19 @@ public sealed class TStepLeastSquaresMovingAverageSpecOptions : IIndicatorSpecOp
 /// </summary>
 public sealed class VariableAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public VariableAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public VariableAdaptiveMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VariableAdaptiveMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7407,12 +7460,20 @@ public sealed class StrengthOfMovementSpecOptions : IIndicatorSpecOptions
 public sealed class ValueChartIndicatorSpecOptions : IIndicatorSpecOptions
 {
     public ValueChartIndicatorSpecOptions(int length = 5, int numAtrs = 8)
+        : this(length, numAtrs, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ValueChartIndicatorSpecOptions(int length, int numAtrs, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         NumAtrs = Math.Max(1, numAtrs);
+        MaType = maType;
     }
+
     public int Length { get; }
     public int NumAtrs { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
