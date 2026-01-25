@@ -1052,7 +1052,7 @@ internal static partial class IndicatorCompute
             EhlersRestoringPullIndicatorSpecOptions erpi => ComputeEhlersRestoringPullIndicatorFast(data, context, erpi.Length2, erpi.MaType),
             EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1, errsi.MaType),
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
-            EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length2, esam.MaType),
+            EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1, esam.Length2, esam.MaType),
             EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
             EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.MaType),
             EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
@@ -13553,12 +13553,11 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
+        OscillatorCore.EhlersSmoothedAdaptiveMomentum(close, buffer.WritableSpan, length1, length2);
         return buffer;
     }
 
@@ -13741,8 +13740,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
+        OscillatorCore.EhlersAdaptiveCommodityChannelIndexV2(close, buffer.WritableSpan, length1, length2, length3);
         return buffer;
     }
 
@@ -13750,8 +13748,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length3);
+        OscillatorCore.EhlersAdaptiveRelativeStrengthIndexV2(close, buffer.WritableSpan, length1, length2, length3);
         return buffer;
     }
 
@@ -13778,8 +13775,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length4);
+        OscillatorCore.EhlersMesaPredictIndicatorV2(close, buffer.WritableSpan, length1, length2, length3, length4);
         return buffer;
     }
 
@@ -14370,8 +14366,7 @@ internal static partial class IndicatorCompute
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
+        OscillatorCore.PeakValleyEstimation(close, buffer.WritableSpan, length, smoothLength);
         return buffer;
     }
 

@@ -12778,6 +12778,140 @@ internal static class OscillatorCore
     #region Ehlers Signal Processing
 
     /// <summary>
+    /// Computes Ehlers Adaptive Cyber Cycle Period output.
+    /// </summary>
+    internal static void EhlersAdaptiveCyberCyclePeriod(ReadOnlySpan<double> close, Span<double> periodOutput, int length = 5, double alpha = 0.07)
+    {
+        if (periodOutput.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.");
+
+        length = Math.Max(1, length);
+        var pool = ArrayPool<double>.Shared;
+        var smoothArray = pool.Rent(close.Length);
+        var cycleArray = pool.Rent(close.Length);
+        var q1Array = pool.Rent(close.Length);
+        var i1Array = pool.Rent(close.Length);
+        var ipArray = pool.Rent(close.Length);
+        var dpArray = pool.Rent(close.Length);
+
+        try
+        {
+            var smooth = smoothArray.AsSpan(0, close.Length);
+            var cycle = cycleArray.AsSpan(0, close.Length);
+            var q1 = q1Array.AsSpan(0, close.Length);
+            var i1 = i1Array.AsSpan(0, close.Length);
+            var ip = ipArray.AsSpan(0, close.Length);
+            var dp = dpArray.AsSpan(0, close.Length);
+
+            // Compute with rolling median for dp
+            var dpWindow = new List<double>(length);
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double currentValue = close[i];
+                double prevValue = i >= 1 ? close[i - 1] : 0;
+                double prevCycle = i >= 1 ? cycle[i - 1] : 0;
+                double prevSmooth = i >= 1 ? smooth[i - 1] : 0;
+                double prevIp = i >= 1 ? ip[i - 1] : 0;
+                double prevI1 = i >= 1 ? i1[i - 1] : 0;
+                double prevQ1 = i >= 1 ? q1[i - 1] : 0;
+                double prevP = i >= 1 ? periodOutput[i - 1] : 0;
+                double prevValue2 = i >= 2 ? close[i - 2] : 0;
+                double prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
+                double prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
+                double prevValue3 = i >= 3 ? close[i - 3] : 0;
+                double prevCycle3 = i >= 3 ? cycle[i - 3] : 0;
+                double prevCycle4 = i >= 4 ? cycle[i - 4] : 0;
+                double prevCycle6 = i >= 6 ? cycle[i - 6] : 0;
+
+                smooth[i] = (currentValue + (2 * prevValue) + (2 * prevValue2) + prevValue3) / 6;
+                cycle[i] = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
+                    (Math.Pow(1 - (0.5 * alpha), 2) * (smooth[i] - (2 * prevSmooth) + prevSmooth2)) +
+                    (2 * (1 - alpha) * prevCycle) - (Math.Pow(1 - alpha, 2) * prevCycle2);
+
+                q1[i] = ((0.0962 * cycle[i]) + (0.5769 * prevCycle2) - (0.5769 * prevCycle4) - (0.0962 * prevCycle6)) * (0.5 + (0.08 * prevIp));
+                i1[i] = prevCycle3;
+
+                double dpVal = 0;
+                if (q1[i] != 0 && prevQ1 != 0)
+                {
+                    double denom = 1 + (i1[i] * prevI1 / (q1[i] * prevQ1));
+                    dpVal = denom != 0 ? ((i1[i] / q1[i]) - (prevI1 / prevQ1)) / denom : 0;
+                }
+                dpVal = Math.Min(Math.Max(dpVal, 0.1), 1.1);
+                dp[i] = dpVal;
+
+                // Rolling median
+                dpWindow.Add(dpVal);
+                if (dpWindow.Count > length) dpWindow.RemoveAt(0);
+                var sorted = dpWindow.OrderBy(x => x).ToList();
+                double medianDelta = sorted.Count > 0 ? sorted[sorted.Count / 2] : 0;
+
+                double dc = medianDelta != 0 ? (6.28318 / medianDelta) + 0.5 : 15;
+                ip[i] = (0.33 * dc) + (0.67 * prevIp);
+                periodOutput[i] = (0.15 * ip[i]) + (0.85 * prevP);
+            }
+        }
+        finally
+        {
+            pool.Return(smoothArray);
+            pool.Return(cycleArray);
+            pool.Return(q1Array);
+            pool.Return(i1Array);
+            pool.Return(ipArray);
+            pool.Return(dpArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Smoothed Adaptive Momentum.
+    /// </summary>
+    internal static void EhlersSmoothedAdaptiveMomentum(ReadOnlySpan<double> close, Span<double> output, int length1 = 5, int length2 = 8)
+    {
+        if (output.Length < close.Length)
+            throw new ArgumentException("Output span must be at least input length.");
+
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(2, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var periodArray = pool.Rent(close.Length);
+
+        try
+        {
+            var period = periodArray.AsSpan(0, close.Length);
+            EhlersAdaptiveCyberCyclePeriod(close, period, length1);
+
+            // Filter coefficients
+            double a1 = Math.Exp(-Math.PI / length2);
+            double b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / length2);
+            double c1 = a1 * a1;
+            double coef2 = b1 + c1;
+            double coef3 = -1 * (c1 + (b1 * c1));
+            double coef4 = c1 * c1;
+            double coef1 = 1 - coef2 - coef3 - coef4;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double p = period[i];
+                double prevF3_1 = i >= 1 ? output[i - 1] : 0;
+                double prevF3_2 = i >= 2 ? output[i - 2] : 0;
+                double prevF3_3 = i >= 3 ? output[i - 3] : 0;
+                int pr = (int)Math.Ceiling(Math.Abs(p - 1));
+                pr = Math.Max(1, pr);
+                double prevValue = i >= pr ? close[i - pr] : 0;
+                double v1 = i >= pr ? close[i] - prevValue : 0;
+
+                output[i] = (coef1 * v1) + (coef2 * prevF3_1) + (coef3 * prevF3_2) + (coef4 * prevF3_3);
+            }
+        }
+        finally
+        {
+            pool.Return(periodArray);
+        }
+    }
+
+    /// <summary>
     /// Computes Ehlers Simple Hilbert Transform (outputs InPhase and Quad).
     /// </summary>
     internal static void EhlersHilbertTransformSimple(ReadOnlySpan<double> close, Span<double> inPhase, Span<double> quad, int length = 7, double iMult = 0.635, double qMult = 0.338)
@@ -12998,6 +13132,423 @@ internal static class OscillatorCore
             pool.Return(i1Array);
             pool.Return(q1Array);
             pool.Return(mamaArray);
+        }
+    }
+
+    #endregion
+
+    #region Peak Valley Estimation
+
+    /// <summary>
+    /// Computes Peak Valley Estimation indicator - detects peaks and valleys using linear regression.
+    /// </summary>
+    internal static void PeakValleyEstimation(ReadOnlySpan<double> close, Span<double> output, int length = 500, int smoothLength = 100)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length = Math.Max(1, length);
+        smoothLength = Math.Max(1, smoothLength);
+
+        var pool = ArrayPool<double>.Shared;
+        var maArray = pool.Rent(close.Length);
+        var absOsArray = pool.Rent(close.Length);
+        var linRegArray = pool.Rent(close.Length);
+
+        try
+        {
+            var ma = maArray.AsSpan(0, close.Length);
+            var absOs = absOsArray.AsSpan(0, close.Length);
+            var linReg = linRegArray.AsSpan(0, close.Length);
+
+            // Step 1: Compute SMA
+            MovingAverageCore.SimpleMovingAverage(close, ma, length);
+
+            // Step 2: Compute os = close - MA, absOs = abs(os)
+            for (int i = 0; i < close.Length; i++)
+            {
+                double os = close[i] - ma[i];
+                absOs[i] = Math.Abs(os);
+            }
+
+            // Step 3: Compute Linear Regression of absOs
+            MovingAverageCore.LinearRegression(absOs, linReg, smoothLength);
+
+            // Step 4: Find rolling highest of linReg
+            double prevH = 0;
+            for (int i = 0; i < close.Length; i++)
+            {
+                // Find highest in window
+                double highest = 0;
+                int start = Math.Max(0, i - length + 1);
+                for (int j = start; j <= i; j++)
+                {
+                    highest = Math.Max(highest, linReg[j]);
+                }
+
+                double h = highest > 0 ? linReg[i] / highest : 0;
+                double os = close[i] - ma[i];
+
+                // mod1: h just reached 1 (transition from <1 to 1)
+                double mod1 = h == 1 && prevH < 1 ? 1 : 0;
+
+                // sign1: signal based on mod1 and os direction
+                double sign1 = 0;
+                if (mod1 == 1)
+                {
+                    sign1 = os < 0 ? 1 : (os > 0 ? -1 : 0);
+                }
+
+                prevH = h;
+                output[i] = sign1;
+            }
+        }
+        finally
+        {
+            pool.Return(maArray);
+            pool.Return(absOsArray);
+            pool.Return(linRegArray);
+        }
+    }
+
+    #endregion
+
+    #region Ehlers AutoCorrelation and Adaptive Indicators
+
+    /// <summary>
+    /// Computes Ehlers AutoCorrelation Indicator - correlation between current and lagged RoofingFilter values.
+    /// </summary>
+    internal static void EhlersAutoCorrelationIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var rfArray = pool.Rent(close.Length);
+
+        try
+        {
+            var rf = rfArray.AsSpan(0, close.Length);
+            EhlersRoofingFilterV2(close, rf, length1, length2);
+
+            // Rolling sums for correlation
+            double xSum = 0, ySum = 0, xxSum = 0, yySum = 0, xySum = 0;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double x = rf[i];
+                double y = i >= length1 ? rf[i - length1] : 0;
+                double xx = x * x;
+                double yy = y * y;
+                double xy = x * y;
+
+                // Add new values
+                xSum += x;
+                ySum += y;
+                xxSum += xx;
+                yySum += yy;
+                xySum += xy;
+
+                // Remove old values when window is full
+                if (i >= length1)
+                {
+                    int removeIdx = i - length1;
+                    double oldX = rf[removeIdx];
+                    double oldY = removeIdx >= length1 ? rf[removeIdx - length1] : 0;
+                    xSum -= oldX;
+                    ySum -= oldY;
+                    xxSum -= oldX * oldX;
+                    yySum -= oldY * oldY;
+                    xySum -= oldX * oldY;
+                }
+
+                int count = Math.Min(i + 1, length1);
+                double denom = ((count * xxSum) - (xSum * xSum)) * ((count * yySum) - (ySum * ySum));
+                double corr = denom > 0 ? 0.5 * ((((count * xySum) - (xSum * ySum)) / Math.Sqrt(denom)) + 1) : 0;
+                output[i] = corr;
+            }
+        }
+        finally
+        {
+            pool.Return(rfArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers AutoCorrelation Periodogram - finds dominant cycle from autocorrelation.
+    /// </summary>
+    internal static void EhlersAutoCorrelationPeriodogram(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10, int length3 = 3)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(0, length3);
+
+        var pool = ArrayPool<double>.Shared;
+        var corrArray = pool.Rent(close.Length);
+        var rArray = pool.Rent(length1 + 1);
+
+        try
+        {
+            var corr = corrArray.AsSpan(0, close.Length);
+            var r = rArray.AsSpan(0, length1 + 1);
+            r.Clear();
+
+            EhlersAutoCorrelationIndicator(close, corr, length1, length2);
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double maxPwr = 0;
+
+                for (int j = length2; j <= length1; j++)
+                {
+                    double cosPart = 0, sinPart = 0;
+                    for (int k = length3; k <= length1; k++)
+                    {
+                        double prevCorr = i >= k ? corr[i - k] : 0;
+                        double angle = 2 * Math.PI * ((double)k / j);
+                        cosPart += prevCorr * Math.Cos(angle);
+                        sinPart += prevCorr * Math.Sin(angle);
+                    }
+
+                    double sqSum = (cosPart * cosPart) + (sinPart * sinPart);
+                    double newR = (0.2 * sqSum * sqSum) + (0.8 * r[j]);
+                    r[j] = newR;
+                    maxPwr = Math.Max(newR, maxPwr);
+                }
+
+                double spx = 0, sp = 0;
+                for (int j = length2; j <= length1; j++)
+                {
+                    double pwr = maxPwr > 0 ? r[j] / maxPwr : 0;
+                    if (pwr >= 0.5)
+                    {
+                        spx += j * pwr;
+                        sp += pwr;
+                    }
+                }
+
+                output[i] = sp > 0 ? spx / sp : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(corrArray);
+            pool.Return(rArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Adaptive CCI V2 using autocorrelation periodogram for adaptive period.
+    /// </summary>
+    internal static void EhlersAdaptiveCommodityChannelIndexV2(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10, int length3 = 3)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
+
+        var a1 = Math.Exp(-1.414 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var domCycArray = pool.Rent(close.Length);
+        var rfArray = pool.Rent(close.Length);
+
+        try
+        {
+            var domCyc = domCycArray.AsSpan(0, close.Length);
+            var rf = rfArray.AsSpan(0, close.Length);
+
+            EhlersAutoCorrelationPeriodogram(close, domCyc, length1, length2, length3);
+            EhlersRoofingFilterV2(close, rf, length1, length2);
+
+            double prevRatio = 0;
+            double prevAcci1 = 0, prevAcci2 = 0;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
+                int cycLength = (int)Math.Ceiling(cycle);
+
+                // Compute average and RMS over cycLength
+                double sum = 0;
+                int count = 0;
+                for (int j = 0; j < cycLength && (i - j) >= 0; j++)
+                {
+                    sum += rf[i - j];
+                    count++;
+                }
+                double avg = count > 0 ? sum / count : 0;
+
+                double mdSum = 0;
+                for (int j = 0; j < cycLength && (i - j) >= 0; j++)
+                {
+                    double diff = rf[i - j] - avg;
+                    mdSum += diff * diff;
+                }
+                double rms = count > 0 ? Math.Sqrt(mdSum / count) : 0;
+
+                double num = rf[i] - avg;
+                double denom = 0.015 * rms;
+                double ratio = denom != 0 ? num / denom : 0;
+
+                double acci = (c1 * ((ratio + prevRatio) / 2)) + (c2 * prevAcci1) + (c3 * prevAcci2);
+
+                prevRatio = ratio;
+                prevAcci2 = prevAcci1;
+                prevAcci1 = acci;
+                output[i] = acci;
+            }
+        }
+        finally
+        {
+            pool.Return(domCycArray);
+            pool.Return(rfArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Adaptive RSI V2 using autocorrelation periodogram for adaptive period.
+    /// </summary>
+    internal static void EhlersAdaptiveRelativeStrengthIndexV2(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10, int length3 = 3)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
+
+        var a1 = Math.Exp(-1.414 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var pool = ArrayPool<double>.Shared;
+        var domCycArray = pool.Rent(close.Length);
+        var rfArray = pool.Rent(close.Length);
+
+        try
+        {
+            var domCyc = domCycArray.AsSpan(0, close.Length);
+            var rf = rfArray.AsSpan(0, close.Length);
+
+            EhlersAutoCorrelationPeriodogram(close, domCyc, length1, length2, length3);
+            EhlersRoofingFilterV2(close, rf, length1, length2);
+
+            double prevRatio = 0;
+            double prevArsi1 = 0, prevArsi2 = 0;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
+                int halfCycle = (int)Math.Ceiling(cycle / 2);
+
+                double upChg = 0, dnChg = 0;
+                for (int j = 0; j < halfCycle && (i - j - 1) >= 0; j++)
+                {
+                    double filt = rf[i - j];
+                    double prevFilt = rf[i - j - 1];
+                    if (filt > prevFilt) upChg += filt - prevFilt;
+                    else dnChg += prevFilt - filt;
+                }
+
+                double denom = upChg + dnChg;
+                double ratio = denom != 0 ? ((upChg - dnChg) / denom) : 0;
+
+                double arsi = (c1 * ((ratio + prevRatio) / 2)) + (c2 * prevArsi1) + (c3 * prevArsi2);
+
+                prevRatio = ratio;
+                prevArsi2 = prevArsi1;
+                prevArsi1 = arsi;
+                output[i] = arsi;
+            }
+        }
+        finally
+        {
+            pool.Return(domCycArray);
+            pool.Return(rfArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers MESA Predict Indicator V2.
+    /// </summary>
+    internal static void EhlersMesaPredictIndicatorV2(ReadOnlySpan<double> close, Span<double> output, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
+        length4 = Math.Max(1, length4);
+
+        // MESA prediction uses Hann-windowed moving average and linear extrapolation
+        var pool = ArrayPool<double>.Shared;
+        var hannArray = pool.Rent(close.Length);
+        var filterArray = pool.Rent(close.Length);
+
+        try
+        {
+            var hann = hannArray.AsSpan(0, close.Length);
+            var filter = filterArray.AsSpan(0, close.Length);
+
+            // Apply Hann-windowed moving average
+            for (int i = 0; i < close.Length; i++)
+            {
+                double sum = 0;
+                double weightSum = 0;
+                for (int j = 0; j < length3 && (i - j) >= 0; j++)
+                {
+                    double weight = (1 - Math.Cos(2 * Math.PI * j / length3)) / 2;
+                    sum += close[i - j] * weight;
+                    weightSum += weight;
+                }
+                hann[i] = weightSum > 0 ? sum / weightSum : close[i];
+            }
+
+            // Apply super-smooth filter
+            double a1 = Math.Exp(-Math.Sqrt(2) * Math.PI / length4);
+            double b1 = 2 * a1 * Math.Cos(Math.Min(Math.Sqrt(2) * Math.PI / length4, 0.99));
+            double c2 = b1;
+            double c3 = -a1 * a1;
+            double c1 = 1 - c2 - c3;
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double prevFilter1 = i >= 1 ? filter[i - 1] : 0;
+                double prevFilter2 = i >= 2 ? filter[i - 2] : 0;
+                double prevHann = i >= 1 ? hann[i - 1] : hann[i];
+                filter[i] = (c1 * ((hann[i] + prevHann) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+            }
+
+            // Linear extrapolation for prediction
+            for (int i = 0; i < close.Length; i++)
+            {
+                double slope = 0;
+                if (i >= length1)
+                {
+                    // Calculate slope over length1 periods
+                    double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                    for (int j = 0; j < length1; j++)
+                    {
+                        sumX += j;
+                        sumY += filter[i - j];
+                        sumXY += j * filter[i - j];
+                        sumXX += j * j;
+                    }
+                    double denom = (length1 * sumXX) - (sumX * sumX);
+                    slope = denom != 0 ? ((length1 * sumXY) - (sumX * sumY)) / denom : 0;
+                }
+                // Predict forward
+                output[i] = filter[i] - (slope * length2);
+            }
+        }
+        finally
+        {
+            pool.Return(hannArray);
+            pool.Return(filterArray);
         }
     }
 
