@@ -13364,11 +13364,52 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTrendImpulseFilterFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Trend Impulse Filter
+        // 1. Calculate highest/lowest over length1 bars
+        // 2. If price breaks above highest or below lowest, a=1, else a=0
+        // 3. b = (a * price) + ((1-a) * prevB)
+        // 4. Apply EMA to b with length2
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Calculate rolling highest and lowest
+        var bBuffer = context.Rent(count);
+        var bSpan = bBuffer.WritableSpan;
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevB = i >= 1 ? bSpan[i - 1] : currentValue;
+
+            // Calculate highest and lowest from previous bars (not including current)
+            double highest = double.MinValue;
+            double lowest = double.MaxValue;
+            int startIdx = Math.Max(0, i - length1);
+            for (int j = startIdx; j < i; j++)
+            {
+                if (close[j] > highest) highest = close[j];
+                if (close[j] < lowest) lowest = close[j];
+            }
+
+            // Handle first bar
+            if (i == 0)
+            {
+                bSpan[i] = currentValue;
+                continue;
+            }
+
+            // Determine if breakout occurred
+            double a = (currentValue > highest || currentValue < lowest) ? 1 : 0;
+            bSpan[i] = (a * currentValue) + ((1 - a) * prevB);
+        }
+
+        // Apply EMA to b values
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
-        return buffer;
+        maCore.Compute(bBuffer.Span, result.WritableSpan, length2);
+
+        bBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeTrendDirectionForceIndexFast(StockData data, ComputeContext context, int length1 = 10, int length2 = 30, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -13575,11 +13616,44 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeRelativeSpreadStrengthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Relative Spread Strength
+        // 1. Calculate fast EMA and slow EMA of close
+        // 2. spread = fastEMA - slowEMA
+        // 3. Calculate RSI of spread
+        // 4. Apply smoothing MA
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+
+        // Calculate fast and slow EMAs
+        var fastEmaBuffer = context.Rent(count);
+        var slowEmaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
-        return buffer;
+        maCore.Compute(close, fastEmaBuffer.WritableSpan, fastLength);
+        maCore.Compute(close, slowEmaBuffer.WritableSpan, slowLength);
+
+        // Calculate spread (fast - slow)
+        var spreadBuffer = context.Rent(count);
+        var spreadSpan = spreadBuffer.WritableSpan;
+        var fastSpan = fastEmaBuffer.Span;
+        var slowSpan = slowEmaBuffer.Span;
+        for (int i = 0; i < count; i++)
+        {
+            spreadSpan[i] = fastSpan[i] - slowSpan[i];
+        }
+
+        // Calculate RSI of spread
+        var rsiBuffer = context.Rent(count);
+        OscillatorCore.RelativeStrengthIndex(spreadBuffer.Span, rsiBuffer.WritableSpan, length);
+
+        // Apply smoothing MA to RSI
+        var result = context.Rent(count);
+        maCore.Compute(rsiBuffer.Span, result.WritableSpan, smoothLength);
+
+        fastEmaBuffer.Dispose();
+        slowEmaBuffer.Dispose();
+        spreadBuffer.Dispose();
+        rsiBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeRelativeVolatilityIndexV2Fast(StockData data, ComputeContext context, int length = 10, int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
@@ -13592,11 +13666,36 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeRelativeVolumeIndicatorFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        // V1 Algorithm: Relative Volume Indicator
+        // 1. Calculate MA of volume
+        // 2. Calculate StdDev of volume
+        // 3. relVol = (currentVolume - avg) / stdDev
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        int count = data.Count;
+
+        // Calculate MA of volume
+        var volMaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(volume, volMaBuffer.WritableSpan, length);
+
+        // Calculate StdDev of volume
+        var stdDevBuffer = context.Rent(count);
+        VolatilityCore.StandardDeviation(volume, stdDevBuffer.WritableSpan, length);
+
+        // Calculate relative volume: (volume - avg) / stdDev
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        var volMaSpan = volMaBuffer.Span;
+        var stdDevSpan = stdDevBuffer.Span;
+        for (int i = 0; i < count; i++)
+        {
+            double sd = stdDevSpan[i];
+            resultSpan[i] = sd != 0 ? (volume[i] - volMaSpan[i]) / sd : 0;
+        }
+
+        volMaBuffer.Dispose();
+        stdDevBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14, int smoothingLength = 21, double mult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
