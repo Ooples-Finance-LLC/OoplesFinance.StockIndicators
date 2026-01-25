@@ -38,10 +38,10 @@ internal static partial class IndicatorCompute
             },
             BollingerBandsSpecOptions bb => spec.Output switch
             {
-                IndicatorOutput.UpperBand => ComputeBollingerUpperFast(data, context, bb.Length, bb.StdDevMult),
-                IndicatorOutput.MiddleBand => ComputeBollingerMiddleFast(data, context, bb.Length),
-                IndicatorOutput.LowerBand => ComputeBollingerLowerFast(data, context, bb.Length, bb.StdDevMult),
-                IndicatorOutput.Primary => ComputeBollingerMiddleFast(data, context, bb.Length), // Primary defaults to middle
+                IndicatorOutput.UpperBand => ComputeBollingerUpperFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
+                IndicatorOutput.MiddleBand => ComputeBollingerMiddleFast(data, context, bb.Length, bb.MaType),
+                IndicatorOutput.LowerBand => ComputeBollingerLowerFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
+                IndicatorOutput.Primary => ComputeBollingerMiddleFast(data, context, bb.Length, bb.MaType), // Primary defaults to middle
                 _ => null
             },
             StochasticSpecOptions stoch => spec.Output switch
@@ -1947,31 +1947,31 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Bollinger Bands Middle (SMA) using zero-allocation fast path.
+    /// Computes Bollinger Bands Middle using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerBandsFast(StockData data, ComputeContext context, int length = 20)
+    public static ComputeBuffer ComputeBollingerBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
-        // Bollinger Bands middle is just SMA
-        MovingAverageCore.SimpleMovingAverage(inputSpan, buffer.WritableSpan, length);
+        // Use the registry to compute the MA with the specified type
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
     /// <summary>
     /// Computes Bollinger Bands Middle band using zero-allocation fast path.
-    /// Alias for ComputeBollingerBandsFast (middle band is SMA).
     /// </summary>
-    public static ComputeBuffer ComputeBollingerMiddleFast(StockData data, ComputeContext context, int length = 20)
+    public static ComputeBuffer ComputeBollingerMiddleFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        return ComputeBollingerBandsFast(data, context, length);
+        return ComputeBollingerBandsFast(data, context, length, maType);
     }
 
     /// <summary>
     /// Computes Bollinger Bands Upper band using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerUpperFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    public static ComputeBuffer ComputeBollingerUpperFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1979,7 +1979,7 @@ internal static partial class IndicatorCompute
         // Rent temp buffers for middle and lower that we don't need
         var middleBuffer = context.Rent(inputList.Count);
         var lowerBuffer = context.Rent(inputList.Count);
-        VolatilityCore.BollingerBands(inputSpan, buffer.WritableSpan, middleBuffer.WritableSpan, lowerBuffer.WritableSpan, length, multiplier);
+        VolatilityCore.BollingerBands(inputSpan, buffer.WritableSpan, middleBuffer.WritableSpan, lowerBuffer.WritableSpan, length, multiplier, maType);
         middleBuffer.Dispose();
         lowerBuffer.Dispose();
         return buffer;
@@ -1988,7 +1988,7 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bollinger Bands Lower band using zero-allocation fast path.
     /// </summary>
-    public static ComputeBuffer ComputeBollingerLowerFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2)
+    public static ComputeBuffer ComputeBollingerLowerFast(StockData data, ComputeContext context, int length = 20, double multiplier = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
@@ -1996,7 +1996,7 @@ internal static partial class IndicatorCompute
         // Rent temp buffers for upper and middle that we don't need
         var upperBuffer = context.Rent(inputList.Count);
         var middleBuffer = context.Rent(inputList.Count);
-        VolatilityCore.BollingerBands(inputSpan, upperBuffer.WritableSpan, middleBuffer.WritableSpan, buffer.WritableSpan, length, multiplier);
+        VolatilityCore.BollingerBands(inputSpan, upperBuffer.WritableSpan, middleBuffer.WritableSpan, buffer.WritableSpan, length, multiplier, maType);
         upperBuffer.Dispose();
         middleBuffer.Dispose();
         return buffer;

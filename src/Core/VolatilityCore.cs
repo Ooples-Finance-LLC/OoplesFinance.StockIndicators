@@ -192,6 +192,53 @@ internal static class VolatilityCore
     }
 
     /// <summary>
+    /// Computes Bollinger Bands with configurable moving average type.
+    /// </summary>
+    /// <param name="input">Price series.</param>
+    /// <param name="upper">Output span for upper band.</param>
+    /// <param name="middle">Output span for middle band.</param>
+    /// <param name="lower">Output span for lower band.</param>
+    /// <param name="length">MA period (default 20).</param>
+    /// <param name="multiplier">Standard deviation multiplier (default 2).</param>
+    /// <param name="maType">Moving average type for the middle band.</param>
+    internal static void BollingerBands(ReadOnlySpan<double> input, Span<double> upper, Span<double> middle, Span<double> lower, int length, double multiplier, Enums.MovingAvgType maType)
+    {
+        if (upper.Length < input.Length || middle.Length < input.Length || lower.Length < input.Length)
+        {
+            throw new ArgumentException("Output spans must be at least input length.");
+        }
+
+        // First compute the MA for the middle band using the registry
+        var maCore = Registry.MovingAverageRegistry.GetRequired(maType);
+        maCore.Compute(input, middle, length);
+
+        // Then compute bands based on the MA and standard deviation
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (i < length - 1)
+            {
+                upper[i] = 0;
+                lower[i] = 0;
+                continue;
+            }
+
+            var ma = middle[i];
+
+            // Calculate Standard Deviation around the MA
+            double variance = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                var diff = input[j] - ma;
+                variance += diff * diff;
+            }
+            var stdDev = Math.Sqrt(variance / length);
+
+            upper[i] = ma + (multiplier * stdDev);
+            lower[i] = ma - (multiplier * stdDev);
+        }
+    }
+
+    /// <summary>
     /// Computes Historical Volatility (annualized standard deviation of log returns).
     /// </summary>
     internal static void HistoricalVolatility(ReadOnlySpan<double> close, Span<double> output, int length = 20, int annualizationFactor = 252)
