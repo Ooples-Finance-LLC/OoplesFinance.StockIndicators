@@ -9989,3 +9989,161 @@ public sealed class AccumulationDistributionLineSpecOptions : IIndicatorSpecOpti
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Connors Relative Strength Index options.
+/// </summary>
+public sealed class ConnorsRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ConnorsRelativeStrengthIndexSpecOptions(int length1 = 2, int length2 = 3, int length3 = 100)
+        : this(length1, length2, length3, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public ConnorsRelativeStrengthIndexSpecOptions(int length1, int length2, int length3, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Adaptive Relative Strength Index options.
+/// </summary>
+public sealed class AdaptiveRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public AdaptiveRelativeStrengthIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public AdaptiveRelativeStrengthIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Apirine Slow Relative Strength Index options.
+/// </summary>
+public sealed class ApirineSlowRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public ApirineSlowRelativeStrengthIndexSpecOptions(int length = 14, int smoothLength = 6)
+        : this(length, smoothLength, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public ApirineSlowRelativeStrengthIndexSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// CCT Stoch RSI options.
+/// </summary>
+public sealed class CCTStochRSISpecOptions : IIndicatorSpecOptions
+{
+    public CCTStochRSISpecOptions(int length1 = 5, int length2 = 8, int length3 = 13, int length4 = 14, int length5 = 21, int smoothLength1 = 3, int smoothLength2 = 8)
+        : this(length1, length2, length3, length4, length5, smoothLength1, smoothLength2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public CCTStochRSISpecOptions(int length1, int length2, int length3, int length4, int length5, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        Length5 = Math.Max(1, length5);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public int Length5 { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Folded Relative Strength Index options.
+/// </summary>
+public sealed class FoldedRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public FoldedRelativeStrengthIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public FoldedRelativeStrengthIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Rapid Relative Strength Index options.
+/// </summary>
+public sealed class RapidRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public RapidRelativeStrengthIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public RapidRelativeStrengthIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Recursive Relative Strength Index options.
+/// </summary>
+public sealed class RecursiveRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public RecursiveRelativeStrengthIndexSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public RecursiveRelativeStrengthIndexSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
