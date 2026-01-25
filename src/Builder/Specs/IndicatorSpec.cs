@@ -10853,3 +10853,69 @@ public sealed class TheRangeIndicatorSpecOptions : IIndicatorSpecOptions
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Chande Quick Stick options.
+/// </summary>
+public sealed class ChandeQuickStickSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeQuickStickSpecOptions(int length = 14)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ChandeQuickStickSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Bollinger Bands With ATR Pct options.
+/// </summary>
+public sealed class BollingerBandsWithAtrPctSpecOptions : IIndicatorSpecOptions
+{
+    public BollingerBandsWithAtrPctSpecOptions(int length = 14, int bbLength = 20, double stdDevMult = 2)
+        : this(length, bbLength, stdDevMult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public BollingerBandsWithAtrPctSpecOptions(int length, int bbLength, double stdDevMult, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        BbLength = Math.Max(1, bbLength);
+        StdDevMult = stdDevMult;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int BbLength { get; }
+    public double StdDevMult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Chande Momentum Oscillator (with signal) options.
+/// </summary>
+public sealed class ChandeMomentumOscillatorSignalSpecOptions : IIndicatorSpecOptions
+{
+    public ChandeMomentumOscillatorSignalSpecOptions(int length = 14, int signalLength = 3)
+        : this(length, signalLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public ChandeMomentumOscillatorSignalSpecOptions(int length, int signalLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SignalLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
