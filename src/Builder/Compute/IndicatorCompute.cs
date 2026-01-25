@@ -12949,11 +12949,43 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputePriceVolumeRankFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Compare price/volume with previous bar, assign rank 1-4, then MA smooth
+        // Rank 1 = price up && volume up
+        // Rank 2 = price up && volume down
+        // Rank 3 = price down && volume down
+        // Rank 4 = price down && volume up
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        int count = data.Count;
+
+        // Rent buffer for PVR values
+        var pvrBuffer = context.Rent(count);
+        var pvrSpan = pvrBuffer.WritableSpan;
+
+        // Calculate PVR values
+        pvrSpan[0] = 0; // First bar has no previous to compare
+        for (int i = 1; i < count; i++)
+        {
+            double currentPrice = close[i];
+            double prevPrice = close[i - 1];
+            double currentVol = volume[i];
+            double prevVol = volume[i - 1];
+
+            bool priceUp = currentPrice > prevPrice;
+            bool volUp = currentVol > prevVol;
+
+            pvrSpan[i] = priceUp && volUp ? 1 :
+                         priceUp && !volUp ? 2 :
+                         !priceUp && !volUp ? 3 : 4;
+        }
+
+        // Apply fast MA to PVR values (primary output)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, slowLength);
-        return buffer;
+        maCore.Compute(pvrBuffer.Span, result.WritableSpan, fastLength);
+
+        pvrBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int smoothLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
@@ -12966,20 +12998,84 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        // V1 Algorithm: Projection Bandwidth
+        // 1. Calculate linear regression slope of high and low prices
+        // 2. Project bands using slopes over length period
+        // 3. Pbw = 200 * (UpperBand - LowerBand) / (UpperBand + LowerBand)
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
+
+        // Calculate linear regression slopes
+        var highSlopeBuffer = context.Rent(count);
+        var lowSlopeBuffer = context.Rent(count);
+        TrendCore.LinearRegressionSlope(high, highSlopeBuffer.WritableSpan, length);
+        TrendCore.LinearRegressionSlope(low, lowSlopeBuffer.WritableSpan, length);
+
+        var highSlope = highSlopeBuffer.Span;
+        var lowSlope = lowSlopeBuffer.Span;
+
+        // Calculate projection bands and bandwidth
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        for (int i = 0; i < count; i++)
+        {
+            double pu = high[i];
+            double pl = low[i];
+
+            // Project bands over length period
+            for (int j = 1; j <= length; j++)
+            {
+                int idx = i - j;
+                if (idx < 0) continue;
+
+                double hSlope = idx >= 0 ? highSlope[idx] : 0;
+                double lSlope = idx >= 0 ? lowSlope[idx] : 0;
+                double pHigh = i - j + 1 >= 0 ? high[i - j + 1] : 0;
+                double pLow = i - j + 1 >= 0 ? low[i - j + 1] : 0;
+
+                double vHigh = pHigh + (hSlope * j);
+                double vLow = pLow + (lSlope * j);
+
+                pu = Math.Max(pu, vHigh);
+                pl = Math.Min(pl, vLow);
+            }
+
+            // Calculate bandwidth
+            double sum = pu + pl;
+            resultSpan[i] = sum != 0 ? 200 * (pu - pl) / sum : 0;
+        }
+
+        highSlopeBuffer.Dispose();
+        lowSlopeBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        // V1 Algorithm: Quasi White Noise
+        // 1. Calculate ConnorsRSI with parameters (noiseLength, noiseLength, length)
+        // 2. Transform: whiteNoise = (connorsRsi - 50) * (1 / divisor)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        int count = data.Count;
+
+        // Calculate ConnorsRSI
+        var crsiBuffer = context.Rent(count);
+        OscillatorCore.ConnorsRelativeStrengthIndex(close, crsiBuffer.WritableSpan, noiseLength, noiseLength, length);
+
+        // Transform to white noise: (connorsRsi - 50) * (1 / divisor)
+        var result = context.Rent(count);
+        var crsiSpan = crsiBuffer.Span;
+        var resultSpan = result.WritableSpan;
+        double invDivisor = 1.0 / divisor;
+        for (int i = 0; i < count; i++)
+        {
+            resultSpan[i] = (crsiSpan[i] - 50) * invDivisor;
+        }
+
+        crsiBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -13029,11 +13125,46 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Ehlers AM Detector
+        // 1. Calculate derivative: close - open
+        // 2. Take absolute value
+        // 3. Calculate rolling max over length1 window
+        // 4. Apply MA over length2 to get vol (primary output)
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        int count = data.Count;
+
+        // Calculate absolute derivative (close - open)
+        var absDerBuffer = context.Rent(count);
+        var absDerSpan = absDerBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            absDerSpan[i] = Math.Abs(close[i] - open[i]);
+        }
+
+        // Calculate rolling max over length1 window
+        var envBuffer = context.Rent(count);
+        var envSpan = envBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double maxVal = 0;
+            int startIdx = Math.Max(0, i - length1 + 1);
+            for (int j = startIdx; j <= i; j++)
+            {
+                if (absDerSpan[j] > maxVal)
+                    maxVal = absDerSpan[j];
+            }
+            envSpan[i] = maxVal;
+        }
+
+        // Apply MA to envelope to get vol (primary output)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
-        return buffer;
+        maCore.Compute(envBuffer.Span, result.WritableSpan, length2);
+
+        absDerBuffer.Dispose();
+        envBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
