@@ -35,8 +35,19 @@ The v2 fast path has three layers:
 - **Batch 35**: Added trailing stop wiring
 - **Batch 36**: Added WellesWilderSummation, DampingIndex, DidiIndex Core methods
 - **Batch 37**: Added VerticalHorizontalFilter, LinearRegressionSlope, LinearRegressionIntercept wiring
+- **Batch 38**: Added MovingAverageRegistry infrastructure for O(1) MA type dispatch
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
 - **Total**: 618 SpecOptions, 617 dispatch routes
+
+### MovingAverageRegistry Infrastructure (NEW)
+
+Created `src/Core/Registry/` with interface-based O(1) dispatch for MovingAvgType:
+- **IMovingAverageCore**: Interface with Compute, ComputeOhlc, ComputeWithVolume overloads
+- **MovingAverageRegistry**: Dictionary<MovingAvgType, IMovingAverageCore> with 13 initial implementations
+- **Struct Implementations**: SmaCore, EmaCore, DemaCore, TemaCore, WmaCore, HmaCore, TmaCore, AlmaCore, KamaCore, T3Core, ZlemaCore, LinearRegressionCore, WilderCore
+
+This infrastructure enables the remaining ~156 indicators that depend on MovingAvgType parameter.
+See V2_MOVINGAVGTYPE_DESIGN.md for design decisions.
 
 ### Coverage Analysis
 
