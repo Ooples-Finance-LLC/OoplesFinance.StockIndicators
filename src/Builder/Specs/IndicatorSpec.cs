@@ -1349,11 +1349,18 @@ public sealed class McGinleyDynamicSpecOptions : IIndicatorSpecOptions
 public sealed class T3SpecOptions : IIndicatorSpecOptions
 {
     public T3SpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public T3SpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6104,12 +6111,20 @@ public sealed class EhlersInfiniteImpulseResponseFilterSpecOptions : IIndicatorS
 public sealed class VolumeAdjustedMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public VolumeAdjustedMovingAverageSpecOptions(int length = 14, double factor = 0.67)
+        : this(length, factor, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VolumeAdjustedMovingAverageSpecOptions(int length, double factor, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
         Factor = factor;
+        MaType = maType;
     }
+
     public int Length { get; }
     public double Factor { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6708,8 +6723,19 @@ public sealed class ShapeshiftingMovingAverageSpecOptions : IIndicatorSpecOption
 /// </summary>
 public sealed class SharpModifiedMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public SharpModifiedMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public SharpModifiedMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SharpModifiedMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6791,8 +6817,19 @@ public sealed class VariableAdaptiveMovingAverageSpecOptions : IIndicatorSpecOpt
 /// </summary>
 public sealed class VariableLengthMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public VariableLengthMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public VariableLengthMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VariableLengthMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6829,8 +6866,19 @@ public sealed class VolatilityMovingAverageSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class VolatilityWaveMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public VolatilityWaveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public VolatilityWaveMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public VolatilityWaveMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
