@@ -12127,5 +12127,365 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Additional Oscillators - Batch 2
+
+    /// <summary>
+    /// Computes Chande Quick Stick oscillator.
+    /// QS = SMA((Close - Open) / (High - Low), length)
+    /// </summary>
+    internal static void ChandeQuickStick(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
+        ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var ratioArray = pool.Rent(close.Length);
+        try
+        {
+            var ratio = ratioArray.AsSpan(0, close.Length);
+
+            for (var i = 0; i < close.Length; i++)
+            {
+                var range = high[i] - low[i];
+                ratio[i] = range != 0 ? (close[i] - open[i]) / range : 0;
+            }
+
+            MovingAverageCore.SimpleMovingAverage(ratio, output, length);
+        }
+        finally
+        {
+            pool.Return(ratioArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Delta Moving Average - difference between two MAs.
+    /// </summary>
+    internal static void DeltaMovingAverage(ReadOnlySpan<double> input, Span<double> output, int fastLength = 12, int slowLength = 26)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var fastEmaArray = pool.Rent(input.Length);
+        var slowEmaArray = pool.Rent(input.Length);
+        try
+        {
+            var fastEma = fastEmaArray.AsSpan(0, input.Length);
+            var slowEma = slowEmaArray.AsSpan(0, input.Length);
+
+            MovingAverageCore.ExponentialMovingAverage(input, fastEma, fastLength);
+            MovingAverageCore.ExponentialMovingAverage(input, slowEma, slowLength);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = fastEma[i] - slowEma[i];
+            }
+        }
+        finally
+        {
+            pool.Return(fastEmaArray);
+            pool.Return(slowEmaArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Folded RSI - RSI that folds at midpoint for symmetry.
+    /// </summary>
+    internal static void FoldedRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            RelativeStrengthIndex(input, rsi, length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                // Fold RSI at 50 - values above 50 stay, values below 50 are mirrored
+                output[i] = rsi[i] >= 50 ? rsi[i] : 100 - rsi[i];
+            }
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Enhanced Williams %R - Williams %R with additional smoothing.
+    /// </summary>
+    internal static void EnhancedWilliamsR(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var willRArray = pool.Rent(close.Length);
+        try
+        {
+            var willR = willRArray.AsSpan(0, close.Length);
+            WilliamsR(high, low, close, willR, length);
+            MovingAverageCore.SimpleMovingAverage(willR, output, smoothLength);
+        }
+        finally
+        {
+            pool.Return(willRArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Connors RSI - combination of RSI, up/down streak, and percent rank.
+    /// </summary>
+    internal static void ConnorsRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output,
+        int rsiLength = 3, int streakLength = 2, int rankLength = 100)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        var streakArray = pool.Rent(input.Length);
+        var streakRsiArray = pool.Rent(input.Length);
+        var percentRankArray = pool.Rent(input.Length);
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            var streak = streakArray.AsSpan(0, input.Length);
+            var streakRsi = streakRsiArray.AsSpan(0, input.Length);
+            var percentRank = percentRankArray.AsSpan(0, input.Length);
+
+            // Calculate standard RSI
+            RelativeStrengthIndex(input, rsi, rsiLength);
+
+            // Calculate streak (consecutive up/down days)
+            double currentStreak = 0;
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i == 0)
+                {
+                    currentStreak = 0;
+                }
+                else
+                {
+                    var change = input[i] - input[i - 1];
+                    if (change > 0)
+                    {
+                        currentStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+                    }
+                    else if (change < 0)
+                    {
+                        currentStreak = currentStreak < 0 ? currentStreak - 1 : -1;
+                    }
+                    else
+                    {
+                        currentStreak = 0;
+                    }
+                }
+                streak[i] = currentStreak;
+            }
+
+            // Calculate RSI of streak
+            RelativeStrengthIndex(streak, streakRsi, streakLength);
+
+            // Calculate percent rank of ROC
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i == 0)
+                {
+                    percentRank[i] = 0;
+                    continue;
+                }
+
+                var currentRoc = input[i - 1] != 0 ? (input[i] - input[i - 1]) / input[i - 1] * 100 : 0;
+                var count = 0;
+                var lookback = Math.Min(i, rankLength);
+
+                for (var j = 1; j <= lookback; j++)
+                {
+                    var prevRoc = input[i - j - 1] != 0 && i - j > 0
+                        ? (input[i - j] - input[i - j - 1]) / input[i - j - 1] * 100
+                        : 0;
+                    if (prevRoc < currentRoc) count++;
+                }
+
+                percentRank[i] = lookback > 0 ? (double)count / lookback * 100 : 0;
+            }
+
+            // Connors RSI = (RSI + StreakRSI + PercentRank) / 3
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] = (rsi[i] + streakRsi[i] + percentRank[i]) / 3;
+            }
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(streakArray);
+            pool.Return(streakRsiArray);
+            pool.Return(percentRankArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stochastic RSI - Stochastic oscillator applied to RSI values.
+    /// </summary>
+    internal static void StochasticRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output,
+        int rsiLength = 14, int stochLength = 14, int smoothK = 3, int smoothD = 3)
+    {
+        if (output.Length < input.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (input.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var rsiArray = pool.Rent(input.Length);
+        var stochKArray = pool.Rent(input.Length);
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, input.Length);
+            var stochK = stochKArray.AsSpan(0, input.Length);
+
+            // Calculate RSI
+            RelativeStrengthIndex(input, rsi, rsiLength);
+
+            // Calculate Stochastic of RSI
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (i < stochLength - 1)
+                {
+                    stochK[i] = 0;
+                    continue;
+                }
+
+                double highest = double.MinValue;
+                double lowest = double.MaxValue;
+
+                for (var j = 0; j < stochLength; j++)
+                {
+                    var val = rsi[i - j];
+                    if (val > highest) highest = val;
+                    if (val < lowest) lowest = val;
+                }
+
+                var range = highest - lowest;
+                stochK[i] = range != 0 ? (rsi[i] - lowest) / range * 100 : 50;
+            }
+
+            // Smooth with SMA
+            MovingAverageCore.SimpleMovingAverage(stochK, output, smoothK);
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(stochKArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Stochastic Momentum Index (SMI).
+    /// </summary>
+    internal static void StochasticMomentumIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
+        ReadOnlySpan<double> close, Span<double> output, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
+    {
+        if (output.Length < close.Length)
+        {
+            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        }
+
+        if (close.Length == 0) return;
+
+        var pool = ArrayPool<double>.Shared;
+        var hlDiffArray = pool.Rent(close.Length);
+        var midRangeArray = pool.Rent(close.Length);
+        var emaHlArray = pool.Rent(close.Length);
+        var emaMidArray = pool.Rent(close.Length);
+        var emaHl2Array = pool.Rent(close.Length);
+        var emaMid2Array = pool.Rent(close.Length);
+        try
+        {
+            var hlDiff = hlDiffArray.AsSpan(0, close.Length);
+            var midRange = midRangeArray.AsSpan(0, close.Length);
+            var emaHl = emaHlArray.AsSpan(0, close.Length);
+            var emaMid = emaMidArray.AsSpan(0, close.Length);
+            var emaHl2 = emaHl2Array.AsSpan(0, close.Length);
+            var emaMid2 = emaMid2Array.AsSpan(0, close.Length);
+
+            // Calculate highest high and lowest low
+            for (var i = 0; i < close.Length; i++)
+            {
+                if (i < length - 1)
+                {
+                    hlDiff[i] = 0;
+                    midRange[i] = 0;
+                    continue;
+                }
+
+                double hh = double.MinValue;
+                double ll = double.MaxValue;
+                for (var j = 0; j < length; j++)
+                {
+                    if (high[i - j] > hh) hh = high[i - j];
+                    if (low[i - j] < ll) ll = low[i - j];
+                }
+
+                hlDiff[i] = hh - ll;
+                midRange[i] = close[i] - ((hh + ll) / 2);
+            }
+
+            // Double EMA smoothing
+            MovingAverageCore.ExponentialMovingAverage(hlDiff, emaHl, smoothLength1);
+            MovingAverageCore.ExponentialMovingAverage(midRange, emaMid, smoothLength1);
+            MovingAverageCore.ExponentialMovingAverage(emaHl, emaHl2, smoothLength2);
+            MovingAverageCore.ExponentialMovingAverage(emaMid, emaMid2, smoothLength2);
+
+            // SMI = 100 * emaMid2 / (emaHl2 / 2)
+            for (var i = 0; i < close.Length; i++)
+            {
+                var halfRange = emaHl2[i] / 2;
+                output[i] = halfRange != 0 ? 100 * emaMid2[i] / halfRange : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(hlDiffArray);
+            pool.Return(midRangeArray);
+            pool.Return(emaHlArray);
+            pool.Return(emaMidArray);
+            pool.Return(emaHl2Array);
+            pool.Return(emaMid2Array);
+        }
+    }
+
+    #endregion
+
     #endregion
 }

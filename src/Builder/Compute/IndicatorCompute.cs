@@ -855,6 +855,15 @@ internal static partial class IndicatorCompute
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length),
             TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2),
 
+            // Batch 6 - Additional Oscillators with Core methods
+            ChandeQuickStickSpecOptions cqs => ComputeChandeQuickStickFast(data, context, cqs.Length),
+            DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length1, dma.Length2),
+            FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length),
+            EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.SignalLength),
+            ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
+            StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length, srsi2.SmoothLength1, srsi2.SmoothLength2),
+            StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.SmoothLength1, smi.SmoothLength2),
+
             _ => null
         };
     }
@@ -9233,6 +9242,123 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.TrueStrengthIndex(inputSpan, buffer.WritableSpan, longLength, shortLength);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 6 - Additional Oscillators
+
+    /// <summary>
+    /// Computes Chande Quick Stick using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeQuickStickFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var open = new double[count];
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            open[i] = (double)tickerList[i].Open;
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.ChandeQuickStick(open, high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Delta Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 5)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.DeltaMovingAverage(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Folded RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeFoldedRsiFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.FoldedRelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Enhanced Williams %R using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.EnhancedWilliamsR(high, low, close, buffer.WritableSpan, length, smoothLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Connors RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int rsiLength = 3, int streakLength = 2, int rankLength = 100)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.ConnorsRelativeStrengthIndex(inputSpan, buffer.WritableSpan, rsiLength, streakLength, rankLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stochastic RSI using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int smoothK = 3, int smoothD = 3)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.StochasticRelativeStrengthIndex(inputSpan, buffer.WritableSpan, rsiLength, rsiLength, smoothK, smoothD);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stochastic Momentum Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.StochasticMomentumIndex(high, low, close, buffer.WritableSpan, length, smoothLength1, smoothLength2);
         return buffer;
     }
 
