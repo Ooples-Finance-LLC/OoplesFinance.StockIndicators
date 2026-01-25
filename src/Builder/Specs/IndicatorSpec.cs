@@ -10545,3 +10545,99 @@ public sealed class EhlersZeroLagExponentialMovingAverageSpecOptions : IIndicato
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Trend Analysis Index options.
+/// </summary>
+public sealed class TrendAnalysisIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TrendAnalysisIndexSpecOptions(int length1 = 28, int length2 = 5)
+        : this(length1, length2, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TrendAnalysisIndexSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Trend Direction Force Index options.
+/// </summary>
+public sealed class TrendDirectionForceIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TrendDirectionForceIndexSpecOptions(int length1 = 10, int length2 = 30)
+        : this(length1, length2, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TrendDirectionForceIndexSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Self Adjusting Relative Strength Index options.
+/// </summary>
+public sealed class SelfAdjustingRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public SelfAdjustingRelativeStrengthIndexSpecOptions(int length = 14, int smoothingLength = 21, double mult = 2)
+        : this(length, smoothingLength, mult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SelfAdjustingRelativeStrengthIndexSpecOptions(int length, int smoothingLength, double mult, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothingLength = Math.Max(1, smoothingLength);
+        Mult = mult;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothingLength { get; }
+    public double Mult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Stochastic Connors Relative Strength Index options.
+/// </summary>
+public sealed class StochasticConnorsRelativeStrengthIndexSpecOptions : IIndicatorSpecOptions
+{
+    public StochasticConnorsRelativeStrengthIndexSpecOptions(int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3)
+        : this(length1, length2, length3, smoothLength1, smoothLength2, MovingAvgType.WildersSmoothingMethod)
+    {
+    }
+
+    public StochasticConnorsRelativeStrengthIndexSpecOptions(int length1, int length2, int length3, int smoothLength1, int smoothLength2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int SmoothLength1 { get; }
+    public int SmoothLength2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
