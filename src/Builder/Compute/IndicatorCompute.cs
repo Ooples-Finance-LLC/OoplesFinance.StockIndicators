@@ -14009,11 +14009,54 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: SMA crossover to update support/resistance from highest/lowest
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
+
+        // Compute SMA, highest, lowest
+        var smaBuffer = context.Rent(count);
+        var highestBuffer = context.Rent(count);
+        var lowestBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, smaBuffer.WritableSpan, length);
+        VolatilityCore.Highest(high, highestBuffer.WritableSpan, length);
+        VolatilityCore.Lowest(low, lowestBuffer.WritableSpan, length);
+
+        // Compute support/resistance based on SMA crossovers
+        // Returns support level as primary output
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+
+        double prevRes = high[0];
+        double prevSupp = low[0];
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 1 ? close[i - 1] : 0;
+            double sma = i >= 1 ? smaBuffer.Span[i - 1] : 0;
+            double highest = highestBuffer.Span[i];
+            double lowest = lowestBuffer.Span[i];
+
+            bool crossAbove = prevValue < sma && currentValue >= sma;
+            bool crossBelow = prevValue > sma && currentValue <= sma;
+
+            double res = crossBelow ? highest : (i >= 1 ? prevRes : highest);
+            double supp = crossAbove ? lowest : (i >= 1 ? prevSupp : lowest);
+
+            // Return support as primary output
+            resultSpan[i] = supp;
+            prevRes = res;
+            prevSupp = supp;
+        }
+
+        smaBuffer.Dispose();
+        highestBuffer.Dispose();
+        lowestBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -14074,11 +14117,60 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTimeAndMoneyChannelFast(StockData data, ComputeContext context, int length1 = 41, int length2 = 82, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Yield over median (yom), variance, std of yom, channel bands
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
-        return buffer;
+
+        int halfLength = (int)Math.Ceiling((double)length1 / 2);
+        if (halfLength < 1) halfLength = 1;
+
+        // Compute SMA (basis)
+        var smaBuffer = context.Rent(count);
+        maCore.Compute(close, smaBuffer.WritableSpan, length1);
+
+        // Compute yom = 100 * (close - prevBasis) / prevBasis
+        var yomBuffer = context.Rent(count);
+        var yomSquaredBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            double prevBasis = i >= halfLength ? smaBuffer.Span[i - halfLength] : 0;
+            double yom = prevBasis != 0 ? 100 * (close[i] - prevBasis) / prevBasis : 0;
+            yomBuffer.WritableSpan[i] = yom;
+            yomSquaredBuffer.WritableSpan[i] = yom * yom;
+        }
+
+        // Compute avyom and yomSquaredSma
+        var avyomBuffer = context.Rent(count);
+        var yomSquaredSmaBuffer = context.Rent(count);
+        maCore.Compute(yomBuffer.Span, avyomBuffer.WritableSpan, length2);
+        maCore.Compute(yomSquaredBuffer.Span, yomSquaredSmaBuffer.WritableSpan, length2);
+
+        // Compute variance and std
+        var somBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            double avyom = avyomBuffer.Span[i];
+            double yomSquaredSma = yomSquaredSmaBuffer.Span[i];
+            double varyom = yomSquaredSma - (avyom * avyom);
+
+            double prevVaryom = i >= halfLength ? yomSquaredSmaBuffer.Span[i - halfLength] - (avyomBuffer.Span[i - halfLength] * avyomBuffer.Span[i - halfLength]) : 0;
+            double som = prevVaryom >= 0 ? Math.Sqrt(prevVaryom) : 0;
+            somBuffer.WritableSpan[i] = som;
+        }
+
+        // Compute sigom (smoothed som) - this is used for channel width
+        var result = context.Rent(count);
+        maCore.Compute(somBuffer.Span, result.WritableSpan, length1);
+
+        yomBuffer.Dispose();
+        yomSquaredBuffer.Dispose();
+        avyomBuffer.Dispose();
+        yomSquaredSmaBuffer.Dispose();
+        somBuffer.Dispose();
+        smaBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
