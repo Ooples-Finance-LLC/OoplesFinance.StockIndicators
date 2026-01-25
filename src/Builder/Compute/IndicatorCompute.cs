@@ -957,6 +957,26 @@ internal static partial class IndicatorCompute
             VariableMovingAverageBandsSpecOptions vmab => ComputeVariableMovingAverageBandsFast(data, context, vmab.Length, vmab.Mult, vmab.MaType),
             NarrowSidewaysChannelSpecOptions nsc => ComputeNarrowSidewaysChannelFast(data, context, nsc.Length, nsc.Pct, nsc.MaType),
 
+            // Batch 16 - More Band and Channel Indicators
+            HighLowBandsSpecOptions hlb => ComputeHighLowBandsFast(data, context, hlb.Length, hlb.PctShift, hlb.MaType),
+            AutoDispersionBandsSpecOptions adb => ComputeAutoDispersionBandsFast(data, context, adb.Length, adb.SmoothLength, adb.MaType),
+            BollingerBandsFibonacciRatiosSpecOptions bbfr => ComputeBollingerBandsFibonacciRatiosFast(data, context, bbfr.Length, bbfr.FibRatio1, bbfr.FibRatio2, bbfr.FibRatio3, bbfr.MaType),
+            BollingerBandsWithAtrPctSpecOptions bbatrp => ComputeBollingerBandsWithAtrPctFast(data, context, bbatrp.Length, bbatrp.BbLength, bbatrp.StdDevMult, bbatrp.MaType),
+            KirshenbaumBandsSpecOptions kb => ComputeKirshenbaumBandsFast(data, context, kb.Length1, kb.Length2, kb.StdDevFactor, kb.MaType),
+            SmoothedVolatilityBandsSpecOptions svb => ComputeSmoothedVolatilityBandsFast(data, context, svb.Length1, svb.Length2, svb.Deviation, svb.BandAdjust, svb.MaType),
+            StollerAverageRangeChannelsSpecOptions starc => ComputeStollerAverageRangeChannelsFast(data, context, starc.Length, starc.AtrMult, starc.MaType),
+            VervoortVolatilityBandsSpecOptions vvb => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2, vvb.DevMult, vvb.LowBandMult, vvb.MaType),
+
+            // Batch 17 - More Band and Channel Indicators
+            VolumeAdaptiveBandsSpecOptions vab => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType),
+            TrendTraderBandsSpecOptions ttb => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType),
+            ScalpersChannelSpecOptions sc => ComputeScalpersChannelFast(data, context, sc.Length1, sc.Length2, sc.MaType),
+            HurstCycleChannelSpecOptions hcc => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult, hcc.SlowMult, hcc.MaType),
+            PriceCurveChannelSpecOptions pcc => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType),
+            PriceHeadleyAccelerationBandsSpecOptions phab => ComputePriceHeadleyAccelerationBandsFast(data, context, phab.Length, phab.Factor, phab.MaType),
+            PriceLineChannelSpecOptions plc => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType),
+            RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType),
+
             _ => null
         };
     }
@@ -11321,6 +11341,458 @@ internal static partial class IndicatorCompute
             default:
                 MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
                 break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes High Low Bands using zero-allocation fast path.
+    /// Returns the middle band (SMA of close).
+    /// </summary>
+    public static ComputeBuffer ComputeHighLowBandsFast(StockData data, ComputeContext context, int length = 14, double pctShift = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA of close
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Auto Dispersion Bands using zero-allocation fast path.
+    /// Returns the middle band (WMA of close).
+    /// </summary>
+    public static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90, int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA of close
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands Fibonacci Ratios using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerBandsFibonacciRatiosFast(StockData data, ComputeContext context, int length = 20, double fibRatio1 = 1.618, double fibRatio2 = 2.618, double fibRatio3 = 4.236, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Bollinger Bands with ATR Percentage using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeBollingerBandsWithAtrPctFast(StockData data, ComputeContext context, int length = 14, int bbLength = 20, double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, bbLength);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, bbLength);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, bbLength);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kirshenbaum Bands using zero-allocation fast path.
+    /// Returns the middle band (EMA).
+    /// </summary>
+    public static ComputeBuffer ComputeKirshenbaumBandsFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 20, double stdDevFactor = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Smoothed Volatility Bands using zero-allocation fast path.
+    /// Returns the middle band (EMA).
+    /// </summary>
+    public static ComputeBuffer ComputeSmoothedVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Stoller Average Range Channels (STARC) using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeStollerAverageRangeChannelsFast(StockData data, ComputeContext context, int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vervoort Volatility Bands using zero-allocation fast path.
+    /// Returns the middle band (EMA).
+    /// </summary>
+    public static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        // Calculate MA
+        switch (maType)
+        {
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Volume Adaptive Bands using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Trend Trader Bands using zero-allocation fast path.
+    /// Returns the middle band (WMA).
+    /// </summary>
+    public static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3, double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WeightedMovingAverage:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Scalpers Channel using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputeScalpersChannelFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hurst Cycle Channel using zero-allocation fast path.
+    /// Returns the middle line (Wilder smoothed).
+    /// </summary>
+    public static ComputeBuffer ComputeHurstCycleChannelFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WildersSmoothingMethod:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+            default:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, fastLength);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Curve Channel using zero-allocation fast path.
+    /// Returns the middle line (Wilder smoothed).
+    /// </summary>
+    public static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WildersSmoothingMethod:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Headley Acceleration Bands using zero-allocation fast path.
+    /// Returns the middle band (SMA).
+    /// </summary>
+    public static ComputeBuffer ComputePriceHeadleyAccelerationBandsFast(StockData data, ComputeContext context, int length = 20, double factor = 0.001, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Line Channel using zero-allocation fast path.
+    /// Returns the middle line (Wilder smoothed).
+    /// </summary>
+    public static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+
+        switch (maType)
+        {
+            case MovingAvgType.WildersSmoothingMethod:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.SimpleMovingAverage:
+                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            case MovingAvgType.ExponentialMovingAverage:
+                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
+                break;
+            default:
+                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
+                break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Rate of Change Bands using zero-allocation fast path.
+    /// Returns the ROC smoothed value.
+    /// </summary>
+    public static ComputeBuffer ComputeRateOfChangeBandsFast(StockData data, ComputeContext context, int length = 12, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+        var buffer = context.Rent(count);
+        var roc = ArrayPool<double>.Shared.Rent(count);
+        try
+        {
+            var rocSpan = roc.AsSpan(0, count);
+
+            // Calculate ROC
+            OscillatorCore.RateOfChange(close, rocSpan, length);
+
+            // Smooth with MA
+            switch (maType)
+            {
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
+                    break;
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
+                    break;
+                default:
+                    MovingAverageCore.ExponentialMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
+                    break;
+            }
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(roc);
         }
 
         return buffer;
