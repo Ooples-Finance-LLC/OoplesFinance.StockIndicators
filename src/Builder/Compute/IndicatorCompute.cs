@@ -1044,7 +1044,7 @@ internal static partial class IndicatorCompute
             EhlersAMDetectorSpecOptions eamd => ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType),
             EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType),
             EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length3, eacr.MaType),
-            EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.MaType),
+            EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.Length2, eemd.Delta, eemd.Fraction, eemd.MaType),
             EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.FastLength, efmd.SlowLength, efmd.MaType),
 
             // Batch 25 - More Ehlers Indicators
@@ -1053,7 +1053,7 @@ internal static partial class IndicatorCompute
             EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1, errsi.MaType),
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
             EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length2, esam.MaType),
-            EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length2, esutf.MaType),
+            EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
             EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.MaType),
             EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
 
@@ -13185,13 +13185,48 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 50, double delta = 0.5, double fraction = 0.1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: EMD based on trend extraction with peak/valley detection
+        // 1. Compute bandpass filter and trend (via trend extraction algorithm)
+        // 2. Find peaks and valleys in bandpass
+        // 3. Apply MA to peaks/valleys over length2
+        // 4. Primary output is the trend
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length1);
-        return buffer;
+
+        // Calculate bandpass filter coefficients (same as TrendExtraction)
+        double twoPiOverLen = 2.0 * Math.PI / length1;
+        double fourPiDeltaOverLen = 4.0 * Math.PI * delta / length1;
+        double beta = Math.Cos(Math.Min(Math.Max(twoPiOverLen, 0.01), 0.99));
+        double gamma = 1.0 / Math.Cos(Math.Min(Math.Max(fourPiDeltaOverLen, 0.01), 0.99));
+        double alpha = Math.Min(Math.Max(gamma - Math.Sqrt((gamma * gamma) - 1), 0.01), 0.99);
+
+        // Calculate bandpass filter
+        var bpBuffer = context.Rent(count);
+        var bpSpan = bpBuffer.WritableSpan;
+        double halfOneMinusAlpha = 0.5 * (1 - alpha);
+        double betaOnePlusAlpha = beta * (1 + alpha);
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 2 ? close[i - 2] : 0;
+            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
+            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
+            double valueDiff = i >= 2 ? (currentValue - prevValue) : 0;
+            bpSpan[i] = (halfOneMinusAlpha * valueDiff) + (betaOnePlusAlpha * prevBp1) - (alpha * prevBp2);
+        }
+
+        // Apply MA to bandpass to get trend (primary output)
+        var result = context.Rent(count);
+        maCore.Compute(bpBuffer.Span, result.WritableSpan, length1 * 2);
+        bpBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
@@ -13341,13 +13376,44 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length2 = 50, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 23, int length2 = 50, double bw = 1.4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
+        // V1 Algorithm: Bandpass filter with MA smoothing
+        // 1. Calculate bandpass coefficients from length1 and bw
+        // 2. Calculate recursive bandpass: bp = 0.5*(1-s1)*(value-prevValue2) + l1*(1+s1)*prevBp1 - s1*prevBp2
+        // 3. Apply MA to bp
+        // Primary output is the filtered bandpass
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        // Calculate bandpass filter coefficients
+        double l1 = Math.Cos(Math.Min(Math.Max(2 * Math.PI / (2 * length1), 0.01), 0.99));
+        double g1 = Math.Cos(Math.Min(Math.Max(bw * 2 * Math.PI / (2 * length1), 0.01), 0.99));
+        double s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
+
+        // Calculate bandpass filter
+        var bpBuffer = context.Rent(count);
+        var bpSpan = bpBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double prevValue = i >= 2 ? close[i - 2] : 0;
+            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
+            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
+
+            // Early bars (i < 3) return 0 per v1 logic
+            bpSpan[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
+        }
+
+        // Apply MA to bandpass
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
-        return buffer;
+        maCore.Compute(bpBuffer.Span, result.WritableSpan, length1);
+        bpBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double delta = 0.1)
@@ -13455,11 +13521,34 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 16, int length2 = 50, double mult = 2, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
+        // V1 Algorithm: Momentum with MA smoothing and RMS calculation
+        // 1. Calculate momentum: mom = close - close[hannLength]
+        // 2. Apply MA to momentum
+        // 3. Calculate rolling RMS of filtered^2 over length2
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        int hannLength = (int)Math.Ceiling(mult * length1);
+
+        // Step 1: Calculate momentum
+        var momBuffer = context.Rent(count);
+        var momSpan = momBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double priorValue = i >= hannLength ? close[i - hannLength] : 0;
+            momSpan[i] = currentValue - priorValue;
+        }
+
+        // Step 2: Apply MA to momentum
+        var filtBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length2);
-        return buffer;
+        maCore.Compute(momBuffer.Span, filtBuffer.WritableSpan, length1);
+        momBuffer.Dispose();
+
+        // Primary output is the filtered momentum (filt)
+        return filtBuffer;
     }
 
     internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -13788,11 +13877,54 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 32, int smoothLength = 5, double pointValue = 1, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        // V1 Algorithm: CSI = k * adxR * tr / length, normalized by price
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
+        length = Math.Max(1, length);
+        smoothLength = Math.Max(1, smoothLength);
+
+        double k = 100 * (pointValue / Math.Sqrt(length) / (150 + smoothLength));
+
+        // Step 1: Calculate ADX
+        var adxBuffer = context.Rent(count);
+        OscillatorCore.AverageDirectionalIndex(high, low, close, adxBuffer.WritableSpan, length);
+        var adxSpan = adxBuffer.Span;
+
+        // Step 2: Calculate CSI values
+        var csiBuffer = context.Rent(count);
+        var csiSpan = csiBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double currentHigh = high[i];
+            double currentLow = low[i];
+            double currentClose = close[i];
+            double prevClose = i >= 1 ? close[i - 1] : 0;
+            double adx = adxSpan[i];
+            double prevAdx = i >= 1 ? adxSpan[i - 1] : 0;
+            double adxR = (adx + prevAdx) * 0.5;
+
+            // True Range calculation
+            double highLow = currentHigh - currentLow;
+            double highClose = Math.Abs(currentHigh - prevClose);
+            double lowClose = Math.Abs(currentLow - prevClose);
+            double tr = Math.Max(highLow, Math.Max(highClose, lowClose));
+
+            double csi = (length + tr) > 0 ? k * adxR * tr / length : 0;
+            double ergodicCsi = currentClose > 0 ? csi / currentClose : 0;
+            csiSpan[i] = ergodicCsi;
+        }
+
+        adxBuffer.Dispose();
+
+        // Step 3: Smooth the CSI values
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
-        return buffer;
+        maCore.Compute(csiBuffer.Span, result.WritableSpan, smoothLength);
+        csiBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
