@@ -11097,3 +11097,329 @@ public sealed class MultiVoteOnBalanceVolumeSpecOptions : IIndicatorSpecOptions
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Stoller Average Range Channels options.
+/// </summary>
+public sealed class StollerAverageRangeChannelsSpecOptions : IIndicatorSpecOptions
+{
+    public StollerAverageRangeChannelsSpecOptions(int length = 14, double atrMult = 2)
+        : this(length, atrMult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StollerAverageRangeChannelsSpecOptions(int length, double atrMult, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        AtrMult = atrMult;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double AtrMult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Ultimate Moving Average Bands options.
+/// </summary>
+public sealed class UltimateMovingAverageBandsSpecOptions : IIndicatorSpecOptions
+{
+    public UltimateMovingAverageBandsSpecOptions(int minLength = 5, int maxLength = 50, double stdDevMult = 2)
+        : this(minLength, maxLength, stdDevMult, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public UltimateMovingAverageBandsSpecOptions(int minLength, int maxLength, double stdDevMult, MovingAvgType maType)
+    {
+        MinLength = Math.Max(1, minLength);
+        MaxLength = Math.Max(1, maxLength);
+        StdDevMult = stdDevMult;
+        MaType = maType;
+    }
+
+    public int MinLength { get; }
+    public int MaxLength { get; }
+    public double StdDevMult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Uni Channel options.
+/// </summary>
+public sealed class UniChannelSpecOptions : IIndicatorSpecOptions
+{
+    public UniChannelSpecOptions(int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false)
+        : this(length, ubFac, lbFac, type1, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public UniChannelSpecOptions(int length, double ubFac, double lbFac, bool type1, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        UbFac = ubFac;
+        LbFac = lbFac;
+        Type1 = type1;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double UbFac { get; }
+    public double LbFac { get; }
+    public bool Type1 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Wilson Relative Price Channel options.
+/// </summary>
+public sealed class WilsonRelativePriceChannelSpecOptions : IIndicatorSpecOptions
+{
+    public WilsonRelativePriceChannelSpecOptions(int length = 34, int smoothLength = 1, double overbought = 70, double oversold = 30,
+        double upperNeutralZone = 55, double lowerNeutralZone = 45)
+        : this(length, smoothLength, overbought, oversold, upperNeutralZone, lowerNeutralZone, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public WilsonRelativePriceChannelSpecOptions(int length, int smoothLength, double overbought, double oversold,
+        double upperNeutralZone, double lowerNeutralZone, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        Overbought = overbought;
+        Oversold = oversold;
+        UpperNeutralZone = upperNeutralZone;
+        LowerNeutralZone = lowerNeutralZone;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public double Overbought { get; }
+    public double Oversold { get; }
+    public double UpperNeutralZone { get; }
+    public double LowerNeutralZone { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Vortex Bands options.
+/// </summary>
+public sealed class VortexBandsSpecOptions : IIndicatorSpecOptions
+{
+    public VortexBandsSpecOptions(int length = 20)
+        : this(length, MovingAvgType.McNichollMovingAverage)
+    {
+    }
+
+    public VortexBandsSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Volume Adaptive Bands options.
+/// </summary>
+public sealed class VolumeAdaptiveBandsSpecOptions : IIndicatorSpecOptions
+{
+    public VolumeAdaptiveBandsSpecOptions(int length = 100)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VolumeAdaptiveBandsSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Variable Moving Average Bands options.
+/// </summary>
+public sealed class VariableMovingAverageBandsSpecOptions : IIndicatorSpecOptions
+{
+    public VariableMovingAverageBandsSpecOptions(int length = 6, double mult = 1.5)
+        : this(length, mult, MovingAvgType.VariableMovingAverage)
+    {
+    }
+
+    public VariableMovingAverageBandsSpecOptions(int length, double mult, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Mult = mult;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Mult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Vervoort Volatility Bands options.
+/// </summary>
+public sealed class VervoortVolatilityBandsSpecOptions : IIndicatorSpecOptions
+{
+    public VervoortVolatilityBandsSpecOptions(int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9)
+        : this(length1, length2, devMult, lowBandMult, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public VervoortVolatilityBandsSpecOptions(int length1, int length2, double devMult, double lowBandMult, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        DevMult = devMult;
+        LowBandMult = lowBandMult;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double DevMult { get; }
+    public double LowBandMult { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Trend Trader Bands options.
+/// </summary>
+public sealed class TrendTraderBandsSpecOptions : IIndicatorSpecOptions
+{
+    public TrendTraderBandsSpecOptions(int length = 21, double mult = 3, double bandStep = 20)
+        : this(length, mult, bandStep, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public TrendTraderBandsSpecOptions(int length, double mult, double bandStep, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        Mult = mult;
+        BandStep = bandStep;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double Mult { get; }
+    public double BandStep { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Time And Money Channel options.
+/// </summary>
+public sealed class TimeAndMoneyChannelSpecOptions : IIndicatorSpecOptions
+{
+    public TimeAndMoneyChannelSpecOptions(int length1 = 41, int length2 = 82)
+        : this(length1, length2, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TimeAndMoneyChannelSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Support Resistance options.
+/// </summary>
+public sealed class SupportResistanceSpecOptions : IIndicatorSpecOptions
+{
+    public SupportResistanceSpecOptions(int length = 20)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SupportResistanceSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Stationary Extrapolated Levels options.
+/// </summary>
+public sealed class StationaryExtrapolatedLevelsSpecOptions : IIndicatorSpecOptions
+{
+    public StationaryExtrapolatedLevelsSpecOptions(int length = 200)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public StationaryExtrapolatedLevelsSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Scalpers Channel options.
+/// </summary>
+public sealed class ScalpersChannelSpecOptions : IIndicatorSpecOptions
+{
+    public ScalpersChannelSpecOptions(int length1 = 15, int length2 = 20)
+        : this(length1, length2, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public ScalpersChannelSpecOptions(int length1, int length2, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Smoothed Volatility Bands options.
+/// </summary>
+public sealed class SmoothedVolatilityBandsSpecOptions : IIndicatorSpecOptions
+{
+    public SmoothedVolatilityBandsSpecOptions(int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9)
+        : this(length1, length2, deviation, bandAdjust, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public SmoothedVolatilityBandsSpecOptions(int length1, int length2, double deviation, double bandAdjust, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Deviation = deviation;
+        BandAdjust = bandAdjust;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double Deviation { get; }
+    public double BandAdjust { get; }
+    public MovingAvgType MaType { get; }
+}
+
