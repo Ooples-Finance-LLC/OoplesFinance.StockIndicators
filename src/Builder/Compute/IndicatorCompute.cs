@@ -13992,11 +13992,39 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        // V1 Algorithm: RSI calculated on all OHLC prices, averaged
+        // 1. Calculate RSI on close, open, high, low prices
+        // 2. Return average of all 4 RSI values
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Calculate RSI on each OHLC price
+        var rsiCloseBuffer = context.Rent(count);
+        var rsiOpenBuffer = context.Rent(count);
+        var rsiHighBuffer = context.Rent(count);
+        var rsiLowBuffer = context.Rent(count);
+        OscillatorCore.RelativeStrengthIndex(close, rsiCloseBuffer.WritableSpan, length);
+        OscillatorCore.RelativeStrengthIndex(open, rsiOpenBuffer.WritableSpan, length);
+        OscillatorCore.RelativeStrengthIndex(high, rsiHighBuffer.WritableSpan, length);
+        OscillatorCore.RelativeStrengthIndex(low, rsiLowBuffer.WritableSpan, length);
+
+        // Calculate average of all 4 RSI values
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            resultSpan[i] = (rsiCloseBuffer.Span[i] + rsiOpenBuffer.Span[i] + rsiHighBuffer.Span[i] + rsiLowBuffer.Span[i]) / 4.0;
+        }
+
+        rsiCloseBuffer.Dispose();
+        rsiOpenBuffer.Dispose();
+        rsiHighBuffer.Dispose();
+        rsiLowBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500, int smoothLength = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
@@ -14268,11 +14296,47 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Extrapolated levels from deviations
+        // 1. Calculate SMA of input
+        // 2. y = currentValue - sma (deviation from MA)
+        // 3. ext = (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(length, 1);
+
+        // Calculate SMA
+        var smaBuffer = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(close, smaBuffer.WritableSpan, length);
+
+        // Calculate y (deviation) values
+        var yBuffer = context.Rent(count);
+        var ySpan = yBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            ySpan[i] = close[i] - smaBuffer.Span[i];
+        }
+
+        // Calculate extrapolated values
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double x = i;
+            double priorX = i >= length ? (i - length) : 0;
+            double priorX2 = i >= length * 2 ? (i - (length * 2)) : 0;
+            double priorY = i >= length ? ySpan[i - length] : 0;
+            double priorY2 = i >= length * 2 ? ySpan[i - (length * 2)] : 0;
+
+            double ext = (priorX2 - priorX) != 0 && (priorY2 - priorY) != 0
+                ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
+                : 0;
+            resultSpan[i] = ext;
+        }
+
+        smaBuffer.Dispose();
+        yBuffer.Dispose();
+        return result;
     }
 
     internal static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
