@@ -830,6 +830,31 @@ internal static partial class IndicatorCompute
             LinearRegressionSlopeSpecOptions lrs => ComputeLinearRegressionSlopeFast(data, context, lrs.Length),
             LinearRegressionInterceptSpecOptions lri => ComputeLinearRegressionInterceptFast(data, context, lri.Length),
 
+            // Batch 5 - Indicators with Core methods (23 indicators)
+            AbsolutePriceOscillatorSpecOptions apo2 => ComputeAbsolutePriceOscillatorFast(data, context, apo2.FastLength, apo2.SlowLength),
+            AccumulationDistributionLineSpecOptions adl2 => ComputeAccumulationDistributionLineFast(data, context),
+            AdaptiveExponentialMovingAverageSpecOptions aema => ComputeAdaptiveExponentialMovingAverageFast(data, context, aema.Length),
+            AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length),
+            AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length),
+            ChandeMomentumOscillatorSpecOptions cmo2 => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length),
+            EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Length),
+            EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length),
+            HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length),
+            KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
+            KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2, kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4),
+            NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context),
+            OnBalanceVolumeSpecOptions obv2 => ComputeOnBalanceVolumeFast(data, context),
+            PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
+            PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+            PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context),
+            PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length),
+            PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
+            PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
+            PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length),
+            RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length),
+            TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length),
+            TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2),
+
             _ => null
         };
     }
@@ -8898,6 +8923,316 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         TrendCore.LinearRegressionIntercept(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    #endregion
+
+    #region Batch 5 - Additional Indicators with Core Methods
+
+    /// <summary>
+    /// Computes Absolute Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.AbsolutePriceOscillator(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Accumulation Distribution Line using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAccumulationDistributionLineFast(StockData data, ComputeContext context)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.AccumulationDistributionLine(high, low, close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Adaptive Exponential Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAdaptiveExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.AdaptiveExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Average Directional Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAverageDirectionalIndexFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        OscillatorCore.AverageDirectionalIndex(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Average True Range using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeAverageTrueRangeFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+        }
+        var buffer = context.Rent(count);
+        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Chande Momentum Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeChandeMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.ChandeMomentumOscillator(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ease of Movement using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.EaseOfMovement(high, low, volume, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Hull Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.HullMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Klinger Volume Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKlingerVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var high = new double[count];
+        var low = new double[count];
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            high[i] = (double)tickerList[i].High;
+            low[i] = (double)tickerList[i].Low;
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.KlingerVolumeOscillator(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Know Sure Thing using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeKnowSureThingFast(StockData data, ComputeContext context,
+        int roc1 = 10, int roc2 = 15, int roc3 = 20, int roc4 = 30,
+        int sma1 = 10, int sma2 = 10, int sma3 = 10, int sma4 = 15)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.KnowSureThing(inputSpan, buffer.WritableSpan, roc1, roc2, roc3, roc4, sma1, sma2, sma3, sma4);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Negative Volume Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.NegativeVolumeIndex(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes On Balance Volume using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeOnBalanceVolumeFast(StockData data, ComputeContext context)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.OnBalanceVolume(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Percentage Price Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePercentagePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PercentagePriceOscillator(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Percentage Volume Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePercentageVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    {
+        var volumeSpan = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.PercentageVolumeOscillator(volumeSpan, buffer.WritableSpan, fastLength, slowLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Positive Volume Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.PositiveVolumeIndex(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Momentum Oscillator using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int firstLength = 35, int secondLength = 20)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.PriceMomentumOscillator(inputSpan, buffer.WritableSpan, firstLength, secondLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Price Volume Trend using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context)
+    {
+        var tickerList = data.TickerDataList;
+        var count = tickerList.Count;
+        var close = new double[count];
+        var volume = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            close[i] = (double)tickerList[i].Close;
+            volume[i] = (double)tickerList[i].Volume;
+        }
+        var buffer = context.Rent(count);
+        VolumeCore.PriceVolumeTrend(close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Triangular Moving Average using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTriangularMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.TriangularMovingAverage(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes True Strength Index using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeTrueStrengthIndexFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        OscillatorCore.TrueStrengthIndex(inputSpan, buffer.WritableSpan, longLength, shortLength);
         return buffer;
     }
 
