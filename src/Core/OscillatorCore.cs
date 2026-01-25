@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using OoplesFinance.StockIndicators.Core.Registry;
 
 namespace OoplesFinance.StockIndicators.Core;
 
@@ -13137,6 +13138,181 @@ internal static class OscillatorCore
 
     #endregion
 
+    #region Ehlers Spectrum Derived Filter Bank
+
+    /// <summary>
+    /// Computes Ehlers Spectrum Derived Filter Bank - finds dominant cycle using spectral analysis.
+    /// </summary>
+    internal static void EhlersSpectrumDerivedFilterBank(ReadOnlySpan<double> close, Span<double> output, int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        minLength = Math.Max(1, minLength);
+        maxLength = Math.Max(minLength, maxLength);
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+
+        var pool = ArrayPool<double>.Shared;
+        var hpArray = pool.Rent(close.Length);
+        var smoothHpArray = pool.Rent(close.Length);
+        var realArray = pool.Rent(close.Length);
+        var imagArray = pool.Rent(close.Length);
+        var q1Array = pool.Rent(close.Length);
+        var dcArray = pool.Rent(close.Length);
+        var medianArray = pool.Rent(length2);
+        var sortArray = pool.Rent(length2);
+
+        try
+        {
+            var hp = hpArray.AsSpan(0, close.Length);
+            var smoothHp = smoothHpArray.AsSpan(0, close.Length);
+            var real = realArray.AsSpan(0, close.Length);
+            var imag = imagArray.AsSpan(0, close.Length);
+            var q1 = q1Array.AsSpan(0, close.Length);
+            var dc = dcArray.AsSpan(0, close.Length);
+            var medianBuf = medianArray.AsSpan(0, length2);
+            var sortBuf = sortArray.AsSpan(0, length2);
+            medianBuf.Clear();
+            int medianIdx = 0;
+            int medianCount = 0;
+
+            var twoPiPer = Math.Min(0.99, Math.Max(0.01, 2 * Math.PI / length1));
+            var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double currentValue = close[i];
+                double prevValue = i >= 1 ? close[i - 1] : 0;
+                double delta = Math.Max((-0.015 * i) + 0.5, 0.15);
+
+                double prevHp1 = i >= 1 ? hp[i - 1] : 0;
+                double prevHp2 = i >= 2 ? hp[i - 2] : 0;
+                double prevHp3 = i >= 3 ? hp[i - 3] : 0;
+                double prevHp4 = i >= 4 ? hp[i - 4] : 0;
+                double prevHp5 = i >= 5 ? hp[i - 5] : 0;
+
+                hp[i] = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
+
+                double prevSmoothHp = i >= 1 ? smoothHp[i - 1] : 0;
+                smoothHp[i] = i < 7 ? currentValue - prevValue : (hp[i] + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
+
+                double num = 0, denom = 0, dcVal = 0, realVal = 0, imagVal = 0, q1Val = 0, maxAmpl = 0;
+
+                for (int j = minLength; j <= maxLength; j++)
+                {
+                    double beta = Math.Cos(Math.Min(0.99, Math.Max(0.01, 2 * Math.PI / j)));
+                    double gamma = 1 / Math.Cos(Math.Min(0.99, Math.Max(0.01, 4 * Math.PI * delta / j)));
+                    double alpha = gamma - Math.Sqrt((gamma * gamma) - 1);
+
+                    double priorSmoothHp = i >= j ? smoothHp[i - j] : 0;
+                    double prevReal = i >= j ? real[i - j] : 0;
+                    double priorReal = i >= j * 2 ? real[i - (j * 2)] : 0;
+                    double prevImag = i >= j ? imag[i - j] : 0;
+                    double priorImag = i >= j * 2 ? imag[i - (j * 2)] : 0;
+                    double prevQ1 = i >= j ? q1[i - j] : 0;
+
+                    q1Val = j / Math.PI * 2 * (smoothHp[i] - prevSmoothHp);
+                    realVal = (0.5 * (1 - alpha) * (smoothHp[i] - priorSmoothHp)) + (beta * (1 + alpha) * prevReal) - (alpha * priorReal);
+                    imagVal = (0.5 * (1 - alpha) * (q1Val - prevQ1)) + (beta * (1 + alpha) * prevImag) - (alpha * priorImag);
+
+                    double ampl = (realVal * realVal) + (imagVal * imagVal);
+                    maxAmpl = Math.Max(ampl, maxAmpl);
+
+                    double dbRatio = maxAmpl > 0 ? ampl / maxAmpl : 0;
+                    double dbVal = dbRatio > 0 ? -length2 * Math.Log(0.01 / (1 - (0.99 * dbRatio))) / Math.Log(length2) : 0;
+                    dbVal = Math.Min(dbVal, maxLength);
+
+                    if (dbVal <= 3)
+                    {
+                        num += j * (maxLength - dbVal);
+                        denom += maxLength - dbVal;
+                    }
+                    dcVal = denom > 0 ? num / denom : 0;
+                }
+
+                q1[i] = q1Val;
+                real[i] = realVal;
+                imag[i] = imagVal;
+                dc[i] = dcVal;
+
+                // Rolling median
+                medianBuf[medianIdx] = dcVal;
+                medianIdx = (medianIdx + 1) % length2;
+                medianCount = Math.Min(medianCount + 1, length2);
+
+                // Compute median using insertion sort (efficient for small length2)
+                double median;
+                if (medianCount == 1)
+                {
+                    median = medianBuf[0];
+                }
+                else
+                {
+                    // Copy to sort buffer for sorting
+                    for (int k = 0; k < medianCount; k++)
+                    {
+                        sortBuf[k] = medianBuf[k];
+                    }
+                    // Insertion sort (O(n^2) but very fast for small n like 10)
+                    for (int k = 1; k < medianCount; k++)
+                    {
+                        double key = sortBuf[k];
+                        int j = k - 1;
+                        while (j >= 0 && sortBuf[j] > key)
+                        {
+                            sortBuf[j + 1] = sortBuf[j];
+                            j--;
+                        }
+                        sortBuf[j + 1] = key;
+                    }
+                    median = medianCount % 2 == 1 ? sortBuf[medianCount / 2] : (sortBuf[(medianCount / 2) - 1] + sortBuf[medianCount / 2]) / 2;
+                }
+                output[i] = median;
+            }
+        }
+        finally
+        {
+            pool.Return(hpArray);
+            pool.Return(smoothHpArray);
+            pool.Return(realArray);
+            pool.Return(imagArray);
+            pool.Return(q1Array);
+            pool.Return(dcArray);
+            pool.Return(medianArray);
+            pool.Return(sortArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Ehlers Restoring Pull Indicator.
+    /// </summary>
+    internal static void EhlersRestoringPullIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+
+        var pool = ArrayPool<double>.Shared;
+        var domCycArray = pool.Rent(close.Length);
+
+        try
+        {
+            var domCyc = domCycArray.AsSpan(0, close.Length);
+            EhlersSpectrumDerivedFilterBank(close, domCyc, minLength, maxLength, length1, length2);
+
+            for (int i = 0; i < close.Length; i++)
+            {
+                double cycle = domCyc[i];
+                double twoPiOverCyc = cycle > 0 ? 2 * Math.PI / cycle : 0;
+                twoPiOverCyc = Math.Min(0.99, Math.Max(0.01, twoPiOverCyc));
+                output[i] = volume[i] * twoPiOverCyc * twoPiOverCyc;
+            }
+        }
+        finally
+        {
+            pool.Return(domCycArray);
+        }
+    }
+
+    #endregion
+
     #region Peak Valley Estimation
 
     /// <summary>
@@ -13549,6 +13725,571 @@ internal static class OscillatorCore
         {
             pool.Return(hannArray);
             pool.Return(filterArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes the Confluence Indicator using multiple timeframe MAs.
+    /// </summary>
+    internal static void ConfluenceIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> ftp, Span<double> output, int length = 10, IMovingAverageCore maCore = null!)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        length = Math.Max(2, length);
+        maCore ??= new SmaCore();
+
+        int count = close.Length;
+        var pool = ArrayPool<double>.Shared;
+
+        // Compute derived lengths
+        int stl = (int)Math.Ceiling((length * 2) - 1 - 0.5);
+        int itl = (int)Math.Ceiling((stl * 2) - 1 - 0.5);
+        int ltl = (int)Math.Ceiling((itl * 2) - 1 - 0.5);
+        int hoff = (int)Math.Ceiling((double)length / 2 - 0.5);
+        int soff = (int)Math.Ceiling((double)stl / 2 - 0.5);
+        int ioff = (int)Math.Ceiling((double)itl / 2 - 0.5);
+        int hLength = Math.Max(1, length - 1);
+        int sLength = Math.Max(1, stl - 1);
+        int iLength = Math.Max(1, itl - 1);
+        int lLength = Math.Max(1, ltl - 1);
+
+        // Rent buffers for all MAs
+        var hAvgArray = pool.Rent(count);
+        var sAvgArray = pool.Rent(count);
+        var iAvgArray = pool.Rent(count);
+        var lAvgArray = pool.Rent(count);
+        var h2AvgArray = pool.Rent(count);
+        var s2AvgArray = pool.Rent(count);
+        var i2AvgArray = pool.Rent(count);
+        var l2AvgArray = pool.Rent(count);
+        var ftpAvgArray = pool.Rent(count);
+        var value5Array = pool.Rent(count);
+        var value6Array = pool.Rent(count);
+        var value7Array = pool.Rent(count);
+        var sumArray = pool.Rent(count);
+        var errSumArray = pool.Rent(count);
+        var value70Array = pool.Rent(count);
+        var momArray = pool.Rent(count);
+
+        try
+        {
+            var hAvg = hAvgArray.AsSpan(0, count);
+            var sAvg = sAvgArray.AsSpan(0, count);
+            var iAvg = iAvgArray.AsSpan(0, count);
+            var lAvg = lAvgArray.AsSpan(0, count);
+            var h2Avg = h2AvgArray.AsSpan(0, count);
+            var s2Avg = s2AvgArray.AsSpan(0, count);
+            var i2Avg = i2AvgArray.AsSpan(0, count);
+            var l2Avg = l2AvgArray.AsSpan(0, count);
+            var ftpAvg = ftpAvgArray.AsSpan(0, count);
+            var value5 = value5Array.AsSpan(0, count);
+            var value6 = value6Array.AsSpan(0, count);
+            var value7 = value7Array.AsSpan(0, count);
+            var sumBuf = sumArray.AsSpan(0, count);
+            var errSum = errSumArray.AsSpan(0, count);
+            var value70 = value70Array.AsSpan(0, count);
+            var mom = momArray.AsSpan(0, count);
+
+            // Compute all moving averages
+            maCore.Compute(close, hAvg, length);
+            maCore.Compute(close, sAvg, stl);
+            maCore.Compute(close, iAvg, itl);
+            maCore.Compute(close, lAvg, ltl);
+            maCore.Compute(close, h2Avg, hLength);
+            maCore.Compute(close, s2Avg, sLength);
+            maCore.Compute(close, i2Avg, iLength);
+            maCore.Compute(close, l2Avg, lLength);
+            maCore.Compute(ftp, ftpAvg, lLength);
+
+            // Main computation loop
+            double errSumSum = 0, value70Sum = 0;
+            int errSumCount = 0, value70Count = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                double priorHAvg = i >= hoff ? hAvg[i - hoff] : 0;
+                double priorSAvg = i >= soff ? sAvg[i - soff] : 0;
+                double priorIAvg = i >= ioff ? iAvg[i - ioff] : 0;
+                double prevHAvg = i >= 1 ? hAvg[i - 1] : 0;
+                double prevSAvg = i >= 1 ? sAvg[i - 1] : 0;
+                double prevIAvg = i >= 1 ? iAvg[i - 1] : 0;
+                double prevLAvg = i >= 1 ? lAvg[i - 1] : 0;
+
+                // Value2, Value3, Value12 and momentum signal
+                double value2 = sAvg[i] - priorHAvg;
+                double value3 = iAvg[i] - priorSAvg;
+                double value12 = lAvg[i] - priorIAvg;
+                double momSig = value2 + value3 + value12;
+
+                // Derivatives
+                double derivH = (hAvg[i] * 2) - prevHAvg;
+                double derivS = (sAvg[i] * 2) - prevSAvg;
+                double derivI = (iAvg[i] * 2) - prevIAvg;
+                double derivL = (lAvg[i] * 2) - prevLAvg;
+
+                // Sum derivatives
+                double sumDH = length * derivH;
+                double sumDS = stl * derivS;
+                double sumDI = itl * derivI;
+                double sumDL = ltl * derivL;
+
+                // N1 values
+                double n1h = h2Avg[i] * hLength;
+                double n1s = s2Avg[i] * sLength;
+                double n1i = i2Avg[i] * iLength;
+                double n1l = l2Avg[i] * lLength;
+
+                // DR values
+                double drh = sumDH - n1h;
+                double drs = sumDS - n1s;
+                double dri = sumDI - n1i;
+                double drl = sumDL - n1l;
+
+                // Sum values
+                double hSum = h2Avg[i] * (length - 1);
+                double sSum = s2Avg[i] * (stl - 1);
+                double iSum = i2Avg[i] * (itl - 1);
+                double lSum = ftpAvg[i] * (ltl - 1);
+
+                value5[i] = (hSum + drh) / length;
+                value6[i] = (sSum + drs) / stl;
+                value7[i] = (iSum + dri) / itl;
+                double value13 = (lSum + drl) / ltl;
+
+                double priorValue5 = i >= hoff ? value5[i - hoff] : 0;
+                double priorValue6 = i >= soff ? value6[i - soff] : 0;
+                double priorValue7 = i >= ioff ? value7[i - ioff] : 0;
+
+                double value9 = value6[i] - priorValue5;
+                double value10 = value7[i] - priorValue6;
+                double value14 = value13 - priorValue7;
+
+                mom[i] = value9 + value10 + value14;
+
+                // Sine/cosine calculations
+                double ht = Math.Sin(value5[i] * 2 * Math.PI / 360) + Math.Cos(value5[i] * 2 * Math.PI / 360);
+                double hta = Math.Sin(hAvg[i] * 2 * Math.PI / 360) + Math.Cos(hAvg[i] * 2 * Math.PI / 360);
+                double st = Math.Sin(value6[i] * 2 * Math.PI / 360) + Math.Cos(value6[i] * 2 * Math.PI / 360);
+                double sta = Math.Sin(sAvg[i] * 2 * Math.PI / 360) + Math.Cos(sAvg[i] * 2 * Math.PI / 360);
+                double it = Math.Sin(value7[i] * 2 * Math.PI / 360) + Math.Cos(value7[i] * 2 * Math.PI / 360);
+                double ita = Math.Sin(iAvg[i] * 2 * Math.PI / 360) + Math.Cos(iAvg[i] * 2 * Math.PI / 360);
+
+                sumBuf[i] = ht + st + it;
+                double err = hta + sta + ita;
+
+                double priorSum = i >= soff ? sumBuf[i - soff] : 0;
+                double priorHAvg2 = i >= soff ? hAvg[i - soff] : 0;
+                double cond2 = (sumBuf[i] > priorSum && hAvg[i] < priorHAvg2) || (sumBuf[i] < priorSum && hAvg[i] > priorHAvg2) ? 1 : 0;
+                double phase = cond2 == 1 ? -1 : 1;
+
+                errSum[i] = (sumBuf[i] - err) * phase;
+                value70[i] = value5[i] - value13;
+
+                // Rolling averages for errSig and value71
+                if (i >= soff)
+                {
+                    errSumSum -= errSum[i - soff];
+                    errSumCount--;
+                }
+                errSumSum += errSum[i];
+                errSumCount++;
+                double errSig = errSumCount > 0 ? errSumSum / errSumCount : 0;
+
+                if (i >= length)
+                {
+                    value70Sum -= value70[i - length];
+                    value70Count--;
+                }
+                value70Sum += value70[i];
+                value70Count++;
+                double value71 = value70Count > 0 ? value70Sum / value70Count : 0;
+
+                double prevErrSum = i >= 1 ? errSum[i - 1] : 0;
+                double prevMom = i >= 1 ? mom[i - 1] : 0;
+                double prevValue70 = i >= 1 ? value70[i - 1] : 0;
+
+                // Error number
+                double errNum = errSum[i] > 0 && errSum[i] < prevErrSum && errSum[i] < errSig ? 1 :
+                    errSum[i] > 0 && errSum[i] < prevErrSum && errSum[i] > errSig ? 2 :
+                    errSum[i] > 0 && errSum[i] > prevErrSum && errSum[i] < errSig ? 2 :
+                    errSum[i] > 0 && errSum[i] > prevErrSum && errSum[i] > errSig ? 3 :
+                    errSum[i] < 0 && errSum[i] > prevErrSum && errSum[i] > errSig ? -1 :
+                    errSum[i] < 0 && errSum[i] < prevErrSum && errSum[i] > errSig ? -2 :
+                    errSum[i] < 0 && errSum[i] > prevErrSum && errSum[i] < errSig ? -2 :
+                    errSum[i] < 0 && errSum[i] < prevErrSum && errSum[i] < errSig ? -3 : 0;
+
+                // Momentum number
+                double momNum = mom[i] > 0 && mom[i] < prevMom && mom[i] < momSig ? 1 :
+                    mom[i] > 0 && mom[i] < prevMom && mom[i] > momSig ? 2 :
+                    mom[i] > 0 && mom[i] > prevMom && mom[i] < momSig ? 2 :
+                    mom[i] > 0 && mom[i] > prevMom && mom[i] > momSig ? 3 :
+                    mom[i] < 0 && mom[i] > prevMom && mom[i] > momSig ? -1 :
+                    mom[i] < 0 && mom[i] < prevMom && mom[i] > momSig ? -2 :
+                    mom[i] < 0 && mom[i] > prevMom && mom[i] < momSig ? -2 :
+                    mom[i] < 0 && mom[i] < prevMom && mom[i] < momSig ? -3 : 0;
+
+                // TC number
+                double tcNum = value70[i] > 0 && value70[i] < prevValue70 && value70[i] < value71 ? 1 :
+                    value70[i] > 0 && value70[i] < prevValue70 && value70[i] > value71 ? 2 :
+                    value70[i] > 0 && value70[i] > prevValue70 && value70[i] < value71 ? 2 :
+                    value70[i] > 0 && value70[i] > prevValue70 && value70[i] > value71 ? 3 :
+                    value70[i] < 0 && value70[i] > prevValue70 && value70[i] > value71 ? -1 :
+                    value70[i] < 0 && value70[i] < prevValue70 && value70[i] > value71 ? -2 :
+                    value70[i] < 0 && value70[i] > prevValue70 && value70[i] < value71 ? -2 :
+                    value70[i] < 0 && value70[i] < prevValue70 && value70[i] < value71 ? -3 : 0;
+
+                double value42 = errNum + momNum + tcNum;
+
+                output[i] = value42 > 0 && value70[i] > 0 ? value42 :
+                    value42 < 0 && value70[i] < 0 ? value42 :
+                    (value42 > 0 && value70[i] < 0) || (value42 < 0 && value70[i] > 0) ? value42 / 10 : 0;
+            }
+        }
+        finally
+        {
+            pool.Return(hAvgArray);
+            pool.Return(sAvgArray);
+            pool.Return(iAvgArray);
+            pool.Return(lAvgArray);
+            pool.Return(h2AvgArray);
+            pool.Return(s2AvgArray);
+            pool.Return(i2AvgArray);
+            pool.Return(l2AvgArray);
+            pool.Return(ftpAvgArray);
+            pool.Return(value5Array);
+            pool.Return(value6Array);
+            pool.Return(value7Array);
+            pool.Return(sumArray);
+            pool.Return(errSumArray);
+            pool.Return(value70Array);
+            pool.Return(momArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes the InSync Index - a composite oscillator combining multiple indicators.
+    /// </summary>
+    internal static void InsyncIndex(
+        ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        ReadOnlySpan<double> volume, Span<double> output,
+        int fastLength = 12, int slowLength = 26, int signalLength = 9,
+        int rsiLength = 14, int cciLength = 14, int mfiLength = 20, int bbLength = 20,
+        int dpoLength = 18, int rocLength = 10, int stochLength = 14,
+        int stochKLength = 1, int stochDLength = 3, int smaLength = 10, double stdDevMult = 2)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+
+        int count = close.Length;
+        var pool = ArrayPool<double>.Shared;
+
+        // Rent buffers for all the sub-indicators
+        var rsiArray = pool.Rent(count);
+        var cciArray = pool.Rent(count);
+        var mfiArray = pool.Rent(count);
+        var macdArray = pool.Rent(count);
+        var bbPctBArray = pool.Rent(count);
+        var dpoArray = pool.Rent(count);
+        var rocArray = pool.Rent(count);
+        var stoKArray = pool.Rent(count);
+        var stoDArray = pool.Rent(count);
+        var emvArray = pool.Rent(count);
+
+        try
+        {
+            var rsi = rsiArray.AsSpan(0, count);
+            var cci = cciArray.AsSpan(0, count);
+            var mfi = mfiArray.AsSpan(0, count);
+            var macd = macdArray.AsSpan(0, count);
+            var bbPctB = bbPctBArray.AsSpan(0, count);
+            var dpo = dpoArray.AsSpan(0, count);
+            var roc = rocArray.AsSpan(0, count);
+            var stoK = stoKArray.AsSpan(0, count);
+            var stoD = stoDArray.AsSpan(0, count);
+            var emv = emvArray.AsSpan(0, count);
+
+            // Compute all sub-indicators using existing Core methods
+            RelativeStrengthIndex(close, rsi, rsiLength);
+            CommodityChannelIndex(high, low, close, cci, cciLength);
+            MoneyFlowIndex(high, low, close, volume, mfi, mfiLength);
+            MacdLine(close, macd, fastLength, slowLength);
+            DetrendedPriceOscillator(close, dpo, dpoLength);
+            RateOfChange(close, roc, rocLength);
+            StochasticK(high, low, close, stoK, stochLength);
+            StochasticD(high, low, close, stoD, stochLength, stochDLength);
+
+            // Inline Bollinger Bands %B: (close - lowerBand) / (upperBand - lowerBand)
+            var smaArray = pool.Rent(count);
+            var stdDevArray = pool.Rent(count);
+            var smaBuf = smaArray.AsSpan(0, count);
+            var stdDevBuf = stdDevArray.AsSpan(0, count);
+            MovingAverageCore.SimpleMovingAverage(close, smaBuf, bbLength);
+            VolatilityCore.StandardDeviation(close, stdDevBuf, bbLength);
+            for (int i = 0; i < count; i++)
+            {
+                double upperBand = smaBuf[i] + (stdDevMult * stdDevBuf[i]);
+                double lowerBand = smaBuf[i] - (stdDevMult * stdDevBuf[i]);
+                double bandWidth = upperBand - lowerBand;
+                bbPctB[i] = bandWidth != 0 ? (close[i] - lowerBand) / bandWidth : 0;
+            }
+            pool.Return(smaArray);
+            pool.Return(stdDevArray);
+
+            // Inline Ease of Movement: distance / (volume / boxRatio)
+            for (int i = 0; i < count; i++)
+            {
+                double prevHigh = i >= 1 ? high[i - 1] : 0;
+                double prevLow = i >= 1 ? low[i - 1] : 0;
+                double distance = ((high[i] + low[i]) / 2) - ((prevHigh + prevLow) / 2);
+                double boxRatio = high[i] != low[i] ? (volume[i] / 10000.0) / (high[i] - low[i]) : 0;
+                emv[i] = boxRatio != 0 ? distance / boxRatio : 0;
+            }
+
+            // Compute rolling averages and scores
+            double macdSum = 0, dpoSum = 0, rocSum = 0, emvSum = 0;
+            var pdoinsbArray = pool.Rent(count);
+            var pdoinssArray = pool.Rent(count);
+            var pdoinsb = pdoinsbArray.AsSpan(0, count);
+            var pdoinss = pdoinssArray.AsSpan(0, count);
+
+            try
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    // CCI score
+                    double cciins = cci[i] > 100 ? 5 : cci[i] < -100 ? -5 : 0;
+
+                    // Bollinger %B score
+                    double bolinsll = bbPctB[i] < 0.05 ? -5 : bbPctB[i] > 0.95 ? 5 : 0;
+
+                    // RSI score
+                    double rsiins = rsi[i] > 70 ? 5 : rsi[i] < 30 ? -5 : 0;
+
+                    // Stochastic K score
+                    double stopkins = stoK[i] > 80 ? 5 : stoK[i] < 20 ? -5 : 0;
+
+                    // Stochastic D score
+                    double stopdins = stoD[i] > 80 ? 5 : stoD[i] < 20 ? -5 : 0;
+
+                    // MFI score
+                    double mfiins = mfi[i] > 80 ? 5 : mfi[i] < 20 ? -5 : 0;
+
+                    // MACD rolling average and score
+                    if (i >= smaLength) macdSum -= macd[i - smaLength];
+                    macdSum += macd[i];
+                    int macdCount = Math.Min(i + 1, smaLength);
+                    double macdSma = macdCount > 0 ? macdSum / macdCount : 0;
+                    double macdins2 = macd[i] - macdSma;
+                    double macdinsb = macdins2 < 0 ? (macdSma < 0 ? -5 : 0) : (macdSma > 0 ? 5 : 0);
+
+                    // DPO rolling average and scores
+                    if (i >= smaLength) dpoSum -= dpo[i - smaLength];
+                    dpoSum += dpo[i];
+                    int dpoCount = Math.Min(i + 1, smaLength);
+                    double dpoSma = dpoCount > 0 ? dpoSum / dpoCount : 0;
+                    double pdoins2 = dpo[i] - dpoSma;
+                    pdoinsb[i] = pdoins2 < 0 ? (dpoSma < 0 ? -5 : 0) : (dpoSma > 0 ? 5 : 0);
+                    pdoinss[i] = pdoins2 > 0 ? (dpoSma > 0 ? 5 : 0) : (dpoSma < 0 ? -5 : 0);
+
+                    // ROC rolling average and score
+                    if (i >= smaLength) rocSum -= roc[i - smaLength];
+                    rocSum += roc[i];
+                    int rocCount = Math.Min(i + 1, smaLength);
+                    double rocSma = rocCount > 0 ? rocSum / rocCount : 0;
+                    double rocins2 = roc[i] - rocSma;
+                    double rocinsb = rocins2 < 0 ? (rocSma < 0 ? -5 : 0) : (rocSma > 0 ? 5 : 0);
+
+                    // EMV rolling average and score
+                    if (i >= smaLength) emvSum -= emv[i - smaLength];
+                    emvSum += emv[i];
+                    int emvCount = Math.Min(i + 1, smaLength);
+                    double emoSma = emvCount > 0 ? emvSum / emvCount : 0;
+                    double emvins2 = emv[i] - emoSma;
+                    double emvinsb = emvins2 < 0 ? (emoSma < 0 ? -5 : 0) : (emoSma > 0 ? 5 : 0);
+
+                    // Get prior pdoins values (10 bars back)
+                    double prevPdoinss10 = i >= smaLength ? pdoinss[i - smaLength] : 0;
+                    double prevPdoinsb10 = i >= smaLength ? pdoinsb[i - smaLength] : 0;
+
+                    // Final InSync Index
+                    output[i] = 50 + cciins + bolinsll + rsiins + stopkins + stopdins + mfiins + emvinsb + rocinsb + prevPdoinss10 + prevPdoinsb10 + macdinsb;
+                }
+            }
+            finally
+            {
+                pool.Return(pdoinsbArray);
+                pool.Return(pdoinssArray);
+            }
+        }
+        finally
+        {
+            pool.Return(rsiArray);
+            pool.Return(cciArray);
+            pool.Return(mfiArray);
+            pool.Return(macdArray);
+            pool.Return(bbPctBArray);
+            pool.Return(dpoArray);
+            pool.Return(rocArray);
+            pool.Return(stoKArray);
+            pool.Return(stoDArray);
+            pool.Return(emvArray);
+        }
+    }
+
+    /// <summary>
+    /// Computes Technical Ratings - a composite rating from multiple MA and oscillator indicators.
+    /// Returns the total rating (average of MA rating and oscillator rating).
+    /// </summary>
+    internal static void TechnicalRatings(
+        ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        ReadOnlySpan<double> volume, Span<double> output,
+        int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14,
+        int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3,
+        int cciLength = 20, int adxLength = 14, int momLength = 10,
+        int macdLength1 = 12, int macdLength2 = 26, int macdLength3 = 9,
+        int williamRLength = 14,
+        int maLength1 = 10, int maLength2 = 20, int maLength3 = 30,
+        int maLength4 = 50, int maLength5 = 100, int maLength6 = 200,
+        int hullMaLength = 9, int vwmaLength = 20,
+        IMovingAverageCore maCore = null!)
+    {
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+
+        int count = close.Length;
+        var pool = ArrayPool<double>.Shared;
+        maCore ??= new EmaCore();
+
+        // Rent buffers for MAs
+        var ma10Array = pool.Rent(count);
+        var ma20Array = pool.Rent(count);
+        var ma30Array = pool.Rent(count);
+        var ma50Array = pool.Rent(count);
+        var ma100Array = pool.Rent(count);
+        var ma200Array = pool.Rent(count);
+        var hullMaArray = pool.Rent(count);
+        var vwmaArray = pool.Rent(count);
+
+        // Rent buffers for oscillators
+        var rsiArray = pool.Rent(count);
+        var stoKArray = pool.Rent(count);
+        var stoDArray = pool.Rent(count);
+        var cciArray = pool.Rent(count);
+        var adxArray = pool.Rent(count);
+        var momArray = pool.Rent(count);
+        var macdArray = pool.Rent(count);
+        var macdSigArray = pool.Rent(count);
+        var stoRsiArray = pool.Rent(count);
+        var wrArray = pool.Rent(count);
+        var aoArray = pool.Rent(count);
+
+        try
+        {
+            var ma10 = ma10Array.AsSpan(0, count);
+            var ma20 = ma20Array.AsSpan(0, count);
+            var ma30 = ma30Array.AsSpan(0, count);
+            var ma50 = ma50Array.AsSpan(0, count);
+            var ma100 = ma100Array.AsSpan(0, count);
+            var ma200 = ma200Array.AsSpan(0, count);
+            var hullMa = hullMaArray.AsSpan(0, count);
+            var vwma = vwmaArray.AsSpan(0, count);
+            var rsi = rsiArray.AsSpan(0, count);
+            var stoK = stoKArray.AsSpan(0, count);
+            var stoD = stoDArray.AsSpan(0, count);
+            var cci = cciArray.AsSpan(0, count);
+            var adx = adxArray.AsSpan(0, count);
+            var mom = momArray.AsSpan(0, count);
+            var macd = macdArray.AsSpan(0, count);
+            var macdSig = macdSigArray.AsSpan(0, count);
+            var stoRsi = stoRsiArray.AsSpan(0, count);
+            var wr = wrArray.AsSpan(0, count);
+            var ao = aoArray.AsSpan(0, count);
+
+            // Compute moving averages
+            maCore.Compute(close, ma10, maLength1);
+            maCore.Compute(close, ma20, maLength2);
+            maCore.Compute(close, ma30, maLength3);
+            maCore.Compute(close, ma50, maLength4);
+            maCore.Compute(close, ma100, maLength5);
+            maCore.Compute(close, ma200, maLength6);
+            MovingAverageCore.HullMovingAverage(close, hullMa, hullMaLength);
+            MovingAverageCore.VolumeWeightedMovingAverage(close, volume, vwma, vwmaLength);
+
+            // Compute oscillators
+            RelativeStrengthIndex(close, rsi, rsiLength);
+            StochasticK(high, low, close, stoK, stochLength1);
+            StochasticD(high, low, close, stoD, stochLength1, stochLength3);
+            CommodityChannelIndex(high, low, close, cci, cciLength);
+            AverageDirectionalIndex(high, low, close, adx, adxLength);
+            Momentum(close, mom, momLength);
+            MacdLine(close, macd, macdLength1, macdLength2);
+            MacdSignal(close, macdSig, macdLength1, macdLength2, macdLength3);
+            StochasticRsi(close, stoRsi, rsiLength, stochLength1);
+            WilliamsR(high, low, close, wr, williamRLength);
+            AwesomeOscillator(high, low, ao, aoLength1, aoLength2);
+
+            // Compute ratings
+            for (int i = 0; i < count; i++)
+            {
+                double currentValue = close[i];
+                double prevRsi = i >= 1 ? rsi[i - 1] : 0;
+                double prevStoK = i >= 1 ? stoK[i - 1] : 0;
+                double prevStoD = i >= 1 ? stoD[i - 1] : 0;
+                double prevCci = i >= 1 ? cci[i - 1] : 0;
+                double prevMom = i >= 1 ? mom[i - 1] : 0;
+                double prevAo1 = i >= 1 ? ao[i - 1] : 0;
+                double prevAo2 = i >= 2 ? ao[i - 2] : 0;
+                double prevWr = i >= 1 ? wr[i - 1] : 0;
+
+                // MA Rating (8 components)
+                double maRating = 0;
+                maRating += currentValue > ma10[i] ? 1 : currentValue < ma10[i] ? -1 : 0;
+                maRating += currentValue > ma20[i] ? 1 : currentValue < ma20[i] ? -1 : 0;
+                maRating += currentValue > ma30[i] ? 1 : currentValue < ma30[i] ? -1 : 0;
+                maRating += currentValue > ma50[i] ? 1 : currentValue < ma50[i] ? -1 : 0;
+                maRating += currentValue > ma100[i] ? 1 : currentValue < ma100[i] ? -1 : 0;
+                maRating += currentValue > ma200[i] ? 1 : currentValue < ma200[i] ? -1 : 0;
+                maRating += currentValue > hullMa[i] ? 1 : currentValue < hullMa[i] ? -1 : 0;
+                maRating += currentValue > vwma[i] ? 1 : currentValue < vwma[i] ? -1 : 0;
+                maRating /= 8;
+
+                // Oscillator Rating (9 components)
+                double oscRating = 0;
+                oscRating += rsi[i] < 30 && prevRsi < rsi[i] ? 1 : rsi[i] > 70 && prevRsi > rsi[i] ? -1 : 0;
+                oscRating += stoK[i] < 20 && stoD[i] < 20 && stoK[i] > stoD[i] && prevStoK < prevStoD ? 1 :
+                    stoK[i] > 80 && stoD[i] > 80 && stoK[i] < stoD[i] && prevStoK > prevStoD ? -1 : 0;
+                oscRating += cci[i] < -100 && cci[i] > prevCci ? 1 : cci[i] > 100 && cci[i] < prevCci ? -1 : 0;
+                oscRating += adx[i] > 20 ? 1 : adx[i] < 20 ? -1 : 0;
+                oscRating += (ao[i] > 0 && prevAo1 < 0) || (ao[i] > 0 && prevAo1 > 0 && ao[i] > prevAo1 && prevAo2 > prevAo1) ? 1 :
+                    (ao[i] < 0 && prevAo1 > 0) || (ao[i] < 0 && prevAo1 < 0 && ao[i] < prevAo1 && prevAo2 < prevAo1) ? -1 : 0;
+                oscRating += mom[i] > prevMom ? 1 : mom[i] < prevMom ? -1 : 0;
+                oscRating += macd[i] > macdSig[i] ? 1 : macd[i] < macdSig[i] ? -1 : 0;
+                oscRating += stoRsi[i] < 20 ? 1 : stoRsi[i] > 80 ? -1 : 0;
+                oscRating += wr[i] < -80 && wr[i] > prevWr ? 1 : wr[i] > -20 && wr[i] < prevWr ? -1 : 0;
+                oscRating /= 9;
+
+                // Total rating (average of MA and oscillator ratings)
+                output[i] = (maRating + oscRating) / 2;
+            }
+        }
+        finally
+        {
+            pool.Return(ma10Array);
+            pool.Return(ma20Array);
+            pool.Return(ma30Array);
+            pool.Return(ma50Array);
+            pool.Return(ma100Array);
+            pool.Return(ma200Array);
+            pool.Return(hullMaArray);
+            pool.Return(vwmaArray);
+            pool.Return(rsiArray);
+            pool.Return(stoKArray);
+            pool.Return(stoDArray);
+            pool.Return(cciArray);
+            pool.Return(adxArray);
+            pool.Return(momArray);
+            pool.Return(macdArray);
+            pool.Return(macdSigArray);
+            pool.Return(stoRsiArray);
+            pool.Return(wrArray);
+            pool.Return(aoArray);
         }
     }
 
