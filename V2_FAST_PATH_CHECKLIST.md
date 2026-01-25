@@ -7,17 +7,17 @@ This checklist tracks progress on implementing the v2 Builder fast path for all 
 The v2 fast path has three layers:
 
 1. **Core Methods** (`src/Core/*.cs`) - Span-based implementations (**620 methods**)
-2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (**617 methods**)
-3. **TryComputeFast Dispatch** - Routes spec options to fast path (**614 INDICATORS WIRED**)
+2. **ComputeFast Wrappers** (`src/Builder/Compute/IndicatorCompute.cs`) - Buffer wrappers (**620 methods**)
+3. **TryComputeFast Dispatch** - Routes spec options to fast path (**617 INDICATORS WIRED**)
 
 ### Current State (Updated 2026-01-24)
 
 | Layer | Implemented | Notes |
 |-------|-------------|-------|
 | Core Methods | **620** | Span-based implementations (Osc:287 MA:198 Trend:71 Vol:35 Volume:29) |
-| ComputeFast Wrappers | **617** | Buffer wrappers in IndicatorCompute.cs |
-| SpecOptions Classes | **614** | Typed indicator options |
-| TryComputeFast Dispatch | **614** | Routed to fast path methods |
+| ComputeFast Wrappers | **620** | Buffer wrappers in IndicatorCompute.cs |
+| SpecOptions Classes | **618** | Typed indicator options |
+| TryComputeFast Dispatch | **617** | Routed to fast path methods |
 | IndicatorName Total | 773 | Target for 100% coverage |
 
 ### Progress Summary
@@ -34,15 +34,16 @@ The v2 fast path has three layers:
 - **Batch 34**: Added ThreeHma, AlphaDecreasingEMA, AdaptiveAutonomousRecursiveTrailingStop, AdaptiveTrailingStop, AtrTrailingStops
 - **Batch 35**: Added trailing stop wiring
 - **Batch 36**: Added WellesWilderSummation, DampingIndex, DidiIndex Core methods
+- **Batch 37**: Added VerticalHorizontalFilter, LinearRegressionSlope, LinearRegressionIntercept wiring
 - **Multi-Output Support**: MACD (Line/Signal/Histogram), BollingerBands (Upper/Middle/Lower), Stochastic (K/D)
-- **Total**: 614 SpecOptions, 614 dispatch routes
+- **Total**: 618 SpecOptions, 617 dispatch routes
 
 ### Coverage Analysis
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
 | Core Methods | **620** | **80.2%** of 773 |
-| SpecOptions/Dispatch | **614** | **79.4%** of 773 |
+| SpecOptions/Dispatch | **617** | **79.8%** of 773 |
 | Remaining indicators | **153** | **19.8%** |
 
 ### Notes on Coverage Calculation
