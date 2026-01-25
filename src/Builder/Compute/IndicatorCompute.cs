@@ -1045,7 +1045,7 @@ internal static partial class IndicatorCompute
             EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType),
             EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length3, eacr.MaType),
             EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.MaType),
-            EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.SlowLength, efmd.MaType),
+            EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.FastLength, efmd.SlowLength, efmd.MaType),
 
             // Batch 25 - More Ehlers Indicators
             EhlersPhaseCalculationSpecOptions epc => ComputeEhlersPhaseCalculationFast(data, context, epc.Length, epc.MaType),
@@ -13194,13 +13194,32 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    internal static ComputeBuffer ComputeEhlersFMDemodulatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
+        // V1 Algorithm: FM demodulator based on close-open derivative, clamped and smoothed
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        int count = data.Count;
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+
+        // Step 1: Calculate HL (derivative scaled by fastLength, clamped to [-1, 1])
+        var hlBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            double der = close[i] - open[i];
+            double hlRaw = fastLength * der;
+            // Clamp to [-1, 1]
+            hlBuffer.WritableSpan[i] = Math.Max(-1, Math.Min(1, hlRaw));
+        }
+
+        // Step 2: Smooth with MA (slowLength)
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, slowLength);
-        return buffer;
+        maCore.Compute(hlBuffer.Span, result.WritableSpan, slowLength);
+        hlBuffer.Dispose();
+
+        return result;
     }
 
     // Batch 25 - More Ehlers Indicators
@@ -14393,11 +14412,58 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: Rolling correlation between current and previous close values, transformed to roughness
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(2, length);
+
+        // Build arrays for current and previous values
+        var prevBuffer = context.Rent(count);
+        var prevSpan = prevBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+            prevSpan[i] = i >= 1 ? close[i - 1] : 0;
+
+        // Calculate rolling correlation and transform to roughness
+        var aBuffer = context.Rent(count);
+        var aSpan = aBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            if (i < length - 1)
+            {
+                aSpan[i] = 0;
+                continue;
+            }
+
+            // Calculate Pearson correlation between close and prev over window
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+            for (int j = 0; j < length; j++)
+            {
+                double x = prevSpan[i - j];
+                double y = close[i - j];
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+                sumY2 += y * y;
+            }
+
+            double n = length;
+            double denom = Math.Sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            double corr = denom != 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+
+            // Transform correlation to roughness: a = 1 - ((corr + 1) / 2)
+            aSpan[i] = 1 - ((corr + 1) / 2);
+        }
+
+        prevBuffer.Dispose();
+
+        // Smooth the roughness values with MA
+        var result = context.Rent(count);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+        maCore.Compute(aBuffer.Span, result.WritableSpan, length);
+        aBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -14507,11 +14573,71 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTopsAndBottomsFinderFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: EMA rising/falling with stddev-based thresholds for top/bottom detection
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(2, length);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+
+        // Step 1: Compute EMA of close prices
+        var emaBuffer = context.Rent(count);
+        maCore.Compute(close, emaBuffer.WritableSpan, length);
+        var emaSpan = emaBuffer.Span;
+
+        // Step 2: Calculate b (EMA when rising) and c (EMA when falling)
+        var bBuffer = context.Rent(count);
+        var cBuffer = context.Rent(count);
+        var bSpan = bBuffer.WritableSpan;
+        var cSpan = cBuffer.WritableSpan;
+        for (int i = 0; i < count; i++)
+        {
+            double a = emaSpan[i];
+            double prevA = i >= 1 ? emaSpan[i - 1] : 0;
+            bSpan[i] = a > prevA ? a : 0;
+            cSpan[i] = a < prevA ? a : 0;
+        }
+
+        // Step 3: Compute stddev of b and c values
+        var bStdDevBuffer = context.Rent(count);
+        var cStdDevBuffer = context.Rent(count);
+        VolatilityCore.StandardDeviation(bBuffer.Span, bStdDevBuffer.WritableSpan, length);
+        VolatilityCore.StandardDeviation(cBuffer.Span, cStdDevBuffer.WritableSpan, length);
+        var bStdSpan = bStdDevBuffer.Span;
+        var cStdSpan = cStdDevBuffer.Span;
+
+        // Step 4: Calculate up, dn, and os (oscillator signal)
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        double prevUp = 0;
+        double prevDn = 0;
+        for (int i = 0; i < count; i++)
+        {
+            double a = emaSpan[i];
+            double bStd = bStdSpan[i];
+            double cStd = cStdSpan[i];
+
+            double up = (a + bStd) != 0 ? a / (a + bStd) : 0;
+            double dn = (a + cStd) != 0 ? a / (a + cStd) : 0;
+
+            // Signal: 1 when up drops from 1, -1 when dn drops from 1
+            double os = 0;
+            if (prevUp == 1 && up != 1)
+                os = 1;
+            else if (prevDn == 1 && dn != 1)
+                os = -1;
+
+            resultSpan[i] = os;
+            prevUp = up;
+            prevDn = dn;
+        }
+
+        emaBuffer.Dispose();
+        bBuffer.Dispose();
+        cBuffer.Dispose();
+        bStdDevBuffer.Dispose();
+        cStdDevBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
@@ -14576,11 +14702,60 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeUhlMaCrossoverSystemFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // V1 Algorithm: Adaptive MA crossover system using variance-based coefficients
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(1, length);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, length);
-        return buffer;
+
+        // Step 1: Compute SMA of close prices
+        var smaBuffer = context.Rent(count);
+        maCore.Compute(close, smaBuffer.WritableSpan, length);
+        var smaSpan = smaBuffer.Span;
+
+        // Step 2: Compute standard deviation (we need variance = stddev^2)
+        var stdDevBuffer = context.Rent(count);
+        VolatilityCore.StandardDeviation(close, stdDevBuffer.WritableSpan, length);
+        // Convert to variance (stddev^2)
+        var varBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            double std = stdDevBuffer.Span[i];
+            varBuffer.WritableSpan[i] = std * std;
+        }
+        stdDevBuffer.Dispose();
+        var varSpan = varBuffer.Span;
+
+        // Step 3: Calculate CTS using adaptive coefficients
+        var result = context.Rent(count);
+        var resultSpan = result.WritableSpan;
+        double prevCma = count > 0 ? close[0] : 0;
+        double prevCts = count > 0 ? close[0] : 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            double currentValue = close[i];
+            double sma = smaSpan[i];
+            double prevVar = i >= length ? varSpan[i - length] : 0;
+
+            double secma = (sma - prevCma) * (sma - prevCma);
+            double sects = (currentValue - prevCts) * (currentValue - prevCts);
+
+            double ka = (prevVar < secma && secma != 0) ? 1 - (prevVar / secma) : 0;
+            double kb = (prevVar < sects && sects != 0) ? 1 - (prevVar / sects) : 0;
+
+            double cma = (ka * sma) + ((1 - ka) * prevCma);
+            double cts = (kb * currentValue) + ((1 - kb) * prevCts);
+
+            resultSpan[i] = cts;  // Return CTS as primary output
+            prevCma = cma;
+            prevCts = cts;
+        }
+
+        smaBuffer.Dispose();
+        varBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeUltimateVolatilityIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
@@ -14667,11 +14842,53 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // V1 Algorithm: RSI-based price channel with overbought/oversold zones
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
+        int count = data.Count;
+        length = Math.Max(1, length);
+        smoothLength = Math.Max(1, smoothLength);
         var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, buffer.WritableSpan, smoothLength);
-        return buffer;
+
+        const double overbought = 70;
+        const double oversold = 30;
+
+        // Step 1: Calculate RSI
+        var rsiBuffer = context.Rent(count);
+        OscillatorCore.RelativeStrengthIndex(close, rsiBuffer.WritableSpan, length);
+        var rsiSpan = rsiBuffer.Span;
+
+        // Step 2: Calculate differences from overbought/oversold levels
+        var rsiOverboughtBuffer = context.Rent(count);
+        var rsiOversoldBuffer = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            rsiOverboughtBuffer.WritableSpan[i] = rsiSpan[i] - overbought;
+            rsiOversoldBuffer.WritableSpan[i] = rsiSpan[i] - oversold;
+        }
+
+        // Step 3: Smooth the differences
+        var obSmoothBuffer = context.Rent(count);
+        var osSmoothBuffer = context.Rent(count);
+        maCore.Compute(rsiOverboughtBuffer.Span, obSmoothBuffer.WritableSpan, smoothLength);
+        maCore.Compute(rsiOversoldBuffer.Span, osSmoothBuffer.WritableSpan, smoothLength);
+
+        // Step 4: Calculate channel values (returning s1 - oversold channel line)
+        var result = context.Rent(count);
+        for (int i = 0; i < count; i++)
+        {
+            double currentClose = close[i];
+            double os = osSmoothBuffer.Span[i];
+            // s1 = close - (close * smoothedOversold / 100)
+            result.WritableSpan[i] = currentClose - (currentClose * os / 100);
+        }
+
+        rsiBuffer.Dispose();
+        rsiOverboughtBuffer.Dispose();
+        rsiOversoldBuffer.Dispose();
+        obSmoothBuffer.Dispose();
+        osSmoothBuffer.Dispose();
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
