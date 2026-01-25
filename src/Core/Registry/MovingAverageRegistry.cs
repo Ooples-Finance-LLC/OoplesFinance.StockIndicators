@@ -40,7 +40,7 @@ public static class MovingAverageRegistry
             [MovingAvgType.ZeroLagExponentialMovingAverage] = new ZlemaCore(),
             [MovingAvgType.LinearRegression] = new LinearRegressionCore(),
             [MovingAvgType.WildersSmoothingMethod] = new WilderCore(),
-            // Add more as needed...
+            // Additional MA types will be registered as their Core implementations are added.
         };
     }
 
