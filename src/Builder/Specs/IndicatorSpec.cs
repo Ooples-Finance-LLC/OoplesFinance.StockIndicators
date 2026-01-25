@@ -10641,3 +10641,215 @@ public sealed class StochasticConnorsRelativeStrengthIndexSpecOptions : IIndicat
     public MovingAvgType MaType { get; }
 }
 
+/// <summary>
+/// Uhl MA Crossover System options.
+/// </summary>
+public sealed class UhlMaCrossoverSystemSpecOptions : IIndicatorSpecOptions
+{
+    public UhlMaCrossoverSystemSpecOptions(int length = 100)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public UhlMaCrossoverSystemSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Woodie Commodity Channel Index options.
+/// </summary>
+public sealed class WoodieCommodityChannelIndexSpecOptions : IIndicatorSpecOptions
+{
+    public WoodieCommodityChannelIndexSpecOptions(int fastLength = 6, int slowLength = 14)
+        : this(fastLength, slowLength, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public WoodieCommodityChannelIndexSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
+    {
+        FastLength = Math.Max(1, fastLength);
+        SlowLength = Math.Max(1, slowLength);
+        MaType = maType;
+    }
+
+    public int FastLength { get; }
+    public int SlowLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Vostro Indicator options.
+/// </summary>
+public sealed class VostroIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public VostroIndicatorSpecOptions(int length1 = 5, int length2 = 100, double level = 8)
+        : this(length1, length2, level, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public VostroIndicatorSpecOptions(int length1, int length2, double level, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Level = level;
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public double Level { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// VIX Trading System options.
+/// </summary>
+public sealed class VixTradingSystemSpecOptions : IIndicatorSpecOptions
+{
+    public VixTradingSystemSpecOptions(int length = 50, double maxCount = 11, double minCount = -11)
+        : this(length, maxCount, minCount, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public VixTradingSystemSpecOptions(int length, double maxCount, double minCount, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaxCount = maxCount;
+        MinCount = minCount;
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public double MaxCount { get; }
+    public double MinCount { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Traders Dynamic Index options.
+/// </summary>
+public sealed class TradersDynamicIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TradersDynamicIndexSpecOptions(int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7)
+        : this(length1, length2, length3, length4, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public TradersDynamicIndexSpecOptions(int length1, int length2, int length3, int length4, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int Length4 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Tops And Bottoms Finder options.
+/// </summary>
+public sealed class TopsAndBottomsFinderSpecOptions : IIndicatorSpecOptions
+{
+    public TopsAndBottomsFinderSpecOptions(int length = 50)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TopsAndBottomsFinderSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Trader Pressure Index options.
+/// </summary>
+public sealed class TraderPressureIndexSpecOptions : IIndicatorSpecOptions
+{
+    public TraderPressureIndexSpecOptions(int length1 = 7, int length2 = 2, int smoothLength = 3)
+        : this(length1, length2, smoothLength, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public TraderPressureIndexSpecOptions(int length1, int length2, int smoothLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// Technical Ratings options.
+/// </summary>
+public sealed class TechnicalRatingsSpecOptions : IIndicatorSpecOptions
+{
+    public TechnicalRatingsSpecOptions(int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3)
+        : this(aoLength1, aoLength2, rsiLength, stochLength1, stochLength2, stochLength3, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TechnicalRatingsSpecOptions(int aoLength1, int aoLength2, int rsiLength, int stochLength1, int stochLength2, int stochLength3, MovingAvgType maType)
+    {
+        AoLength1 = Math.Max(1, aoLength1);
+        AoLength2 = Math.Max(1, aoLength2);
+        RsiLength = Math.Max(1, rsiLength);
+        StochLength1 = Math.Max(1, stochLength1);
+        StochLength2 = Math.Max(1, stochLength2);
+        StochLength3 = Math.Max(1, stochLength3);
+        MaType = maType;
+    }
+
+    public int AoLength1 { get; }
+    public int AoLength2 { get; }
+    public int RsiLength { get; }
+    public int StochLength1 { get; }
+    public int StochLength2 { get; }
+    public int StochLength3 { get; }
+    public MovingAvgType MaType { get; }
+}
+
+/// <summary>
+/// The Range Indicator options.
+/// </summary>
+public sealed class TheRangeIndicatorSpecOptions : IIndicatorSpecOptions
+{
+    public TheRangeIndicatorSpecOptions(int length = 10, int smoothLength = 3)
+        : this(length, smoothLength, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public TheRangeIndicatorSpecOptions(int length, int smoothLength, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
+        MaType = maType;
+    }
+
+    public int Length { get; }
+    public int SmoothLength { get; }
+    public MovingAvgType MaType { get; }
+}
+
