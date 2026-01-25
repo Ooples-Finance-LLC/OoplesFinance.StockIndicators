@@ -7875,3 +7875,39 @@ public sealed class DidiIndexSpecOptions : IIndicatorSpecOptions
     public int LongLength { get; }
 }
 
+/// <summary>
+/// Vertical Horizontal Filter options.
+/// </summary>
+public sealed class VerticalHorizontalFilterSpecOptions : IIndicatorSpecOptions
+{
+    public VerticalHorizontalFilterSpecOptions(int length = 28) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Pretty Good Oscillator options.
+/// </summary>
+public sealed class PrettyGoodOscillatorSpecOptions : IIndicatorSpecOptions
+{
+    public PrettyGoodOscillatorSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression Slope options.
+/// </summary>
+public sealed class LinearRegressionSlopeSpecOptions : IIndicatorSpecOptions
+{
+    public LinearRegressionSlopeSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+
+/// <summary>
+/// Linear Regression Intercept options.
+/// </summary>
+public sealed class LinearRegressionInterceptSpecOptions : IIndicatorSpecOptions
+{
+    public LinearRegressionInterceptSpecOptions(int length = 14) { Length = Math.Max(1, length); }
+    public int Length { get; }
+}
+

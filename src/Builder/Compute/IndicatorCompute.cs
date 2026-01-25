@@ -826,6 +826,9 @@ internal static partial class IndicatorCompute
             WellesWilderSummationSpecOptions wws => ComputeWellesWilderSummationFast(data, context, wws.Length),
             DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length),
             DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength, didi.MediumLength, didi.LongLength),
+            VerticalHorizontalFilterSpecOptions vhf => ComputeVerticalHorizontalFilterFast(data, context, vhf.Length),
+            LinearRegressionSlopeSpecOptions lrs => ComputeLinearRegressionSlopeFast(data, context, lrs.Length),
+            LinearRegressionInterceptSpecOptions lri => ComputeLinearRegressionInterceptFast(data, context, lri.Length),
 
             _ => null
         };
@@ -8860,6 +8863,41 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.DidiIndex(inputSpan, buffer.WritableSpan, shortLength, mediumLength, longLength);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Vertical Horizontal Filter using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeVerticalHorizontalFilterFast(StockData data, ComputeContext context, int length = 28)
+    {
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var buffer = context.Rent(data.Count);
+        TrendCore.VerticalHorizontalFilter(closeSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Regression Slope using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearRegressionSlopeFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.LinearRegressionSlope(inputSpan, buffer.WritableSpan, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Linear Regression Intercept using zero-allocation fast path.
+    /// </summary>
+    public static ComputeBuffer ComputeLinearRegressionInterceptFast(StockData data, ComputeContext context, int length = 14)
+    {
+        var inputList = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var buffer = context.Rent(inputList.Count);
+        TrendCore.LinearRegressionIntercept(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
