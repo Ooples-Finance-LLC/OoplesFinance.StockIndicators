@@ -5021,11 +5021,18 @@ public sealed class Spencer21PointMovingAverageSpecOptions : IIndicatorSpecOptio
 public sealed class SlowSmoothedMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public SlowSmoothedMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public SlowSmoothedMovingAverageSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -6696,8 +6703,19 @@ public sealed class SelfWeightedMovingAverageSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class SequentiallyFilteredMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public SequentiallyFilteredMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public SequentiallyFilteredMovingAverageSpecOptions(int length)
+        : this(length, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    public SequentiallyFilteredMovingAverageSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -8169,8 +8187,19 @@ public sealed class DonchianChannelLowerSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class ThreeHmaSpecOptions : IIndicatorSpecOptions
 {
-    public ThreeHmaSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public ThreeHmaSpecOptions(int length = 50)
+        : this(length, MovingAvgType.WeightedMovingAverage)
+    {
+    }
+
+    public ThreeHmaSpecOptions(int length, MovingAvgType maType)
+    {
+        Length = Math.Max(1, length);
+        MaType = maType;
+    }
+
     public int Length { get; }
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
