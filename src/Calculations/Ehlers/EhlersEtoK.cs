@@ -213,7 +213,11 @@ public static partial class Calculations
             var n2 = (hh2 - ll2) / hLength;
 
             var prevDimen = GetLastOrDefault(dimenList);
-            var dimen = 0.5 * (((Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2)) + prevDimen);
+            // Protect against log of zero or negative values (when price has no variation)
+            var sumN = n1 + n2;
+            var dimen = (sumN > 0 && n3 > 0)
+                ? 0.5 * (((Math.Log(sumN) - Math.Log(n3)) / Math.Log(2)) + prevDimen)
+                : prevDimen;
             dimenList.Add(dimen);
 
             var prevHurst = GetLastOrDefault(hurstList);

@@ -41,7 +41,7 @@ public static partial class Calculations
             }
 
             var prevUpsidePotential = GetLastOrDefault(upsidePotentialList);
-            var upsidePotential = downSide >= 0 ? upSide / Sqrt(downSide) : 0;
+            var upsidePotential = downSide > 0 ? upSide / Sqrt(downSide) : 0;
             upsidePotentialList.Add(upsidePotential);
 
             var signal = GetCompareSignal(upsidePotential - 5, prevUpsidePotential - 5);
