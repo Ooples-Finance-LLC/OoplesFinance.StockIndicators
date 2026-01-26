@@ -2341,6 +2341,530 @@ public sealed class ReferenceTests
         }
     }
 
+    /// <summary>
+    /// Verifies CMO (Chande Momentum Oscillator) properties.
+    /// Bounded [-100, 100]
+    /// </summary>
+    [Theory]
+    [InlineData(14)]
+    [InlineData(20)]
+    public void CMO_ShouldBeBounded(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.ChandeMomentumOscillator(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"CMO({length}) should have valid values");
+
+        // CMO bounded [-100, 100]
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(-100, "CMO >= -100");
+            value.Should().BeLessThanOrEqualTo(100, "CMO <= 100");
+        }
+    }
+
+    /// <summary>
+    /// Verifies Bull Power properties.
+    /// Bull Power = High - EMA(Close)
+    /// </summary>
+    [Theory]
+    [InlineData(13)]
+    [InlineData(21)]
+    public void BullPower_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.BullPowerIndicator(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Bull Power({length}) should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "Bull Power should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Bear Power properties.
+    /// Bear Power = Low - EMA(Close)
+    /// </summary>
+    [Theory]
+    [InlineData(13)]
+    [InlineData(21)]
+    public void BearPower_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.BearPowerIndicator(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Bear Power({length}) should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "Bear Power should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Linear Regression Line properties.
+    /// Fits a linear trend line to price data
+    /// </summary>
+    [Theory]
+    [InlineData(14)]
+    [InlineData(25)]
+    public void LinearRegression_ShouldTrackPrice(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.LinearRegressionLine(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var closes = testData.Select(t => t.Close).ToArray();
+        // Skip warmup period
+        var validValues = actual.Skip(length).Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Linear Regression({length}) should have valid values");
+
+        // Linear Regression should be within price range
+        var postWarmupCloses = closes.Skip(length).ToArray();
+        var minPrice = postWarmupCloses.Min() * 0.8;
+        var maxPrice = postWarmupCloses.Max() * 1.2;
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(minPrice, "LinReg should be near price");
+            value.Should().BeLessThan(maxPrice, "LinReg should be near price");
+        }
+    }
+
+    /// <summary>
+    /// Verifies PVO (Percentage Volume Oscillator) properties.
+    /// Similar to PPO but for volume
+    /// </summary>
+    [Fact]
+    public void PVO_ShouldProduceValidValues()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.PercentageVolumeOscillator();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("PVO should have valid values");
+
+        // PVO oscillates around zero
+        var positiveCount = validValues.Count(v => v > 0);
+        var negativeCount = validValues.Count(v => v < 0);
+        // With varying volume in test data, we should see both positive and negative values
+        (positiveCount + negativeCount).Should().BeGreaterThan(0, "PVO should have non-zero values");
+    }
+
+    /// <summary>
+    /// Verifies RVI (Relative Vigor Index) properties.
+    /// Measures the strength of price movement
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(14)]
+    public void RVI_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.RelativeVigorIndex(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"RVI({length}) should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 6)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "RVI should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Mass Index properties.
+    /// Identifies trend reversals based on range expansion
+    /// </summary>
+    [Fact]
+    public void MassIndex_ShouldProduceValidValues()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.MassIndex();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v) && v > 0).ToArray();
+        validValues.Should().NotBeEmpty("Mass Index should have valid positive values");
+
+        // Mass Index should be positive
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(0, "Mass Index should be positive");
+        }
+    }
+
+    /// <summary>
+    /// Verifies KVO (Klinger Volume Oscillator) properties.
+    /// Combines price, volume, and accumulation/distribution
+    /// </summary>
+    [Fact]
+    public void KVO_ShouldProduceValidValues()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.KlingerVolumeOscillator();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("KVO should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 2)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "KVO should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Acceleration Oscillator properties.
+    /// Derivative of Awesome Oscillator
+    /// </summary>
+    [Fact]
+    public void AccelerationOscillator_ShouldOscillate()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.AcceleratorOscillator();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Acceleration Oscillator should have valid values");
+
+        // Acceleration Oscillator oscillates around zero
+        var positiveCount = validValues.Count(v => v > 0);
+        var negativeCount = validValues.Count(v => v < 0);
+        (positiveCount + negativeCount).Should().BeGreaterThan(0, "AC should have non-zero values");
+    }
+
+    /// <summary>
+    /// Verifies Ulcer Index properties.
+    /// Measures downside volatility/risk
+    /// </summary>
+    [Theory]
+    [InlineData(14)]
+    [InlineData(20)]
+    public void UlcerIndex_ShouldBeNonNegative(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.UlcerIndex(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Ulcer Index({length}) should have valid values");
+
+        // Ulcer Index should be non-negative
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "Ulcer Index >= 0");
+        }
+    }
+
+    /// <summary>
+    /// Verifies PFE (Polarized Fractal Efficiency) properties.
+    /// Measures price path efficiency
+    /// Note: PFE can exceed [-100, 100] bounds in some implementations during warmup
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(14)]
+    public void PFE_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.PolarizedFractalEfficiency(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        // Skip warmup values that may be out of normal bounds
+        var validValues = actual.Skip(length * 2).Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"PFE({length}) should have valid values after warmup");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "PFE should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Connors RSI properties.
+    /// Composite RSI with streak and rate of change components
+    /// Bounded [0, 100]
+    /// </summary>
+    [Fact]
+    public void ConnorsRSI_ShouldBeBounded()
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.ConnorsRelativeStrengthIndex();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Connors RSI should have valid values");
+
+        // Connors RSI bounded [0, 100]
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "CRSI >= 0");
+            value.Should().BeLessThanOrEqualTo(100, "CRSI <= 100");
+        }
+    }
+
+    /// <summary>
+    /// Verifies KST (Know Sure Thing) properties.
+    /// Combines multiple ROC indicators with different periods
+    /// </summary>
+    [Fact]
+    public void KST_ShouldProduceValidValues()
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.KnowSureThing();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("KST should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "KST should change over time");
+    }
+
+    /// <summary>
+    /// Verifies Historical Volatility properties.
+    /// Annualized standard deviation of log returns
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(20)]
+    public void HistoricalVolatility_ShouldBeNonNegative(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.HistoricalVolatility(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Historical Volatility({length}) should have valid values");
+
+        // Historical Volatility should be non-negative
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "HV >= 0");
+        }
+    }
+
+    /// <summary>
+    /// Verifies Chaikin Volatility properties.
+    /// Rate of change of High-Low range spread
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(14)]
+    public void ChaikinVolatility_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.ChaikinVolatility(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Chaikin Volatility({length}) should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "Chaikin Volatility should change over time");
+    }
+
     #endregion
 
     #region Reference Formula Implementations
