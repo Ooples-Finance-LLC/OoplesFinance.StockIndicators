@@ -301,7 +301,9 @@ public static class CalculationsHelper
             case DerivedSeriesKind.TrueRange:
                 for (var i = 0; i < count; i++)
                 {
-                    var prevClose = i >= 1 ? closes[i - 1] : 0;
+                    // For the first bar, use current close as prevClose (TR = High - Low)
+                    // This avoids artificially high TR values when there's no previous bar
+                    var prevClose = i >= 1 ? closes[i - 1] : closes[i];
                     list.Add(CalculateTrueRange(highs[i], lows[i], prevClose));
                 }
                 break;

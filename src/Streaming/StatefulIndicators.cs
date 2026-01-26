@@ -3663,7 +3663,8 @@ public sealed class SmoothedVolatilityBandsState : IStreamingIndicatorState, IDi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
         var ma = _maSmoother.Next(value, isFinal);
@@ -6257,7 +6258,8 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For first bar, use current close (TR = High - Low)
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atr.GetNext(tr, isFinal);
 
@@ -6317,14 +6319,15 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState
     {
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
 
         var highDiff = bar.High - prevHigh;
         var lowDiff = prevLow - bar.Low;
 
         var dmPlus = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
         var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
 
         var dmPlus14 = _dmPlus.GetNext(dmPlus, isFinal);
         var dmMinus14 = _dmMinus.GetNext(dmMinus, isFinal);
@@ -6760,7 +6763,9 @@ public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDis
     {
         var value = _input.GetValue(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
-        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
+        // For TrueRange on first bar, use current close
+        var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
+        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
         var range = bar.High - bar.Low;
         var vqiT = trueRange != 0 && range != 0
             ? (((value - prevClose) / trueRange) + ((value - bar.Open) / range)) * 0.5
@@ -7582,7 +7587,8 @@ public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDi
     {
         var input = _input.GetValue(bar);
         var f = _inputSmoother.Next(input, isFinal);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -8531,7 +8537,8 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
         var currentHigh = bar.High;
         var currentLow = bar.Low;
         var currentClose = bar.Close;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevClose = _hasPrev ? _prevClose : currentClose;
         var trRaw = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
         var atr = _atr.Next(trRaw, isFinal);
         var atrHigh = isFinal ? _atrHighWindow.Add(atr, out _) : _atrHighWindow.Preview(atr, out _);
@@ -14109,7 +14116,8 @@ public sealed class ChandelierExitState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
         var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
