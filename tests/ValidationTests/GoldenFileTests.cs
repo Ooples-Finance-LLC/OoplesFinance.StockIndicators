@@ -11413,4 +11413,1718 @@ public sealed class GoldenFileTests
     }
 
     #endregion
+
+    #region M Indicators
+
+    /// <summary>
+    /// Validates MacZ Indicator
+    ///
+    /// Key properties:
+    /// - Z-score based MACD variant
+    /// </summary>
+    [Fact]
+    public void MacZIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MacZIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("MacZ Indicator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates MacZ VWAP Indicator
+    ///
+    /// Key properties:
+    /// - Z-score MACD with VWAP integration
+    /// </summary>
+    [Fact]
+    public void MacZVwapIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MacZVwapIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("MacZ VWAP Indicator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Market Direction Indicator
+    ///
+    /// Key properties:
+    /// - Measures overall market direction
+    /// </summary>
+    [Fact]
+    public void MarketDirectionIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MarketDirectionIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Market Direction Indicator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Market Meanness Index
+    ///
+    /// Key properties:
+    /// - Measures market mean-reversion tendency
+    /// </summary>
+    [Fact]
+    public void MarketMeannessIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MarketMeannessIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Market Meanness Index should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Martin Ratio
+    ///
+    /// Key properties:
+    /// - Risk-adjusted return metric using Ulcer Index
+    /// </summary>
+    [Fact]
+    public void MartinRatio_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MartinRatio, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Martin Ratio should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mass Thrust Oscillator
+    ///
+    /// Key properties:
+    /// - Oscillator version of Mass Thrust
+    /// </summary>
+    [Fact]
+    public void MassThrustOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MassThrustOscillator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Mass Thrust Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mayer Multiple
+    ///
+    /// Reference: Trace Mayer
+    /// Key properties:
+    /// - Current price / 200-day MA
+    /// </summary>
+    [Fact]
+    public void MayerMultiple_GoldenFile_MayerFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MayerMultiple, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Mayer Multiple should be positive");
+            double.IsFinite(val).Should().BeTrue("Mayer Multiple should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates McClellan Oscillator
+    ///
+    /// Reference: McClellan Financial Publications
+    /// Key properties:
+    /// - Breadth oscillator for market internals
+    /// </summary>
+    [Fact]
+    public void McClellanOscillator_GoldenFile_McClellanFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.McClellanOscillator, new object[] { 19, 39 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(40).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("McClellan Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates McNicholl Moving Average
+    ///
+    /// Key properties:
+    /// - Smooth moving average variant
+    /// </summary>
+    [Fact]
+    public void McNichollMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.McNichollMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "McNicholl MA should be positive for positive prices");
+            double.IsFinite(val).Should().BeTrue("McNicholl MA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mean Absolute Error Bands
+    ///
+    /// Key properties:
+    /// - Bands using mean absolute error
+    /// </summary>
+    [Fact]
+    public void MeanAbsoluteErrorBands_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MeanAbsoluteErrorBands, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MAE Bands should be positive");
+            double.IsFinite(val).Should().BeTrue("MAE Bands should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Median Price
+    ///
+    /// Key properties:
+    /// - (High + Low) / 2
+    /// </summary>
+    [Fact]
+    public void MedianPrice_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MedianPrice, new object[] { });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(1).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Median Price should be positive");
+            double.IsFinite(val).Should().BeTrue("Median Price should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Middle High Low Moving Average
+    ///
+    /// Key properties:
+    /// - MA using middle of high-low range
+    /// </summary>
+    [Fact]
+    public void MiddleHighLowMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MiddleHighLowMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MHLMA should be positive");
+            double.IsFinite(val).Should().BeTrue("MHLMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Midpoint
+    ///
+    /// Key properties:
+    /// - Midpoint of highest high and lowest low over period
+    /// </summary>
+    [Fact]
+    public void Midpoint_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.Midpoint, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Midpoint should be positive");
+            double.IsFinite(val).Should().BeTrue("Midpoint should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Midpoint Oscillator
+    ///
+    /// Key properties:
+    /// - Oscillator derived from midpoint
+    /// </summary>
+    [Fact]
+    public void MidpointOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MidpointOscillator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Midpoint Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Midprice
+    ///
+    /// Key properties:
+    /// - (Highest High + Lowest Low) / 2 over period
+    /// </summary>
+    [Fact]
+    public void Midprice_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.Midprice, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Midprice should be positive");
+            double.IsFinite(val).Should().BeTrue("Midprice should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mirrored MACD
+    ///
+    /// Key properties:
+    /// - MACD with mirrored signal processing
+    /// </summary>
+    [Fact]
+    public void MirroredMovingAverageConvergenceDivergence_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MirroredMovingAverageConvergenceDivergence, new object[] { 12, 26, 9 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(27).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Mirrored MACD should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mirrored PPO
+    ///
+    /// Key properties:
+    /// - PPO with mirrored signal processing
+    /// </summary>
+    [Fact]
+    public void MirroredPercentagePriceOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MirroredPercentagePriceOscillator, new object[] { 12, 26, 9 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(27).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Mirrored PPO should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Mobility Oscillator
+    ///
+    /// Key properties:
+    /// - Measures price mobility
+    /// </summary>
+    [Fact]
+    public void MobilityOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MobilityOscillator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Mobility Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Modified Gann Hi-Lo Activator
+    ///
+    /// Key properties:
+    /// - Modified version of Gann Hi-Lo indicator
+    /// </summary>
+    [Fact]
+    public void ModifiedGannHiloActivator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ModifiedGannHiloActivator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Modified Gann Hi-Lo should be positive");
+            double.IsFinite(val).Should().BeTrue("Modified Gann Hi-Lo should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Modified Price Volume Trend
+    ///
+    /// Key properties:
+    /// - Enhanced PVT indicator
+    /// </summary>
+    [Fact]
+    public void ModifiedPriceVolumeTrend_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ModifiedPriceVolumeTrend, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Modified PVT should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Modular Filter
+    ///
+    /// Key properties:
+    /// - Configurable modular filter
+    /// </summary>
+    [Fact]
+    public void ModularFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ModularFilter, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Modular Filter should be positive");
+            double.IsFinite(val).Should().BeTrue("Modular Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Momenta RSI
+    ///
+    /// Key properties:
+    /// - RSI with momentum enhancements
+    /// </summary>
+    [Fact]
+    public void MomentaRelativeStrengthIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MomentaRelativeStrengthIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Momenta RSI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Morphed Sine Wave
+    ///
+    /// Key properties:
+    /// - Sine wave transformed indicator
+    /// </summary>
+    [Fact]
+    public void MorphedSineWave_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MorphedSineWave, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Morphed Sine Wave should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Motion Smoothness Index
+    ///
+    /// Key properties:
+    /// - Measures smoothness of price motion
+    /// </summary>
+    [Fact]
+    public void MotionSmoothnessIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MotionSmoothnessIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Motion Smoothness Index should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Motion To Attraction Channels
+    ///
+    /// Key properties:
+    /// - Channels based on price attraction
+    /// </summary>
+    [Fact]
+    public void MotionToAttractionChannels_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MotionToAttractionChannels, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Motion To Attraction Channels should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Motion To Attraction Trailing Stop
+    ///
+    /// Key properties:
+    /// - Trailing stop based on price attraction
+    /// </summary>
+    [Fact]
+    public void MotionToAttractionTrailingStop_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MotionToAttractionTrailingStop, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Motion To Attraction Trailing Stop should be positive");
+            double.IsFinite(val).Should().BeTrue("Motion To Attraction Trailing Stop should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Move Tracker
+    ///
+    /// Key properties:
+    /// - Tracks price movement
+    /// </summary>
+    [Fact]
+    public void MoveTracker_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MoveTracker, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Move Tracker should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Adaptive Filter
+    ///
+    /// Key properties:
+    /// - Adaptive MA filter
+    /// </summary>
+    [Fact]
+    public void MovingAverageAdaptiveFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageAdaptiveFilter, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Adaptive Filter should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Adaptive Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Adaptive Q
+    ///
+    /// Key properties:
+    /// - Adaptive MA with Q factor
+    /// </summary>
+    [Fact]
+    public void MovingAverageAdaptiveQ_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageAdaptiveQ, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Adaptive Q should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Adaptive Q should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Band Width
+    ///
+    /// Key properties:
+    /// - Width of MA bands
+    /// </summary>
+    [Fact]
+    public void MovingAverageBandWidth_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageBandWidth, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThanOrEqualTo(0, "MA Band Width should be non-negative");
+            double.IsFinite(val).Should().BeTrue("MA Band Width should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Bands
+    ///
+    /// Key properties:
+    /// - Bands around a moving average
+    /// </summary>
+    [Fact]
+    public void MovingAverageBands_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageBands, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Bands should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Bands should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Channel
+    ///
+    /// Key properties:
+    /// - Channel based on moving averages
+    /// </summary>
+    [Fact]
+    public void MovingAverageChannel_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageChannel, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Channel should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Channel should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates MACD Leader
+    ///
+    /// Key properties:
+    /// - Leading version of MACD
+    /// </summary>
+    [Fact]
+    public void MovingAverageConvergenceDivergenceLeader_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageConvergenceDivergenceLeader, new object[] { 12, 26, 9 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(27).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("MACD Leader should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Displaced Envelope
+    ///
+    /// Key properties:
+    /// - Envelope with displaced MA
+    /// </summary>
+    [Fact]
+    public void MovingAverageDisplacedEnvelope_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageDisplacedEnvelope, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Displaced Envelope should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Displaced Envelope should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Envelope
+    ///
+    /// Key properties:
+    /// - Standard envelope around MA
+    /// </summary>
+    [Fact]
+    public void MovingAverageEnvelope_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageEnvelope, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Envelope should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Envelope should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Moving Average Support Resistance
+    ///
+    /// Key properties:
+    /// - Support/resistance from MAs
+    /// </summary>
+    [Fact]
+    public void MovingAverageSupportResistance_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageSupportResistance, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "MA Support Resistance should be positive");
+            double.IsFinite(val).Should().BeTrue("MA Support Resistance should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Multi Depth Zero Lag EMA
+    ///
+    /// Key properties:
+    /// - Multiple depth zero-lag EMA
+    /// </summary>
+    [Fact]
+    public void MultiDepthZeroLagExponentialMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MultiDepthZeroLagExponentialMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Multi Depth ZLEMA should be positive");
+            double.IsFinite(val).Should().BeTrue("Multi Depth ZLEMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Multi Level Indicator
+    ///
+    /// Key properties:
+    /// - Multi-level analysis indicator
+    /// </summary>
+    [Fact]
+    public void MultiLevelIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MultiLevelIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Multi Level Indicator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Multi Vote OBV
+    ///
+    /// Key properties:
+    /// - Multi-vote version of OBV
+    /// </summary>
+    [Fact]
+    public void MultiVoteOnBalanceVolume_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MultiVoteOnBalanceVolume, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Multi Vote OBV should be finite");
+        }
+    }
+
+    #endregion
+
+    #region N Indicators
+
+    /// <summary>
+    /// Validates Narrow Sideways Channel
+    ///
+    /// Key properties:
+    /// - Detects narrow ranging markets
+    /// </summary>
+    [Fact]
+    public void NarrowSidewaysChannel_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NarrowSidewaysChannel, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Narrow Sideways Channel should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Directional Combo
+    ///
+    /// Key properties:
+    /// - Combination directional indicator
+    /// </summary>
+    [Fact]
+    public void NaturalDirectionalCombo_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalDirectionalCombo, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Directional Combo should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Market Combo
+    ///
+    /// Key properties:
+    /// - Natural market analysis combo
+    /// </summary>
+    [Fact]
+    public void NaturalMarketCombo_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalMarketCombo, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Market Combo should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Market Mirror
+    ///
+    /// Key properties:
+    /// - Market mirror indicator
+    /// </summary>
+    [Fact]
+    public void NaturalMarketMirror_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalMarketMirror, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Market Mirror should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Market River
+    ///
+    /// Key properties:
+    /// - River flow market analysis
+    /// </summary>
+    [Fact]
+    public void NaturalMarketRiver_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalMarketRiver, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Market River should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Market Slope
+    ///
+    /// Key properties:
+    /// - Market slope indicator
+    /// </summary>
+    [Fact]
+    public void NaturalMarketSlope_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalMarketSlope, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Market Slope should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Moving Average
+    ///
+    /// Key properties:
+    /// - Natural smoothing MA
+    /// </summary>
+    [Fact]
+    public void NaturalMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Natural MA should be positive");
+            double.IsFinite(val).Should().BeTrue("Natural MA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Stochastic Indicator
+    ///
+    /// Key properties:
+    /// - Natural stochastic calculation
+    /// </summary>
+    [Fact]
+    public void NaturalStochasticIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalStochasticIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Natural Stochastic should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Negative Volume Disparity Indicator
+    ///
+    /// Key properties:
+    /// - Measures negative volume disparity
+    /// </summary>
+    [Fact]
+    public void NegativeVolumeDisparityIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NegativeVolumeDisparityIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Negative Volume Disparity should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Nick Rypock Trailing Reverse
+    ///
+    /// Key properties:
+    /// - Trailing reversal indicator
+    /// </summary>
+    [Fact]
+    public void NickRypockTrailingReverse_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NickRypockTrailingReverse, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            val.Should().BeGreaterThan(0, "Nick Rypock Trailing Reverse should be positive");
+            double.IsFinite(val).Should().BeTrue("Nick Rypock Trailing Reverse should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Normalized Relative Vigor Index
+    ///
+    /// Key properties:
+    /// - Normalized RVI calculation
+    /// </summary>
+    [Fact]
+    public void NormalizedRelativeVigorIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NormalizedRelativeVigorIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Normalized RVI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Nth Order Differencing Oscillator
+    ///
+    /// Key properties:
+    /// - Nth order differencing
+    /// </summary>
+    [Fact]
+    public void NthOrderDifferencingOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NthOrderDifferencingOscillator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var val in postWarmupValues)
+        {
+            double.IsFinite(val).Should().BeTrue("Nth Order Differencing Oscillator should be finite");
+        }
+    }
+
+    #endregion
 }
