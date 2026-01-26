@@ -147,17 +147,44 @@ See `IndicatorName.cs` for the complete list of all 716 indicators.
 
 ---
 
-## Known Variants (Research Needed)
+## Known Variants (Research Complete for Core Indicators)
 
-The following indicators are known to have multiple legitimate formula variants:
+### Smoothing Method Variants
+
+The library uses two smoothing primitives:
+
+| Class | Formula | Usage | Notes |
+|-------|---------|-------|-------|
+| `WilderState` | `k = 1/n` | RSI, ATR, ADX | Original Wilder smoothing |
+| `EmaState` | `k = 2/(n+1)` | MACD, other EMAs | Standard EMA |
+
+**Key Insight**: Wilder smoothing is slower than standard EMA. `Wilder(14)` is approximately equivalent to `EMA(27)`.
+
+### Indicator Variant Documentation
 
 | Indicator | Variants | Our Implementation | Reference |
 |-----------|----------|-------------------|-----------|
-| RSI | Wilder (original), Cutler | TBD | Wilder 1978 |
-| EMA | Wilder (2/(n+1)), Standard | TBD | - |
-| ATR | Wilder smoothing, SMA | TBD | Wilder 1978 |
-| MACD | Different EMA periods | TBD | Appel |
-| Stochastic | Fast, Slow, Full | TBD | Lane |
+| RSI | Wilder (original), Cutler (SMA) | **Wilder** | Wilder 1978, "New Concepts in Technical Trading Systems" |
+| ATR | Wilder smoothing, SMA, EMA | **Wilder** | Wilder 1978 |
+| MACD | Standard EMA, Wilder EMA | **Standard EMA** | Appel, "Technical Analysis: Power Tools for Active Investors" |
+| ADX | Wilder smoothing | **Wilder** | Wilder 1978 |
+| Stochastic | Fast, Slow, Full | **All supported** | Lane, "Stochastics" |
+| Bollinger Bands | SMA (original), EMA variant | **SMA** | Bollinger, "Bollinger on Bollinger Bands" |
+
+### Future Variant Support (Phase 5)
+
+When implementing hybrid config API, these indicators should support variant selection:
+
+```csharp
+// Example: RSI with variant selection
+catalog.Rsi(14, RsiVariant.Wilder);    // Default - Wilder smoothing
+catalog.Rsi(14, RsiVariant.Cutler);    // Alternative - SMA smoothing
+
+// Example: ATR with variant selection
+catalog.Atr(14, AtrVariant.Wilder);    // Default - Wilder smoothing
+catalog.Atr(14, AtrVariant.Sma);       // Alternative - Simple MA
+catalog.Atr(14, AtrVariant.Ema);       // Alternative - Standard EMA
+```
 
 ---
 

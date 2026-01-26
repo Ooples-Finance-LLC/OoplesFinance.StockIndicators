@@ -1,6 +1,7 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System;
 using System.Collections.Generic;
+using OoplesFinance.StockIndicators.Attributes;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -4486,7 +4487,10 @@ public sealed class MovingAverageChannelState : IStreamingIndicatorState, IDispo
         _lowSmoother.Dispose();
     }
 }
-public sealed class RelativeStrengthIndexState : IStreamingIndicatorState       
+[IndicatorBounds(0, 100, CanBeNegative = false)]
+[IndicatorCategory("Oscillator", SubCategory = "Momentum")]
+[HasVariants("Wilder", OtherVariants = "Cutler", Reference = "Wilder 1978")]
+public sealed class RelativeStrengthIndexState : IStreamingIndicatorState
 {
     private readonly WilderState _avgGain;
     private readonly WilderState _avgLoss;
@@ -5169,6 +5173,9 @@ public sealed class StochasticMomentumIndexState : IStreamingIndicatorState, IDi
     }
 }
 
+[IndicatorBounds(double.NegativeInfinity, double.PositiveInfinity)]
+[IndicatorCategory("Trend", SubCategory = "Momentum")]
+[HasVariants("Standard EMA", OtherVariants = "Wilder EMA", Reference = "Appel")]
 public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicatorState
 {
     private readonly EmaState _fast;
@@ -6239,6 +6246,9 @@ public sealed class ChandeMomentumOscillatorState : IStreamingIndicatorState, ID
     }
 }
 
+[IndicatorBounds(0, double.PositiveInfinity, CanBeNegative = false)]
+[IndicatorCategory("Volatility")]
+[HasVariants("Wilder", OtherVariants = "SMA, EMA", Reference = "Wilder 1978")]
 public sealed class AverageTrueRangeState : IStreamingIndicatorState
 {
     private readonly WilderState _atr;
