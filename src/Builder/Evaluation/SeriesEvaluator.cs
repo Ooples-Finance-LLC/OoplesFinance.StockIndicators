@@ -1,8 +1,8 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
+using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators.Builder;
 
@@ -163,17 +163,33 @@ internal sealed class SeriesEvaluator
                 }
             }
 
+            // V2 path: use StatefulIndicator for batch computation
             _standardPathHits++;
-            var result = ApplyIndicator(baseData, node.Spec);
-            return ExtractOutput(result, node.Spec);
+            return ComputeWithV2(baseData, node.Spec);
         }
 
-        // Chained indicator path: need to clone with custom input values
+        // Chained indicator path: use custom input values with V2 computation
         _standardPathHits++;
         var input = Resolve(node.Input.Value);
-        var working = CloneWithCustomValues(baseData, input);
-        var result2 = ApplyIndicator(working, node.Spec);
-        return ExtractOutput(result2, node.Spec);
+        return ComputeWithV2CustomInput(baseData, input, node.Spec);
+    }
+
+    /// <summary>
+    /// Computes an indicator using V2-native StatefulIndicators.
+    /// </summary>
+    private static double[] ComputeWithV2(StockData data, IndicatorSpec spec)
+    {
+        var state = StatefulIndicatorFactory.Create(spec);
+        return BatchCompute.ComputeAll(data, state);
+    }
+
+    /// <summary>
+    /// Computes an indicator with custom input values using V2-native StatefulIndicators.
+    /// </summary>
+    private static double[] ComputeWithV2CustomInput(StockData data, double[] customInput, IndicatorSpec spec)
+    {
+        var state = StatefulIndicatorFactory.Create(spec);
+        return BatchCompute.ComputeAllWithCustomInput(data, customInput, state);
     }
 
     /// <summary>
@@ -228,10 +244,9 @@ internal sealed class SeriesEvaluator
         // For multi-stock indicators, we need to create a StockData with the market prices as close prices
         var marketData = CreateMarketDataFromPrices(stockData, marketPrices);
 
-        // Apply the multi-stock indicator using the v1 API
+        // Apply the multi-stock indicator using V2-native implementation
         _standardPathHits++;
-        var result = ApplyMultiStockIndicator(stockData, marketData, node.Spec);
-        return ExtractOutput(result, node.Spec);
+        return ApplyMultiStockIndicatorV2(stockData, marketData, node.Spec);
     }
 
     /// <summary>
@@ -262,26 +277,47 @@ internal sealed class SeriesEvaluator
     }
 
     /// <summary>
-    /// Applies a multi-stock indicator using the v1 API.
+    /// Applies a multi-stock indicator using V2-native implementations.
     /// </summary>
-    private static StockData ApplyMultiStockIndicator(StockData stockData, StockData marketData, IndicatorSpec spec)
+    private static double[] ApplyMultiStockIndicatorV2(StockData stockData, StockData marketData, IndicatorSpec spec)
     {
         if (spec.Options is not MultiStockIndicatorOptions options)
         {
             throw new InvalidOperationException($"Multi-stock indicator '{spec.Name}' requires MultiStockIndicatorOptions.");
         }
 
-        return spec.Name switch
+        // Create series keys for primary and market data (use Streaming.SeriesKey, not Builder.SeriesKey)
+        var primaryKey = new Streaming.SeriesKey("PRIMARY", BarTimeframe.Days(1));
+        var marketKey = new Streaming.SeriesKey("MARKET", BarTimeframe.Days(1));
+
+        var state = CreateMultiSeriesIndicatorState(spec.Name, options, primaryKey, marketKey);
+        return BatchCompute.ComputeAllMultiSeries(stockData, marketData, state, primaryKey, marketKey);
+    }
+
+    /// <summary>
+    /// Creates a V2-native multi-series indicator state from spec.
+    /// </summary>
+    private static IMultiSeriesIndicatorState CreateMultiSeriesIndicatorState(
+        IndicatorName name,
+        MultiStockIndicatorOptions options,
+        Streaming.SeriesKey primaryKey,
+        Streaming.SeriesKey marketKey)
+    {
+        return name switch
         {
-            IndicatorName.RSMKIndicator => stockData.CalculateRSMKIndicator(marketData, options.MaType, options.Length1, options.Length2),
-            IndicatorName.ComparePriceMomentumOscillator => stockData.CalculateComparePriceMomentumOscillator(
-                marketData, options.MaType, options.Length1, options.Length2, options.SignalLength),
-            IndicatorName.KaufmanStressIndicator => stockData.CalculateKaufmanStressIndicator(marketData, options.Length1),
-            IndicatorName.RelativeNormalizedVolatility => stockData.CalculateRelativeNormalizedVolatility(marketData, options.MaType, options.Length1),
-            IndicatorName.RelativeStrength3DIndicator => stockData.CalculateRelativeStrength3DIndicator(
-                marketData, options.MaType, options.Length1, options.Length2, options.Length3, options.Length4, options.Length5),
-            IndicatorName.SectorRotationModel => stockData.CalculateSectorRotationModel(marketData, options.MaType, options.Length1, options.Length2),
-            _ => throw new NotSupportedException($"Multi-stock indicator '{spec.Name}' is not supported.")
+            IndicatorName.RSMKIndicator => new RSMKIndicatorState(
+                primaryKey, marketKey, options.MaType, options.Length1, options.Length2),
+            IndicatorName.ComparePriceMomentumOscillator => new ComparePriceMomentumOscillatorState(
+                primaryKey, marketKey, options.Length1, options.Length2),
+            IndicatorName.KaufmanStressIndicator => new KaufmanStressIndicatorState(
+                primaryKey, marketKey, options.Length1),
+            IndicatorName.RelativeNormalizedVolatility => new RelativeNormalizedVolatilityState(
+                primaryKey, marketKey, options.MaType, options.Length1),
+            IndicatorName.RelativeStrength3DIndicator => new RelativeStrength3DIndicatorState(
+                primaryKey, marketKey, options.MaType, options.Length1, options.Length2, options.Length3, options.Length4, options.Length5),
+            IndicatorName.SectorRotationModel => new SectorRotationModelState(
+                primaryKey, marketKey, options.MaType, options.Length1, options.Length2),
+            _ => throw new NotSupportedException($"Multi-stock indicator '{name}' is not supported in V2.")
         };
     }
 
@@ -322,52 +358,10 @@ internal sealed class SeriesEvaluator
         return input.ToArray();
     }
 
-    private static StockData CloneWithCustomValues(StockData baseData, double[] customValues)
-    {
-        var clone = new StockData(baseData.TickerDataList, baseData.InputName)
-        {
-            Options = baseData.Options,
-            CustomValuesList = new List<double>(customValues)
-        };
-        return clone;
-    }
-
-    private static StockData ApplyIndicator(StockData data, IndicatorSpec spec)
-    {
-        // Handle known typed options first for performance
-        switch (spec.Options)
-        {
-            case SmaSpecOptions sma:
-                return data.CalculateSimpleMovingAverage(sma.Length);
-            case EmaSpecOptions ema:
-                return data.CalculateExponentialMovingAverage(length: ema.Length);
-            case RsiSpecOptions rsi:
-                return data.CalculateRelativeStrengthIndex(length: rsi.Length);
-            case MacdSpecOptions macd:
-                return data.CalculateMovingAverageConvergenceDivergence(
-                    fastLength: macd.FastLength,
-                    slowLength: macd.SlowLength,
-                    signalLength: macd.SignalLength);
-            case BollingerBandsSpecOptions bb:
-                return data.CalculateBollingerBands(
-                    length: bb.Length,
-                    stdDevMult: bb.StdDevMult);
-            case AtrSpecOptions atr:
-                return data.CalculateAverageTrueRange(length: atr.Length);
-            case AdxSpecOptions adx:
-                return data.CalculateAverageDirectionalIndex(length: adx.Length);
-            case StochasticSpecOptions stoch:
-                return data.CalculateStochasticOscillator(
-                    length: stoch.KLength,
-                    smoothLength1: stoch.DLength);
-            case GenericIndicatorOptions generic:
-                // Use reflection-based dispatch for all other indicators
-                return IndicatorInvoker.Invoke(data, spec.Name, generic.Parameters);
-            default:
-                throw new NotSupportedException($"Indicator '{spec.Name}' with options type '{spec.Options?.GetType().Name}' not supported.");
-        }
-    }
-
+    /// <summary>
+    /// Extracts output values from v1 StockData result.
+    /// Used temporarily for multi-stock indicators until Phase 2 migration.
+    /// </summary>
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
         var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
