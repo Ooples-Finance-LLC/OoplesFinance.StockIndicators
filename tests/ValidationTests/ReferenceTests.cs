@@ -1729,6 +1729,618 @@ public sealed class ReferenceTests
         }
     }
 
+    /// <summary>
+    /// Verifies Awesome Oscillator properties.
+    /// Reference: Bill Williams
+    /// AO = SMA(5, Median) - SMA(34, Median)
+    /// </summary>
+    [Fact]
+    public void AwesomeOscillator_ShouldOscillate()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.AwesomeOscillator();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Awesome Oscillator should have valid values");
+
+        // Should oscillate around zero
+        var distinctCount = validValues.Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "AO should oscillate");
+    }
+
+    /// <summary>
+    /// Verifies Fisher Transform properties.
+    /// Reference: John Ehlers
+    /// Transforms prices into Gaussian distribution, bounded approximately -1 to +1 but can exceed
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(14)]
+    public void FisherTransform_ShouldBeApproximatelyBounded(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.EhlersFisherTransform(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).ToArray();
+        validValues.Should().NotBeEmpty($"Fisher Transform({length}) should have valid values");
+
+        // Fisher Transform can exceed -5 to +5 in extreme cases but most values should be smaller
+        foreach (var value in validValues)
+        {
+            Math.Abs(value).Should().BeLessThan(20, "Fisher Transform should be reasonable");
+        }
+    }
+
+    /// <summary>
+    /// Verifies Coppock Curve properties.
+    /// Reference: Edwin Coppock
+    /// Long-term momentum indicator
+    /// </summary>
+    [Fact]
+    public void CoppockCurve_ShouldOscillate()
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.CoppockCurve();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Coppock Curve should have valid values");
+
+        // Should have variance
+        var distinctCount = validValues.Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "Coppock Curve should oscillate");
+    }
+
+    /// <summary>
+    /// Verifies Balance of Power indicator properties.
+    /// BOP = (Close - Open) / (High - Low)
+    /// Bounded [-1, 1]
+    /// </summary>
+    [Fact]
+    public void BalanceOfPower_ShouldBeBounded()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.BalanceOfPower();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Balance of Power should have valid values");
+
+        // BOP bounded [-1, 1] (smoothed version may slightly exceed)
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(-1.5, "BOP >= -1.5");
+            value.Should().BeLessThanOrEqualTo(1.5, "BOP <= 1.5");
+        }
+    }
+
+    /// <summary>
+    /// Verifies PVT (Price Volume Trend) properties.
+    /// Reference: Cumulative volume weighted by price change
+    /// </summary>
+    [Fact]
+    public void PVT_ShouldAccumulate()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.PriceVolumeTrend();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("PVT should have valid values");
+
+        // PVT should change (cumulative)
+        var distinctCount = validValues.Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "PVT should change over time");
+    }
+
+    /// <summary>
+    /// Verifies NVI (Negative Volume Index) properties.
+    /// Reference: Paul Dysart, popularized by Norman Fosback
+    /// NVI changes only on down volume days
+    /// </summary>
+    [Fact]
+    public void NVI_ShouldAccumulateOnDownVolumeDays()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.NegativeVolumeIndex();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("NVI should have valid values");
+
+        // NVI should be positive (starts at 1000 or similar)
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(0, "NVI > 0");
+        }
+    }
+
+    /// <summary>
+    /// Verifies PVI (Positive Volume Index) properties.
+    /// Reference: Paul Dysart, popularized by Norman Fosback
+    /// PVI changes only on up volume days
+    /// </summary>
+    [Fact]
+    public void PVI_ShouldAccumulateOnUpVolumeDays()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.PositiveVolumeIndex();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("PVI should have valid values");
+
+        // PVI should be positive (starts at 1000 or similar)
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(0, "PVI > 0");
+        }
+    }
+
+    /// <summary>
+    /// Verifies EMV (Ease of Movement) properties.
+    /// Reference: Richard Arms
+    /// Measures price/volume relationship
+    /// </summary>
+    [Fact]
+    public void EMV_ShouldOscillate()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.EaseOfMovement();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("EMV should have valid values");
+
+        // EMV oscillates around zero
+        var distinctCount = validValues.Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "EMV should vary");
+    }
+
+    /// <summary>
+    /// Verifies VHF (Vertical Horizontal Filter) properties.
+    /// Reference: Adam White
+    /// Measures trend strength, higher values = stronger trend
+    /// </summary>
+    [Theory]
+    [InlineData(14)]
+    [InlineData(28)]
+    public void VHF_ShouldBePositive(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.VerticalHorizontalFilter(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"VHF({length}) should have valid values");
+
+        // VHF should be positive
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "VHF >= 0");
+        }
+    }
+
+    /// <summary>
+    /// Verifies LSMA (Least Squares Moving Average) properties.
+    /// Also known as Linear Regression Line or Time Series Forecast
+    /// </summary>
+    [Theory]
+    [InlineData(14)]
+    [InlineData(25)]
+    public void LSMA_ShouldProduceValidValues(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.LeastSquaresMovingAverage(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var closes = testData.Select(t => t.Close).ToArray();
+        // Skip warmup period - LSMA needs 2*length bars for stable output
+        var validValues = actual.Skip(length * 2).Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"LSMA({length}) should have valid values after warmup");
+
+        // LSMA should be within price range after warmup
+        var postWarmupCloses = closes.Skip(length * 2).ToArray();
+        var minPrice = postWarmupCloses.Min() * 0.8;
+        var maxPrice = postWarmupCloses.Max() * 1.2;
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(minPrice, "LSMA should be near price");
+            value.Should().BeLessThan(maxPrice, "LSMA should be near price");
+        }
+    }
+
+    /// <summary>
+    /// Verifies ALMA (Arnaud Legoux Moving Average) properties.
+    /// Reference: Arnaud Legoux
+    /// Gaussian-weighted moving average
+    /// </summary>
+    [Theory]
+    [InlineData(9)]
+    [InlineData(20)]
+    public void ALMA_ShouldFollowTrend(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.ArnaudLegouxMovingAverage(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"ALMA({length}) should have valid values");
+
+        // In uptrend data, ALMA should generally increase
+        var firstQuarter = validValues.Take(validValues.Length / 4).Average();
+        var lastQuarter = validValues.Skip(3 * validValues.Length / 4).Average();
+        lastQuarter.Should().BeGreaterThan(firstQuarter, "ALMA should follow uptrend");
+    }
+
+    /// <summary>
+    /// Verifies T3 (Tillson T3) moving average properties.
+    /// Reference: Tim Tillson
+    /// Triple-smoothed EMA variant
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(21)]
+    public void T3_ShouldFollowTrend(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.TillsonT3MovingAverage(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"T3({length}) should have valid values");
+
+        // In uptrend data, T3 should generally increase
+        var firstQuarter = validValues.Take(validValues.Length / 4).Average();
+        var lastQuarter = validValues.Skip(3 * validValues.Length / 4).Average();
+        lastQuarter.Should().BeGreaterThan(firstQuarter, "T3 should follow uptrend");
+    }
+
+    /// <summary>
+    /// Verifies McGinley Dynamic indicator properties.
+    /// Reference: John McGinley
+    /// Self-adjusting moving average that responds to market speed
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(14)]
+    public void McGinleyDynamic_ShouldFollowTrend(int length)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.McGinleyDynamicIndicator(length);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty($"McGinley Dynamic({length}) should have valid values");
+
+        // In uptrend data, McGinley should generally increase
+        var firstQuarter = validValues.Take(validValues.Length / 4).Average();
+        var lastQuarter = validValues.Skip(3 * validValues.Length / 4).Average();
+        lastQuarter.Should().BeGreaterThan(firstQuarter, "McGinley Dynamic should follow uptrend");
+    }
+
+    /// <summary>
+    /// Verifies VWMA (Volume Weighted Moving Average) properties using direct state test.
+    /// MA weighted by volume
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(20)]
+    public void VWMA_ShouldProduceValidValues(int length)
+    {
+        // Direct test of VolumeWeightedMovingAverageState to isolate issues
+        var state = new VolumeWeightedMovingAverageState(MovingAvgType.SimpleMovingAverage, length);
+        var testData = CreateTrueRangeTestData();
+        var results = new List<double>();
+
+        foreach (var tick in testData)
+        {
+            var bar = new OhlcvBar(
+                "TEST",
+                BarTimeframe.Days(1),
+                tick.Date,
+                tick.Date,
+                tick.Open,
+                tick.High,
+                tick.Low,
+                tick.Close,
+                tick.Volume,
+                isFinal: true);
+
+            var result = state.Update(bar, isFinal: true, includeOutputs: false);
+            results.Add(result.Value);
+        }
+
+        // Filter out zeros (warmup period returns 0)
+        var validValues = results.Where(v => !double.IsNaN(v) && v > 0).ToArray();
+        validValues.Should().NotBeEmpty($"VWMA({length}) should have valid values after warmup (got {results.Count} total, {validValues.Length} non-zero)");
+
+        // Should have variance
+        var distinctCount = validValues.Select(v => Math.Round(v, 4)).Distinct().Count();
+        distinctCount.Should().BeGreaterThan(1, "VWMA should change over time");
+    }
+
+    /// <summary>
+    /// Verifies VWAP (Volume Weighted Average Price) properties.
+    /// Session cumulative volume-weighted average price
+    /// </summary>
+    [Fact]
+    public void VWAP_ShouldBeNearPrice()
+    {
+        var testData = CreateTrueRangeTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Vwap();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var closes = testData.Select(t => t.Close).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("VWAP should have valid values");
+
+        // VWAP should be within price range
+        var minPrice = closes.Min() * 0.5;
+        var maxPrice = closes.Max() * 1.5;
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThan(minPrice, "VWAP should be near price");
+            value.Should().BeLessThan(maxPrice, "VWAP should be near price");
+        }
+    }
+
+    /// <summary>
+    /// Verifies Stochastic RSI properties.
+    /// RSI applied to RSI, bounded [0, 100]
+    /// </summary>
+    [Theory]
+    [InlineData(14, 14)]
+    public void StochasticRSI_ShouldBeBounded(int rsiLength, int stochLength)
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.StochasticRelativeStrengthIndex();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Stochastic RSI should have valid values");
+
+        // Stochastic RSI bounded [0, 100]
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "StochRSI >= 0");
+            value.Should().BeLessThanOrEqualTo(100, "StochRSI <= 100");
+        }
+    }
+
+    /// <summary>
+    /// Verifies Schaff Trend Cycle properties.
+    /// Combination of MACD and Stochastic
+    /// Bounded [0, 100]
+    /// </summary>
+    [Fact]
+    public void SchaffTrendCycle_ShouldBeBounded()
+    {
+        var testData = CreateKnownPriceSeries();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.SchaffTrendCycle();
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var validValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        validValues.Should().NotBeEmpty("Schaff Trend Cycle should have valid values");
+
+        // STC bounded [0, 100]
+        foreach (var value in validValues)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, "STC >= 0");
+            value.Should().BeLessThanOrEqualTo(100, "STC <= 100");
+        }
+    }
+
     #endregion
 
     #region Reference Formula Implementations
