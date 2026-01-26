@@ -1004,6 +1004,7 @@ internal static partial class IndicatorCompute
             JapaneseCorrelationCoefficientSpecOptions jcc => ComputeJapaneseCorrelationCoefficientFast(data, context, jcc.Length, jcc.MaType),
             JrcFractalDimensionSpecOptions jfd => ComputeJrcFractalDimensionFast(data, context, jfd.Length1, jfd.Length2, jfd.SmoothLength, jfd.MaType),
             KaseConvergenceDivergenceSpecOptions kcd => ComputeKaseConvergenceDivergenceFast(data, context, kcd.Length1, kcd.Length2, kcd.Length3, kcd.MaType),
+            KaseDevStopV2SpecOptions kds2 => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength, kds2.Length, kds2.StdDev1, kds2.StdDev2, kds2.StdDev3, kds2.StdDev4, kds2.MaType),
             KwanIndicatorSpecOptions kwi => ComputeKwanIndicatorFast(data, context, kwi.Length, kwi.SmoothLength, kwi.MaType),
             LBRPaintBarsSpecOptions lbr => ComputeLBRPaintBarsFast(data, context, lbr.Length, lbr.LbLength, lbr.AtrMult, lbr.MaType),
 
@@ -12562,6 +12563,87 @@ internal static partial class IndicatorCompute
             default:
                 MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
                 break;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes Kase Dev Stop V2 using zero-allocation fast path.
+    /// Returns the trailing stop level based on trend direction and volatility.
+    /// </summary>
+    internal static ComputeBuffer ComputeKaseDevStopV2Fast(StockData data, ComputeContext context,
+        int fastLength = 10, int slowLength = 21, int length = 20,
+        double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    {
+        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = data.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        var pool = ArrayPool<double>.Shared;
+
+        var maFast = pool.Rent(count);
+        var maSlow = pool.Rent(count);
+        var rrange = pool.Rent(count);
+        var rangeAvg = pool.Rent(count);
+        var rangeStd = pool.Rent(count);
+
+        try
+        {
+            var maFastSpan = maFast.AsSpan(0, count);
+            var maSlowSpan = maSlow.AsSpan(0, count);
+            var rrangeSpan = rrange.AsSpan(0, count);
+            var rangeAvgSpan = rangeAvg.AsSpan(0, count);
+            var rangeStdSpan = rangeStd.AsSpan(0, count);
+
+            maCore.Compute(close, maFastSpan, fastLength);
+            maCore.Compute(close, maSlowSpan, slowLength);
+
+            // Calculate range
+            for (int i = 0; i < count; i++)
+            {
+                double prevHigh = i >= 1 ? high[i - 1] : 0;
+                double prevLow = i >= 1 ? low[i - 1] : 0;
+                double prevClose = i >= 2 ? close[i - 2] : 0;
+
+                double mmax = Math.Max(Math.Max(high[i], prevHigh), prevClose);
+                double mmin = Math.Min(Math.Min(low[i], prevLow), prevClose);
+                rrangeSpan[i] = mmax - mmin;
+            }
+
+            maCore.Compute(rrangeSpan, rangeAvgSpan, length);
+            VolatilityCore.StandardDeviation(rrangeSpan, rangeStdSpan, length);
+
+            // Calculate stop levels
+            for (int i = 0; i < count; i++)
+            {
+                double trend = maFastSpan[i] > maSlowSpan[i] ? 1 : -1;
+                double price = trend > 0 ? high[i] : low[i];
+                double avg = rangeAvgSpan[i];
+                double std = rangeStdSpan[i];
+
+                double stop1 = price - (avg + (std * stdDev1)) * trend;
+                double stop2 = price - (avg + (std * stdDev2)) * trend;
+                double stop3 = price - (avg + (std * stdDev3)) * trend;
+                double stop4 = price - (avg + (std * stdDev4)) * trend;
+
+                // Return the most conservative stop (stop2 is typical)
+                output[i] = stop2;
+            }
+        }
+        finally
+        {
+            pool.Return(maFast);
+            pool.Return(maSlow);
+            pool.Return(rrange);
+            pool.Return(rangeAvg);
+            pool.Return(rangeStd);
         }
 
         return buffer;
