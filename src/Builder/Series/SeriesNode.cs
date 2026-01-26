@@ -83,4 +83,18 @@ public sealed class SeriesNode
     {
         return new SeriesNode(SeriesNodeKind.Formula, key, null, null, left, right, formula);
     }
+
+    /// <summary>
+    /// Creates a multi-stock indicator node (compares stock vs market/benchmark).
+    /// </summary>
+    /// <param name="key">The series key for the output.</param>
+    /// <param name="stockInput">The primary stock input series.</param>
+    /// <param name="marketInput">The market/benchmark comparison series.</param>
+    /// <param name="spec">The indicator specification.</param>
+    public static SeriesNode MultiStockIndicator(SeriesKey key, SeriesHandle stockInput, SeriesHandle marketInput, IndicatorSpec spec)
+    {
+        // Use Left/Right for stock/market inputs, and Input is unused for this type
+        // This reuses the formula node structure for multi-input indicators
+        return new SeriesNode(SeriesNodeKind.MultiStockIndicator, key, null, spec, stockInput, marketInput, null);
+    }
 }

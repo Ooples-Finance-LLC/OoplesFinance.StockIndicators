@@ -13,6 +13,7 @@ public sealed class StockIndicatorBuilder
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
     private readonly Dictionary<SeriesKey, SeriesHandle> _baseSeries;
+    private readonly Dictionary<string, IndicatorDataSource> _namedSources;
     private readonly IndicatorCatalog _indicators;
     private readonly SignalCatalog _signals;
     private readonly NotificationCatalog _notifications;
@@ -40,6 +41,7 @@ public sealed class StockIndicatorBuilder
         _nodes = new Dictionary<SeriesHandle, SeriesNode>();
         _keys = new Dictionary<IndicatorKey, SeriesHandle>();
         _baseSeries = new Dictionary<SeriesKey, SeriesHandle>();
+        _namedSources = new Dictionary<string, IndicatorDataSource>(StringComparer.OrdinalIgnoreCase);
         _behavior = new BehaviorOptions();
         _signals = new SignalCatalog();
         _notifications = new NotificationCatalog();
@@ -47,6 +49,40 @@ public sealed class StockIndicatorBuilder
         _indicators = new IndicatorCatalog(this);
         _nextId = 1;
     }
+
+    /// <summary>
+    /// Adds a named data source for multi-stock indicators (e.g., market comparison).
+    /// </summary>
+    /// <param name="name">The name to identify this data source (e.g., "market", "spy").</param>
+    /// <param name="source">The data source containing the comparison data.</param>
+    /// <returns>This builder for chaining.</returns>
+    /// <remarks>
+    /// Multi-stock indicators like RSMKIndicator compare a stock against a market index.
+    /// Use this method to register comparison data, then reference it via catalog.Price("market").
+    /// </remarks>
+    public StockIndicatorBuilder AddDataSource(string name, IndicatorDataSource source)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Data source name cannot be null or empty.", nameof(name));
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+
+        _namedSources[name] = source;
+        return this;
+    }
+
+    /// <summary>
+    /// Gets a named data source.
+    /// </summary>
+    internal IndicatorDataSource? GetNamedSource(string name)
+    {
+        return _namedSources.TryGetValue(name, out var source) ? source : null;
+    }
+
+    /// <summary>
+    /// Gets the primary data source.
+    /// </summary>
+    internal IndicatorDataSource PrimarySource => _source;
 
     /// <summary>
     /// Configures the symbols to use.
@@ -199,6 +235,18 @@ public sealed class StockIndicatorBuilder
     {
         var handle = NewHandle();
         _nodes[handle] = SeriesNode.CreateFormula(ResolveSeriesKey(left), left, right, formula);
+        return handle;
+    }
+
+    internal SeriesHandle AddMultiStockIndicator(IndicatorSpec spec, SeriesHandle stockInput, SeriesHandle marketInput, SeriesKey seriesKey, IndicatorKey? key)
+    {
+        var handle = NewHandle();
+        _nodes[handle] = SeriesNode.MultiStockIndicator(seriesKey, stockInput, marketInput, spec);
+        if (key.HasValue)
+        {
+            _keys[key.Value] = handle;
+        }
+
         return handle;
     }
 

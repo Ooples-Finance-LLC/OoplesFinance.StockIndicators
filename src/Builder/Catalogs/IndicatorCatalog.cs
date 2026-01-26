@@ -80,6 +80,41 @@ public sealed partial class IndicatorCatalog
     }
 
     /// <summary>
+    /// Gets the price series handle from a named data source.
+    /// Use this for multi-stock indicators that compare against a market index.
+    /// </summary>
+    /// <param name="sourceName">The name of the data source (registered via AddDataSource).</param>
+    /// <returns>A SeriesHandle for the named source's price data.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the named source is not found.</exception>
+    /// <example>
+    /// <code>
+    /// // Register market data for comparison
+    /// builder.AddDataSource("market", IndicatorDataSource.FromBatch(spyData));
+    ///
+    /// // Use in indicator configuration
+    /// builder.ConfigureIndicators(catalog => {
+    ///     var marketPrice = catalog.Price("market");
+    ///     var rsmk = catalog.RSMKIndicator(marketPrice, 90, 3);
+    /// });
+    /// </code>
+    /// </example>
+    public SeriesHandle Price(string sourceName)
+    {
+        var source = _builder.GetNamedSource(sourceName);
+        if (source is null)
+        {
+            throw new InvalidOperationException(
+                $"Data source '{sourceName}' not found. Register it first with builder.AddDataSource(\"{sourceName}\", source).");
+        }
+
+        // Create a series key for the named source
+        var symbol = new SymbolId(sourceName);
+        var timeframe = _builder.ResolveDefaultSeriesKey().Timeframe;
+        var key = new SeriesKey(symbol, timeframe);
+        return _builder.GetOrCreateBaseSeries(key);
+    }
+
+    /// <summary>
     /// Creates a chain for a specific symbol and timeframe.
     /// </summary>
     public IndicatorChain For(SymbolId symbol, BarTimeframe timeframe)
@@ -420,6 +455,142 @@ public sealed partial class IndicatorCatalog
     {
         return _builder.AddFormula(left, right, formula);
     }
+
+    #region Multi-Stock Comparison Indicators
+
+    /// <summary>
+    /// Calculates RSMK (Relative Strength Mansfield-Kostelich) Indicator.
+    /// Compares a stock's performance against a market index.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series (e.g., S&amp;P 500).</param>
+    /// <param name="length">The lookback period for the ratio calculation. Default is 90.</param>
+    /// <param name="smoothLength">The smoothing length for the EMA. Default is 3.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    /// <returns>A SeriesHandle for the RSMK indicator values.</returns>
+    /// <example>
+    /// <code>
+    /// builder.AddDataSource("market", IndicatorDataSource.FromBatch(spyData));
+    /// builder.ConfigureIndicators(catalog => {
+    ///     var marketPrice = catalog.Price("market");
+    ///     var rsmk = catalog.RSMKIndicator(marketPrice, 90, 3);
+    /// });
+    /// </code>
+    /// </example>
+    public SeriesHandle RSMKIndicator(SeriesHandle marketPrice, int length = 90, int smoothLength = 3,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.RSMKIndicator,
+            new MultiStockIndicatorOptions(length, smoothLength, MovingAvgType.ExponentialMovingAverage),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>
+    /// Calculates Compare Price Momentum Oscillator (CPMO).
+    /// Compares a stock's momentum against a market index.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series.</param>
+    /// <param name="length1">First smoothing period. Default is 20.</param>
+    /// <param name="length2">Second smoothing period. Default is 35.</param>
+    /// <param name="signalLength">Signal line length. Default is 10.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    public SeriesHandle ComparePriceMomentumOscillator(SeriesHandle marketPrice, int length1 = 20, int length2 = 35,
+        int signalLength = 10, SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.ComparePriceMomentumOscillator,
+            new MultiStockIndicatorOptions(length1, length2, signalLength, MovingAvgType.ExponentialMovingAverage),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>
+    /// Calculates Kaufman Stress Indicator.
+    /// Measures stress relative to market volatility.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series.</param>
+    /// <param name="length">The lookback period. Default is 60.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    public SeriesHandle KaufmanStressIndicator(SeriesHandle marketPrice, int length = 60,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.KaufmanStressIndicator,
+            new MultiStockIndicatorOptions(length),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>
+    /// Calculates Relative Normalized Volatility.
+    /// Compares volatility relative to a market index.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series.</param>
+    /// <param name="length">The lookback period. Default is 14.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    public SeriesHandle RelativeNormalizedVolatility(SeriesHandle marketPrice, int length = 14,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.RelativeNormalizedVolatility,
+            new MultiStockIndicatorOptions(length, MovingAvgType.SimpleMovingAverage),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>
+    /// Calculates Relative Strength 3D Indicator.
+    /// Multi-period relative strength comparison against a market index.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series.</param>
+    /// <param name="length1">First period length. Default is 4.</param>
+    /// <param name="length2">Second period length. Default is 7.</param>
+    /// <param name="length3">Third period length. Default is 10.</param>
+    /// <param name="length4">Fourth period length. Default is 15.</param>
+    /// <param name="length5">Fifth period length. Default is 30.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    public SeriesHandle RelativeStrength3DIndicator(SeriesHandle marketPrice, int length1 = 4, int length2 = 7,
+        int length3 = 10, int length4 = 15, int length5 = 30, SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.RelativeStrength3DIndicator,
+            new MultiStockIndicatorOptions(length1, length2, length3, length4, length5, MovingAvgType.ExponentialMovingAverage),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>
+    /// Calculates Sector Rotation Model.
+    /// Identifies sector rotation relative to market.
+    /// </summary>
+    /// <param name="marketPrice">The market/benchmark price series.</param>
+    /// <param name="length1">First smoothing period. Default is 25.</param>
+    /// <param name="length2">Second smoothing period. Default is 75.</param>
+    /// <param name="input">Optional input series for the stock. Uses default price if null.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    public SeriesHandle SectorRotationModel(SeriesHandle marketPrice, int length1 = 25, int length2 = 75,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var stockPrice = input ?? Price();
+        var spec = IndicatorSpecs.CreateMultiStock(
+            IndicatorName.SectorRotationModel,
+            new MultiStockIndicatorOptions(length1, length2, MovingAvgType.ExponentialMovingAverage),
+            IndicatorOutput.Primary);
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    #endregion
 
     internal void ApplyDefaults(IndicatorSelection selection)
     {

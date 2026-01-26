@@ -542,6 +542,18 @@ public sealed class IndicatorRuntime : IDisposable
                     ActivateSeries(node.Right.Value);
                 }
                 break;
+            case SeriesNodeKind.MultiStockIndicator:
+                // Multi-stock indicators use Left for stock price and Right for market price
+                if (node.Left.HasValue)
+                {
+                    ActivateSeries(node.Left.Value);
+                }
+
+                if (node.Right.HasValue)
+                {
+                    ActivateSeries(node.Right.Value);
+                }
+                break;
         }
     }
 

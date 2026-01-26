@@ -285,7 +285,12 @@ public enum SeriesNodeKind
     /// <summary>
     /// Formula-computed series.
     /// </summary>
-    Formula
+    Formula,
+
+    /// <summary>
+    /// Multi-stock indicator (compares stock vs market/benchmark).
+    /// </summary>
+    MultiStockIndicator
 }
 
 /// <summary>

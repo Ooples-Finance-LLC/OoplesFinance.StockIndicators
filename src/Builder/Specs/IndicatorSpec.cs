@@ -333,6 +333,14 @@ public static class IndicatorSpecs
     {
         return new IndicatorSpec(name, options, output);
     }
+
+    /// <summary>
+    /// Creates a multi-stock indicator specification.
+    /// </summary>
+    public static IndicatorSpec CreateMultiStock(IndicatorName name, MultiStockIndicatorOptions options, IndicatorOutput output = IndicatorOutput.Primary)
+    {
+        return new IndicatorSpec(name, options, output);
+    }
 }
 
 /// <summary>
@@ -7879,6 +7887,98 @@ public sealed class GenericIndicatorOptions : IIndicatorSpecOptions
     /// Gets a multiplier parameter (common for bands/channels).
     /// </summary>
     public double Multiplier => GetParameter(1, 2.0);
+}
+
+/// <summary>
+/// Options for multi-stock comparison indicators (e.g., RSMK, Sector Rotation Model).
+/// These indicators compare a stock against a market index or benchmark.
+/// </summary>
+public sealed class MultiStockIndicatorOptions : IIndicatorSpecOptions
+{
+    /// <summary>
+    /// Creates multi-stock indicator options with a single length parameter.
+    /// </summary>
+    public MultiStockIndicatorOptions(int length)
+    {
+        Length1 = Math.Max(1, length);
+        Length2 = 0;
+        Length3 = 0;
+        Length4 = 0;
+        Length5 = 0;
+        SignalLength = 0;
+        MaType = MovingAvgType.SimpleMovingAverage;
+    }
+
+    /// <summary>
+    /// Creates multi-stock indicator options with length and moving average type.
+    /// </summary>
+    public MultiStockIndicatorOptions(int length, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length);
+        Length2 = 0;
+        Length3 = 0;
+        Length4 = 0;
+        Length5 = 0;
+        SignalLength = 0;
+        MaType = maType;
+    }
+
+    /// <summary>
+    /// Creates multi-stock indicator options with two length parameters.
+    /// </summary>
+    public MultiStockIndicatorOptions(int length1, int length2, MovingAvgType maType)
+        : this(length1, length2, 0, maType)
+    {
+    }
+
+    /// <summary>
+    /// Creates multi-stock indicator options with three parameters.
+    /// </summary>
+    public MultiStockIndicatorOptions(int length1, int length2, int signalLength, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = 0;
+        Length4 = 0;
+        Length5 = 0;
+        SignalLength = signalLength;
+        MaType = maType;
+    }
+
+    /// <summary>
+    /// Creates multi-stock indicator options for RS3D (5 length parameters).
+    /// </summary>
+    public MultiStockIndicatorOptions(int length1, int length2, int length3, int length4, int length5, MovingAvgType maType)
+    {
+        Length1 = Math.Max(1, length1);
+        Length2 = Math.Max(1, length2);
+        Length3 = Math.Max(1, length3);
+        Length4 = Math.Max(1, length4);
+        Length5 = Math.Max(1, length5);
+        SignalLength = 0;
+        MaType = maType;
+    }
+
+    /// <summary>Primary length parameter.</summary>
+    public int Length1 { get; }
+
+    /// <summary>Secondary length parameter.</summary>
+    public int Length2 { get; }
+
+    /// <summary>Third length parameter.</summary>
+    public int Length3 { get; }
+
+    /// <summary>Fourth length parameter.</summary>
+    public int Length4 { get; }
+
+    /// <summary>Fifth length parameter.</summary>
+    public int Length5 { get; }
+
+    /// <summary>Signal line length.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>Moving average type.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>

@@ -124,6 +124,9 @@ internal sealed class SeriesEvaluator
             case SeriesNodeKind.Formula:
                 resolved = ResolveFormula(node);
                 break;
+            case SeriesNodeKind.MultiStockIndicator:
+                resolved = ResolveMultiStockIndicator(node);
+                break;
             default:
                 throw new InvalidOperationException("Unknown series node kind.");
         }
@@ -206,6 +209,80 @@ internal sealed class SeriesEvaluator
         }
 
         return values;
+    }
+
+    /// <summary>
+    /// Resolves a multi-stock indicator node (compares stock vs market/benchmark).
+    /// </summary>
+    private double[] ResolveMultiStockIndicator(SeriesNode node)
+    {
+        if (!node.Left.HasValue || !node.Right.HasValue || node.Spec == null)
+        {
+            throw new InvalidOperationException("Multi-stock indicator node missing stock input, market input, or spec.");
+        }
+
+        var stockData = GetBaseData(node.SeriesKey);
+        var marketPrices = Resolve(node.Right.Value);
+
+        // Create market StockData from the resolved market prices
+        // For multi-stock indicators, we need to create a StockData with the market prices as close prices
+        var marketData = CreateMarketDataFromPrices(stockData, marketPrices);
+
+        // Apply the multi-stock indicator using the v1 API
+        _standardPathHits++;
+        var result = ApplyMultiStockIndicator(stockData, marketData, node.Spec);
+        return ExtractOutput(result, node.Spec);
+    }
+
+    /// <summary>
+    /// Creates a StockData object from market prices, using the stock data structure as a template.
+    /// </summary>
+    private static StockData CreateMarketDataFromPrices(StockData templateData, double[] marketPrices)
+    {
+        // Create ticker data with the market prices as close prices
+        var tickerList = new List<TickerData>();
+        var count = Math.Min(templateData.ClosePrices.Count, marketPrices.Length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var date = i < templateData.Dates.Count ? templateData.Dates[i] : DateTime.MinValue.AddDays(i);
+            var price = marketPrices[i];
+            tickerList.Add(new TickerData
+            {
+                Date = date,
+                Open = price,
+                High = price,
+                Low = price,
+                Close = price,
+                Volume = 0
+            });
+        }
+
+        return new StockData(tickerList, InputName.Close);
+    }
+
+    /// <summary>
+    /// Applies a multi-stock indicator using the v1 API.
+    /// </summary>
+    private static StockData ApplyMultiStockIndicator(StockData stockData, StockData marketData, IndicatorSpec spec)
+    {
+        if (spec.Options is not MultiStockIndicatorOptions options)
+        {
+            throw new InvalidOperationException($"Multi-stock indicator '{spec.Name}' requires MultiStockIndicatorOptions.");
+        }
+
+        return spec.Name switch
+        {
+            IndicatorName.RSMKIndicator => stockData.CalculateRSMKIndicator(marketData, options.MaType, options.Length1, options.Length2),
+            IndicatorName.ComparePriceMomentumOscillator => stockData.CalculateComparePriceMomentumOscillator(
+                marketData, options.MaType, options.Length1, options.Length2, options.SignalLength),
+            IndicatorName.KaufmanStressIndicator => stockData.CalculateKaufmanStressIndicator(marketData, options.Length1),
+            IndicatorName.RelativeNormalizedVolatility => stockData.CalculateRelativeNormalizedVolatility(marketData, options.MaType, options.Length1),
+            IndicatorName.RelativeStrength3DIndicator => stockData.CalculateRelativeStrength3DIndicator(
+                marketData, options.MaType, options.Length1, options.Length2, options.Length3, options.Length4, options.Length5),
+            IndicatorName.SectorRotationModel => stockData.CalculateSectorRotationModel(marketData, options.MaType, options.Length1, options.Length2),
+            _ => throw new NotSupportedException($"Multi-stock indicator '{spec.Name}' is not supported.")
+        };
     }
 
     /// <summary>
