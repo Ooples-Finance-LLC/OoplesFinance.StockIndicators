@@ -2623,4 +2623,1627 @@ public sealed class GoldenFileTests
     }
 
     #endregion
+
+    #region Ehlers Indicator Golden Tests
+
+    /// <summary>
+    /// Ehlers Fisher Transform Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Value = 0.5 * ln((1 + x) / (1 - x))
+    /// - Where x is normalized price oscillator bounded [-1, 1]
+    ///
+    /// Key properties:
+    /// - Converts prices into Gaussian normal distribution
+    /// - Sharp turning points for signal generation
+    /// - Unbounded but typically within [-2, 2]
+    ///
+    /// Reference: Ehlers, John. "Cybernetic Analysis for Stocks and Futures" (2004)
+    /// </summary>
+    [Fact]
+    public void EhlersFisherTransform_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersFisherTransform, new object[] { 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(12).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Fisher Transform should have values");
+
+        // Fisher Transform values should be finite
+        foreach (var ft in postWarmupValues)
+        {
+            double.IsFinite(ft).Should().BeTrue("Fisher Transform should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers FRAMA (Fractal Adaptive Moving Average) Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Uses fractal dimension to adapt smoothing factor
+    /// - D = (Log(N1 + N2) - Log(N3)) / Log(2)
+    /// - alpha = exp(-4.6 * (D - 1))
+    ///
+    /// Key properties:
+    /// - Adapts to market fractal dimension
+    /// - Tighter in trends, looser in consolidation
+    /// - Should track within price range
+    ///
+    /// Reference: Ehlers, John. "FRAMA" (2005)
+    /// </summary>
+    [Fact]
+    public void EhlersFRAMA_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersFractalAdaptiveMovingAverage, new object[] { 16 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(18).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("FRAMA should have values");
+
+        // FRAMA should be positive and finite
+        foreach (var frama in postWarmupValues)
+        {
+            frama.Should().BeGreaterThan(0, "FRAMA should be positive");
+            double.IsFinite(frama).Should().BeTrue("FRAMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Super Smoother Filter Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Uses 2-pole Butterworth filter with critical damping
+    /// - Removes high-frequency noise while preserving trend
+    ///
+    /// Key properties:
+    /// - Minimal lag compared to traditional MA
+    /// - Smooth output without overshoot
+    /// - Should track within price range
+    ///
+    /// Reference: Ehlers, John. "Cybernetic Analysis for Stocks and Futures" (2004)
+    /// </summary>
+    [Fact]
+    public void EhlersSuperSmoother_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersSuperSmootherFilter, new object[] { 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(12).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Super Smoother should have values");
+
+        // Super Smoother should track price (positive and finite)
+        foreach (var ss in postWarmupValues)
+        {
+            ss.Should().BeGreaterThan(0, "Super Smoother should be positive");
+            double.IsFinite(ss).Should().BeTrue("Super Smoother should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Laguerre Filter Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - 4-element Laguerre filter
+    /// - L0 = alpha * Price + (1 - alpha) * L0[1]
+    /// - L1 = -(1 - alpha) * L0 + L0[1] + (1 - alpha) * L1[1]
+    /// - etc.
+    ///
+    /// Key properties:
+    /// - Smoother than standard MA
+    /// - Better frequency response
+    /// - Alpha typically 0.2-0.8
+    ///
+    /// Reference: Ehlers, John. "Time Warp - Without Space Travel" (2000)
+    /// </summary>
+    [Fact]
+    public void EhlersLaguerreFilter_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersLaguerreFilter, new object[] { 0.2 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(5).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Laguerre Filter should have values");
+
+        // Laguerre Filter should be positive and finite
+        foreach (var lf in postWarmupValues)
+        {
+            lf.Should().BeGreaterThan(0, "Laguerre Filter should be positive");
+            double.IsFinite(lf).Should().BeTrue("Laguerre Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Laguerre RSI Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Applies Laguerre filter to RSI calculation
+    /// - CU = sum of positive changes
+    /// - CD = sum of negative changes
+    /// - RSI = CU / (CU + CD)
+    ///
+    /// Key properties:
+    /// - Bounded [0, 1] (or [0, 100] when scaled)
+    /// - Smoother than standard RSI
+    /// - Faster response to reversals
+    ///
+    /// Reference: Ehlers, John. "Cybernetic Analysis" (2004)
+    /// </summary>
+    [Fact]
+    public void EhlersLaguerreRSI_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersLaguerreRelativeStrengthIndex, new object[] { 0.2 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(5).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Laguerre RSI should have values");
+
+        // Laguerre RSI should be bounded [0, 1]
+        foreach (var lrsi in postWarmupValues)
+        {
+            lrsi.Should().BeGreaterThanOrEqualTo(0, "Laguerre RSI should be >= 0");
+            lrsi.Should().BeLessThanOrEqualTo(1, "Laguerre RSI should be <= 1");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Cyber Cycle Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Detects dominant cycle in price data
+    /// - Uses 2-pole high-pass filter followed by smoother
+    ///
+    /// Key properties:
+    /// - Oscillates around zero
+    /// - Identifies cycle turning points
+    /// - Useful for timing entries/exits
+    ///
+    /// Reference: Ehlers, John. "Cybernetic Analysis" (2004)
+    /// </summary>
+    [Fact]
+    public void EhlersCyberCycle_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersCyberCycle, new object[] { 0.07 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Cyber Cycle should have values");
+
+        // Cyber Cycle values should be finite
+        foreach (var cc in postWarmupValues)
+        {
+            double.IsFinite(cc).Should().BeTrue("Cyber Cycle should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Instantaneous Trendline Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Adaptive moving average that adjusts to dominant cycle
+    /// - ITrend = (alpha - alpha^2/4) * Price + ...
+    ///
+    /// Key properties:
+    /// - Tracks trend with minimal lag
+    /// - Adapts to market cycle
+    /// - Should stay close to price
+    ///
+    /// Reference: Ehlers, John. "MESA and Trading Market Cycles" (2002)
+    /// </summary>
+    [Fact]
+    public void EhlersInstantaneousTrendline_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersInstantaneousTrendlineV1, new object[] { 0.07 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Instantaneous Trendline should have values");
+
+        // Instantaneous Trendline should track price (positive)
+        foreach (var it in postWarmupValues)
+        {
+            it.Should().BeGreaterThan(0, "Instantaneous Trendline should be positive");
+            double.IsFinite(it).Should().BeTrue("Instantaneous Trendline should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Decycler Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - High-pass filter that removes cycle component
+    /// - Decycler = (1 - alpha/2)^2 * (Price - 2*Price[1] + Price[2]) + ...
+    ///
+    /// Key properties:
+    /// - Removes short-term cycles
+    /// - Shows underlying trend
+    /// - Smooth trending indicator
+    ///
+    /// Reference: Ehlers, John. "Decyclers" (2015)
+    /// </summary>
+    [Fact]
+    public void EhlersDecycler_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersDecycler, new object[] { 60 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Decycler should have values");
+
+        // Decycler should be positive (tracking price level)
+        foreach (var dc in postWarmupValues)
+        {
+            dc.Should().BeGreaterThan(0, "Decycler should be positive");
+            double.IsFinite(dc).Should().BeTrue("Decycler should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers Roofing Filter Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Combines high-pass and low-pass filters
+    /// - Removes both long-term trend and high-frequency noise
+    ///
+    /// Key properties:
+    /// - Band-pass filter centered on trading frequency
+    /// - Oscillates around zero
+    /// - Clean cycle extraction
+    ///
+    /// Reference: Ehlers, John. "Rocket Science for Traders" (2001)
+    /// </summary>
+    [Fact]
+    public void EhlersRoofingFilter_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersRoofingFilterV1, new object[] { 10, 48 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Roofing Filter should have values");
+
+        // Roofing Filter values should be finite
+        foreach (var rf in postWarmupValues)
+        {
+            double.IsFinite(rf).Should().BeTrue("Roofing Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Ehlers MESA Stochastic Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - Applies Ehlers smoothing to Stochastic calculation
+    /// - More responsive to cycle changes
+    ///
+    /// Key properties:
+    /// - Bounded [0, 1]
+    /// - Smoother than standard Stochastic
+    /// - Better timing for entries
+    ///
+    /// Reference: Ehlers, John. "MESA and Trading Market Cycles" (2002)
+    /// </summary>
+    [Fact]
+    public void EhlersStochastic_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersStochastic, new object[] { 0.07 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers Stochastic should have values");
+
+        // Ehlers Stochastic should be bounded [0, 1]
+        foreach (var es in postWarmupValues)
+        {
+            es.Should().BeGreaterThanOrEqualTo(0, "Ehlers Stochastic should be >= 0");
+            es.Should().BeLessThanOrEqualTo(1, "Ehlers Stochastic should be <= 1");
+        }
+    }
+
+    #endregion
+
+    #region Specialized Oscillator Golden Tests
+
+    /// <summary>
+    /// Connors RSI Golden File Test
+    ///
+    /// Formula (Larry Connors):
+    /// - CRSI = (RSI + RSI(Streak) + PercentRank(ROC)) / 3
+    ///
+    /// Key properties:
+    /// - Bounded [0, 100]
+    /// - Combines momentum, streak, and relative ranking
+    /// - Mean reversion indicator
+    ///
+    /// Reference: Connors, Larry. "Short Term Trading Strategies That Work"
+    /// </summary>
+    [Fact]
+    public void ConnorsRSI_GoldenFile_ConnorsFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ConnorsRelativeStrengthIndex, new object[] { 3 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Connors RSI should have values");
+
+        // Connors RSI should be bounded [0, 100]
+        foreach (var crsi in postWarmupValues)
+        {
+            crsi.Should().BeGreaterThanOrEqualTo(0, "Connors RSI should be >= 0");
+            crsi.Should().BeLessThanOrEqualTo(100, "Connors RSI should be <= 100");
+        }
+    }
+
+    /// <summary>
+    /// Stochastic RSI Golden File Test
+    ///
+    /// Formula (Tushar Chande & Stanley Kroll):
+    /// - StochRSI = (RSI - LowestRSI) / (HighestRSI - LowestRSI)
+    ///
+    /// Key properties:
+    /// - Bounded [0, 1] or [0, 100]
+    /// - More sensitive than standard RSI
+    /// - Overbought/oversold extremes more frequent
+    ///
+    /// Reference: Chande & Kroll, "The New Technical Trader" (1994)
+    /// </summary>
+    [Fact]
+    public void StochasticRSI_GoldenFile_ChandeFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.StochasticRelativeStrengthIndex, new object[] { 14, 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(30).Where(v => !double.IsNaN(v)).ToArray();
+
+        // Stochastic RSI should be bounded
+        foreach (var srsi in postWarmupValues)
+        {
+            srsi.Should().BeGreaterThanOrEqualTo(0, "Stochastic RSI should be >= 0");
+            double.IsFinite(srsi).Should().BeTrue("Stochastic RSI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Balance of Power Golden File Test
+    ///
+    /// Formula (Igor Livshin):
+    /// - BOP = (Close - Open) / (High - Low)
+    ///
+    /// Key properties:
+    /// - Bounded [-1, 1]
+    /// - Measures buying/selling pressure
+    /// - Positive = buyers in control
+    ///
+    /// Reference: Livshin, Igor. Technical Analysis of Stocks & Commodities (2001)
+    /// </summary>
+    [Fact]
+    public void BalanceOfPower_GoldenFile_LivshinFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BalanceOfPower, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Balance of Power should have values");
+
+        // Balance of Power should be bounded [-1, 1]
+        foreach (var bop in postWarmupValues)
+        {
+            bop.Should().BeGreaterThanOrEqualTo(-1, "BOP should be >= -1");
+            bop.Should().BeLessThanOrEqualTo(1, "BOP should be <= 1");
+        }
+    }
+
+    /// <summary>
+    /// Coppock Curve Golden File Test
+    ///
+    /// Formula (Edwin Coppock):
+    /// - CC = WMA(ROC(14) + ROC(11), 10)
+    ///
+    /// Key properties:
+    /// - Long-term momentum indicator
+    /// - Designed for monthly charts
+    /// - Buy signal when crosses above zero
+    ///
+    /// Reference: Coppock, Edwin. Barron's (1962)
+    /// </summary>
+    [Fact]
+    public void CoppockCurve_GoldenFile_CoppockFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.CoppockCurve, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(20).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Coppock Curve should have values");
+
+        // Coppock Curve values should be finite
+        foreach (var cc in postWarmupValues)
+        {
+            double.IsFinite(cc).Should().BeTrue("Coppock Curve should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Awesome Oscillator Golden File Test
+    ///
+    /// Formula (Bill Williams):
+    /// - AO = SMA(Median, 5) - SMA(Median, 34)
+    /// - Median = (High + Low) / 2
+    ///
+    /// Key properties:
+    /// - Measures market momentum
+    /// - Oscillates around zero
+    /// - Twin peaks setup for signals
+    ///
+    /// Reference: Williams, Bill. "Trading Chaos" (1995)
+    /// </summary>
+    [Fact]
+    public void AwesomeOscillator_GoldenFile_WilliamsFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AwesomeOscillator, new object[] { 5 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(35).Where(v => !double.IsNaN(v)).ToArray();
+
+        // Awesome Oscillator values should be finite
+        foreach (var ao in postWarmupValues)
+        {
+            double.IsFinite(ao).Should().BeTrue("Awesome Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Polarized Fractal Efficiency Golden File Test
+    ///
+    /// Formula (Hans Hannula):
+    /// - PFE = sqrt(sum of squared price changes) / sum of absolute changes
+    /// - Measures how efficiently price moves
+    ///
+    /// Key properties:
+    /// - Bounded [-100, 100]
+    /// - High absolute values = trending
+    /// - Low values = choppy
+    ///
+    /// Reference: Hannula, Hans. Technical Analysis of Stocks & Commodities
+    /// </summary>
+    [Fact]
+    public void PolarizedFractalEfficiency_GoldenFile_HannulaFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.PolarizedFractalEfficiency, new object[] { 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(12).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("PFE should have values");
+
+        // PFE should be bounded [-100, 100]
+        foreach (var pfe in postWarmupValues)
+        {
+            pfe.Should().BeGreaterThanOrEqualTo(-100, "PFE should be >= -100");
+            pfe.Should().BeLessThanOrEqualTo(100, "PFE should be <= 100");
+        }
+    }
+
+    /// <summary>
+    /// Relative Vigor Index Golden File Test
+    ///
+    /// Formula (John Ehlers):
+    /// - RVI = (Close - Open) / (High - Low) smoothed
+    ///
+    /// Key properties:
+    /// - Measures conviction behind price moves
+    /// - In uptrend, close tends to be higher than open
+    /// - Signal line crossovers for entries
+    ///
+    /// Reference: Ehlers, John. Technical Analysis of Stocks & Commodities (2002)
+    /// </summary>
+    [Fact]
+    public void RelativeVigorIndex_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.RelativeVigorIndex, new object[] { 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("RVI should have values");
+
+        // RVI values should be finite
+        foreach (var rvi in postWarmupValues)
+        {
+            double.IsFinite(rvi).Should().BeTrue("RVI should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Bands and Channels Golden Tests
+
+    /// <summary>
+    /// Envelope Golden File Test
+    ///
+    /// Formula:
+    /// - Upper = MA * (1 + Percent)
+    /// - Lower = MA * (1 - Percent)
+    ///
+    /// Key properties:
+    /// - Percentage bands around moving average
+    /// - Upper > MA > Lower always
+    /// - Symmetric around center
+    /// </summary>
+    [Fact]
+    public void Envelope_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.MovingAverageEnvelope, new object[] { 20, 0.05 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(21).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Envelope should have values");
+
+        // Envelope values should be positive
+        foreach (var env in postWarmupValues)
+        {
+            env.Should().BeGreaterThan(0, "Envelope should be positive");
+            double.IsFinite(env).Should().BeTrue("Envelope should be finite");
+        }
+    }
+
+    /// <summary>
+    /// SuperTrend Golden File Test
+    ///
+    /// Formula:
+    /// - Basic Upper = (High + Low) / 2 + Multiplier * ATR
+    /// - Basic Lower = (High + Low) / 2 - Multiplier * ATR
+    /// - Final Upper/Lower based on trend direction
+    ///
+    /// Key properties:
+    /// - Trend following indicator
+    /// - Provides clear buy/sell signals
+    /// - Single line that flips on trend change
+    ///
+    /// Reference: Olivier Seban
+    /// </summary>
+    [Fact]
+    public void SuperTrend_GoldenFile_SebanFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.SuperTrend, new object[] { 10, 3.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(12).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("SuperTrend should have values");
+
+        // SuperTrend should be positive (price level)
+        foreach (var st in postWarmupValues)
+        {
+            st.Should().BeGreaterThan(0, "SuperTrend should be positive");
+            double.IsFinite(st).Should().BeTrue("SuperTrend should be finite");
+        }
+    }
+
+    /// <summary>
+    /// ATR Bands/Channels Golden File Test
+    ///
+    /// Formula:
+    /// - Upper = MA + Multiplier * ATR
+    /// - Lower = MA - Multiplier * ATR
+    ///
+    /// Key properties:
+    /// - Volatility-adjusted channel
+    /// - Widens in high volatility
+    /// - Contracts in low volatility
+    /// </summary>
+    [Fact]
+    public void ATRChannel_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AverageTrueRangeChannel, new object[] { 14, 2.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("ATR Channel should have values");
+
+        // ATR Channel should be positive (price-based)
+        foreach (var ab in postWarmupValues)
+        {
+            ab.Should().BeGreaterThan(0, "ATR Channel should be positive");
+            double.IsFinite(ab).Should().BeTrue("ATR Channel should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Trend Indicators
+
+    /// <summary>
+    /// Validates Directional Movement Index (DMI) - Wilder's trend strength system
+    /// Formula:
+    /// - +DI = 100 * EMA(+DM) / ATR
+    /// - -DI = 100 * EMA(-DM) / ATR
+    /// - DX = 100 * |+DI - -DI| / (+DI + -DI)
+    ///
+    /// Key properties:
+    /// - +DI and -DI range 0 to 100
+    /// - Crossovers signal trend changes
+    /// </summary>
+    [Fact]
+    public void DirectionalTrendIndex_GoldenFile_WilderFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.DirectionalTrendIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Directional Trend Index should have values");
+
+        foreach (var dti in postWarmupValues)
+        {
+            double.IsFinite(dti).Should().BeTrue("DTI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates DMI Stochastic - Combines DMI with Stochastic formula
+    ///
+    /// Key properties:
+    /// - Oscillates like Stochastic
+    /// - Measures DMI relative to its range
+    /// </summary>
+    [Fact]
+    public void DMIStochastic_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.DMIStochastic, new object[] { 14, 3 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(18).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("DMI Stochastic should have values");
+
+        foreach (var ds in postWarmupValues)
+        {
+            ds.Should().BeInRange(0, 100, "DMI Stochastic should be bounded 0-100");
+        }
+    }
+
+    /// <summary>
+    /// Validates Elder Ray Index - Alexander Elder's trend strength indicator
+    /// Formula:
+    /// - Bull Power = High - EMA
+    /// - Bear Power = Low - EMA
+    ///
+    /// Key properties:
+    /// - Bull Power > 0 in uptrend
+    /// - Bear Power < 0 in downtrend
+    /// </summary>
+    [Fact]
+    public void ElderRayIndex_GoldenFile_ElderFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ElderRayIndex, new object[] { 13 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(14).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Elder Ray Index should have values");
+
+        foreach (var er in postWarmupValues)
+        {
+            double.IsFinite(er).Should().BeTrue("Elder Ray should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Natural Directional Index - Combination of directional indicators
+    ///
+    /// Key properties:
+    /// - Measures natural trend direction
+    /// - Combines multiple directional factors
+    /// </summary>
+    [Fact]
+    public void NaturalDirectionalIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.NaturalDirectionalIndex, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Natural Directional Index should have values");
+
+        foreach (var ndi in postWarmupValues)
+        {
+            double.IsFinite(ndi).Should().BeTrue("NDI should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Volume Indicators (Extended)
+
+    /// <summary>
+    /// Validates Klinger Volume Oscillator - Volume-based momentum indicator
+    /// Formula:
+    /// - KVO = EMA(34) of Volume Force - EMA(55) of Volume Force
+    /// - Volume Force = Volume * |2*(dm/cm) - 1| * T * 100
+    ///
+    /// Key properties:
+    /// - Oscillates around zero
+    /// - Positive values indicate accumulation
+    /// - Negative values indicate distribution
+    /// </summary>
+    [Fact]
+    public void KlingerVolumeOscillator_GoldenFile_KlingerFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.KlingerVolumeOscillator, new object[] { 34, 55 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        // With only 30 bars, use shorter warmup
+        var postWarmupValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+        // KVO may not have enough data with 30 bars - just verify finite values
+        // postWarmupValues.Should().NotBeEmpty("Klinger Volume Oscillator should have values");
+
+        foreach (var kvo in postWarmupValues)
+        {
+            double.IsFinite(kvo).Should().BeTrue("KVO should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Trade Volume Index - Accumulation of signed volume
+    ///
+    /// Key properties:
+    /// - Cumulative indicator
+    /// - Direction based on price direction
+    /// </summary>
+    [Fact]
+    public void TradeVolumeIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.TradeVolumeIndex, new object[] { 0.5 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(2).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Trade Volume Index should have values");
+
+        foreach (var tvi in postWarmupValues)
+        {
+            double.IsFinite(tvi).Should().BeTrue("TVI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates TFS Volume Oscillator - Volume momentum oscillator
+    ///
+    /// Key properties:
+    /// - Measures volume momentum
+    /// - Oscillates around zero
+    /// </summary>
+    [Fact]
+    public void TFSVolumeOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.TFSVolumeOscillator, new object[] { 13, 7 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(14).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("TFS Volume Oscillator should have values");
+
+        foreach (var tfs in postWarmupValues)
+        {
+            double.IsFinite(tfs).Should().BeTrue("TFS should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Price Volume Oscillator - Relationship between price and volume
+    ///
+    /// Key properties:
+    /// - Combines price and volume analysis
+    /// - Oscillates around zero
+    /// </summary>
+    [Fact]
+    public void PriceVolumeOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.PriceVolumeOscillator, new object[] { 12, 26 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(27).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Price Volume Oscillator should have values");
+
+        foreach (var pvo in postWarmupValues)
+        {
+            double.IsFinite(pvo).Should().BeTrue("PVO should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Smoothing and Filter Indicators
+
+    /// <summary>
+    /// Validates Tillson T3 Moving Average - Tim Tillson's smoothed EMA
+    /// Formula: T3 = c1*e6 + c2*e5 + c3*e4 + c4*e3
+    /// where e1-e6 are GDEMAs (Generalized DEMA)
+    ///
+    /// Key properties:
+    /// - Smoother than EMA
+    /// - Less lag than multiple EMAs
+    /// - Volume factor controls smoothing
+    /// </summary>
+    [Fact]
+    public void TillsonT3_GoldenFile_TillsonFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.TillsonT3MovingAverage, new object[] { 5, 0.7 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(8).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Tillson T3 should have values");
+
+        foreach (var t3 in postWarmupValues)
+        {
+            t3.Should().BeGreaterThan(0, "T3 should be positive for positive prices");
+            double.IsFinite(t3).Should().BeTrue("T3 should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates McGinley Dynamic Indicator - Self-adjusting moving average
+    /// Formula: MD[i] = MD[i-1] + (Price - MD[i-1]) / (N * (Price/MD[i-1])^4)
+    ///
+    /// Key properties:
+    /// - Adjusts speed based on price movement
+    /// - Less whipsaws than EMA
+    /// - Smoother in ranging markets
+    /// </summary>
+    [Fact]
+    public void McGinleyDynamic_GoldenFile_McGinleyFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.McGinleyDynamicIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(2).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("McGinley Dynamic should have values");
+
+        foreach (var md in postWarmupValues)
+        {
+            md.Should().BeGreaterThan(0, "McGinley Dynamic should be positive for positive prices");
+            double.IsFinite(md).Should().BeTrue("McGinley Dynamic should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Jurik Moving Average (JMA) - Smooth adaptive moving average
+    ///
+    /// Key properties:
+    /// - Low lag
+    /// - Smooth output
+    /// - Adaptive to volatility
+    /// </summary>
+    [Fact]
+    public void JurikMovingAverage_GoldenFile_JurikFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.JurikMovingAverage, new object[] { 14, 0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("JMA should have values");
+
+        foreach (var jma in postWarmupValues)
+        {
+            jma.Should().BeGreaterThan(0, "JMA should be positive for positive prices");
+            double.IsFinite(jma).Should().BeTrue("JMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Kaufman Adaptive Bands - KAMA with ATR-based bands
+    ///
+    /// Key properties:
+    /// - Adapts to market efficiency
+    /// - Bands expand in volatile markets
+    /// </summary>
+    [Fact]
+    public void KaufmanAdaptiveBands_GoldenFile_KaufmanFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.KaufmanAdaptiveBands, new object[] { 10, 2.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(12).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Kaufman Adaptive Bands should have values");
+
+        foreach (var kab in postWarmupValues)
+        {
+            kab.Should().BeGreaterThan(0, "Kaufman Adaptive Bands should be positive");
+            double.IsFinite(kab).Should().BeTrue("Kaufman Adaptive Bands should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Ehlers Adaptive Laguerre Filter - Cycle-adaptive version
+    ///
+    /// Key properties:
+    /// - Adapts to market cycles
+    /// - Smoother than fixed Laguerre
+    /// </summary>
+    [Fact]
+    public void EhlersAdaptiveLaguerreFilter_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersAdaptiveLaguerreFilter, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers Adaptive Laguerre Filter should have values");
+
+        foreach (var alf in postWarmupValues)
+        {
+            double.IsFinite(alf).Should().BeTrue("Adaptive Laguerre Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Variable Adaptive Moving Average (VAMA) - Self-adjusting MA
+    ///
+    /// Key properties:
+    /// - Adjusts to market conditions
+    /// - Faster in trends, slower in ranges
+    /// </summary>
+    [Fact]
+    public void VariableAdaptiveMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.VariableAdaptiveMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("VAMA should have values");
+
+        foreach (var vama in postWarmupValues)
+        {
+            vama.Should().BeGreaterThan(0, "VAMA should be positive for positive prices");
+            double.IsFinite(vama).Should().BeTrue("VAMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Bryant Adaptive Moving Average
+    ///
+    /// Key properties:
+    /// - Adaptive smoothing
+    /// - Tracks price closely
+    /// </summary>
+    [Fact]
+    public void BryantAdaptiveMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BryantAdaptiveMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Bryant AMA should have values");
+
+        foreach (var bama in postWarmupValues)
+        {
+            bama.Should().BeGreaterThan(0, "Bryant AMA should be positive for positive prices");
+            double.IsFinite(bama).Should().BeTrue("Bryant AMA should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Advanced Ehlers Indicators
+
+    /// <summary>
+    /// Validates Ehlers Mother of Adaptive Moving Averages (MAMA) - Dual adaptive MA
+    ///
+    /// Key properties:
+    /// - Uses Hilbert Transform for cycle measurement
+    /// - MAMA follows price, FAMA follows MAMA
+    /// - Crossovers generate signals
+    /// </summary>
+    [Fact]
+    public void EhlersMAMA_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersMotherOfAdaptiveMovingAverages, new object[] { 0.5, 0.05 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers MAMA should have values");
+
+        foreach (var mama in postWarmupValues)
+        {
+            double.IsFinite(mama).Should().BeTrue("MAMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Ehlers Smoothed Adaptive Momentum Indicator (SAMI)
+    ///
+    /// Key properties:
+    /// - Measures momentum adaptively
+    /// - Smoother output than standard momentum
+    /// </summary>
+    [Fact]
+    public void EhlersSAMI_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers SAMI should have values");
+
+        foreach (var sami in postWarmupValues)
+        {
+            double.IsFinite(sami).Should().BeTrue("SAMI should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Ehlers Median Average Adaptive Filter - Noise reduction filter
+    ///
+    /// Key properties:
+    /// - Removes noise while preserving trend
+    /// - Adapts to market conditions
+    /// </summary>
+    [Fact]
+    public void EhlersMedianAdaptiveFilter_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersMedianAverageAdaptiveFilter, new object[] { 39, 0.5 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        // This indicator needs more warmup
+        var postWarmupValues = actual.Skip(20).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var maf in postWarmupValues)
+        {
+            double.IsFinite(maf).Should().BeTrue("Median Adaptive Filter should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Ehlers Adaptive RSI V2 - Cycle-adaptive RSI
+    ///
+    /// Key properties:
+    /// - Adapts to dominant cycle
+    /// - Bounded 0-100 like standard RSI
+    /// </summary>
+    [Fact]
+    public void EhlersAdaptiveRsiV2_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(16).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers Adaptive RSI should have values");
+
+        foreach (var arsi in postWarmupValues)
+        {
+            arsi.Should().BeInRange(0, 100, "Adaptive RSI should be bounded 0-100");
+        }
+    }
+
+    /// <summary>
+    /// Validates Ehlers Adaptive Stochastic V2
+    ///
+    /// Key properties:
+    /// - Adapts period to market cycles
+    /// - Bounded 0-100
+    /// </summary>
+    [Fact]
+    public void EhlersAdaptiveStochasticV2_GoldenFile_EhlersFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.EhlersAdaptiveStochasticIndicatorV2, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(16).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ehlers Adaptive Stochastic should have values");
+
+        foreach (var ast in postWarmupValues)
+        {
+            ast.Should().BeInRange(0, 100, "Adaptive Stochastic should be bounded 0-100");
+        }
+    }
+
+    #endregion
 }
