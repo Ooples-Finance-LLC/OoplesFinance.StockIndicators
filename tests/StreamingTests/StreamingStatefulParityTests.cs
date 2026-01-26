@@ -3361,6 +3361,1002 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     () => new EhlersSquelchIndicatorState(),
                     data => data.CalculateEhlersSquelchIndicator().CustomValuesList)
             };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("OscarIndicator",
+                    () => new OscarIndicatorState(),
+                    data => data.CalculateOscarIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("OscOscillator",
+                    () => new OscOscillatorState(),
+                    data => data.CalculateOscOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ParabolicSAR",
+                    () => new ParabolicSARState(),
+                    data => data.CalculateParabolicSAR().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ParabolicWeightedMovingAverage",
+                    () => new ParabolicWeightedMovingAverageState(),
+                    data => data.CalculateParabolicWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ParametricCorrectiveLinearMovingAverage",
+                    () => new ParametricCorrectiveLinearMovingAverageState(),
+                    data => data.CalculateParametricCorrectiveLinearMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ParametricKalmanFilter",
+                    () => new ParametricKalmanFilterState(),
+                    data => data.CalculateParametricKalmanFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PeakValleyEstimation",
+                    () => new PeakValleyEstimationState(),
+                    data => data.CalculatePeakValleyEstimation().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PentupleExponentialMovingAverage",
+                    () => new PentupleExponentialMovingAverageState(),
+                    data => data.CalculatePentupleExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PercentagePriceOscillatorLeader",
+                    () => new PercentagePriceOscillatorLeaderState(),
+                    data => data.CalculatePercentagePriceOscillatorLeader().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PercentageTrend",
+                    () => new PercentageTrendState(),
+                    data => data.CalculatePercentageTrend().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PercentChangeOscillator",
+                    () => new PercentChangeOscillatorState(),
+                    data => data.CalculatePercentChangeOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PerformanceIndex",
+                    () => new PerformanceIndexState(),
+                    data => data.CalculatePerformanceIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PhaseChangeIndex",
+                    () => new PhaseChangeIndexState(),
+                    data => data.CalculatePhaseChangeIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PivotDetectorOscillator",
+                    () => new PivotDetectorOscillatorState(),
+                    data => data.CalculatePivotDetectorOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PivotPointAverage",
+                    () => new PivotPointAverageState(),
+                    data => data.CalculatePivotPointAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PolarizedFractalEfficiency",
+                    () => new PolarizedFractalEfficiencyState(),
+                    data => data.CalculatePolarizedFractalEfficiency().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PolynomialLeastSquaresMovingAverage",
+                    () => new PolynomialLeastSquaresMovingAverageState(),
+                    data => data.CalculatePolynomialLeastSquaresMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PositiveVolumeIndex",
+                    () => new PositiveVolumeIndexState(),
+                    data => data.CalculatePositiveVolumeIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PoweredKaufmanAdaptiveMovingAverage",
+                    () => new PoweredKaufmanAdaptiveMovingAverageState(),
+                    data => data.CalculatePoweredKaufmanAdaptiveMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PremierStochasticOscillator",
+                    () => new PremierStochasticOscillatorState(),
+                    data => data.CalculatePremierStochasticOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PriceCycleOscillator",
+                    () => new PriceCycleOscillatorState(),
+                    data => data.CalculatePriceCycleOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PriceMomentumOscillator",
+                    () => new PriceMomentumOscillatorState(),
+                    data => data.CalculatePriceMomentumOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PriceVolumeRank",
+                    () => new PriceVolumeRankState(),
+                    data => data.CalculatePriceVolumeRank().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PriceVolumeTrend",
+                    () => new PriceVolumeTrendState(),
+                    data => data.CalculatePriceVolumeTrend().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PriceZoneOscillator",
+                    () => new PriceZoneOscillatorState(),
+                    data => data.CalculatePriceZoneOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PrimeNumberOscillator",
+                    () => new PrimeNumberOscillatorState(),
+                    data => data.CalculatePrimeNumberOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("PsychologicalLine",
+                    () => new PsychologicalLineState(),
+                    data => data.CalculatePsychologicalLine().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("QuadraticMovingAverage",
+                    () => new QuadraticMovingAverageState(),
+                    data => data.CalculateQuadraticMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("QuadraticRegression",
+                    () => new QuadraticRegressionState(),
+                    data => data.CalculateQuadraticRegression().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("QuadrupleExponentialMovingAverage",
+                    () => new QuadrupleExponentialMovingAverageState(),
+                    data => data.CalculateQuadrupleExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("QuasiWhiteNoise",
+                    () => new QuasiWhiteNoiseState(),
+                    data => data.CalculateQuasiWhiteNoise().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("QuickMovingAverage",
+                    () => new QuickMovingAverageState(),
+                    data => data.CalculateQuickMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RahulMohindarOscillator",
+                    () => new RahulMohindarOscillatorState(),
+                    data => data.CalculateRahulMohindarOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RainbowOscillator",
+                    () => new RainbowOscillatorState(),
+                    data => data.CalculateRainbowOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RangeActionVerificationIndex",
+                    () => new RangeActionVerificationIndexState(),
+                    data => data.CalculateRangeActionVerificationIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RapidRelativeStrengthIndex",
+                    () => new RapidRelativeStrengthIndexState(),
+                    data => data.CalculateRapidRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RateOfChange",
+                    () => new RateOfChangeState(),
+                    data => data.CalculateRateOfChange().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RatioOCHLAverager",
+                    () => new RatioOCHLAveragerState(),
+                    data => data.CalculateRatioOCHLAverager().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ReallySimpleIndicator",
+                    () => new ReallySimpleIndicatorState(),
+                    data => data.CalculateReallySimpleIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RecursiveDifferenciator",
+                    () => new RecursiveDifferenciatorState(),
+                    data => data.CalculateRecursiveDifferenciator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RecursiveMovingTrendAverage",
+                    () => new RecursiveMovingTrendAverageState(),
+                    data => data.CalculateRecursiveMovingTrendAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RecursiveRelativeStrengthIndex",
+                    () => new RecursiveRelativeStrengthIndexState(),
+                    data => data.CalculateRecursiveRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RecursiveStochastic",
+                    () => new RecursiveStochasticState(),
+                    data => data.CalculateRecursiveStochastic().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RegressionOscillator",
+                    () => new RegressionOscillatorState(),
+                    data => data.CalculateRegressionOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RegularizedExponentialMovingAverage",
+                    () => new RegularizedExponentialMovingAverageState(),
+                    data => data.CalculateRegularizedExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeDifferenceOfSquaresOscillator",
+                    () => new RelativeDifferenceOfSquaresOscillatorState(),
+                    data => data.CalculateRelativeDifferenceOfSquaresOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeMomentumIndex",
+                    () => new RelativeMomentumIndexState(),
+                    data => data.CalculateRelativeMomentumIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeSpreadStrength",
+                    () => new RelativeSpreadStrengthState(),
+                    data => data.CalculateRelativeSpreadStrength().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeStrengthIndex",
+                    () => new RelativeStrengthIndexState(),
+                    data => data.CalculateRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeVigorIndex",
+                    () => new RelativeVigorIndexState(),
+                    data => data.CalculateRelativeVigorIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeVolatilityIndexV1",
+                    () => new RelativeVolatilityIndexV1State(),
+                    data => data.CalculateRelativeVolatilityIndexV1().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeVolatilityIndexV2",
+                    () => new RelativeVolatilityIndexV2State(),
+                    data => data.CalculateRelativeVolatilityIndexV2().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RelativeVolumeIndicator",
+                    () => new RelativeVolumeIndicatorState(),
+                    data => data.CalculateRelativeVolumeIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("Repulse",
+                    () => new RepulseState(),
+                    data => data.CalculateRepulse().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RepulsionMovingAverage",
+                    () => new RepulsionMovingAverageState(),
+                    data => data.CalculateRepulsionMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RetentionAccelerationFilter",
+                    () => new RetentionAccelerationFilterState(),
+                    data => data.CalculateRetentionAccelerationFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RetrospectiveCandlestickChart",
+                    () => new RetrospectiveCandlestickChartState(),
+                    data => data.CalculateRetrospectiveCandlestickChart().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ReversalPoints",
+                    () => new ReversalPointsState(),
+                    data => data.CalculateReversalPoints().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ReverseEngineeringRelativeStrengthIndex",
+                    () => new ReverseEngineeringRelativeStrengthIndexState(),
+                    data => data.CalculateReverseEngineeringRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ReverseMovingAverageConvergenceDivergence",
+                    () => new ReverseMovingAverageConvergenceDivergenceState(),
+                    data => data.CalculateReverseMovingAverageConvergenceDivergence().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RexOscillator",
+                    () => new RexOscillatorState(),
+                    data => data.CalculateRexOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RightSidedRickerMovingAverage",
+                    () => new RightSidedRickerMovingAverageState(),
+                    data => data.CalculateRightSidedRickerMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RSINGIndicator",
+                    () => new RSINGIndicatorState(),
+                    data => data.CalculateRSINGIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("RunningEquity",
+                    () => new RunningEquityState(),
+                    data => data.CalculateRunningEquity().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SelfAdjustingRelativeStrengthIndex",
+                    () => new SelfAdjustingRelativeStrengthIndexState(),
+                    data => data.CalculateSelfAdjustingRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SelfWeightedMovingAverage",
+                    () => new SelfWeightedMovingAverageState(),
+                    data => data.CalculateSelfWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SellGravitationIndex",
+                    () => new SellGravitationIndexState(),
+                    data => data.CalculateSellGravitationIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SentimentZoneOscillator",
+                    () => new SentimentZoneOscillatorState(),
+                    data => data.CalculateSentimentZoneOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SequentiallyFilteredMovingAverage",
+                    () => new SequentiallyFilteredMovingAverageState(),
+                    data => data.CalculateSequentiallyFilteredMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SettingLessTrendStepFiltering",
+                    () => new SettingLessTrendStepFilteringState(),
+                    data => data.CalculateSettingLessTrendStepFiltering().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ShapeshiftingMovingAverage",
+                    () => new ShapeshiftingMovingAverageState(),
+                    data => data.CalculateShapeshiftingMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SharpeRatio",
+                    () => new SharpeRatioState(),
+                    data => data.CalculateSharpeRatio().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SharpModifiedMovingAverage",
+                    () => new SharpModifiedMovingAverageState(),
+                    data => data.CalculateSharpModifiedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SimpleCycle",
+                    () => new SimpleCycleState(),
+                    data => data.CalculateSimpleCycle().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SimpleLines",
+                    () => new SimpleLinesState(),
+                    data => data.CalculateSimpleLines().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SimpleMovingAverage",
+                    () => new SimpleMovingAverageState(),
+                    data => data.CalculateSimpleMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SimplifiedLeastSquaresMovingAverage",
+                    () => new SimplifiedLeastSquaresMovingAverageState(),
+                    data => data.CalculateSimplifiedLeastSquaresMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SimplifiedWeightedMovingAverage",
+                    () => new SimplifiedWeightedMovingAverageState(),
+                    data => data.CalculateSimplifiedWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SineWeightedMovingAverage",
+                    () => new SineWeightedMovingAverageState(),
+                    data => data.CalculateSineWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SlowSmoothedMovingAverage",
+                    () => new SlowSmoothedMovingAverageState(),
+                    data => data.CalculateSlowSmoothedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SMIErgodicIndicator",
+                    () => new SMIErgodicIndicatorState(),
+                    data => data.CalculateSMIErgodicIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SmoothedDeltaRatioOscillator",
+                    () => new SmoothedDeltaRatioOscillatorState(),
+                    data => data.CalculateSmoothedDeltaRatioOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SmoothedRateOfChange",
+                    () => new SmoothedRateOfChangeState(),
+                    data => data.CalculateSmoothedRateOfChange().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SmoothedWilliamsAccumulationDistribution",
+                    () => new SmoothedWilliamsAccumulationDistributionState(),
+                    data => data.CalculateSmoothedWilliamsAccumulationDistribution().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SpearmanIndicator",
+                    () => new SpearmanIndicatorState(),
+                    data => data.CalculateSpearmanIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("Spencer15PointMovingAverage",
+                    () => new Spencer15PointMovingAverageState(),
+                    data => data.CalculateSpencer15PointMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("Spencer21PointMovingAverage",
+                    () => new Spencer21PointMovingAverageState(),
+                    data => data.CalculateSpencer21PointMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SquareRootWeightedMovingAverage",
+                    () => new SquareRootWeightedMovingAverageState(),
+                    data => data.CalculateSquareRootWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SqueezeMomentumIndicator",
+                    () => new SqueezeMomentumIndicatorState(),
+                    data => data.CalculateSqueezeMomentumIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StandardPivotPoints",
+                    () => new StandardPivotPointsState(),
+                    data => data.CalculateStandardPivotPoints().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StationaryExtrapolatedLevelsOscillator",
+                    () => new StationaryExtrapolatedLevelsOscillatorState(),
+                    data => data.CalculateStationaryExtrapolatedLevelsOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StochasticCustomOscillator",
+                    () => new StochasticCustomOscillatorState(),
+                    data => data.CalculateStochasticCustomOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StochasticFastOscillator",
+                    () => new StochasticFastOscillatorState(),
+                    data => data.CalculateStochasticFastOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StochasticMovingAverageConvergenceDivergenceOscillator",
+                    () => new StochasticMovingAverageConvergenceDivergenceOscillatorState(),
+                    data => data.CalculateStochasticMovingAverageConvergenceDivergenceOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("StochasticRegular",
+                    () => new StochasticRegularState(),
+                    data => data.CalculateStochasticRegular().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SuperTrend",
+                    () => new SuperTrendState(),
+                    data => data.CalculateSuperTrend().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SuperTrendFilter",
+                    () => new SuperTrendFilterState(),
+                    data => data.CalculateSuperTrendFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SupportAndResistanceOscillator",
+                    () => new SupportAndResistanceOscillatorState(),
+                    data => data.CalculateSupportAndResistanceOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SurfaceRoughnessEstimator",
+                    () => new SurfaceRoughnessEstimatorState(),
+                    data => data.CalculateSurfaceRoughnessEstimator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("Svama",
+                    () => new SvamaState(),
+                    data => data.CalculateSvama().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SwamiStochastics",
+                    () => new SwamiStochasticsState(),
+                    data => data.CalculateSwamiStochastics().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("SymmetricallyWeightedMovingAverage",
+                    () => new SymmetricallyWeightedMovingAverageState(),
+                    data => data.CalculateSymmetricallyWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TFSMboIndicator",
+                    () => new TFSMboIndicatorState(),
+                    data => data.CalculateTFSMboIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TFSMboPercentagePriceOscillator",
+                    () => new TFSMboPercentagePriceOscillatorState(),
+                    data => data.CalculateTFSMboPercentagePriceOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TFSTetherLineIndicator",
+                    () => new TFSTetherLineIndicatorState(),
+                    data => data.CalculateTFSTetherLineIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TFSVolumeOscillator",
+                    () => new TFSVolumeOscillatorState(),
+                    data => data.CalculateTFSVolumeOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TheRangeIndicator",
+                    () => new TheRangeIndicatorState(),
+                    data => data.CalculateTheRangeIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TickLineMomentumOscillator",
+                    () => new TickLineMomentumOscillatorState(),
+                    data => data.CalculateTickLineMomentumOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TillsonT3MovingAverage",
+                    () => new TillsonT3MovingAverageState(),
+                    data => data.CalculateTillsonT3MovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TopsAndBottomsFinder",
+                    () => new TopsAndBottomsFinderState(),
+                    data => data.CalculateTopsAndBottomsFinder().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TotalPowerIndicator",
+                    () => new TotalPowerIndicatorState(),
+                    data => data.CalculateTotalPowerIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TraderPressureIndex",
+                    () => new TraderPressureIndexState(),
+                    data => data.CalculateTraderPressureIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TradersDynamicIndex",
+                    () => new TradersDynamicIndexState(),
+                    data => data.CalculateTradersDynamicIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TradeVolumeIndex",
+                    () => new TradeVolumeIndexState(),
+                    data => data.CalculateTradeVolumeIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendAnalysisIndex",
+                    () => new TrendAnalysisIndexState(),
+                    data => data.CalculateTrendAnalysisIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendDetectionIndex",
+                    () => new TrendDetectionIndexState(),
+                    data => data.CalculateTrendDetectionIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendDirectionForceIndex",
+                    () => new TrendDirectionForceIndexState(),
+                    data => data.CalculateTrendDirectionForceIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendExhaustionIndicator",
+                    () => new TrendExhaustionIndicatorState(),
+                    data => data.CalculateTrendExhaustionIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendForceHistogram",
+                    () => new TrendForceHistogramState(),
+                    data => data.CalculateTrendForceHistogram().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendImpulseFilter",
+                    () => new TrendImpulseFilterState(),
+                    data => data.CalculateTrendImpulseFilter().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendIntensityIndex",
+                    () => new TrendIntensityIndexState(),
+                    data => data.CalculateTrendIntensityIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendPersistenceRate",
+                    () => new TrendPersistenceRateState(),
+                    data => data.CalculateTrendPersistenceRate().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendStep",
+                    () => new TrendStepState(),
+                    data => data.CalculateTrendStep().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendTriggerFactor",
+                    () => new TrendTriggerFactorState(),
+                    data => data.CalculateTrendTriggerFactor().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TreynorRatio",
+                    () => new TreynorRatioState(),
+                    data => data.CalculateTreynorRatio().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrigonometricOscillator",
+                    () => new TrigonometricOscillatorState(),
+                    data => data.CalculateTrigonometricOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("Trimean",
+                    () => new TrimeanState(),
+                    data => data.CalculateTrimean().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TripleExponentialMovingAverage",
+                    () => new TripleExponentialMovingAverageState(),
+                    data => data.CalculateTripleExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TTMScalperIndicator",
+                    () => new TTMScalperIndicatorState(),
+                    data => data.CalculateTTMScalperIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TurboScaler",
+                    () => new TurboScalerState(),
+                    data => data.CalculateTurboScaler().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TurboStochasticsFast",
+                    () => new TurboStochasticsFastState(),
+                    data => data.CalculateTurboStochasticsFast().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TurboStochasticsSlow",
+                    () => new TurboStochasticsSlowState(),
+                    data => data.CalculateTurboStochasticsSlow().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TwiggsMoneyFlow",
+                    () => new TwiggsMoneyFlowState(),
+                    data => data.CalculateTwiggsMoneyFlow().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UberTrendIndicator",
+                    () => new UberTrendIndicatorState(),
+                    data => data.CalculateUberTrendIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UltimateOscillator",
+                    () => new UltimateOscillatorState(),
+                    data => data.CalculateUltimateOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UpsideDownsideVolume",
+                    () => new UpsideDownsideVolumeState(),
+                    data => data.CalculateUpsideDownsideVolume().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UpsidePotentialRatio",
+                    () => new UpsidePotentialRatioState(),
+                    data => data.CalculateUpsidePotentialRatio().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VanillaABCDPattern",
+                    () => new VanillaABCDPatternState(),
+                    data => data.CalculateVanillaABCDPattern().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VaradiOscillator",
+                    () => new VaradiOscillatorState(),
+                    data => data.CalculateVaradiOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VariableAdaptiveMovingAverage",
+                    () => new VariableAdaptiveMovingAverageState(),
+                    data => data.CalculateVariableAdaptiveMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VariableMovingAverage",
+                    () => new VariableMovingAverageState(),
+                    data => data.CalculateVariableMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VerticalHorizontalMovingAverage",
+                    () => new VerticalHorizontalMovingAverageState(),
+                    data => data.CalculateVerticalHorizontalMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VervoortHeikenAshiLongTermCandlestickOscillator",
+                    () => new VervoortHeikenAshiLongTermCandlestickOscillatorState(),
+                    data => data.CalculateVervoortHeikenAshiLongTermCandlestickOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VixTradingSystem",
+                    () => new VixTradingSystemState(),
+                    data => data.CalculateVixTradingSystem().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolatilityRatio",
+                    () => new VolatilityRatioState(),
+                    data => data.CalculateVolatilityRatio().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolatilityWaveMovingAverage",
+                    () => new VolatilityWaveMovingAverageState(),
+                    data => data.CalculateVolatilityWaveMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeAccumulationPercent",
+                    () => new VolumeAccumulationPercentState(),
+                    data => data.CalculateVolumeAccumulationPercent().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeAdjustedMovingAverage",
+                    () => new VolumeAdjustedMovingAverageState(),
+                    data => data.CalculateVolumeAdjustedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeFlowIndicator",
+                    () => new VolumeFlowIndicatorState(),
+                    data => data.CalculateVolumeFlowIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumePriceConfirmationIndicator",
+                    () => new VolumePriceConfirmationIndicatorState(),
+                    data => data.CalculateVolumePriceConfirmationIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeWeightedAveragePrice",
+                    () => new VolumeWeightedAveragePriceState(),
+                    data => data.CalculateVolumeWeightedAveragePrice().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeWeightedMovingAverage",
+                    () => new VolumeWeightedMovingAverageState(),
+                    data => data.CalculateVolumeWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VolumeWeightedRelativeStrengthIndex",
+                    () => new VolumeWeightedRelativeStrengthIndexState(),
+                    data => data.CalculateVolumeWeightedRelativeStrengthIndex().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("VostroIndicator",
+                    () => new VostroIndicatorState(),
+                    data => data.CalculateVostroIndicator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WamiOscillator",
+                    () => new WamiOscillatorState(),
+                    data => data.CalculateWamiOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WaveTrendOscillator",
+                    () => new WaveTrendOscillatorState(),
+                    data => data.CalculateWaveTrendOscillator().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WellesWilderSummation",
+                    () => new WellesWilderSummationState(),
+                    data => data.CalculateWellesWilderSummation().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WellesWilderVolatilitySystem",
+                    () => new WellesWilderVolatilitySystemState(),
+                    data => data.CalculateWellesWilderVolatilitySystem().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WellRoundedMovingAverage",
+                    () => new WellRoundedMovingAverageState(),
+                    data => data.CalculateWellRoundedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WilliamsAccumulationDistribution",
+                    () => new WilliamsAccumulationDistributionState(),
+                    data => data.CalculateWilliamsAccumulationDistribution().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WindowedVolumeWeightedMovingAverage",
+                    () => new WindowedVolumeWeightedMovingAverageState(),
+                    data => data.CalculateWindowedVolumeWeightedMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("WoodiePivotPoints",
+                    () => new WoodiePivotPointsState(),
+                    data => data.CalculateWoodiePivotPoints().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ZeroLagExponentialMovingAverage",
+                    () => new ZeroLagExponentialMovingAverageState(),
+                    data => data.CalculateZeroLagExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ZeroLagSmoothedCycle",
+                    () => new ZeroLagSmoothedCycleState(),
+                    data => data.CalculateZeroLagSmoothedCycle().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ZeroLagTripleExponentialMovingAverage",
+                    () => new ZeroLagTripleExponentialMovingAverageState(),
+                    data => data.CalculateZeroLagTripleExponentialMovingAverage().CustomValuesList)
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ZeroLowLagMovingAverage",
+                    () => new ZeroLowLagMovingAverageState(),
+                    data => data.CalculateZeroLowLagMovingAverage().CustomValuesList)
+            };
         }
     }
 
