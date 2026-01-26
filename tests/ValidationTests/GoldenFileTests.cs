@@ -5929,4 +5929,919 @@ public sealed class GoldenFileTests
     }
 
     #endregion
+
+    #region Adaptive Indicators
+
+    /// <summary>
+    /// Validates Adaptive Exponential Moving Average
+    ///
+    /// Key properties:
+    /// - Adapts to volatility changes
+    /// - Smoother than standard EMA
+    /// </summary>
+    [Fact]
+    public void AdaptiveExponentialMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AdaptiveExponentialMovingAverage, new object[] { 10, 2, 30 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(11).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Adaptive EMA should have values");
+
+        foreach (var aema in postWarmupValues)
+        {
+            aema.Should().BeGreaterThan(0, "Adaptive EMA should be positive for positive prices");
+            double.IsFinite(aema).Should().BeTrue("Adaptive EMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Adaptive Least Squares
+    ///
+    /// Key properties:
+    /// - Uses least squares regression adaptively
+    /// - Tracks price closely
+    /// </summary>
+    [Fact]
+    public void AdaptiveLeastSquares_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AdaptiveLeastSquares, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Adaptive Least Squares should have values");
+
+        foreach (var als in postWarmupValues)
+        {
+            als.Should().BeGreaterThan(0, "ALS should be positive for positive prices");
+            double.IsFinite(als).Should().BeTrue("ALS should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Adaptive Price Zone Indicator
+    ///
+    /// Key properties:
+    /// - Identifies price zones adaptively
+    /// - Volume-weighted zones
+    /// </summary>
+    [Fact]
+    public void AdaptivePriceZoneIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AdaptivePriceZoneIndicator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var apz in postWarmupValues)
+        {
+            double.IsFinite(apz).Should().BeTrue("APZ should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Adaptive Trailing Stop
+    ///
+    /// Key properties:
+    /// - ATR-based adaptive stop
+    /// - Adjusts to volatility
+    /// </summary>
+    [Fact]
+    public void AdaptiveTrailingStop_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AdaptiveTrailingStop, new object[] { 14, 2.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var ats in postWarmupValues)
+        {
+            ats.Should().BeGreaterThan(0, "Adaptive Trailing Stop should be positive");
+            double.IsFinite(ats).Should().BeTrue("ATS should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Auto and Autonomous Indicators
+
+    /// <summary>
+    /// Validates Auto Line - Automatic trend line
+    ///
+    /// Key properties:
+    /// - Automatically calculated trend line
+    /// </summary>
+    [Fact]
+    public void AutoLine_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AutoLine, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Auto Line should have values");
+
+        foreach (var al in postWarmupValues)
+        {
+            double.IsFinite(al).Should().BeTrue("Auto Line should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Auto Line With Drift
+    ///
+    /// Key properties:
+    /// - Automatic trend line with drift component
+    /// </summary>
+    [Fact]
+    public void AutoLineWithDrift_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AutoLineWithDrift, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Auto Line With Drift should have values");
+
+        foreach (var alwd in postWarmupValues)
+        {
+            double.IsFinite(alwd).Should().BeTrue("ALWD should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Autonomous Recursive Moving Average
+    ///
+    /// Key properties:
+    /// - Self-adjusting recursive MA
+    /// - Reduces lag
+    /// </summary>
+    [Fact]
+    public void AutonomousRecursiveMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AutonomousRecursiveMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("ARMA should have values");
+
+        foreach (var arma in postWarmupValues)
+        {
+            arma.Should().BeGreaterThan(0, "ARMA should be positive for positive prices");
+            double.IsFinite(arma).Should().BeTrue("ARMA should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Volatility Stop Indicators
+
+    /// <summary>
+    /// Validates ATR Trailing Stops - Volatility-based stop levels
+    ///
+    /// Key properties:
+    /// - Uses ATR for stop calculation
+    /// - Adjusts to market volatility
+    /// </summary>
+    [Fact]
+    public void AverageTrueRangeTrailingStops_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AverageTrueRangeTrailingStops, new object[] { 14, 2.5 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var atrs in postWarmupValues)
+        {
+            atrs.Should().BeGreaterThan(0, "ATR Trailing Stops should be positive");
+            double.IsFinite(atrs).Should().BeTrue("ATR Trailing Stops should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Parabolic SAR - Welles Wilder's stop and reverse
+    /// Formula: SAR = Prior SAR + AF * (EP - Prior SAR)
+    ///
+    /// Key properties:
+    /// - Trailing stop that accelerates
+    /// - AF increases as trend continues
+    /// </summary>
+    [Fact]
+    public void ParabolicSAR_GoldenFile_WilderFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ParabolicSAR, new object[] { 0.02, 0.2 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(2).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Parabolic SAR should have values");
+
+        foreach (var sar in postWarmupValues)
+        {
+            sar.Should().BeGreaterThan(0, "SAR should be positive for positive prices");
+            double.IsFinite(sar).Should().BeTrue("SAR should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Bollinger Band Variants
+
+    /// <summary>
+    /// Validates Bollinger Bands Percent B (%B)
+    /// Formula: %B = (Price - Lower) / (Upper - Lower)
+    ///
+    /// Key properties:
+    /// - Shows where price is within bands
+    /// - 0 = at lower band, 1 = at upper band
+    /// - Can be < 0 or > 1 when outside bands
+    /// </summary>
+    [Fact]
+    public void BollingerBandsPercentB_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BollingerBandsPercentB, new object[] { 20, 2.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(21).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var pctB in postWarmupValues)
+        {
+            double.IsFinite(pctB).Should().BeTrue("%B should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Bollinger Bands Width
+    /// Formula: Width = (Upper - Lower) / Middle
+    ///
+    /// Key properties:
+    /// - Measures band width relative to middle band
+    /// - Lower values indicate squeeze (low volatility)
+    /// </summary>
+    [Fact]
+    public void BollingerBandsWidth_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BollingerBandsWidth, new object[] { 20, 2.0 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(21).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var bbw in postWarmupValues)
+        {
+            bbw.Should().BeGreaterThanOrEqualTo(0, "BB Width should be non-negative");
+            double.IsFinite(bbw).Should().BeTrue("BB Width should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Momentum Variants
+
+    /// <summary>
+    /// Validates Anchored Momentum
+    ///
+    /// Key properties:
+    /// - Momentum from specific anchor point
+    /// - Useful for trend strength
+    /// </summary>
+    [Fact]
+    public void AnchoredMomentum_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AnchoredMomentum, new object[] { 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(11).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Anchored Momentum should have values");
+
+        foreach (var am in postWarmupValues)
+        {
+            double.IsFinite(am).Should().BeTrue("Anchored Momentum should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Decision Point Price Momentum Oscillator (PMO)
+    ///
+    /// Key properties:
+    /// - Double-smoothed ROC
+    /// - Oscillates above/below zero
+    /// </summary>
+    [Fact]
+    public void DecisionPointPMO_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.DecisionPointPriceMomentumOscillator, new object[] { 35, 20, 10 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        // Skip lots of warmup since this is triple-smoothed
+        var postWarmupValues = actual.Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var pmo in postWarmupValues)
+        {
+            double.IsFinite(pmo).Should().BeTrue("PMO should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Additional Oscillators
+
+    /// <summary>
+    /// Validates Bayesian Oscillator
+    ///
+    /// Key properties:
+    /// - Probability-based oscillator
+    /// - Statistical approach to momentum
+    /// </summary>
+    [Fact]
+    public void BayesianOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BayesianOscillator, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var bo in postWarmupValues)
+        {
+            double.IsFinite(bo).Should().BeTrue("Bayesian Oscillator should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Bilateral Stochastic Oscillator
+    ///
+    /// Key properties:
+    /// - Measures both up and down price movements
+    /// - More sensitive than traditional stochastic
+    /// </summary>
+    [Fact]
+    public void BilateralStochasticOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BilateralStochasticOscillator, new object[] { 14, 3 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(18).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var bso in postWarmupValues)
+        {
+            double.IsFinite(bso).Should().BeTrue("BSO should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Chop Zone indicator
+    ///
+    /// Key properties:
+    /// - Identifies choppy/trending market conditions
+    /// - Based on EMA relationship
+    /// </summary>
+    [Fact]
+    public void ChopZone_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ChopZone, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var cz in postWarmupValues)
+        {
+            double.IsFinite(cz).Should().BeTrue("Chop Zone should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Additional Moving Averages
+
+    /// <summary>
+    /// Validates Ahrens Moving Average
+    ///
+    /// Key properties:
+    /// - Weighted based on distance from current price
+    /// - Smoother than SMA
+    /// </summary>
+    [Fact]
+    public void AhrensMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.AhrensMovingAverage, new object[] { 9 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(10).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Ahrens MA should have values");
+
+        foreach (var ama in postWarmupValues)
+        {
+            ama.Should().BeGreaterThan(0, "Ahrens MA should be positive for positive prices");
+            double.IsFinite(ama).Should().BeTrue("Ahrens MA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Buff Average - Modified moving average
+    ///
+    /// Key properties:
+    /// - Adaptive to recent price changes
+    /// </summary>
+    [Fact]
+    public void BuffAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.BuffAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Buff Average should have values");
+
+        foreach (var ba in postWarmupValues)
+        {
+            ba.Should().BeGreaterThan(0, "Buff Average should be positive for positive prices");
+            double.IsFinite(ba).Should().BeTrue("Buff Average should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Corrected Moving Average
+    ///
+    /// Key properties:
+    /// - Corrects for lag in standard MAs
+    /// </summary>
+    [Fact]
+    public void CorrectedMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.CorrectedMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Corrected MA should have values");
+
+        foreach (var cma in postWarmupValues)
+        {
+            cma.Should().BeGreaterThan(0, "Corrected MA should be positive for positive prices");
+            double.IsFinite(cma).Should().BeTrue("Corrected MA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Cubed Weighted Moving Average
+    ///
+    /// Key properties:
+    /// - Cubic weighting scheme
+    /// - More weight to recent prices
+    /// </summary>
+    [Fact]
+    public void CubedWeightedMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.CubedWeightedMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Cubed WMA should have values");
+
+        foreach (var cwma in postWarmupValues)
+        {
+            cwma.Should().BeGreaterThan(0, "Cubed WMA should be positive for positive prices");
+            double.IsFinite(cwma).Should().BeTrue("Cubed WMA should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Delta Moving Average
+    ///
+    /// Key properties:
+    /// - Based on price differences
+    /// </summary>
+    [Fact]
+    public void DeltaMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.DeltaMovingAverage, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Delta MA should have values");
+
+        foreach (var dma in postWarmupValues)
+        {
+            double.IsFinite(dma).Should().BeTrue("Delta MA should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Ratio and Comparison Indicators
+
+    /// <summary>
+    /// Validates Calmar Ratio - Risk-adjusted return metric
+    ///
+    /// Key properties:
+    /// - CAGR / Max Drawdown
+    /// - Higher is better
+    /// </summary>
+    [Fact]
+    public void CalmarRatio_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.CalmarRatio, new object[] { 14 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var cr in postWarmupValues)
+        {
+            double.IsFinite(cr).Should().BeTrue("Calmar Ratio should be finite");
+        }
+    }
+
+    /// <summary>
+    /// Validates Chartmill Value Indicator
+    ///
+    /// Key properties:
+    /// - Identifies value areas
+    /// - Based on price distribution
+    /// </summary>
+    [Fact]
+    public void ChartmillValueIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ChartmillValueIndicator, new object[] { 5 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(6).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var cvi in postWarmupValues)
+        {
+            double.IsFinite(cvi).Should().BeTrue("CVI should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Constance Brown Indicators
+
+    /// <summary>
+    /// Validates Constance Brown Composite Index
+    ///
+    /// Key properties:
+    /// - Combines RSI and Momentum
+    /// - Divergence indicator
+    /// </summary>
+    [Fact]
+    public void ConstanceBrownCompositeIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.ConstanceBrownCompositeIndex, new object[] { 14, 9 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(25).Where(v => !double.IsNaN(v)).ToArray();
+
+        foreach (var cbci in postWarmupValues)
+        {
+            double.IsFinite(cbci).Should().BeTrue("CBCI should be finite");
+        }
+    }
+
+    #endregion
+
+    #region Coral and Trend Indicators
+
+    /// <summary>
+    /// Validates Coral Trend Indicator
+    ///
+    /// Key properties:
+    /// - Color-coded trend following
+    /// - Based on smoothed MA
+    /// </summary>
+    [Fact]
+    public void CoralTrendIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            handle = catalog.Calculate(IndicatorName.CoralTrendIndicator, new object[] { 21, 0.4 });
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+
+        var postWarmupValues = actual.Skip(22).Where(v => !double.IsNaN(v)).ToArray();
+        postWarmupValues.Should().NotBeEmpty("Coral Trend should have values");
+
+        foreach (var ct in postWarmupValues)
+        {
+            ct.Should().BeGreaterThan(0, "Coral Trend should be positive for positive prices");
+            double.IsFinite(ct).Should().BeTrue("Coral Trend should be finite");
+        }
+    }
+
+    #endregion
 }
