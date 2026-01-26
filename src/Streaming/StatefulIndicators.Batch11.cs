@@ -5605,6 +5605,12 @@ internal sealed class ReverseEmaEngine
         var re8 = (_cc128 * re7) + prevRe7;
         var wave = ema - (_alpha * re8);
 
+        // Protect against numerical instability (infinity/NaN)
+        if (double.IsNaN(wave) || double.IsInfinity(wave))
+        {
+            wave = ema; // Fall back to just the EMA
+        }
+
         if (isFinal)
         {
             _ema = ema;

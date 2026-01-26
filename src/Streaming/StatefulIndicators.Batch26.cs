@@ -151,7 +151,7 @@ public sealed class UpsidePotentialRatioState : IStreamingIndicatorState, IDispo
             }
         }
 
-        var upr = downSide >= 0 ? upSide / Math.Sqrt(downSide) : 0;
+        var upr = downSide > 0 ? upSide / Math.Sqrt(downSide) : 0;
 
         if (isFinal)
         {

@@ -1014,7 +1014,11 @@ public sealed class EhlersHurstCoefficientState : IStreamingIndicatorState, IDis
         }
 
         var n2 = (hh2 - ll2) / _halfLength;
-        var dimen = 0.5 * (((Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2)) + _prevDimen);
+        // Protect against log of zero or negative values (when price has no variation)
+        var sumN = n1 + n2;
+        var dimen = (sumN > 0 && n3 > 0)
+            ? 0.5 * (((Math.Log(sumN) - Math.Log(n3)) / Math.Log(2)) + _prevDimen)
+            : _prevDimen;
         var hurst = 2 - dimen;
         var smoothHurst = (_c1 * ((hurst + _prevHurst) / 2)) + (_c2 * _prevSmoothHurst1) + (_c3 * _prevSmoothHurst2);
 
