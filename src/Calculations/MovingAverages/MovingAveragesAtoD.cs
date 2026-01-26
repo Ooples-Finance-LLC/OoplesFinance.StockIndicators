@@ -340,7 +340,8 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var trVal = currentValue != 0 ? tr / currentValue : tr;
@@ -432,7 +433,8 @@ public static partial class Calculations
         {
             var currentValue = inputList[i];
             double index = i;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
 

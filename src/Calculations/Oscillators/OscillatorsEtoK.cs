@@ -1779,7 +1779,8 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
             var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
@@ -3200,7 +3201,8 @@ public static partial class Calculations
             var adx = adxList[i];
             var prevAdx = i >= 1 ? adxList[i - 1] : 0;
             var adxR = (adx + prevAdx) * 0.5;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
             var csi = length + tr > 0 ? k * adxR * tr / length : 0;
 

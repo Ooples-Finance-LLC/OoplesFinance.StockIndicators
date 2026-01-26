@@ -1283,7 +1283,8 @@ public sealed class TheRangeIndicatorState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var v1 = _hasPrev && value > prevValue ? tr / (value - prevValue) : tr;
         var v2 = isFinal ? _minWindow.Add(v1, out _) : _minWindow.Preview(v1, out _);

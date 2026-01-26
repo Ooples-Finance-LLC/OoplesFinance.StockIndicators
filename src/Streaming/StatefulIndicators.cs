@@ -2689,7 +2689,8 @@ public sealed class PriceLineChannelState : IStreamingIndicatorState, IDisposabl
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -2802,7 +2803,8 @@ public sealed class PriceCurveChannelState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -6110,7 +6112,8 @@ public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var currentValue = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : currentValue;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
 
         int trCount;
@@ -6681,7 +6684,7 @@ public sealed class VolatilityBasedMomentumState : IStreamingIndicatorState, IDi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var prevLengthValue = _window.Count >= _length1 ? _window[0] : 0;
@@ -6762,10 +6765,9 @@ public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDis
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        // For TrueRange on first bar, use current close
-        var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
-        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
+        // For first bar, use current value as previous close (matches batch behavior)
+        var prevClose = _hasPrev ? _prevClose : value;
+        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var range = bar.High - bar.Low;
         var vqiT = trueRange != 0 && range != 0
             ? (((value - prevClose) / trueRange) + ((value - bar.Open) / range)) * 0.5
@@ -8478,37 +8480,29 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 
 public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
     private readonly double _k;
     private readonly IMovingAverageSmoother _atr;
-    private readonly IMovingAverageSmoother _dmPlus;
-    private readonly IMovingAverageSmoother _dmMinus;
-    private readonly IMovingAverageSmoother _tr;
-    private readonly IMovingAverageSmoother _adx;
-    private readonly RollingWindowMax _atrHighWindow;
-    private readonly RollingWindowMin _atrLowWindow;
+    private readonly IMovingAverageSmoother _dmPlusSmoother;
+    private readonly IMovingAverageSmoother _dmMinusSmoother;
+    private readonly IMovingAverageSmoother _trSmoother;
+    private readonly IMovingAverageSmoother _adxSmoother;
     private readonly RollingWindowSum _sumWindow;
     private double _prevClose;
-    private double _prevAtr;
+    private double _prevHigh;
+    private double _prevLow;
     private bool _hasPrev;
-    private bool _hasPrevAtr;
-    private double _prevAtrHigh;
-    private double _prevAtrLow;
-    private bool _hasPrevAtrRange;
 
     public CommoditySelectionIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14,
         double pointValue = 50, double margin = 3000, double commission = 10)
     {
-        _length = Math.Max(1, length);
+        var len = Math.Max(1, length);
         _k = 100 * (pointValue / Math.Sqrt(margin) / (150 + commission));
-        _atr = MovingAverageSmootherFactory.Create(maType, _length);
-        _dmPlus = MovingAverageSmootherFactory.Create(maType, _length);
-        _dmMinus = MovingAverageSmootherFactory.Create(maType, _length);
-        _tr = MovingAverageSmootherFactory.Create(maType, _length);
-        _adx = MovingAverageSmootherFactory.Create(maType, _length);
-        _atrHighWindow = new RollingWindowMax(2);
-        _atrLowWindow = new RollingWindowMin(2);
-        _sumWindow = new RollingWindowSum(_length);
+        _atr = MovingAverageSmootherFactory.Create(maType, len);
+        _dmPlusSmoother = MovingAverageSmootherFactory.Create(maType, len);
+        _dmMinusSmoother = MovingAverageSmootherFactory.Create(maType, len);
+        _trSmoother = MovingAverageSmootherFactory.Create(maType, len);
+        _adxSmoother = MovingAverageSmootherFactory.Create(maType, len);
+        _sumWindow = new RollingWindowSum(len);
     }
 
     public IndicatorName Name => IndicatorName.CommoditySelectionIndex;
@@ -8516,20 +8510,15 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
     public void Reset()
     {
         _atr.Reset();
-        _dmPlus.Reset();
-        _dmMinus.Reset();
-        _tr.Reset();
-        _adx.Reset();
-        _atrHighWindow.Reset();
-        _atrLowWindow.Reset();
+        _dmPlusSmoother.Reset();
+        _dmMinusSmoother.Reset();
+        _trSmoother.Reset();
+        _adxSmoother.Reset();
         _sumWindow.Reset();
         _prevClose = 0;
-        _prevAtr = 0;
+        _prevHigh = 0;
+        _prevLow = 0;
         _hasPrev = false;
-        _hasPrevAtr = false;
-        _prevAtrHigh = 0;
-        _prevAtrLow = 0;
-        _hasPrevAtrRange = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -8537,30 +8526,32 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
         var currentHigh = bar.High;
         var currentLow = bar.Low;
         var currentClose = bar.Close;
+
         // For TrueRange on first bar, use current close
         var prevClose = _hasPrev ? _prevClose : currentClose;
         var trRaw = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
         var atr = _atr.Next(trRaw, isFinal);
-        var atrHigh = isFinal ? _atrHighWindow.Add(atr, out _) : _atrHighWindow.Preview(atr, out _);
-        var atrLow = isFinal ? _atrLowWindow.Add(atr, out _) : _atrLowWindow.Preview(atr, out _);
-        var prevAtrHigh = _hasPrevAtrRange ? _prevAtrHigh : 0;
-        var prevAtrLow = _hasPrevAtrRange ? _prevAtrLow : 0;
-        var highDiff = atrHigh - prevAtrHigh;
-        var lowDiff = prevAtrLow - atrLow;
+
+        // Calculate ADX from raw OHLC prices (matching batch CalculateAverageDirectionalIndex)
+        // Use 0 for prevHigh/prevLow on first bar (matching batch behavior)
+        var prevHigh = _hasPrev ? _prevHigh : 0;
+        var prevLow = _hasPrev ? _prevLow : 0;
+        var highDiff = currentHigh - prevHigh;
+        var lowDiff = prevLow - currentLow;
         var dmPlusRaw = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
         var dmMinusRaw = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
-        var prevAtr = _hasPrevAtr ? _prevAtr : 0;
-        var trRawAdx = CalculationsHelper.CalculateTrueRange(atrHigh, atrLow, prevAtr);
 
-        var dmPlus = _dmPlus.Next(dmPlusRaw, isFinal);
-        var dmMinus = _dmMinus.Next(dmMinusRaw, isFinal);
-        var tr = _tr.Next(trRawAdx, isFinal);
-        var diPlus = tr != 0 ? MathHelper.MinOrMax(100 * dmPlus / tr, 100, 0) : 0;
-        var diMinus = tr != 0 ? MathHelper.MinOrMax(100 * dmMinus / tr, 100, 0) : 0;
+        var dmPlus14 = _dmPlusSmoother.Next(dmPlusRaw, isFinal);
+        var dmMinus14 = _dmMinusSmoother.Next(dmMinusRaw, isFinal);
+        var tr14 = _trSmoother.Next(trRaw, isFinal);
+
+        var diPlus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmPlus14 / tr14, 100, 0) : 0;
+        var diMinus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmMinus14 / tr14, 100, 0) : 0;
         var diDiff = Math.Abs(diPlus - diMinus);
         var diSum = diPlus + diMinus;
         var di = diSum != 0 ? MathHelper.MinOrMax(100 * diDiff / diSum, 100, 0) : 0;
-        var adx = _adx.Next(di, isFinal);
+        var adx = _adxSmoother.Next(di, isFinal);
+
         var csi = _k * atr * adx;
         var sum = isFinal ? _sumWindow.Add(csi, out var countAfter) : _sumWindow.Preview(csi, out countAfter);
         var csiSma = countAfter > 0 ? sum / countAfter : 0;
@@ -8568,12 +8559,9 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
         if (isFinal)
         {
             _prevClose = currentClose;
-            _prevAtr = atr;
+            _prevHigh = currentHigh;
+            _prevLow = currentLow;
             _hasPrev = true;
-            _hasPrevAtr = true;
-            _prevAtrHigh = atrHigh;
-            _prevAtrLow = atrLow;
-            _hasPrevAtrRange = true;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -8592,12 +8580,10 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
     public void Dispose()
     {
         _atr.Dispose();
-        _dmPlus.Dispose();
-        _dmMinus.Dispose();
-        _tr.Dispose();
-        _adx.Dispose();
-        _atrHighWindow.Dispose();
-        _atrLowWindow.Dispose();
+        _dmPlusSmoother.Dispose();
+        _dmMinusSmoother.Dispose();
+        _trSmoother.Dispose();
+        _adxSmoother.Dispose();
         _sumWindow.Dispose();
     }
 }
@@ -9512,11 +9498,12 @@ public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable
     {
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
 
         var vmPlus = Math.Abs(bar.High - prevLow);
         var vmMinus = Math.Abs(bar.Low - prevHigh);
-        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
+        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
 
         int _;
         var vmPlusTotal = isFinal ? _vmPlusSum.Add(vmPlus, out _) : _vmPlusSum.Preview(vmPlus, out _);
@@ -10503,7 +10490,8 @@ public sealed class AdaptiveLeastSquaresState : IStreamingIndicatorState, IDispo
     {
         var value = _input.GetValue(bar);
         var index = (double)_index;
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
 
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var highest = isFinal ? _trWindow.Add(tr, out _) : _trWindow.Preview(tr, out _);
@@ -12357,7 +12345,7 @@ public sealed class AverageTrueRangeTrailingStopsState : IStreamingIndicatorStat
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var ema = _ema.Next(value, isFinal);
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atr.Next(tr, isFinal);
@@ -12553,7 +12541,8 @@ public sealed class BetterVolumeIndicatorState : IStreamingIndicatorState
         var currentOpen = bar.Open;
         var currentClose = bar.Close;
         var currentVolume = bar.Volume;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close
+        var prevClose = _hasPrev ? _prevClose : currentClose;
         var range = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
         var v1 = currentClose > currentOpen
             ? range / ((2 * range) + currentOpen - currentClose) * currentVolume

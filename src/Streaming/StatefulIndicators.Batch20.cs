@@ -2295,7 +2295,8 @@ internal sealed class AverageTrueRangeSmoother : IDisposable
     public double Next(OhlcvBar bar, bool isFinal)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _smoother.Next(tr, isFinal);
 

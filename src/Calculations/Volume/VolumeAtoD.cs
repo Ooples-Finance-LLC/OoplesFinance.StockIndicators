@@ -249,7 +249,8 @@ public static partial class Calculations
             var currentOpen = openList[i];
             var currentClose = inputList[i];
             var highLowRange = highest - lowest;
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
             var prevOpen = i >= 1 ? openList[i - 1] : 0;
             var range = CalculateTrueRange(currentHigh, currentLow, prevClose);
 

@@ -1206,6 +1206,9 @@ public static partial class Calculations
         var k = 100 * (pointValue / Sqrt(margin) / (150 + commission));
 
         var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        // Clear state to prevent pollution of CalculateAverageDirectionalIndex inputs
+        stockData.SetCustomValues(new List<double>());
+        stockData.SetSignals(null);
         var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1829,7 +1832,8 @@ public static partial class Calculations
         {
             var highestHigh = highestList[i];
             var lowestLow = lowestList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
 
             var currentHigh = highList[i];
             tempHighList.Add(currentHigh);

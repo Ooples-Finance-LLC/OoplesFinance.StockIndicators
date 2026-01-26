@@ -26,7 +26,8 @@ public sealed class WilderTests : GlobalTestData
         {
             var currentHigh = stockData.HighPrices[i];
             var currentLow = stockData.LowPrices[i];
-            var prevClose = i >= 1 ? stockData.ClosePrices[i - 1] : 0;
+            // For first bar, use current close as prevClose (matches batch behavior)
+            var prevClose = i >= 1 ? stockData.ClosePrices[i - 1] : stockData.ClosePrices[i];
             var range1 = currentHigh - currentLow;
             var range2 = Math.Abs(currentHigh - prevClose);
             var range3 = Math.Abs(currentLow - prevClose);

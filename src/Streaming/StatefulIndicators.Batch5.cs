@@ -1027,7 +1027,8 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
     {
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
 
         var highDiff = bar.High - prevHigh;
         var lowDiff = prevLow - bar.Low;

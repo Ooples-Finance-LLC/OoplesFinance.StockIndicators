@@ -582,7 +582,8 @@ public static partial class Calculations
         {
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var prevHigh = i >= 1 ? highList[i - 1] : 0;
 

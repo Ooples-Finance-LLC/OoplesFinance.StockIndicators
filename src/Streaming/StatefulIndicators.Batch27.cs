@@ -1106,7 +1106,8 @@ public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrMa.Next(tr, isFinal);
         var ema = _ema.Next(value, isFinal);

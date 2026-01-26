@@ -1009,9 +1009,11 @@ public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorSta
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
+        // Use 0 for prevHigh/prevLow on first bar to match batch ADX behavior
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // For TrueRange, use current value on first bar to avoid inflated TR
+        var prevValue = _hasPrev ? _prevValue : value;
         var prevAdx = _hasPrev ? _prevAdx : 0;
 
         var highDiff = bar.High - prevHigh;

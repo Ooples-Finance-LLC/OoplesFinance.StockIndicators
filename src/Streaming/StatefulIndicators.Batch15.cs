@@ -1728,7 +1728,8 @@ public sealed class KaseIndicatorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var volumeSma = _volumeSma.Next(bar.Volume, isFinal);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -2329,7 +2330,8 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
 
     public double Next(OhlcvBar bar, bool isFinal, out double mn, out double stdDev)
     {
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // For TrueRange on first bar, use current close to avoid inflated TR
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atr.GetNext(tr, isFinal);
         var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);
