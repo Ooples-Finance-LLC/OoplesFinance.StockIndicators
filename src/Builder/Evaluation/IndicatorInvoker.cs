@@ -8,6 +8,12 @@ namespace OoplesFinance.StockIndicators.Builder;
 /// Invokes indicator calculations dynamically using reflection.
 /// Provides access to all 750+ indicators via IndicatorName.
 /// </summary>
+/// <remarks>
+/// V1 API - DEPRECATED. Use the V2 StatefulIndicatorFactory and source-generated factory methods instead.
+/// This reflection-based approach is slower and will be removed in the next major version.
+/// V2 provides compile-time type safety and better performance through source generation.
+/// </remarks>
+[Obsolete("V1 API - use StatefulIndicatorFactory.Create() instead. Will be removed in next major version.", error: false)]
 internal static class IndicatorInvoker
 {
     private static readonly Dictionary<IndicatorName, MethodInfo> MethodCache = new();

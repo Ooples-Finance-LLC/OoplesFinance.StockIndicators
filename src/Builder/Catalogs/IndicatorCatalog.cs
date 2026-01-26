@@ -45,28 +45,61 @@ public sealed partial class IndicatorCatalog
     /// </summary>
     /// <param name="name">The indicator name.</param>
     /// <returns>Array of parameter info, or null if indicator not found.</returns>
+    /// <remarks>
+    /// V2 Note: This method uses the V1 reflection-based IndicatorInvoker for backwards compatibility.
+    /// In V2, indicators are defined via StatefulIndicator classes with strongly-typed constructors.
+    /// Consider using the source-generated catalog methods instead.
+    /// </remarks>
+    [Obsolete("V1 API - use V2 StatefulIndicator constructors directly. Will be removed in next major version.")]
     public static System.Reflection.ParameterInfo[]? GetIndicatorParameters(IndicatorName name)
     {
+        // V1 fallback - this will eventually be removed
+#pragma warning disable CS0618 // Suppress obsolete warning for internal use
         return IndicatorInvoker.GetParameters(name);
+#pragma warning restore CS0618
     }
 
     /// <summary>
-    /// Checks if an indicator is supported by the generic Calculate method.
+    /// Checks if an indicator is supported by the V2 StatefulIndicator factory.
     /// </summary>
     /// <param name="name">The indicator name.</param>
-    /// <returns>True if the indicator can be calculated.</returns>
+    /// <returns>True if the indicator can be calculated via V2.</returns>
     public static bool IsIndicatorSupported(IndicatorName name)
     {
-        return IndicatorInvoker.IsSupported(name);
+        // V2 approach: Try to create the state - if it works, it's supported
+        try
+        {
+            var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(Array.Empty<object>()), IndicatorOutput.Primary);
+            var state = StatefulIndicatorFactory.Create(spec);
+            // If we got here, it's supported. Dispose if needed.
+            if (state is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+            return true;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 
     /// <summary>
     /// Gets all supported indicator names.
     /// </summary>
     /// <returns>Collection of all supported indicator names.</returns>
+    /// <remarks>
+    /// V2 Note: Returns all IndicatorName enum values. Use IsIndicatorSupported()
+    /// to check if a specific indicator has a V2 StatefulIndicator implementation.
+    /// </remarks>
     public static IReadOnlyCollection<IndicatorName> GetSupportedIndicators()
     {
-        return IndicatorInvoker.GetSupportedIndicators();
+        // Return all indicator names - the factory will throw if one isn't supported
+        return Enum.GetValues(typeof(IndicatorName))
+            .Cast<IndicatorName>()
+            .Where(n => n != IndicatorName.None)
+            .ToList()
+            .AsReadOnly();
     }
 
     #endregion
