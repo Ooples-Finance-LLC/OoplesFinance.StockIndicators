@@ -26556,4 +26556,201 @@ public sealed class GoldenFileTests
     }
 
     #endregion
+
+    #region Multi-Stock Indicators Golden File Tests
+
+    /// <summary>
+    /// Creates market (benchmark) test data for multi-stock indicators.
+    /// Uses slightly different but correlated values from stock data.
+    /// </summary>
+    private static List<TickerData> CreateMarketTestData()
+    {
+        var data = new List<TickerData>();
+        var baseDate = new DateTime(2024, 1, 1);
+
+        // Generate 30 bars of market data (similar to stock but offset to represent S&P 500-like index)
+        double[] marketCloses = { 400, 402, 401, 405, 408, 406, 410, 412, 409, 415,
+                                   418, 416, 420, 422, 419, 425, 428, 426, 430, 432,
+                                   429, 435, 438, 436, 440, 442, 439, 445, 448, 446 };
+
+        for (int i = 0; i < 30; i++)
+        {
+            var close = marketCloses[i];
+            data.Add(new TickerData
+            {
+                Date = baseDate.AddDays(i),
+                Open = i == 0 ? close : marketCloses[i - 1],
+                High = close * 1.01,
+                Low = close * 0.99,
+                Close = close,
+                Volume = 2000000 + i * 50000
+            });
+        }
+
+        return data;
+    }
+
+    [Fact]
+    public void RSMKIndicator_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.RSMKIndicator(marketPrice, 14, 3);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("RSMK should be finite"); }
+    }
+
+    [Fact]
+    public void ComparePriceMomentumOscillator_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.ComparePriceMomentumOscillator(marketPrice, 10, 15, 5);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(20).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("CPMO should be finite"); }
+    }
+
+    [Fact]
+    public void KaufmanStressIndicator_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.KaufmanStressIndicator(marketPrice, 14);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Kaufman Stress should be finite"); }
+    }
+
+    [Fact]
+    public void RelativeNormalizedVolatility_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.RelativeNormalizedVolatility(marketPrice, 14);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Relative Normalized Volatility should be finite"); }
+    }
+
+    [Fact]
+    public void RelativeStrength3DIndicator_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.RelativeStrength3DIndicator(marketPrice, 4, 7, 10, 15, 20);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(25).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Relative Strength 3D should be finite"); }
+    }
+
+    [Fact]
+    public void SectorRotationModel_GoldenFile_MultiStock()
+    {
+        var stockTestData = CreateGoldenTestData();
+        var stockData = new StockData(stockTestData);
+        var marketTestData = CreateMarketTestData();
+        var marketData = new StockData(marketTestData);
+
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        builder.AddDataSource("market", IndicatorDataSource.FromBatch(marketData));
+
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog =>
+        {
+            var marketPrice = catalog.Price("market");
+            handle = catalog.SectorRotationModel(marketPrice, 10, 14);
+        });
+
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Sector Rotation Model should be finite"); }
+    }
+
+    #endregion
 }
