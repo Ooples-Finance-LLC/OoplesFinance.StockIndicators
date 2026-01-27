@@ -522,3 +522,374 @@ public sealed class DiscordNotificationChannel : INotificationChannel
         }
     }
 }
+
+/// <summary>
+/// WebSocket notification options.
+/// </summary>
+public sealed class WebSocketOptions
+{
+    /// <summary>
+    /// Gets or sets the WebSocket server URI.
+    /// </summary>
+    public string? Uri { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reconnect interval in milliseconds. Defaults to 5000ms.
+    /// </summary>
+    public int ReconnectIntervalMs { get; set; } = 5000;
+
+    /// <summary>
+    /// Gets or sets whether to auto-reconnect on disconnect. Defaults to true.
+    /// </summary>
+    public bool AutoReconnect { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the maximum reconnect attempts. Defaults to 10.
+    /// </summary>
+    public int MaxReconnectAttempts { get; set; } = 10;
+
+    /// <summary>
+    /// Gets or sets custom headers for the WebSocket connection.
+    /// </summary>
+    public Dictionary<string, string>? Headers { get; set; }
+}
+
+/// <summary>
+/// WebSocket notification channel for real-time signal push.
+/// </summary>
+public sealed class WebSocketNotificationChannel : INotificationChannel, IDisposable
+{
+    private readonly WebSocketOptions _options;
+    private System.Net.WebSockets.ClientWebSocket? _webSocket;
+    private readonly SemaphoreSlim _sendLock = new(1, 1);
+    private int _reconnectAttempts;
+    private bool _disposed;
+
+    /// <summary>
+    /// Creates a new WebSocket notification channel.
+    /// </summary>
+    public WebSocketNotificationChannel(WebSocketOptions options)
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(_options.Uri))
+        {
+            System.Console.WriteLine("[WebSocket] Configuration incomplete - URI missing");
+            return;
+        }
+
+        try
+        {
+            await EnsureConnectedAsync(cancellationToken).ConfigureAwait(false);
+
+            if (_webSocket is null || _webSocket.State != System.Net.WebSockets.WebSocketState.Open)
+            {
+                System.Console.WriteLine("[WebSocket] Not connected, message dropped");
+                return;
+            }
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                type = "signal",
+                signal = notification.Name,
+                value = notification.Value,
+                timestamp = notification.Timestamp.ToString("o"),
+                signalId = notification.Signal.Id
+            });
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(payload);
+            var segment = new ArraySegment<byte>(bytes);
+
+            await _sendLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _webSocket.SendAsync(segment, System.Net.WebSockets.WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
+                System.Console.WriteLine($"[WebSocket] Sent: {notification.Name}");
+            }
+            finally
+            {
+                _sendLock.Release();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[WebSocket] Failed to send: {ex.Message}");
+        }
+    }
+
+    private async Task EnsureConnectedAsync(CancellationToken cancellationToken)
+    {
+        if (_webSocket is not null && _webSocket.State == System.Net.WebSockets.WebSocketState.Open)
+        {
+            return;
+        }
+
+        // Clean up existing WebSocket if in a bad state
+        if (_webSocket is not null)
+        {
+            try { _webSocket.Dispose(); } catch { /* Ignore disposal errors */ }
+            _webSocket = null;
+        }
+
+        if (!_options.AutoReconnect && _reconnectAttempts > 0)
+        {
+            return;
+        }
+
+        if (_reconnectAttempts >= _options.MaxReconnectAttempts)
+        {
+            System.Console.WriteLine($"[WebSocket] Max reconnect attempts ({_options.MaxReconnectAttempts}) reached");
+            return;
+        }
+
+        _reconnectAttempts++;
+        _webSocket = new System.Net.WebSockets.ClientWebSocket();
+
+        // Add custom headers
+        if (_options.Headers is not null)
+        {
+            foreach (var header in _options.Headers)
+            {
+                _webSocket.Options.SetRequestHeader(header.Key, header.Value);
+            }
+        }
+
+        try
+        {
+            var uri = new Uri(_options.Uri ?? throw new InvalidOperationException("WebSocket URI not set"));
+            await _webSocket.ConnectAsync(uri, cancellationToken).ConfigureAwait(false);
+            _reconnectAttempts = 0; // Reset on successful connection
+            System.Console.WriteLine($"[WebSocket] Connected to {_options.Uri}");
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[WebSocket] Connection failed: {ex.Message}");
+            try { _webSocket.Dispose(); } catch { /* Ignore */ }
+            _webSocket = null;
+
+            if (_options.AutoReconnect && _reconnectAttempts < _options.MaxReconnectAttempts)
+            {
+                await Task.Delay(_options.ReconnectIntervalMs, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Disconnects the WebSocket.
+    /// </summary>
+    public async Task DisconnectAsync(CancellationToken cancellationToken = default)
+    {
+        if (_webSocket is not null && _webSocket.State == System.Net.WebSockets.WebSocketState.Open)
+        {
+            try
+            {
+                await _webSocket.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken).ConfigureAwait(false);
+                System.Console.WriteLine("[WebSocket] Disconnected");
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"[WebSocket] Error during disconnect: {ex.Message}");
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        _sendLock.Dispose();
+        if (_webSocket is not null)
+        {
+            try { _webSocket.Dispose(); } catch { /* Ignore */ }
+            _webSocket = null;
+        }
+    }
+}
+
+/// <summary>
+/// Notification routing rule that maps signals to specific channels.
+/// </summary>
+public sealed class NotificationRoute
+{
+    /// <summary>
+    /// Gets or sets the signal name pattern (supports wildcards: * matches any characters).
+    /// </summary>
+    public string? SignalPattern { get; set; }
+
+    /// <summary>
+    /// Gets or sets specific signal handles to match.
+    /// </summary>
+    public List<SignalHandle>? SignalHandles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the notification channels for this route.
+    /// </summary>
+    public List<INotificationChannel> Channels { get; set; } = new();
+
+    /// <summary>
+    /// Checks if this route matches the given notification.
+    /// </summary>
+    public bool Matches(NotificationEvent notification)
+    {
+        // Match by handle
+        if (SignalHandles is not null && SignalHandles.Count > 0)
+        {
+            if (SignalHandles.Contains(notification.Signal))
+            {
+                return true;
+            }
+        }
+
+        // Match by pattern
+        if (SignalPattern is string patternToMatch && patternToMatch.Length > 0)
+        {
+            if (patternToMatch == "*")
+            {
+                return true;
+            }
+
+            // Simple wildcard matching
+            if (patternToMatch.Contains("*"))
+            {
+                if (string.IsNullOrEmpty(notification.Name))
+                {
+                    return false;
+                }
+
+                var regexPattern = patternToMatch.Replace("*", ".*");
+                return System.Text.RegularExpressions.Regex.IsMatch(
+                    notification.Name,
+                    $"^{regexPattern}$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase,
+                    TimeSpan.FromSeconds(1));
+            }
+
+            return string.Equals(notification.Name, patternToMatch, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
+}
+
+/// <summary>
+/// Builder for notification routes.
+/// </summary>
+public sealed class NotificationRouteBuilder
+{
+    private readonly NotificationRoute _route = new();
+    private readonly Action<NotificationRoute> _onComplete;
+
+    internal NotificationRouteBuilder(string signalPattern, Action<NotificationRoute> onComplete)
+    {
+        _route.SignalPattern = signalPattern;
+        _onComplete = onComplete;
+    }
+
+    internal NotificationRouteBuilder(SignalHandle handle, Action<NotificationRoute> onComplete)
+    {
+        _route.SignalHandles = new List<SignalHandle> { handle };
+        _onComplete = onComplete;
+    }
+
+    /// <summary>
+    /// Sends notifications to a WebSocket endpoint.
+    /// </summary>
+    public NotificationRouteBuilder SendWebSocket(WebSocketOptions options)
+    {
+        _route.Channels.Add(new WebSocketNotificationChannel(options));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to a WebSocket endpoint.
+    /// </summary>
+    public NotificationRouteBuilder SendWebSocket(string uri)
+    {
+        return SendWebSocket(new WebSocketOptions { Uri = uri });
+    }
+
+    /// <summary>
+    /// Sends notifications via email.
+    /// </summary>
+    public NotificationRouteBuilder SendEmail(EmailOptions options)
+    {
+        _route.Channels.Add(new EmailNotificationChannel(options));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to a webhook.
+    /// </summary>
+    public NotificationRouteBuilder SendWebhook(WebhookOptions options)
+    {
+        _route.Channels.Add(new WebhookNotificationChannel(options));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to a webhook URL.
+    /// </summary>
+    public NotificationRouteBuilder SendWebhook(string url)
+    {
+        return SendWebhook(new WebhookOptions { Url = url });
+    }
+
+    /// <summary>
+    /// Sends notifications via SMS.
+    /// </summary>
+    public NotificationRouteBuilder SendSms(SmsOptions options)
+    {
+        _route.Channels.Add(new SmsNotificationChannel(options));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to Telegram.
+    /// </summary>
+    public NotificationRouteBuilder SendTelegram(TelegramOptions? options = null)
+    {
+        _route.Channels.Add(new TelegramNotificationChannel(options ?? new TelegramOptions()));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to Discord.
+    /// </summary>
+    public NotificationRouteBuilder SendDiscord(DiscordOptions? options = null)
+    {
+        _route.Channels.Add(new DiscordNotificationChannel(options ?? new DiscordOptions()));
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to the console.
+    /// </summary>
+    public NotificationRouteBuilder SendConsole()
+    {
+        _route.Channels.Add(new ConsoleNotificationChannel());
+        return this;
+    }
+
+    /// <summary>
+    /// Sends notifications to a custom channel.
+    /// </summary>
+    public NotificationRouteBuilder SendTo(INotificationChannel channel)
+    {
+        _route.Channels.Add(channel);
+        return this;
+    }
+
+    /// <summary>
+    /// Completes the route configuration and registers it.
+    /// </summary>
+    internal void Complete()
+    {
+        _onComplete(_route);
+    }
+}

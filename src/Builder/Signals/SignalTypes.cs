@@ -690,3 +690,540 @@ public sealed class SignalGroupState
     /// </summary>
     public bool IsActive { get; set; }
 }
+
+/// <summary>
+/// Represents a compound signal rule (combining multiple conditions with And/Or).
+/// </summary>
+public sealed class CompoundSignalRule
+{
+    /// <summary>
+    /// Creates a new compound signal rule.
+    /// </summary>
+    public CompoundSignalRule(SignalHandle handle, string name, List<SignalConditionSpec> conditions, CompoundOperator op)
+    {
+        Handle = handle;
+        Name = name;
+        Conditions = conditions;
+        Operator = op;
+    }
+
+    /// <summary>
+    /// Gets the signal handle.
+    /// </summary>
+    public SignalHandle Handle { get; }
+
+    /// <summary>
+    /// Gets the signal name.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Gets the conditions.
+    /// </summary>
+    public List<SignalConditionSpec> Conditions { get; }
+
+    /// <summary>
+    /// Gets the logical operator (And/Or).
+    /// </summary>
+    public CompoundOperator Operator { get; }
+}
+
+/// <summary>
+/// Specifies a condition in a compound signal.
+/// </summary>
+public sealed class SignalConditionSpec
+{
+    /// <summary>
+    /// Gets or sets the series handle.
+    /// </summary>
+    public SeriesHandle Series { get; set; }
+
+    /// <summary>
+    /// Gets or sets the trigger type.
+    /// </summary>
+    public SignalTrigger Trigger { get; set; }
+
+    /// <summary>
+    /// Gets or sets the threshold (or low threshold for range triggers).
+    /// </summary>
+    public double Threshold { get; set; }
+
+    /// <summary>
+    /// Gets or sets the high threshold (for range triggers).
+    /// </summary>
+    public double? ThresholdHigh { get; set; }
+
+    /// <summary>
+    /// Gets or sets the comparison series (for series-to-series comparisons).
+    /// </summary>
+    public SeriesHandle? ComparisonSeries { get; set; }
+}
+
+/// <summary>
+/// Logical operator for compound signals.
+/// </summary>
+public enum CompoundOperator
+{
+    /// <summary>
+    /// All conditions must be true.
+    /// </summary>
+    And,
+
+    /// <summary>
+    /// Any condition must be true.
+    /// </summary>
+    Or
+}
+
+/// <summary>
+/// Builder for compound signals with fluent .And() / .Or() syntax.
+/// </summary>
+public sealed class CompoundSignalBuilder
+{
+    private readonly SignalCatalog _catalog;
+    private readonly List<SignalConditionSpec> _conditions = new();
+    private CompoundOperator _operator = CompoundOperator.And;
+
+    internal CompoundSignalBuilder(SignalCatalog catalog, SeriesHandle series, SignalTrigger trigger, double threshold, double? thresholdHigh = null)
+    {
+        _catalog = catalog;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = trigger,
+            Threshold = threshold,
+            ThresholdHigh = thresholdHigh
+        });
+    }
+
+    internal CompoundSignalBuilder(SignalCatalog catalog, SeriesHandle series, SignalTrigger trigger, SeriesHandle comparisonSeries)
+    {
+        _catalog = catalog;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = trigger,
+            ComparisonSeries = comparisonSeries
+        });
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to be above a threshold.
+    /// </summary>
+    public CompoundSignalBuilder AndAbove(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.Above,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to be below a threshold.
+    /// </summary>
+    public CompoundSignalBuilder AndBelow(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.Below,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to cross above a threshold.
+    /// </summary>
+    public CompoundSignalBuilder AndCrossesAbove(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesAbove,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to cross below a threshold.
+    /// </summary>
+    public CompoundSignalBuilder AndCrossesBelow(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesBelow,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to cross above another series.
+    /// </summary>
+    public CompoundSignalBuilder AndCrossesAbove(SeriesHandle series, SeriesHandle other)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesAbove,
+            ComparisonSeries = other
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition requiring this series to cross below another series.
+    /// </summary>
+    public CompoundSignalBuilder AndCrossesBelow(SeriesHandle series, SeriesHandle other)
+    {
+        _operator = CompoundOperator.And;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesBelow,
+            ComparisonSeries = other
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an AND condition for a fluent sub-builder on a series.
+    /// </summary>
+    public CompoundConditionBuilder And(SeriesHandle series)
+    {
+        _operator = CompoundOperator.And;
+        return new CompoundConditionBuilder(this, series);
+    }
+
+    /// <summary>
+    /// Adds an OR condition requiring this series to be above a threshold.
+    /// </summary>
+    public CompoundSignalBuilder OrAbove(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.Or;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.Above,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an OR condition requiring this series to be below a threshold.
+    /// </summary>
+    public CompoundSignalBuilder OrBelow(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.Or;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.Below,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an OR condition requiring this series to cross above a threshold.
+    /// </summary>
+    public CompoundSignalBuilder OrCrossesAbove(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.Or;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesAbove,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an OR condition requiring this series to cross below a threshold.
+    /// </summary>
+    public CompoundSignalBuilder OrCrossesBelow(SeriesHandle series, double threshold)
+    {
+        _operator = CompoundOperator.Or;
+        _conditions.Add(new SignalConditionSpec
+        {
+            Series = series,
+            Trigger = SignalTrigger.CrossesBelow,
+            Threshold = threshold
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an OR condition for a fluent sub-builder on a series.
+    /// </summary>
+    public CompoundConditionBuilder Or(SeriesHandle series)
+    {
+        _operator = CompoundOperator.Or;
+        return new CompoundConditionBuilder(this, series);
+    }
+
+    /// <summary>
+    /// Names the compound signal and registers it.
+    /// </summary>
+    public SignalHandle Named(string name)
+    {
+        var handle = _catalog.NextHandle();
+        _catalog.AddCompoundRule(new CompoundSignalRule(handle, name, _conditions, _operator));
+        return handle;
+    }
+
+    /// <summary>
+    /// Emits the compound signal with an optional name.
+    /// </summary>
+    public SignalHandle Emit(string? name = null)
+    {
+        var handle = _catalog.NextHandle();
+        _catalog.AddCompoundRule(new CompoundSignalRule(handle, name ?? handle.ToString(), _conditions, _operator));
+        return handle;
+    }
+
+    internal void AddCondition(SignalConditionSpec spec)
+    {
+        _conditions.Add(spec);
+    }
+}
+
+/// <summary>
+/// Builder for a single condition in a compound signal.
+/// </summary>
+public sealed class CompoundConditionBuilder
+{
+    private readonly CompoundSignalBuilder _parent;
+    private readonly SeriesHandle _series;
+
+    internal CompoundConditionBuilder(CompoundSignalBuilder parent, SeriesHandle series)
+    {
+        _parent = parent;
+        _series = series;
+    }
+
+    /// <summary>
+    /// Condition: series is above threshold.
+    /// </summary>
+    public CompoundSignalBuilder Above(double threshold)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.Above,
+            Threshold = threshold
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series is below threshold.
+    /// </summary>
+    public CompoundSignalBuilder Below(double threshold)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.Below,
+            Threshold = threshold
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series crosses above threshold.
+    /// </summary>
+    public CompoundSignalBuilder CrossesAbove(double threshold)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.CrossesAbove,
+            Threshold = threshold
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series crosses below threshold.
+    /// </summary>
+    public CompoundSignalBuilder CrossesBelow(double threshold)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.CrossesBelow,
+            Threshold = threshold
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series crosses above another series.
+    /// </summary>
+    public CompoundSignalBuilder CrossesAbove(SeriesHandle other)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.CrossesAbove,
+            ComparisonSeries = other
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series crosses below another series.
+    /// </summary>
+    public CompoundSignalBuilder CrossesBelow(SeriesHandle other)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.CrossesBelow,
+            ComparisonSeries = other
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series is between two values.
+    /// </summary>
+    public CompoundSignalBuilder Between(double low, double high)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.Between,
+            Threshold = low,
+            ThresholdHigh = high
+        });
+        return _parent;
+    }
+
+    /// <summary>
+    /// Condition: series is outside a range.
+    /// </summary>
+    public CompoundSignalBuilder Outside(double low, double high)
+    {
+        _parent.AddCondition(new SignalConditionSpec
+        {
+            Series = _series,
+            Trigger = SignalTrigger.Outside,
+            Threshold = low,
+            ThresholdHigh = high
+        });
+        return _parent;
+    }
+}
+
+/// <summary>
+/// Extended signal rule builder that supports compound signals.
+/// </summary>
+public readonly struct ExtendedSignalRuleBuilder
+{
+    private readonly SignalCatalog _catalog;
+    private readonly SeriesHandle _series;
+
+    internal ExtendedSignalRuleBuilder(SignalCatalog catalog, SeriesHandle series)
+    {
+        _catalog = catalog;
+        _series = series;
+    }
+
+    /// <summary>
+    /// Condition: series is above threshold. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder IsAbove(double threshold)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Above, threshold);
+    }
+
+    /// <summary>
+    /// Condition: series is below threshold. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder IsBelow(double threshold)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Below, threshold);
+    }
+
+    /// <summary>
+    /// Condition: series crosses above threshold. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder CrossesAbove(double threshold)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.CrossesAbove, threshold);
+    }
+
+    /// <summary>
+    /// Condition: series crosses below threshold. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder CrossesBelow(double threshold)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.CrossesBelow, threshold);
+    }
+
+    /// <summary>
+    /// Condition: series crosses above another series. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder CrossesAbove(SeriesHandle other)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.CrossesAbove, other);
+    }
+
+    /// <summary>
+    /// Condition: series crosses below another series. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder CrossesBelow(SeriesHandle other)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.CrossesBelow, other);
+    }
+
+    /// <summary>
+    /// Condition: series is between two values. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder IsBetween(double low, double high)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Between, low, high);
+    }
+
+    /// <summary>
+    /// Condition: series is outside a range. Returns a compound builder for chaining.
+    /// </summary>
+    public CompoundSignalBuilder IsOutside(double low, double high)
+    {
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Outside, low, high);
+    }
+
+    /// <summary>
+    /// Condition: series is rising (current value &gt; previous value).
+    /// </summary>
+    public CompoundSignalBuilder IsRising()
+    {
+        // IsRising is implemented as crossing above 0 for the first derivative
+        // For simplicity, we use a special trigger that the runtime will handle
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Rising, 0);
+    }
+
+    /// <summary>
+    /// Condition: series is falling (current value &lt; previous value).
+    /// </summary>
+    public CompoundSignalBuilder IsFalling()
+    {
+        // IsFalling is implemented as crossing below 0 for the first derivative
+        return new CompoundSignalBuilder(_catalog, _series, SignalTrigger.Falling, 0);
+    }
+}

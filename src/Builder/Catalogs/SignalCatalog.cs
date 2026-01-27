@@ -10,6 +10,7 @@ public sealed class SignalCatalog
     private readonly List<SignalRule> _rules = new();
     private readonly List<SignalGroupRule> _groupRules = new();
     private readonly List<SignalRangeRule> _rangeRules = new();
+    private readonly List<CompoundSignalRule> _compoundRules = new();
     private int _nextId;
 
     /// <summary>
@@ -26,6 +27,26 @@ public sealed class SignalCatalog
     public SignalRuleBuilder When(IndicatorKey key)
     {
         return new SignalRuleBuilder(this, SignalSeries.FromKey(key));
+    }
+
+    /// <summary>
+    /// Creates an extended signal rule builder for compound signals with fluent .And() / .Or() syntax.
+    /// Use this for creating multi-condition signals.
+    /// </summary>
+    /// <param name="handle">The series handle to start the signal condition.</param>
+    /// <returns>An extended signal rule builder for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// builder.ConfigureSignals(signals => {
+    ///     signals.Signal(rsi).IsBelow(30)
+    ///            .And(macdLine).CrossesAbove(macdSignal)
+    ///            .Named("Strong Buy Signal");
+    /// });
+    /// </code>
+    /// </example>
+    public ExtendedSignalRuleBuilder Signal(SeriesHandle handle)
+    {
+        return new ExtendedSignalRuleBuilder(this, handle);
     }
 
     /// <summary>
@@ -54,6 +75,12 @@ public sealed class SignalCatalog
         return rule.Handle;
     }
 
+    internal SignalHandle AddCompoundRule(CompoundSignalRule rule)
+    {
+        _compoundRules.Add(rule);
+        return rule.Handle;
+    }
+
     internal SignalHandle NextHandle()
     {
         _nextId++;
@@ -74,5 +101,10 @@ public sealed class SignalCatalog
     internal IReadOnlyList<SignalRangeRule> BuildRangeRules()
     {
         return _rangeRules.Count == 0 ? Array.Empty<SignalRangeRule>() : new List<SignalRangeRule>(_rangeRules);
+    }
+
+    internal IReadOnlyList<CompoundSignalRule> BuildCompoundRules()
+    {
+        return _compoundRules.Count == 0 ? Array.Empty<CompoundSignalRule>() : new List<CompoundSignalRule>(_compoundRules);
     }
 }

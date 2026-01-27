@@ -176,7 +176,17 @@ public enum SignalTrigger
     /// <summary>
     /// Triggers when value is outside low and high thresholds.
     /// </summary>
-    Outside
+    Outside,
+
+    /// <summary>
+    /// Triggers when value is rising (current &gt; previous).
+    /// </summary>
+    Rising,
+
+    /// <summary>
+    /// Triggers when value is falling (current &lt; previous).
+    /// </summary>
+    Falling
 }
 
 /// <summary>
