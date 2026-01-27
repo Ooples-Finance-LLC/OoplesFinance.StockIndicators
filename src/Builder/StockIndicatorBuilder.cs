@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Builder.Backtest;
 using OoplesFinance.StockIndicators.Builder.Catalogs;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Streaming;
@@ -217,6 +218,50 @@ public sealed class StockIndicatorBuilder
             _signalOptions,
             _backtestOptions,
             _benchmarkOptions);
+    }
+
+    /// <summary>
+    /// Runs a backtest with the configured indicators and signals.
+    /// </summary>
+    /// <returns>Backtest results with comprehensive metrics.</returns>
+    /// <exception cref="InvalidOperationException">If the data source is not batch mode.</exception>
+    public BacktestResults Backtest()
+    {
+        return Backtest(null);
+    }
+
+    /// <summary>
+    /// Runs a backtest with the configured indicators and signals.
+    /// </summary>
+    /// <param name="configure">Optional callback to configure backtest options.</param>
+    /// <returns>Backtest results with comprehensive metrics.</returns>
+    /// <exception cref="InvalidOperationException">If the data source is not batch mode.</exception>
+    public BacktestResults Backtest(Action<BacktestOptions>? configure)
+    {
+        if (_source.Kind != IndicatorSourceKind.Batch)
+        {
+            throw new InvalidOperationException("Backtesting requires batch data. Use IndicatorDataSource.FromBatch().");
+        }
+
+        var data = _source.BatchData ?? throw new InvalidOperationException("Batch data is missing.");
+
+        // Apply additional configuration if provided
+        _backtestOptions ??= new BacktestOptions();
+        configure?.Invoke(_backtestOptions);
+
+        // Build and start the runtime to compute indicators
+        using var runtime = Build();
+        runtime.Start();
+
+        // Create and run the backtest engine
+        var engine = new BacktestEngine(
+            runtime,
+            data,
+            _backtestOptions,
+            _backtestOptions.PositionSizing,
+            _backtestOptions.RiskManagement);
+
+        return engine.Run();
     }
 
     internal SeriesHandle AddIndicator(IndicatorSpec spec, SeriesHandle input, SeriesKey seriesKey, IndicatorKey? key)
