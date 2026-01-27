@@ -23845,4 +23845,1708 @@ public sealed class GoldenFileTests
     }
 
     #endregion
+
+    #region Ehlers Indicators Golden File Tests
+
+    [Fact]
+    public void Ehlers2PoleButterworthFilterV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.Ehlers2PoleButterworthFilterV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers 2-Pole Butterworth V2 should be finite"); }
+    }
+
+    [Fact]
+    public void Ehlers2PoleSuperSmootherFilterV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.Ehlers2PoleSuperSmootherFilterV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers 2-Pole Super Smoother V1 should be finite"); }
+    }
+
+    [Fact]
+    public void Ehlers2PoleSuperSmootherFilterV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.Ehlers2PoleSuperSmootherFilterV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers 2-Pole Super Smoother V2 should be finite"); }
+    }
+
+    [Fact]
+    public void Ehlers3PoleButterworthFilterV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.Ehlers3PoleButterworthFilterV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers 3-Pole Butterworth V1 should be finite"); }
+    }
+
+    [Fact]
+    public void Ehlers3PoleButterworthFilterV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.Ehlers3PoleButterworthFilterV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers 3-Pole Butterworth V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAdaptiveCenterOfGravityOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAdaptiveCenterOfGravityOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Adaptive COG should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAdaptiveCyberCycle_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAdaptiveCyberCycle, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Adaptive Cyber Cycle should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAdaptiveRsiFisherTransformV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAdaptiveRsiFisherTransformV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Adaptive RSI Fisher V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAdaptiveRsiFisherTransformV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAdaptiveRsiFisherTransformV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Adaptive RSI Fisher V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAllPassPhaseShifter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAllPassPhaseShifter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers All Pass Phase Shifter should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAlternateSignalToNoiseRatio_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAlternateSignalToNoiseRatio, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Alternate SNR should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAutoCorrelationPeriodogram_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAutoCorrelationPeriodogram, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Auto Correlation should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAutoCorrelationReversals_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAutoCorrelationReversals, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Auto Correlation Reversals should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersAverageErrorFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersAverageErrorFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Average Error Filter should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersBandPassFilterV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersBandPassFilterV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Band Pass V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersBandPassFilterV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersBandPassFilterV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Band Pass V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersBetterExponentialMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersBetterExponentialMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Better EMA should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCenterofGravityOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCenterofGravityOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers COG should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersChebyshevLowPassFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersChebyshevLowPassFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Chebyshev should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersClassicHilbertTransformer_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersClassicHilbertTransformer, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Classic Hilbert should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCombFilterSpectralEstimate_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCombFilterSpectralEstimate, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Comb Filter should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersConvolutionIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersConvolutionIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Convolution should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCorrelationAngleIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCorrelationAngleIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Correlation Angle should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCorrelationCycleIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCorrelationCycleIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Correlation Cycle should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCorrelationTrendIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCorrelationTrendIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Correlation Trend should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCycleAmplitude_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCycleAmplitude, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Cycle Amplitude should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersCycleBandPassFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersCycleBandPassFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Cycle Band Pass should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDetrendedLeadingIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDetrendedLeadingIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Detrended Leading should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDeviationScaledSuperSmoother_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDeviationScaledSuperSmoother, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Deviation Scaled SS should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDiscreteFourierTransform_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDiscreteFourierTransform, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers DFT should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDiscreteFourierTransformSpectralEstimate_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDiscreteFourierTransformSpectralEstimate, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers DFT Spectral should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDistanceCoefficientFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDistanceCoefficientFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Distance Coefficient should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersDualDifferentiatorDominantCycle_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersDualDifferentiatorDominantCycle, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Dual Diff DC should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersEmpiricalModeDecomposition_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersEmpiricalModeDecomposition, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers EMD should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersEnhancedSignalToNoiseRatio_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersEnhancedSignalToNoiseRatio, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Enhanced SNR should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Filter should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersFiniteImpulseResponseFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersFiniteImpulseResponseFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers FIR should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersFisherizedDeviationScaledOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersFisherizedDeviationScaledOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Fisherized DSO should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersFMDemodulatorIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersFMDemodulatorIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers FM Demod should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersFourierSeriesAnalysis_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersFourierSeriesAnalysis, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Fourier should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHammingMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHammingMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hamming MA should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHammingWindowIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHammingWindowIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hamming Window should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHannMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHannMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hann MA should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHannWindowIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHannWindowIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hann Window should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHighPassFilterV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHighPassFilterV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers High Pass V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHighPassFilterV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHighPassFilterV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers High Pass V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHilbertTransformIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHilbertTransformIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hilbert Transform should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHilbertTransformer_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHilbertTransformer, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hilbert Transformer should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHilbertTransformerIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHilbertTransformerIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Hilbert Transformer Indicator should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHomodyneDominantCycle_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHomodyneDominantCycle, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Homodyne DC should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersHpLpRoofingFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersHpLpRoofingFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers HP LP Roofing should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersImpulseResponse_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersImpulseResponse, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Impulse Response should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersInfiniteImpulseResponseFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersInfiniteImpulseResponseFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers IIR should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersInstantaneousPhaseIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersInstantaneousPhaseIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Instantaneous Phase should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersInverseFisherTransform_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersInverseFisherTransform, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Inverse Fisher should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersLeadingIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersLeadingIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Leading should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersMedianAverageAdaptiveFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersMedianAverageAdaptiveFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Median Adaptive should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersMesaPredictIndicatorV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersMesaPredictIndicatorV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Mesa Predict V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersMesaPredictIndicatorV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersMesaPredictIndicatorV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Mesa Predict V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersModifiedOptimumEllipticFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersModifiedOptimumEllipticFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Modified Elliptic should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersMovingAverageDifferenceIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersMovingAverageDifferenceIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers MA Difference should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersOptimumEllipticFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersOptimumEllipticFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Optimum Elliptic should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersPhaseAccumulationDominantCycle_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersPhaseAccumulationDominantCycle, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Phase Accumulation DC should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersPhaseCalculation_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersPhaseCalculation, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Phase Calculation should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersRecursiveMedianFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersRecursiveMedianFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Recursive Median should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersRecursiveMedianOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersRecursiveMedianOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Recursive Median Oscillator should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersRestoringPullIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersRestoringPullIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Restoring Pull should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersReverseExponentialMovingAverageIndicatorV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Reverse EMA V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersReverseExponentialMovingAverageIndicatorV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Reverse EMA V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSignalToNoiseRatioV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSignalToNoiseRatioV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers SNR V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSignalToNoiseRatioV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSignalToNoiseRatioV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers SNR V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSimpleClipIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSimpleClipIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Simple Clip should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSimpleDecycler_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSimpleDecycler, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Simple Decycler should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSimpleDerivIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSimpleDerivIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Simple Deriv should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSimpleWindowIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSimpleWindowIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Simple Window should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSineWaveIndicatorV1_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSineWaveIndicatorV1, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Sine Wave V1 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSineWaveIndicatorV2_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSineWaveIndicatorV2, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Sine Wave V2 should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSmoothedAdaptiveMomentumIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers SAMI should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSnakeUniversalTradingFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSnakeUniversalTradingFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Snake UTF should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSpectrumDerivedFilterBank_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSpectrumDerivedFilterBank, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Spectrum Filter Bank should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSquelchIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSquelchIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Squelch should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSuperPassbandFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSuperPassbandFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Super Passband should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersSwissArmyKnifeIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersSwissArmyKnifeIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Swiss Army Knife should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersTrendExtraction_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersTrendExtraction, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Trend Extraction should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersTriangleMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersTriangleMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Triangle MA should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersTriangleWindowIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersTriangleWindowIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Triangle Window should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersTripleDelayLineDetrender_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersTripleDelayLineDetrender, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Triple Delay Detrender should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersTruncatedBandPassFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersTruncatedBandPassFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Truncated Band Pass should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersUniversalTradingFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersUniversalTradingFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers UTF should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersVossPredictiveFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersVossPredictiveFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Voss Predictive should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersZeroCrossingsDominantCycle_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersZeroCrossingsDominantCycle, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Zero Crossings DC should be finite"); }
+    }
+
+    [Fact]
+    public void EhlersZeroMeanRoofingFilter_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EhlersZeroMeanRoofingFilter, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ehlers Zero Mean Roofing should be finite"); }
+    }
+
+    [Fact]
+    public void ElliottWaveOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.ElliottWaveOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(35).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Elliott Wave Oscillator should be finite"); }
+    }
+
+    [Fact]
+    public void EndPointMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EndPointMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("End Point MA should be finite"); }
+    }
+
+    [Fact]
+    public void EnhancedIndex_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EnhancedIndex, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Enhanced Index should be finite"); }
+    }
+
+    [Fact]
+    public void EquityMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.EquityMovingAverage, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Equity MA should be finite"); }
+    }
+
+    [Fact]
+    public void ErgodicCandlestickOscillator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.ErgodicCandlestickOscillator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ergodic Candlestick should be finite"); }
+    }
+
+    [Fact]
+    public void ErgodicMeanDeviationIndicator_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.ErgodicMeanDeviationIndicator, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Ergodic Mean Deviation should be finite"); }
+    }
+
+    [Fact]
+    public void ExponentialMovingAverage_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.ExponentialMovingAverage, new object[] { 10 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(11).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("EMA should be finite"); }
+    }
+
+    [Fact]
+    public void ExtendedRecursiveBands_GoldenFile_StandardFormula()
+    {
+        var testData = CreateGoldenTestData();
+        var stockData = new StockData(testData);
+        var source = IndicatorDataSource.FromBatch(stockData);
+        var builder = new StockIndicatorBuilder(source);
+        SeriesHandle? handle = null;
+        builder.ConfigureIndicators(catalog => { handle = catalog.Calculate(IndicatorName.ExtendedRecursiveBands, new object[] { 14 }); });
+        using var runtime = builder.Build();
+        runtime.Start();
+        runtime.Subscribe(handle!.Value);
+        var actual = runtime.GetSeries(handle!.Value).ToArray();
+        var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("Extended Recursive Bands should be finite"); }
+    }
+
+    #endregion
 }
