@@ -1,0 +1,301 @@
+name: PR to Main - Load & Smoke Tests
+
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # Enforce branch protection: PRs to main only allowed from dev or hotfix/*
+  check-branch-policy:
+    name: Check Branch Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch
+        run: |
+          HEAD_REF="${{ github.head_ref }}"
+          echo "Checking source branch: $HEAD_REF"
+          if [[ "$HEAD_REF" == "dev" ]] || [[ "$HEAD_REF" == "develop" ]] || [[ "$HEAD_REF" == hotfix/* ]] || [[ "$HEAD_REF" == release/* ]]; then
+            echo "✅ Source branch '$HEAD_REF' is allowed."
+            exit 0
+          else
+            echo "❌ ERROR: PRs to 'main' are only allowed from 'dev', 'develop', 'hotfix/*', or 'release/*' branches."
+            echo "Current branch: '$HEAD_REF'"
+            exit 1
+          fi
+
+  # Full build and test suite
+  build-and-test:
+    name: Build & Full Test Suite
+    needs: check-branch-policy
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run All Tests
+        run: |
+          dotnet test --configuration Release --no-build --verbosity normal \
+            --logger "trx;LogFileName=all-test-results.trx" \
+            --results-directory ./TestResults \
+            --collect:"XPlat Code Coverage"
+        env:
+          REDIS_CONNECTION_STRING: localhost:6379
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-main
+          path: ./TestResults/
+          retention-days: 14
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results (Main)
+          path: ./TestResults/*.trx
+          reporter: dotnet-trx
+
+  # Extended load tests for production readiness
+  load-tests:
+    name: Extended Load Tests
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore and Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+
+      - name: Run Extended Load Tests
+        run: |
+          dotnet test tests/TradingApp.Tests/TradingApp.Tests.csproj \
+            --configuration Release --no-build \
+            --filter "FullyQualifiedName~Load" \
+            --verbosity normal \
+            --logger "trx;LogFileName=load-test-results.trx" \
+            --results-directory ./TestResults
+        env:
+          REDIS_CONNECTION_STRING: localhost:6379
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          LOAD_TEST_EXTENDED: true
+        timeout-minutes: 15
+
+      - name: Upload Load Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results-main
+          path: ./TestResults/load-test-results.trx
+          retention-days: 14
+
+  # Comprehensive E2E smoke tests
+  smoke-tests:
+    name: Playwright Smoke Tests
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore and Build
+        run: |
+          dotnet restore
+          dotnet build tests/E2E.Playwright/E2E.Playwright.csproj --configuration Release
+
+      - name: Install Playwright browsers
+        run: pwsh tests/E2E.Playwright/bin/Release/net10.0/playwright.ps1 install chromium
+
+      - name: Run All Smoke Tests
+        run: |
+          dotnet test tests/E2E.Playwright/E2E.Playwright.csproj \
+            --configuration Release --no-build \
+            --verbosity normal \
+            --logger "trx;LogFileName=smoke-test-results.trx" \
+            --results-directory ./TestResults
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          TEST_BASE_URL: ${{ secrets.STAGING_URL }}
+          PLAYWRIGHT_HEADLESS: true
+        timeout-minutes: 15
+
+      - name: Upload Smoke Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test-results-main
+          path: ./TestResults/smoke-test-results.trx
+          retention-days: 14
+
+  # Performance tests
+  performance-tests:
+    name: Performance Tests
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore and Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+
+      - name: Run Performance Tests
+        run: |
+          dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit/OoplesFinance.StockIndicators.Tests.Unit.csproj \
+            --configuration Release --no-build \
+            --filter "FullyQualifiedName~Performance" \
+            --verbosity normal \
+            --logger "trx;LogFileName=performance-test-results.trx" \
+            --results-directory ./TestResults
+        timeout-minutes: 20
+
+      - name: Upload Performance Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-test-results
+          path: ./TestResults/performance-test-results.trx
+          retention-days: 14
+
+  # Update PR status with comprehensive results
+  update-pr-status:
+    name: Update PR Status
+    needs: [build-and-test, load-tests, smoke-tests, performance-tests]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine overall status
+        id: status
+        run: |
+          if [ "${{ needs.build-and-test.result }}" == "success" ] && \
+             [ "${{ needs.load-tests.result }}" == "success" ] && \
+             [ "${{ needs.smoke-tests.result }}" == "success" ] && \
+             [ "${{ needs.performance-tests.result }}" == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=All tests passed! Ready for production deployment." >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=Some tests failed. Please review the test results." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment test results on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.status.outputs.status }}';
+            const message = '${{ steps.status.outputs.message }}';
+            const buildResult = '${{ needs.build-and-test.result }}';
+            const loadResult = '${{ needs.load-tests.result }}';
+            const smokeResult = '${{ needs.smoke-tests.result }}';
+            const perfResult = '${{ needs.performance-tests.result }}';
+
+            const statusEmoji = status === 'success' ? '✅' : '❌';
+            const buildEmoji = buildResult === 'success' ? '✅' : '❌';
+            const loadEmoji = loadResult === 'success' ? '✅' : '❌';
+            const smokeEmoji = smokeResult === 'success' ? '✅' : '❌';
+            const perfEmoji = perfResult === 'success' ? '✅' : '❌';
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ${statusEmoji} Pre-Production Test Results
+
+            | Test Suite | Status |
+            |------------|--------|
+            | Build & Full Test Suite | ${buildEmoji} ${buildResult} |
+            | Extended Load Tests | ${loadEmoji} ${loadResult} |
+            | Playwright Smoke Tests | ${smokeEmoji} ${smokeResult} |
+            | Performance Tests | ${perfEmoji} ${perfResult} |
+
+            ${message}
+
+            ${status === 'success' ? '### Ready for Production\nMerge this PR to deploy to production.' : '### Action Required\nPlease fix the failing tests before merging.'}`
+            });
+
+  # Auto-merge if all tests pass and enabled
+  auto-merge:
+    name: Auto-Merge (if enabled)
+    needs: [load-tests, smoke-tests, performance-tests]
+    runs-on: ubuntu-latest
+    if: success() && vars.AUTO_MERGE_TO_MAIN == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge
+        run: gh pr merge ${{ github.event.pull_request.number }} --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}

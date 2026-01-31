@@ -1,0 +1,250 @@
+name: PR to Dev - Build, Test & E2E
+
+on:
+  pull_request:
+    branches: [dev, develop]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # Build and test the core library
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run Unit Tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-test-results.trx" --results-directory ./TestResults
+
+      - name: Run Integration Tests
+        run: dotnet test tests/TradingApp.Tests/TradingApp.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx" --results-directory ./TestResults
+        env:
+          REDIS_CONNECTION_STRING: localhost:6379
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./TestResults/*.trx
+          retention-days: 7
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: ./TestResults/*.trx
+          reporter: dotnet-trx
+
+  # Security audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run security scan
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee security-scan.txt
+          if grep -q "has the following vulnerable packages" security-scan.txt; then
+            echo "::warning::Vulnerable packages found. Review security-scan.txt"
+          fi
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan
+          path: security-scan.txt
+          retention-days: 7
+
+  # Load tests
+  load-tests:
+    name: Load Tests
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run Load Tests
+        run: dotnet test tests/TradingApp.Tests/TradingApp.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Load" --verbosity normal --logger "trx;LogFileName=load-test-results.trx" --results-directory ./TestResults
+        env:
+          REDIS_CONNECTION_STRING: localhost:6379
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        timeout-minutes: 10
+
+      - name: Upload Load Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results
+          path: ./TestResults/load-test-results.trx
+          retention-days: 7
+
+  # Playwright E2E tests
+  e2e-tests:
+    name: E2E Smoke Tests
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build E2E tests
+        run: dotnet build tests/E2E.Playwright/E2E.Playwright.csproj --configuration Release
+
+      - name: Install Playwright browsers
+        run: pwsh tests/E2E.Playwright/bin/Release/net10.0/playwright.ps1 install chromium
+
+      - name: Run Playwright API smoke tests
+        run: dotnet test tests/E2E.Playwright/E2E.Playwright.csproj --configuration Release --no-build --filter "FullyQualifiedName~ApiSmokeTests" --verbosity normal --logger "trx;LogFileName=e2e-test-results.trx" --results-directory ./TestResults
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PLAYWRIGHT_HEADLESS: true
+        timeout-minutes: 10
+
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: ./TestResults/e2e-test-results.trx
+          retention-days: 7
+
+  # Update PR status
+  update-pr-status:
+    name: Update PR Status
+    needs: [build-and-test, security-audit, load-tests, e2e-tests]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comment test results on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const buildResult = '${{ needs.build-and-test.result }}';
+            const securityResult = '${{ needs.security-audit.result }}';
+            const loadResult = '${{ needs.load-tests.result }}';
+            const e2eResult = '${{ needs.e2e-tests.result }}';
+
+            const allPassed = buildResult === 'success' &&
+                             securityResult === 'success' &&
+                             loadResult === 'success' &&
+                             e2eResult === 'success';
+
+            const statusEmoji = allPassed ? '✅' : '❌';
+            const buildEmoji = buildResult === 'success' ? '✅' : '❌';
+            const securityEmoji = securityResult === 'success' ? '✅' : '❌';
+            const loadEmoji = loadResult === 'success' ? '✅' : '❌';
+            const e2eEmoji = e2eResult === 'success' ? '✅' : '❌';
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ${statusEmoji} PR Test Results
+
+            | Check | Status |
+            |-------|--------|
+            | Build & Unit Tests | ${buildEmoji} ${buildResult} |
+            | Security Audit | ${securityEmoji} ${securityResult} |
+            | Load Tests | ${loadEmoji} ${loadResult} |
+            | E2E Smoke Tests | ${e2eEmoji} ${e2eResult} |
+
+            ${allPassed ? '### Ready to Merge\nAll checks passed. This PR can be merged to dev.' : '### Action Required\nSome checks failed. Please fix before merging.'}`
+            });
+
+  # Auto-merge if enabled
+  auto-merge:
+    name: Auto-Merge to Dev
+    needs: [build-and-test, security-audit, load-tests, e2e-tests]
+    runs-on: ubuntu-latest
+    if: success() && vars.AUTO_MERGE_TO_DEV == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge
+        run: gh pr merge ${{ github.event.pull_request.number }} --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
