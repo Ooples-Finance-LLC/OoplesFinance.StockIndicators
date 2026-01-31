@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             xmlns:controls="clr-namespace:OoplesFinance.TradingApp.Maui.Controls"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.DashboardPage"
+             x:DataType="viewmodels:DashboardViewModel"
+             Title="Dashboard"
+             BackgroundColor="{StaticResource Background}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="15" Spacing="15">
+
+                <!-- Account Summary Card -->
+                <Border Style="{StaticResource CardStyle}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Portfolio Value"
+                               Style="{StaticResource LabelMuted}"/>
+                        <Label Text="{Binding TotalPortfolioValue, StringFormat='${0:N2}'}"
+                               FontSize="32"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+
+                        <Grid ColumnDefinitions="*,*" Margin="0,10,0,0">
+                            <VerticalStackLayout Grid.Column="0">
+                                <Label Text="Today's P/L"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="11"/>
+                                <Label Text="{Binding TodayPnL, StringFormat='${0:N2}'}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{Binding TodayPnLColor}"/>
+                                <Label Text="{Binding TodayPnLPercent, StringFormat='{0:P2}'}"
+                                       FontSize="12"
+                                       TextColor="{Binding TodayPnLColor}"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="Total P/L"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="11"/>
+                                <Label Text="{Binding TotalPnL, StringFormat='${0:N2}'}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{Binding TotalPnLColor}"/>
+                                <Label Text="{Binding TotalPnLPercent, StringFormat='{0:P2}'}"
+                                       FontSize="12"
+                                       TextColor="{Binding TotalPnLColor}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Quick Stats Row -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource SmallCardStyle}">
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding OpenPositionsCount}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Positions"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="11"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource SmallCardStyle}">
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding OpenOrdersCount}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Warning}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Orders"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="11"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource SmallCardStyle}">
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding ActiveAlertsCount}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding ActiveAlertsCount, Converter={StaticResource AlertCountColorConverter}}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Alerts"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="11"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Buying Power -->
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Buying Power"
+                                   Style="{StaticResource LabelMuted}"/>
+                            <Label Text="{Binding BuyingPower, StringFormat='${0:N2}'}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                            <Label Text="Cash"
+                                   Style="{StaticResource LabelMuted}"/>
+                            <Label Text="{Binding CashBalance, StringFormat='${0:N2}'}"
+                                   FontSize="16"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Top Movers Section -->
+                <Label Text="Top Positions"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+                <CollectionView ItemsSource="{Binding TopPositions}"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding SelectedPosition}"
+                                SelectionChangedCommand="{Binding PositionSelectedCommand}"
+                                HeightRequest="200">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:PositionSummaryViewModel">
+                            <Border Style="{StaticResource PositionCardStyle}"
+                                    WidthRequest="150">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="{Binding Symbol}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextPrimary}"/>
+                                    <Label Text="{Binding Quantity, StringFormat='{0:N0} shares'}"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="11"/>
+                                    <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
+                                           FontSize="14"
+                                           TextColor="{StaticResource TextPrimary}"/>
+                                    <Label Text="{Binding UnrealizedPnL, StringFormat='${0:N2}'}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding PnLColor}"/>
+                                    <Label Text="{Binding UnrealizedPnLPercent, StringFormat='{0:P2}'}"
+                                           FontSize="12"
+                                           TextColor="{Binding PnLColor}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Recent Activity -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="Recent Activity"
+                           Style="{StaticResource SectionHeaderStyle}"/>
+                    <Button Grid.Column="1"
+                            Text="See All"
+                            Command="{Binding ViewAllOrdersCommand}"
+                            Style="{StaticResource LinkButtonStyle}"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding RecentOrders}"
+                                SelectionMode="None"
+                                HeightRequest="180">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:OrderSummaryViewModel">
+                            <Border Style="{StaticResource ListItemStyle}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" Padding="10">
+                                    <BoxView Grid.Column="0"
+                                             WidthRequest="4"
+                                             BackgroundColor="{Binding StatusColor}"
+                                             VerticalOptions="Fill"/>
+                                    <VerticalStackLayout Grid.Column="1" Margin="10,0">
+                                        <Label Text="{Binding Symbol}"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextPrimary}"/>
+                                        <Label Text="{Binding Description}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="12"/>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" HorizontalOptions="End">
+                                        <Label Text="{Binding Status}"
+                                               FontSize="12"
+                                               TextColor="{Binding StatusColor}"/>
+                                        <Label Text="{Binding Time, StringFormat='{0:HH:mm}'}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="11"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Market Status -->
+                <Border Style="{StaticResource CardStyle}">
+                    <HorizontalStackLayout Spacing="10">
+                        <Ellipse Fill="{Binding MarketStatusColor}"
+                                 WidthRequest="12"
+                                 HeightRequest="12"
+                                 VerticalOptions="Center"/>
+                        <Label Text="{Binding MarketStatus}"
+                               VerticalOptions="Center"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="{Binding MarketStatusTime}"
+                               VerticalOptions="Center"
+                               Style="{StaticResource LabelMuted}"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

@@ -1,0 +1,606 @@
+@using SkiaSharp
+@using SkiaSharp.Views.Blazor
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder.Canvas
+
+<div class="strategy-canvas-container" @ref="_containerRef"
+     @onmousedown="OnMouseDown"
+     @onmousemove="OnMouseMove"
+     @onmouseup="OnMouseUp"
+     @onmouseleave="OnMouseLeave"
+     @onwheel="OnWheel"
+     @onkeydown="OnKeyDown"
+     tabindex="0">
+
+    <SKCanvasView @ref="_canvasView"
+                  OnPaintSurface="OnPaintSurface"
+                  style="width: 100%; height: 100%;" />
+
+    @if (_showContextMenu)
+    {
+        <div class="context-menu" style="left: @(_contextMenuPosition.X)px; top: @(_contextMenuPosition.Y)px;">
+            <button @onclick="AddDataSourceNode">Add Data Source</button>
+            <button @onclick="AddIndicatorNode">Add Indicator</button>
+            <button @onclick="AddLogicNode">Add Logic</button>
+            <button @onclick="AddSignalNode">Add Signal</button>
+            <button @onclick="AddActionNode">Add Action</button>
+            <hr />
+            <button @onclick="DeleteSelected" disabled="@(_controller.State.SelectedNodeCount == 0)">Delete Selected</button>
+            <button @onclick="DuplicateSelected" disabled="@(_controller.State.SelectedNodeCount == 0)">Duplicate</button>
+        </div>
+    }
+</div>
+
+@code {
+    private SKCanvasView? _canvasView;
+    private ElementReference _containerRef;
+    private CanvasController _controller = null!;
+    private IndicatorLibrary _indicatorLibrary = null!;
+
+    private bool _isDragging;
+    private bool _isPanning;
+    private bool _isSelecting;
+    private CanvasPoint _lastMousePosition;
+    private CanvasPoint _dragStartPosition;
+    private bool _showContextMenu;
+    private CanvasPoint _contextMenuPosition;
+
+    [Parameter] public StrategyDefinition? Strategy { get; set; }
+    [Parameter] public EventCallback<StrategyDefinition> OnStrategyChanged { get; set; }
+    [Parameter] public EventCallback<NodeViewModel> OnNodeSelected { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _indicatorLibrary = new IndicatorLibrary();
+        var state = new CanvasState();
+        _controller = new CanvasController(state, _indicatorLibrary);
+
+        _controller.State.StateChanged += (s, e) => InvokeAsync(StateHasChanged);
+
+        if (Strategy != null)
+        {
+            _controller.LoadStrategy(Strategy);
+        }
+        else
+        {
+            _controller.NewStrategy("New Strategy");
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Strategy != null && _controller != null)
+        {
+            _controller.LoadStrategy(Strategy);
+        }
+    }
+
+    private void OnPaintSurface(SKPaintSurfaceEventArgs e)
+    {
+        var canvas = e.Surface.Canvas;
+        var info = e.Info;
+
+        _controller.State.ViewportSize = new CanvasSize(info.Width, info.Height);
+
+        canvas.Clear(ToSKColor(_controller.State.Theme.BackgroundColor));
+
+        canvas.Save();
+        canvas.Translate((float)_controller.State.PanOffset.X, (float)_controller.State.PanOffset.Y);
+        canvas.Scale((float)_controller.State.Zoom);
+
+        DrawGrid(canvas, info);
+        DrawConnections(canvas);
+        DrawNodes(canvas);
+        DrawConnectionDrag(canvas);
+        DrawSelectionRect(canvas);
+
+        canvas.Restore();
+    }
+
+    private void DrawGrid(SKCanvas canvas, SKImageInfo info)
+    {
+        var theme = _controller.State.Theme;
+        var gridSpacing = (float)theme.GridSpacing;
+
+        using var gridPaint = new SKPaint
+        {
+            Color = ToSKColor(theme.GridColor),
+            StrokeWidth = 1,
+            IsAntialias = true
+        };
+
+        var worldTopLeft = _controller.State.ScreenToWorld(new CanvasPoint(0, 0));
+        var worldBottomRight = _controller.State.ScreenToWorld(new CanvasPoint(info.Width, info.Height));
+
+        var startX = (float)(Math.Floor(worldTopLeft.X / gridSpacing) * gridSpacing);
+        var startY = (float)(Math.Floor(worldTopLeft.Y / gridSpacing) * gridSpacing);
+
+        for (var x = startX; x <= worldBottomRight.X; x += gridSpacing)
+        {
+            canvas.DrawLine(x, (float)worldTopLeft.Y, x, (float)worldBottomRight.Y, gridPaint);
+        }
+
+        for (var y = startY; y <= worldBottomRight.Y; y += gridSpacing)
+        {
+            canvas.DrawLine((float)worldTopLeft.X, y, (float)worldBottomRight.X, y, gridPaint);
+        }
+    }
+
+    private void DrawConnections(SKCanvas canvas)
+    {
+        var theme = _controller.State.Theme;
+
+        using var linePaint = new SKPaint
+        {
+            Color = ToSKColor(theme.ConnectionColor),
+            StrokeWidth = (float)theme.ConnectionLineWidth,
+            Style = SKPaintStyle.Stroke,
+            IsAntialias = true
+        };
+
+        foreach (var connection in _controller.State.Connections)
+        {
+            var sourceNode = _controller.State.Nodes.FirstOrDefault(n => n.Id == connection.SourceNodeId);
+            var targetNode = _controller.State.Nodes.FirstOrDefault(n => n.Id == connection.TargetNodeId);
+
+            if (sourceNode == null || targetNode == null) continue;
+
+            var sourcePort = sourceNode.OutputPorts.FirstOrDefault(p => p.Id == connection.SourcePortId);
+            var targetPort = targetNode.InputPorts.FirstOrDefault(p => p.Id == connection.TargetPortId);
+
+            if (sourcePort == null || targetPort == null) continue;
+
+            if (connection.IsActive)
+            {
+                linePaint.Color = ToSKColor(theme.ActiveConnectionColor);
+            }
+            else
+            {
+                linePaint.Color = ToSKColor(theme.ConnectionColor);
+            }
+
+            DrawBezierConnection(canvas, sourcePort.Position, targetPort.Position, linePaint);
+        }
+    }
+
+    private void DrawBezierConnection(SKCanvas canvas, CanvasPoint start, CanvasPoint end, SKPaint paint)
+    {
+        var controlDistance = Math.Abs(end.X - start.X) * 0.5;
+        controlDistance = Math.Max(controlDistance, 50);
+
+        using var path = new SKPath();
+        path.MoveTo((float)start.X, (float)start.Y);
+        path.CubicTo(
+            (float)(start.X + controlDistance), (float)start.Y,
+            (float)(end.X - controlDistance), (float)end.Y,
+            (float)end.X, (float)end.Y);
+
+        canvas.DrawPath(path, paint);
+    }
+
+    private void DrawNodes(SKCanvas canvas)
+    {
+        var theme = _controller.State.Theme;
+
+        foreach (var node in _controller.State.Nodes)
+        {
+            var isSelected = _controller.State.IsNodeSelected(node.Id);
+            var isHovered = _controller.State.HoveredNodeId == node.Id;
+
+            DrawNode(canvas, node, theme, isSelected, isHovered);
+        }
+    }
+
+    private void DrawNode(SKCanvas canvas, NodeViewModel node, CanvasTheme theme, bool isSelected, bool isHovered)
+    {
+        var rect = new SKRect(
+            (float)node.Position.X,
+            (float)node.Position.Y,
+            (float)(node.Position.X + node.Size.Width),
+            (float)(node.Position.Y + node.Size.Height));
+
+        var cornerRadius = (float)theme.NodeCornerRadius;
+
+        // Shadow
+        using var shadowPaint = new SKPaint
+        {
+            Color = new SKColor(0, 0, 0, 50),
+            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4),
+            IsAntialias = true
+        };
+        canvas.DrawRoundRect(rect.Left + 3, rect.Top + 3, rect.Width, rect.Height, cornerRadius, cornerRadius, shadowPaint);
+
+        // Background
+        using var bgPaint = new SKPaint
+        {
+            Color = ToSKColor(theme.NodeBackgroundColor),
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true
+        };
+        canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, bgPaint);
+
+        // Header
+        var headerHeight = 28f;
+        using var headerPaint = new SKPaint
+        {
+            Color = ToSKColor(node.HeaderColor),
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true
+        };
+
+        // Draw header with rounded top corners
+        // First draw the header as a full rounded rect
+        var headerRect = new SKRect(rect.Left, rect.Top, rect.Right, rect.Top + headerHeight);
+        canvas.DrawRoundRect(headerRect, cornerRadius, cornerRadius, headerPaint);
+        // Then draw a rect to fill in the bottom corners (making them square)
+        var bottomFillRect = new SKRect(rect.Left, rect.Top + headerHeight - cornerRadius, rect.Right, rect.Top + headerHeight);
+        canvas.DrawRect(bottomFillRect, headerPaint);
+
+        // Border
+        using var borderPaint = new SKPaint
+        {
+            Color = isSelected ? ToSKColor(theme.SelectionColor) :
+                    isHovered ? ToSKColor(theme.SelectionColor).WithAlpha(128) :
+                    ToSKColor(theme.NodeBorderColor),
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = isSelected ? 2 : 1,
+            IsAntialias = true
+        };
+        canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, borderPaint);
+
+        // Node name
+        using var textPaint = new SKPaint
+        {
+            Color = SKColors.White,
+            TextSize = (float)theme.HeaderFontSize,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName(theme.FontFamily, SKFontStyle.Bold)
+        };
+
+        var textBounds = new SKRect();
+        textPaint.MeasureText(node.Name, ref textBounds);
+        canvas.DrawText(node.Name,
+            rect.Left + 10,
+            rect.Top + headerHeight / 2 + textBounds.Height / 2 - 2,
+            textPaint);
+
+        // Draw ports
+        DrawPorts(canvas, node, theme);
+    }
+
+    private void DrawPorts(SKCanvas canvas, NodeViewModel node, CanvasTheme theme)
+    {
+        var portRadius = (float)theme.PortRadius;
+
+        using var inputPaint = new SKPaint
+        {
+            Color = ToSKColor(theme.InputPortColor),
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true
+        };
+
+        using var outputPaint = new SKPaint
+        {
+            Color = ToSKColor(theme.OutputPortColor),
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true
+        };
+
+        using var textPaint = new SKPaint
+        {
+            Color = ToSKColor(theme.TextColor),
+            TextSize = (float)theme.FontSize - 2,
+            IsAntialias = true
+        };
+
+        // Input ports
+        foreach (var port in node.InputPorts)
+        {
+            var isHovered = _controller.State.HoveredPortId == port.Id;
+            inputPaint.Color = isHovered ? ToSKColor(theme.ActiveConnectionColor) : ToSKColor(theme.InputPortColor);
+
+            canvas.DrawCircle((float)port.Position.X, (float)port.Position.Y, portRadius, inputPaint);
+            canvas.DrawText(port.Name, (float)port.Position.X + portRadius + 6, (float)port.Position.Y + 4, textPaint);
+        }
+
+        // Output ports
+        foreach (var port in node.OutputPorts)
+        {
+            var isHovered = _controller.State.HoveredPortId == port.Id;
+            outputPaint.Color = isHovered ? ToSKColor(theme.ActiveConnectionColor) : ToSKColor(theme.OutputPortColor);
+
+            canvas.DrawCircle((float)port.Position.X, (float)port.Position.Y, portRadius, outputPaint);
+
+            var textBounds = new SKRect();
+            textPaint.MeasureText(port.Name, ref textBounds);
+            canvas.DrawText(port.Name, (float)port.Position.X - portRadius - 6 - textBounds.Width, (float)port.Position.Y + 4, textPaint);
+        }
+    }
+
+    private void DrawConnectionDrag(SKCanvas canvas)
+    {
+        var drag = _controller.State.ConnectionDrag;
+        if (drag == null) return;
+
+        using var paint = new SKPaint
+        {
+            Color = ToSKColor(_controller.State.Theme.ActiveConnectionColor),
+            StrokeWidth = 2,
+            Style = SKPaintStyle.Stroke,
+            IsAntialias = true,
+            PathEffect = SKPathEffect.CreateDash(new[] { 8f, 4f }, 0)
+        };
+
+        DrawBezierConnection(canvas, drag.StartPosition, drag.CurrentPosition, paint);
+    }
+
+    private void DrawSelectionRect(SKCanvas canvas)
+    {
+        var selRect = _controller.State.SelectionRect;
+        if (selRect == null) return;
+
+        using var fillPaint = new SKPaint
+        {
+            Color = ToSKColor(_controller.State.Theme.SelectionColor).WithAlpha(30),
+            Style = SKPaintStyle.Fill
+        };
+
+        using var strokePaint = new SKPaint
+        {
+            Color = ToSKColor(_controller.State.Theme.SelectionColor),
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 1
+        };
+
+        var rect = new SKRect(
+            (float)selRect.Value.Left,
+            (float)selRect.Value.Top,
+            (float)selRect.Value.Right,
+            (float)selRect.Value.Bottom);
+
+        canvas.DrawRect(rect, fillPaint);
+        canvas.DrawRect(rect, strokePaint);
+    }
+
+    private void OnMouseDown(MouseEventArgs e)
+    {
+        _showContextMenu = false;
+        var screenPos = new CanvasPoint(e.OffsetX, e.OffsetY);
+        _lastMousePosition = screenPos;
+        _dragStartPosition = screenPos;
+
+        if (e.Button == 2) // Right click
+        {
+            _contextMenuPosition = screenPos;
+            _showContextMenu = true;
+            return;
+        }
+
+        // Check for port click
+        var portHit = _controller.State.GetPortAtPosition(screenPos);
+        if (portHit != null)
+        {
+            _controller.State.StartConnectionDrag(portHit.Value.Node.Id, portHit.Value.Port.Id, portHit.Value.IsOutput);
+            return;
+        }
+
+        // Check for node click
+        var node = _controller.State.GetNodeAtPosition(screenPos);
+        if (node != null)
+        {
+            if (!_controller.State.IsNodeSelected(node.Id))
+            {
+                _controller.State.SelectNode(node.Id, e.CtrlKey);
+            }
+            _isDragging = true;
+            OnNodeSelected.InvokeAsync(node);
+        }
+        else if (e.ShiftKey)
+        {
+            _isSelecting = true;
+        }
+        else
+        {
+            _controller.State.ClearSelection();
+            _isPanning = true;
+        }
+
+        _canvasView?.Invalidate();
+    }
+
+    private void OnMouseMove(MouseEventArgs e)
+    {
+        var screenPos = new CanvasPoint(e.OffsetX, e.OffsetY);
+        var delta = new CanvasPoint(screenPos.X - _lastMousePosition.X, screenPos.Y - _lastMousePosition.Y);
+
+        if (_controller.State.ConnectionDrag != null)
+        {
+            _controller.State.UpdateConnectionDrag(_controller.State.ScreenToWorld(screenPos));
+
+            var portHit = _controller.State.GetPortAtPosition(screenPos);
+            _controller.State.HoveredPortId = portHit?.Port.Id;
+        }
+        else if (_isDragging)
+        {
+            var worldDelta = new CanvasPoint(delta.X / _controller.State.Zoom, delta.Y / _controller.State.Zoom);
+            _controller.State.MoveSelectedNodes(worldDelta);
+        }
+        else if (_isPanning)
+        {
+            _controller.State.Pan(delta);
+        }
+        else if (_isSelecting)
+        {
+            var worldStart = _controller.State.ScreenToWorld(_dragStartPosition);
+            var worldCurrent = _controller.State.ScreenToWorld(screenPos);
+            _controller.State.SelectionRect = new CanvasRect(
+                Math.Min(worldStart.X, worldCurrent.X),
+                Math.Min(worldStart.Y, worldCurrent.Y),
+                Math.Abs(worldCurrent.X - worldStart.X),
+                Math.Abs(worldCurrent.Y - worldStart.Y));
+        }
+        else
+        {
+            // Hover detection
+            var node = _controller.State.GetNodeAtPosition(screenPos);
+            _controller.State.HoveredNodeId = node?.Id;
+
+            var portHit = _controller.State.GetPortAtPosition(screenPos);
+            _controller.State.HoveredPortId = portHit?.Port.Id;
+        }
+
+        _lastMousePosition = screenPos;
+        _canvasView?.Invalidate();
+    }
+
+    private void OnMouseUp(MouseEventArgs e)
+    {
+        var screenPos = new CanvasPoint(e.OffsetX, e.OffsetY);
+
+        if (_controller.State.ConnectionDrag != null)
+        {
+            var portHit = _controller.State.GetPortAtPosition(screenPos);
+            if (portHit != null)
+            {
+                _controller.State.EndConnectionDrag(portHit.Value.Node.Id, portHit.Value.Port.Id);
+            }
+            else
+            {
+                _controller.State.CancelConnectionDrag();
+            }
+        }
+
+        if (_isSelecting && _controller.State.SelectionRect != null)
+        {
+            _controller.State.SelectNodesInRect(_controller.State.SelectionRect.Value, e.CtrlKey);
+            _controller.State.SelectionRect = null;
+        }
+
+        _isDragging = false;
+        _isPanning = false;
+        _isSelecting = false;
+
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void OnMouseLeave(MouseEventArgs e)
+    {
+        _isDragging = false;
+        _isPanning = false;
+        _isSelecting = false;
+        _controller.State.CancelConnectionDrag();
+        _controller.State.SelectionRect = null;
+        _controller.State.HoveredNodeId = null;
+        _controller.State.HoveredPortId = null;
+        _canvasView?.Invalidate();
+    }
+
+    private void OnWheel(WheelEventArgs e)
+    {
+        var zoomDelta = e.DeltaY > 0 ? 0.9 : 1.1;
+        var newZoom = _controller.State.Zoom * zoomDelta;
+        _controller.State.SetZoom(newZoom, new CanvasPoint(e.OffsetX, e.OffsetY));
+        _canvasView?.Invalidate();
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "Delete":
+            case "Backspace":
+                DeleteSelected();
+                break;
+            case "z" when e.CtrlKey:
+                _controller.Undo();
+                break;
+            case "y" when e.CtrlKey:
+                _controller.Redo();
+                break;
+            case "d" when e.CtrlKey:
+                DuplicateSelected();
+                break;
+            case "a" when e.CtrlKey:
+                foreach (var node in _controller.State.Nodes)
+                {
+                    _controller.State.SelectNode(node.Id, true);
+                }
+                break;
+        }
+        _canvasView?.Invalidate();
+    }
+
+    private void AddDataSourceNode()
+    {
+        var worldPos = _controller.State.ScreenToWorld(_contextMenuPosition);
+        _controller.AddNode(NodeType.DataSource, "Price Data", worldPos);
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void AddIndicatorNode()
+    {
+        var worldPos = _controller.State.ScreenToWorld(_contextMenuPosition);
+        _controller.AddIndicatorNode("SMA", worldPos);
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void AddLogicNode()
+    {
+        var worldPos = _controller.State.ScreenToWorld(_contextMenuPosition);
+        _controller.AddNode(NodeType.Logic, "Compare", worldPos);
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void AddSignalNode()
+    {
+        var worldPos = _controller.State.ScreenToWorld(_contextMenuPosition);
+        _controller.AddNode(NodeType.Signal, "Buy Signal", worldPos);
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void AddActionNode()
+    {
+        var worldPos = _controller.State.ScreenToWorld(_contextMenuPosition);
+        _controller.AddNode(NodeType.Action, "Market Order", worldPos);
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void DeleteSelected()
+    {
+        _controller.RemoveSelectedNodes();
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void DuplicateSelected()
+    {
+        _controller.DuplicateSelectedNodes();
+        _showContextMenu = false;
+        NotifyStrategyChanged();
+        _canvasView?.Invalidate();
+    }
+
+    private void NotifyStrategyChanged()
+    {
+        var strategy = _controller.SaveStrategy();
+        OnStrategyChanged.InvokeAsync(strategy);
+    }
+
+    public void FitToView() => _controller.State.FitToView();
+    public void Undo() => _controller.Undo();
+    public void Redo() => _controller.Redo();
+
+    private static SKColor ToSKColor(CanvasColor color) => new(color.R, color.G, color.B, color.A);
+}

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.OrderConfirmationPopup"
+             x:DataType="vm:OrderConfirmationViewModel"
+             Shell.PresentationMode="ModalAnimated"
+             BackgroundColor="#80000000">
+
+    <Grid VerticalOptions="Center" Padding="20">
+        <Frame BackgroundColor="{StaticResource Surface}"
+               CornerRadius="16"
+               Padding="24"
+               HasShadow="True">
+            <VerticalStackLayout Spacing="20">
+
+                <!-- Header -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Confirm Order"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}" />
+                    <ImageButton Source="close.png"
+                                 Command="{Binding CancelCommand}"
+                                 WidthRequest="24"
+                                 HeightRequest="24"
+                                 Grid.Column="1" />
+                </Grid>
+
+                <!-- Warning for Market Orders -->
+                <Frame BackgroundColor="#3D3020"
+                       BorderColor="{StaticResource Warning}"
+                       Padding="12"
+                       CornerRadius="8"
+                       IsVisible="{Binding IsMarketOrder}">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="[!]"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Warning}" />
+                        <Label Text="Market orders execute immediately at the best available price."
+                               TextColor="{StaticResource Warning}"
+                               FontSize="13"
+                               LineBreakMode="WordWrap" />
+                    </HorizontalStackLayout>
+                </Frame>
+
+                <!-- Large Order Warning -->
+                <Frame BackgroundColor="#3D2020"
+                       BorderColor="{StaticResource Error}"
+                       Padding="12"
+                       CornerRadius="8"
+                       IsVisible="{Binding IsLargeOrder}">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="[!!]"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Error}" />
+                        <Label Text="Large order detected. Please verify quantity and estimated cost."
+                               TextColor="{StaticResource Error}"
+                               FontSize="13"
+                               LineBreakMode="WordWrap" />
+                    </HorizontalStackLayout>
+                </Frame>
+
+                <!-- Order Details -->
+                <Frame BackgroundColor="{StaticResource SurfaceLight}"
+                       Padding="16"
+                       CornerRadius="12">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                          ColumnDefinitions="*,*"
+                          RowSpacing="12">
+
+                        <!-- Symbol -->
+                        <Label Text="Symbol"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               Grid.Row="0" Grid.Column="0" />
+                        <Label Text="{Binding Symbol}"
+                               TextColor="{StaticResource TextPrimary}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalOptions="End"
+                               Grid.Row="0" Grid.Column="1" />
+
+                        <!-- Side -->
+                        <Label Text="Side"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               Grid.Row="1" Grid.Column="0" />
+                        <Label Text="{Binding Side}"
+                               TextColor="{Binding SideColor}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalOptions="End"
+                               Grid.Row="1" Grid.Column="1" />
+
+                        <!-- Order Type -->
+                        <Label Text="Order Type"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               Grid.Row="2" Grid.Column="0" />
+                        <Label Text="{Binding OrderType}"
+                               TextColor="{StaticResource TextPrimary}"
+                               FontSize="16"
+                               HorizontalOptions="End"
+                               Grid.Row="2" Grid.Column="1" />
+
+                        <!-- Quantity -->
+                        <Label Text="Quantity"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               Grid.Row="3" Grid.Column="0" />
+                        <Label Text="{Binding Quantity}"
+                               TextColor="{StaticResource TextPrimary}"
+                               FontSize="16"
+                               HorizontalOptions="End"
+                               Grid.Row="3" Grid.Column="1" />
+
+                        <!-- Price (for limit orders) -->
+                        <Label Text="{Binding PriceLabel}"
+                               TextColor="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               IsVisible="{Binding HasPrice}"
+                               Grid.Row="4" Grid.Column="0" />
+                        <Label Text="{Binding PriceDisplay}"
+                               TextColor="{StaticResource TextPrimary}"
+                               FontSize="16"
+                               IsVisible="{Binding HasPrice}"
+                               HorizontalOptions="End"
+                               Grid.Row="4" Grid.Column="1" />
+
+                        <!-- Estimated Total -->
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="{StaticResource Surface}"
+                                 Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                 Margin="0,8,0,0" />
+
+                    </Grid>
+                </Frame>
+
+                <!-- Estimated Cost/Proceeds -->
+                <Grid ColumnDefinitions="*,*" Margin="0,8,0,0">
+                    <Label Text="{Binding EstimatedLabel}"
+                           TextColor="{StaticResource TextSecondary}"
+                           FontSize="16" />
+                    <Label Text="{Binding EstimatedTotal, StringFormat='{0:C2}'}"
+                           TextColor="{Binding EstimatedColor}"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           HorizontalOptions="End"
+                           Grid.Column="1" />
+                </Grid>
+
+                <!-- Position Impact -->
+                <Frame BackgroundColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8"
+                       IsVisible="{Binding HasPositionImpact}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Position Impact"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Grid ColumnDefinitions="*,*">
+                            <Label Text="Current Position"
+                                   TextColor="{StaticResource TextSecondary}"
+                                   FontSize="13" />
+                            <Label Text="{Binding CurrentPosition}"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   FontSize="13"
+                                   HorizontalOptions="End"
+                                   Grid.Column="1" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*">
+                            <Label Text="After Order"
+                                   TextColor="{StaticResource TextSecondary}"
+                                   FontSize="13" />
+                            <Label Text="{Binding NewPosition}"
+                                   TextColor="{StaticResource Primary}"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="End"
+                                   Grid.Column="1" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Time in Force -->
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <Label Text="Time in Force:"
+                           TextColor="{StaticResource TextSecondary}"
+                           FontSize="14" />
+                    <Label Text="{Binding TimeInForce}"
+                           TextColor="{StaticResource TextPrimary}"
+                           FontSize="14"
+                           FontAttributes="Bold" />
+                </HorizontalStackLayout>
+
+                <!-- Confirmation Checkbox for Large Orders -->
+                <HorizontalStackLayout Spacing="8"
+                                       IsVisible="{Binding RequiresExplicitConfirmation}"
+                                       HorizontalOptions="Center">
+                    <CheckBox IsChecked="{Binding ExplicitlyConfirmed}"
+                              Color="{StaticResource Primary}" />
+                    <Label Text="I understand this is a large order"
+                           TextColor="{StaticResource TextSecondary}"
+                           FontSize="14"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Text="Cancel"
+                            Command="{Binding CancelCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource TextSecondary}"
+                            BorderColor="{StaticResource SurfaceLight}"
+                            BorderWidth="1"
+                            CornerRadius="8" />
+                    <Button Text="{Binding ConfirmButtonText}"
+                            Command="{Binding ConfirmCommand}"
+                            IsEnabled="{Binding CanConfirm}"
+                            BackgroundColor="{Binding ConfirmButtonColor}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Grid.Column="1" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>

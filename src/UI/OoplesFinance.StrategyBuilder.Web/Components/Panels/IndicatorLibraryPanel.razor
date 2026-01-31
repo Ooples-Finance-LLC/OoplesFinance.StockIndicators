@@ -1,0 +1,129 @@
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder
+
+<div class="indicator-library-panel">
+    <div class="panel-header">
+        <h3>Indicators</h3>
+        <input type="text" class="search-input" placeholder="Search..." @bind="searchText" @bind:event="oninput" />
+    </div>
+
+    <div class="category-list">
+        @foreach (var category in FilteredCategories)
+        {
+            <div class="category-section">
+                <button class="category-header @(expandedCategories.Contains(category.Key) ? "expanded" : "")"
+                        @onclick="() => ToggleCategory(category.Key)">
+                    <span class="expand-icon">@(expandedCategories.Contains(category.Key) ? "▼" : "▶")</span>
+                    <span class="category-name">@category.Key</span>
+                    <span class="category-count">(@category.Count())</span>
+                </button>
+
+                @if (expandedCategories.Contains(category.Key))
+                {
+                    <div class="indicator-list">
+                        @foreach (var indicator in category)
+                        {
+                            <div class="indicator-item"
+                                 draggable="true"
+                                 @ondragstart="() => OnDragStart(indicator)"
+                                 @onclick="() => OnIndicatorClick(indicator)">
+                                <span class="indicator-icon">@GetIndicatorIcon(indicator.Category)</span>
+                                <div class="indicator-info">
+                                    <span class="indicator-name">@indicator.Name</span>
+                                    <span class="indicator-description">@indicator.Description</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<IndicatorDefinition> OnIndicatorSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<IndicatorDefinition> OnIndicatorDragStart { get; set; }
+
+    private string searchText = string.Empty;
+    private HashSet<string> expandedCategories = new();
+    private List<IndicatorDefinition> allIndicators = new();
+
+    protected override void OnInitialized()
+    {
+        // Load all indicators from the library
+        LoadIndicators();
+
+        // Expand first category by default
+        if (allIndicators.Any())
+        {
+            var firstCategory = allIndicators.First().Category;
+            expandedCategories.Add(firstCategory);
+        }
+    }
+
+    private void LoadIndicators()
+    {
+        var library = new IndicatorLibrary();
+        allIndicators = library.Indicators.Values.ToList();
+    }
+
+    private IEnumerable<IGrouping<string, IndicatorDefinition>> FilteredCategories
+    {
+        get
+        {
+            var filtered = allIndicators.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var search = searchText.ToLowerInvariant();
+                filtered = filtered.Where(i =>
+                    i.Name.ToLowerInvariant().Contains(search) ||
+                    i.Description.ToLowerInvariant().Contains(search) ||
+                    i.Category.ToLowerInvariant().Contains(search));
+            }
+
+            return filtered.GroupBy(i => i.Category).OrderBy(g => g.Key);
+        }
+    }
+
+    private void ToggleCategory(string category)
+    {
+        if (expandedCategories.Contains(category))
+        {
+            expandedCategories.Remove(category);
+        }
+        else
+        {
+            expandedCategories.Add(category);
+        }
+    }
+
+    private async Task OnIndicatorClick(IndicatorDefinition indicator)
+    {
+        await OnIndicatorSelected.InvokeAsync(indicator);
+    }
+
+    private async Task OnDragStart(IndicatorDefinition indicator)
+    {
+        await OnIndicatorDragStart.InvokeAsync(indicator);
+    }
+
+    private string GetIndicatorIcon(string category)
+    {
+        return category.ToLowerInvariant() switch
+        {
+            "trend" => "~",
+            "momentum" => ">",
+            "volatility" => "^",
+            "volume" => "|",
+            "overlap" => "=",
+            "oscillator" => "S",
+            "pattern" => "*",
+            "statistic" => "#",
+            _ => "o"
+        };
+    }
+}

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title="Sign In"
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20" VerticalOptions="Center">
+
+            <!-- Logo / App Name -->
+            <VerticalStackLayout Spacing="8" Margin="0,0,0,40">
+                <Label Text="OoplesFinance"
+                       FontSize="32"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="{StaticResource Primary}" />
+                <Label Text="Trading Platform"
+                       FontSize="16"
+                       HorizontalOptions="Center"
+                       TextColor="{StaticResource TextSecondary}" />
+            </VerticalStackLayout>
+
+            <!-- Error Message -->
+            <Frame BackgroundColor="#3D2020"
+                   BorderColor="{StaticResource Error}"
+                   Padding="12"
+                   CornerRadius="8"
+                   IsVisible="{Binding HasError}">
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="{StaticResource Error}"
+                       FontSize="14" />
+            </Frame>
+
+            <!-- Email Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Email"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding Email}"
+                           Placeholder="Enter your email"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           Keyboard="Email"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Password Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Password"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding Password}"
+                           Placeholder="Enter your password"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           IsPassword="True"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Forgot Password Link -->
+            <Label Text="Forgot password?"
+                   FontSize="14"
+                   TextColor="{StaticResource Primary}"
+                   HorizontalOptions="End">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <!-- Sign In Button -->
+            <Button Text="{Binding IsLoading, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Signing in...|Sign In'}"
+                    Command="{Binding SignInCommand}"
+                    IsEnabled="{Binding IsNotLoading}"
+                    Style="{StaticResource PrimaryButton}"
+                    Margin="0,20,0,0" />
+
+            <!-- Divider -->
+            <Grid ColumnDefinitions="*,Auto,*" Margin="0,10">
+                <BoxView HeightRequest="1"
+                         BackgroundColor="{StaticResource SurfaceLight}"
+                         VerticalOptions="Center"
+                         Grid.Column="0" />
+                <Label Text="or"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}"
+                       Margin="16,0"
+                       Grid.Column="1" />
+                <BoxView HeightRequest="1"
+                         BackgroundColor="{StaticResource SurfaceLight}"
+                         VerticalOptions="Center"
+                         Grid.Column="2" />
+            </Grid>
+
+            <!-- OAuth Buttons -->
+            <Button Text="Continue with Google"
+                    Command="{Binding SignInWithGoogleCommand}"
+                    BackgroundColor="{StaticResource Surface}"
+                    TextColor="{StaticResource TextPrimary}"
+                    BorderColor="{StaticResource SurfaceLight}"
+                    BorderWidth="1"
+                    CornerRadius="8" />
+
+            <Button Text="Continue with GitHub"
+                    Command="{Binding SignInWithGitHubCommand}"
+                    BackgroundColor="{StaticResource Surface}"
+                    TextColor="{StaticResource TextPrimary}"
+                    BorderColor="{StaticResource SurfaceLight}"
+                    BorderWidth="1"
+                    CornerRadius="8" />
+
+            <!-- Register Link -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4" Margin="0,20,0,0">
+                <Label Text="Don't have an account?"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Label Text="Sign up"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToRegisterCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

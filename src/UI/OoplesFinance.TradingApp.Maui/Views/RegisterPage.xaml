@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Title="Create Account"
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20" VerticalOptions="Center">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="8" Margin="0,0,0,20">
+                <Label Text="Create Account"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" />
+                <Label Text="Start your trading journey today"
+                       FontSize="16"
+                       TextColor="{StaticResource TextSecondary}" />
+            </VerticalStackLayout>
+
+            <!-- Error Message -->
+            <Frame BackgroundColor="#3D2020"
+                   BorderColor="{StaticResource Error}"
+                   Padding="12"
+                   CornerRadius="8"
+                   IsVisible="{Binding HasError}">
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="{StaticResource Error}"
+                       FontSize="14" />
+            </Frame>
+
+            <!-- Display Name Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Display Name"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding DisplayName}"
+                           Placeholder="How should we call you?"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Email Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Email"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding Email}"
+                           Placeholder="Enter your email"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           Keyboard="Email"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Password Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Password"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding Password}"
+                           Placeholder="Create a strong password"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           IsPassword="True"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+                <Label Text="At least 8 characters with a number and symbol"
+                       FontSize="12"
+                       TextColor="{StaticResource TextSecondary}" />
+            </VerticalStackLayout>
+
+            <!-- Confirm Password Input -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Confirm Password"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Frame BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource SurfaceLight}"
+                       Padding="12"
+                       CornerRadius="8">
+                    <Entry Text="{Binding ConfirmPassword}"
+                           Placeholder="Confirm your password"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           IsPassword="True"
+                           TextColor="{StaticResource TextPrimary}"
+                           BackgroundColor="Transparent" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Terms Agreement -->
+            <HorizontalStackLayout Spacing="8">
+                <CheckBox IsChecked="{Binding AgreedToTerms}"
+                          Color="{StaticResource Primary}" />
+                <Label VerticalOptions="Center">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="I agree to the "
+                                  TextColor="{StaticResource TextSecondary}"
+                                  FontSize="14" />
+                            <Span Text="Terms of Service"
+                                  TextColor="{StaticResource Primary}"
+                                  FontSize="14"
+                                  TextDecorations="Underline" />
+                            <Span Text=" and "
+                                  TextColor="{StaticResource TextSecondary}"
+                                  FontSize="14" />
+                            <Span Text="Privacy Policy"
+                                  TextColor="{StaticResource Primary}"
+                                  FontSize="14"
+                                  TextDecorations="Underline" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </HorizontalStackLayout>
+
+            <!-- Create Account Button -->
+            <Button Text="{Binding IsLoading, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Creating account...|Create Account'}"
+                    Command="{Binding CreateAccountCommand}"
+                    IsEnabled="{Binding CanCreateAccount}"
+                    Style="{StaticResource PrimaryButton}"
+                    Margin="0,20,0,0" />
+
+            <!-- Login Link -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4" Margin="0,20,0,0">
+                <Label Text="Already have an account?"
+                       FontSize="14"
+                       TextColor="{StaticResource TextSecondary}" />
+                <Label Text="Sign in"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToLoginCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

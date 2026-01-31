@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.StrategyBuilder.Maui.ViewModels"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.IndicatorLibraryPanel"
+             x:DataType="viewmodels:IndicatorLibraryViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*" BackgroundColor="#252526">
+
+        <!-- Header -->
+        <Label Grid.Row="0"
+               Text="Indicator Library"
+               FontSize="14"
+               FontAttributes="Bold"
+               TextColor="White"
+               Padding="15,10"/>
+
+        <!-- Search -->
+        <SearchBar Grid.Row="1"
+                   Placeholder="Search indicators..."
+                   Text="{Binding SearchText}"
+                   BackgroundColor="#3E3E42"
+                   PlaceholderColor="#888"
+                   TextColor="White"
+                   Margin="10,0,10,10"/>
+
+        <!-- Categories and Indicators -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Categories}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:IndicatorCategoryViewModel">
+                    <VerticalStackLayout Padding="10,5" IsVisible="{Binding IsExpanded}">
+                        <Label Text="{Binding CategoryName}"
+                               FontAttributes="Bold"
+                               TextColor="#569CD6"
+                               FontSize="12"/>
+
+                        <CollectionView ItemsSource="{Binding Indicators}"
+                                        SelectionMode="None"
+                                        Margin="10,5,0,0">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:IndicatorItemViewModel">
+                                    <Border BackgroundColor="#2D2D30"
+                                            StrokeThickness="1"
+                                            Stroke="#3E3E42"
+                                            Padding="10,8"
+                                            Margin="0,2"
+                                            IsVisible="{Binding IsVisible}">
+                                        <Border.GestureRecognizers>
+                                            <DragGestureRecognizer
+                                                CanDrag="True"
+                                                DragStartingCommand="{Binding DragStartCommand}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Name}"
+                                                   TextColor="White"
+                                                   FontSize="13"/>
+                                            <Label Text="{Binding Description}"
+                                                   TextColor="#888"
+                                                   FontSize="11"
+                                                   LineBreakMode="TailTruncation"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentView>

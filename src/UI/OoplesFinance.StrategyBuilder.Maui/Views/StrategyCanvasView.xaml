@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:OoplesFinance.StrategyBuilder.Maui.Views"
+             xmlns:canvas="clr-namespace:OoplesFinance.StrategyBuilder.Maui.Canvas"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.StrategyCanvasView">
+
+    <Grid>
+        <!-- Canvas background with grid pattern -->
+        <GraphicsView x:Name="CanvasBackground"
+                      BackgroundColor="{StaticResource CanvasBackgroundColor}">
+            <GraphicsView.Drawable>
+                <canvas:GridDrawable GridSize="20" LineColor="{StaticResource GridLineColor}"/>
+            </GraphicsView.Drawable>
+        </GraphicsView>
+
+        <!-- Connections layer (drawn below nodes) -->
+        <GraphicsView x:Name="ConnectionsLayer">
+            <GraphicsView.Drawable>
+                <canvas:ConnectionsDrawable x:Name="ConnectionsDrawable"/>
+            </GraphicsView.Drawable>
+        </GraphicsView>
+
+        <!-- Nodes layer -->
+        <AbsoluteLayout x:Name="NodesContainer">
+            <AbsoluteLayout.GestureRecognizers>
+                <DropGestureRecognizer AllowDrop="True"
+                                       DragLeaveCommand="{Binding DragLeaveCommand}"
+                                       DragOverCommand="{Binding DragOverCommand}"
+                                       DropCommand="{Binding DropCommand}"/>
+                <TapGestureRecognizer Tapped="OnCanvasTapped"/>
+                <PanGestureRecognizer PanUpdated="OnCanvasPan"/>
+            </AbsoluteLayout.GestureRecognizers>
+        </AbsoluteLayout>
+
+        <!-- Selection rectangle (when dragging to select multiple) -->
+        <BoxView x:Name="SelectionRect"
+                 IsVisible="False"
+                 BackgroundColor="#3007ACC"
+                 Opacity="0.3"/>
+
+        <!-- Minimap -->
+        <Border WidthRequest="150"
+                HeightRequest="100"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="10"
+                BackgroundColor="#1E1E1E"
+                StrokeThickness="1"
+                Stroke="#3E3E42">
+            <GraphicsView x:Name="MinimapView">
+                <GraphicsView.Drawable>
+                    <canvas:MinimapDrawable x:Name="MinimapDrawable"/>
+                </GraphicsView.Drawable>
+            </GraphicsView>
+        </Border>
+
+        <!-- Zoom controls -->
+        <VerticalStackLayout HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Margin="10"
+                             Spacing="5">
+            <Button Text="+"
+                    Command="{Binding ZoomInCommand}"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    Padding="0"
+                    BackgroundColor="#3E3E42"/>
+            <Label Text="{Binding ZoomLevel, StringFormat='{0:P0}'}"
+                   TextColor="White"
+                   FontSize="10"
+                   HorizontalTextAlignment="Center"/>
+            <Button Text="-"
+                    Command="{Binding ZoomOutCommand}"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    Padding="0"
+                    BackgroundColor="#3E3E42"/>
+            <Button Text="Fit"
+                    Command="{Binding FitToViewCommand}"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    Padding="0"
+                    FontSize="8"
+                    BackgroundColor="#3E3E42"/>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentView>

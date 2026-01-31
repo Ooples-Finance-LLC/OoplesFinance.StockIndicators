@@ -1,0 +1,479 @@
+@page "/"
+@page "/builder"
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder.Canvas
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder.NodeTypes
+@using OoplesFinance.StrategyBuilder.Web.Components.Canvas
+@using OoplesFinance.StrategyBuilder.Web.Components.Panels
+@using OoplesFinance.StrategyBuilder.Web.Components.Toolbar
+@inject IJSRuntime JS
+
+<PageTitle>Strategy Builder - OoplesFinance</PageTitle>
+
+<div class="strategy-builder-layout">
+    <StrategyToolbar
+        CanUndo="@canvasController.CanUndo"
+        CanRedo="@canvasController.CanRedo"
+        HasSelection="@(canvasState.SelectedNodeCount > 0)"
+        HasMultiSelection="@(canvasState.SelectedNodeCount > 1)"
+        HasClipboard="@hasClipboard"
+        IsValidateMode="@isValidating"
+        ZoomLevel="@canvasState.Zoom"
+        OnNewStrategy="NewStrategy"
+        OnOpenStrategy="OpenStrategy"
+        OnSaveStrategy="SaveStrategy"
+        OnUndo="Undo"
+        OnRedo="Redo"
+        OnCut="Cut"
+        OnCopy="Copy"
+        OnPaste="Paste"
+        OnDelete="Delete"
+        OnSelectAll="SelectAll"
+        OnZoomIn="ZoomIn"
+        OnZoomOut="ZoomOut"
+        OnZoomToFit="ZoomToFit"
+        OnAlignLeft="AlignLeft"
+        OnAlignCenter="AlignCenter"
+        OnAlignRight="AlignRight"
+        OnAlignTop="AlignTop"
+        OnAlignMiddle="AlignMiddle"
+        OnAlignBottom="AlignBottom"
+        OnValidate="Validate"
+        OnRunBacktest="RunBacktest"
+        OnGenerateCode="GenerateCode" />
+
+    <div class="builder-content">
+        <IndicatorLibraryPanel
+            OnIndicatorSelected="OnIndicatorSelected"
+            OnIndicatorDragStart="OnIndicatorDragStart" />
+
+        <div class="canvas-area">
+            <StrategyCanvas
+                @ref="strategyCanvas"
+                CanvasState="@canvasState"
+                Controller="@canvasController"
+                OnNodeSelected="OnNodeSelected"
+                OnAddNode="OnAddNode"
+                OnRemoveNode="OnRemoveNode"
+                OnAddConnection="OnAddConnection"
+                OnRemoveConnection="OnRemoveConnection" />
+        </div>
+
+        <NodePropertiesPanel
+            SelectedNode="@selectedNode"
+            OnConfigurationChanged="OnConfigurationChanged"
+            OnPositionChanged_Event="OnNodePositionChanged"
+            OnCollapsedChanged="OnNodeCollapsedChanged"
+            OnLockedChanged="OnNodeLockedChanged" />
+    </div>
+
+    @if (showCodeDialog)
+    {
+        <div class="modal-overlay" @onclick="CloseCodeDialog">
+            <div class="modal-dialog code-dialog" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>Generated Strategy Code</h2>
+                    <button class="close-button" @onclick="CloseCodeDialog">X</button>
+                </div>
+                <div class="modal-body">
+                    <pre class="code-output">@generatedCode</pre>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" @onclick="CopyCode">Copy to Clipboard</button>
+                    <button class="btn primary" @onclick="DownloadCode">Download</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (showBacktestDialog)
+    {
+        <div class="modal-overlay" @onclick="CloseBacktestDialog">
+            <div class="modal-dialog backtest-dialog" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>Backtest Results</h2>
+                    <button class="close-button" @onclick="CloseBacktestDialog">X</button>
+                </div>
+                <div class="modal-body">
+                    @if (isBacktesting)
+                    {
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Running backtest...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="backtest-results">
+                            <div class="result-row">
+                                <span class="label">Total Return</span>
+                                <span class="value @(backtestResults.TotalReturn >= 0 ? "positive" : "negative")">
+                                    @($"{backtestResults.TotalReturn:P2}")
+                                </span>
+                            </div>
+                            <div class="result-row">
+                                <span class="label">Sharpe Ratio</span>
+                                <span class="value">@($"{backtestResults.SharpeRatio:F2}")</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="label">Max Drawdown</span>
+                                <span class="value negative">@($"{backtestResults.MaxDrawdown:P2}")</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="label">Win Rate</span>
+                                <span class="value">@($"{backtestResults.WinRate:P2}")</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="label">Total Trades</span>
+                                <span class="value">@backtestResults.TotalTrades</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" @onclick="CloseBacktestDialog">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (validationMessages.Any())
+    {
+        <div class="validation-toast">
+            <div class="validation-header">
+                <span>@(validationMessages.Any(m => m.IsError) ? "Validation Errors" : "Validation Complete")</span>
+                <button class="close-button" @onclick="ClearValidation">X</button>
+            </div>
+            @foreach (var message in validationMessages)
+            {
+                <div class="validation-item @(message.IsError ? "error" : "warning")">
+                    @message.Text
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private StrategyCanvas? strategyCanvas;
+    private CanvasState canvasState = new();
+    private IndicatorLibrary indicatorLibrary = new();
+    private CanvasController canvasController = null!;
+    private NodeViewModel? selectedNode;
+    private bool hasClipboard = false;
+    private bool isValidating = false;
+    private bool showCodeDialog = false;
+    private bool showBacktestDialog = false;
+    private bool isBacktesting = false;
+    private string generatedCode = string.Empty;
+    private List<ValidationMessage> validationMessages = new();
+    private BacktestResults backtestResults = new();
+    private List<NodeViewModel> clipboard = new();
+    private IndicatorDefinition? draggedIndicator;
+
+    protected override void OnInitialized()
+    {
+        canvasController = new CanvasController(canvasState, indicatorLibrary);
+        canvasController.NewStrategy("Untitled Strategy");
+    }
+
+    // File operations
+    private async Task NewStrategy()
+    {
+        if (canvasState.Nodes.Any())
+        {
+            // Could add confirmation dialog here
+        }
+        canvasState = new CanvasState();
+        canvasController = new CanvasController(canvasState, indicatorLibrary);
+        canvasController.NewStrategy("Untitled Strategy");
+        selectedNode = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OpenStrategy()
+    {
+        // Implement file picker and strategy loading
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveStrategy()
+    {
+        var strategy = canvasController.SaveStrategy();
+        var json = strategy.ToJson();
+
+        // Could save to Supabase or download as file
+        await JS.InvokeVoidAsync("console.log", "Strategy saved:", json);
+    }
+
+    // Edit operations
+    private void Undo()
+    {
+        canvasController.Undo();
+        RefreshSelectedNode();
+    }
+
+    private void Redo()
+    {
+        canvasController.Redo();
+        RefreshSelectedNode();
+    }
+
+    private void Cut()
+    {
+        Copy();
+        Delete();
+    }
+
+    private void Copy()
+    {
+        clipboard = canvasState.SelectedNodeIds
+            .Select(id => canvasState.Nodes.FirstOrDefault(n => n.Id == id))
+            .Where(n => n is not null)
+            .Cast<NodeViewModel>()
+            .ToList();
+        hasClipboard = clipboard.Any();
+    }
+
+    private void Paste()
+    {
+        if (!clipboard.Any()) return;
+
+        // Use the controller's duplicate functionality
+        canvasController.DuplicateSelectedNodes();
+    }
+
+    private void Delete()
+    {
+        canvasController.RemoveSelectedNodes();
+        selectedNode = null;
+    }
+
+    private void SelectAll()
+    {
+        // Select all nodes by iterating through them
+        foreach (var node in canvasState.Nodes)
+        {
+            canvasState.SelectNode(node.Id, true);
+        }
+    }
+
+    // Zoom operations
+    private void ZoomIn()
+    {
+        canvasState.SetZoom(canvasState.Zoom * 1.2, new CanvasPoint(canvasState.ViewportSize.Width / 2, canvasState.ViewportSize.Height / 2));
+    }
+
+    private void ZoomOut()
+    {
+        canvasState.SetZoom(canvasState.Zoom / 1.2, new CanvasPoint(canvasState.ViewportSize.Width / 2, canvasState.ViewportSize.Height / 2));
+    }
+
+    private void ZoomToFit()
+    {
+        canvasState.FitToView();
+    }
+
+    // Alignment operations
+    private void AlignLeft() => canvasController.AlignSelectedNodes(AlignmentType.Left);
+    private void AlignCenter() => canvasController.AlignSelectedNodes(AlignmentType.CenterHorizontal);
+    private void AlignRight() => canvasController.AlignSelectedNodes(AlignmentType.Right);
+    private void AlignTop() => canvasController.AlignSelectedNodes(AlignmentType.Top);
+    private void AlignMiddle() => canvasController.AlignSelectedNodes(AlignmentType.CenterVertical);
+    private void AlignBottom() => canvasController.AlignSelectedNodes(AlignmentType.Bottom);
+
+    // Strategy operations
+    private void Validate()
+    {
+        isValidating = true;
+        validationMessages.Clear();
+
+        var strategy = canvasController.SaveStrategy();
+        var validator = new StrategyValidator();
+        var result = validator.Validate(strategy);
+
+        if (!result.IsValid)
+        {
+            foreach (var error in result.Errors)
+            {
+                validationMessages.Add(new ValidationMessage { Text = error.Message, IsError = true });
+            }
+            foreach (var warning in result.Warnings)
+            {
+                validationMessages.Add(new ValidationMessage { Text = warning.Message, IsError = false });
+            }
+        }
+        else
+        {
+            validationMessages.Add(new ValidationMessage { Text = "Strategy is valid!", IsError = false });
+        }
+
+        isValidating = false;
+    }
+
+    private async Task RunBacktest()
+    {
+        showBacktestDialog = true;
+        isBacktesting = true;
+        StateHasChanged();
+
+        // Simulate backtest delay
+        await Task.Delay(2000);
+
+        // Generate mock results (in real implementation, this would run actual backtest)
+        var random = new Random();
+        backtestResults = new BacktestResults
+        {
+            TotalReturn = (random.NextDouble() - 0.3) * 0.5,
+            SharpeRatio = random.NextDouble() * 2.5,
+            MaxDrawdown = -random.NextDouble() * 0.2,
+            WinRate = 0.4 + random.NextDouble() * 0.3,
+            TotalTrades = random.Next(50, 500)
+        };
+
+        isBacktesting = false;
+        StateHasChanged();
+    }
+
+    private void GenerateCode()
+    {
+        var strategy = canvasController.SaveStrategy();
+        var codeGen = new CodeGenerator();
+        var result = codeGen.Generate(strategy);
+
+        if (result.IsSuccess)
+        {
+            generatedCode = result.Code;
+        }
+        else
+        {
+            generatedCode = "// Code generation failed:\n" + string.Join("\n// ", result.Errors);
+        }
+
+        showCodeDialog = true;
+    }
+
+    private async Task CopyCode()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", generatedCode);
+    }
+
+    private async Task DownloadCode()
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(generatedCode);
+        var base64 = Convert.ToBase64String(bytes);
+        await JS.InvokeVoidAsync("downloadFile", "Strategy.cs", base64);
+    }
+
+    private void CloseCodeDialog() => showCodeDialog = false;
+    private void CloseBacktestDialog() => showBacktestDialog = false;
+    private void ClearValidation() => validationMessages.Clear();
+
+    // Indicator library events
+    private void OnIndicatorSelected(IndicatorDefinition indicator)
+    {
+        // Add indicator node at center of canvas
+        var centerPosition = canvasState.ScreenToWorld(new CanvasPoint(
+            canvasState.ViewportSize.Width / 2,
+            canvasState.ViewportSize.Height / 2));
+        canvasController.AddIndicatorNode(indicator.Name, centerPosition);
+    }
+
+    private void OnIndicatorDragStart(IndicatorDefinition indicator)
+    {
+        draggedIndicator = indicator;
+    }
+
+    // Canvas events
+    private void OnNodeSelected(NodeViewModel? node)
+    {
+        selectedNode = node;
+    }
+
+    private void OnAddNode(CanvasPoint position)
+    {
+        if (draggedIndicator is not null)
+        {
+            canvasController.AddIndicatorNode(draggedIndicator.Name, position);
+            draggedIndicator = null;
+        }
+    }
+
+    private void OnRemoveNode(string nodeId)
+    {
+        canvasState.RemoveNode(nodeId);
+        if (selectedNode?.Id == nodeId)
+        {
+            selectedNode = null;
+        }
+    }
+
+    private void OnAddConnection(ConnectionViewModel connection)
+    {
+        canvasController.Connect(
+            connection.SourceNodeId,
+            connection.SourcePortId,
+            connection.TargetNodeId,
+            connection.TargetPortId);
+    }
+
+    private void OnRemoveConnection(string connectionId)
+    {
+        canvasController.RemoveConnection(connectionId);
+    }
+
+    // Properties panel events
+    private void OnConfigurationChanged((string Key, object? Value) change)
+    {
+        if (selectedNode is null) return;
+
+        var newConfig = new Dictionary<string, object?>(selectedNode.Configuration)
+        {
+            [change.Key] = change.Value
+        };
+        canvasController.UpdateNodeConfiguration(selectedNode.Id, newConfig);
+    }
+
+    private void OnNodePositionChanged(CanvasPoint newPosition)
+    {
+        if (selectedNode is null) return;
+        selectedNode.Position = newPosition;
+        selectedNode.UpdatePortPositions();
+    }
+
+    private void OnNodeCollapsedChanged(bool collapsed)
+    {
+        if (selectedNode is null) return;
+        selectedNode.IsCollapsed = collapsed;
+    }
+
+    private void OnNodeLockedChanged(bool locked)
+    {
+        if (selectedNode is null) return;
+        selectedNode.IsLocked = locked;
+    }
+
+    // Helpers
+    private void RefreshSelectedNode()
+    {
+        if (selectedNode is not null)
+        {
+            selectedNode = canvasState.Nodes.FirstOrDefault(n => n.Id == selectedNode.Id);
+        }
+    }
+
+    private sealed class ValidationMessage
+    {
+        public string Text { get; set; } = string.Empty;
+        public bool IsError { get; set; }
+    }
+
+    private sealed class BacktestResults
+    {
+        public double TotalReturn { get; set; }
+        public double SharpeRatio { get; set; }
+        public double MaxDrawdown { get; set; }
+        public double WinRate { get; set; }
+        public int TotalTrades { get; set; }
+    }
+}

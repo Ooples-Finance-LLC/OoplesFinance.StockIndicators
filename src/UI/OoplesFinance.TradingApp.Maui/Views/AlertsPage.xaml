@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.AlertsPage"
+             x:DataType="viewmodels:AlertsViewModel"
+             Title="Alerts"
+             BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header with Add Button -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="15,10">
+            <Label Text="Price Alerts"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimary}"
+                   VerticalOptions="Center"/>
+            <Button Grid.Column="1"
+                    Text="+ New Alert"
+                    Style="{StaticResource PrimaryButton}"
+                    Command="{Binding AddAlertCommand}"
+                    WidthRequest="120"/>
+        </Grid>
+
+        <!-- Alerts List -->
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Alerts}"
+                            SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                        <Label Text="No Alerts Set"
+                               FontSize="18"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Create alerts to get notified when prices reach your targets"
+                               FontSize="14"
+                               TextColor="{StaticResource TextDisabled}"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:AlertItemViewModel">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="{StaticResource Error}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:AlertsViewModel}}, Path=DeleteAlertCommand}"
+                                               CommandParameter="{Binding}"/>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                                <Grid ColumnDefinitions="*,Auto,Auto" Padding="15">
+                                    <VerticalStackLayout Grid.Column="0">
+                                        <Label Text="{Binding Symbol}"
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextPrimary}"/>
+                                        <HorizontalStackLayout Spacing="5">
+                                            <Label Text="{Binding Condition}"
+                                                   Style="{StaticResource LabelMuted}"
+                                                   FontSize="14"/>
+                                            <Label Text="{Binding TargetPrice, StringFormat='${0:N2}'}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Primary}"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <Switch Grid.Column="1"
+                                            IsToggled="{Binding IsActive}"
+                                            OnColor="{StaticResource Primary}"
+                                            VerticalOptions="Center"/>
+
+                                    <Label Grid.Column="2"
+                                           Text="{Binding StatusIcon}"
+                                           FontSize="20"
+                                           VerticalOptions="Center"
+                                           Margin="10,0,0,0"/>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Primary Colors -->
+    <Color x:Key="Primary">#6366F1</Color>
+    <Color x:Key="PrimaryDark">#4F46E5</Color>
+    <Color x:Key="PrimaryLight">#818CF8</Color>
+
+    <!-- Secondary Colors -->
+    <Color x:Key="Secondary">#64748B</Color>
+    <Color x:Key="SecondaryDark">#475569</Color>
+    <Color x:Key="SecondaryLight">#94A3B8</Color>
+
+    <!-- Background Colors -->
+    <Color x:Key="Background">#0F172A</Color>
+    <Color x:Key="BackgroundSecondary">#1E293B</Color>
+    <Color x:Key="Surface">#1E293B</Color>
+    <Color x:Key="SurfaceLight">#334155</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#F8FAFC</Color>
+    <Color x:Key="TextSecondary">#CBD5E1</Color>
+    <Color x:Key="TextMuted">#94A3B8</Color>
+    <Color x:Key="TextDisabled">#64748B</Color>
+
+    <!-- Status Colors -->
+    <Color x:Key="Success">#10B981</Color>
+    <Color x:Key="SuccessLight">#34D399</Color>
+    <Color x:Key="SuccessDark">#059669</Color>
+
+    <Color x:Key="Error">#EF4444</Color>
+    <Color x:Key="ErrorLight">#F87171</Color>
+    <Color x:Key="ErrorDark">#DC2626</Color>
+
+    <Color x:Key="Warning">#F59E0B</Color>
+    <Color x:Key="WarningLight">#FBBF24</Color>
+    <Color x:Key="WarningDark">#D97706</Color>
+
+    <Color x:Key="Info">#3B82F6</Color>
+    <Color x:Key="InfoLight">#60A5FA</Color>
+    <Color x:Key="InfoDark">#2563EB</Color>
+
+    <!-- Trading Colors -->
+    <Color x:Key="Buy">#10B981</Color>
+    <Color x:Key="BuyLight">#34D399</Color>
+    <Color x:Key="Sell">#EF4444</Color>
+    <Color x:Key="SellLight">#F87171</Color>
+    <Color x:Key="Neutral">#64748B</Color>
+
+    <!-- Border Colors -->
+    <Color x:Key="BorderColor">#334155</Color>
+    <Color x:Key="BorderColorLight">#475569</Color>
+
+    <!-- Chart Colors -->
+    <Color x:Key="ChartGreen">#10B981</Color>
+    <Color x:Key="ChartRed">#EF4444</Color>
+    <Color x:Key="ChartLine">#6366F1</Color>
+    <Color x:Key="ChartGrid">#334155</Color>
+    <Color x:Key="ChartCrosshair">#94A3B8</Color>
+
+    <!-- Semantic Colors for Light Theme (not used by default but available) -->
+    <Color x:Key="LightBackground">#FFFFFF</Color>
+    <Color x:Key="LightSurface">#F8FAFC</Color>
+    <Color x:Key="LightTextPrimary">#1E293B</Color>
+    <Color x:Key="LightTextSecondary">#475569</Color>
+
+</ResourceDictionary>

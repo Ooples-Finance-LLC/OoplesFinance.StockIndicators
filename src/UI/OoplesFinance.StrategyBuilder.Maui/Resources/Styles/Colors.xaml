@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Primary Colors -->
+    <Color x:Key="Primary">#007ACC</Color>
+    <Color x:Key="PrimaryDark">#005A9E</Color>
+    <Color x:Key="PrimaryLight">#3399FF</Color>
+
+    <!-- Accent Colors -->
+    <Color x:Key="Accent">#569CD6</Color>
+    <Color x:Key="Success">#4EC9B0</Color>
+    <Color x:Key="Warning">#DCDCAA</Color>
+    <Color x:Key="Error">#F14C4C</Color>
+    <Color x:Key="Signal">#C586C0</Color>
+
+    <!-- Background Colors -->
+    <Color x:Key="Background">#1E1E1E</Color>
+    <Color x:Key="BackgroundDark">#181818</Color>
+    <Color x:Key="Surface">#252526</Color>
+    <Color x:Key="SurfaceLight">#2D2D30</Color>
+    <Color x:Key="SurfaceLighter">#3E3E42</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#FFFFFF</Color>
+    <Color x:Key="TextSecondary">#CCCCCC</Color>
+    <Color x:Key="TextMuted">#888888</Color>
+    <Color x:Key="TextDisabled">#666666</Color>
+
+    <!-- Border Colors -->
+    <Color x:Key="Border">#3E3E42</Color>
+    <Color x:Key="BorderLight">#555555</Color>
+
+    <!-- Node Colors -->
+    <Color x:Key="NodeBackgroundColor">#2D2D30</Color>
+    <Color x:Key="NodeBorderColor">#3E3E42</Color>
+    <Color x:Key="NodeSelectedBorderColor">#007ACC</Color>
+    <Color x:Key="ConnectionLineColor">#569CD6</Color>
+    <Color x:Key="CanvasBackgroundColor">#1E1E1E</Color>
+    <Color x:Key="GridLineColor">#333333</Color>
+
+    <!-- Port Colors -->
+    <Color x:Key="InputPortColor">#4EC9B0</Color>
+    <Color x:Key="OutputPortColor">#DCDCAA</Color>
+    <Color x:Key="SignalPortColor">#C586C0</Color>
+
+    <!-- Node Type Colors -->
+    <Color x:Key="IndicatorNodeColor">#264F78</Color>
+    <Color x:Key="SignalNodeColor">#4B2F4B</Color>
+    <Color x:Key="ActionNodeColor">#2F4B3E</Color>
+    <Color x:Key="DataSourceNodeColor">#4B3E2F</Color>
+
+</ResourceDictionary>

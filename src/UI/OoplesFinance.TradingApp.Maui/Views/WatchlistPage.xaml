@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.WatchlistPage"
+             x:DataType="viewmodels:WatchlistViewModel"
+             Title="Watchlist"
+             BackgroundColor="{StaticResource Background}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <CollectionView ItemsSource="{Binding Items}"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding TapItemCommand}">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                    <Label Text="No Symbols in Watchlist"
+                           FontSize="18"
+                           TextColor="{StaticResource TextMuted}"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Add symbols to track their prices"
+                           FontSize="14"
+                           TextColor="{StaticResource TextDisabled}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:WatchlistItemViewModel">
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Remove"
+                                           BackgroundColor="{StaticResource Error}"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:WatchlistViewModel}}, Path=RemoveFromWatchlistCommand}"
+                                           CommandParameter="{Binding}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                            <Grid ColumnDefinitions="*,Auto" Padding="15">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding Symbol}"
+                                           FontSize="18"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextPrimary}"/>
+                                    <Label Text="{Binding CompanyName}"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="12"
+                                           LineBreakMode="TailTruncation"/>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                    <Label Text="{Binding LastPrice, StringFormat='${0:N2}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           HorizontalOptions="End"/>
+                                    <HorizontalStackLayout HorizontalOptions="End">
+                                        <Label Text="{Binding Change, StringFormat='{0:+0.00;-0.00}'}"
+                                               TextColor="{Binding ChangeColor}"
+                                               FontSize="14"/>
+                                        <Label Text="{Binding ChangePercent, StringFormat=' ({0:P2})'}"
+                                               TextColor="{Binding ChangeColor}"
+                                               FontSize="14"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+
+</ContentPage>

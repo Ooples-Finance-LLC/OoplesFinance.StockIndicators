@@ -1,0 +1,52 @@
+.strategy-canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #1e1e1e;
+    outline: none;
+    cursor: default;
+}
+
+.strategy-canvas-container:focus {
+    outline: 2px solid #0078d7;
+}
+
+.context-menu {
+    position: absolute;
+    background: #2d2d2d;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 4px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    min-width: 160px;
+}
+
+.context-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.context-menu button:hover:not(:disabled) {
+    background: #3c3c3c;
+    color: #fff;
+}
+
+.context-menu button:disabled {
+    color: #666;
+    cursor: not-allowed;
+}
+
+.context-menu hr {
+    margin: 4px 0;
+    border: none;
+    border-top: 1px solid #3c3c3c;
+}

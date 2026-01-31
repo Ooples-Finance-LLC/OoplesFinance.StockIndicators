@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.SettingsPage"
+             x:DataType="viewmodels:SettingsViewModel"
+             Title="Settings"
+             BackgroundColor="{StaticResource Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="20">
+
+            <!-- Broker Connection Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Broker Connection"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding ConnectedBroker, StringFormat='Connected to: {0}'}"
+                                   IsVisible="{Binding IsConnected}"
+                                   TextColor="{StaticResource Success}"
+                                   FontSize="14"/>
+                            <Label Text="Not Connected"
+                                   IsVisible="{Binding IsNotConnected}"
+                                   TextColor="{StaticResource Error}"
+                                   FontSize="14"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1"
+                                Text="{Binding ConnectionButtonText}"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding ManageBrokerCommand}"
+                                WidthRequest="120"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Appearance Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Appearance"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Theme"
+                               VerticalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}"/>
+                        <Picker Grid.Column="1"
+                                ItemsSource="{Binding ThemeOptions}"
+                                SelectedItem="{Binding SelectedTheme}"
+                                WidthRequest="150"
+                                TextColor="{StaticResource TextPrimary}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Security Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Security"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="Biometric Login"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="Use Face ID or Touch ID to login"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="12"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding BiometricEnabled}"
+                                OnColor="{StaticResource Primary}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Notifications Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Notifications"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="Push Notifications"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="Receive alerts and order updates"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="12"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding PushNotificationsEnabled}"
+                                OnColor="{StaticResource Primary}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="Price Alerts"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="Get notified when prices hit targets"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="12"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding PriceAlertsEnabled}"
+                                OnColor="{StaticResource Primary}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="Order Fills"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="Notify when orders are filled"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="12"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding OrderFillsEnabled}"
+                                OnColor="{StaticResource Primary}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Support Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Support"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Button Text="Help Center"
+                            Style="{StaticResource TextButton}"
+                            Command="{Binding OpenHelpCommand}"
+                            HorizontalOptions="Start"/>
+
+                    <Button Text="Contact Support"
+                            Style="{StaticResource TextButton}"
+                            Command="{Binding ContactSupportCommand}"
+                            HorizontalOptions="Start"/>
+
+                    <Button Text="Privacy Policy"
+                            Style="{StaticResource TextButton}"
+                            Command="{Binding OpenPrivacyPolicyCommand}"
+                            HorizontalOptions="Start"/>
+
+                    <Button Text="Terms of Service"
+                            Style="{StaticResource TextButton}"
+                            Command="{Binding OpenTermsCommand}"
+                            HorizontalOptions="Start"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- App Info Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="5">
+                    <Label Text="About"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+                    <Label Text="{Binding AppVersion, StringFormat='Version {0}'}"
+                           Style="{StaticResource LabelMuted}"/>
+                    <Label Text="Ooples Finance Trading App"
+                           Style="{StaticResource LabelMuted}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Logout Button -->
+            <Button Text="Log Out"
+                    Style="{StaticResource DangerButton}"
+                    Command="{Binding LogoutCommand}"
+                    IsVisible="{Binding IsConnected}"
+                    Margin="0,10"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

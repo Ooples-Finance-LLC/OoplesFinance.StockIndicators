@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--
+    EXPERT MODE STYLES
+    Full trading terminal, all features, multiple chart layouts, hotkeys, dense data
+    Target: Professional traders, power users, maximum information density
+    -->
+
+    <!-- Compact Buttons -->
+    <Style x:Key="ExpertButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="HeightRequest" Value="32"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="10,4"/>
+    </Style>
+
+    <Style x:Key="ExpertSecondaryButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource BorderColor}"/>
+        <Setter Property="BorderWidth" Value="1"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="HeightRequest" Value="28"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="8,2"/>
+    </Style>
+
+    <Style x:Key="ExpertIconButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="WidthRequest" Value="28"/>
+        <Setter Property="HeightRequest" Value="28"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="ExpertQuickAction" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="#333333"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="HeightRequest" Value="24"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Padding" Value="6,2"/>
+    </Style>
+
+    <!-- Dense Text Styles -->
+    <Style x:Key="ExpertTitle" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertSubtitle" TargetType="Label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertBodyText" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertMonospace" TargetType="Label">
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+    </Style>
+
+    <!-- Compact Cards -->
+    <Style x:Key="ExpertCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="Margin" Value="2"/>
+        <Setter Property="HasShadow" Value="False"/>
+    </Style>
+
+    <Style x:Key="ExpertPanel" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#1A1A1A"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="Margin" Value="1"/>
+        <Setter Property="HasShadow" Value="False"/>
+    </Style>
+
+    <Style x:Key="ExpertDockPanel" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#0D0D0D"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="HasShadow" Value="False"/>
+    </Style>
+
+    <!-- Data Display (High Density) -->
+    <Style x:Key="ExpertValueDisplay" TargetType="Label">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertPositiveValue" TargetType="Label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource SuccessColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertNegativeValue" TargetType="Label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource ErrorColor}"/>
+    </Style>
+
+    <!-- Ticker/Quote Display -->
+    <Style x:Key="ExpertTickerSymbol" TargetType="Label">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource PrimaryColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertTickerPrice" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+    </Style>
+
+    <Style x:Key="ExpertTickerChange" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+    </Style>
+
+    <!-- Data Grid/Table Styles -->
+    <Style x:Key="ExpertTableHeader" TargetType="Label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+        <Setter Property="TextTransform" Value="Uppercase"/>
+    </Style>
+
+    <Style x:Key="ExpertTableCell" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <Style x:Key="ExpertTableRowAlternate" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#1A1A1A"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <!-- Entry Fields (Compact) -->
+    <Style x:Key="ExpertEntry" TargetType="Entry">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="HeightRequest" Value="28"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="BackgroundColor" Value="#1A1A1A"/>
+    </Style>
+
+    <!-- Order Entry Specific -->
+    <Style x:Key="ExpertBuyButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="#1E4D2B"/>
+        <Setter Property="TextColor" Value="{StaticResource SuccessColor}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HeightRequest" Value="36"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+
+    <Style x:Key="ExpertSellButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="#4D1E1E"/>
+        <Setter Property="TextColor" Value="{StaticResource ErrorColor}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HeightRequest" Value="36"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+
+    <!-- Level 2 / Order Book -->
+    <Style x:Key="ExpertBidLevel" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#0D2818"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <Style x:Key="ExpertAskLevel" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#280D0D"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <!-- Chart Styles -->
+    <Style x:Key="ExpertChartContainer" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#0A0A0A"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="2"/>
+    </Style>
+
+    <Style x:Key="ExpertChartToolbar" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#1A1A1A"/>
+        <Setter Property="HeightRequest" Value="28"/>
+        <Setter Property="Padding" Value="4,0"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <!-- Status Bar -->
+    <Style x:Key="ExpertStatusBar" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#0D0D0D"/>
+        <Setter Property="HeightRequest" Value="24"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+
+    <Style x:Key="ExpertStatusText" TargetType="Label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <!-- Hotkey Hint -->
+    <Style x:Key="ExpertHotkeyHint" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#333333"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="4,2"/>
+    </Style>
+
+    <Style x:Key="ExpertHotkeyText" TargetType="Label">
+        <Setter Property="FontSize" Value="9"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+    </Style>
+
+    <!-- Tab/Panel Headers -->
+    <Style x:Key="ExpertTabHeader" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <Style x:Key="ExpertTabHeaderActive" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+</ResourceDictionary>

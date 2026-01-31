@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.StrategyMonitorPage"
+             x:DataType="viewmodels:StrategyMonitorViewModel"
+             Title="Strategies"
+             BackgroundColor="{StaticResource Background}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <CollectionView ItemsSource="{Binding Strategies}"
+                        SelectionMode="None">
+            <CollectionView.Header>
+                <VerticalStackLayout Padding="15,10">
+                    <Label Text="Active Strategies"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+                    <Label Text="Monitor and control your automated trading strategies"
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="14"/>
+                </VerticalStackLayout>
+            </CollectionView.Header>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                    <Label Text="No Active Strategies"
+                           FontSize="18"
+                           TextColor="{StaticResource TextMuted}"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Start a strategy from the Strategy Builder"
+                           FontSize="14"
+                           TextColor="{StaticResource TextDisabled}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                    <Button Text="Open Strategy Builder"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding OpenStrategyBuilderCommand}"
+                            Margin="0,20,0,0"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:StrategyItemViewModel">
+                    <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                        <VerticalStackLayout Padding="15" Spacing="10">
+                            <!-- Strategy Header -->
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding Name}"
+                                           FontSize="18"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextPrimary}"/>
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Border BackgroundColor="{Binding StatusBackgroundColor}"
+                                                Padding="8,2"
+                                                StrokeShape="RoundRectangle 4">
+                                            <Label Text="{Binding Status}"
+                                                   TextColor="{Binding StatusTextColor}"
+                                                   FontSize="12"/>
+                                        </Border>
+                                        <Label Text="{Binding RunningTime}"
+                                               Style="{StaticResource LabelMuted}"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <!-- Toggle Button -->
+                                <Button Grid.Column="1"
+                                        Text="{Binding ToggleButtonText}"
+                                        Style="{Binding ToggleButtonStyle}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StrategyMonitorViewModel}}, Path=ToggleStrategyCommand}"
+                                        CommandParameter="{Binding}"
+                                        WidthRequest="90"/>
+                            </Grid>
+
+                            <!-- Performance Metrics -->
+                            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="P&amp;L"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="12"/>
+                                    <Label Text="{Binding PnL, StringFormat='${0:N2}'}"
+                                           TextColor="{Binding PnLColor}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Text="Trades"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="12"/>
+                                    <Label Text="{Binding TradesCount}"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2">
+                                    <Label Text="Win Rate"
+                                           Style="{StaticResource LabelMuted}"
+                                           FontSize="12"/>
+                                    <Label Text="{Binding WinRate, StringFormat='{0:P1}'}"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <!-- Action Buttons -->
+                            <HorizontalStackLayout Spacing="10" HorizontalOptions="End">
+                                <Button Text="View Details"
+                                        Style="{StaticResource TextButton}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StrategyMonitorViewModel}}, Path=ViewDetailsCommand}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Text="Stop"
+                                        Style="{StaticResource DangerButton}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StrategyMonitorViewModel}}, Path=StopStrategyCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsVisible="{Binding IsRunning}"
+                                        HeightRequest="36"
+                                        WidthRequest="80"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+
+</ContentPage>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.BrokerConnectionPage"
+             x:DataType="viewmodels:BrokerConnectionViewModel"
+             Title="Connect Broker"
+             BackgroundColor="{StaticResource Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Logo/Header -->
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="10" Margin="0,20,0,30">
+                <Label Text="Ooples Finance"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalOptions="Center"/>
+                <Label Text="Connect your brokerage account"
+                       FontSize="16"
+                       TextColor="{StaticResource TextMuted}"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Broker Selection -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="15">
+                    <Label Text="Select Broker"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <CollectionView ItemsSource="{Binding Brokers}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedBroker}"
+                                    HeightRequest="200">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:BrokerOption">
+                                <Border Style="{StaticResource SelectableItemStyle}"
+                                        Margin="0,5">
+                                    <Grid ColumnDefinitions="50,*,Auto" Padding="10">
+                                        <Image Grid.Column="0"
+                                               Source="{Binding IconSource}"
+                                               HeightRequest="30"
+                                               WidthRequest="30"
+                                               VerticalOptions="Center"/>
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0">
+                                            <Label Text="{Binding Name}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"/>
+                                            <Label Text="{Binding Description}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextMuted}"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="2"
+                                               Text=">"
+                                               FontSize="20"
+                                               TextColor="{StaticResource TextMuted}"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Credentials Form -->
+            <Border Style="{StaticResource CardStyle}"
+                    IsVisible="{Binding ShowCredentialsForm}">
+                <VerticalStackLayout Padding="15" Spacing="15">
+                    <Label Text="{Binding SelectedBroker.Name, StringFormat='{0} Credentials'}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="API Key"
+                               Style="{StaticResource LabelMuted}"/>
+                        <Entry Placeholder="Enter API Key"
+                               Text="{Binding ApiKey}"
+                               Style="{StaticResource EntryStyle}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="API Secret"
+                               Style="{StaticResource LabelMuted}"/>
+                        <Entry Placeholder="Enter API Secret"
+                               Text="{Binding ApiSecret}"
+                               IsPassword="True"
+                               Style="{StaticResource EntryStyle}"/>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Paper Trading Mode"
+                               VerticalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}"/>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding IsPaperTrading}"
+                                OnColor="{StaticResource Primary}"/>
+                    </Grid>
+
+                    <Label Text="Paper trading uses simulated funds - no real money at risk"
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="12"
+                           IsVisible="{Binding IsPaperTrading}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error Message -->
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="{StaticResource Error}"
+                   IsVisible="{Binding HasError}"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Connect Button -->
+            <Button Text="{Binding ConnectButtonText}"
+                    Style="{StaticResource PrimaryButton}"
+                    Command="{Binding ConnectCommand}"
+                    IsEnabled="{Binding CanConnect}"
+                    HeightRequest="50"
+                    Margin="0,10"/>
+
+            <!-- Help Links -->
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Button Text="How to get API keys?"
+                        Style="{StaticResource TextButton}"
+                        Command="{Binding ShowApiKeyHelpCommand}"/>
+                <Button Text="Skip for now (Demo Mode)"
+                        Style="{StaticResource TextButton}"
+                        Command="{Binding UseDemoModeCommand}"/>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

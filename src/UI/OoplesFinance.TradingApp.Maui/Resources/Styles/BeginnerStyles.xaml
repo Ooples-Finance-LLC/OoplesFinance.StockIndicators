@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--
+    BEGINNER MODE STYLES
+    Large buttons, minimal data, guided actions, essential features only
+    Target: New investors, simplified UI, maximum clarity
+    -->
+
+    <!-- Large Tap Targets (44pt minimum for accessibility, we use 60pt) -->
+    <Style x:Key="BeginnerButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HeightRequest" Value="60"/>
+        <Setter Property="CornerRadius" Value="15"/>
+        <Setter Property="Padding" Value="20,15"/>
+        <Setter Property="Margin" Value="0,10"/>
+    </Style>
+
+    <Style x:Key="BeginnerSecondaryButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="BorderWidth" Value="2"/>
+        <Setter Property="TextColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="HeightRequest" Value="55"/>
+        <Setter Property="CornerRadius" Value="15"/>
+        <Setter Property="Padding" Value="20,12"/>
+    </Style>
+
+    <!-- Large, Clear Text -->
+    <Style x:Key="BeginnerTitle" TargetType="Label">
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,20"/>
+    </Style>
+
+    <Style x:Key="BeginnerSubtitle" TargetType="Label">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="TextColor" Value="{StaticResource SecondaryTextColor}"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,10"/>
+    </Style>
+
+    <Style x:Key="BeginnerBodyText" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="LineHeight" Value="1.5"/>
+    </Style>
+
+    <!-- Simplified Cards with More Padding -->
+    <Style x:Key="BeginnerCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Padding" Value="25"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="HasShadow" Value="True"/>
+    </Style>
+
+    <!-- Large Action Card (main tappable areas) -->
+    <Style x:Key="BeginnerActionCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}"/>
+        <Setter Property="BorderColor" Value="{StaticResource BorderColor}"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Padding" Value="30"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="HeightRequest" Value="120"/>
+        <Setter Property="HasShadow" Value="True"/>
+    </Style>
+
+    <!-- Prominent Status Indicators -->
+    <Style x:Key="BeginnerPositiveIndicator" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#1E4D2B"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="15,10"/>
+    </Style>
+
+    <Style x:Key="BeginnerNegativeIndicator" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#4D1E1E"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="15,10"/>
+    </Style>
+
+    <!-- Large, Readable Numbers -->
+    <Style x:Key="BeginnerValueDisplay" TargetType="Label">
+        <Setter Property="FontSize" Value="36"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
+    <Style x:Key="BeginnerPositiveValue" TargetType="Label">
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource SuccessColor}"/>
+    </Style>
+
+    <Style x:Key="BeginnerNegativeValue" TargetType="Label">
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource ErrorColor}"/>
+    </Style>
+
+    <!-- Simplified Entry Fields -->
+    <Style x:Key="BeginnerEntry" TargetType="Entry">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="HeightRequest" Value="55"/>
+        <Setter Property="TextColor" Value="{StaticResource TextColor}"/>
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}"/>
+        <Setter Property="Margin" Value="0,5"/>
+    </Style>
+
+    <!-- Help/Info Labels -->
+    <Style x:Key="BeginnerHelpText" TargetType="Label">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="FontAttributes" Value="Italic"/>
+        <Setter Property="Margin" Value="0,5"/>
+    </Style>
+
+    <!-- Progress Indicators -->
+    <Style x:Key="BeginnerProgressBar" TargetType="ProgressBar">
+        <Setter Property="ProgressColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="HeightRequest" Value="12"/>
+    </Style>
+
+    <!-- Simple Navigation Items -->
+    <Style x:Key="BeginnerNavItem" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackgroundColor}"/>
+        <Setter Property="CornerRadius" Value="15"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="HeightRequest" Value="80"/>
+    </Style>
+
+    <!-- Tooltip/Guidance Popup -->
+    <Style x:Key="BeginnerTooltip" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#334CAF50"/>
+        <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="15"/>
+    </Style>
+
+</ResourceDictionary>

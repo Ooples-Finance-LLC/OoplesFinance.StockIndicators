@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.StrategyBuilder.Maui.ViewModels"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.NodePropertiesPanel"
+             x:DataType="viewmodels:NodePropertiesViewModel">
+
+    <Grid RowDefinitions="Auto,*" BackgroundColor="#252526">
+
+        <!-- Header -->
+        <Label Grid.Row="0"
+               Text="Properties"
+               FontSize="14"
+               FontAttributes="Bold"
+               TextColor="White"
+               Padding="15,10"/>
+
+        <!-- Properties content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="15,0" IsVisible="{Binding HasNode}">
+
+                <!-- Node type header -->
+                <Border BackgroundColor="{Binding SelectedNode.NodeColor}"
+                        Padding="10"
+                        Margin="0,0,0,15">
+                    <Label Text="{Binding SelectedNode.NodeType}"
+                           TextColor="White"
+                           FontAttributes="Bold"/>
+                </Border>
+
+                <!-- Node name -->
+                <Label Text="Name" TextColor="#888" FontSize="12"/>
+                <Entry Text="{Binding SelectedNode.Name}"
+                       BackgroundColor="#3E3E42"
+                       TextColor="White"
+                       Margin="0,5,0,15"/>
+
+                <!-- Parameters section -->
+                <Label Text="Parameters"
+                       TextColor="#888"
+                       FontSize="12"
+                       Margin="0,0,0,10"/>
+
+                <CollectionView ItemsSource="{Binding SelectedNode.Parameters}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:NodeParameterViewModel">
+                            <VerticalStackLayout Margin="0,0,0,10">
+                                <Label Text="{Binding DisplayName}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Text="{Binding Description}"
+                                       TextColor="#666"
+                                       FontSize="10"
+                                       Margin="0,2,0,5"/>
+
+                                <!-- Numeric input -->
+                                <Entry Text="{Binding Value}"
+                                       BackgroundColor="#3E3E42"
+                                       TextColor="White"
+                                       Keyboard="{Binding KeyboardType}"
+                                       IsVisible="{Binding IsNumeric}"/>
+
+                                <!-- Enum picker -->
+                                <Picker SelectedItem="{Binding Value}"
+                                        ItemsSource="{Binding Options}"
+                                        BackgroundColor="#3E3E42"
+                                        TextColor="White"
+                                        IsVisible="{Binding IsEnum}"/>
+
+                                <!-- Boolean switch -->
+                                <Switch IsToggled="{Binding BoolValue}"
+                                        IsVisible="{Binding IsBool}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Input ports section -->
+                <Label Text="Inputs"
+                       TextColor="#888"
+                       FontSize="12"
+                       Margin="0,10,0,5"/>
+
+                <CollectionView ItemsSource="{Binding SelectedNode.InputPorts}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:PortViewModel">
+                            <HorizontalStackLayout Spacing="5" Margin="0,2">
+                                <Ellipse Fill="{StaticResource InputPortColor}"
+                                         WidthRequest="10"
+                                         HeightRequest="10"/>
+                                <Label Text="{Binding Name}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Text="{Binding DataType, StringFormat='({0})'}"
+                                       TextColor="#666"
+                                       FontSize="10"/>
+                                <Label Text="Connected"
+                                       TextColor="#4EC9B0"
+                                       FontSize="10"
+                                       IsVisible="{Binding IsConnected}"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Output ports section -->
+                <Label Text="Outputs"
+                       TextColor="#888"
+                       FontSize="12"
+                       Margin="0,10,0,5"/>
+
+                <CollectionView ItemsSource="{Binding SelectedNode.OutputPorts}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:PortViewModel">
+                            <HorizontalStackLayout Spacing="5" Margin="0,2">
+                                <Ellipse Fill="{StaticResource OutputPortColor}"
+                                         WidthRequest="10"
+                                         HeightRequest="10"/>
+                                <Label Text="{Binding Name}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Text="{Binding DataType, StringFormat='({0})'}"
+                                       TextColor="#666"
+                                       FontSize="10"/>
+                                <Label Text="Connected"
+                                       TextColor="#DCDCAA"
+                                       FontSize="10"
+                                       IsVisible="{Binding IsConnected}"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Empty state -->
+        <VerticalStackLayout Grid.Row="1"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Center"
+                             IsVisible="{Binding HasNode, Converter={StaticResource InvertedBoolConverter}}">
+            <Label Text="No node selected"
+                   TextColor="#666"
+                   FontSize="14"
+                   HorizontalTextAlignment="Center"/>
+            <Label Text="Click a node on the canvas to view its properties"
+                   TextColor="#444"
+                   FontSize="11"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentView>

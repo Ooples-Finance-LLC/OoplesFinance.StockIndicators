@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:local="clr-namespace:OoplesFinance.StrategyBuilder.Maui.Views"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.StrategyBuilder.Maui.ViewModels"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.MainPage"
+             x:DataType="viewmodels:StrategyCanvasViewModel"
+             Title="Strategy Builder"
+             BackgroundColor="{StaticResource CanvasBackgroundColor}">
+
+    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="280,*,320">
+
+        <!-- Toolbar (Top) -->
+        <Grid Grid.Row="0" Grid.ColumnSpan="3"
+              BackgroundColor="#2D2D30"
+              Padding="10,5"
+              ColumnDefinitions="Auto,*,Auto">
+
+            <!-- File operations -->
+            <HorizontalStackLayout Grid.Column="0" Spacing="5">
+                <Button Text="New"
+                        Command="{Binding NewStrategyCommand}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <Button Text="Open"
+                        Command="{Binding OpenStrategyCommand}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <Button Text="Save"
+                        Command="{Binding SaveStrategyCommand}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <BoxView WidthRequest="1" BackgroundColor="#555" Margin="10,5"/>
+                <Button Text="Undo"
+                        Command="{Binding UndoCommand}"
+                        IsEnabled="{Binding CanUndo}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <Button Text="Redo"
+                        Command="{Binding RedoCommand}"
+                        IsEnabled="{Binding CanRedo}"
+                        Style="{StaticResource ToolbarButton}"/>
+            </HorizontalStackLayout>
+
+            <!-- Strategy name -->
+            <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="Strategy:" TextColor="White" VerticalOptions="Center"/>
+                <Entry Text="{Binding StrategyName}"
+                       WidthRequest="300"
+                       BackgroundColor="#3E3E42"
+                       TextColor="White"
+                       Margin="10,0"/>
+            </HorizontalStackLayout>
+
+            <!-- Action buttons -->
+            <HorizontalStackLayout Grid.Column="2" Spacing="5">
+                <Button Text="Validate"
+                        Command="{Binding ValidateCommand}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <Button Text="Generate Code"
+                        Command="{Binding GenerateCodeCommand}"
+                        Style="{StaticResource ToolbarButton}"/>
+                <Button Text="Backtest"
+                        Command="{Binding BacktestCommand}"
+                        BackgroundColor="#0E639C"
+                        Style="{StaticResource ToolbarButton}"/>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Left Panel: Indicator Library -->
+        <Border Grid.Row="1" Grid.Column="0"
+                BackgroundColor="#252526"
+                StrokeThickness="0"
+                Padding="0">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <Label Grid.Row="0"
+                       Text="Indicator Library"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Padding="15,10"/>
+
+                <SearchBar Grid.Row="1"
+                           Placeholder="Search indicators..."
+                           Text="{Binding SearchText}"
+                           BackgroundColor="#3E3E42"
+                           PlaceholderColor="#888"
+                           TextColor="White"
+                           Margin="10,0,10,10"/>
+
+                <CollectionView Grid.Row="2"
+                                ItemsSource="{Binding IndicatorCategories}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:IndicatorCategoryViewModel">
+                            <VerticalStackLayout Padding="10,5">
+                                <Label Text="{Binding CategoryName}"
+                                       FontAttributes="Bold"
+                                       TextColor="#569CD6"
+                                       FontSize="12"/>
+                                <CollectionView ItemsSource="{Binding Indicators}"
+                                                SelectionMode="None"
+                                                Margin="10,5,0,0">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="viewmodels:IndicatorItemViewModel">
+                                            <Border BackgroundColor="#2D2D30"
+                                                    StrokeThickness="1"
+                                                    Stroke="#3E3E42"
+                                                    Padding="10,8"
+                                                    Margin="0,2">
+                                                <Border.GestureRecognizers>
+                                                    <DragGestureRecognizer
+                                                        CanDrag="True"
+                                                        DragStartingCommand="{Binding DragStartCommand}"/>
+                                                </Border.GestureRecognizers>
+                                                <VerticalStackLayout>
+                                                    <Label Text="{Binding Name}"
+                                                           TextColor="White"
+                                                           FontSize="13"/>
+                                                    <Label Text="{Binding Description}"
+                                                           TextColor="#888"
+                                                           FontSize="11"
+                                                           LineBreakMode="TailTruncation"/>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
+
+        <!-- Center: Strategy Canvas -->
+        <local:StrategyCanvasView Grid.Row="1" Grid.Column="1"
+                                  Nodes="{Binding Nodes}"
+                                  Connections="{Binding Connections}"
+                                  SelectedNode="{Binding SelectedNode, Mode=TwoWay}"
+                                  NodeAddedCommand="{Binding AddNodeCommand}"
+                                  NodeMovedCommand="{Binding MoveNodeCommand}"
+                                  ConnectionCreatedCommand="{Binding CreateConnectionCommand}"
+                                  ConnectionDeletedCommand="{Binding DeleteConnectionCommand}"/>
+
+        <!-- Right Panel: Node Properties -->
+        <Border Grid.Row="1" Grid.Column="2"
+                BackgroundColor="#252526"
+                StrokeThickness="0"
+                Padding="0">
+            <Grid RowDefinitions="Auto,*">
+                <Label Grid.Row="0"
+                       Text="Properties"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Padding="15,10"/>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Padding="15,0"
+                                         IsVisible="{Binding HasSelectedNode}">
+                        <!-- Node type header -->
+                        <Border BackgroundColor="{Binding SelectedNodeColor}"
+                                Padding="10"
+                                Margin="0,0,0,15">
+                            <Label Text="{Binding SelectedNode.NodeType}"
+                                   TextColor="White"
+                                   FontAttributes="Bold"/>
+                        </Border>
+
+                        <!-- Node name -->
+                        <Label Text="Name" TextColor="#888" FontSize="12"/>
+                        <Entry Text="{Binding SelectedNode.Name}"
+                               BackgroundColor="#3E3E42"
+                               TextColor="White"
+                               Margin="0,5,0,15"/>
+
+                        <!-- Parameters -->
+                        <Label Text="Parameters"
+                               TextColor="#888"
+                               FontSize="12"
+                               Margin="0,0,0,10"/>
+
+                        <CollectionView ItemsSource="{Binding SelectedNode.Parameters}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:NodeParameterViewModel">
+                                    <VerticalStackLayout Margin="0,0,0,10">
+                                        <Label Text="{Binding DisplayName}"
+                                               TextColor="White"
+                                               FontSize="12"/>
+                                        <Label Text="{Binding Description}"
+                                               TextColor="#666"
+                                               FontSize="10"
+                                               Margin="0,2,0,5"/>
+
+                                        <!-- Different controls based on parameter type -->
+                                        <Entry Text="{Binding Value}"
+                                               BackgroundColor="#3E3E42"
+                                               TextColor="White"
+                                               Keyboard="{Binding KeyboardType}"
+                                               IsVisible="{Binding IsNumeric}"/>
+
+                                        <Picker SelectedItem="{Binding Value}"
+                                                ItemsSource="{Binding Options}"
+                                                BackgroundColor="#3E3E42"
+                                                TextColor="White"
+                                                IsVisible="{Binding IsEnum}"/>
+
+                                        <Switch IsToggled="{Binding BoolValue}"
+                                                IsVisible="{Binding IsBool}"/>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <!-- Input/Output ports -->
+                        <Label Text="Inputs"
+                               TextColor="#888"
+                               FontSize="12"
+                               Margin="0,10,0,5"/>
+                        <CollectionView ItemsSource="{Binding SelectedNode.InputPorts}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:PortViewModel">
+                                    <HorizontalStackLayout Spacing="5" Margin="0,2">
+                                        <Ellipse Fill="{StaticResource InputPortColor}"
+                                                 WidthRequest="10"
+                                                 HeightRequest="10"/>
+                                        <Label Text="{Binding Name}" TextColor="White" FontSize="12"/>
+                                        <Label Text="{Binding DataType, StringFormat='({0})'}"
+                                               TextColor="#666"
+                                               FontSize="10"/>
+                                    </HorizontalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <Label Text="Outputs"
+                               TextColor="#888"
+                               FontSize="12"
+                               Margin="0,10,0,5"/>
+                        <CollectionView ItemsSource="{Binding SelectedNode.OutputPorts}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:PortViewModel">
+                                    <HorizontalStackLayout Spacing="5" Margin="0,2">
+                                        <Ellipse Fill="{StaticResource OutputPortColor}"
+                                                 WidthRequest="10"
+                                                 HeightRequest="10"/>
+                                        <Label Text="{Binding Name}" TextColor="White" FontSize="12"/>
+                                        <Label Text="{Binding DataType, StringFormat='({0})'}"
+                                               TextColor="#666"
+                                               FontSize="10"/>
+                                    </HorizontalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <!-- Delete button -->
+                        <Button Text="Delete Node"
+                                Command="{Binding DeleteSelectedNodeCommand}"
+                                BackgroundColor="#8B0000"
+                                TextColor="White"
+                                Margin="0,20,0,0"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar (Bottom) -->
+        <Grid Grid.Row="2" Grid.ColumnSpan="3"
+              BackgroundColor="#007ACC"
+              Padding="10,5"
+              ColumnDefinitions="*,Auto,Auto,Auto">
+            <Label Grid.Column="0"
+                   Text="{Binding StatusMessage}"
+                   TextColor="White"
+                   FontSize="12"/>
+            <Label Grid.Column="1"
+                   Text="{Binding NodeCount, StringFormat='Nodes: {0}'}"
+                   TextColor="White"
+                   FontSize="12"
+                   Margin="20,0"/>
+            <Label Grid.Column="2"
+                   Text="{Binding ConnectionCount, StringFormat='Connections: {0}'}"
+                   TextColor="White"
+                   FontSize="12"
+                   Margin="20,0"/>
+            <Label Grid.Column="3"
+                   Text="{Binding ValidationStatus}"
+                   TextColor="White"
+                   FontSize="12"/>
+        </Grid>
+
+    </Grid>
+</ContentPage>

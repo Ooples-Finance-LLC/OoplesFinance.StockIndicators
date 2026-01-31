@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.ChartPage"
+             x:DataType="viewmodels:ChartViewModel"
+             Title="{Binding Symbol}"
+             BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Symbol Header -->
+        <Grid Grid.Row="0" Padding="15,10" ColumnDefinitions="*,Auto">
+            <VerticalStackLayout>
+                <Label Text="{Binding Symbol}"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"/>
+                <Label Text="{Binding CompanyName}"
+                       Style="{StaticResource LabelMuted}"
+                       FontSize="14"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                <Label Text="{Binding LastPrice, StringFormat='${0:N2}'}"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="End"/>
+                <HorizontalStackLayout HorizontalOptions="End">
+                    <Label Text="{Binding Change, StringFormat='{0:+0.00;-0.00}'}"
+                           TextColor="{Binding ChangeColor}"
+                           FontSize="16"/>
+                    <Label Text="{Binding ChangePercent, StringFormat=' ({0:P2})'}"
+                           TextColor="{Binding ChangeColor}"
+                           FontSize="16"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Timeframe Selector -->
+        <HorizontalStackLayout Grid.Row="1" Padding="15,5" Spacing="10">
+            <Button Text="1D"
+                    Style="{Binding DayButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="1D"
+                    WidthRequest="50"/>
+            <Button Text="1W"
+                    Style="{Binding WeekButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="1W"
+                    WidthRequest="50"/>
+            <Button Text="1M"
+                    Style="{Binding MonthButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="1M"
+                    WidthRequest="50"/>
+            <Button Text="3M"
+                    Style="{Binding ThreeMonthButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="3M"
+                    WidthRequest="50"/>
+            <Button Text="1Y"
+                    Style="{Binding YearButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="1Y"
+                    WidthRequest="50"/>
+            <Button Text="ALL"
+                    Style="{Binding AllButtonStyle}"
+                    Command="{Binding SetTimeframeCommand}"
+                    CommandParameter="ALL"
+                    WidthRequest="50"/>
+        </HorizontalStackLayout>
+
+        <!-- Chart Area -->
+        <Grid Grid.Row="2" Padding="10">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="{StaticResource Primary}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"/>
+
+            <!-- Placeholder for chart - LiveCharts would go here -->
+            <Border Style="{StaticResource CardStyle}"
+                    IsVisible="{Binding IsNotLoading}">
+                <GraphicsView x:Name="ChartView"
+                              Drawable="{Binding ChartDrawable}"
+                              HeightRequest="300"/>
+            </Border>
+        </Grid>
+
+        <!-- Quote Details -->
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Margin="15,10">
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" Padding="15">
+                <VerticalStackLayout Grid.Column="0" Grid.Row="0">
+                    <Label Text="Open" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding Open, StringFormat='${0:N2}'}" TextColor="{StaticResource TextPrimary}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Grid.Row="0">
+                    <Label Text="High" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding High, StringFormat='${0:N2}'}" TextColor="{StaticResource Success}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Grid.Row="0">
+                    <Label Text="Low" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding Low, StringFormat='${0:N2}'}" TextColor="{StaticResource Error}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="0" Grid.Row="1" Margin="0,10,0,0">
+                    <Label Text="Volume" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding Volume, StringFormat='{0:N0}'}" TextColor="{StaticResource TextPrimary}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Grid.Row="1" Margin="0,10,0,0">
+                    <Label Text="Bid" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding Bid, StringFormat='${0:N2}'}" TextColor="{StaticResource TextPrimary}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Grid.Row="1" Margin="0,10,0,0">
+                    <Label Text="Ask" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                    <Label Text="{Binding Ask, StringFormat='${0:N2}'}" TextColor="{StaticResource TextPrimary}"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Action Buttons -->
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" Padding="15,10" Margin="0,0,0,10">
+            <Button Grid.Column="0"
+                    Text="Buy"
+                    Style="{StaticResource SuccessButton}"
+                    Command="{Binding BuyCommand}"
+                    Margin="0,0,5,0"/>
+            <Button Grid.Column="1"
+                    Text="Sell"
+                    Style="{StaticResource DangerButton}"
+                    Command="{Binding SellCommand}"
+                    Margin="5,0,0,0"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

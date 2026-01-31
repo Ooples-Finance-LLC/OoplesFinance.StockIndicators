@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.Onboarding.RiskQuizPage"
+             Title="Risk Assessment"
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="20">
+
+        <!-- Progress Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
+            <Label Text="Step 1 of 3: Risk Assessment"
+                   FontSize="14"
+                   TextColor="{StaticResource SecondaryTextColor}"/>
+            <ProgressBar x:Name="ProgressBar"
+                         Progress="0.33"
+                         ProgressColor="{StaticResource PrimaryColor}"
+                         HeightRequest="8"/>
+            <Label x:Name="QuestionCounter"
+                   Text="Question 1 of 5"
+                   FontSize="12"
+                   TextColor="{StaticResource SecondaryTextColor}"
+                   HorizontalOptions="End"/>
+        </VerticalStackLayout>
+
+        <!-- Questions Carousel -->
+        <CarouselView x:Name="QuestionsCarousel"
+                      Grid.Row="1"
+                      Loop="False"
+                      IsSwipeEnabled="False"
+                      CurrentItemChanged="OnCurrentItemChanged">
+            <CarouselView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
+                           CornerRadius="15"
+                           Padding="25"
+                           Margin="10"
+                           HasShadow="True">
+                        <VerticalStackLayout Spacing="25">
+
+                            <Label Text="{Binding Question}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextColor}"
+                                   HorizontalTextAlignment="Center"/>
+
+                            <!-- Answer Options -->
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Options}"
+                                                 Spacing="10">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
+                                               BorderColor="{StaticResource BorderColor}"
+                                               CornerRadius="10"
+                                               Padding="15"
+                                               HasShadow="False">
+                                            <Frame.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                            </Frame.GestureRecognizers>
+                                            <HorizontalStackLayout Spacing="15">
+                                                <Frame x:Name="RadioButton"
+                                                       BackgroundColor="Transparent"
+                                                       BorderColor="{StaticResource BorderColor}"
+                                                       CornerRadius="12"
+                                                       WidthRequest="24"
+                                                       HeightRequest="24"
+                                                       Padding="0"/>
+                                                <Label Text="{Binding Text}"
+                                                       FontSize="16"
+                                                       TextColor="{StaticResource TextColor}"
+                                                       VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </Frame>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <!-- Navigation Buttons -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+            <Button x:Name="BackButton"
+                    Text="Back"
+                    Style="{StaticResource SecondaryButton}"
+                    Clicked="OnBackClicked"
+                    Grid.Column="0"
+                    IsVisible="False"/>
+            <Button x:Name="NextButton"
+                    Text="Next"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnNextClicked"
+                    Grid.Column="1"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

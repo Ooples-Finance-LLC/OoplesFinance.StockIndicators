@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.PositionsPage"
+             x:DataType="viewmodels:PositionsViewModel"
+             Title="Positions"
+             BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Summary Header -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="15,15,15,0">
+            <Grid ColumnDefinitions="*,*,*">
+                <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                    <Label Text="Market Value"
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="11"
+                           HorizontalOptions="Center"/>
+                    <Label Text="{Binding TotalMarketValue, StringFormat='${0:N2}'}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                    <Label Text="Day P/L"
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="11"
+                           HorizontalOptions="Center"/>
+                    <Label Text="{Binding TotalDayPnL, StringFormat='${0:N2}'}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{Binding DayPnLColor}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
+                    <Label Text="Total P/L"
+                           Style="{StaticResource LabelMuted}"
+                           FontSize="11"
+                           HorizontalOptions="Center"/>
+                    <Label Text="{Binding TotalUnrealizedPnL, StringFormat='${0:N2}'}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{Binding TotalPnLColor}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Positions List -->
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Positions}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedPosition}"
+                            SelectionChangedCommand="{Binding PositionTappedCommand}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                        <Label Text="No Open Positions"
+                               FontSize="18"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Your positions will appear here"
+                               FontSize="14"
+                               TextColor="{StaticResource TextDisabled}"
+                               HorizontalOptions="Center"/>
+                        <Button Text="Start Trading"
+                                Command="{Binding GoToTradeCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,20,0,0"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:PositionViewModel">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Close"
+                                               BackgroundColor="{StaticResource Error}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PositionsViewModel}}, Path=ClosePositionCommand}"
+                                               CommandParameter="{Binding}"/>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                                <Grid ColumnDefinitions="*,Auto" Padding="15">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Label Text="{Binding Symbol}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"/>
+                                            <Border BackgroundColor="{Binding SideColor}"
+                                                    Padding="8,2"
+                                                    StrokeThickness="0">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10"/>
+                                                </Border.StrokeShape>
+                                                <Label Text="{Binding Side}"
+                                                       FontSize="10"
+                                                       TextColor="White"/>
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding Quantity, StringFormat='{0:N0} shares @ ${1:N2}', Path=AveragePrice}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="12"/>
+                                        <Label Text="{Binding CompanyName}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="11"
+                                               LineBreakMode="TailTruncation"/>
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="3">
+                                        <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextPrimary}"
+                                               HorizontalOptions="End"/>
+                                        <Label Text="{Binding UnrealizedPnL, StringFormat='${0:N2}'}"
+                                               FontSize="14"
+                                               TextColor="{Binding PnLColor}"
+                                               HorizontalOptions="End"/>
+                                        <Label Text="{Binding UnrealizedPnLPercent, StringFormat='{0:P2}'}"
+                                               FontSize="12"
+                                               TextColor="{Binding PnLColor}"
+                                               HorizontalOptions="End"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

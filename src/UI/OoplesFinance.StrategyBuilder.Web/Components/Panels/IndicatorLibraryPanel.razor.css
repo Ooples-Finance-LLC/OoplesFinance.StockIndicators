@@ -1,0 +1,143 @@
+.indicator-library-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+}
+
+.panel-header {
+    padding: 12px;
+    border-bottom: 1px solid #3c3c3c;
+}
+
+.panel-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ccc;
+}
+
+.search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    background: #1e1e1e;
+    color: #ccc;
+    font-size: 13px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #0078d7;
+}
+
+.search-input::placeholder {
+    color: #666;
+}
+
+.category-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.category-section {
+    border-bottom: 1px solid #2d2d2d;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+}
+
+.category-header:hover {
+    background: #2d2d2d;
+}
+
+.category-header.expanded {
+    background: #2a2a2a;
+}
+
+.expand-icon {
+    width: 16px;
+    font-size: 10px;
+    color: #888;
+}
+
+.category-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.category-count {
+    color: #666;
+    font-size: 12px;
+}
+
+.indicator-list {
+    padding: 4px 0;
+}
+
+.indicator-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 12px 8px 28px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.indicator-item:hover {
+    background: #2d2d2d;
+}
+
+.indicator-item:active {
+    background: #3c3c3c;
+}
+
+.indicator-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3c3c3c;
+    border-radius: 4px;
+    color: #0078d7;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.indicator-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.indicator-name {
+    color: #ccc;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.indicator-description {
+    color: #666;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}

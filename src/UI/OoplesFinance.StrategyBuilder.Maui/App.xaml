@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:OoplesFinance.StrategyBuilder.Maui"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Strategy Builder specific colors -->
+            <Color x:Key="NodeBackgroundColor">#2D2D30</Color>
+            <Color x:Key="NodeBorderColor">#3E3E42</Color>
+            <Color x:Key="NodeSelectedBorderColor">#007ACC</Color>
+            <Color x:Key="ConnectionLineColor">#569CD6</Color>
+            <Color x:Key="CanvasBackgroundColor">#1E1E1E</Color>
+            <Color x:Key="GridLineColor">#333333</Color>
+            <Color x:Key="InputPortColor">#4EC9B0</Color>
+            <Color x:Key="OutputPortColor">#DCDCAA</Color>
+            <Color x:Key="SignalPortColor">#C586C0</Color>
+
+            <!-- Node type colors -->
+            <Color x:Key="IndicatorNodeColor">#264F78</Color>
+            <Color x:Key="SignalNodeColor">#4B2F4B</Color>
+            <Color x:Key="ActionNodeColor">#2F4B3E</Color>
+            <Color x:Key="DataSourceNodeColor">#4B3E2F</Color>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

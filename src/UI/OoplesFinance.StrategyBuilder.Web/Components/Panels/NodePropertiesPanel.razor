@@ -1,0 +1,249 @@
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder.Canvas
+
+<div class="node-properties-panel">
+    @if (SelectedNode is null)
+    {
+        <div class="no-selection">
+            <span class="no-selection-icon">i</span>
+            <p>Select a node to view its properties</p>
+        </div>
+    }
+    else
+    {
+        <div class="panel-header">
+            <div class="node-type-badge" style="background-color: @GetHeaderColorHex()">
+                @SelectedNode.Type.ToString()
+            </div>
+            <h3>@SelectedNode.Name</h3>
+        </div>
+
+        <div class="properties-content">
+            @if (!string.IsNullOrEmpty(SelectedNode.Description))
+            {
+                <div class="property-section">
+                    <p class="node-description">@SelectedNode.Description</p>
+                </div>
+            }
+
+            <div class="property-section">
+                <h4>Configuration</h4>
+                @foreach (var config in SelectedNode.Configuration)
+                {
+                    <div class="property-row">
+                        <label>@FormatLabel(config.Key)</label>
+                        @if (config.Value is bool boolValue)
+                        {
+                            <input type="checkbox"
+                                   checked="@boolValue"
+                                   @onchange="e => OnConfigChanged(config.Key, e.Value)" />
+                        }
+                        else if (config.Value is int || config.Value is double || config.Value is decimal)
+                        {
+                            <input type="number"
+                                   value="@config.Value"
+                                   @onchange="e => OnConfigChanged(config.Key, e.Value)" />
+                        }
+                        else if (config.Value is string strValue && GetEnumOptions(config.Key) is { } options)
+                        {
+                            <select value="@strValue" @onchange="e => OnConfigChanged(config.Key, e.Value)">
+                                @foreach (var option in options)
+                                {
+                                    <option value="@option" selected="@(option == strValue)">@option</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <input type="text"
+                                   value="@config.Value?.ToString()"
+                                   @onchange="e => OnConfigChanged(config.Key, e.Value)" />
+                        }
+                    </div>
+                }
+
+                @if (!SelectedNode.Configuration.Any())
+                {
+                    <p class="no-config">No configurable parameters</p>
+                }
+            </div>
+
+            @if (SelectedNode.InputPorts.Any())
+            {
+                <div class="property-section">
+                    <h4>Inputs</h4>
+                    @foreach (var port in SelectedNode.InputPorts)
+                    {
+                        <div class="port-row">
+                            <span class="port-indicator input"></span>
+                            <span class="port-name">@port.Name</span>
+                            <span class="port-type">@port.DataType</span>
+                            @if (port.IsRequired)
+                            {
+                                <span class="required-badge">Required</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (SelectedNode.OutputPorts.Any())
+            {
+                <div class="property-section">
+                    <h4>Outputs</h4>
+                    @foreach (var port in SelectedNode.OutputPorts)
+                    {
+                        <div class="port-row">
+                            <span class="port-indicator output"></span>
+                            <span class="port-name">@port.Name</span>
+                            <span class="port-type">@port.DataType</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="property-section">
+                <h4>Position</h4>
+                <div class="position-inputs">
+                    <div class="property-row">
+                        <label>X</label>
+                        <input type="number" value="@((int)SelectedNode.Position.X)"
+                               @onchange="e => OnPositionChanged(true, e.Value)" />
+                    </div>
+                    <div class="property-row">
+                        <label>Y</label>
+                        <input type="number" value="@((int)SelectedNode.Position.Y)"
+                               @onchange="e => OnPositionChanged(false, e.Value)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-section">
+                <h4>Options</h4>
+                <div class="property-row checkbox-row">
+                    <input type="checkbox" id="collapsed" checked="@SelectedNode.IsCollapsed"
+                           @onchange="e => OnCollapseChanged(e.Value)" />
+                    <label for="collapsed">Collapsed</label>
+                </div>
+                <div class="property-row checkbox-row">
+                    <input type="checkbox" id="locked" checked="@SelectedNode.IsLocked"
+                           @onchange="e => OnLockChanged(e.Value)" />
+                    <label for="locked">Locked</label>
+                </div>
+            </div>
+
+            @if (SelectedNode.ValidationState != NodeValidationState.Valid)
+            {
+                <div class="property-section validation-section @(SelectedNode.ValidationState == NodeValidationState.Error ? "error" : "warning")">
+                    <h4>@(SelectedNode.ValidationState == NodeValidationState.Error ? "Errors" : "Warnings")</h4>
+                    @foreach (var message in SelectedNode.ValidationMessages)
+                    {
+                        <p class="validation-message">@message</p>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public NodeViewModel? SelectedNode { get; set; }
+
+    [Parameter]
+    public EventCallback<(string Key, object? Value)> OnConfigurationChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<CanvasPoint> OnPositionChanged_Event { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnCollapsedChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnLockedChanged { get; set; }
+
+    private string GetHeaderColorHex()
+    {
+        if (SelectedNode is null) return "#666666";
+        var color = SelectedNode.HeaderColor;
+        return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+    }
+
+    private string FormatLabel(string key)
+    {
+        // Convert camelCase or PascalCase to Title Case with spaces
+        var result = new System.Text.StringBuilder();
+        for (int i = 0; i < key.Length; i++)
+        {
+            var c = key[i];
+            if (i > 0 && char.IsUpper(c))
+            {
+                result.Append(' ');
+            }
+            result.Append(i == 0 ? char.ToUpper(c) : c);
+        }
+        return result.ToString();
+    }
+
+    private string[]? GetEnumOptions(string key)
+    {
+        // Return enum options for known enum parameters
+        return key.ToLowerInvariant() switch
+        {
+            "matype" or "movingaveragetype" => new[] { "SMA", "EMA", "WMA", "DEMA", "TEMA", "TRIMA", "KAMA", "T3" },
+            "pricetype" or "appliedprice" => new[] { "Close", "Open", "High", "Low", "HL2", "HLC3", "OHLC4", "Weighted" },
+            "signaltype" => new[] { "CrossOver", "CrossUnder", "Above", "Below", "Equal" },
+            "comparisontype" => new[] { "GreaterThan", "LessThan", "Equal", "NotEqual", "GreaterOrEqual", "LessOrEqual" },
+            _ => null
+        };
+    }
+
+    private async Task OnConfigChanged(string key, object? value)
+    {
+        if (SelectedNode is null) return;
+
+        // Convert value to appropriate type
+        object? convertedValue = value;
+        if (SelectedNode.Configuration.TryGetValue(key, out var existing))
+        {
+            convertedValue = existing switch
+            {
+                int _ when int.TryParse(value?.ToString(), out var intVal) => intVal,
+                double _ when double.TryParse(value?.ToString(), out var dblVal) => dblVal,
+                decimal _ when decimal.TryParse(value?.ToString(), out var decVal) => decVal,
+                bool _ => value is bool b ? b : bool.TryParse(value?.ToString(), out var boolVal) && boolVal,
+                _ => value?.ToString()
+            };
+        }
+
+        await OnConfigurationChanged.InvokeAsync((key, convertedValue));
+    }
+
+    private async Task OnPositionChanged(bool isX, object? value)
+    {
+        if (SelectedNode is null || value is null) return;
+
+        if (double.TryParse(value.ToString(), out var coord))
+        {
+            var newPosition = isX
+                ? new CanvasPoint(coord, SelectedNode.Position.Y)
+                : new CanvasPoint(SelectedNode.Position.X, coord);
+            await OnPositionChanged_Event.InvokeAsync(newPosition);
+        }
+    }
+
+    private async Task OnCollapseChanged(object? value)
+    {
+        if (value is bool collapsed)
+        {
+            await OnCollapsedChanged.InvokeAsync(collapsed);
+        }
+    }
+
+    private async Task OnLockChanged(object? value)
+    {
+        if (value is bool locked)
+        {
+            await OnLockedChanged.InvokeAsync(locked);
+        }
+    }
+}

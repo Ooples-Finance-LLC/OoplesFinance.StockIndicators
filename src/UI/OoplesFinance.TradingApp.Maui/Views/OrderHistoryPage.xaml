@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.OrderHistoryPage"
+             x:DataType="viewmodels:OrderHistoryViewModel"
+             Title="Order History"
+             BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Filter Tabs -->
+        <HorizontalStackLayout Grid.Row="0" Padding="15,10" Spacing="10">
+            <Button Text="All"
+                    Style="{Binding AllFilterStyle}"
+                    Command="{Binding FilterCommand}"
+                    CommandParameter="all"
+                    WidthRequest="70"/>
+            <Button Text="Open"
+                    Style="{Binding OpenFilterStyle}"
+                    Command="{Binding FilterCommand}"
+                    CommandParameter="open"
+                    WidthRequest="70"/>
+            <Button Text="Filled"
+                    Style="{Binding FilledFilterStyle}"
+                    Command="{Binding FilterCommand}"
+                    CommandParameter="filled"
+                    WidthRequest="70"/>
+            <Button Text="Cancelled"
+                    Style="{Binding CancelledFilterStyle}"
+                    Command="{Binding FilterCommand}"
+                    CommandParameter="cancelled"
+                    WidthRequest="90"/>
+        </HorizontalStackLayout>
+
+        <!-- Orders List -->
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding FilteredOrders}"
+                            SelectionMode="Single"
+                            SelectionChangedCommand="{Binding OrderTappedCommand}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+                        <Label Text="No Orders Found"
+                               FontSize="18"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Your order history will appear here"
+                               FontSize="14"
+                               TextColor="{StaticResource TextDisabled}"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:OrderItemViewModel">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Cancel"
+                                               BackgroundColor="{StaticResource Error}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:OrderHistoryViewModel}}, Path=CancelOrderCommand}"
+                                               CommandParameter="{Binding}"
+                                               IsVisible="{Binding CanCancel}"/>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                                <Grid ColumnDefinitions="Auto,*,Auto" Padding="15">
+                                    <!-- Side Indicator -->
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{Binding SideColor}"
+                                            WidthRequest="4"
+                                            HeightRequest="40"
+                                            Margin="0,0,10,0"/>
+
+                                    <!-- Order Details -->
+                                    <VerticalStackLayout Grid.Column="1">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding Side}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding SideColor}"/>
+                                            <Label Text="{Binding Symbol}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="5">
+                                            <Label Text="{Binding Quantity, StringFormat='{0} shares'}"
+                                                   Style="{StaticResource LabelMuted}"
+                                                   FontSize="14"/>
+                                            <Label Text="@"
+                                                   Style="{StaticResource LabelMuted}"
+                                                   FontSize="14"/>
+                                            <Label Text="{Binding Price, StringFormat='${0:N2}'}"
+                                                   Style="{StaticResource LabelMuted}"
+                                                   FontSize="14"/>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding CreatedAt, StringFormat='{0:MMM dd, yyyy HH:mm}'}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="12"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Status -->
+                                    <VerticalStackLayout Grid.Column="2" HorizontalOptions="End">
+                                        <Border BackgroundColor="{Binding StatusBackgroundColor}"
+                                                Padding="8,4"
+                                                StrokeShape="RoundRectangle 4">
+                                            <Label Text="{Binding Status}"
+                                                   TextColor="{Binding StatusTextColor}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"/>
+                                        </Border>
+                                        <Label Text="{Binding FilledPrice, StringFormat='Filled @ ${0:N2}'}"
+                                               Style="{StaticResource LabelMuted}"
+                                               FontSize="12"
+                                               HorizontalOptions="End"
+                                               IsVisible="{Binding IsFilled}"
+                                               Margin="0,5,0,0"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

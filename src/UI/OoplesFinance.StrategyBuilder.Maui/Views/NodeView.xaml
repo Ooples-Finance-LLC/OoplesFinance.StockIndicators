@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.StrategyBuilder.Maui.ViewModels"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.NodeView"
+             x:DataType="viewmodels:NodeViewModel"
+             WidthRequest="{Binding Width}"
+             HeightRequest="{Binding Height}">
+
+    <Border x:Name="NodeBorder"
+            BackgroundColor="{Binding NodeColor}"
+            Stroke="{StaticResource NodeBorderColor}"
+            StrokeThickness="2"
+            StrokeShape="RoundRectangle 5">
+        <Grid RowDefinitions="Auto,*" Padding="0">
+
+            <!-- Node Header -->
+            <Border Grid.Row="0"
+                    BackgroundColor="{Binding HeaderColor}"
+                    StrokeThickness="0"
+                    Padding="10,6">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Image Grid.Column="0"
+                           Source="{Binding IconSource}"
+                           WidthRequest="16"
+                           HeightRequest="16"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding HasIcon}"/>
+                    <Label Grid.Column="1"
+                           Text="{Binding Name}"
+                           TextColor="White"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           Margin="5,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- Node Body with Ports -->
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Padding="5">
+
+                <!-- Input Ports (Left side) -->
+                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                    <BindableLayout.ItemsSource>
+                        <Binding Path="InputPorts"/>
+                    </BindableLayout.ItemsSource>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:PortViewModel">
+                            <HorizontalStackLayout Spacing="5">
+                                <Ellipse x:Name="PortDot"
+                                         Fill="{StaticResource InputPortColor}"
+                                         WidthRequest="10"
+                                         HeightRequest="10"
+                                         VerticalOptions="Center">
+                                    <Ellipse.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding TapCommand}"/>
+                                    </Ellipse.GestureRecognizers>
+                                </Ellipse>
+                                <Label Text="{Binding Name}"
+                                       TextColor="#CCC"
+                                       FontSize="10"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Center content (parameters preview) -->
+                <VerticalStackLayout Grid.Column="1"
+                                     Padding="10,5"
+                                     VerticalOptions="Center"
+                                     IsVisible="{Binding ShowPreview}">
+                    <Label Text="{Binding PreviewText}"
+                           TextColor="#888"
+                           FontSize="10"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Output Ports (Right side) -->
+                <VerticalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center">
+                    <BindableLayout.ItemsSource>
+                        <Binding Path="OutputPorts"/>
+                    </BindableLayout.ItemsSource>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:PortViewModel">
+                            <HorizontalStackLayout Spacing="5" HorizontalOptions="End">
+                                <Label Text="{Binding Name}"
+                                       TextColor="#CCC"
+                                       FontSize="10"
+                                       VerticalOptions="Center"/>
+                                <Ellipse Fill="{StaticResource OutputPortColor}"
+                                         WidthRequest="10"
+                                         HeightRequest="10"
+                                         VerticalOptions="Center">
+                                    <Ellipse.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding TapCommand}"/>
+                                        <DragGestureRecognizer CanDrag="True"
+                                                               DragStartingCommand="{Binding DragStartCommand}"/>
+                                    </Ellipse.GestureRecognizers>
+                                </Ellipse>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </Grid>
+
+        </Grid>
+    </Border>
+
+</ContentView>

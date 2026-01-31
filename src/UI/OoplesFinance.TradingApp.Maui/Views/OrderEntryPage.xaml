@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.OrderEntryPage"
+             x:DataType="viewmodels:OrderEntryViewModel"
+             Title="Trade"
+             BackgroundColor="{StaticResource Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Symbol Search -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Symbol" Style="{StaticResource LabelMuted}"/>
+                    <SearchBar Placeholder="Search symbol..."
+                               Text="{Binding SearchText}"
+                               SearchCommand="{Binding SearchCommand}"
+                               BackgroundColor="{StaticResource SurfaceLighter}"/>
+
+                    <!-- Symbol Result -->
+                    <Border IsVisible="{Binding HasSelectedSymbol}"
+                            BackgroundColor="{StaticResource SurfaceLighter}"
+                            Padding="15"
+                            StrokeThickness="0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0">
+                                <Label Text="{Binding SelectedSymbol}"
+                                       FontSize="24"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}"/>
+                                <Label Text="{Binding CompanyName}"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="12"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}"/>
+                                <HorizontalStackLayout HorizontalOptions="End">
+                                    <Label Text="{Binding PriceChange, StringFormat='{0:+0.00;-0.00}'}"
+                                           TextColor="{Binding PriceChangeColor}"
+                                           FontSize="14"/>
+                                    <Label Text="{Binding PriceChangePercent, StringFormat=' ({0:P2})'}"
+                                           TextColor="{Binding PriceChangeColor}"
+                                           FontSize="14"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Buy/Sell Toggle -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="BUY"
+                        Command="{Binding SetBuyCommand}"
+                        BackgroundColor="{Binding BuyButtonColor}"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        HeightRequest="50"/>
+                <Button Grid.Column="1"
+                        Text="SELL"
+                        Command="{Binding SetSellCommand}"
+                        BackgroundColor="{Binding SellButtonColor}"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        HeightRequest="50"/>
+            </Grid>
+
+            <!-- Order Type -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Order Type" Style="{StaticResource LabelMuted}"/>
+                    <Picker SelectedItem="{Binding SelectedOrderType}"
+                            ItemsSource="{Binding OrderTypes}"
+                            BackgroundColor="{StaticResource SurfaceLighter}"
+                            TextColor="{StaticResource TextPrimary}"/>
+
+                    <!-- Limit Price (shown for limit orders) -->
+                    <VerticalStackLayout IsVisible="{Binding ShowLimitPrice}" Spacing="5">
+                        <Label Text="Limit Price" Style="{StaticResource LabelMuted}"/>
+                        <Entry Text="{Binding LimitPrice}"
+                               Keyboard="Numeric"
+                               Placeholder="0.00"
+                               BackgroundColor="{StaticResource SurfaceLighter}"
+                               TextColor="{StaticResource TextPrimary}"/>
+                    </VerticalStackLayout>
+
+                    <!-- Stop Price (shown for stop orders) -->
+                    <VerticalStackLayout IsVisible="{Binding ShowStopPrice}" Spacing="5">
+                        <Label Text="Stop Price" Style="{StaticResource LabelMuted}"/>
+                        <Entry Text="{Binding StopPrice}"
+                               Keyboard="Numeric"
+                               Placeholder="0.00"
+                               BackgroundColor="{StaticResource SurfaceLighter}"
+                               TextColor="{StaticResource TextPrimary}"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Quantity -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Quantity" Style="{StaticResource LabelMuted}"/>
+                        <Label Grid.Column="1"
+                               Text="{Binding AvailableShares, StringFormat='Available: {0:N0}'}"
+                               Style="{StaticResource LabelMuted}"
+                               FontSize="11"/>
+                    </Grid>
+
+                    <Entry Text="{Binding Quantity}"
+                           Keyboard="Numeric"
+                           Placeholder="0"
+                           BackgroundColor="{StaticResource SurfaceLighter}"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <!-- Quick quantity buttons -->
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Button Text="25%"
+                                Command="{Binding SetQuantityPercentCommand}"
+                                CommandParameter="0.25"
+                                Style="{StaticResource SmallButtonStyle}"/>
+                        <Button Text="50%"
+                                Command="{Binding SetQuantityPercentCommand}"
+                                CommandParameter="0.50"
+                                Style="{StaticResource SmallButtonStyle}"/>
+                        <Button Text="75%"
+                                Command="{Binding SetQuantityPercentCommand}"
+                                CommandParameter="0.75"
+                                Style="{StaticResource SmallButtonStyle}"/>
+                        <Button Text="100%"
+                                Command="{Binding SetQuantityPercentCommand}"
+                                CommandParameter="1.0"
+                                Style="{StaticResource SmallButtonStyle}"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Time in Force -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Time in Force" Style="{StaticResource LabelMuted}"/>
+                    <Picker SelectedItem="{Binding SelectedTimeInForce}"
+                            ItemsSource="{Binding TimeInForceOptions}"
+                            BackgroundColor="{StaticResource SurfaceLighter}"
+                            TextColor="{StaticResource TextPrimary}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Order Summary -->
+            <Border Style="{StaticResource CardStyle}"
+                    BackgroundColor="{StaticResource SurfaceLighter}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Order Summary"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Estimated Cost" Style="{StaticResource LabelMuted}"/>
+                        <Label Text="{Binding EstimatedCost, StringFormat='${0:N2}'}"
+                               TextColor="{StaticResource TextPrimary}"
+                               FontAttributes="Bold"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Commission" Style="{StaticResource LabelMuted}"/>
+                        <Label Text="{Binding Commission, StringFormat='${0:N2}'}"
+                               TextColor="{StaticResource TextSecondary}"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Total"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="{Binding TotalCost, StringFormat='${0:N2}'}"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}"
+                               FontSize="18"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Buying Power After" Style="{StaticResource LabelMuted}"/>
+                        <Label Text="{Binding BuyingPowerAfter, StringFormat='${0:N2}'}"
+                               TextColor="{StaticResource TextSecondary}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Submit Button -->
+            <Button Text="{Binding SubmitButtonText}"
+                    Command="{Binding SubmitOrderCommand}"
+                    IsEnabled="{Binding CanSubmit}"
+                    BackgroundColor="{Binding SubmitButtonColor}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    HeightRequest="55"/>
+
+            <!-- Disclaimer -->
+            <Label Text="Orders submitted outside market hours will be queued for the next trading session."
+                   Style="{StaticResource LabelMuted}"
+                   FontSize="10"
+                   HorizontalTextAlignment="Center"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

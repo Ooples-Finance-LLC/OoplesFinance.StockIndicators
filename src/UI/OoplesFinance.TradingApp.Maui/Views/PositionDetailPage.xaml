@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             x:Class="OoplesFinance.TradingApp.Maui.Views.PositionDetailPage"
+             x:DataType="viewmodels:PositionDetailViewModel"
+             Title="{Binding Symbol}"
+             BackgroundColor="{StaticResource Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="15">
+
+            <!-- Position Header -->
+            <Border Style="{StaticResource CardStyle}">
+                <Grid ColumnDefinitions="*,Auto" Padding="15">
+                    <VerticalStackLayout>
+                        <Label Text="{Binding Symbol}"
+                               FontSize="28"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="{Binding CompanyName}"
+                               Style="{StaticResource LabelMuted}"
+                               FontSize="16"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                        <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"
+                               HorizontalOptions="End"/>
+                        <HorizontalStackLayout HorizontalOptions="End">
+                            <Label Text="{Binding DayChange, StringFormat='{0:+0.00;-0.00}'}"
+                                   TextColor="{Binding DayChangeColor}"
+                                   FontSize="16"/>
+                            <Label Text="{Binding DayChangePercent, StringFormat=' ({0:P2})'}"
+                                   TextColor="{Binding DayChangeColor}"
+                                   FontSize="16"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Position Value -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Position Value"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="15">
+                        <VerticalStackLayout Grid.Column="0" Grid.Row="0">
+                            <Label Text="Market Value" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding MarketValue, StringFormat='${0:N2}'}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Grid.Row="0">
+                            <Label Text="Quantity" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding Quantity, StringFormat='{0:N0} shares'}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="0" Grid.Row="1">
+                            <Label Text="Avg Cost" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding AveragePrice, StringFormat='${0:N2}'}"
+                                   FontSize="18"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Grid.Row="1">
+                            <Label Text="Cost Basis" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding CostBasis, StringFormat='${0:N2}'}"
+                                   FontSize="18"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="0" Grid.Row="2">
+                            <Label Text="Total P&amp;L" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding UnrealizedPnL, StringFormat='${0:+#,##0.00;-#,##0.00}'}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding UnrealizedPnLColor}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Grid.Row="2">
+                            <Label Text="Today's P&amp;L" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding DayPnL, StringFormat='${0:+#,##0.00;-#,##0.00}'}"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding DayPnLColor}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Return on Investment -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Return on Investment"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Total Return" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding TotalReturnPercent, StringFormat='{0:+#0.00%;-#0.00%}'}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding TotalReturnColor}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Day's Return" Style="{StaticResource LabelMuted}" FontSize="12"/>
+                            <Label Text="{Binding DayReturnPercent, StringFormat='{0:+#0.00%;-#0.00%}'}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding DayReturnColor}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Quick Actions -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Quick Actions"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0"
+                                Text="Add to Position"
+                                Style="{StaticResource SuccessButton}"
+                                Command="{Binding AddToPositionCommand}"/>
+                        <Button Grid.Column="1"
+                                Text="Reduce Position"
+                                Style="{StaticResource DangerButton}"
+                                Command="{Binding ReducePositionCommand}"/>
+                    </Grid>
+
+                    <Button Text="Close Entire Position"
+                            Style="{StaticResource DangerOutlineButton}"
+                            Command="{Binding ClosePositionCommand}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Set Alert -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="Price Alert"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Set Stop Loss"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding SetStopLossCommand}"/>
+                        <Button Text="Set Take Profit"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding SetTakeProfitCommand}"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- View Chart -->
+            <Button Text="View Chart"
+                    Style="{StaticResource PrimaryButton}"
+                    Command="{Binding ViewChartCommand}"
+                    HeightRequest="50"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

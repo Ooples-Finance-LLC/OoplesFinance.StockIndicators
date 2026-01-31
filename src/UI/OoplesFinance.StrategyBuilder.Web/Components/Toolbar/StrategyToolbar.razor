@@ -1,0 +1,152 @@
+@using OoplesFinance.StockIndicators.Builder.VisualBuilder.Canvas
+
+<div class="strategy-toolbar">
+    <div class="toolbar-group">
+        <button class="toolbar-button" @onclick="OnNewStrategy" title="New Strategy (Ctrl+N)">
+            <span class="icon">+</span>
+            <span class="label">New</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnOpenStrategy" title="Open Strategy (Ctrl+O)">
+            <span class="icon">O</span>
+            <span class="label">Open</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnSaveStrategy" title="Save Strategy (Ctrl+S)">
+            <span class="icon">S</span>
+            <span class="label">Save</span>
+        </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <div class="toolbar-group">
+        <button class="toolbar-button" @onclick="OnUndo" disabled="@(!CanUndo)" title="Undo (Ctrl+Z)">
+            <span class="icon">&lt;</span>
+            <span class="label">Undo</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnRedo" disabled="@(!CanRedo)" title="Redo (Ctrl+Y)">
+            <span class="icon">&gt;</span>
+            <span class="label">Redo</span>
+        </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <div class="toolbar-group">
+        <button class="toolbar-button" @onclick="OnCut" disabled="@(!HasSelection)" title="Cut (Ctrl+X)">
+            <span class="icon">X</span>
+            <span class="label">Cut</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnCopy" disabled="@(!HasSelection)" title="Copy (Ctrl+C)">
+            <span class="icon">C</span>
+            <span class="label">Copy</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnPaste" disabled="@(!HasClipboard)" title="Paste (Ctrl+V)">
+            <span class="icon">V</span>
+            <span class="label">Paste</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnDelete" disabled="@(!HasSelection)" title="Delete (Del)">
+            <span class="icon">D</span>
+            <span class="label">Delete</span>
+        </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <div class="toolbar-group">
+        <button class="toolbar-button" @onclick="OnSelectAll" title="Select All (Ctrl+A)">
+            <span class="icon">A</span>
+            <span class="label">All</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnZoomIn" title="Zoom In (Ctrl++)">
+            <span class="icon">+</span>
+            <span class="label">Zoom+</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnZoomOut" title="Zoom Out (Ctrl+-)">
+            <span class="icon">-</span>
+            <span class="label">Zoom-</span>
+        </button>
+        <button class="toolbar-button" @onclick="OnZoomToFit" title="Fit to View">
+            <span class="icon">[]</span>
+            <span class="label">Fit</span>
+        </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <div class="toolbar-group alignment-group">
+        <button class="toolbar-button small" @onclick="OnAlignLeft" disabled="@(!HasMultiSelection)" title="Align Left">
+            <span class="icon">|=</span>
+        </button>
+        <button class="toolbar-button small" @onclick="OnAlignCenter" disabled="@(!HasMultiSelection)" title="Align Center">
+            <span class="icon">=|=</span>
+        </button>
+        <button class="toolbar-button small" @onclick="OnAlignRight" disabled="@(!HasMultiSelection)" title="Align Right">
+            <span class="icon">=|</span>
+        </button>
+        <button class="toolbar-button small" @onclick="OnAlignTop" disabled="@(!HasMultiSelection)" title="Align Top">
+            <span class="icon">T</span>
+        </button>
+        <button class="toolbar-button small" @onclick="OnAlignMiddle" disabled="@(!HasMultiSelection)" title="Align Middle">
+            <span class="icon">M</span>
+        </button>
+        <button class="toolbar-button small" @onclick="OnAlignBottom" disabled="@(!HasMultiSelection)" title="Align Bottom">
+            <span class="icon">B</span>
+        </button>
+    </div>
+
+    <div class="toolbar-separator"></div>
+
+    <div class="toolbar-group">
+        <button class="toolbar-button @(IsValidateMode ? "active" : "")" @onclick="OnValidate" title="Validate Strategy">
+            <span class="icon">V</span>
+            <span class="label">Validate</span>
+        </button>
+        <button class="toolbar-button primary" @onclick="OnRunBacktest" title="Run Backtest">
+            <span class="icon">&gt;</span>
+            <span class="label">Backtest</span>
+        </button>
+        <button class="toolbar-button success" @onclick="OnGenerateCode" title="Generate Code">
+            <span class="icon">{}</span>
+            <span class="label">Code</span>
+        </button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <div class="toolbar-group">
+        <span class="zoom-label">@($"{ZoomLevel * 100:F0}%")</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool CanUndo { get; set; }
+    [Parameter] public bool CanRedo { get; set; }
+    [Parameter] public bool HasSelection { get; set; }
+    [Parameter] public bool HasMultiSelection { get; set; }
+    [Parameter] public bool HasClipboard { get; set; }
+    [Parameter] public bool IsValidateMode { get; set; }
+    [Parameter] public double ZoomLevel { get; set; } = 1.0;
+
+    [Parameter] public EventCallback OnNewStrategy { get; set; }
+    [Parameter] public EventCallback OnOpenStrategy { get; set; }
+    [Parameter] public EventCallback OnSaveStrategy { get; set; }
+    [Parameter] public EventCallback OnUndo { get; set; }
+    [Parameter] public EventCallback OnRedo { get; set; }
+    [Parameter] public EventCallback OnCut { get; set; }
+    [Parameter] public EventCallback OnCopy { get; set; }
+    [Parameter] public EventCallback OnPaste { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnSelectAll { get; set; }
+    [Parameter] public EventCallback OnZoomIn { get; set; }
+    [Parameter] public EventCallback OnZoomOut { get; set; }
+    [Parameter] public EventCallback OnZoomToFit { get; set; }
+    [Parameter] public EventCallback OnAlignLeft { get; set; }
+    [Parameter] public EventCallback OnAlignCenter { get; set; }
+    [Parameter] public EventCallback OnAlignRight { get; set; }
+    [Parameter] public EventCallback OnAlignTop { get; set; }
+    [Parameter] public EventCallback OnAlignMiddle { get; set; }
+    [Parameter] public EventCallback OnAlignBottom { get; set; }
+    [Parameter] public EventCallback OnValidate { get; set; }
+    [Parameter] public EventCallback OnRunBacktest { get; set; }
+    [Parameter] public EventCallback OnGenerateCode { get; set; }
+}

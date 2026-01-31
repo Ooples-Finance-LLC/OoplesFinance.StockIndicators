@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:OoplesFinance.StrategyBuilder.Maui.ViewModels"
+             x:Class="OoplesFinance.StrategyBuilder.Maui.Views.BacktestResultsPage"
+             x:DataType="viewmodels:BacktestResultsViewModel"
+             Title="Backtest Results"
+             BackgroundColor="#1E1E1E">
+
+    <Grid RowDefinitions="Auto,*" Padding="20">
+
+        <!-- Header with summary stats -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" Margin="0,0,0,20">
+
+            <!-- Total Return -->
+            <Border Grid.Column="0" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Total Return" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.TotalReturn, StringFormat='{0:P2}'}"
+                           TextColor="#4EC9B0"
+                           FontSize="24"
+                           FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Sharpe Ratio -->
+            <Border Grid.Column="1" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Sharpe Ratio" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.SharpeRatio, StringFormat='{0:F2}'}"
+                           TextColor="#569CD6"
+                           FontSize="24"
+                           FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Max Drawdown -->
+            <Border Grid.Column="2" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Max Drawdown" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.MaxDrawdown, StringFormat='{0:P2}'}"
+                           TextColor="#F14C4C"
+                           FontSize="24"
+                           FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Win Rate -->
+            <Border Grid.Column="3" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Win Rate" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.WinRate, StringFormat='{0:P1}'}"
+                           TextColor="#DCDCAA"
+                           FontSize="24"
+                           FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Second row of stats -->
+            <Border Grid.Row="1" Grid.Column="0" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Total Trades" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.TotalTrades}"
+                           TextColor="White"
+                           FontSize="18"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Profit Factor" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.ProfitFactor, StringFormat='{0:F2}'}"
+                           TextColor="White"
+                           FontSize="18"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="2" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Avg Win" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.AverageWin, StringFormat='${0:N0}'}"
+                           TextColor="#4EC9B0"
+                           FontSize="18"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="3" BackgroundColor="#252526" Padding="15" Margin="5">
+                <VerticalStackLayout>
+                    <Label Text="Avg Loss" TextColor="#888" FontSize="12"/>
+                    <Label Text="{Binding Result.AverageLoss, StringFormat='${0:N0}'}"
+                           TextColor="#F14C4C"
+                           FontSize="18"/>
+                </VerticalStackLayout>
+            </Border>
+
+        </Grid>
+
+        <!-- Trade list -->
+        <Border Grid.Row="1" BackgroundColor="#252526" Padding="15">
+            <Grid RowDefinitions="Auto,*">
+                <Label Grid.Row="0"
+                       Text="Trade History"
+                       TextColor="White"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       Margin="0,0,0,10"/>
+
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding Result.Trades}"
+                                SelectionMode="None">
+                    <CollectionView.Header>
+                        <Grid ColumnDefinitions="100,80,80,80,80,80,*"
+                              BackgroundColor="#1E1E1E"
+                              Padding="10,5">
+                            <Label Grid.Column="0" Text="Date" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="1" Text="Symbol" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="2" Text="Direction" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="3" Text="Entry" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="4" Text="Exit" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="5" Text="Qty" TextColor="#888" FontSize="11"/>
+                            <Label Grid.Column="6" Text="P/L" TextColor="#888" FontSize="11"/>
+                        </Grid>
+                    </CollectionView.Header>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type viewmodels:TradeRecord}">
+                            <Grid ColumnDefinitions="100,80,80,80,80,80,*"
+                                  Padding="10,8"
+                                  BackgroundColor="#2D2D30">
+                                <Label Grid.Column="0"
+                                       Text="{Binding EntryDate, StringFormat='{0:MM/dd/yy}'}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Symbol}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Grid.Column="2"
+                                       Text="{Binding Direction}"
+                                       TextColor="{Binding Direction, Converter={StaticResource DirectionColorConverter}}"
+                                       FontSize="12"/>
+                                <Label Grid.Column="3"
+                                       Text="{Binding EntryPrice, StringFormat='${0:F2}'}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Grid.Column="4"
+                                       Text="{Binding ExitPrice, StringFormat='${0:F2}'}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Grid.Column="5"
+                                       Text="{Binding Quantity}"
+                                       TextColor="White"
+                                       FontSize="12"/>
+                                <Label Grid.Column="6"
+                                       Text="{Binding ProfitLoss, StringFormat='${0:N0}'}"
+                                       TextColor="{Binding ProfitLoss, Converter={StaticResource ProfitLossColorConverter}}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</ContentPage>
