@@ -85,6 +85,13 @@
     <PackageReference Include="Alpaca.Markets.Extensions" Version="7.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Fork: grant ONLY the platform's indicator adapter access to the internal,
+         deprecated reflection breadth-engine (IndicatorInvoker) instead of making
+         it public. Keeps it out of the library's public API. -->
+    <InternalsVisibleTo Include="Ooples.Indicators" />
+  </ItemGroup>
+
   <!-- Source Generator: Build the generator project first -->
   <ItemGroup>
     <ProjectReference Include="SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj"
