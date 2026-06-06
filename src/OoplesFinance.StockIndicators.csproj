@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net461</TargetFrameworks>
+    <!-- Fork note: net461 dropped — the platform consuming this is net10-only,
+         and the net461 shim chain conflicts with the Alpaca SDK transitive deps. -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -77,6 +79,10 @@
   <ItemGroup>
     <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <!-- Upstream fix (to PR back to pr87): the Builder/Trading + Builder/MarketData
+         Alpaca adapters use Alpaca.Markets but the reference was missing. -->
+    <PackageReference Include="Alpaca.Markets" Version="7.1.4" />
+    <PackageReference Include="Alpaca.Markets.Extensions" Version="7.1.1" />
   </ItemGroup>
 
   <!-- Source Generator: Build the generator project first -->
@@ -93,7 +99,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="System.Memory" Version="4.6.0" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.Json" Version="6.0.11" />
