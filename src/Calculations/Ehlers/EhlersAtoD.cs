@@ -1218,6 +1218,19 @@ public static partial class Calculations
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
+        // DFT basis cos/sin(2π·k/j) depends only on (period j, lag k), not the bar i — precompute once.
+        var cosTable = new double[length1 + 1, length1 + 1];
+        var sinTable = new double[length1 + 1, length1 + 1];
+        for (var jj = length2; jj <= length1; jj++)
+        {
+            for (var kk = 0; kk <= length1; kk++)
+            {
+                var angle = 2 * Math.PI * ((double)kk / jj);
+                cosTable[jj, kk] = Math.Cos(angle);
+                sinTable[jj, kk] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var roofingFilter = roofingFilterList[i];
@@ -1231,13 +1244,13 @@ public static partial class Calculations
                 for (var k = 0; k <= length1; k++)
                 {
                     var prevFilt = i >= k ? roofingFilterList[i - k] : 0;
-                    cosPart += prevFilt * Math.Cos(2 * Math.PI * ((double)k / j));
-                    sinPart += prevFilt * Math.Sin(2 * Math.PI * ((double)k / j));
+                    cosPart += prevFilt * cosTable[j, k];
+                    sinPart += prevFilt * sinTable[j, k];
                 }
 
-                var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
+                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
                 var prevR = rArray[j];
-                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * prevR);
+                var r = (0.2 * (sqSum * sqSum)) + (0.8 * prevR);
                 rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
                 var pwr = maxPwr != 0 ? r / maxPwr : 0;

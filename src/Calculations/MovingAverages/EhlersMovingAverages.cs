@@ -1369,19 +1369,26 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // The Hann window weights (1 - cos(2π·j/(length+1))) and their sum are constant across bars — precompute.
+        var cosWeights = new double[Math.Max(length, 0) + 1];
+        double coefSum = 0;
+        for (var j = 1; j <= length; j++)
+        {
+            cosWeights[j] = 1 - Math.Cos(2 * Math.PI * ((double)j / (length + 1)));
+            coefSum += cosWeights[j];
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevFilt = i >= 1 ? filtList[i - 1] : 0;
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            double filtSum = 0, coefSum = 0;
+            double filtSum = 0;
             for (var j = 1; j <= length; j++)
             {
                 var prevV = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                var cos = 1 - Math.Cos(2 * Math.PI * ((double)j / (length + 1)));
-                filtSum += cos * prevV;
-                coefSum += cos;
+                filtSum += cosWeights[j] * prevV;
             }
 
             var filt = coefSum != 0 ? filtSum / coefSum : 0;
