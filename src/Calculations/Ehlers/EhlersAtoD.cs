@@ -768,6 +768,20 @@ public static partial class Calculations
         var corrList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
 
+        // The DFT basis cos/sin(2π·k/j) depends only on (j,k) — not the bar i — yet was recomputed every bar
+        // (Count × ~39 periods × ~46 lags trig calls). Precompute it once; bit-identical (same values + order).
+        var cosTable = new double[length1 + 1, length1 + 1];
+        var sinTable = new double[length1 + 1, length1 + 1];
+        for (var j = length2; j <= length1; j++)
+        {
+            for (var k = length3; k <= length1; k++)
+            {
+                var angle = 2 * Math.PI * ((double)k / j);
+                cosTable[j, k] = Math.Cos(angle);
+                sinTable[j, k] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var corr = corrList[i];
@@ -781,12 +795,12 @@ public static partial class Calculations
                 for (var k = length3; k <= length1; k++)
                 {
                     var prevCorr = i >= k ? corrList[i - k] : 0;
-                    cosPart += prevCorr * Math.Cos(2 * Math.PI * ((double)k / j));
-                    sinPart += prevCorr * Math.Sin(2 * Math.PI * ((double)k / j));
+                    cosPart += prevCorr * cosTable[j, k];
+                    sinPart += prevCorr * sinTable[j, k];
                 }
 
-                var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
-                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * rArray[j]);
+                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
+                var r = (0.2 * (sqSum * sqSum)) + (0.8 * rArray[j]);
                 rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
             }
