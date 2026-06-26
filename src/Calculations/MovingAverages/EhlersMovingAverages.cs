@@ -1152,6 +1152,22 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // distance(p) = Σ_{lookBack=1..length-1} (input[p] - input[p-lookBack])² depends only on p = i-count
+        // (not on i and count separately), so it repeats across bars. Precompute it once per p — turning the
+        // O(Count·length²) triple loop into O(Count·length). Bit-identical (same operands + order; input[neg]=0).
+        var distanceByP = new double[stockData.Count];
+        for (var p = 0; p < stockData.Count; p++)
+        {
+            double distance = 0;
+            for (var lookBack = 1; lookBack <= length - 1; lookBack++)
+            {
+                var back = p >= lookBack ? inputList[p - lookBack] : 0;
+                distance += Pow(inputList[p] - back, 2);
+            }
+
+            distanceByP[p] = distance;
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -1161,13 +1177,7 @@ public static partial class Calculations
             for (var count = 0; count <= length - 1; count++)
             {
                 var prevCount = i >= count ? inputList[i - count] : 0;
-
-                double distance = 0;
-                for (var lookBack = 1; lookBack <= length - 1; lookBack++)
-                {
-                    var prevCountLookBack = i >= count + lookBack ? inputList[i - (count + lookBack)] : 0;
-                    distance += Pow(prevCount - prevCountLookBack, 2);
-                }
+                var distance = i >= count ? distanceByP[i - count] : 0;
 
                 srcSum += distance * prevCount;
                 coefSum += distance;
