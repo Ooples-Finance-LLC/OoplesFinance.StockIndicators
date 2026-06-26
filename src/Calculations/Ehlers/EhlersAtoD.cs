@@ -1603,6 +1603,20 @@ public static partial class Calculations
         var twoPiPrd = MinOrMax(2 * Math.PI / length, 0.99, 0.01);
         var alpha = (1 - Math.Sin(twoPiPrd)) / Math.Cos(twoPiPrd);
 
+        // DFT basis cos/sin(clamp(2π·n/j)) depends only on (period j, lag n), not the bar i — yet was
+        // recomputed every bar (Count × ~43 × ~50 trig calls). Precompute once; bit-identical.
+        var cosTable = new double[maxLength + 1, maxLength];
+        var sinTable = new double[maxLength + 1, maxLength];
+        for (var j = minLength; j <= maxLength; j++)
+        {
+            for (var n = 0; n <= maxLength - 1; n++)
+            {
+                var angle = MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01);
+                cosTable[j, n] = Math.Cos(angle);
+                sinTable[j, n] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -1626,8 +1640,8 @@ public static partial class Calculations
                 for (var n = 0; n <= maxLength - 1; n++)
                 {
                     var prevCleanedData = i >= n ? cleanedDataList[i - n] : 0;
-                    cosPart += prevCleanedData * Math.Cos(MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
-                    sinPart += prevCleanedData * Math.Sin(MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
+                    cosPart += prevCleanedData * cosTable[j, n];
+                    sinPart += prevCleanedData * sinTable[j, n];
                 }
 
                 var periodPwr = (cosPart * cosPart) + (sinPart * sinPart);
