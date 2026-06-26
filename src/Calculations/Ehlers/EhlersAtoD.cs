@@ -591,24 +591,57 @@ public static partial class Calculations
         var hFiltList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersImpulseResponse(data, maType, length, bw));
 
+        // Hoist the i-INDEPENDENT target waveform out of the per-bar loop. y(j,k) = -Sin(clamp(2π(j+k)/length))
+        // depends only on (j+k), and the y-only statistics (Σy, Σy²) depend only on j — not on the bar i. So
+        // precompute them once: the hot inner loop becomes a single multiply-add (was Sin + 4 Pow per k) and the
+        // per-bar x-stats are computed once instead of once per j. Bit-identical result (same operands + order).
+        var yTable = new double[(2 * length) - 1];
+        for (var m = 0; m < yTable.Length; m++)
+        {
+            yTable[m] = -Math.Sin(MinOrMax(2 * Math.PI * ((double)m / length), 0.99, 0.01));
+        }
+
+        var syArr = new double[length];
+        var denomYArr = new double[length];
+        for (var j = 0; j < length; j++)
+        {
+            double sy = 0, syy = 0;
+            for (var k = 0; k < length; k++)
+            {
+                var y = yTable[j + k];
+                sy += y;
+                syy += y * y;
+            }
+
+            syArr[j] = sy;
+            denomYArr[j] = (length * syy) - (sy * sy);
+        }
+
+        var xWin = new double[length];
         for (var i = 0; i < stockData.Count; i++)
         {
+            double sx = 0, sxx = 0;
+            for (var k = 0; k < length; k++)
+            {
+                var x = i >= k ? hFiltList[i - k] : 0;
+                xWin[k] = x;
+                sx += x;
+                sxx += x * x;
+            }
+
+            var denomX = (length * sxx) - (sx * sx);
+
             double maxCorr = -1, start = 0;
             for (var j = 0; j < length; j++)
             {
-                double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+                double sxy = 0;
                 for (var k = 0; k < length; k++)
                 {
-                    var x = i >= k ? hFiltList[i - k] : 0;
-                    var y = -Math.Sin(MinOrMax(2 * Math.PI * ((double)(j + k) / length), 0.99, 0.01));
-                    sx += x;
-                    sy += y;
-                    sxx += Pow(x, 2);
-                    sxy += x * y;
-                    syy += Pow(y, 2);
+                    sxy += xWin[k] * yTable[j + k];
                 }
-                var corr = ((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2)) > 0 ? ((length * sxy) - (sx * sy)) /
-                    Sqrt(((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2))) : 0;
+
+                var denom = denomX * denomYArr[j];
+                var corr = denom > 0 ? ((length * sxy) - (sx * syArr[j])) / Sqrt(denom) : 0;
                 if (corr > maxCorr)
                 {
                     maxCorr = corr;
