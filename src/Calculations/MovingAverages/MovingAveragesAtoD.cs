@@ -986,6 +986,7 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         var v1List = CalculateStandardDeviationVolatility(stockData, maType, length).OutputValues["Variance"];
+        var tolerance = Pow(10, -5);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -997,15 +998,14 @@ public static partial class Calculations
             var v2 = Pow(prevCma - sma, 2);
             var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
 
-            double tolerance = Pow(10, -5), err = 1, kPrev = 1, k = 1;
-            for (var j = 0; j <= 5000; j++)
+            // Fixed-point iteration converges in a handful of steps — stop at convergence instead of always
+            // spinning the full 5000 (the original kept looping a dead body after err<=tolerance). Identical k.
+            double err = 1, kPrev = 1, k = 1;
+            for (var j = 0; j <= 5000 && err > tolerance; j++)
             {
-                if (err > tolerance)
-                {
-                    k = v3 * kPrev * (2 - kPrev);
-                    err = kPrev - k;
-                    kPrev = k;
-                }
+                k = v3 * kPrev * (2 - kPrev);
+                err = kPrev - k;
+                kPrev = k;
             }
 
             var cma = prevCma + (k * (sma - prevCma));

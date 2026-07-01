@@ -591,24 +591,57 @@ public static partial class Calculations
         var hFiltList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersImpulseResponse(data, maType, length, bw));
 
+        // Hoist the i-INDEPENDENT target waveform out of the per-bar loop. y(j,k) = -Sin(clamp(2π(j+k)/length))
+        // depends only on (j+k), and the y-only statistics (Σy, Σy²) depend only on j — not on the bar i. So
+        // precompute them once: the hot inner loop becomes a single multiply-add (was Sin + 4 Pow per k) and the
+        // per-bar x-stats are computed once instead of once per j. Bit-identical result (same operands + order).
+        var yTable = new double[(2 * length) - 1];
+        for (var m = 0; m < yTable.Length; m++)
+        {
+            yTable[m] = -Math.Sin(MinOrMax(2 * Math.PI * ((double)m / length), 0.99, 0.01));
+        }
+
+        var syArr = new double[length];
+        var denomYArr = new double[length];
+        for (var j = 0; j < length; j++)
+        {
+            double sy = 0, syy = 0;
+            for (var k = 0; k < length; k++)
+            {
+                var y = yTable[j + k];
+                sy += y;
+                syy += y * y;
+            }
+
+            syArr[j] = sy;
+            denomYArr[j] = (length * syy) - (sy * sy);
+        }
+
+        var xWin = new double[length];
         for (var i = 0; i < stockData.Count; i++)
         {
+            double sx = 0, sxx = 0;
+            for (var k = 0; k < length; k++)
+            {
+                var x = i >= k ? hFiltList[i - k] : 0;
+                xWin[k] = x;
+                sx += x;
+                sxx += x * x;
+            }
+
+            var denomX = (length * sxx) - (sx * sx);
+
             double maxCorr = -1, start = 0;
             for (var j = 0; j < length; j++)
             {
-                double sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+                double sxy = 0;
                 for (var k = 0; k < length; k++)
                 {
-                    var x = i >= k ? hFiltList[i - k] : 0;
-                    var y = -Math.Sin(MinOrMax(2 * Math.PI * ((double)(j + k) / length), 0.99, 0.01));
-                    sx += x;
-                    sy += y;
-                    sxx += Pow(x, 2);
-                    sxy += x * y;
-                    syy += Pow(y, 2);
+                    sxy += xWin[k] * yTable[j + k];
                 }
-                var corr = ((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2)) > 0 ? ((length * sxy) - (sx * sy)) /
-                    Sqrt(((length * sxx) - Pow(sx, 2)) * ((length * syy) - Pow(sy, 2))) : 0;
+
+                var denom = denomX * denomYArr[j];
+                var corr = denom > 0 ? ((length * sxy) - (sx * syArr[j])) / Sqrt(denom) : 0;
                 if (corr > maxCorr)
                 {
                     maxCorr = corr;
@@ -735,6 +768,20 @@ public static partial class Calculations
         var corrList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
 
+        // The DFT basis cos/sin(2π·k/j) depends only on (j,k) — not the bar i — yet was recomputed every bar
+        // (Count × ~39 periods × ~46 lags trig calls). Precompute it once; bit-identical (same values + order).
+        var cosTable = new double[length1 + 1, length1 + 1];
+        var sinTable = new double[length1 + 1, length1 + 1];
+        for (var j = length2; j <= length1; j++)
+        {
+            for (var k = length3; k <= length1; k++)
+            {
+                var angle = 2 * Math.PI * ((double)k / j);
+                cosTable[j, k] = Math.Cos(angle);
+                sinTable[j, k] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var corr = corrList[i];
@@ -748,12 +795,12 @@ public static partial class Calculations
                 for (var k = length3; k <= length1; k++)
                 {
                     var prevCorr = i >= k ? corrList[i - k] : 0;
-                    cosPart += prevCorr * Math.Cos(2 * Math.PI * ((double)k / j));
-                    sinPart += prevCorr * Math.Sin(2 * Math.PI * ((double)k / j));
+                    cosPart += prevCorr * cosTable[j, k];
+                    sinPart += prevCorr * sinTable[j, k];
                 }
 
-                var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
-                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * rArray[j]);
+                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
+                var r = (0.2 * (sqSum * sqSum)) + (0.8 * rArray[j]);
                 rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
             }
@@ -1171,6 +1218,19 @@ public static partial class Calculations
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
+        // DFT basis cos/sin(2π·k/j) depends only on (period j, lag k), not the bar i — precompute once.
+        var cosTable = new double[length1 + 1, length1 + 1];
+        var sinTable = new double[length1 + 1, length1 + 1];
+        for (var jj = length2; jj <= length1; jj++)
+        {
+            for (var kk = 0; kk <= length1; kk++)
+            {
+                var angle = 2 * Math.PI * ((double)kk / jj);
+                cosTable[jj, kk] = Math.Cos(angle);
+                sinTable[jj, kk] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var roofingFilter = roofingFilterList[i];
@@ -1184,13 +1244,13 @@ public static partial class Calculations
                 for (var k = 0; k <= length1; k++)
                 {
                     var prevFilt = i >= k ? roofingFilterList[i - k] : 0;
-                    cosPart += prevFilt * Math.Cos(2 * Math.PI * ((double)k / j));
-                    sinPart += prevFilt * Math.Sin(2 * Math.PI * ((double)k / j));
+                    cosPart += prevFilt * cosTable[j, k];
+                    sinPart += prevFilt * sinTable[j, k];
                 }
 
-                var sqSum = Pow(cosPart, 2) + Pow(sinPart, 2);
+                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
                 var prevR = rArray[j];
-                var r = (0.2 * Pow(sqSum, 2)) + (0.8 * prevR);
+                var r = (0.2 * (sqSum * sqSum)) + (0.8 * prevR);
                 rArray[j] = r;
                 maxPwr = Math.Max(r, maxPwr);
                 var pwr = maxPwr != 0 ? r / maxPwr : 0;
@@ -1556,6 +1616,20 @@ public static partial class Calculations
         var twoPiPrd = MinOrMax(2 * Math.PI / length, 0.99, 0.01);
         var alpha = (1 - Math.Sin(twoPiPrd)) / Math.Cos(twoPiPrd);
 
+        // DFT basis cos/sin(clamp(2π·n/j)) depends only on (period j, lag n), not the bar i — yet was
+        // recomputed every bar (Count × ~43 × ~50 trig calls). Precompute once; bit-identical.
+        var cosTable = new double[maxLength + 1, maxLength];
+        var sinTable = new double[maxLength + 1, maxLength];
+        for (var j = minLength; j <= maxLength; j++)
+        {
+            for (var n = 0; n <= maxLength - 1; n++)
+            {
+                var angle = MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01);
+                cosTable[j, n] = Math.Cos(angle);
+                sinTable[j, n] = Math.Sin(angle);
+            }
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -1579,8 +1653,8 @@ public static partial class Calculations
                 for (var n = 0; n <= maxLength - 1; n++)
                 {
                     var prevCleanedData = i >= n ? cleanedDataList[i - n] : 0;
-                    cosPart += prevCleanedData * Math.Cos(MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
-                    sinPart += prevCleanedData * Math.Sin(MinOrMax(2 * Math.PI * ((double)n / j), 0.99, 0.01));
+                    cosPart += prevCleanedData * cosTable[j, n];
+                    sinPart += prevCleanedData * sinTable[j, n];
                 }
 
                 var periodPwr = (cosPart * cosPart) + (sinPart * sinPart);
