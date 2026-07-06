@@ -1,3 +1,7 @@
+using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using Alpaca.Markets;
 
 namespace OoplesFinance.StockIndicators.Builder.Trading;
@@ -49,30 +53,83 @@ public sealed class AlpacaBroker : IBroker, IDisposable
         _tradingClient = environment.GetAlpacaTradingClient(secretKey);
     }
 
+    // Shared, thread-safe client for the tolerant account fetch below. No default
+    // headers are set on it (auth headers are attached per-request), so a single
+    // static instance is safe to share across brokers and calls.
+    private static readonly HttpClient _accountHttp = new HttpClient();
+
     /// <inheritdoc />
     public async Task<BrokerAccount> GetAccountAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
-        var account = await _tradingClient.GetAccountAsync(cancellationToken).ConfigureAwait(false);
+        // The Alpaca.Markets SDK's typed GetAccountAsync deserializes into its
+        // JsonAccount, which marks `pattern_day_trader` as Required.Always. Alpaca's
+        // paper-account responses intermittently omit that field, so the SDK throws
+        // JsonSerializationException ("Required property 'pattern_day_trader' not
+        // found in JSON") on EVERY account fetch — which flooded the worker with
+        // failing equity-snapshot / lead-lag / paper-trading jobs (each retried 10x).
+        // Fetch the account via a tolerant raw HTTP + System.Text.Json read of only
+        // the fields we actually consume, so a missing optional field can never break
+        // the fetch. The rest of this broker keeps using the SDK; only the account
+        // endpoint had the strict-required-property problem.
+        var apiKey = _options.ApiKey ?? Environment.GetEnvironmentVariable("ALPACA_KEY");
+        var apiSecret = _options.ApiSecret ?? Environment.GetEnvironmentVariable("ALPACA_SECRET");
+        var baseUrl = _isPaper
+            ? "https://paper-api.alpaca.markets"
+            : "https://api.alpaca.markets";
 
-        var equity = account.Equity ?? 0m;
-        var lastEquity = account.LastEquity;
+        using var request = new HttpRequestMessage(HttpMethod.Get, baseUrl + "/v2/account");
+        request.Headers.Add("APCA-API-KEY-ID", apiKey);
+        request.Headers.Add("APCA-API-SECRET-KEY", apiSecret);
+
+        using var response = await _accountHttp.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var raw = await response.Content
+            .ReadFromJsonAsync<RawAlpacaAccount>(cancellationToken).ConfigureAwait(false)
+            ?? new RawAlpacaAccount();
+
+        var equity = ParseDecimal(raw.Equity);
+        var lastEquity = ParseDecimal(raw.LastEquity);
         var dayPnL = equity - lastEquity;
         var dayPnLPercent = lastEquity != 0 ? (double)((dayPnL / lastEquity) * 100) : 0.0;
 
         return new BrokerAccount
         {
-            AccountId = account.AccountId.ToString(),
+            AccountId = raw.AccountNumber ?? raw.Id ?? "alpaca",
             Equity = equity,
-            Cash = account.TradableCash,
-            BuyingPower = account.BuyingPower ?? 0m,
-            PortfolioValue = (account.LongMarketValue ?? 0m) + (account.ShortMarketValue ?? 0m),
+            Cash = ParseDecimal(raw.Cash),
+            BuyingPower = ParseDecimal(raw.BuyingPower),
+            PortfolioValue = ParseDecimal(raw.LongMarketValue) + ParseDecimal(raw.ShortMarketValue),
             DayPnL = dayPnL,
             DayPnLPercent = dayPnLPercent,
-            TradingEnabled = account.IsTradingBlocked == false,
+            TradingEnabled = !raw.TradingBlocked && !raw.AccountBlocked,
             IsPaper = _isPaper
         };
+    }
+
+    // Alpaca returns monetary fields as JSON strings ("12345.67"); tolerate null /
+    // absent / unparseable by falling back to 0 rather than throwing.
+    private static decimal ParseDecimal(string? value) =>
+        decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)
+            ? result
+            : 0m;
+
+    // Tolerant account shape: every field is optional (nullable / defaulted), so a
+    // response missing any field (e.g. pattern_day_trader, which we don't even read)
+    // deserializes cleanly. Only the fields BrokerAccount needs are mapped.
+    private sealed class RawAlpacaAccount
+    {
+        [JsonPropertyName("id")] public string? Id { get; set; }
+        [JsonPropertyName("account_number")] public string? AccountNumber { get; set; }
+        [JsonPropertyName("equity")] public string? Equity { get; set; }
+        [JsonPropertyName("last_equity")] public string? LastEquity { get; set; }
+        [JsonPropertyName("cash")] public string? Cash { get; set; }
+        [JsonPropertyName("buying_power")] public string? BuyingPower { get; set; }
+        [JsonPropertyName("long_market_value")] public string? LongMarketValue { get; set; }
+        [JsonPropertyName("short_market_value")] public string? ShortMarketValue { get; set; }
+        [JsonPropertyName("trading_blocked")] public bool TradingBlocked { get; set; }
+        [JsonPropertyName("account_blocked")] public bool AccountBlocked { get; set; }
     }
 
     /// <inheritdoc />
