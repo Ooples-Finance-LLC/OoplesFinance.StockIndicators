@@ -20,6 +20,19 @@ namespace OoplesFinance.StockIndicators.Builder;
 public static class IndicatorInvoker
 {
     private static readonly Dictionary<IndicatorName, MethodInfo> MethodCache = new();
+    private static readonly IReadOnlyDictionary<string, IndicatorName> MethodAliases =
+        new Dictionary<string, IndicatorName>(StringComparer.Ordinal)
+        {
+            ["1LCLeastSquaresMovingAverage"] = IndicatorName._1LCLeastSquaresMovingAverage,
+            ["3HMA"] = IndicatorName._3HMA,
+            ["4MovingAverageConvergenceDivergence"] = IndicatorName._4MovingAverageConvergenceDivergence,
+            ["4PercentagePriceOscillator"] = IndicatorName._4PercentagePriceOscillator,
+            ["BollingerBandsAvgTrueRange"] = IndicatorName.BollingerBandsAverageTrueRange,
+            ["CCTStochRSI"] = IndicatorName.CCTStochRelativeStrengthIndex,
+            ["EhlersSmoothedAdaptiveMomentum"] = IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator,
+            ["StandardDevation"] = IndicatorName.StandardDeviation,
+            ["ZDistanceFromVwapIndicator"] = IndicatorName.ZDistanceFromVwap,
+        };
     private static readonly object CacheLock = new();
     private static bool _initialized;
 
@@ -139,7 +152,8 @@ public static class IndicatorInvoker
                 var indicatorName = method.Name.Substring("Calculate".Length);
 
                 // Try to match with IndicatorName enum
-                if (Enum.TryParse<IndicatorName>(indicatorName, out var name) && name != IndicatorName.None)
+                if ((Enum.TryParse<IndicatorName>(indicatorName, out var name) && name != IndicatorName.None)
+                    || MethodAliases.TryGetValue(indicatorName, out name))
                 {
                     MethodCache[name] = method;
                 }
