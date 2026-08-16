@@ -10,4 +10,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\OoplesFinance.StockIndicators.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
+  </ItemGroup>
 </Project>
