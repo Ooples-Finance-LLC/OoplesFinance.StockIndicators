@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 
 namespace OoplesFinance.StockIndicators.SourceGeneration;
@@ -155,9 +156,9 @@ public class StatefulIndicatorFactoryGenerator : IIncrementalGenerator
         return defaultValue switch
         {
             null => "null",
-            int i => i.ToString(),
-            double d => d.ToString("G17") + (d == Math.Floor(d) ? ".0" : ""),
-            float f => f.ToString("G9") + "f",
+            int i => i.ToString(CultureInfo.InvariantCulture),
+            double d => d.ToString("G17", CultureInfo.InvariantCulture) + (d == Math.Floor(d) ? ".0" : ""),
+            float f => f.ToString("G9", CultureInfo.InvariantCulture) + "f",
             bool b => b ? "true" : "false",
             string s => $"\"{s}\"",
             _ when param.Type.TypeKind == TypeKind.Enum => $"{param.Type.ToDisplayString()}.{defaultValue}",
@@ -327,11 +328,11 @@ public class StatefulIndicatorFactoryGenerator : IIncrementalGenerator
                 if (defaultVal is not null)
                 {
                     // Try to parse as int
-                    if (int.TryParse(defaultVal, out var parsed))
+                    if (int.TryParse(defaultVal, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
                     {
                         defaultInt = parsed;
                     }
-                    else if (double.TryParse(defaultVal, out var parsedDouble))
+                    else if (double.TryParse(defaultVal, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedDouble))
                     {
                         defaultInt = (int)parsedDouble;
                     }
