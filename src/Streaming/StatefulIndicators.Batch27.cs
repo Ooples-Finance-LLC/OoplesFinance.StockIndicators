@@ -184,7 +184,7 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrMa.Next(tr, isFinal);
         var mav = _volumeMa.Next(bar.Volume, isFinal);

@@ -506,7 +506,7 @@ public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposabl
         var upper = retEma + _bandStep;
         var lower = retEma - _bandStep;
 
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -2252,7 +2252,7 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var high = bar.High;
         var low = bar.Low;
         var open = bar.Open;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : close;
         var tr = CalculationsHelper.CalculateTrueRange(high, low, prevClose);
         var trHigh = isFinal ? _trMax.Add(tr, out _) : _trMax.Preview(tr, out _);
         var trLow = isFinal ? _trMin.Add(tr, out _) : _trMin.Preview(tr, out _);

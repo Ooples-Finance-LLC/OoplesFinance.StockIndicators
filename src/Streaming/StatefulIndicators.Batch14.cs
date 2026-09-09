@@ -571,7 +571,7 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var prevTs = _hasPrev ? _prevTs : value;
@@ -1174,7 +1174,7 @@ public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
 
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
@@ -2126,7 +2126,7 @@ public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var sclAtr = _sclAtrSmoother.Next(tr, isFinal);
         var mclAtr = _mclAtrSmoother.Next(tr, isFinal);

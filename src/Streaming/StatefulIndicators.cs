@@ -715,7 +715,7 @@ public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var middle = _middleSmoother.Next(value, isFinal);
@@ -2236,7 +2236,7 @@ public sealed class StollerAverageRangeChannelsState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var middle = _middleSmoother.Next(value, isFinal);
@@ -2396,7 +2396,7 @@ public sealed class DynamicSupportAndResistanceState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -3572,7 +3572,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
         // Match batch behavior: ATR uses the prior SMA values as the close series.
-        var prevSma = _hasPrev ? _prevSma : 0;
+        var prevSma = _hasPrev ? _prevSma : sma;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevSma);
         var atr = _atrSmoother.Next(tr, isFinal);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
@@ -11629,7 +11629,7 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var trVal = value != 0 ? tr / value : tr;
         var atrVal = _atrSmoother.Next(trVal, isFinal);
@@ -12735,7 +12735,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
         var atrMa = _atrMaSmoother.Next(value, isFinal);
-        var prevAtrMa = _hasPrev ? _prevAtrMa : 0;
+        var prevAtrMa = _hasPrev ? _prevAtrMa : atrMa;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevAtrMa);
         var atr = _atrSmoother.Next(tr, isFinal);
         var bbDiff = upper - lower;
@@ -12821,7 +12821,7 @@ public sealed class BollingerBandsFibonacciRatiosState : IStreamingIndicatorStat
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atr.Next(tr, isFinal);
         var r3 = atr * _fibRatio3;

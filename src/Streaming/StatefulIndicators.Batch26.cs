@@ -830,7 +830,7 @@ public sealed class VariableMovingAverageBandsState : IStreamingIndicatorState, 
             ? _vmaEngine!.Next(value, isFinal)
             : _ma!.Next(value, isFinal);
 
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _useVariable
             ? _atrEngine!.Next(tr, isFinal)
@@ -2017,7 +2017,7 @@ public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable
     {
         var value = _input.GetValue(bar);
         _ema.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        var prevValue = _hasPrev ? _prevValue : value;
         var prevHighest = _hasWindow ? _prevHighest : 0;
         var prevLowest = _hasWindow ? _prevLowest : 0;
         var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length + 1);
