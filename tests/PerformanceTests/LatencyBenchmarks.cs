@@ -1,4 +1,4 @@
-namespace OoplesFinance.StockIndicators.Tests.PerformanceTests;
+﻿namespace OoplesFinance.StockIndicators.Tests.PerformanceTests;
 
 using System.Diagnostics;
 using OoplesFinance.StockIndicators.Builder.Risk;
@@ -404,12 +404,19 @@ public class MemoryBenchmarks
         var calculator = new PortfolioRiskCalculator();
         var returns = GenerateReturns(252);
 
-        // Force GC to get clean baseline
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
+        // Warm up so first-call JIT and one-off setup are not counted as per-call allocation.
+        for (var i = 0; i < 50; i++)
+        {
+            calculator.CalculateHistoricalVaR(returns, 0.95m, 100000m);
+        }
 
-        var beforeBytes = GC.GetTotalMemory(true);
+        // GC.GetTotalMemory measures the WHOLE PROCESS, and xUnit runs test collections in
+        // parallel, so another test class allocating concurrently lands in the reading. It also
+        // reports bytes currently held rather than bytes allocated, so whether a collection happens
+        // to run inside the loop changes the answer - and can make it negative.
+        // GetAllocatedBytesForCurrentThread is cumulative and thread-local: unaffected by GC timing
+        // and by every other test running at the same time.
+        var beforeBytes = GC.GetAllocatedBytesForCurrentThread();
 
         // Act - Run many iterations
         for (var i = 0; i < 1000; i++)
@@ -417,8 +424,7 @@ public class MemoryBenchmarks
             calculator.CalculateHistoricalVaR(returns, 0.95m, 100000m);
         }
 
-        var afterBytes = GC.GetTotalMemory(false);
-        var allocatedBytes = afterBytes - beforeBytes;
+        var allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - beforeBytes;
         var bytesPerCall = allocatedBytes / 1000;
 
         // Assert
@@ -455,12 +461,10 @@ public class MemoryBenchmarks
             limits.CheckViolations(exposure);
         }
 
-        // Force GC
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-
-        var beforeBytes = GC.GetTotalMemory(true);
+        // Thread-local and cumulative, for the reasons given on the VaR benchmark above: a
+        // process-wide GC.GetTotalMemory reading is polluted by the other test collections xUnit
+        // runs in parallel, and depends on whether a collection happens to fire inside the loop.
+        var beforeBytes = GC.GetAllocatedBytesForCurrentThread();
 
         // Act
         for (var i = 0; i < 10000; i++)
@@ -468,8 +472,7 @@ public class MemoryBenchmarks
             limits.CheckViolations(exposure);
         }
 
-        var afterBytes = GC.GetTotalMemory(false);
-        var allocatedBytes = afterBytes - beforeBytes;
+        var allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - beforeBytes;
         var bytesPerCall = allocatedBytes / 10000;
 
         // Assert
