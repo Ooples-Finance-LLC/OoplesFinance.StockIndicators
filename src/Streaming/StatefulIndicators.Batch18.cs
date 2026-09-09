@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -1409,7 +1409,10 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
         var prevVolume = _hasPrev ? _prevVolume : 0;
         var prevNvi = _hasPrev ? _prevNvi : 1000;
         var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        var nvi = volume >= prevVolume ? prevNvi : prevNvi + pctChg;
+        // Matches the batch CalculateNegativeVolumeIndex: Fosback compounds the rate of change onto the
+        // running index (NVI = prevNVI + prevNVI * ROC), and CalculatePercentChange returns that ROC
+        // already scaled to a percentage, so the 100 has to come back out.
+        var nvi = volume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
 
         var inputSma = _inputSma.Next(value, isFinal);
         var nviSma = _nviSma.Next(nvi, isFinal);
@@ -1516,7 +1519,10 @@ public sealed class NegativeVolumeIndexState : IStreamingIndicatorState, IDispos
         var prevVolume = _hasPrev ? _prevVolume : 0;
         var prevNvi = _hasPrev ? _prevNvi : _initialValue;
         var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        var nvi = volume >= prevVolume ? prevNvi : prevNvi + pctChg;
+        // Matches the batch CalculateNegativeVolumeIndex: Fosback compounds the rate of change onto the
+        // running index (NVI = prevNVI + prevNVI * ROC), and CalculatePercentChange returns that ROC
+        // already scaled to a percentage, so the 100 has to come back out.
+        var nvi = volume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
         var signal = _signalSmoother.Next(nvi, isFinal);
 
         if (isFinal)
