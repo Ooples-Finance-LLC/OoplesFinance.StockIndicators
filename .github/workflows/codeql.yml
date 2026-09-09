@@ -40,7 +40,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         # The build below compiles repository-controlled MSBuild inputs. Leaving the checkout
         # token in .git/config makes it reachable from any of that, and nothing after this step
