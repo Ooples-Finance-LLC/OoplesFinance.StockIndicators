@@ -19,8 +19,15 @@ concurrency:
 jobs:
   commitlint:
     name: Lint commit messages
-    # release-please authors its own Release PR commits; they are generated, not hand-written.
-    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    # Skipped for generated commits, by AUTHOR rather than by message. Dependabot composes its
+    # own subject and always capitalises "Bump", which config-conventional's subject-case rule
+    # rejects, and no Dependabot setting lowercases it. Exempting it through commitlint's
+    # `ignores` would have keyed on the message text alone, so any human could write
+    # "deps: Bump ..." and skip every rule; github.event.pull_request.user.login is set by
+    # GitHub and cannot be spoofed from the branch.
+    if: >-
+      ${{ !startsWith(github.head_ref, 'release-please--')
+          && github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the PR
