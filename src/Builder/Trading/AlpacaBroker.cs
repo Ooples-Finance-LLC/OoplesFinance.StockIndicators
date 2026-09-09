@@ -92,6 +92,20 @@ public sealed class AlpacaBroker : IBroker, IDisposable
         var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         var raw = JsonSerializer.Deserialize<RawAlpacaAccount>(payload) ?? new RawAlpacaAccount();
 
+        return MapAccount(raw, _isPaper);
+    }
+
+    /// <summary>
+    /// Maps a raw Alpaca account payload onto <see cref="BrokerAccount"/>.
+    /// </summary>
+    /// <remarks>
+    /// Separate from the HTTP call so the mapping can be tested directly. The account fetch goes
+    /// through a shared static HttpClient, which leaves no seam to intercept, and two of the
+    /// decisions here - which identifier wins, and what an absent blocked-flag means - are ones a
+    /// test should pin rather than take on trust.
+    /// </remarks>
+    internal static BrokerAccount MapAccount(RawAlpacaAccount raw, bool isPaper)
+    {
         var equity = ParseDecimal(raw.Equity);
         var lastEquity = ParseDecimal(raw.LastEquity);
         var dayPnL = equity - lastEquity;
@@ -99,15 +113,28 @@ public sealed class AlpacaBroker : IBroker, IDisposable
 
         return new BrokerAccount
         {
-            AccountId = raw.AccountNumber ?? raw.Id ?? "alpaca",
+            // The SDK's account.AccountId, which this replaced, is the "id" GUID - not
+            // account_number. Preferring account_number would silently change the identity of every
+            // account for anything that persisted or keyed on the old value. "id" is also
+            // Required.Always in the SDK's own model while account_number is Required.Default, so
+            // it is the more dependable of the two. A response carrying neither is a broken
+            // response and is reported as one rather than dressed up as "alpaca".
+            AccountId = raw.Id ?? raw.AccountNumber ?? throw new InvalidOperationException(
+                "Alpaca account response contained neither an id nor an account_number."),
             Equity = equity,
+            // Maps to Alpaca's "cash", which is exactly what the SDK's account.TradableCash reads
+            // ([JsonProperty("cash")] in its own model), so this is not a change of quantity.
             Cash = ParseDecimal(raw.Cash),
             BuyingPower = ParseDecimal(raw.BuyingPower),
             PortfolioValue = ParseDecimal(raw.LongMarketValue) + ParseDecimal(raw.ShortMarketValue),
             DayPnL = dayPnL,
             DayPnLPercent = dayPnLPercent,
-            TradingEnabled = !raw.TradingBlocked && !raw.AccountBlocked,
-            IsPaper = _isPaper
+            // Fails CLOSED. The flags are nullable so an absent field is distinguishable from a
+            // real false; with non-nullable bools a missing trading_blocked deserialized to false
+            // and read as "trading is enabled". This whole method exists because Alpaca omits
+            // fields it declares as required, so a safety flag must not treat silence as permission.
+            TradingEnabled = raw.TradingBlocked == false && raw.AccountBlocked == false,
+            IsPaper = isPaper
         };
     }
 
@@ -159,7 +186,7 @@ public sealed class AlpacaBroker : IBroker, IDisposable
     // Tolerant account shape: every field is optional (nullable / defaulted), so a
     // response missing any field (e.g. pattern_day_trader, which we don't even read)
     // deserializes cleanly. Only the fields BrokerAccount needs are mapped.
-    private sealed class RawAlpacaAccount
+    internal sealed class RawAlpacaAccount
     {
         [JsonPropertyName("id")] public string? Id { get; set; }
         [JsonPropertyName("account_number")] public string? AccountNumber { get; set; }
@@ -169,8 +196,10 @@ public sealed class AlpacaBroker : IBroker, IDisposable
         [JsonPropertyName("buying_power")] public string? BuyingPower { get; set; }
         [JsonPropertyName("long_market_value")] public string? LongMarketValue { get; set; }
         [JsonPropertyName("short_market_value")] public string? ShortMarketValue { get; set; }
-        [JsonPropertyName("trading_blocked")] public bool TradingBlocked { get; set; }
-        [JsonPropertyName("account_blocked")] public bool AccountBlocked { get; set; }
+        // Nullable on purpose: a non-nullable bool cannot distinguish "Alpaca said false" from
+        // "Alpaca did not send the field", and the two mean opposite things for a safety flag.
+        [JsonPropertyName("trading_blocked")] public bool? TradingBlocked { get; set; }
+        [JsonPropertyName("account_blocked")] public bool? AccountBlocked { get; set; }
     }
 
     /// <inheritdoc />
