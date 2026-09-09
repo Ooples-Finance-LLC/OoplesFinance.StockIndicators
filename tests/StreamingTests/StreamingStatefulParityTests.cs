@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Streaming;
+﻿using OoplesFinance.StockIndicators.Streaming;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
@@ -661,10 +661,47 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
+                new StatefulIndicatorSpec("SchaffTrendCycleShk.Stc",
+                    () => new SchaffTrendCycleShkState(MovingAvgType.ExponentialMovingAverage, 23, 50, 10, 3, 3),
+                    data => data.CalculateSchaffTrendCycleShk(MovingAvgType.ExponentialMovingAverage, 23, 50, 10, 3, 3)
+                        .OutputValues["Stc"], "Stc")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UtBotAlerts.TrailingStop",
+                    () => new UtBotAlertsState(MovingAvgType.WildersSmoothingMethod, 10, 1),
+                    data => data.CalculateUtBotAlerts(MovingAvgType.WildersSmoothingMethod, 10, 1)
+                        .OutputValues["TrailingStop"], "TrailingStop")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UtBotAlerts.Position",
+                    () => new UtBotAlertsState(MovingAvgType.WildersSmoothingMethod, 10, 1),
+                    data => data.CalculateUtBotAlerts(MovingAvgType.WildersSmoothingMethod, 10, 1)
+                        .OutputValues["Position"], "Position")
+            };
+            yield return new object[]
+            {
                 new StatefulIndicatorSpec("KeltnerChannels.MiddleBand",
                     () => new KeltnerChannelsState(MovingAvgType.ExponentialMovingAverage, 20, 10, 2),
                     data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
                         .OutputValues["MiddleBand"])
+            };
+            // MiddleBand is only the basis average, so it stayed in agreement while the ATR-derived bands
+            // silently diverged between batch and streaming. Cover those too.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("KeltnerChannels.UpperBand",
+                    () => new KeltnerChannelsState(MovingAvgType.ExponentialMovingAverage, 20, 10, 2),
+                    data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
+                        .OutputValues["UpperBand"], "UpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("KeltnerChannels.LowerBand",
+                    () => new KeltnerChannelsState(MovingAvgType.ExponentialMovingAverage, 20, 10, 2),
+                    data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
+                        .OutputValues["LowerBand"], "LowerBand")
             };
             yield return new object[]
             {
@@ -4381,8 +4418,18 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             var ticker = data[i];
             var bar = new OhlcvBar("AAPL", BarTimeframe.Tick, ticker.Date, ticker.Date,
                 ticker.Open, ticker.High, ticker.Low, ticker.Close, ticker.Volume, isFinal: true);
-            var result = state.Update(bar, isFinal: true, includeOutputs: false);
-            streamingValues.Add(result.Value);
+            var result = state.Update(bar, isFinal: true, includeOutputs: spec.OutputKey is not null);
+            if (spec.OutputKey is null)
+            {
+                streamingValues.Add(result.Value);
+            }
+            else
+            {
+                result.Outputs.Should().NotBeNull($"{spec.Name} should publish named outputs");
+                result.Outputs!.ContainsKey(spec.OutputKey).Should()
+                    .BeTrue($"{spec.Name} should publish an output named {spec.OutputKey}");
+                streamingValues.Add(result.Outputs[spec.OutputKey]);
+            }
         }
 
         for (var i = 0; i < maxCount; i++)
@@ -4436,7 +4483,16 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
         actual.Should().BeApproximately(expected, 5e-10, $"{name} mismatch at index {index}");
     }
 
+    /// <summary>
+    /// A batch calculation paired with its streaming state.
+    /// </summary>
+    /// <param name="OutputKey">
+    /// Named output to compare. When null the state's primary <c>Result.Value</c> is used, which is all
+    /// this harness could read before - so an indicator publishing several series was only ever checked
+    /// on its primary one, and the rest could drift between batch and streaming unnoticed.
+    /// </param>
     public sealed record StatefulIndicatorSpec(string Name,
         Func<IStreamingIndicatorState> CreateState,
-        Func<StockData, List<double>> Calculate);
+        Func<StockData, List<double>> Calculate,
+        string? OutputKey = null);
 }

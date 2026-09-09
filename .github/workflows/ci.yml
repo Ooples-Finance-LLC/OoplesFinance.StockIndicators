@@ -13,17 +13,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # dotnet build/test below run repository-controlled MSBuild inputs; the checkout token
+          # has no reader after this step, so it should not be left in .git/config.
+          persist-credentials: false
 
-      - name: Setup .NET 10
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.x
+          dotnet-version: |
+            8.x
+            10.x
 
       - name: Restore dependencies
         run: dotnet restore src/OoplesFinance.StockIndicators.csproj
 
       - name: Build for .NET 10
         run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net10.0
+
+      - name: Build for .NET 8
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net8.0
 
       - name: Build for .NET Framework 4.6.1
         run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net461
