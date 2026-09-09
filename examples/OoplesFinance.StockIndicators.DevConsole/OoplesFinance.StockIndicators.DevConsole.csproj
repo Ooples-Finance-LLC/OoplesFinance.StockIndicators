@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,5 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OoplesFinance.StockIndicators.csproj" />
+    <ProjectReference Include="..\OoplesFinance.StockIndicators.FXMacroData\OoplesFinance.StockIndicators.FXMacroData.csproj" />
   </ItemGroup>
 </Project>
