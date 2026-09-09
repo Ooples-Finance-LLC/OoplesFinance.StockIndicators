@@ -41,6 +41,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        # The build below compiles repository-controlled MSBuild inputs. Leaving the checkout
+        # token in .git/config makes it reachable from any of that, and nothing after this step
+        # performs a git operation, so there is nothing to persist it for.
+        persist-credentials: false
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
