@@ -50,18 +50,32 @@ public readonly struct IndicatorSource
     private readonly IReadOnlyList<double>? _high;
     private readonly IReadOnlyList<double>? _low;
     private readonly IReadOnlyList<double>? _volume;
+    private readonly IReadOnlyList<double>? _barHigh;
+    private readonly IReadOnlyList<double>? _barLow;
 
     /// <summary>
     /// Creates a source from an explicit set of series.
     /// </summary>
     public IndicatorSource(IReadOnlyList<double> values, IReadOnlyList<double> open, IReadOnlyList<double> high,
         IReadOnlyList<double> low, IReadOnlyList<double> volume)
+        : this(values, open, high, low, volume, high, low)
+    {
+    }
+
+    /// <summary>
+    /// Creates a source that distinguishes the resolved highs and lows from the raw bar highs and lows.
+    /// </summary>
+    public IndicatorSource(IReadOnlyList<double> values, IReadOnlyList<double> open, IReadOnlyList<double> high,
+        IReadOnlyList<double> low, IReadOnlyList<double> volume, IReadOnlyList<double> barHigh,
+        IReadOnlyList<double> barLow)
     {
         _values = values ?? throw new ArgumentNullException(nameof(values));
         _open = open ?? throw new ArgumentNullException(nameof(open));
         _high = high ?? throw new ArgumentNullException(nameof(high));
         _low = low ?? throw new ArgumentNullException(nameof(low));
         _volume = volume ?? throw new ArgumentNullException(nameof(volume));
+        _barHigh = barHigh ?? throw new ArgumentNullException(nameof(barHigh));
+        _barLow = barLow ?? throw new ArgumentNullException(nameof(barLow));
     }
 
     private static readonly IReadOnlyList<double> EmptySeries = new List<double>();
@@ -84,6 +98,37 @@ public readonly struct IndicatorSource
     /// <summary>The volumes of the underlying bars.</summary>
     public IReadOnlyList<double> Volume => _volume ?? EmptySeries;
 
+    /// <summary>
+    /// The raw bar highs, never substituted.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This differs from <see cref="High"/> whenever the input is a chained indicator series, and the
+    /// library is currently inconsistent about which of the two it uses:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>
+    /// <c>GetInputValuesList</c> substitutes highs and lows derived from the input series when that
+    /// series does not sit inside the bar range - this is <see cref="High"/> and <see cref="Low"/>,
+    /// and it is what indicator bodies read.
+    /// </description></item>
+    /// <item><description>
+    /// <c>BuildDerivedSeriesList</c>, which produces the true range, always reads
+    /// <c>stockData.HighPrices</c> and <c>stockData.LowPrices</c> - these properties.
+    /// </description></item>
+    /// </list>
+    /// <para>
+    /// So an average true range taken over a chained series today measures the bars' price range while
+    /// treating the chained series as the close. Both are exposed here so a port can be faithful to the
+    /// existing behaviour rather than silently picking one; whether the true range should follow
+    /// <see cref="High"/> instead belongs with the rest of the issue #145 review.
+    /// </para>
+    /// </remarks>
+    public IReadOnlyList<double> BarHigh => _barHigh ?? High;
+
+    /// <inheritdoc cref="BarHigh"/>
+    public IReadOnlyList<double> BarLow => _barLow ?? Low;
+
     /// <summary>The number of values in <see cref="Values"/>.</summary>
     public int Count => Values.Count;
 
@@ -102,11 +147,23 @@ public readonly struct IndicatorSource
             throw new ArgumentNullException(nameof(stockData));
         }
 
-        var custom = stockData.CustomValuesList;
-        var values = custom is not null && custom.Count > 0 ? custom : stockData.InputValues;
+        // Delegate rather than reimplement. GetInputValuesList does two things beyond picking the input
+        // series, and both matter:
+        //
+        //   it throws when CustomValuesList is empty but SignalsList is not, because that means the
+        //   caller chained from an indicator with no single output;
+        //
+        //   it substitutes highs and lows derived from the input series when that series does not sit
+        //   inside the bar high/low range - which is the case whenever a chained indicator is the
+        //   input. A true range taken against the bar highs of a different series would be meaningless.
+        //
+        // Resolving through the same helper means an IndicatorSource cannot drift from the behaviour
+        // every existing calculation already has.
+        var (inputList, highList, lowList, openList, volumeList) =
+            CalculationsHelper.GetInputValuesList(stockData);
 
-        return new IndicatorSource(values, stockData.OpenPrices, stockData.HighPrices, stockData.LowPrices,
-            stockData.Volumes);
+        return new IndicatorSource(inputList, openList, highList, lowList, volumeList,
+            stockData.HighPrices, stockData.LowPrices);
     }
 
     /// <summary>
@@ -117,5 +174,5 @@ public readonly struct IndicatorSource
     /// explicit form of what chaining does implicitly today.
     /// </remarks>
     public IndicatorSource With(IReadOnlyList<double> values) =>
-        new(values, Open, High, Low, Volume);
+        new(values, Open, High, Low, Volume, BarHigh, BarLow);
 }

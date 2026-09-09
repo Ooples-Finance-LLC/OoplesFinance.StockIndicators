@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Exceptions;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
@@ -40,6 +41,64 @@ public sealed class IndicatorSourceTests : GlobalTestData
         source.Values.Should().BeSameAs(chained,
             "a chained series must still arrive as the calculation input - Resolve changes when it is "
             + "read, not what is read");
+    }
+
+    [Fact]
+    public void Resolve_SubstitutesDerivedHighsAndLowsForAChainedSeries()
+    {
+        var data = CreateData();
+        var rsi = CreateData().CalculateRelativeStrengthIndex(length: 14).CustomValuesList;
+        data.SetCustomValues(rsi);
+
+        var source = IndicatorSource.Resolve(data);
+        var (_, expectedHigh, expectedLow, _, _) = CalculationsHelper.GetInputValuesList(data);
+
+        // GetMaxAndMinValuesList allocates a fresh list per call, so compare by value not by reference.
+        source.High.Should().Equal(expectedHigh,
+            "an RSI series does not sit inside the bar high/low range, so GetInputValuesList derives "
+            + "the highs from the series itself, and Resolve must return the same");
+        source.Low.Should().Equal(expectedLow);
+        source.High.Should().NotEqual(data.HighPrices, "these are not the bar highs");
+
+        // The true range deliberately keeps reading the bar highs - see IndicatorSource.BarHigh.
+        source.BarHigh.Should().BeSameAs(data.HighPrices);
+        source.BarLow.Should().BeSameAs(data.LowPrices);
+    }
+
+    [Fact]
+    public void Resolve_RejectsChainingFromAnIndicatorWithNoSingleOutput()
+    {
+        var data = CreateData();
+        data.SetCustomValues(new List<double>());
+        data.SetSignals(new List<Signal> { Signal.Buy });
+
+        var act = () => IndicatorSource.Resolve(data);
+
+        act.Should().Throw<CalculationException>(
+            "Resolve must reject exactly what GetInputValuesList rejects");
+    }
+
+    [Fact]
+    public void AverageTrueRange_MatchesTheExistingCalculation_OnAChainedSeries()
+    {
+        var rsi = CreateData().CalculateRelativeStrengthIndex(length: 14).CustomValuesList;
+
+        var existing = CreateData();
+        existing.SetCustomValues(new List<double>(rsi));
+        var expected = existing.CalculateAverageTrueRange(MovingAvgType.WildersSmoothingMethod, 14)
+            .CustomValuesList;
+
+        var data = CreateData();
+        data.SetCustomValues(new List<double>(rsi));
+        var actual = IndicatorMath.AverageTrueRange(data, IndicatorSource.Resolve(data),
+            MovingAvgType.WildersSmoothingMethod, 14);
+
+        actual.Should().HaveCount(expected.Count);
+        for (var i = 0; i < expected.Count; i++)
+        {
+            actual[i].Should().BeApproximately(expected[i], Tolerance,
+                $"the port must agree on chained input too, not only on price, index {i}");
+        }
     }
 
     [Fact]
