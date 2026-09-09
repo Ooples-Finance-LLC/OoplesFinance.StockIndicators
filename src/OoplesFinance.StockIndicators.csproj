@@ -104,14 +104,14 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <!-- These two must move together. System.Memory 4.6.3 requires System.Buffers >= 4.6.1, and
-         leaving either behind produces a fatal NU1605 downgrade on this target, where warnings are
-         errors. That pairing broke three Dependabot updates at once - System.Linq.Async 7,
-         System.Memory 4.6.3 and System.Text.Json 10 all raise the floor on one or both. -->
+    <!-- These two move together. System.Memory 4.6.3 and System.Text.Json 10 both require
+         System.Buffers >= 4.6.1, and leaving either half behind is a fatal NU1605 downgrade on
+         this target, where warnings are errors. Bumping only System.Memory (#159) is what broke
+         master; this takes both sides of that conflict rather than either one. -->
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Buffers" Version="4.6.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.Json" Version="6.0.11" />
+    <PackageReference Include="System.Text.Json" Version="10.0.12" />
   </ItemGroup>
 
   <ItemGroup>
