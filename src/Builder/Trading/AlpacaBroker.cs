@@ -1,3 +1,7 @@
+﻿using System.Globalization;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Alpaca.Markets;
 
 namespace OoplesFinance.StockIndicators.Builder.Trading;
@@ -10,6 +14,8 @@ public sealed class AlpacaBroker : IBroker, IDisposable
 {
     private readonly IAlpacaTradingClient _tradingClient;
     private readonly AlpacaOptions _options;
+    private readonly string _apiKey;
+    private readonly string _apiSecret;
     private readonly bool _isPaper;
     private bool _disposed;
 
@@ -46,33 +52,154 @@ public sealed class AlpacaBroker : IBroker, IDisposable
 
         var secretKey = new SecretKey(apiKey, apiSecret);
 
+        _apiKey = apiKey;
+        _apiSecret = apiSecret;
+
         _tradingClient = environment.GetAlpacaTradingClient(secretKey);
     }
+
+    // Shared, thread-safe client for the tolerant account fetch below. No default
+    // headers are set on it (auth headers are attached per-request), so a single
+    // static instance is safe to share across brokers and calls.
+    private static readonly HttpClient _accountHttp = new HttpClient();
 
     /// <inheritdoc />
     public async Task<BrokerAccount> GetAccountAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
-        var account = await _tradingClient.GetAccountAsync(cancellationToken).ConfigureAwait(false);
+        // The Alpaca.Markets SDK's typed GetAccountAsync deserializes into its
+        // JsonAccount, which marks `pattern_day_trader` as Required.Always. Alpaca's
+        // paper-account responses intermittently omit that field, so the SDK throws
+        // JsonSerializationException ("Required property 'pattern_day_trader' not
+        // found in JSON") on EVERY account fetch — which flooded the worker with
+        // failing equity-snapshot / lead-lag / paper-trading jobs (each retried 10x).
+        // Fetch the account via a tolerant raw HTTP + System.Text.Json read of only
+        // the fields we actually consume, so a missing optional field can never break
+        // the fetch. The rest of this broker keeps using the SDK; only the account
+        // endpoint had the strict-required-property problem.
+        // AlpacaOptions.BaseUrl is a documented setting; hardcoding the endpoint here would silently
+        // ignore it and send a configured request to the wrong host. It is validated before use,
+        // because the very next lines attach the API key and secret to the request.
+        var accountEndpoint = ResolveAccountEndpoint();
 
-        var equity = account.Equity ?? 0m;
-        var lastEquity = account.LastEquity;
+        using var request = new HttpRequestMessage(HttpMethod.Get, accountEndpoint);
+        request.Headers.Add("APCA-API-KEY-ID", _apiKey);
+        request.Headers.Add("APCA-API-SECRET-KEY", _apiSecret);
+
+        using var response = await _accountHttp.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var raw = JsonSerializer.Deserialize<RawAlpacaAccount>(payload) ?? new RawAlpacaAccount();
+
+        return MapAccount(raw, _isPaper);
+    }
+
+    /// <summary>
+    /// Maps a raw Alpaca account payload onto <see cref="BrokerAccount"/>.
+    /// </summary>
+    /// <remarks>
+    /// Separate from the HTTP call so the mapping can be tested directly. The account fetch goes
+    /// through a shared static HttpClient, which leaves no seam to intercept, and two of the
+    /// decisions here - which identifier wins, and what an absent blocked-flag means - are ones a
+    /// test should pin rather than take on trust.
+    /// </remarks>
+    internal static BrokerAccount MapAccount(RawAlpacaAccount raw, bool isPaper)
+    {
+        var equity = ParseDecimal(raw.Equity);
+        var lastEquity = ParseDecimal(raw.LastEquity);
         var dayPnL = equity - lastEquity;
         var dayPnLPercent = lastEquity != 0 ? (double)((dayPnL / lastEquity) * 100) : 0.0;
 
         return new BrokerAccount
         {
-            AccountId = account.AccountId.ToString(),
+            // The SDK's account.AccountId, which this replaced, is the "id" GUID - not
+            // account_number. Preferring account_number would silently change the identity of every
+            // account for anything that persisted or keyed on the old value. "id" is also
+            // Required.Always in the SDK's own model while account_number is Required.Default, so
+            // it is the more dependable of the two. A response carrying neither is a broken
+            // response and is reported as one rather than dressed up as "alpaca".
+            AccountId = raw.Id ?? raw.AccountNumber ?? throw new InvalidOperationException(
+                "Alpaca account response contained neither an id nor an account_number."),
             Equity = equity,
-            Cash = account.TradableCash,
-            BuyingPower = account.BuyingPower ?? 0m,
-            PortfolioValue = (account.LongMarketValue ?? 0m) + (account.ShortMarketValue ?? 0m),
+            // Maps to Alpaca's "cash", which is exactly what the SDK's account.TradableCash reads
+            // ([JsonProperty("cash")] in its own model), so this is not a change of quantity.
+            Cash = ParseDecimal(raw.Cash),
+            BuyingPower = ParseDecimal(raw.BuyingPower),
+            PortfolioValue = ParseDecimal(raw.LongMarketValue) + ParseDecimal(raw.ShortMarketValue),
             DayPnL = dayPnL,
             DayPnLPercent = dayPnLPercent,
-            TradingEnabled = account.IsTradingBlocked == false,
-            IsPaper = _isPaper
+            // Fails CLOSED. The flags are nullable so an absent field is distinguishable from a
+            // real false; with non-nullable bools a missing trading_blocked deserialized to false
+            // and read as "trading is enabled". This whole method exists because Alpaca omits
+            // fields it declares as required, so a safety flag must not treat silence as permission.
+            TradingEnabled = raw.TradingBlocked == false && raw.AccountBlocked == false,
+            IsPaper = isPaper
         };
+    }
+
+    /// <summary>
+    /// Resolves the account endpoint, requiring any configured base URL to be absolute HTTPS.
+    /// </summary>
+    /// <remarks>
+    /// The request built from this carries APCA-API-KEY-ID and APCA-API-SECRET-KEY. An unvalidated
+    /// base URL would therefore hand the live trading credentials to whatever host - and over
+    /// whatever scheme - happened to be configured, so a non-absolute or non-HTTPS value is
+    /// rejected before the headers are ever attached rather than after.
+    /// </remarks>
+    private Uri ResolveAccountEndpoint()
+    {
+        if (string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            return new Uri(_isPaper
+                ? "https://paper-api.alpaca.markets/v2/account"
+                : "https://api.alpaca.markets/v2/account");
+        }
+
+        if (!Uri.TryCreate(_options.BaseUrl, UriKind.Absolute, out var configured))
+        {
+            throw new InvalidOperationException(
+                "AlpacaOptions.BaseUrl must be an absolute URI, for example " +
+                "https://paper-api.alpaca.markets.");
+        }
+
+        if (!string.Equals(configured.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "AlpacaOptions.BaseUrl must use https. The account request sends the Alpaca API key " +
+                "and secret as headers, which must never travel over a cleartext scheme.");
+        }
+
+        // GetLeftPart keeps scheme, host and any path prefix while dropping query and fragment,
+        // so a base URL such as https://host/gateway still resolves to /gateway/v2/account.
+        var basePath = configured.GetLeftPart(UriPartial.Path).TrimEnd('/');
+        return new Uri(basePath + "/v2/account");
+    }
+
+    // Alpaca returns monetary fields as JSON strings ("12345.67"); tolerate null /
+    // absent / unparseable by falling back to 0 rather than throwing.
+    private static decimal ParseDecimal(string? value) =>
+        decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)
+            ? result
+            : 0m;
+
+    // Tolerant account shape: every field is optional (nullable / defaulted), so a
+    // response missing any field (e.g. pattern_day_trader, which we don't even read)
+    // deserializes cleanly. Only the fields BrokerAccount needs are mapped.
+    internal sealed class RawAlpacaAccount
+    {
+        [JsonPropertyName("id")] public string? Id { get; set; }
+        [JsonPropertyName("account_number")] public string? AccountNumber { get; set; }
+        [JsonPropertyName("equity")] public string? Equity { get; set; }
+        [JsonPropertyName("last_equity")] public string? LastEquity { get; set; }
+        [JsonPropertyName("cash")] public string? Cash { get; set; }
+        [JsonPropertyName("buying_power")] public string? BuyingPower { get; set; }
+        [JsonPropertyName("long_market_value")] public string? LongMarketValue { get; set; }
+        [JsonPropertyName("short_market_value")] public string? ShortMarketValue { get; set; }
+        // Nullable on purpose: a non-nullable bool cannot distinguish "Alpaca said false" from
+        // "Alpaca did not send the field", and the two mean opposite things for a safety flag.
+        [JsonPropertyName("trading_blocked")] public bool? TradingBlocked { get; set; }
+        [JsonPropertyName("account_blocked")] public bool? AccountBlocked { get; set; }
     }
 
     /// <inheritdoc />

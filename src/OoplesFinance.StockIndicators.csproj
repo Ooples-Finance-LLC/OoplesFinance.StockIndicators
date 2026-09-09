@@ -88,6 +88,7 @@
          deprecated reflection breadth-engine (IndicatorInvoker) instead of making
          it public. Keeps it out of the library's public API. -->
     <InternalsVisibleTo Include="Ooples.Indicators" />
+    <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
   </ItemGroup>
 
   <!-- Source Generator: Build the generator project first -->
