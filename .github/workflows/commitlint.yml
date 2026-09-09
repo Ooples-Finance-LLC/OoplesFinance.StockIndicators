@@ -1,0 +1,36 @@
+name: Commit Message Lint
+
+# Lints every commit in a pull request against commitlint.config.mjs.
+#
+# Why it matters here: release-please builds the version bump and the CHANGELOG from commit
+# messages, so a commit that does not parse is invisible to the release, and a mistyped type
+# silently changes the version bump.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    name: Lint commit messages
+    # release-please authors its own Release PR commits; they are generated, not hand-written.
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the PR
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # commitlint needs the full base..head range, which a shallow clone does not contain.
+          fetch-depth: 0
+
+      - name: Lint commits
+        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6
+        # No commitDepth: it does NOT mean "the newest N commits". It lints a window from the far
+        # end of the PR range, which on a long-lived branch checks only ancient commits and none of
+        # the ones under review. The default (the PR's full base..head range) is the correct scope.
