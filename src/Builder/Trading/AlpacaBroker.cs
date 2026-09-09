@@ -1,6 +1,6 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net.Http;
-using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Alpaca.Markets;
 
@@ -14,6 +14,8 @@ public sealed class AlpacaBroker : IBroker, IDisposable
 {
     private readonly IAlpacaTradingClient _tradingClient;
     private readonly AlpacaOptions _options;
+    private readonly string _apiKey;
+    private readonly string _apiSecret;
     private readonly bool _isPaper;
     private bool _disposed;
 
@@ -50,6 +52,9 @@ public sealed class AlpacaBroker : IBroker, IDisposable
 
         var secretKey = new SecretKey(apiKey, apiSecret);
 
+        _apiKey = apiKey;
+        _apiSecret = apiSecret;
+
         _tradingClient = environment.GetAlpacaTradingClient(secretKey);
     }
 
@@ -73,21 +78,20 @@ public sealed class AlpacaBroker : IBroker, IDisposable
         // the fields we actually consume, so a missing optional field can never break
         // the fetch. The rest of this broker keeps using the SDK; only the account
         // endpoint had the strict-required-property problem.
-        var apiKey = _options.ApiKey ?? Environment.GetEnvironmentVariable("ALPACA_KEY");
-        var apiSecret = _options.ApiSecret ?? Environment.GetEnvironmentVariable("ALPACA_SECRET");
-        var baseUrl = _isPaper
-            ? "https://paper-api.alpaca.markets"
-            : "https://api.alpaca.markets";
+        // AlpacaOptions.BaseUrl is a documented setting; hardcoding the endpoint here would silently
+        // ignore it and send a configured request to the wrong host.
+        var baseUrl = string.IsNullOrWhiteSpace(_options.BaseUrl)
+            ? (_isPaper ? "https://paper-api.alpaca.markets" : "https://api.alpaca.markets")
+            : _options.BaseUrl!.TrimEnd('/');
 
         using var request = new HttpRequestMessage(HttpMethod.Get, baseUrl + "/v2/account");
-        request.Headers.Add("APCA-API-KEY-ID", apiKey);
-        request.Headers.Add("APCA-API-SECRET-KEY", apiSecret);
+        request.Headers.Add("APCA-API-KEY-ID", _apiKey);
+        request.Headers.Add("APCA-API-SECRET-KEY", _apiSecret);
 
         using var response = await _accountHttp.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        var raw = await response.Content
-            .ReadFromJsonAsync<RawAlpacaAccount>(cancellationToken).ConfigureAwait(false)
-            ?? new RawAlpacaAccount();
+        var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var raw = JsonSerializer.Deserialize<RawAlpacaAccount>(payload) ?? new RawAlpacaAccount();
 
         var equity = ParseDecimal(raw.Equity);
         var lastEquity = ParseDecimal(raw.LastEquity);
