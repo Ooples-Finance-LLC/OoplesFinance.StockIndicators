@@ -7,8 +7,17 @@ name: Auto-Fix PR Title
 #
 # Rather than fail the PR, this rewrites the title into conventional form and explains what it did.
 
+# pull_request_target, not pull_request. On a fork PR the pull_request event hands the job a
+# READ-ONLY token, so pulls.update returns 403, the script throws, and the advisory comment never
+# posts - the workflow would simply fail on every outside contribution, which is most of what it
+# exists to help with. Two of the currently open PRs come from forks.
+#
+# pull_request_target is safe HERE specifically because this job never checks out or executes any
+# pull-request content: it reads the title and the changed-file names through the API and writes
+# back a title and a comment. The workflow definition itself is also taken from the base branch, so
+# a pull request cannot alter what runs. Do not add actions/checkout of the PR ref to this file.
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited, reopened, synchronize]
 
 concurrency:

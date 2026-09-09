@@ -122,15 +122,29 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+          # The expected list is read from the csproj rather than hardcoded. Hardcoding it couples
+          # this workflow to whatever TargetFrameworks happened to say when it was written, so a
+          # legitimate change to the target list would fail verification AFTER release-please had
+          # already created the tag and the GitHub release - leaving a release with no package.
+          [xml]$proj = Get-Content 'src/OoplesFinance.StockIndicators.csproj'
+          $raw = @($proj.Project.PropertyGroup.TargetFrameworks) +
+                 @($proj.Project.PropertyGroup.TargetFramework) |
+                 Where-Object { $_ -and $_.ToString().Trim() } | Select-Object -First 1
+          $tfms = @($raw -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          if (-not $tfms) { Write-Error 'Could not read TargetFrameworks from the csproj'; exit 1 }
+          Write-Host "Project targets: $($tfms -join ', ')"
+
           $pkgs = Get-ChildItem out/*.nupkg
-          if (-not $pkgs) { Write-Error "No .nupkg produced in out/"; exit 1 }
+          if (-not $pkgs) { Write-Error 'No .nupkg produced in out/'; exit 1 }
           foreach ($pkg in $pkgs) {
             $zip = [System.IO.Compression.ZipFile]::OpenRead($pkg.FullName)
             try   { $entries = $zip.Entries.FullName }
             finally { $zip.Dispose() }
-            # Guards the failure mode that started this work: a target silently disappearing from
-            # TargetFrameworks still packs and publishes cleanly, and consumers only find out later.
-            foreach ($tfm in 'net10.0', 'net8.0', 'net461') {
+            # Catches the pack-time failure this guards against: a target the project still claims
+            # but that never made it into the package, which publishes cleanly and only surfaces
+            # when a consumer on that framework tries to restore it.
+            foreach ($tfm in $tfms) {
               if (-not ($entries | Where-Object { $_ -match "^lib/$([regex]::Escape($tfm))/.+\.dll$" })) {
                 Write-Error "$($pkg.Name) is missing lib/$tfm"; exit 1
               }

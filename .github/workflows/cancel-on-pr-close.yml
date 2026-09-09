@@ -7,8 +7,13 @@ name: Cancel in-progress runs on PR close
 #
 # Both merged and closed-without-merge leave runs orphaned, so both are handled.
 
+# pull_request_target for the same reason as pr-title-lint.yml: a fork PR's pull_request event
+# grants a read-only token, so actions:write would not be honoured and gh run cancel would 403 -
+# leaving exactly the orphaned runs this exists to kill. Safe here because the job never checks out
+# or executes pull-request content; it only calls the Actions API. Do not add a checkout of the PR
+# ref to this file.
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
 
 permissions:
