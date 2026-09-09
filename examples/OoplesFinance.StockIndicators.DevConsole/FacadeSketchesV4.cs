@@ -1611,11 +1611,11 @@ internal static class FacadeSketchesV4
         return spec.Name switch
         {
             IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SketchSmaOptions)spec.Options).Length),
-            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((SketchRsiOptions)spec.Options).Length),
+            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(length: ((SketchRsiOptions)spec.Options).Length),
             IndicatorName.MovingAverageConvergenceDivergence => new MovingAverageConvergenceDivergenceState(
-                ((SketchMacdOptions)spec.Options).FastLength,
-                ((SketchMacdOptions)spec.Options).SlowLength,
-                ((SketchMacdOptions)spec.Options).SignalLength),
+                fastLength: ((SketchMacdOptions)spec.Options).FastLength,
+                slowLength: ((SketchMacdOptions)spec.Options).SlowLength,
+                signalLength: ((SketchMacdOptions)spec.Options).SignalLength),
             _ => throw new NotSupportedException($"Indicator '{spec.Name}' not wired for streaming in this sketch.")
         };
     }

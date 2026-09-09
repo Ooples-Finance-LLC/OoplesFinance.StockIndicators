@@ -810,19 +810,21 @@ public sealed class KurtosisIndicatorState : IStreamingIndicatorState, IDisposab
     private readonly StreamingInputResolver _input;
     private int _index;
 
-    public KurtosisIndicatorState(int length1 = 3, int length2 = 1, int fastLength = 3, int slowLength = 65,
-        InputName inputName = InputName.Close)
+    public KurtosisIndicatorState(MovingAvgType slowMaType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType fastMaType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 1,
+        int fastLength = 3, int slowLength = 65, InputName inputName = InputName.Close)
     {
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
-        _slowSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, slowLength));
-        _fastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, fastLength));
+        _slowSmoother = MovingAverageSmootherFactory.Create(slowMaType, Math.Max(1, slowLength));
+        _fastSmoother = MovingAverageSmootherFactory.Create(fastMaType, Math.Max(1, fastLength));
         _values = new PooledRingBuffer<double>(_length1);
         _diffs = new PooledRingBuffer<double>(_length2);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public KurtosisIndicatorState(int length1, int length2, int fastLength, int slowLength, Func<OhlcvBar, double> selector)
+    public KurtosisIndicatorState(MovingAvgType slowMaType, MovingAvgType fastMaType, int length1, int length2,
+        int fastLength, int slowLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -831,8 +833,8 @@ public sealed class KurtosisIndicatorState : IStreamingIndicatorState, IDisposab
 
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
-        _slowSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, slowLength));
-        _fastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, fastLength));
+        _slowSmoother = MovingAverageSmootherFactory.Create(slowMaType, Math.Max(1, slowLength));
+        _fastSmoother = MovingAverageSmootherFactory.Create(fastMaType, Math.Max(1, fastLength));
         _values = new PooledRingBuffer<double>(_length1);
         _diffs = new PooledRingBuffer<double>(_length2);
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -1060,14 +1062,15 @@ public sealed class LeastSquaresMovingAverageState : IStreamingIndicatorState, I
     private readonly IMovingAverageSmoother _sma;
     private readonly StreamingInputResolver _input;
 
-    public LeastSquaresMovingAverageState(int length = 25, InputName inputName = InputName.Close)
+    public LeastSquaresMovingAverageState(MovingAvgType smaMaType = MovingAvgType.SimpleMovingAverage,
+        int length = 25, InputName inputName = InputName.Close)
     {
         _wma = new WmaState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public LeastSquaresMovingAverageState(int length, Func<OhlcvBar, double> selector)
+    public LeastSquaresMovingAverageState(MovingAvgType smaMaType, int length, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1075,7 +1078,7 @@ public sealed class LeastSquaresMovingAverageState : IStreamingIndicatorState, I
         }
 
         _wma = new WmaState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1120,14 +1123,15 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
     private readonly IMovingAverageSmoother _sma;
     private readonly StreamingInputResolver _input;
 
-    public LeoMovingAverageState(int length = 14, InputName inputName = InputName.Close)
+    public LeoMovingAverageState(MovingAvgType smaMaType = MovingAvgType.SimpleMovingAverage,
+        int length = 14, InputName inputName = InputName.Close)
     {
         _wma = new WmaState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public LeoMovingAverageState(int length, Func<OhlcvBar, double> selector)
+    public LeoMovingAverageState(MovingAvgType smaMaType, int length, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1135,7 +1139,7 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
         }
 
         _wma = new WmaState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1890,7 +1894,8 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
     private readonly StreamingInputResolver _input;
     private readonly double _mult;
 
-    public MacZIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 12,
+    public MacZIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType wilderMaType = MovingAvgType.WildersSmoothingMethod, int fastLength = 12,
         int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1,
         InputName inputName = InputName.Close)
     {
@@ -1899,14 +1904,14 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _wilderSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WildersSmoothingMethod, resolved);
+        _wilderSmoother = MovingAverageSmootherFactory.Create(wilderMaType, resolved);
         _input = new StreamingInputResolver(inputName, null);
         _mult = mult;
         _ = gamma;
     }
 
-    public MacZIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length,
-        double gamma, double mult, Func<OhlcvBar, double> selector)
+    public MacZIndicatorState(MovingAvgType maType, MovingAvgType wilderMaType, int fastLength, int slowLength,
+        int signalLength, int length, double gamma, double mult, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1918,7 +1923,7 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _wilderSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WildersSmoothingMethod, resolved);
+        _wilderSmoother = MovingAverageSmootherFactory.Create(wilderMaType, resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
         _mult = mult;
         _ = gamma;

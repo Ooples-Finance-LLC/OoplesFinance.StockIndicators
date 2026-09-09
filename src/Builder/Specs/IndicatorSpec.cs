@@ -62,11 +62,21 @@ public static class IndicatorSpecs
     }
 
     /// <summary>
-    /// Creates an RSI specification.
+    /// Creates an RSI specification with default Wilder smoothing.
     /// </summary>
     public static IndicatorSpec Rsi(int length)
     {
         return new IndicatorSpec(IndicatorName.RelativeStrengthIndex, new RsiSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an RSI specification with configurable smoothing method.
+    /// </summary>
+    /// <param name="length">The RSI period length.</param>
+    /// <param name="maType">The smoothing method. Wilder (original) or SMA (Cutler variant).</param>
+    public static IndicatorSpec Rsi(int length, MovingAvgType maType)
+    {
+        return new IndicatorSpec(IndicatorName.RelativeStrengthIndex, new RsiSpecOptions(length, maType), IndicatorOutput.Primary);
     }
 
     /// <summary>
@@ -87,11 +97,21 @@ public static class IndicatorSpecs
     }
 
     /// <summary>
-    /// Creates an ATR specification.
+    /// Creates an ATR specification with default Wilder smoothing.
     /// </summary>
     public static IndicatorSpec Atr(int length)
     {
         return new IndicatorSpec(IndicatorName.AverageTrueRange, new AtrSpecOptions(length), IndicatorOutput.Primary);
+    }
+
+    /// <summary>
+    /// Creates an ATR specification with configurable smoothing method.
+    /// </summary>
+    /// <param name="length">The ATR period length.</param>
+    /// <param name="maType">The smoothing method. Wilder (original), SMA, or EMA variants.</param>
+    public static IndicatorSpec Atr(int length, MovingAvgType maType)
+    {
+        return new IndicatorSpec(IndicatorName.AverageTrueRange, new AtrSpecOptions(length, maType), IndicatorOutput.Primary);
     }
 
     /// <summary>

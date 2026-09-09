@@ -2778,11 +2778,11 @@ internal static class FacadeSketchesV6
         return spec.Name switch
         {
             IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SketchSmaOptions)spec.Options).Length),
-            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((SketchRsiOptions)spec.Options).Length),
+            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(length: ((SketchRsiOptions)spec.Options).Length),
             IndicatorName.MovingAverageConvergenceDivergence => new MovingAverageConvergenceDivergenceState(
-                ((SketchMacdOptions)spec.Options).FastLength,
-                ((SketchMacdOptions)spec.Options).SlowLength,
-                ((SketchMacdOptions)spec.Options).SignalLength),
+                fastLength: ((SketchMacdOptions)spec.Options).FastLength,
+                slowLength: ((SketchMacdOptions)spec.Options).SlowLength,
+                signalLength: ((SketchMacdOptions)spec.Options).SignalLength),
             IndicatorName.BollingerBands => new BollingerBandsState(
                 ((SketchBollingerBandsOptions)spec.Options).Length,
                 ((SketchBollingerBandsOptions)spec.Options).StdDevMult),

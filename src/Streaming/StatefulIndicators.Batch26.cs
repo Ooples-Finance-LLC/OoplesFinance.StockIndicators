@@ -1278,6 +1278,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     private bool _hasPrev;
 
     public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage,
+        MovingAvgType wmaMaType = MovingAvgType.WeightedMovingAverage,
         InputName inputName = InputName.FullTypicalPrice, int length1 = 18, int length2 = 200,
         int smoothLength = 8, double stdDevMult = 1.6)
     {
@@ -1285,14 +1286,14 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _hacMa1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _hacMa2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _zlhaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length1));
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, Math.Max(1, length1));
         _zlhaStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length1), _ => _zlhaTemaValue);
         _percbStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), _ => _percbValue);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType, InputName inputName, int length1, int length2,
-        int smoothLength, double stdDevMult, Func<OhlcvBar, double> selector)
+    public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType, MovingAvgType wmaMaType, InputName inputName,
+        int length1, int length2, int smoothLength, double stdDevMult, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1303,7 +1304,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _hacMa1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _hacMa2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _zlhaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length1));
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, Math.Max(1, length1));
         _zlhaStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length1), _ => _zlhaTemaValue);
         _percbStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), _ => _percbValue);
         _input = new StreamingInputResolver(inputName, selector);
@@ -1406,7 +1407,11 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly RollingWindowSum _fastKSum;
     private readonly StreamingInputResolver _input;
 
-    public VervoortSmoothedOscillatorState(InputName inputName = InputName.TypicalPrice, int length1 = 18,
+    public VervoortSmoothedOscillatorState(MovingAvgType rainbowMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType zlrbMaType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType temaMaType = MovingAvgType.TripleExponentialMovingAverage,
+        MovingAvgType wmaMaType = MovingAvgType.WeightedMovingAverage,
+        InputName inputName = InputName.TypicalPrice, int length1 = 18,
         int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
     {
         var resolvedLength1 = Math.Max(1, length1);
@@ -1414,21 +1419,21 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var resolvedLength3 = Math.Max(1, length3);
         var resolvedSmoothLength = Math.Max(1, smoothLength);
         _stdDevMult = stdDevMult;
-        _r1Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r2Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r3Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r4Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r5Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r6Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r7Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r8Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r9Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r10Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
+        _r1Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r2Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r3Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r4Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r5Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r6Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r7Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r8Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r9Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r10Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _ema1 = MovingAverageSmootherFactory.Create(zlrbMaType, resolvedSmoothLength);
+        _ema2 = MovingAverageSmootherFactory.Create(zlrbMaType, resolvedSmoothLength);
+        _tema = MovingAverageSmootherFactory.Create(temaMaType, resolvedSmoothLength);
+        _stdDev = new StandardDeviationVolatilityState(rainbowMaType, resolvedLength1);
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
         _rbcMinWindow = new RollingWindowMin(resolvedLength2);
@@ -1436,8 +1441,9 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public VervoortSmoothedOscillatorState(InputName inputName, int length1, int length2, int length3,
-        int smoothLength, double stdDevMult, Func<OhlcvBar, double> selector)
+    public VervoortSmoothedOscillatorState(MovingAvgType rainbowMaType, MovingAvgType zlrbMaType,
+        MovingAvgType temaMaType, MovingAvgType wmaMaType, InputName inputName, int length1, int length2,
+        int length3, int smoothLength, double stdDevMult, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1449,21 +1455,21 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var resolvedLength3 = Math.Max(1, length3);
         var resolvedSmoothLength = Math.Max(1, smoothLength);
         _stdDevMult = stdDevMult;
-        _r1Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r2Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r3Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r4Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r5Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r6Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r7Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r8Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r9Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _r10Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
-        _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
-        _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
+        _r1Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r2Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r3Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r4Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r5Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r6Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r7Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r8Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r9Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _r10Sma = MovingAverageSmootherFactory.Create(rainbowMaType, resolvedLength3);
+        _ema1 = MovingAverageSmootherFactory.Create(zlrbMaType, resolvedSmoothLength);
+        _ema2 = MovingAverageSmootherFactory.Create(zlrbMaType, resolvedSmoothLength);
+        _tema = MovingAverageSmootherFactory.Create(temaMaType, resolvedSmoothLength);
+        _stdDev = new StandardDeviationVolatilityState(rainbowMaType, resolvedLength1);
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
         _rbcMinWindow = new RollingWindowMin(resolvedLength2);

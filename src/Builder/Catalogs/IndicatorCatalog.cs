@@ -193,12 +193,31 @@ public sealed partial class IndicatorCatalog
     }
 
     /// <summary>
-    /// Calculates Relative Strength Index.
+    /// Calculates Relative Strength Index with default Wilder smoothing.
     /// </summary>
     public SeriesHandle Rsi(int length = 14, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
         return _builder.AddIndicator(IndicatorSpecs.Rsi(length), series, _builder.ResolveSeriesKey(series), key);
+    }
+
+    /// <summary>
+    /// Calculates Relative Strength Index with configurable smoothing method.
+    /// </summary>
+    /// <param name="length">The RSI period length.</param>
+    /// <param name="maType">The smoothing method. Use WildersSmoothingMethod (original) or SimpleMovingAverage (Cutler variant).</param>
+    /// <param name="input">Optional input series. If null, uses default price series.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    /// <returns>A SeriesHandle for the RSI values.</returns>
+    /// <remarks>
+    /// RSI Variants:
+    /// - Wilder (original, 1978): Uses Wilder's smoothing method, slower response
+    /// - Cutler: Uses simple moving average, more responsive to price changes
+    /// </remarks>
+    public SeriesHandle Rsi(int length, MovingAvgType maType, SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var series = input ?? Price();
+        return _builder.AddIndicator(IndicatorSpecs.Rsi(length, maType), series, _builder.ResolveSeriesKey(series), key);
     }
 
     /// <summary>
@@ -238,12 +257,32 @@ public sealed partial class IndicatorCatalog
     }
 
     /// <summary>
-    /// Calculates Average True Range.
+    /// Calculates Average True Range with default Wilder smoothing.
     /// </summary>
     public SeriesHandle Atr(int length = 14, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
         return _builder.AddIndicator(IndicatorSpecs.Atr(length), series, _builder.ResolveSeriesKey(series), key);
+    }
+
+    /// <summary>
+    /// Calculates Average True Range with configurable smoothing method.
+    /// </summary>
+    /// <param name="length">The ATR period length.</param>
+    /// <param name="maType">The smoothing method. Use WildersSmoothingMethod (original), SimpleMovingAverage, or ExponentialMovingAverage.</param>
+    /// <param name="input">Optional input series. If null, uses default price series.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    /// <returns>A SeriesHandle for the ATR values.</returns>
+    /// <remarks>
+    /// ATR Variants:
+    /// - Wilder (original, 1978): Uses Wilder's smoothing method
+    /// - SMA: Uses simple moving average of true range
+    /// - EMA: Uses exponential moving average of true range
+    /// </remarks>
+    public SeriesHandle Atr(int length, MovingAvgType maType, SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var series = input ?? Price();
+        return _builder.AddIndicator(IndicatorSpecs.Atr(length, maType), series, _builder.ResolveSeriesKey(series), key);
     }
 
     /// <summary>

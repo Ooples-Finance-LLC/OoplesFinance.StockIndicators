@@ -1003,6 +1003,7 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
     private readonly StreamingInputResolver _input;
 
     public StiffnessIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType signalMaType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 100, int length2 = 60, int smoothingLength = 3, double threshold = 90,
         InputName inputName = InputName.Close)
     {
@@ -1012,12 +1013,12 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
         _stdDev = new StandardDeviationVolatilityState(maType, resolved, inputName);
         _aboveSum = new RollingWindowSum(_length2);
-        _signal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, smoothingLength));
+        _signal = MovingAverageSmootherFactory.Create(signalMaType, Math.Max(1, smoothingLength));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public StiffnessIndicatorState(MovingAvgType maType, int length1, int length2, int smoothingLength, double threshold,
-        Func<OhlcvBar, double> selector)
+    public StiffnessIndicatorState(MovingAvgType maType, MovingAvgType signalMaType, int length1, int length2,
+        int smoothingLength, double threshold, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1030,7 +1031,7 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
         _stdDev = new StandardDeviationVolatilityState(maType, resolved, selector);
         _aboveSum = new RollingWindowSum(_length2);
-        _signal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, smoothingLength));
+        _signal = MovingAverageSmootherFactory.Create(signalMaType, Math.Max(1, smoothingLength));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -2104,25 +2105,28 @@ public sealed class TechnicalRankState : IStreamingIndicatorState, IDisposable
     private readonly StreamingInputResolver _input;
     private int _index;
 
-    public TechnicalRankState(int length1 = 200, int length2 = 125, int length3 = 50, int length4 = 20,
+    public TechnicalRankState(MovingAvgType smaMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType ppoMaType = MovingAvgType.ExponentialMovingAverage,
+        int length1 = 200, int length2 = 125, int length3 = 50, int length4 = 20,
         int length5 = 12, int length6 = 26, int length7 = 9, int length8 = 3, int length9 = 14,
         InputName inputName = InputName.Close)
     {
         _length8 = Math.Max(1, length8);
-        _ma1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length1));
-        _ma2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length3));
+        _ma1 = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length1));
+        _ma2 = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length3));
         _rocLong = new RateOfChangeState(Math.Max(1, length2), inputName);
         _rocShort = new RateOfChangeState(Math.Max(1, length4), inputName);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, length9), 3, inputName);
-        _ppoFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length5));
-        _ppoSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length6));
-        _ppoSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length7));
+        _rsi = new RelativeStrengthIndexState(length: Math.Max(1, length9), signalLength: 3, inputName: inputName);
+        _ppoFast = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length5));
+        _ppoSlow = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length6));
+        _ppoSignal = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length7));
         _histValues = new PooledRingBuffer<double>(_length8);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public TechnicalRankState(int length1, int length2, int length3, int length4, int length5, int length6,
-        int length7, int length8, int length9, Func<OhlcvBar, double> selector)
+    public TechnicalRankState(MovingAvgType smaMaType, MovingAvgType ppoMaType, int length1, int length2,
+        int length3, int length4, int length5, int length6, int length7, int length8, int length9,
+        Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -2130,14 +2134,14 @@ public sealed class TechnicalRankState : IStreamingIndicatorState, IDisposable
         }
 
         _length8 = Math.Max(1, length8);
-        _ma1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length1));
-        _ma2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length3));
+        _ma1 = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length1));
+        _ma2 = MovingAverageSmootherFactory.Create(smaMaType, Math.Max(1, length3));
         _rocLong = new RateOfChangeState(Math.Max(1, length2), selector);
         _rocShort = new RateOfChangeState(Math.Max(1, length4), selector);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, length9), 3, selector);
-        _ppoFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length5));
-        _ppoSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length6));
-        _ppoSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length7));
+        _rsi = new RelativeStrengthIndexState(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length9), 3, selector);
+        _ppoFast = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length5));
+        _ppoSlow = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length6));
+        _ppoSignal = MovingAverageSmootherFactory.Create(ppoMaType, Math.Max(1, length7));
         _histValues = new PooledRingBuffer<double>(_length8);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }

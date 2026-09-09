@@ -213,8 +213,8 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
     private readonly int _length;
     private readonly double _alpha;
     private readonly IMovingAverageSmoother _ema;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
+    private readonly IMovingAverageSmoother _avgGain;
+    private readonly IMovingAverageSmoother _avgLoss;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _bValues;
     private double _prevEma;
@@ -224,18 +224,20 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
     private bool _hasPrevBChg;
 
     public RecursiveDifferenciatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType rsiMaType = MovingAvgType.WildersSmoothingMethod,
         int length = 14, double alpha = 0.6, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
         _alpha = alpha;
         _ema = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, _length);
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, _length);
         _input = new StreamingInputResolver(inputName, null);
         _bValues = new PooledRingBuffer<double>(_length);
     }
 
-    public RecursiveDifferenciatorState(MovingAvgType maType, int length, double alpha, Func<OhlcvBar, double> selector)
+    public RecursiveDifferenciatorState(MovingAvgType maType, MovingAvgType rsiMaType, int length, double alpha,
+        Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -245,8 +247,8 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
         _length = Math.Max(1, length);
         _alpha = alpha;
         _ema = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, _length);
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, _length);
         _input = new StreamingInputResolver(InputName.Close, selector);
         _bValues = new PooledRingBuffer<double>(_length);
     }
@@ -274,8 +276,8 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
         var priceChg = _hasPrevEma ? ema - prevEma : 0;
         var gain = priceChg > 0 ? priceChg : 0;
         var loss = priceChg < 0 ? Math.Abs(priceChg) : 0;
-        var avgGain = _avgGain.GetNext(gain, isFinal);
-        var avgLoss = _avgLoss.GetNext(loss, isFinal);
+        var avgGain = _avgGain.Next(gain, isFinal);
+        var avgLoss = _avgLoss.Next(loss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
 
@@ -310,6 +312,8 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
     public void Dispose()
     {
         _ema.Dispose();
+        _avgGain.Dispose();
+        _avgLoss.Dispose();
         _bValues.Dispose();
     }
 }
@@ -382,8 +386,8 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
 {
     private readonly int _length;
     private readonly IMovingAverageSmoother _srcMa;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
+    private readonly IMovingAverageSmoother _avgGain;
+    private readonly IMovingAverageSmoother _avgLoss;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _values;
     private readonly PooledRingBuffer<double> _bValues;
@@ -396,12 +400,13 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
     private bool _hasPrevSrc;
 
     public RecursiveRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType rsiMaType = MovingAvgType.WildersSmoothingMethod,
         int length = 14, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
         _srcMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, _length);
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, _length);
         _input = new StreamingInputResolver(inputName, null);
         _values = new PooledRingBuffer<double>(_length);
         _bValues = new PooledRingBuffer<double>(_length);
@@ -411,7 +416,8 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
         _avgRsiValues = new PooledRingBuffer<double>(_length);
     }
 
-    public RecursiveRelativeStrengthIndexState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
+    public RecursiveRelativeStrengthIndexState(MovingAvgType maType, MovingAvgType rsiMaType, int length,
+        Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -420,8 +426,8 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
 
         _length = Math.Max(1, length);
         _srcMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, _length);
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, _length);
         _input = new StreamingInputResolver(InputName.Close, selector);
         _values = new PooledRingBuffer<double>(_length);
         _bValues = new PooledRingBuffer<double>(_length);
@@ -459,8 +465,8 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
         var srcChg = _hasPrevSrc ? src - prevSrc : 0;
         var srcGain = srcChg > 0 ? srcChg : 0;
         var srcLoss = srcChg < 0 ? Math.Abs(srcChg) : 0;
-        var avgGain = _avgGain.GetNext(srcGain, isFinal);
-        var avgLoss = _avgLoss.GetNext(srcLoss, isFinal);
+        var avgGain = _avgGain.Next(srcGain, isFinal);
+        var avgLoss = _avgLoss.Next(srcLoss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
 
@@ -526,6 +532,8 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
     public void Dispose()
     {
         _srcMa.Dispose();
+        _avgGain.Dispose();
+        _avgLoss.Dispose();
         _values.Dispose();
         _bValues.Dispose();
         _avgValues.Dispose();
@@ -1041,26 +1049,27 @@ public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDis
     private readonly IMovingAverageSmoother _fastMa;
     private readonly IMovingAverageSmoother _slowMa;
     private readonly IMovingAverageSmoother _signal;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
+    private readonly IMovingAverageSmoother _avgGain;
+    private readonly IMovingAverageSmoother _avgLoss;
     private readonly StreamingInputResolver _input;
     private double _prevSpread;
     private bool _hasPrevSpread;
 
     public RelativeSpreadStrengthState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType rsiMaType = MovingAvgType.WildersSmoothingMethod,
         int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5,
         InputName inputName = InputName.Close)
     {
         _fastMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _avgGain = new WilderState(Math.Max(1, length));
-        _avgLoss = new WilderState(Math.Max(1, length));
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, Math.Max(1, length));
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RelativeSpreadStrengthState(MovingAvgType maType, int fastLength, int slowLength, int length,
-        int smoothLength, Func<OhlcvBar, double> selector)
+    public RelativeSpreadStrengthState(MovingAvgType maType, MovingAvgType rsiMaType, int fastLength, int slowLength,
+        int length, int smoothLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1070,8 +1079,8 @@ public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDis
         _fastMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _avgGain = new WilderState(Math.Max(1, length));
-        _avgLoss = new WilderState(Math.Max(1, length));
+        _avgGain = MovingAverageSmootherFactory.Create(rsiMaType, Math.Max(1, length));
+        _avgLoss = MovingAverageSmootherFactory.Create(rsiMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1098,8 +1107,8 @@ public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDis
         var priceChg = _hasPrevSpread ? spread - prevSpread : 0;
         var gain = priceChg > 0 ? priceChg : 0;
         var loss = priceChg < 0 ? Math.Abs(priceChg) : 0;
-        var avgGain = _avgGain.GetNext(gain, isFinal);
-        var avgLoss = _avgLoss.GetNext(loss, isFinal);
+        var avgGain = _avgGain.Next(gain, isFinal);
+        var avgLoss = _avgLoss.Next(loss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
         var rss = _signal.Next(rsi, isFinal);
@@ -1127,6 +1136,8 @@ public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDis
         _fastMa.Dispose();
         _slowMa.Dispose();
         _signal.Dispose();
+        _avgGain.Dispose();
+        _avgLoss.Dispose();
     }
 }
 

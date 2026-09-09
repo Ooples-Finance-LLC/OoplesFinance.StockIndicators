@@ -4489,34 +4489,34 @@ public sealed class MovingAverageChannelState : IStreamingIndicatorState, IDispo
 }
 [IndicatorBounds(0, 100, CanBeNegative = false)]
 [IndicatorCategory("Oscillator", SubCategory = "Momentum")]
-[HasVariants("Wilder", OtherVariants = "Cutler", Reference = "Wilder 1978")]
-public sealed class RelativeStrengthIndexState : IStreamingIndicatorState
+public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
-    private readonly WilderState _signal;
+    private readonly IMovingAverageSmoother _avgGain;
+    private readonly IMovingAverageSmoother _avgLoss;
+    private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
     private double _prevClose;
     private bool _hasPrev;
 
-    public RelativeStrengthIndexState(int length = 14, int signalLength = 3, InputName inputName = InputName.Close)
+    public RelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
+        int length = 14, int signalLength = 3, InputName inputName = InputName.Close)
     {
-        _avgGain = new WilderState(length);
-        _avgLoss = new WilderState(length);
-        _signal = new WilderState(signalLength);
+        _avgGain = MovingAverageSmootherFactory.Create(maType, length);
+        _avgLoss = MovingAverageSmootherFactory.Create(maType, length);
+        _signal = MovingAverageSmootherFactory.Create(maType, signalLength);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RelativeStrengthIndexState(int length, int signalLength, Func<OhlcvBar, double> selector)
+    public RelativeStrengthIndexState(MovingAvgType maType, int length, int signalLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _avgGain = new WilderState(length);
-        _avgLoss = new WilderState(length);
-        _signal = new WilderState(signalLength);
+        _avgGain = MovingAverageSmootherFactory.Create(maType, length);
+        _avgLoss = MovingAverageSmootherFactory.Create(maType, length);
+        _signal = MovingAverageSmootherFactory.Create(maType, signalLength);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -4539,11 +4539,11 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState
         var gain = priceChg > 0 ? priceChg : 0;
         var loss = priceChg < 0 ? Math.Abs(priceChg) : 0;
 
-        var avgGain = _avgGain.GetNext(gain, isFinal);
-        var avgLoss = _avgLoss.GetNext(loss, isFinal);
+        var avgGain = _avgGain.Next(gain, isFinal);
+        var avgLoss = _avgLoss.Next(loss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        var signal = _signal.GetNext(rsi, isFinal);
+        var signal = _signal.Next(rsi, isFinal);
         var histogram = rsi - signal;
 
         if (isFinal)
@@ -4564,6 +4564,13 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState
         }
 
         return new StreamingIndicatorStateResult(rsi, outputs);
+    }
+
+    public void Dispose()
+    {
+        _avgGain.Dispose();
+        _avgLoss.Dispose();
+        _signal.Dispose();
     }
 }
 
@@ -5175,24 +5182,23 @@ public sealed class StochasticMomentumIndexState : IStreamingIndicatorState, IDi
 
 [IndicatorBounds(double.NegativeInfinity, double.PositiveInfinity)]
 [IndicatorCategory("Trend", SubCategory = "Momentum")]
-[HasVariants("Standard EMA", OtherVariants = "Wilder EMA", Reference = "Appel")]
-public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicatorState
+public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EmaState _fast;
-    private readonly EmaState _slow;
-    private readonly EmaState _signal;
+    private readonly IMovingAverageSmoother _fast;
+    private readonly IMovingAverageSmoother _slow;
+    private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
 
-    public MovingAverageConvergenceDivergenceState(int fastLength = 12, int slowLength = 26, int signalLength = 9,
-        InputName inputName = InputName.Close)
+    public MovingAverageConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        int fastLength = 12, int slowLength = 26, int signalLength = 9, InputName inputName = InputName.Close)
     {
-        _fast = new EmaState(fastLength);
-        _slow = new EmaState(slowLength);
-        _signal = new EmaState(signalLength);
+        _fast = MovingAverageSmootherFactory.Create(maType, fastLength);
+        _slow = MovingAverageSmootherFactory.Create(maType, slowLength);
+        _signal = MovingAverageSmootherFactory.Create(maType, signalLength);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public MovingAverageConvergenceDivergenceState(int fastLength, int slowLength, int signalLength,
+    public MovingAverageConvergenceDivergenceState(MovingAvgType maType, int fastLength, int slowLength, int signalLength,
         Func<OhlcvBar, double> selector)
     {
         if (selector == null)
@@ -5200,9 +5206,9 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _fast = new EmaState(fastLength);
-        _slow = new EmaState(slowLength);
-        _signal = new EmaState(signalLength);
+        _fast = MovingAverageSmootherFactory.Create(maType, fastLength);
+        _slow = MovingAverageSmootherFactory.Create(maType, slowLength);
+        _signal = MovingAverageSmootherFactory.Create(maType, signalLength);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -5218,10 +5224,10 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fast = _fast.GetNext(value, isFinal);
-        var slow = _slow.GetNext(value, isFinal);
+        var fast = _fast.Next(value, isFinal);
+        var slow = _slow.Next(value, isFinal);
         var macd = fast - slow;
-        var signal = _signal.GetNext(macd, isFinal);
+        var signal = _signal.Next(macd, isFinal);
         var histogram = macd - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -5236,6 +5242,13 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
         }
 
         return new StreamingIndicatorStateResult(macd, outputs);
+    }
+
+    public void Dispose()
+    {
+        _fast.Dispose();
+        _slow.Dispose();
+        _signal.Dispose();
     }
 }
 
@@ -6248,16 +6261,15 @@ public sealed class ChandeMomentumOscillatorState : IStreamingIndicatorState, ID
 
 [IndicatorBounds(0, double.PositiveInfinity, CanBeNegative = false)]
 [IndicatorCategory("Volatility")]
-[HasVariants("Wilder", OtherVariants = "SMA, EMA", Reference = "Wilder 1978")]
-public sealed class AverageTrueRangeState : IStreamingIndicatorState
+public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly WilderState _atr;
+    private readonly IMovingAverageSmoother _atr;
     private double _prevClose;
     private bool _hasPrev;
 
-    public AverageTrueRangeState(int length = 14)
+    public AverageTrueRangeState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14)
     {
-        _atr = new WilderState(length);
+        _atr = MovingAverageSmootherFactory.Create(maType, length);
     }
 
     public IndicatorName Name => IndicatorName.AverageTrueRange;
@@ -6274,7 +6286,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState
         // For first bar, use current close (TR = High - Low)
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atr.GetNext(tr, isFinal);
+        var atr = _atr.Next(tr, isFinal);
 
         if (isFinal)
         {
@@ -6293,25 +6305,32 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState
 
         return new StreamingIndicatorStateResult(atr, outputs);
     }
+
+    public void Dispose()
+    {
+        _atr.Dispose();
+    }
 }
 
-public sealed class AverageDirectionalIndexState : IStreamingIndicatorState
+[IndicatorBounds(0, 100, CanBeNegative = false)]
+[IndicatorCategory("Trend")]
+public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly WilderState _dmPlus;
-    private readonly WilderState _dmMinus;
-    private readonly WilderState _tr;
-    private readonly WilderState _adx;
+    private readonly IMovingAverageSmoother _dmPlus;
+    private readonly IMovingAverageSmoother _dmMinus;
+    private readonly IMovingAverageSmoother _tr;
+    private readonly IMovingAverageSmoother _adx;
     private double _prevHigh;
     private double _prevLow;
     private double _prevClose;
     private bool _hasPrev;
 
-    public AverageDirectionalIndexState(int length = 14)
+    public AverageDirectionalIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14)
     {
-        _dmPlus = new WilderState(length);
-        _dmMinus = new WilderState(length);
-        _tr = new WilderState(length);
-        _adx = new WilderState(length);
+        _dmPlus = MovingAverageSmootherFactory.Create(maType, length);
+        _dmMinus = MovingAverageSmootherFactory.Create(maType, length);
+        _tr = MovingAverageSmootherFactory.Create(maType, length);
+        _adx = MovingAverageSmootherFactory.Create(maType, length);
     }
 
     public IndicatorName Name => IndicatorName.AverageDirectionalIndex;
@@ -6342,16 +6361,16 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState
         var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
 
-        var dmPlus14 = _dmPlus.GetNext(dmPlus, isFinal);
-        var dmMinus14 = _dmMinus.GetNext(dmMinus, isFinal);
-        var tr14 = _tr.GetNext(tr, isFinal);
+        var dmPlus14 = _dmPlus.Next(dmPlus, isFinal);
+        var dmMinus14 = _dmMinus.Next(dmMinus, isFinal);
+        var tr14 = _tr.Next(tr, isFinal);
 
         var diPlus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmPlus14 / tr14, 100, 0) : 0;
         var diMinus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmMinus14 / tr14, 100, 0) : 0;
         var diDiff = Math.Abs(diPlus - diMinus);
         var diSum = diPlus + diMinus;
         var dx = diSum != 0 ? MathHelper.MinOrMax(100 * diDiff / diSum, 100, 0) : 0;
-        var adx = _adx.GetNext(dx, isFinal);
+        var adx = _adx.Next(dx, isFinal);
 
         if (isFinal)
         {
@@ -6373,6 +6392,14 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState
         }
 
         return new StreamingIndicatorStateResult(adx, outputs);
+    }
+
+    public void Dispose()
+    {
+        _dmPlus.Dispose();
+        _dmMinus.Dispose();
+        _tr.Dispose();
+        _adx.Dispose();
     }
 }
 
@@ -6815,28 +6842,29 @@ public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDis
         _slowSmoother.Dispose();
     }
 }
-public sealed class OnBalanceVolumeState : IStreamingIndicatorState
+public sealed class OnBalanceVolumeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EmaState _signal;
+    private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
     private double _prevClose;
     private double _obv;
     private bool _hasPrev;
 
-    public OnBalanceVolumeState(int length = 20, InputName inputName = InputName.Close)
+    public OnBalanceVolumeState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        int length = 20, InputName inputName = InputName.Close)
     {
-        _signal = new EmaState(length);
+        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public OnBalanceVolumeState(int length, Func<OhlcvBar, double> selector)
+    public OnBalanceVolumeState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _signal = new EmaState(length);
+        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -6859,7 +6887,7 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState
             : currentValue < prevClose ? prevObv - bar.Volume
             : prevObv;
 
-        var signal = _signal.GetNext(obv, isFinal);
+        var signal = _signal.Next(obv, isFinal);
 
         if (isFinal)
         {
@@ -6879,6 +6907,11 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState
         }
 
         return new StreamingIndicatorStateResult(obv, outputs);
+    }
+
+    public void Dispose()
+    {
+        _signal.Dispose();
     }
 }
 
@@ -9705,33 +9738,36 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
     }
 }
 
-public sealed class TrixState : IStreamingIndicatorState
+public sealed class TrixState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EmaState _ema1;
-    private readonly EmaState _ema2;
-    private readonly EmaState _ema3;
+    private readonly IMovingAverageSmoother _ema1;
+    private readonly IMovingAverageSmoother _ema2;
+    private readonly IMovingAverageSmoother _ema3;
     private readonly StreamingInputResolver _input;
     private double _prevEma3;
     private bool _hasPrev;
 
-    public TrixState(int length = 15, InputName inputName = InputName.Close)
+    public TrixState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        int length = 15, InputName inputName = InputName.Close)
     {
-        _ema1 = new EmaState(length);
-        _ema2 = new EmaState(length);
-        _ema3 = new EmaState(length);
+        var resolved = Math.Max(1, length);
+        _ema1 = MovingAverageSmootherFactory.Create(maType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(maType, resolved);
+        _ema3 = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public TrixState(int length, Func<OhlcvBar, double> selector)
+    public TrixState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _ema1 = new EmaState(length);
-        _ema2 = new EmaState(length);
-        _ema3 = new EmaState(length);
+        var resolved = Math.Max(1, length);
+        _ema1 = MovingAverageSmootherFactory.Create(maType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(maType, resolved);
+        _ema3 = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -9749,9 +9785,9 @@ public sealed class TrixState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var ema1 = _ema1.GetNext(value, isFinal);
-        var ema2 = _ema2.GetNext(ema1, isFinal);
-        var ema3 = _ema3.GetNext(ema2, isFinal);
+        var ema1 = _ema1.Next(value, isFinal);
+        var ema2 = _ema2.Next(ema1, isFinal);
+        var ema3 = _ema3.Next(ema2, isFinal);
         var prevEma3 = _hasPrev ? _prevEma3 : 0;
         var trix = CalculationsHelper.CalculatePercentChange(ema3, prevEma3);
 
@@ -9771,6 +9807,13 @@ public sealed class TrixState : IStreamingIndicatorState
         }
 
         return new StreamingIndicatorStateResult(trix, outputs);
+    }
+
+    public void Dispose()
+    {
+        _ema1.Dispose();
+        _ema2.Dispose();
+        _ema3.Dispose();
     }
 }
 

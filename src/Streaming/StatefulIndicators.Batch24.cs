@@ -62,6 +62,9 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     private bool _hasPrev;
 
     public TechnicalRatingsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType vwmaMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType stochMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType macdMaType = MovingAvgType.ExponentialMovingAverage,
         int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3,
         int stochLength3 = 3, int ultOscLength1 = 7, int ultOscLength2 = 14, int ultOscLength3 = 28,
         int ichiLength1 = 9, int ichiLength2 = 26, int ichiLength3 = 52, int vwmaLength = 20, int cciLength = 20,
@@ -90,21 +93,21 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         _ma50 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength4));
         _ma100 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength5));
         _ma200 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength6));
-        _vwmaVolumeSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, _vwmaLength);
+        _vwmaVolumeSmoother = MovingAverageSmootherFactory.Create(vwmaMaType, _vwmaLength);
         _vwmaVolumePriceSum = new RollingWindowSum(_vwmaLength);
         _stochHighWindow = new RollingWindowMax(resolvedStoch);
         _stochLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
+        _stochFastSmoother = MovingAverageSmootherFactory.Create(stochMaType, resolvedStochSmooth);
         _stochRsiHighWindow = new RollingWindowMax(resolvedStoch);
         _stochRsiLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochRsiFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, rsiLength), 3, inputName);
+        _stochRsiFastSmoother = MovingAverageSmootherFactory.Create(stochMaType, resolvedStochSmooth);
+        _rsi = new RelativeStrengthIndexState(length: Math.Max(1, rsiLength), signalLength: 3, inputName: inputName);
         _ao = new AwesomeOscillatorState(Math.Max(1, aoLength1), Math.Max(1, aoLength2), InputName.MedianPrice);
-        _macdFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength1));
-        _macdSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength2));
-        _macdSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength3));
+        _macdFast = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength1));
+        _macdSlow = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength2));
+        _macdSignal = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength3));
         _ichimoku = new IchimokuCloudState(ichiLength1, ichiLength2, ichiLength3, inputName);
-        _adx = new AverageDirectionalIndexState(Math.Max(1, adxLength));
+        _adx = new AverageDirectionalIndexState(length: Math.Max(1, adxLength));
         _cci = new CommodityChannelIndexState(InputName.TypicalPrice, MovingAvgType.SimpleMovingAverage, Math.Max(1, cciLength), 0.015);
         _elderRay = new ElderRayIndexState(MovingAvgType.ExponentialMovingAverage, Math.Max(1, bullBearLength), inputName);
         _hma = new HullMovingAverageState(MovingAvgType.WeightedMovingAverage, Math.Max(1, hullMaLength), inputName);
@@ -113,7 +116,8 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public TechnicalRatingsState(MovingAvgType maType, int aoLength1, int aoLength2, int rsiLength, int stochLength1,
+    public TechnicalRatingsState(MovingAvgType maType, MovingAvgType vwmaMaType, MovingAvgType stochMaType,
+        MovingAvgType macdMaType, int aoLength1, int aoLength2, int rsiLength, int stochLength1,
         int stochLength2, int stochLength3, int ultOscLength1, int ultOscLength2, int ultOscLength3, int ichiLength1,
         int ichiLength2, int ichiLength3, int vwmaLength, int cciLength, int adxLength, int momLength, int macdLength1,
         int macdLength2, int macdLength3, int bullBearLength, int williamRLength, int maLength1, int maLength2,
@@ -144,21 +148,21 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         _ma50 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength4));
         _ma100 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength5));
         _ma200 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, maLength6));
-        _vwmaVolumeSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, _vwmaLength);
+        _vwmaVolumeSmoother = MovingAverageSmootherFactory.Create(vwmaMaType, _vwmaLength);
         _vwmaVolumePriceSum = new RollingWindowSum(_vwmaLength);
         _stochHighWindow = new RollingWindowMax(resolvedStoch);
         _stochLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
+        _stochFastSmoother = MovingAverageSmootherFactory.Create(stochMaType, resolvedStochSmooth);
         _stochRsiHighWindow = new RollingWindowMax(resolvedStoch);
         _stochRsiLowWindow = new RollingWindowMin(resolvedStoch);
-        _stochRsiFastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedStochSmooth);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, rsiLength), 3, selector);
+        _stochRsiFastSmoother = MovingAverageSmootherFactory.Create(stochMaType, resolvedStochSmooth);
+        _rsi = new RelativeStrengthIndexState(MovingAvgType.WildersSmoothingMethod, Math.Max(1, rsiLength), 3, selector);
         _ao = new AwesomeOscillatorState(Math.Max(1, aoLength1), Math.Max(1, aoLength2), selector);
-        _macdFast = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength1));
-        _macdSlow = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength2));
-        _macdSignal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, macdLength3));
+        _macdFast = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength1));
+        _macdSlow = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength2));
+        _macdSignal = MovingAverageSmootherFactory.Create(macdMaType, Math.Max(1, macdLength3));
         _ichimoku = new IchimokuCloudState(ichiLength1, ichiLength2, ichiLength3, selector);
-        _adx = new AverageDirectionalIndexState(Math.Max(1, adxLength));
+        _adx = new AverageDirectionalIndexState(length: Math.Max(1, adxLength));
         _cci = new CommodityChannelIndexState(InputName.TypicalPrice, MovingAvgType.SimpleMovingAverage, Math.Max(1, cciLength), 0.015, selector);
         _elderRay = new ElderRayIndexState(MovingAvgType.ExponentialMovingAverage, Math.Max(1, bullBearLength), selector);
         _hma = new HullMovingAverageState(MovingAvgType.WeightedMovingAverage, Math.Max(1, hullMaLength), selector);

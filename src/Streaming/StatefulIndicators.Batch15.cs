@@ -9,28 +9,31 @@ namespace OoplesFinance.StockIndicators.Streaming;
 public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _signalLength;
-    private readonly EmaState _ema1;
-    private readonly EmaState _ema2;
+    private readonly IMovingAverageSmoother _ema1;
+    private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
     private readonly RollingWindowSum _signalSum;
     private readonly StreamingInputResolver _input;
 
     public ImpulsePercentagePriceOscillatorState(InputName inputName = InputName.TypicalPrice,
+        MovingAvgType zlemaMaType = MovingAvgType.ExponentialMovingAverage,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
     {
         var resolved = Math.Max(1, length);
         _signalLength = Math.Max(1, signalLength);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
+        // ZLEMA smoothers (configurable, default EMA)
+        _ema1 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        // High/low smoothers (configurable, default Wilder)
         _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSum = new RollingWindowSum(_signalLength);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public ImpulsePercentagePriceOscillatorState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
+    public ImpulsePercentagePriceOscillatorState(MovingAvgType zlemaMaType, MovingAvgType maType,
+        int length, int signalLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -39,8 +42,10 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
 
         var resolved = Math.Max(1, length);
         _signalLength = Math.Max(1, signalLength);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
+        // ZLEMA smoothers (configurable)
+        _ema1 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        // High/low smoothers (configurable)
         _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSum = new RollingWindowSum(_signalLength);
@@ -61,8 +66,8 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var ema1 = _ema1.GetNext(value, isFinal);
-        var ema2 = _ema2.GetNext(ema1, isFinal);
+        var ema1 = _ema1.Next(value, isFinal);
+        var ema2 = _ema2.Next(ema1, isFinal);
         var mi = (2 * ema1) - ema2;
         var hi = _highSmoother.Next(bar.High, isFinal);
         var lo = _lowSmoother.Next(bar.Low, isFinal);
@@ -88,6 +93,8 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
 
     public void Dispose()
     {
+        _ema1.Dispose();
+        _ema2.Dispose();
         _highSmoother.Dispose();
         _lowSmoother.Dispose();
         _signalSum.Dispose();
@@ -249,17 +256,19 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable
     private readonly PooledRingBuffer<double> _pdoinssValues;
 
     public InsyncIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType stochKMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType stochDMaType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9, int emoLength = 14, int mfiLength = 20, int bbLength = 20,
         int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1,
         int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
     {
         _smaLength = Math.Max(1, smaLength);
-        _rsi = new RelativeStrengthIndexState(Math.Max(1, rsiLength));
+        _rsi = new RelativeStrengthIndexState(length: Math.Max(1, rsiLength));
         _cci = new CommodityChannelIndexState(length: Math.Max(1, cciLength));
         _mfi = new MoneyFlowIndexState(Math.Max(1, mfiLength));
-        _macd = new MovingAverageConvergenceDivergenceState(Math.Max(1, fastLength), Math.Max(1, slowLength), Math.Max(1, signalLength));
-        _pctB = new BollingerBandsPercentBState(stdDevMult, MovingAvgType.SimpleMovingAverage, Math.Max(1, bbLength));
-        _dpo = new DetrendedPriceOscillatorState(MovingAvgType.SimpleMovingAverage, Math.Max(1, dpoLength));
+        _macd = new MovingAverageConvergenceDivergenceState(fastLength: Math.Max(1, fastLength), slowLength: Math.Max(1, slowLength), signalLength: Math.Max(1, signalLength));
+        _pctB = new BollingerBandsPercentBState(stdDevMult, maType, Math.Max(1, bbLength));
+        _dpo = new DetrendedPriceOscillatorState(maType, Math.Max(1, dpoLength));
         _roc = new RateOfChangeState(Math.Max(1, rocLength));
         _eom = new EaseOfMovementState(divisor);
         _emoSum = new RollingWindowSum(_smaLength);
@@ -269,8 +278,8 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable
         var resolvedStochLength = Math.Max(1, stochLength);
         _stochHigh = new RollingWindowMax(resolvedStochLength);
         _stochLow = new RollingWindowMin(resolvedStochLength);
-        _stochFast = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, stochKLength));
-        _stochSlow = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, stochDLength));
+        _stochFast = MovingAverageSmootherFactory.Create(stochKMaType, Math.Max(1, stochKLength));
+        _stochSlow = MovingAverageSmootherFactory.Create(stochDMaType, Math.Max(1, stochDLength));
         _pdoinsbValues = new PooledRingBuffer<double>(_smaLength);
         _pdoinssValues = new PooledRingBuffer<double>(_smaLength);
     }
@@ -1389,9 +1398,13 @@ public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, I
     private readonly IMovingAverageSmoother _pkSmoother;
 
     public KaseConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod,
+        MovingAvgType enginePkMaType = MovingAvgType.WeightedMovingAverage,
+        MovingAvgType engineMnMaType = MovingAvgType.SimpleMovingAverage,
         int length1 = 30, int length2 = 3, int length3 = 8)
     {
-        _engine = new KasePeakOscillatorV1Engine(Math.Max(1, length1), Math.Max(1, length2));
+        _engine = new KasePeakOscillatorV1Engine(atrMaType, enginePkMaType, engineMnMaType,
+            Math.Max(1, length1), Math.Max(1, length2));
         _pkSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
     }
 
@@ -1774,9 +1787,13 @@ public sealed class KasePeakOscillatorV1State : IStreamingIndicatorState, IDispo
     private readonly KasePeakOscillatorV1Engine _engine;
     private double _prevPk;
 
-    public KasePeakOscillatorV1State(int length = 30, int smoothLength = 3)
+    public KasePeakOscillatorV1State(MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod,
+        MovingAvgType pkMaType = MovingAvgType.WeightedMovingAverage,
+        MovingAvgType mnMaType = MovingAvgType.SimpleMovingAverage,
+        int length = 30, int smoothLength = 3)
     {
-        _engine = new KasePeakOscillatorV1Engine(Math.Max(1, length), Math.Max(1, smoothLength));
+        _engine = new KasePeakOscillatorV1Engine(atrMaType, pkMaType, mnMaType,
+            Math.Max(1, length), Math.Max(1, smoothLength));
     }
 
     public IndicatorName Name => IndicatorName.KasePeakOscillatorV1;
@@ -2306,7 +2323,7 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
 {
     private readonly int _length;
     private readonly double _sqrtLength;
-    private readonly WilderState _atr;
+    private readonly IMovingAverageSmoother _atr;
     private readonly IMovingAverageSmoother _pkSmoother;
     private readonly IMovingAverageSmoother _mnSmoother;
     private readonly StandardDeviationVolatilityState _stdDev;
@@ -2316,14 +2333,15 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
     private bool _hasPrev;
     private double _pkValue;
 
-    public KasePeakOscillatorV1Engine(int length, int smoothLength)
+    public KasePeakOscillatorV1Engine(MovingAvgType atrMaType, MovingAvgType pkMaType, MovingAvgType mnMaType,
+        int length, int smoothLength)
     {
         _length = Math.Max(1, length);
         _sqrtLength = MathHelper.Sqrt(_length);
-        _atr = new WilderState(_length);
-        _pkSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, smoothLength));
-        _mnSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, _length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length, _ => _pkValue);
+        _atr = MovingAverageSmootherFactory.Create(atrMaType, _length);
+        _pkSmoother = MovingAverageSmootherFactory.Create(pkMaType, Math.Max(1, smoothLength));
+        _mnSmoother = MovingAverageSmootherFactory.Create(mnMaType, _length);
+        _stdDev = new StandardDeviationVolatilityState(mnMaType, _length, _ => _pkValue);
         _highValues = new PooledRingBuffer<double>(_length);
         _lowValues = new PooledRingBuffer<double>(_length);
     }
@@ -2333,7 +2351,7 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
         // For TrueRange on first bar, use current close to avoid inflated TR
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atr.GetNext(tr, isFinal);
+        var atr = _atr.Next(tr, isFinal);
         var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);
         var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, _length);
         var rwh = atr != 0 ? (bar.High - prevLow) / atr * _sqrtLength : 0;
@@ -2370,6 +2388,7 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
 
     public void Dispose()
     {
+        _atr.Dispose();
         _pkSmoother.Dispose();
         _mnSmoother.Dispose();
         _stdDev.Dispose();

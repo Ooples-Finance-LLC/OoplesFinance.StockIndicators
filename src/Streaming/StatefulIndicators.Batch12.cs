@@ -403,34 +403,35 @@ public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposabl
     private readonly IMovingAverageSmoother _wcSmoother;
     private readonly StreamingInputResolver _input;
 
-    public EmaWaveIndicatorState(int length1 = 5, int length2 = 25, int length3 = 50, int smoothLength = 4,
-        InputName inputName = InputName.Close)
+    public EmaWaveIndicatorState(MovingAvgType emaMaType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType smoothMaType = MovingAvgType.SimpleMovingAverage, int length1 = 5, int length2 = 25,
+        int length3 = 50, int smoothLength = 4, InputName inputName = InputName.Close)
     {
-        _emaA = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length1));
-        _emaB = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length2));
-        _emaC = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length3));
+        _emaA = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length1));
+        _emaB = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length2));
+        _emaC = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length3));
         var resolvedSmooth = Math.Max(1, smoothLength);
-        _waSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wbSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wcSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
+        _waSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
+        _wbSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
+        _wcSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EmaWaveIndicatorState(int length1, int length2, int length3, int smoothLength,
-        Func<OhlcvBar, double> selector)
+    public EmaWaveIndicatorState(MovingAvgType emaMaType, MovingAvgType smoothMaType, int length1, int length2,
+        int length3, int smoothLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _emaA = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length1));
-        _emaB = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length2));
-        _emaC = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length3));
+        _emaA = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length1));
+        _emaB = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length2));
+        _emaC = MovingAverageSmootherFactory.Create(emaMaType, Math.Max(1, length3));
         var resolvedSmooth = Math.Max(1, smoothLength);
-        _waSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wbSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wcSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
+        _waSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
+        _wbSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
+        _wcSmoother = MovingAverageSmootherFactory.Create(smoothMaType, resolvedSmooth);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 

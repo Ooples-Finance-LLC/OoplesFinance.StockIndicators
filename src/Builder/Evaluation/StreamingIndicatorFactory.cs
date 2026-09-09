@@ -18,15 +18,15 @@ internal static class StreamingIndicatorFactory
         {
             IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SmaSpecOptions)spec.Options).Length),
             IndicatorName.ExponentialMovingAverage => new ExponentialMovingAverageState(((EmaSpecOptions)spec.Options).Length),
-            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((RsiSpecOptions)spec.Options).Length),
+            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(length: ((RsiSpecOptions)spec.Options).Length),
             IndicatorName.MovingAverageConvergenceDivergence => new MovingAverageConvergenceDivergenceState(
-                ((MacdSpecOptions)spec.Options).FastLength,
-                ((MacdSpecOptions)spec.Options).SlowLength,
-                ((MacdSpecOptions)spec.Options).SignalLength),
+                fastLength: ((MacdSpecOptions)spec.Options).FastLength,
+                slowLength: ((MacdSpecOptions)spec.Options).SlowLength,
+                signalLength: ((MacdSpecOptions)spec.Options).SignalLength),
             IndicatorName.BollingerBands => new BollingerBandsState(
                 ((BollingerBandsSpecOptions)spec.Options).Length,
                 ((BollingerBandsSpecOptions)spec.Options).StdDevMult),
-            IndicatorName.AverageTrueRange => new AverageTrueRangeState(((AtrSpecOptions)spec.Options).Length),
+            IndicatorName.AverageTrueRange => new AverageTrueRangeState(length: ((AtrSpecOptions)spec.Options).Length),
             _ => null
         };
     }

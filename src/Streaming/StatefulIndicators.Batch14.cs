@@ -1724,18 +1724,20 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
     private double _prevS2;
     private bool _hasPrev;
 
-    public HirashimaSugitaRSState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 1000,
+    public HirashimaSugitaRSState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
+        MovingAvgType emaMaType = MovingAvgType.ExponentialMovingAverage, int length = 1000,
         InputName inputName = InputName.Close)
     {
         var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved);
+        _ema = MovingAverageSmootherFactory.Create(emaMaType, resolved);
         _wma = MovingAverageSmootherFactory.Create(maType, resolved);
         _s1Regression = new LinearRegressionState(resolved, _ => _d1Value);
         _s2Regression = new LinearRegressionState(resolved, _ => _d2Value);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public HirashimaSugitaRSState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
+    public HirashimaSugitaRSState(MovingAvgType maType, MovingAvgType emaMaType, int length,
+        Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1743,7 +1745,7 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
         }
 
         var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved);
+        _ema = MovingAverageSmootherFactory.Create(emaMaType, resolved);
         _wma = MovingAverageSmootherFactory.Create(maType, resolved);
         _s1Regression = new LinearRegressionState(resolved, _ => _d1Value);
         _s2Regression = new LinearRegressionState(resolved, _ => _d2Value);
@@ -1889,15 +1891,18 @@ public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _ema;
     private readonly StreamingInputResolver _input;
 
-    public HullEstimateState(int length = 50, InputName inputName = InputName.Close)
+    public HullEstimateState(MovingAvgType wmaMaType = MovingAvgType.WeightedMovingAverage,
+        MovingAvgType emaMaType = MovingAvgType.ExponentialMovingAverage, int length = 50,
+        InputName inputName = InputName.Close)
     {
         var maLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, maLength);
-        _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, maLength);
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, maLength);
+        _ema = MovingAverageSmootherFactory.Create(emaMaType, maLength);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public HullEstimateState(int length, Func<OhlcvBar, double> selector)
+    public HullEstimateState(MovingAvgType wmaMaType, MovingAvgType emaMaType, int length,
+        Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1905,8 +1910,8 @@ public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
         }
 
         var maLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, maLength);
-        _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, maLength);
+        _wma = MovingAverageSmootherFactory.Create(wmaMaType, maLength);
+        _ema = MovingAverageSmootherFactory.Create(emaMaType, maLength);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -2418,28 +2423,31 @@ public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
 public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _signalLength;
-    private readonly EmaState _ema1;
-    private readonly EmaState _ema2;
+    private readonly IMovingAverageSmoother _ema1;
+    private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
     private readonly RollingWindowSum _signalSum;
     private readonly StreamingInputResolver _input;
 
     public ImpulseMovingAverageConvergenceDivergenceState(InputName inputName = InputName.TypicalPrice,
+        MovingAvgType zlemaMaType = MovingAvgType.ExponentialMovingAverage,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
     {
         var resolved = Math.Max(1, length);
         _signalLength = Math.Max(1, signalLength);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
+        // ZLEMA smoothers (configurable, default EMA)
+        _ema1 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        // High/low smoothers (configurable, default Wilder)
         _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSum = new RollingWindowSum(_signalLength);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public ImpulseMovingAverageConvergenceDivergenceState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
+    public ImpulseMovingAverageConvergenceDivergenceState(MovingAvgType zlemaMaType, MovingAvgType maType,
+        int length, int signalLength, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -2448,8 +2456,10 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
 
         var resolved = Math.Max(1, length);
         _signalLength = Math.Max(1, signalLength);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
+        // ZLEMA smoothers (configurable)
+        _ema1 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        _ema2 = MovingAverageSmootherFactory.Create(zlemaMaType, resolved);
+        // High/low smoothers (configurable)
         _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSum = new RollingWindowSum(_signalLength);
@@ -2470,8 +2480,8 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var ema1 = _ema1.GetNext(value, isFinal);
-        var ema2 = _ema2.GetNext(ema1, isFinal);
+        var ema1 = _ema1.Next(value, isFinal);
+        var ema2 = _ema2.Next(ema1, isFinal);
         var mi = (2 * ema1) - ema2;
         var hi = _highSmoother.Next(bar.High, isFinal);
         var lo = _lowSmoother.Next(bar.Low, isFinal);
@@ -2496,6 +2506,8 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
 
     public void Dispose()
     {
+        _ema1.Dispose();
+        _ema2.Dispose();
         _highSmoother.Dispose();
         _lowSmoother.Dispose();
         _signalSum.Dispose();

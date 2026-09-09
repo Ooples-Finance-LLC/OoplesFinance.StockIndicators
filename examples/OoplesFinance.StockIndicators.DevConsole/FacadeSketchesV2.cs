@@ -527,11 +527,11 @@ internal static class FacadeSketchesV2
             return spec.Name switch
             {
                 IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SmaOptions)spec.Options).Length),
-                IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((RsiOptions)spec.Options).Length),
+                IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(length: ((RsiOptions)spec.Options).Length),
                 IndicatorName.MovingAverageConvergenceDivergence => new MovingAverageConvergenceDivergenceState(
-                    ((MacdOptions)spec.Options).FastLength,
-                    ((MacdOptions)spec.Options).SlowLength,
-                    ((MacdOptions)spec.Options).SignalLength),
+                    fastLength: ((MacdOptions)spec.Options).FastLength,
+                    slowLength: ((MacdOptions)spec.Options).SlowLength,
+                    signalLength: ((MacdOptions)spec.Options).SignalLength),
                 _ => throw new NotSupportedException($"Indicator '{spec.Name}' not wired in this sketch.")
             };
         }

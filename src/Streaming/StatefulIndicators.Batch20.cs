@@ -1115,14 +1115,15 @@ public sealed class QmaSmaDifferenceState : IStreamingIndicatorState, IDisposabl
     private readonly IMovingAverageSmoother _sma;
     private readonly StreamingInputResolver _input;
 
-    public QmaSmaDifferenceState(int length = 14, InputName inputName = InputName.Close)
+    public QmaSmaDifferenceState(MovingAvgType compareMaType = MovingAvgType.SimpleMovingAverage,
+        int length = 14, InputName inputName = InputName.Close)
     {
         _qma = new QuadraticMovingAverageState(length, inputName);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(compareMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public QmaSmaDifferenceState(int length, Func<OhlcvBar, double> selector)
+    public QmaSmaDifferenceState(MovingAvgType compareMaType, int length, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1130,7 +1131,7 @@ public sealed class QmaSmaDifferenceState : IStreamingIndicatorState, IDisposabl
         }
 
         _qma = new QuadraticMovingAverageState(length, selector);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = MovingAverageSmootherFactory.Create(compareMaType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1866,32 +1867,36 @@ public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDi
     private readonly IMovingAverageSmoother _rmoSmoother;
     private readonly StreamingInputResolver _input;
 
-    public RahulMohindarOscillatorState(int length1 = 2, int length2 = 10, int length3 = 30, int length4 = 81,
+    public RahulMohindarOscillatorState(MovingAvgType rMaType = MovingAvgType.SimpleMovingAverage,
+        MovingAvgType swingMaType = MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType rmoMaType = MovingAvgType.ExponentialMovingAverage,
+        int length1 = 2, int length2 = 10, int length3 = 30, int length4 = 81,
         InputName inputName = InputName.Close)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
         var resolved3 = Math.Max(1, length3);
         var resolved4 = Math.Max(1, length4);
-        _r1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r3 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r4 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r5 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r6 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r7 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r8 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r9 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r10 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
+        _r1 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r2 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r3 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r4 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r5 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r6 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r7 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r8 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r9 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r10 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
         _highWindow = new RollingWindowMax(resolved2);
         _lowWindow = new RollingWindowMin(resolved2);
-        _swing2Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _swing3Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _rmoSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved4);
+        _swing2Smoother = MovingAverageSmootherFactory.Create(swingMaType, resolved3);
+        _swing3Smoother = MovingAverageSmootherFactory.Create(swingMaType, resolved3);
+        _rmoSmoother = MovingAverageSmootherFactory.Create(rmoMaType, resolved4);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RahulMohindarOscillatorState(int length1, int length2, int length3, int length4, Func<OhlcvBar, double> selector)
+    public RahulMohindarOscillatorState(MovingAvgType rMaType, MovingAvgType swingMaType, MovingAvgType rmoMaType,
+        int length1, int length2, int length3, int length4, Func<OhlcvBar, double> selector)
     {
         if (selector == null)
         {
@@ -1902,21 +1907,21 @@ public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDi
         var resolved2 = Math.Max(1, length2);
         var resolved3 = Math.Max(1, length3);
         var resolved4 = Math.Max(1, length4);
-        _r1 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r2 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r3 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r4 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r5 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r6 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r7 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r8 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r9 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
-        _r10 = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolved1);
+        _r1 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r2 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r3 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r4 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r5 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r6 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r7 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r8 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r9 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
+        _r10 = MovingAverageSmootherFactory.Create(rMaType, resolved1);
         _highWindow = new RollingWindowMax(resolved2);
         _lowWindow = new RollingWindowMin(resolved2);
-        _swing2Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _swing3Smoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved3);
-        _rmoSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolved4);
+        _swing2Smoother = MovingAverageSmootherFactory.Create(swingMaType, resolved3);
+        _swing3Smoother = MovingAverageSmootherFactory.Create(swingMaType, resolved3);
+        _rmoSmoother = MovingAverageSmootherFactory.Create(rmoMaType, resolved4);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
