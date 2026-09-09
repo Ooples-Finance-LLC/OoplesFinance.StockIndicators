@@ -12,6 +12,11 @@ name: Release Please
 #
 # Merging the Release PR is the explicit, human approval gate - nothing publishes without it.
 #
+# Publishing uses NuGet trusted publishing (OIDC): no long-lived API key is stored in this
+# repository at all. The publish job mints a GitHub OIDC token and NuGet/login exchanges it for
+# a key valid for minutes, which nuget.org grants only because a trusted-publishing policy on
+# the package names this repository and this workflow file.
+#
 # Seeding note: the manifest starts at 1.0.53, which is the newest version actually on nuget.org.
 # The repository's tags stop at v1.0.49 and the csproj said 1.1.0, so neither of those was a safe
 # starting point. `bootstrap-sha` in release-please-config.json pins the first Release PR to only
@@ -65,6 +70,12 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     timeout-minutes: 30
+    # id-token lets the runner mint a GitHub OIDC token, which NuGet/login exchanges for a
+    # short-lived publish key. A job-level block overrides the workflow default, so contents:write
+    # is re-declared here for the `gh release upload` step at the end.
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: Checkout the release tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -86,14 +97,15 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Fail fast if the NuGet key is missing
-        shell: bash
-        run: |
-          if [ -z "${{ secrets.NUGET_API_KEY }}" ]; then
-            echo "::error::NUGET_API_KEY is not configured, so this release cannot be published."
-            echo "::error::The tag and GitHub release already exist; add the secret and re-run this job."
-            exit 1
-          fi
+      - name: Authenticate to NuGet via trusted publishing
+        id: nuget-login
+        # Trusted publishing: there is no long-lived NUGET_API_KEY secret to leak or rotate. The
+        # action swaps this workflow's GitHub OIDC token for a key that lives minutes, and
+        # nuget.org only honours it because a trusted-publishing policy on the package names this
+        # exact repository and workflow file.
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER || 'ooples' }}
 
       - name: Restore and build
         run: |
@@ -134,7 +146,7 @@ jobs:
           for pkg in out/*.nupkg; do
             echo "Publishing $pkg"
             dotnet nuget push "$pkg" \
-              --api-key "${{ secrets.NUGET_API_KEY }}" \
+              --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" \
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
