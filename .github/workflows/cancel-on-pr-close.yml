@@ -1,0 +1,50 @@
+name: Cancel in-progress runs on PR close
+
+# When a PR is merged or closed, cancel any workflow runs still executing for its HEAD ref.
+# Without this, the last `synchronize` event's build keeps running for minutes on a SHA that is
+# now dead - the branch usually auto-deletes on merge - burning a CI slot that queued runs on
+# other branches need.
+#
+# Both merged and closed-without-merge leave runs orphaned, so both are handled.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  actions: write
+
+concurrency:
+  group: cancel-on-pr-close-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cancel:
+    name: Cancel orphaned PR runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cancel in-progress and queued runs for this PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Queued runs are cancelled as well as in-progress ones: a queued run still holds a slot
+          # in the FIFO, so leaving it only moves the waste later.
+          for status in in_progress queued; do
+            echo "::group::$status runs on $PR_HEAD_REF"
+            gh api "repos/${{ github.repository }}/actions/runs?branch=${PR_HEAD_REF}&status=${status}&per_page=100" \
+              --jq '.workflow_runs[] | "\(.id) \(.head_sha) \(.name)"' \
+              | while read -r run_id head_sha run_name; do
+                  # Only cancel runs for this PR's head SHA. Branch names get reused, and a run
+                  # belonging to a later PR on the same branch name must not be killed here.
+                  if [ "$head_sha" = "$PR_HEAD_SHA" ]; then
+                    echo "Cancelling run $run_id ($run_name) for PR #$PR_NUMBER"
+                    gh run cancel "$run_id" --repo "${{ github.repository }}" || true
+                  fi
+                done
+            echo "::endgroup::"
+          done

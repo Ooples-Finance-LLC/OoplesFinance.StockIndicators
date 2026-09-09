@@ -1,12 +1,40 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
-# Dependabot configuration
+# Dependabot configuration.
+#
+# The commit-message prefixes matter beyond tidiness: release-please builds the version bump and
+# the CHANGELOG from conventional-commit messages, and commitlint.config.mjs enforces the format on
+# every PR. Dependabot's default subject ("Bump X from A to B") is not conventional, so without a
+# prefix here the bot's own pull requests would fail the repository's own lint and its updates
+# would be missing from the release notes.
 version: 2
 updates:
+  # NuGet package updates.
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "nuget"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Deliberately no `ignore` rule for major updates. The test-tooling majors that came through
+    # recently - coverlet 6 to 10, Microsoft.NET.Test.Sdk 17 to 18, FluentAssertions 6 to 8 - are
+    # exactly the updates this repository has been taking, so suppressing majors would hide them.
+
+  # GitHub Actions updates. The workflows pin actions to a commit SHA, which is the safe way to use
+  # a third-party action but also freezes it - nothing tells you an update exists. Dependabot is
+  # what keeps those pins moving, so this ecosystem is required, not optional.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

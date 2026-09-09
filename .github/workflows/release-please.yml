@@ -1,0 +1,146 @@
+name: Release Please
+
+# Batched, reviewable releases.
+#
+# How it works:
+#   1. Every push to master, release-please accumulates the conventional-commit changes since the
+#      last release into a rolling "Release PR" (version bump + CHANGELOG). NO release is cut yet -
+#      merges just keep updating that one PR, so a burst of merged PRs bundles into a single version.
+#   2. When a maintainer merges the Release PR, release-please creates the git tag (v<version>) and
+#      the GitHub release. Only then does the `publish` job run: it builds, packs, pushes to NuGet
+#      and attaches the .nupkg to the release.
+#
+# Merging the Release PR is the explicit, human approval gate - nothing publishes without it.
+#
+# Seeding note: the manifest starts at 1.0.53, which is the newest version actually on nuget.org.
+# The repository's tags stop at v1.0.49 and the csproj said 1.1.0, so neither of those was a safe
+# starting point. `bootstrap-sha` in release-please-config.json pins the first Release PR to only
+# describe work merged after release automation landed, instead of replaying the whole history.
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Serialize (never cancel): a release cut / PR update must finish. Runs are cheap when they only
+# update the Release PR, and must be atomic when they actually publish.
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Maintain Release PR / cut release
+    runs-on: ubuntu-latest
+    # A job-level permissions block OVERRIDES the workflow default, so contents/pull-requests are
+    # re-declared here; issues:write is scoped to this job only, following least privilege.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write # release-please creates/applies the `autorelease:` labels via the Issues API
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+      version: ${{ steps.rp.outputs.version }}
+    steps:
+      - name: Run release-please
+        id: rp
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # A PAT (not GITHUB_TOKEN) so the Release PR and the tag it creates can trigger the normal
+          # CI checks; GITHUB_TOKEN-authored events do not re-trigger workflows. Falls back to
+          # GITHUB_TOKEN if the PAT is not configured (the PR still opens, CI just will not auto-run).
+          token: ${{ secrets.RELEASE_PLEASE_PAT || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Build, pack, publish NuGet
+    runs-on: windows-latest # net461 needs the .NET Framework reference assemblies
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    timeout-minutes: 30
+    steps:
+      - name: Checkout the release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Fail fast if the NuGet key is missing
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.NUGET_API_KEY }}" ]; then
+            echo "::error::NUGET_API_KEY is not configured, so this release cannot be published."
+            echo "::error::The tag and GitHub release already exist; add the secret and re-run this job."
+            exit 1
+          fi
+
+      - name: Restore and build
+        run: |
+          dotnet restore src/OoplesFinance.StockIndicators.csproj
+          dotnet build src/OoplesFinance.StockIndicators.csproj -c Release --no-restore
+
+      - name: Pack NuGet
+        run: >
+          dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release -o out --no-build
+          /p:PackageVersion=${{ needs.release-please.outputs.version }}
+
+      - name: Verify the package ships every target framework
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $pkgs = Get-ChildItem out/*.nupkg
+          if (-not $pkgs) { Write-Error "No .nupkg produced in out/"; exit 1 }
+          foreach ($pkg in $pkgs) {
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($pkg.FullName)
+            try   { $entries = $zip.Entries.FullName }
+            finally { $zip.Dispose() }
+            # Guards the failure mode that started this work: a target silently disappearing from
+            # TargetFrameworks still packs and publishes cleanly, and consumers only find out later.
+            foreach ($tfm in 'net10.0', 'net8.0', 'net461') {
+              if (-not ($entries | Where-Object { $_ -match "^lib/$([regex]::Escape($tfm))/.+\.dll$" })) {
+                Write-Error "$($pkg.Name) is missing lib/$tfm"; exit 1
+              }
+              Write-Host "Found lib/$tfm in $($pkg.Name)"
+            }
+          }
+
+      - name: Push to NuGet
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for pkg in out/*.nupkg; do
+            echo "Publishing $pkg"
+            dotnet nuget push "$pkg" \
+              --api-key "${{ secrets.NUGET_API_KEY }}" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
+
+      - name: Attach the .nupkg to the GitHub release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" out/*.nupkg --clobber
