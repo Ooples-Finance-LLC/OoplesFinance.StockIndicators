@@ -64,6 +64,11 @@
     <!-- Exclude source generator files from main project compilation -->
     <Compile Remove="SourceGeneration\**" />
     <None Remove="SourceGeneration\**" />
+    <!-- Exclude UI projects from main library compilation -->
+    <Compile Remove="UI\**" />
+    <Content Remove="UI\**" />
+    <EmbeddedResource Remove="UI\**" />
+    <None Remove="UI\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,16 +80,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Alpaca.Markets" Version="7.2.0" />
     <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+    <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
+  </ItemGroup>
+
+  <!-- AiDotNet for ML/Finance models (net10.0 only due to modern C# requirements) -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net10.0'">
+    <PackageReference Include="AiDotNet" Version="0.75.0" />
+    <PackageReference Include="AiDotNet.Tensors" Version="0.5.0" />
   </ItemGroup>
 
   <!-- Source Generator: Build the generator project first -->
   <ItemGroup>
-    <ProjectReference Include="SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj"
-                      ReferenceOutputAssembly="false"
-                      SetTargetFramework="TargetFramework=netstandard2.0"
-                      PrivateAssets="all" />
+    <ProjectReference Include="SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Source Generator: Reference the built analyzer DLL -->
@@ -93,10 +105,14 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Memory" Version="4.6.0" />
+    <PackageReference Include="System.Buffers" Version="4.6.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.Json" Version="6.0.11" />
+    <!-- ML namespace, DataProviders, and AI require modern C# features not available in net461 -->
+    <Compile Remove="Builder\ML\**" />
+    <Compile Remove="Builder\DataProviders\**" />
+    <Compile Remove="Builder\AI\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -34,8 +34,5 @@
     The tests in this project test the core library components.
     MAUI UI tests should be in a separate platform-specific test project.
   -->
-  <ItemGroup>
-    <Compile Include="Mocks\*.cs" />
-  </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Maui">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
@@ -19,6 +19,9 @@
     <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
+
+    <!-- Unpackaged for development -->
+    <WindowsPackageType>None</WindowsPackageType>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -46,20 +49,25 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0"/>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-    <PackageReference Include="CommunityToolkit.Maui" Version="10.0.0"/>
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.0-rc3.3"/>
+    <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.0"/>
     <PackageReference Include="System.Text.Json" Version="9.0.0"/>
-    <PackageReference Include="StackExchange.Redis" Version="2.8.16"/>
+    <PackageReference Include="StackExchange.Redis" Version="2.10.1"/>
+    <!-- LiveCharts for cross-platform charting -->
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.0-rc6.1" />
+  </ItemGroup>
+
+  <!-- Reference to main StockIndicators library -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\OoplesFinance.StockIndicators.csproj" />
   </ItemGroup>
 
   <!-- Copy local settings file if it exists (gitignored, contains secrets) -->
   <ItemGroup>
-    <None Include="appsettings.local.json" Condition="Exists('appsettings.local.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="appsettings.local.json" Condition="Exists('appsettings.local.json')">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

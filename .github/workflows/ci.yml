@@ -1,42 +1,96 @@
-name: CI
+name: CI - Build & Test
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, master, dev, develop, 'feature/**', 'fix/**', 'hotfix/**']
   pull_request:
-    branches: [master, main]
+    branches: [main, master, dev, develop]
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  build:
+    name: Build & Test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET 10
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore src/OoplesFinance.StockIndicators.csproj
+        run: dotnet restore
 
-      - name: Build for .NET 10
-        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net10.0
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
-      - name: Build for .NET Framework 4.6.1
-        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net461
+      - name: Run Core Library Tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --no-build --verbosity normal
 
-      - name: Restore test dependencies
-        run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
+      - name: Run Validation Tests
+        run: dotnet test tests/ValidationTests/ReferenceTests.cs --configuration Release --no-build --verbosity normal
+        continue-on-error: true
 
-      - name: Build and run tests
-        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0 --verbosity normal --logger trx --results-directory ./test-results
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          name: test-results
-          path: ./test-results
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Check formatting
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        continue-on-error: true
+
+      - name: Security vulnerability check
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
+          if grep -q "has the following vulnerable packages" vuln-report.txt; then
+            echo "::warning::Security vulnerabilities found"
+          fi
+
+  # Build MAUI app (Windows only due to workload requirements)
+  build-maui:
+    name: Build MAUI App
+    runs-on: windows-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Restore dependencies
+        run: dotnet restore src/UI/OoplesFinance.TradingApp.Maui/OoplesFinance.TradingApp.Maui.csproj
+
+      - name: Build MAUI App (Windows)
+        run: dotnet build src/UI/OoplesFinance.TradingApp.Maui/OoplesFinance.TradingApp.Maui.csproj --configuration Release --framework net10.0-windows10.0.19041.0
+        continue-on-error: true
