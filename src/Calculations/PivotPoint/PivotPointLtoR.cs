@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -40,15 +40,37 @@ public static partial class Calculations
         var ppav1List = GetMovingAverageList(stockData, maType, length, pp1List);
         var ppav2List = GetMovingAverageList(stockData, maType, length, pp2List);
         var ppav3List = GetMovingAverageList(stockData, maType, length, pp3List);
-        for (var i = 0; i < stockData.Count; i++)
+        // The series above hold one entry per PERIOD, not per bar. Iterating to stockData.Count here read
+        // past the end of them and threw ArgumentOutOfRangeException for any input whose bar count exceeds
+        // its period count - which is every intraday series grouped by day.
+        List<Signal> periodSignals = new(pp1List.Count);
+        for (var i = 0; i < pp1List.Count; i++)
         {
             var pp1 = pp1List[i];
             var ppav1 = ppav1List[i];
             var prevPp1 = i >= 1 ? pp1List[i - 1] : 0;
             var prevPpav1 = i >= 1 ? ppav1List[i - 1] : 0;
 
-            var signal = GetCompareSignal(pp1 - ppav1, prevPp1 - prevPpav1);
-            signalsList?.Add(signal);
+            periodSignals.Add(GetCompareSignal(pp1 - ppav1, prevPp1 - prevPpav1));
+        }
+
+        // BAR ALIGNMENT. Everything above is computed per PERIOD; the StockData this is stored on is
+        // per BAR, and callers index the two in parallel. Project each series onto the bars of its own
+        // period before storing. Causal: a period's level derives from the PRECEDING period, so it is
+        // already known when its own period opens.
+        var barGroupIndexes = GetInputLengthGroupIndexes(stockData, inputLength);
+        pp1List = ExpandPeriodValuesToBars(pp1List, barGroupIndexes);
+        pp2List = ExpandPeriodValuesToBars(pp2List, barGroupIndexes);
+        pp3List = ExpandPeriodValuesToBars(pp3List, barGroupIndexes);
+        // The moving averages are published as Signal1/2/3 and are period-length too. Expanding only the
+        // pivots would leave this indicator's own output dictionary holding two different lengths.
+        ppav1List = ExpandPeriodValuesToBars(ppav1List, barGroupIndexes);
+        ppav2List = ExpandPeriodValuesToBars(ppav2List, barGroupIndexes);
+        ppav3List = ExpandPeriodValuesToBars(ppav3List, barGroupIndexes);
+
+        if (signalsList is not null)
+        {
+            signalsList.AddRange(ExpandPeriodItemsToBars(periodSignals, barGroupIndexes, Signal.None));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
