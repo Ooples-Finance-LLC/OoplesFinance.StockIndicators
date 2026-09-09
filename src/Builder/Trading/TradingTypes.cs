@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder.Catalogs;
+﻿using OoplesFinance.StockIndicators.Builder.Catalogs;
 
 namespace OoplesFinance.StockIndicators.Builder.Trading;
 
@@ -975,26 +975,8 @@ public sealed class ExtendedAutoTradeRule
     /// <summary>
     /// Checks if this rule matches a notification by name.
     /// </summary>
-    public bool Matches(string signalName)
-    {
-        if (string.IsNullOrEmpty(SignalPattern))
-        {
-            return false;
-        }
-
-        if (SignalPattern == "*")
-        {
-            return true;
-        }
-
-        if (SignalPattern.EndsWith("*"))
-        {
-            var prefix = SignalPattern.Substring(0, SignalPattern.Length - 1);
-            return signalName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return string.Equals(SignalPattern, signalName, StringComparison.OrdinalIgnoreCase);
-    }
+    public bool Matches(string signalName) =>
+        SignalPatternMatcher.IsMatch(SignalPattern, signalName);
 }
 
 /// <summary>

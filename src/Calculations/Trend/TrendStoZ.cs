@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -892,6 +892,97 @@ public static partial class Calculations
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(stcList);
         stockData.IndicatorName = IndicatorName.SchaffTrendCycle;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Schaff Trend Cycle as published in the "STC Indicator - A Better MACD [SHK]"
+    /// TradingView script.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the full Schaff construction: a MACD line is put through a stochastic, the result is
+    /// smoothed, that is put through a second stochastic, and the result is smoothed again. The existing
+    /// <see cref="CalculateSchaffTrendCycle"/> applies only the first of those two passes, which is why
+    /// the two do not agree - this one is the double-smoothed form the script implements.
+    /// </para>
+    /// <para>
+    /// Where a stochastic window is completely flat its denominator is zero; in that case the previous
+    /// value is carried forward rather than treated as zero, which is what the Pine <c>nz</c> chain does
+    /// and what keeps the series from collapsing during quiet stretches.
+    /// </para>
+    /// </remarks>
+    /// <param name="stockData">The stock data.</param>
+    /// <param name="maType">Moving average used for the MACD legs.</param>
+    /// <param name="fastLength">Fast MACD length.</param>
+    /// <param name="slowLength">Slow MACD length.</param>
+    /// <param name="cycleLength">Lookback of both stochastic passes.</param>
+    /// <param name="d1Length">Smoothing applied after the first stochastic pass.</param>
+    /// <param name="d2Length">Smoothing applied after the second stochastic pass.</param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSchaffTrendCycleShk(this StockData stockData,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 23, int slowLength = 50,
+        int cycleLength = 10, int d1Length = 3, int d2Length = 3)
+    {
+        List<double> macdList = new(stockData.Count);
+        List<double> fastKList = new(stockData.Count);
+        List<double> fastDList = new(stockData.Count);
+        List<double> slowKList = new(stockData.Count);
+        List<double> stcList = new(stockData.Count);
+        List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+
+        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            macdList.Add(fastEmaList[i] - slowEmaList[i]);
+        }
+
+        // First stochastic pass, over the MACD line.
+        var (macdHighestList, macdLowestList) = GetMaxAndMinValuesList(macdList, cycleLength);
+        var d1Alpha = (double)2 / (d1Length + 1);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var range = macdHighestList[i] - macdLowestList[i];
+            var prevFastK = i >= 1 ? fastKList[i - 1] : 0;
+            var fastK = range > 0 ? MinOrMax((macdList[i] - macdLowestList[i]) / range * 100, 100, 0) : prevFastK;
+            fastKList.Add(fastK);
+
+            var prevFastD = i >= 1 ? fastDList[i - 1] : fastK;
+            fastDList.Add(prevFastD + (d1Alpha * (fastK - prevFastD)));
+        }
+
+        // Second stochastic pass, over the smoothed result of the first.
+        var (fastDHighestList, fastDLowestList) = GetMaxAndMinValuesList(fastDList, cycleLength);
+        var d2Alpha = (double)2 / (d2Length + 1);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var range = fastDHighestList[i] - fastDLowestList[i];
+            var prevSlowK = i >= 1 ? slowKList[i - 1] : 0;
+            var slowK = range > 0 ? MinOrMax((fastDList[i] - fastDLowestList[i]) / range * 100, 100, 0) : prevSlowK;
+            slowKList.Add(slowK);
+
+            var prevStc = i >= 1 ? stcList[i - 1] : slowK;
+            var stc = MinOrMax(prevStc + (d2Alpha * (slowK - prevStc)), 100, 0);
+            stcList.Add(stc);
+
+            var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
+            var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
+            var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Stc", stcList },
+            { "Macd", macdList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(stcList);
+        stockData.IndicatorName = IndicatorName.SchaffTrendCycleShk;
 
         return stockData;
     }
