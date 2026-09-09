@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Catalogs;
@@ -1311,8 +1311,14 @@ internal static class Program
             throw new ArgumentException("START and END must use YYYY-MM-DD format.");
         }
 
-        var apiKey = Environment.GetEnvironmentVariable("FXMACRODATA_API_KEY")
-            ?? Environment.GetEnvironmentVariable("FXMD_API_KEY");
+        // ?? only falls through on null, so a set-but-empty FXMACRODATA_API_KEY would win and the
+        // check below would then reject the request even though FXMD_API_KEY was configured.
+        var apiKey = Environment.GetEnvironmentVariable("FXMACRODATA_API_KEY");
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            apiKey = Environment.GetEnvironmentVariable("FXMD_API_KEY");
+        }
+
         if (string.IsNullOrWhiteSpace(apiKey))
         {
             throw new InvalidOperationException(

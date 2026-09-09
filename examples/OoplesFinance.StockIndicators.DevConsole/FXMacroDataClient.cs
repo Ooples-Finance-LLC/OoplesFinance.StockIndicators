@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using OoplesFinance.StockIndicators.Models;
 
@@ -43,7 +43,14 @@ internal sealed class FXMacroDataClient
         }
 
         var uri = BuildUri(baseCurrency, quoteCurrency, start, end);
-        using var response = await _httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        // The key travels as a header, never in the URL. FXMacroData's own OpenAPI document says so:
+        // the X-API-Key scheme is "Preferred transport for server-side clients: the key stays out of
+        // URLs and access logs", while the api_key query parameter is "Supported for browser/
+        // EventSource clients". A query string is recorded by origin logs, proxies, CDNs and APM
+        // traces, and lands in any exception message that echoes the request URI.
+        request.Headers.Add("X-API-Key", _apiKey);
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         return ParseDailyFx(json);
@@ -56,8 +63,7 @@ internal sealed class FXMacroDataClient
         var query = string.Join(
             "&",
             $"start_date={Uri.EscapeDataString(start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))}",
-            $"end_date={Uri.EscapeDataString(end.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))}",
-            $"api_key={Uri.EscapeDataString(_apiKey)}");
+            $"end_date={Uri.EscapeDataString(end.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))}");
 
         return new Uri($"{_baseUrl}/forex/{baseCode}/{quoteCode}?{query}", UriKind.Absolute);
     }

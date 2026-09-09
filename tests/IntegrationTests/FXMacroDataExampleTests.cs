@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using FluentAssertions;
 using OoplesFinance.StockIndicators.DevConsole;
@@ -47,8 +47,13 @@ public class FXMacroDataExampleTests
             new DateOnly(2024, 1, 1),
             new DateOnly(2024, 1, 31));
 
+        // The key is sent as a header, and must not appear in the URL - a query string is recorded
+        // by origin logs, proxies and APM traces, and by anything that echoes the request URI.
         handler.RequestUri.Should().Be(
-            new Uri("https://example.test/v1/forex/eur/usd?start_date=2024-01-01&end_date=2024-01-31&api_key=test-key"));
+            new Uri("https://example.test/v1/forex/eur/usd?start_date=2024-01-01&end_date=2024-01-31"));
+        handler.RequestUri!.Query.Should().NotContain("api_key");
+        handler.RequestUri.ToString().Should().NotContain("test-key");
+        handler.ApiKeyHeader.Should().Be("test-key");
         rows.Should().ContainSingle();
         rows[0].Close.Should().Be(1.095);
     }
@@ -74,11 +79,16 @@ public class FXMacroDataExampleTests
     {
         internal Uri? RequestUri { get; private set; }
 
+        internal string? ApiKeyHeader { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             RequestUri = request.RequestUri;
+            ApiKeyHeader = request.Headers.TryGetValues("X-API-Key", out var values)
+                ? string.Join(",", values)
+                : null;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
