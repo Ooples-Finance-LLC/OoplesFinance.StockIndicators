@@ -15,9 +15,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests basic broker account info retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrieveAccountInfo()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange - Using Alpaca paper trading as the test broker
         var broker = CreateTestBroker();
 
@@ -33,9 +35,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests position retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrievePositions()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -50,9 +54,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests market order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitMarketOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -76,9 +82,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests limit order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitLimitOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -108,9 +116,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests stop order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitStopOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -140,9 +150,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests order cancellation.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldCancelOrder()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -169,9 +181,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests order status retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrieveOrderStatus()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -202,9 +216,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests position closing.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldClosePosition()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -232,9 +248,11 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests concurrent order submission.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldHandleConcurrentOrders()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -267,13 +285,7 @@ public class BrokerIntegrationTests
     private static IBroker CreateTestBroker()
     {
         // Use environment variables or test configuration for credentials
-        var options = new AlpacaOptions
-        {
-            ApiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY") ?? "test-key",
-            ApiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET") ?? "test-secret",
-            UsePaper = true // Always use paper trading for tests
-        };
-
+        var options = AlpacaTestCredentials.CreateOptions();
         return new AlpacaBroker(options);
     }
 

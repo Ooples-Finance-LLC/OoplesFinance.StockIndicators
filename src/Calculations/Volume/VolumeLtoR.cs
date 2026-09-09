@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -135,7 +135,13 @@ public static partial class Calculations
             var prevNvi = i >= 1 ? nviList[i - 1] : initialValue;
             var pctChg = CalculatePercentChange(currentClose, prevClose);
 
-            var nvi = currentVolume >= prevVolume ? prevNvi : prevNvi + pctChg;
+            // Fosback's NVI compounds the period's rate of change onto the running index:
+            //     NVI = prevNVI + (prevNVI * ROC).
+            // CalculatePercentChange returns that ROC already scaled to a percentage, so it has to be
+            // divided back out. Adding pctChg straight onto the index instead moved a 1% day by 1 point
+            // rather than by 1% of the index, making every move smaller than it should be by a factor of
+            // prevNVI / 100.
+            var nvi = currentVolume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
             nviList.Add(nvi);
         }
 
@@ -188,7 +194,9 @@ public static partial class Calculations
             var prevPvi = i >= 1 ? pviList[i - 1] : initialValue;
             var pctChg = CalculatePercentChange(currentClose, prevClose);
 
-            var pvi = currentVolume <= prevVolume ? prevPvi : prevPvi + pctChg;
+            // PVI is the same construction as NVI, applied on rising volume instead of falling:
+            //     PVI = prevPVI + (prevPVI * ROC).
+            var pvi = currentVolume <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
             pviList.Add(pvi);
         }
 

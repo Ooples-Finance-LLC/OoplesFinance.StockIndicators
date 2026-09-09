@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Catalogs;
 using OoplesFinance.StockIndicators.Builder.Notifications;
 using OoplesFinance.StockIndicators.Enums;
+using OoplesFinance.StockIndicators.FXMacroData;
 using OoplesFinance.StockIndicators.Models;
 using OoplesFinance.StockIndicators.Streaming;
 

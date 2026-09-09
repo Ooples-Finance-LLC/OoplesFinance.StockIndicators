@@ -12,18 +12,27 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/checkout@v7
         with:
-          dotnet-version: 10.x
+          # dotnet build/test below run repository-controlled MSBuild inputs; the checkout token
+          # has no reader after this step, so it should not be left in .git/config.
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
 
       - name: Restore dependencies
         run: dotnet restore src/OoplesFinance.StockIndicators.csproj
 
       - name: Build for .NET 10
         run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net10.0
+
+      - name: Build for .NET 8
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net8.0
 
       - name: Build for .NET Framework 4.6.1
         run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net461
@@ -35,7 +44,7 @@ jobs:
         run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0 --verbosity normal --logger trx --results-directory ./test-results
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results

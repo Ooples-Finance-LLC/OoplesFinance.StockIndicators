@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using FluentAssertions;
-using OoplesFinance.StockIndicators.DevConsole;
+using OoplesFinance.StockIndicators.FXMacroData;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.IntegrationTests;
 

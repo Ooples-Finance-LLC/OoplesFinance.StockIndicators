@@ -2,13 +2,14 @@
 using System.Text.Json;
 using OoplesFinance.StockIndicators.Models;
 
-namespace OoplesFinance.StockIndicators.DevConsole;
+namespace OoplesFinance.StockIndicators.FXMacroData;
 
 /// <summary>
 /// Focused data-loading helper for the FXMacroData developer-console example.
-/// This is intentionally not part of the indicator library's public API.
+/// Lives in its own library so the developer console and the tests can both use it without
+/// the test project taking a build dependency on an executable.
 /// </summary>
-internal sealed class FXMacroDataClient
+public sealed class FXMacroDataClient
 {
     private const string DefaultBaseUrl = "https://api.fxmacrodata.com/v1";
 
@@ -16,7 +17,7 @@ internal sealed class FXMacroDataClient
     private readonly string _apiKey;
     private readonly string _baseUrl;
 
-    internal FXMacroDataClient(
+    public FXMacroDataClient(
         HttpClient httpClient,
         string apiKey,
         string baseUrl = DefaultBaseUrl)
@@ -30,7 +31,7 @@ internal sealed class FXMacroDataClient
         _baseUrl = baseUrl.TrimEnd('/');
     }
 
-    internal async Task<IReadOnlyList<TickerData>> GetDailyFxAsync(
+    public async Task<IReadOnlyList<TickerData>> GetDailyFxAsync(
         string baseCurrency,
         string quoteCurrency,
         DateOnly start,
@@ -56,7 +57,7 @@ internal sealed class FXMacroDataClient
         return ParseDailyFx(json);
     }
 
-    internal Uri BuildUri(string baseCurrency, string quoteCurrency, DateOnly start, DateOnly end)
+    public Uri BuildUri(string baseCurrency, string quoteCurrency, DateOnly start, DateOnly end)
     {
         var baseCode = NormalizeCurrency(baseCurrency, nameof(baseCurrency));
         var quoteCode = NormalizeCurrency(quoteCurrency, nameof(quoteCurrency));
@@ -68,7 +69,7 @@ internal sealed class FXMacroDataClient
         return new Uri($"{_baseUrl}/forex/{baseCode}/{quoteCode}?{query}", UriKind.Absolute);
     }
 
-    internal static IReadOnlyList<TickerData> ParseDailyFx(string json)
+    public static IReadOnlyList<TickerData> ParseDailyFx(string json)
     {
         using var document = JsonDocument.Parse(json);
         if (!document.RootElement.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array)

@@ -1603,6 +1603,91 @@ public static class CalculationsHelper
     }
 
     /// <summary>
+    /// The period ordinal each BAR belongs to, using the same grouping
+    /// <see cref="GetInputValuesList(StockData, InputLength)"/> applies.
+    /// </summary>
+    /// <remarks>
+    /// <para>Period indicators aggregate bars into calendar groups and produce one value per GROUP. Their
+    /// results are written back onto a StockData whose <c>TickerDataList</c> is still per BAR, and callers -
+    /// including this library's own chained calculations - index the two in parallel. Without a way to project
+    /// the grouped series back onto the bars, index <c>i</c> means a different instant in each.</para>
+    ///
+    /// <para>Returned one entry per bar, holding that bar's index into the grouped output. The keying is kept
+    /// character-for-character identical to the grouping loop above; if the two ever diverge, the projection
+    /// silently attributes a period's level to the wrong bars.</para>
+    /// </remarks>
+    public static List<int> GetInputLengthGroupIndexes(StockData stockData, InputLength inputLength)
+    {
+        var tickerDataList = stockData.TickerDataList;
+        var indexes = new List<int>(tickerDataList.Count);
+        var seen = new Dictionary<(DateTime Parent, int Child), int>();
+        var next = 0;
+
+        for (var i = 0; i < tickerDataList.Count; i++)
+        {
+            var ticker = tickerDataList[i];
+            var parentKey = ticker.Date.Date;
+            var childKey = inputLength switch
+            {
+                InputLength.Minute => ticker.Date.Minute,
+                InputLength.Hour => ticker.Date.Hour,
+                InputLength.Day => ticker.Date.Day,
+                InputLength.Week => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(ticker.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                InputLength.Month => ticker.Date.Month,
+                InputLength.Year => ticker.Date.Year,
+                _ => ticker.Date.Day,
+            };
+
+            var key = (parentKey, childKey);
+            if (!seen.TryGetValue(key, out var ordinal))
+            {
+                ordinal = next++;
+                seen[key] = ordinal;
+            }
+
+            indexes.Add(ordinal);
+        }
+
+        return indexes;
+    }
+
+    /// <summary>
+    /// Projects a per-period series back onto the bar grid, so bar <c>i</c> carries its own period's value.
+    /// </summary>
+    /// <remarks>
+    /// Causal by construction for the pivot family: a period's level is computed from the PRECEDING period, so
+    /// it is already known when the first bar of its own period opens. Carrying it across that period's bars
+    /// introduces no information the bar did not have - it is exactly how a level is used in practice.
+    /// </remarks>
+    /// <summary>
+    /// Projects any per-period series onto the bar grid. Signals need this as much as levels do: a per-period
+    /// signal list stored on a per-bar StockData misattributes each signal to whichever bar shares its index.
+    /// </summary>
+    public static List<T> ExpandPeriodItemsToBars<T>(List<T> periodItems, List<int> groupIndexes, T fallback)
+    {
+        var expanded = new List<T>(groupIndexes.Count);
+        for (var i = 0; i < groupIndexes.Count; i++)
+        {
+            var ordinal = groupIndexes[i];
+            expanded.Add(ordinal >= 0 && ordinal < periodItems.Count ? periodItems[ordinal] : fallback);
+        }
+
+        return expanded;
+    }
+
+    public static List<double> ExpandPeriodValuesToBars(List<double> periodValues, List<int> groupIndexes)
+    {
+        var expanded = new List<double>(groupIndexes.Count);
+        for (var i = 0; i < groupIndexes.Count; i++)
+        {
+            var ordinal = groupIndexes[i];
+            expanded.Add(ordinal >= 0 && ordinal < periodValues.Count ? periodValues[ordinal] : 0);
+        }
+
+        return expanded;
+    }
+
+    /// <summary>
     /// Gets input values using a fixed length according to the input length to be used with indicators such as Math.PIvot Points or similar indicators
     /// </summary>
     /// <param name="stockData"></param>

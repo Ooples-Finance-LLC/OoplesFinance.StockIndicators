@@ -27,7 +27,7 @@ jobs:
             exit 1
           fi
       - name: Checkout Failing Ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.FAILED_HEAD_SHA }}
           fetch-depth: 0
@@ -47,7 +47,7 @@ jobs:
           if command -v dotnet >/dev/null 2>&1; then dotnet build || true; dotnet test || true; fi
       - name: Create pull request with fixes
         if: success()
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "fix(ci): auto-fix failing CI via Codex"
           branch: codex/auto-fix-${{ github.event.workflow_run.run_id }}
