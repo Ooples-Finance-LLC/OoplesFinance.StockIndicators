@@ -79,12 +79,11 @@ public sealed class AlpacaBroker : IBroker, IDisposable
         // the fetch. The rest of this broker keeps using the SDK; only the account
         // endpoint had the strict-required-property problem.
         // AlpacaOptions.BaseUrl is a documented setting; hardcoding the endpoint here would silently
-        // ignore it and send a configured request to the wrong host.
-        var baseUrl = string.IsNullOrWhiteSpace(_options.BaseUrl)
-            ? (_isPaper ? "https://paper-api.alpaca.markets" : "https://api.alpaca.markets")
-            : _options.BaseUrl!.TrimEnd('/');
+        // ignore it and send a configured request to the wrong host. It is validated before use,
+        // because the very next lines attach the API key and secret to the request.
+        var accountEndpoint = ResolveAccountEndpoint();
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, baseUrl + "/v2/account");
+        using var request = new HttpRequestMessage(HttpMethod.Get, accountEndpoint);
         request.Headers.Add("APCA-API-KEY-ID", _apiKey);
         request.Headers.Add("APCA-API-SECRET-KEY", _apiSecret);
 
@@ -110,6 +109,44 @@ public sealed class AlpacaBroker : IBroker, IDisposable
             TradingEnabled = !raw.TradingBlocked && !raw.AccountBlocked,
             IsPaper = _isPaper
         };
+    }
+
+    /// <summary>
+    /// Resolves the account endpoint, requiring any configured base URL to be absolute HTTPS.
+    /// </summary>
+    /// <remarks>
+    /// The request built from this carries APCA-API-KEY-ID and APCA-API-SECRET-KEY. An unvalidated
+    /// base URL would therefore hand the live trading credentials to whatever host - and over
+    /// whatever scheme - happened to be configured, so a non-absolute or non-HTTPS value is
+    /// rejected before the headers are ever attached rather than after.
+    /// </remarks>
+    private Uri ResolveAccountEndpoint()
+    {
+        if (string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            return new Uri(_isPaper
+                ? "https://paper-api.alpaca.markets/v2/account"
+                : "https://api.alpaca.markets/v2/account");
+        }
+
+        if (!Uri.TryCreate(_options.BaseUrl, UriKind.Absolute, out var configured))
+        {
+            throw new InvalidOperationException(
+                "AlpacaOptions.BaseUrl must be an absolute URI, for example " +
+                "https://paper-api.alpaca.markets.");
+        }
+
+        if (!string.Equals(configured.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "AlpacaOptions.BaseUrl must use https. The account request sends the Alpaca API key " +
+                "and secret as headers, which must never travel over a cleartext scheme.");
+        }
+
+        // GetLeftPart keeps scheme, host and any path prefix while dropping query and fragment,
+        // so a base URL such as https://host/gateway still resolves to /gateway/v2/account.
+        var basePath = configured.GetLeftPart(UriPartial.Path).TrimEnd('/');
+        return new Uri(basePath + "/v2/account");
     }
 
     // Alpaca returns monetary fields as JSON strings ("12345.67"); tolerate null /
