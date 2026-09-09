@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -347,6 +347,110 @@ public static partial class Calculations
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(tsList);
         stockData.IndicatorName = IndicatorName.MotionToAttractionTrailingStop;
+
+        return stockData;
+    }
+
+
+    /// <summary>
+    /// Calculates the UT Bot Alerts indicator, the ATR trailing stop published as the
+    /// "UT Bot Alerts" TradingView script.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The stop trails price by <paramref name="keyValue"/> multiples of ATR. While price stays on the
+    /// same side of the stop the level only ever moves in the favourable direction - it ratchets up in an
+    /// uptrend and down in a downtrend, and never gives ground - which is what makes it a stop rather than
+    /// a band. When price closes through it, the stop flips to the other side and the position marker
+    /// reverses.
+    /// </para>
+    /// <para>
+    /// Buy and Sell mark the bars where that flip happens; Position holds 1 while long and -1 while short,
+    /// so it can be read directly as a regime filter between flips.
+    /// </para>
+    /// </remarks>
+    /// <param name="stockData">The stock data.</param>
+    /// <param name="maType">Moving average used to smooth the true range. Wilder's is the ATR standard.</param>
+    /// <param name="length">ATR period.</param>
+    /// <param name="keyValue">ATR multiple the stop trails by.</param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateUtBotAlerts(this StockData stockData,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10, double keyValue = 1)
+    {
+        List<double> trailingStopList = new(stockData.Count);
+        List<double> positionList = new(stockData.Count);
+        List<double> buyList = new(stockData.Count);
+        List<double> sellList = new(stockData.Count);
+        List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+
+        // Taken before any moving average runs against stockData: GetMovingAverageList writes into
+        // CustomValuesList, which the true-range helper would then read as the close series.
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        stockData.SetCustomValues(new List<double>());
+
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var currentValue = inputList[i];
+            var prevValue = i >= 1 ? inputList[i - 1] : currentValue;
+            var nLoss = keyValue * atrList[i];
+            var prevStop = i >= 1 ? trailingStopList[i - 1] : 0;
+
+            double trailingStop;
+            if (currentValue > prevStop && prevValue > prevStop)
+            {
+                // Still above the stop: raise it, never lower it.
+                trailingStop = Math.Max(prevStop, currentValue - nLoss);
+            }
+            else if (currentValue < prevStop && prevValue < prevStop)
+            {
+                // Still below the stop: lower it, never raise it.
+                trailingStop = Math.Min(prevStop, currentValue + nLoss);
+            }
+            else
+            {
+                // Price crossed the stop, so it flips to the other side of price.
+                trailingStop = currentValue > prevStop ? currentValue - nLoss : currentValue + nLoss;
+            }
+
+            trailingStopList.Add(trailingStop);
+
+            var prevPosition = i >= 1 ? positionList[i - 1] : 0;
+            double position;
+            if (prevValue < prevStop && currentValue > prevStop)
+            {
+                position = 1;
+            }
+            else if (prevValue > prevStop && currentValue < prevStop)
+            {
+                position = -1;
+            }
+            else
+            {
+                position = prevPosition;
+            }
+
+            positionList.Add(position);
+
+            var crossedAbove = prevValue <= prevStop && currentValue > trailingStop;
+            var crossedBelow = prevValue >= prevStop && currentValue < trailingStop;
+            buyList.Add(i >= 1 && crossedAbove ? 1 : 0);
+            sellList.Add(i >= 1 && crossedBelow ? 1 : 0);
+
+            var signal = GetCompareSignal(currentValue - trailingStop, prevValue - prevStop);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "TrailingStop", trailingStopList },
+            { "Position", positionList },
+            { "Buy", buyList },
+            { "Sell", sellList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(trailingStopList);
+        stockData.IndicatorName = IndicatorName.UtBotAlerts;
 
         return stockData;
     }

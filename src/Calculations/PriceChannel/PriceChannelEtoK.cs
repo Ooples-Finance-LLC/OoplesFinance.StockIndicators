@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -747,7 +747,8 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKeltnerChannels(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 20, int length2 = 10, double multFactor = 2)
+        int length1 = 20, int length2 = 10, double multFactor = 2,
+        MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
         List<double> upperChannelList = new(stockData.Count);
         List<double> lowerChannelList = new(stockData.Count);
@@ -755,8 +756,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // ORDER MATTERS. GetMovingAverageList writes its result into stockData.CustomValuesList, and the
+        // true-range helper treats a non-empty CustomValuesList as the close series. Computing the average
+        // first therefore made the ATR measure the distance from each bar's high and low to the PREVIOUS
+        // MOVING AVERAGE rather than to the previous close - on AAPL that inflated ATR(10) from 3.9553 to
+        // 9.7261 and pushed the upper band from 143.74 to 155.28. The ATR is computed here, before any
+        // moving average touches stockData.
+        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).CustomValuesList;
+        stockData.SetCustomValues(new List<double>());
+
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {

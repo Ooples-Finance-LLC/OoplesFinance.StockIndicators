@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -2126,7 +2126,8 @@ public sealed class PositiveVolumeIndexState : IStreamingIndicatorState, IDispos
         var prevVolume = _hasPrev ? _prevVolume : 0;
         var prevPvi = _hasPrev ? _prevPvi : _initialValue;
         var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        var pvi = volume <= prevVolume ? prevPvi : prevPvi + pctChg;
+        // Matches the batch CalculatePositiveVolumeIndex: PVI = prevPVI + prevPVI * ROC, on rising volume.
+        var pvi = volume <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
         var signal = _signalSmoother.Next(pvi, isFinal);
 
         if (isFinal)

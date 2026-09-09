@@ -365,3 +365,11 @@ FodyWeavers.xsd
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+# Local settings with real credentials - never commit these
+appsettings.local.json
+appsettings.*.local.json
+secrets.json
+.env
+.env.local
+.env.*.local
