@@ -1,6 +1,7 @@
 {
+  "//": "The source generator in src/SourceGeneration is built against Microsoft.CodeAnalysis 5.9.0, so the SDK that consumes it must ship a compiler at least that new. Pinning 10.0.101 with rollForward disabled selected a 5.0.0.0 compiler, which cannot load the generated analyzer and fails the build with CS9057. latestMinor keeps builds reproducible across machines while allowing an SDK new enough to load it.",
   "sdk": {
-    "version": "10.0.101",
-    "rollForward": "disable"
+    "version": "10.0.401",
+    "rollForward": "latestMinor"
   }
 }

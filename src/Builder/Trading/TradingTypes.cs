@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder.Catalogs;
+﻿using OoplesFinance.StockIndicators.Builder.Catalogs;
 
 namespace OoplesFinance.StockIndicators.Builder.Trading;
 
@@ -976,44 +976,8 @@ public sealed class ExtendedAutoTradeRule
     /// Checks if this rule matches a notification by name.
     /// Supports wildcard patterns: * (match all), prefix*, *suffix, *contains*
     /// </summary>
-    public bool Matches(string signalName)
-    {
-        if (string.IsNullOrEmpty(SignalPattern))
-        {
-            return false;
-        }
-
-        if (SignalPattern == "*")
-        {
-            return true;
-        }
-
-        var startsWithWildcard = SignalPattern.StartsWith("*");
-        var endsWithWildcard = SignalPattern.EndsWith("*");
-
-        if (startsWithWildcard && endsWithWildcard)
-        {
-            // *contains* pattern
-            var contains = SignalPattern.Substring(1, SignalPattern.Length - 2);
-            return signalName.IndexOf(contains, StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        if (endsWithWildcard)
-        {
-            // prefix* pattern
-            var prefix = SignalPattern.Substring(0, SignalPattern.Length - 1);
-            return signalName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
-        }
-
-        if (startsWithWildcard)
-        {
-            // *suffix pattern
-            var suffix = SignalPattern.Substring(1);
-            return signalName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return string.Equals(SignalPattern, signalName, StringComparison.OrdinalIgnoreCase);
-    }
+    public bool Matches(string signalName) =>
+        SignalPatternMatcher.IsMatch(SignalPattern, signalName);
 }
 
 /// <summary>

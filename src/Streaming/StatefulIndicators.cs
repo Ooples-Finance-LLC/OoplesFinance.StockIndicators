@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Attributes;
@@ -4212,23 +4212,27 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
     private bool _hasPrev;
 
     public KeltnerChannelsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20,
-        int length2 = 10, double multFactor = 2, InputName inputName = InputName.Close)
+        int length2 = 10, double multFactor = 2, InputName inputName = InputName.Close,
+        MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        // The ATR is smoothed with Wilder's method, matching the batch CalculateKeltnerChannels and the
+        // standard definition; maType stays the basis average. Passing maType to both would silently make
+        // the bands disagree with the batch calculation.
+        _atrSmoother = MovingAverageSmootherFactory.Create(atrMaType, Math.Max(1, length2));
         _middleSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _mult = multFactor;
         _input = new StreamingInputResolver(inputName, null);
     }
 
     public KeltnerChannelsState(MovingAvgType maType, int length1, int length2, double multFactor,
-        Func<OhlcvBar, double> selector)
+        Func<OhlcvBar, double> selector, MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _atrSmoother = MovingAverageSmootherFactory.Create(atrMaType, Math.Max(1, length2));
         _middleSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _mult = multFactor;
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -4247,7 +4251,11 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // On the very first bar there is no previous close. Seeding it with 0 made the true range
+        // max(high-low, |high-0|, |low-0|) - the bar's PRICE rather than its range - which on AAPL made
+        // the opening ATR 18.2880 instead of 0.5170 and put the first upper band at 218.59 instead of
+        // 183.04. The batch true-range helper uses the bar's own close for that first bar; match it.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var middle = _middleSmoother.Next(value, isFinal);

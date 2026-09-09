@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -100,6 +100,30 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
+
+        // BAR ALIGNMENT. Everything above is computed per PERIOD; the StockData this is stored on is
+        // per BAR, and callers index the two in parallel. Project each series onto the bars of its own
+        // period before storing. Causal: a period's level derives from the PRECEDING period, so it is
+        // already known when its own period opens.
+        var barGroupIndexes = GetInputLengthGroupIndexes(stockData, inputLength);
+        resistanceLevel5List = ExpandPeriodValuesToBars(resistanceLevel5List, barGroupIndexes);
+        resistanceLevel4List = ExpandPeriodValuesToBars(resistanceLevel4List, barGroupIndexes);
+        resistanceLevel3List = ExpandPeriodValuesToBars(resistanceLevel3List, barGroupIndexes);
+        resistanceLevel2List = ExpandPeriodValuesToBars(resistanceLevel2List, barGroupIndexes);
+        resistanceLevel1List = ExpandPeriodValuesToBars(resistanceLevel1List, barGroupIndexes);
+        supportLevel1List = ExpandPeriodValuesToBars(supportLevel1List, barGroupIndexes);
+        supportLevel2List = ExpandPeriodValuesToBars(supportLevel2List, barGroupIndexes);
+        supportLevel3List = ExpandPeriodValuesToBars(supportLevel3List, barGroupIndexes);
+        supportLevel4List = ExpandPeriodValuesToBars(supportLevel4List, barGroupIndexes);
+        supportLevel5List = ExpandPeriodValuesToBars(supportLevel5List, barGroupIndexes);
+        midpoint1List = ExpandPeriodValuesToBars(midpoint1List, barGroupIndexes);
+        midpoint2List = ExpandPeriodValuesToBars(midpoint2List, barGroupIndexes);
+        midpoint3List = ExpandPeriodValuesToBars(midpoint3List, barGroupIndexes);
+        midpoint4List = ExpandPeriodValuesToBars(midpoint4List, barGroupIndexes);
+        midpoint5List = ExpandPeriodValuesToBars(midpoint5List, barGroupIndexes);
+        midpoint6List = ExpandPeriodValuesToBars(midpoint6List, barGroupIndexes);
+        pivotList = ExpandPeriodValuesToBars(pivotList, barGroupIndexes);
+
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Pivot", pivotList },
             { "S1", supportLevel1List },
@@ -119,6 +143,16 @@ public static partial class Calculations
             { "M5", midpoint5List },
             { "M6", midpoint6List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.CamarillaPivotPoints;
@@ -167,11 +201,31 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
+
+        // BAR ALIGNMENT. Everything above is computed per PERIOD; the StockData this is stored on is
+        // per BAR, and callers index the two in parallel. Project each series onto the bars of its own
+        // period before storing. Causal: a period's level derives from the PRECEDING period, so it is
+        // already known when its own period opens.
+        var barGroupIndexes = GetInputLengthGroupIndexes(stockData, inputLength);
+        pivotList = ExpandPeriodValuesToBars(pivotList, barGroupIndexes);
+        resistanceLevel1List = ExpandPeriodValuesToBars(resistanceLevel1List, barGroupIndexes);
+        supportLevel1List = ExpandPeriodValuesToBars(supportLevel1List, barGroupIndexes);
+
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Pivot", pivotList },
             { "S1", supportLevel1List },
             { "R1", resistanceLevel1List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.DemarkPivotPoints;
@@ -218,11 +272,31 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
+
+        // BAR ALIGNMENT. Everything above is computed per PERIOD; the StockData this is stored on is
+        // per BAR, and callers index the two in parallel. Project each series onto the bars of its own
+        // period before storing. Causal: a period's level derives from the PRECEDING period, so it is
+        // already known when its own period opens.
+        var barGroupIndexes = GetInputLengthGroupIndexes(stockData, inputLength);
+        resistanceLevel1List = ExpandPeriodValuesToBars(resistanceLevel1List, barGroupIndexes);
+        supportLevel1List = ExpandPeriodValuesToBars(supportLevel1List, barGroupIndexes);
+        pivotList = ExpandPeriodValuesToBars(pivotList, barGroupIndexes);
+
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Pivot", pivotList },
             { "S1", supportLevel1List },
             { "R1", resistanceLevel1List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.DynamicPivotPoints;

@@ -5,18 +5,34 @@ using OoplesFinance.StockIndicators.Models;
 namespace OoplesFinance.StockIndicators.Builder;
 
 /// <summary>
-/// Invokes indicator calculations dynamically using reflection.
-/// Provides access to all 750+ indicators via IndicatorName.
+/// Invokes indicator calculations dynamically by <see cref="IndicatorName"/> and returns the FULL per-indicator
+/// breadth — every named intermediate series (<see cref="StockData.OutputValues"/>) plus the primary
+/// (<see cref="StockData.CustomValuesList"/>). This is the SUPPORTED breadth-harvest surface for ML feature
+/// engineering (thousands of candidate series across an Input × MovingAvgType × length grid).
 /// </summary>
 /// <remarks>
-/// V1 API - DEPRECATED. Use the V2 StatefulIndicatorFactory and source-generated factory methods instead.
-/// This reflection-based approach is slower and will be removed in the next major version.
-/// V2 provides compile-time type safety and better performance through source generation.
+/// NOT deprecated. For typed, single-output use of one indicator, prefer the source-generated V2
+/// <c>StatefulIndicatorFactory</c> (compile-time safety, faster). This reflection-based invoker is the
+/// intentional path when you need the full multi-series breadth that the single-output V2 factory collapses
+/// away — e.g. the feature-universe harvester. It is the one supported reason the full-output Calculate
+/// surface is retained, so callers never need to touch the deprecated direct <c>Calculate*</c> extension methods.
 /// </remarks>
-[Obsolete("V1 API - use StatefulIndicatorFactory.Create() instead. Will be removed in next major version.", error: false)]
-internal static class IndicatorInvoker
+public static class IndicatorInvoker
 {
     private static readonly Dictionary<IndicatorName, MethodInfo> MethodCache = new();
+    private static readonly IReadOnlyDictionary<string, IndicatorName> MethodAliases =
+        new Dictionary<string, IndicatorName>(StringComparer.Ordinal)
+        {
+            ["1LCLeastSquaresMovingAverage"] = IndicatorName._1LCLeastSquaresMovingAverage,
+            ["3HMA"] = IndicatorName._3HMA,
+            ["4MovingAverageConvergenceDivergence"] = IndicatorName._4MovingAverageConvergenceDivergence,
+            ["4PercentagePriceOscillator"] = IndicatorName._4PercentagePriceOscillator,
+            ["BollingerBandsAvgTrueRange"] = IndicatorName.BollingerBandsAverageTrueRange,
+            ["CCTStochRSI"] = IndicatorName.CCTStochRelativeStrengthIndex,
+            ["EhlersSmoothedAdaptiveMomentum"] = IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator,
+            ["StandardDevation"] = IndicatorName.StandardDeviation,
+            ["ZDistanceFromVwapIndicator"] = IndicatorName.ZDistanceFromVwap,
+        };
     private static readonly object CacheLock = new();
     private static bool _initialized;
 
@@ -136,7 +152,8 @@ internal static class IndicatorInvoker
                 var indicatorName = method.Name.Substring("Calculate".Length);
 
                 // Try to match with IndicatorName enum
-                if (Enum.TryParse<IndicatorName>(indicatorName, out var name) && name != IndicatorName.None)
+                if ((Enum.TryParse<IndicatorName>(indicatorName, out var name) && name != IndicatorName.None)
+                    || MethodAliases.TryGetValue(indicatorName, out name))
                 {
                     MethodCache[name] = method;
                 }

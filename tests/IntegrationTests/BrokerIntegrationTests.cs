@@ -1,4 +1,4 @@
-namespace OoplesFinance.StockIndicators.Tests.IntegrationTests;
+﻿namespace OoplesFinance.StockIndicators.Tests.IntegrationTests;
 
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Trading;
@@ -19,6 +19,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldRetrieveAccountInfo()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange - Using Alpaca paper trading as the test broker
         var broker = CreateTestBroker();
 
@@ -37,6 +39,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldRetrievePositions()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -54,6 +58,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldSubmitMarketOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -80,6 +86,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldSubmitLimitOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -112,6 +120,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldSubmitStopOrder_PaperTrading()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -144,6 +154,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldCancelOrder()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -173,6 +185,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldRetrieveOrderStatus()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -206,6 +220,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldClosePosition()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -236,6 +252,8 @@ public class BrokerIntegrationTests
     [SkippableFact]
     public async Task Broker_ShouldHandleConcurrentOrders()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var broker = CreateTestBroker();
 
@@ -267,23 +285,8 @@ public class BrokerIntegrationTests
 
     private static IBroker CreateTestBroker()
     {
-        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
-        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
-
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-        {
-            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
-            // This line won't execute due to Skip, but satisfies the compiler
-            throw new InvalidOperationException("Credentials not available");
-        }
-
-        var options = new AlpacaOptions
-        {
-            ApiKey = apiKey,
-            ApiSecret = apiSecret,
-            UsePaper = true // Always use paper trading for tests
-        };
-
+        // Use environment variables or test configuration for credentials
+        var options = AlpacaTestCredentials.CreateOptions();
         return new AlpacaBroker(options);
     }
 

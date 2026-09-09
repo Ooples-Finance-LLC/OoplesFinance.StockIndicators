@@ -1,9 +1,10 @@
-using System.Globalization;
+﻿using System.Globalization;
 using OoplesFinance.StockIndicators;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Catalogs;
 using OoplesFinance.StockIndicators.Builder.Notifications;
 using OoplesFinance.StockIndicators.Enums;
+using OoplesFinance.StockIndicators.FXMacroData;
 using OoplesFinance.StockIndicators.Models;
 using OoplesFinance.StockIndicators.Streaming;
 
@@ -1252,6 +1253,17 @@ internal static class Program
             return false;
         }
 
+        if (string.Equals(args[0], "--fxmacrodata", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length != 5)
+            {
+                PrintUsage();
+                throw new ArgumentException("--fxmacrodata requires BASE QUOTE START END.");
+            }
+            RunFxMacroDataDemo(args[1], args[2], args[3], args[4]);
+            return true;
+        }
+
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
@@ -1276,6 +1288,8 @@ internal static class Program
         Console.WriteLine("Usage:");
         Console.WriteLine("  --help, -h      Show this help");
         Console.WriteLine("  --run-all       Run all demos non-interactively");
+        Console.WriteLine("  --fxmacrodata BASE QUOTE START END");
+        Console.WriteLine("                   Calculate indicators from FXMacroData daily FX rows");
         Console.WriteLine();
         Console.WriteLine("Or run without arguments for interactive mode.");
     }
@@ -1288,6 +1302,53 @@ internal static class Program
         DemoFullExample();
         Console.WriteLine();
         Console.WriteLine("All demos completed.");
+    }
+
+    private static void RunFxMacroDataDemo(string baseCurrency, string quoteCurrency, string start, string end)
+    {
+        if (!DateOnly.TryParseExact(start, "yyyy-MM-dd", Invariant, DateTimeStyles.None, out var startDate)
+            || !DateOnly.TryParseExact(end, "yyyy-MM-dd", Invariant, DateTimeStyles.None, out var endDate))
+        {
+            throw new ArgumentException("START and END must use YYYY-MM-DD format.");
+        }
+
+        // ?? only falls through on null, so a set-but-empty FXMACRODATA_API_KEY would win and the
+        // check below would then reject the request even though FXMD_API_KEY was configured.
+        var apiKey = Environment.GetEnvironmentVariable("FXMACRODATA_API_KEY");
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            apiKey = Environment.GetEnvironmentVariable("FXMD_API_KEY");
+        }
+
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new InvalidOperationException(
+                "FX history requires FXMACRODATA_API_KEY or FXMD_API_KEY in the process environment.");
+        }
+
+        using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        var client = new FXMacroDataClient(httpClient, apiKey);
+        var rows = client
+            .GetDailyFxAsync(baseCurrency, quoteCurrency, startDate, endDate)
+            .GetAwaiter()
+            .GetResult();
+        if (rows.Count < 20)
+        {
+            throw new InvalidDataException("At least 20 daily rows are required for the SMA(20) example.");
+        }
+
+        var source = IndicatorDataSource.FromBatch(new StockData(rows.ToList()));
+        SeriesHandle sma = default;
+        var runtime = new StockIndicatorBuilder(source)
+            .ConfigureIndicators(indicators => sma = indicators.Sma(20))
+            .Build();
+        runtime.Start();
+        var latestSma = runtime.Latest!.GetLastValue(sma);
+        Console.WriteLine();
+        Console.WriteLine($"FXMacroData {baseCurrency.ToUpperInvariant()}/{quoteCurrency.ToUpperInvariant()}");
+        Console.WriteLine($"Rows: {rows.Count} ({rows[0].Date:yyyy-MM-dd} to {rows[^1].Date:yyyy-MM-dd})");
+        Console.WriteLine($"Latest close: {rows[^1].Close.ToString("F6", Invariant)}");
+        Console.WriteLine($"Latest SMA(20): {latestSma.ToString("F6", Invariant)}");
     }
 
     #endregion

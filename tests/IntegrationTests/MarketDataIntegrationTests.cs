@@ -1,4 +1,4 @@
-namespace OoplesFinance.StockIndicators.Tests.IntegrationTests;
+﻿namespace OoplesFinance.StockIndicators.Tests.IntegrationTests;
 
 using OoplesFinance.StockIndicators.Builder.MarketData;
 using OoplesFinance.StockIndicators.Builder.Trading;
@@ -18,6 +18,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveQuote()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -38,6 +40,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveHistoricalBars()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var endDate = DateTime.UtcNow.Date;
@@ -69,6 +73,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveIntradayBars()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var endDate = DateTime.UtcNow;
@@ -99,6 +105,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveMultipleQuotes()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var symbols = new[] { "AAPL", "MSFT", "GOOGL", "AMZN" };
@@ -119,6 +127,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task MarketDataCache_ShouldCacheQuotes()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var cacheTtl = TimeSpan.FromSeconds(30);
         var cache = new MarketDataCache(cacheTtl, cacheTtl, cacheTtl, cacheTtl);
@@ -144,6 +154,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveOrderBook()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -169,6 +181,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldStreamQuotes()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var symbols = new[] { "AAPL", "MSFT" };
@@ -199,6 +213,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldStreamTrades()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var symbols = new[] { "AAPL" };
@@ -229,6 +245,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task MarketData_ShouldHandleInvalidSymbol()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -250,6 +268,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task MarketData_ShouldHandleConcurrentRequests()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var symbols = Enumerable.Range(0, 20).Select(_ => "AAPL").ToList();
@@ -269,6 +289,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveSnapshot()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -286,6 +308,8 @@ public class MarketDataIntegrationTests
     [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveLatestTrade()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -303,43 +327,13 @@ public class MarketDataIntegrationTests
 
     private static IMarketDataProvider CreateAlpacaProvider()
     {
-        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
-        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
-
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-        {
-            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
-            throw new InvalidOperationException("Credentials not available");
-        }
-
-        var options = new AlpacaOptions
-        {
-            ApiKey = apiKey,
-            ApiSecret = apiSecret,
-            UsePaper = true
-        };
-
+        var options = AlpacaTestCredentials.CreateOptions();
         return new AlpacaMarketDataProvider(options);
     }
 
     private static IMarketDataProvider CreateAlpacaProviderWithCache(MarketDataCache cache)
     {
-        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
-        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
-
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-        {
-            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
-            throw new InvalidOperationException("Credentials not available");
-        }
-
-        var options = new AlpacaOptions
-        {
-            ApiKey = apiKey,
-            ApiSecret = apiSecret,
-            UsePaper = true
-        };
-
+        var options = AlpacaTestCredentials.CreateOptions();
         return new AlpacaMarketDataProvider(options, enableStreaming: false, cache: cache);
     }
 
@@ -358,6 +352,8 @@ public class MarketDataQualityTests
     [SkippableFact]
     public async Task Bars_ShouldHaveValidOHLCRelationships()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var endDate = DateTime.UtcNow.Date;
@@ -391,6 +387,8 @@ public class MarketDataQualityTests
     [SkippableFact]
     public async Task Quotes_ShouldHaveReasonableSpreads()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
 
@@ -415,6 +413,8 @@ public class MarketDataQualityTests
     [SkippableFact]
     public async Task Bars_ShouldBeInChronologicalOrder()
     {
+        Skip.IfNot(AlpacaTestCredentials.Available, AlpacaTestCredentials.SkipReason);
+
         // Arrange
         var provider = CreateAlpacaProvider();
         var endDate = DateTime.UtcNow.Date;
@@ -462,22 +462,7 @@ public class MarketDataQualityTests
 
     private static IMarketDataProvider CreateAlpacaProvider()
     {
-        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
-        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
-
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
-        {
-            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
-            throw new InvalidOperationException("Credentials not available");
-        }
-
-        var options = new AlpacaOptions
-        {
-            ApiKey = apiKey,
-            ApiSecret = apiSecret,
-            UsePaper = true
-        };
-
+        var options = AlpacaTestCredentials.CreateOptions();
         return new AlpacaMarketDataProvider(options);
     }
 }

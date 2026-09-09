@@ -326,6 +326,35 @@ Non-interactive:
 dotnet run --project examples/OoplesFinance.StockIndicators.DevConsole/OoplesFinance.StockIndicators.DevConsole.csproj -- --run-all --no-pause
 ```
 
+The developer console also includes an optional FXMacroData consumer example.
+It converts authenticated daily FX rows into the library's existing
+`TickerData`/`StockData` contract and calculates SMA(20); no data-provider code
+is added to the indicator package itself. Keep the API key in the process
+environment:
+
+```bash
+FXMD_API_KEY=your_api_key dotnet run --project examples/OoplesFinance.StockIndicators.DevConsole/OoplesFinance.StockIndicators.DevConsole.csproj -- --fxmacrodata EUR USD 2024-01-01 2024-12-31
+```
+
+On PowerShell, set `$env:FXMD_API_KEY` first and run the same `dotnet` command
+without placing the key on the command line.
+
+This consumer example deliberately follows the indicator library's OHLC input
+contract instead of presenting a second general-purpose data client:
+
+| FXMacroData capability | Example status | Reason |
+| --- | --- | --- |
+| Discovery/catalogue | Not supported | The command accepts one explicit FX pair. |
+| Macro history | Not supported | Economic observations are not OHLC bars. |
+| Release calendar | Not supported | Scheduled events do not map to `TickerData`. |
+| Predictions | Not supported | Forecasts require a separate feature model. |
+| Macro news | Not supported | The library has no text/news input contract. |
+| FX spot history | Native | Daily rows map to `TickerData` and `StockData`. |
+| Market sessions | Not supported | Session intervals cannot be represented by daily bars. |
+| COT positioning | Not supported | Weekly positioning is not an OHLC price series. |
+| Commodities | Not supported | This focused command accepts FX pairs only. |
+| Seasonality | Not supported | Derived features need an explicit indicator design. |
+
 ## Performance chart
 Sample BenchmarkDotNet results (Count=10000, net10.0). Optimized = this fork, Baseline = original library.
 

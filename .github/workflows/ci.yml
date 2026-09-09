@@ -1,96 +1,51 @@
-name: CI - Build & Test
+name: CI
 
 on:
   push:
-    branches: [main, master, dev, develop, 'feature/**', 'fix/**', 'hotfix/**']
+    branches: [master, main]
   pull_request:
-    branches: [main, master, dev, develop]
-
-env:
-  DOTNET_VERSION: '10.0.x'
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_CLI_TELEMETRY_OPTOUT: true
+    branches: [master, main]
 
 jobs:
-  build:
-    name: Build & Test
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-      fail-fast: false
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Run Core Library Tests
-        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --no-build --verbosity normal
-
-      - name: Run Validation Tests
-        run: dotnet test tests/ValidationTests/ReferenceTests.cs --configuration Release --no-build --verbosity normal
-        continue-on-error: true
-
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Check formatting
-        run: dotnet format --verify-no-changes --verbosity diagnostic
-        continue-on-error: true
-
-      - name: Security vulnerability check
-        run: |
-          dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
-          if grep -q "has the following vulnerable packages" vuln-report.txt; then
-            echo "::warning::Security vulnerabilities found"
-          fi
-
-  # Build MAUI app (Windows only due to workload requirements)
-  build-maui:
-    name: Build MAUI App
+  build-and-test:
     runs-on: windows-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # dotnet build/test below run repository-controlled MSBuild inputs; the checkout token
+          # has no reader after this step, so it should not be left in .git/config.
+          persist-credentials: false
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Install MAUI workload
-        run: dotnet workload install maui
+          dotnet-version: |
+            8.x
+            10.x
 
       - name: Restore dependencies
-        run: dotnet restore src/UI/OoplesFinance.TradingApp.Maui/OoplesFinance.TradingApp.Maui.csproj
+        run: dotnet restore src/OoplesFinance.StockIndicators.csproj
 
-      - name: Build MAUI App (Windows)
-        run: dotnet build src/UI/OoplesFinance.TradingApp.Maui/OoplesFinance.TradingApp.Maui.csproj --configuration Release --framework net10.0-windows10.0.19041.0
-        continue-on-error: true
+      - name: Build for .NET 10
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net10.0
+
+      - name: Build for .NET 8
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net8.0
+
+      - name: Build for .NET Framework 4.6.1
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --no-restore --configuration Release --framework net461
+
+      - name: Restore test dependencies
+        run: dotnet restore tests/OoplesFinance.StockIndicators.Tests.Unit.csproj
+
+      - name: Build and run tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj --configuration Release --framework net10.0 --verbosity normal --logger trx --results-directory ./test-results
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results
+          path: ./test-results

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net461</TargetFrameworks>
+    <TargetFrameworks>net10.0;net8.0;net461</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -11,7 +11,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Description>Largest C# stock indicator library with over 750 to choose from and easiest to use with abilities such as making an indicator out of any other indicator or using any moving average with any indicator. </Description>
-    <Version>1.1.0</Version>
+    <Version>1.1.0</Version> <!-- x-release-please-version -->
     <Authors>ooples</Authors>
     <Company>Ooples Finance</Company>
     <RepositoryUrl>https://github.com/ooples/OoplesFinance.StockIndicators</RepositoryUrl>
@@ -80,12 +80,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Alpaca.Markets" Version="7.2.0" />
     <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+    <!-- Must match the version the source generator is built against
+         (src/SourceGeneration, 5.9.0). Pinning the library lower made the compiler load a 5.0.0.0
+         Roslyn while the packaged analyzer referenced 5.9.0.0, which fails with CS9057. Used by
+         Builder/VisualBuilder/StrategyValidator. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
+    <!-- The Builder/Trading + Builder/MarketData Alpaca adapters use Alpaca.Markets. -->
+    <PackageReference Include="Alpaca.Markets" Version="7.2.0" />
+    <PackageReference Include="Alpaca.Markets.Extensions" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Grant ONLY the platform's indicator adapter access to the internal, deprecated
+         reflection breadth-engine (IndicatorInvoker) instead of making it public, plus the
+         test project so the Alpaca account mapping can be tested without the network. -->
+    <InternalsVisibleTo Include="Ooples.Indicators" />
+    <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
   </ItemGroup>
 
   <!-- AiDotNet for ML/Finance models (net10.0 only due to modern C# requirements) -->
@@ -105,10 +119,14 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <PackageReference Include="System.Memory" Version="4.6.0" />
-    <PackageReference Include="System.Buffers" Version="4.6.0" />
+    <!-- These two move together. System.Memory 4.6.3 and System.Text.Json 10 both require
+         System.Buffers >= 4.6.1, and leaving either half behind is a fatal NU1605 downgrade on
+         this target, where warnings are errors. Bumping only System.Memory (#159) is what broke
+         master; this takes both sides of that conflict rather than either one. -->
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Buffers" Version="4.6.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.Json" Version="6.0.11" />
+    <PackageReference Include="System.Text.Json" Version="10.0.12" />
     <!-- ML namespace, DataProviders, and AI require modern C# features not available in net461 -->
     <Compile Remove="Builder\ML\**" />
     <Compile Remove="Builder\DataProviders\**" />

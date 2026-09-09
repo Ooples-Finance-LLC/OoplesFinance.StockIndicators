@@ -25617,7 +25617,7 @@ public sealed class GoldenFileTests
         runtime.Subscribe(handle!.Value);
         var actual = runtime.GetSeries(handle!.Value).ToArray();
         var postWarmupValues = actual.Skip(15).Where(v => !double.IsNaN(v)).ToArray();
-        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("ATR should be finite"); val.Should().BeGreaterOrEqualTo(0, "ATR should be non-negative"); }
+        foreach (var val in postWarmupValues) { double.IsFinite(val).Should().BeTrue("ATR should be finite"); val.Should().BeGreaterThanOrEqualTo(0, "ATR should be non-negative"); }
     }
 
     [Fact]
