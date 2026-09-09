@@ -9,12 +9,30 @@ public partial class RiskQuizPage : ContentPage
     private int _currentIndex = 0;
     private int _totalScore = 0;
 
+    // Parameterless constructor for Shell navigation
+    public RiskQuizPage() : this(
+        App.Current?.Handler?.MauiContext?.Services.GetService<IAdaptiveUIService>()
+        ?? new AdaptiveUIService(new SettingsService()))
+    {
+        App.LogError("RiskQuizPage", "Parameterless constructor called");
+    }
+
     public RiskQuizPage(IAdaptiveUIService adaptiveUI)
     {
-        InitializeComponent();
-        _adaptiveUI = adaptiveUI;
-        _questions = CreateQuestions();
-        QuestionsCarousel.ItemsSource = _questions;
+        App.LogError("RiskQuizPage", "Constructor starting");
+        try
+        {
+            InitializeComponent();
+            _adaptiveUI = adaptiveUI;
+            _questions = CreateQuestions();
+            QuestionsCarousel.ItemsSource = _questions;
+            App.LogError("RiskQuizPage", "Constructor completed");
+        }
+        catch (Exception ex)
+        {
+            App.LogException("RiskQuizPage.Constructor", ex);
+            throw;
+        }
     }
 
     private List<QuizQuestion> CreateQuestions()

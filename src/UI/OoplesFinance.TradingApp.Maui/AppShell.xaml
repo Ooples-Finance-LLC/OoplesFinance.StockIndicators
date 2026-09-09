@@ -14,31 +14,31 @@
     <TabBar>
         <ShellContent
             Title="Dashboard"
-            Icon="dashboard.png"
+            Icon="dashboard.svg"
             ContentTemplate="{DataTemplate views:DashboardPage}"
             Route="dashboard"/>
 
         <ShellContent
             Title="Positions"
-            Icon="positions.png"
+            Icon="positions.svg"
             ContentTemplate="{DataTemplate views:PositionsPage}"
             Route="positions"/>
 
         <ShellContent
             Title="Trade"
-            Icon="trade.png"
+            Icon="trade.svg"
             ContentTemplate="{DataTemplate views:OrderEntryPage}"
             Route="trade"/>
 
         <ShellContent
             Title="Watchlist"
-            Icon="watchlist.png"
+            Icon="watchlist.svg"
             ContentTemplate="{DataTemplate views:WatchlistPage}"
             Route="watchlist"/>
 
         <ShellContent
             Title="More"
-            Icon="more.png"
+            Icon="settings.svg"
             ContentTemplate="{DataTemplate views:SettingsPage}"
             Route="settings"/>
     </TabBar>

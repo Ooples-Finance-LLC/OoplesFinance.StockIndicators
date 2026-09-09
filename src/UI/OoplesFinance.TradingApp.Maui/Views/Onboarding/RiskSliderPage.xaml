@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OoplesFinance.TradingApp.Maui.Views.Onboarding.RiskSliderPage"
              Title="Risk Level"
-             BackgroundColor="{StaticResource BackgroundColor}">
+             BackgroundColor="{StaticResource Background}">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="20">
 
@@ -11,9 +11,9 @@
         <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
             <Label Text="Step 3 of 3: Risk Level"
                    FontSize="14"
-                   TextColor="{StaticResource SecondaryTextColor}"/>
+                   TextColor="{StaticResource TextMuted}"/>
             <ProgressBar Progress="1.0"
-                         ProgressColor="{StaticResource PrimaryColor}"
+                         ProgressColor="{StaticResource Primary}"
                          HeightRequest="8"/>
         </VerticalStackLayout>
 
@@ -24,19 +24,22 @@
                 <Label Text="Choose Your Risk Level"
                        FontSize="22"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource TextColor}"
+                       TextColor="{StaticResource TextPrimary}"
                        HorizontalTextAlignment="Center"/>
 
                 <Label Text="This controls how aggressively the AI will trade on your behalf. You can change this anytime."
                        FontSize="14"
-                       TextColor="{StaticResource SecondaryTextColor}"
+                       TextColor="{StaticResource TextMuted}"
                        HorizontalTextAlignment="Center"/>
 
                 <!-- Risk Level Display -->
-                <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                       CornerRadius="15"
-                       Padding="25"
-                       HasShadow="True">
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="25">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="15"/>
+                    </Border.StrokeShape>
                     <VerticalStackLayout Spacing="20">
 
                         <!-- Current Level -->
@@ -44,7 +47,7 @@
                                Text="Moderate"
                                FontSize="28"
                                FontAttributes="Bold"
-                               TextColor="{StaticResource PrimaryColor}"
+                               TextColor="{StaticResource Primary}"
                                HorizontalOptions="Center"/>
 
                         <!-- Slider -->
@@ -53,136 +56,142 @@
                                 Maximum="5"
                                 Value="3"
                                 ValueChanged="OnRiskValueChanged"
-                                MinimumTrackColor="{StaticResource PrimaryColor}"
+                                MinimumTrackColor="{StaticResource Primary}"
                                 MaximumTrackColor="{StaticResource BorderColor}"
-                                ThumbColor="{StaticResource PrimaryColor}"/>
+                                ThumbColor="{StaticResource Primary}"/>
 
                         <!-- Labels -->
                         <Grid ColumnDefinitions="*,*,*,*,*">
                             <Label Text="Very Conservative"
                                    FontSize="10"
-                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   TextColor="{StaticResource TextMuted}"
                                    HorizontalTextAlignment="Center"
                                    Grid.Column="0"/>
                             <Label Text="Conservative"
                                    FontSize="10"
-                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   TextColor="{StaticResource TextMuted}"
                                    HorizontalTextAlignment="Center"
                                    Grid.Column="1"/>
                             <Label Text="Moderate"
                                    FontSize="10"
-                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   TextColor="{StaticResource TextMuted}"
                                    HorizontalTextAlignment="Center"
                                    Grid.Column="2"/>
                             <Label Text="Aggressive"
                                    FontSize="10"
-                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   TextColor="{StaticResource TextMuted}"
                                    HorizontalTextAlignment="Center"
                                    Grid.Column="3"/>
                             <Label Text="Very Aggressive"
                                    FontSize="10"
-                                   TextColor="{StaticResource SecondaryTextColor}"
+                                   TextColor="{StaticResource TextMuted}"
                                    HorizontalTextAlignment="Center"
                                    Grid.Column="4"/>
                         </Grid>
 
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
                 <!-- Portfolio Preview -->
-                <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                       CornerRadius="15"
-                       Padding="20"
-                       HasShadow="True">
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="15"/>
+                    </Border.StrokeShape>
                     <VerticalStackLayout Spacing="15">
 
                         <Label Text="Suggested Portfolio Allocation"
                                FontSize="16"
                                FontAttributes="Bold"
-                               TextColor="{StaticResource TextColor}"/>
+                               TextColor="{StaticResource TextPrimary}"/>
 
                         <!-- Stocks -->
                         <Grid ColumnDefinitions="*,Auto">
                             <HorizontalStackLayout Spacing="10">
-                                <BoxView BackgroundColor="{StaticResource PrimaryColor}"
+                                <BoxView BackgroundColor="{StaticResource Primary}"
                                          WidthRequest="16"
                                          HeightRequest="16"
                                          CornerRadius="3"/>
                                 <Label Text="Stocks"
                                        FontSize="14"
-                                       TextColor="{StaticResource TextColor}"/>
+                                       TextColor="{StaticResource TextPrimary}"/>
                             </HorizontalStackLayout>
                             <Label x:Name="StocksPercentLabel"
                                    Text="60%"
                                    FontSize="14"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    Grid.Column="1"/>
                         </Grid>
                         <ProgressBar x:Name="StocksBar"
                                      Progress="0.6"
-                                     ProgressColor="{StaticResource PrimaryColor}"
+                                     ProgressColor="{StaticResource Primary}"
                                      HeightRequest="6"/>
 
                         <!-- Bonds -->
                         <Grid ColumnDefinitions="*,Auto">
                             <HorizontalStackLayout Spacing="10">
-                                <BoxView BackgroundColor="{StaticResource WarningColor}"
+                                <BoxView BackgroundColor="{StaticResource Warning}"
                                          WidthRequest="16"
                                          HeightRequest="16"
                                          CornerRadius="3"/>
                                 <Label Text="Bonds"
                                        FontSize="14"
-                                       TextColor="{StaticResource TextColor}"/>
+                                       TextColor="{StaticResource TextPrimary}"/>
                             </HorizontalStackLayout>
                             <Label x:Name="BondsPercentLabel"
                                    Text="30%"
                                    FontSize="14"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    Grid.Column="1"/>
                         </Grid>
                         <ProgressBar x:Name="BondsBar"
                                      Progress="0.3"
-                                     ProgressColor="{StaticResource WarningColor}"
+                                     ProgressColor="{StaticResource Warning}"
                                      HeightRequest="6"/>
 
                         <!-- Cash -->
                         <Grid ColumnDefinitions="*,Auto">
                             <HorizontalStackLayout Spacing="10">
-                                <BoxView BackgroundColor="{StaticResource SecondaryTextColor}"
+                                <BoxView BackgroundColor="{StaticResource TextMuted}"
                                          WidthRequest="16"
                                          HeightRequest="16"
                                          CornerRadius="3"/>
                                 <Label Text="Cash"
                                        FontSize="14"
-                                       TextColor="{StaticResource TextColor}"/>
+                                       TextColor="{StaticResource TextPrimary}"/>
                             </HorizontalStackLayout>
                             <Label x:Name="CashPercentLabel"
                                    Text="10%"
                                    FontSize="14"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    Grid.Column="1"/>
                         </Grid>
                         <ProgressBar x:Name="CashBar"
                                      Progress="0.1"
-                                     ProgressColor="{StaticResource SecondaryTextColor}"
+                                     ProgressColor="{StaticResource TextMuted}"
                                      HeightRequest="6"/>
 
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
                 <!-- Historical Performance -->
-                <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                       CornerRadius="15"
-                       Padding="20"
-                       HasShadow="True">
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="15"/>
+                    </Border.StrokeShape>
                     <VerticalStackLayout Spacing="10">
 
                         <Label Text="Historical Performance (10 years)"
                                FontSize="14"
-                               TextColor="{StaticResource SecondaryTextColor}"/>
+                               TextColor="{StaticResource TextMuted}"/>
 
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
                             <VerticalStackLayout Grid.Column="0">
@@ -190,25 +199,25 @@
                                        Text="+7.2%"
                                        FontSize="24"
                                        FontAttributes="Bold"
-                                       TextColor="{StaticResource SuccessColor}"/>
+                                       TextColor="{StaticResource Success}"/>
                                 <Label Text="Avg. Annual Return"
                                        FontSize="12"
-                                       TextColor="{StaticResource SecondaryTextColor}"/>
+                                       TextColor="{StaticResource TextMuted}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1">
                                 <Label x:Name="MaxDrawdownLabel"
                                        Text="-15%"
                                        FontSize="24"
                                        FontAttributes="Bold"
-                                       TextColor="{StaticResource ErrorColor}"/>
+                                       TextColor="{StaticResource Danger}"/>
                                 <Label Text="Max Drawdown"
                                        FontSize="12"
-                                       TextColor="{StaticResource SecondaryTextColor}"/>
+                                       TextColor="{StaticResource TextMuted}"/>
                             </VerticalStackLayout>
                         </Grid>
 
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
             </VerticalStackLayout>
         </ScrollView>

@@ -67,4 +67,21 @@
     <Color x:Key="LightTextPrimary">#1E293B</Color>
     <Color x:Key="LightTextSecondary">#475569</Color>
 
+    <!-- Additional Surface Colors -->
+    <Color x:Key="SurfaceLighter">#2D3B4F</Color>
+    <Color x:Key="Border">#334155</Color>
+
+    <!-- Aliases for Onboarding Pages (mapping to primary colors) -->
+    <Color x:Key="BackgroundColor">#0F172A</Color>
+    <Color x:Key="TextColor">#F8FAFC</Color>
+    <Color x:Key="SecondaryTextColor">#94A3B8</Color>
+    <Color x:Key="PrimaryColor">#6366F1</Color>
+    <Color x:Key="CardBackgroundColor">#1E293B</Color>
+    <Color x:Key="SuccessColor">#10B981</Color>
+    <Color x:Key="WarningColor">#F59E0B</Color>
+    <Color x:Key="ErrorColor">#EF4444</Color>
+
+    <!-- Alias for Danger (same as Error) -->
+    <Color x:Key="Danger">#EF4444</Color>
+
 </ResourceDictionary>

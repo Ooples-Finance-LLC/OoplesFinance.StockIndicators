@@ -13,8 +13,18 @@ public partial class RiskSliderPage : ContentPage
 
     public RiskSliderPage()
     {
-        InitializeComponent();
-        UpdateRiskDisplay((int)RiskSlider.Value);
+        App.LogError("RiskSliderPage", "Constructor starting");
+        try
+        {
+            InitializeComponent();
+            UpdateRiskDisplay((int)RiskSlider.Value);
+            App.LogError("RiskSliderPage", "Constructor completed");
+        }
+        catch (Exception ex)
+        {
+            App.LogException("RiskSliderPage.Constructor", ex);
+            throw;
+        }
     }
 
     private void OnRiskValueChanged(object sender, ValueChangedEventArgs e)

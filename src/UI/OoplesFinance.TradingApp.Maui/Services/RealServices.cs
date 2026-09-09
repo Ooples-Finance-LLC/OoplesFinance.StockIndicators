@@ -1,9 +1,17 @@
 using System.Text.Json.Serialization;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Cloud;
 using OoplesFinance.StockIndicators.Builder.Trading;
 using OoplesFinance.StockIndicators.Builder.Trading.Brokers;
-using OoplesFinance.StockIndicators.Builder.Trading.MarketData;
+using OoplesFinance.StockIndicators.Builder.Trading.Brokers.InteractiveBrokers;
+using OoplesFinance.StockIndicators.Builder.Trading.Brokers.Binance;
+using OoplesFinance.StockIndicators.Builder.MarketData;
 using OoplesFinance.TradingApp.Maui.Models;
+// Type aliases to disambiguate between library and local models
+using MauiQuote = OoplesFinance.TradingApp.Maui.Models.Quote;
+using MauiBar = OoplesFinance.TradingApp.Maui.Models.Bar;
+using MauiOrder = OoplesFinance.TradingApp.Maui.Models.Order;
+using MauiOrderStatus = OoplesFinance.TradingApp.Maui.Models.OrderStatus;
 
 namespace OoplesFinance.TradingApp.Maui.Services;
 
@@ -35,8 +43,7 @@ public sealed class RealPortfolioService : IPortfolioService
                 Cash = 0,
                 BuyingPower = 0,
                 TodayPnL = 0,
-                TotalPnL = 0,
-                CostBasis = 0
+                TotalPnL = 0
             };
         }
 
@@ -46,7 +53,6 @@ public sealed class RealPortfolioService : IPortfolioService
         var positions = await GetPositionsAsync().ConfigureAwait(false);
         var totalUnrealizedPnL = positions.Sum(p => p.UnrealizedPnL);
         var totalDayPnL = positions.Sum(p => p.DayPnL);
-        var totalCostBasis = positions.Sum(p => p.AveragePrice * p.Quantity);
 
         return new AccountInfo
         {
@@ -54,8 +60,7 @@ public sealed class RealPortfolioService : IPortfolioService
             Cash = brokerAccount.Cash,
             BuyingPower = brokerAccount.BuyingPower,
             TodayPnL = totalDayPnL,
-            TotalPnL = totalUnrealizedPnL,
-            CostBasis = totalCostBasis
+            TotalPnL = totalUnrealizedPnL
         };
     }
 
@@ -144,7 +149,7 @@ public sealed class RealPortfolioService : IPortfolioService
 public sealed class RealMarketDataService : IMarketDataService
 {
     private readonly IMarketDataProvider _marketDataProvider;
-    private readonly Dictionary<string, Quote> _quoteCache = new();
+    private readonly Dictionary<string, MauiQuote> _quoteCache = new();
     private readonly TimeSpan _cacheExpiry = TimeSpan.FromSeconds(5);
     private DateTime _lastCacheUpdate = DateTime.MinValue;
 
@@ -153,7 +158,7 @@ public sealed class RealMarketDataService : IMarketDataService
         _marketDataProvider = marketDataProvider ?? throw new ArgumentNullException(nameof(marketDataProvider));
     }
 
-    public async Task<Quote?> GetQuoteAsync(string symbol)
+    public async Task<MauiQuote?> GetQuoteAsync(string symbol)
     {
         // Check cache
         if (DateTime.UtcNow - _lastCacheUpdate < _cacheExpiry &&
@@ -162,19 +167,31 @@ public sealed class RealMarketDataService : IMarketDataService
             return cached;
         }
 
-        var marketQuote = await _marketDataProvider.GetQuoteAsync(symbol).ConfigureAwait(false);
-        if (marketQuote is null)
+        // Get snapshot for both current quote and previous close
+        var snapshot = await _marketDataProvider.GetSnapshotAsync(symbol).ConfigureAwait(false);
+        if (snapshot is null)
             return null;
 
-        var quote = new Quote
+        var currentPrice = snapshot.CurrentPrice;
+        var previousClose = snapshot.PreviousBar?.Close ?? currentPrice;
+        var change = currentPrice - previousClose;
+        var changePercent = previousClose > 0 ? change / previousClose : 0m;
+
+        var quote = new MauiQuote
         {
             Symbol = symbol.ToUpperInvariant(),
             CompanyName = symbol.ToUpperInvariant(), // Would need company info lookup
-            LastPrice = marketQuote.LastPrice,
-            Change = marketQuote.LastPrice - marketQuote.PreviousClose,
-            ChangePercent = marketQuote.PreviousClose > 0
-                ? (marketQuote.LastPrice - marketQuote.PreviousClose) / marketQuote.PreviousClose
-                : 0
+            LastPrice = currentPrice,
+            Change = change,
+            ChangePercent = changePercent,
+            BidPrice = snapshot.LatestQuote?.Bid ?? currentPrice,
+            AskPrice = snapshot.LatestQuote?.Ask ?? currentPrice,
+            PreviousClose = previousClose,
+            High = snapshot.DailyBar?.High ?? currentPrice,
+            Low = snapshot.DailyBar?.Low ?? currentPrice,
+            Open = snapshot.DailyBar?.Open ?? currentPrice,
+            Volume = snapshot.DailyBar?.Volume ?? 0,
+            Timestamp = snapshot.LatestQuote?.Timestamp ?? DateTime.UtcNow
         };
 
         _quoteCache[symbol.ToUpperInvariant()] = quote;
@@ -196,19 +213,19 @@ public sealed class RealMarketDataService : IMarketDataService
 
         var isOpen = isWeekday && isMarketHours;
 
-        var nextChange = isOpen
-            ? estNow.Date + marketClose
-            : GetNextMarketOpen(estNow);
+        // Calculate next open and next close
+        var nextOpen = isOpen ? (DateTime?)null : GetNextMarketOpen(estNow);
+        var nextClose = isOpen ? estNow.Date + marketClose : (DateTime?)null;
 
         return Task.FromResult(new MarketStatus
         {
-            Status = isOpen ? "Open" : "Closed",
             IsOpen = isOpen,
-            NextChange = nextChange
+            NextOpen = nextOpen,
+            NextClose = nextClose
         });
     }
 
-    public async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, int count)
+    public async Task<List<MauiBar>> GetHistoricalBarsAsync(string symbol, string timeframe, int count)
     {
         var endDate = DateTime.UtcNow;
         var startDate = timeframe switch
@@ -223,24 +240,24 @@ public sealed class RealMarketDataService : IMarketDataService
 
         var interval = timeframe switch
         {
-            "1D" => MarketDataInterval.Minute5,
-            "1W" => MarketDataInterval.Hour,
-            "1M" => MarketDataInterval.Day,
-            "3M" => MarketDataInterval.Day,
-            "1Y" => MarketDataInterval.Day,
-            _ => MarketDataInterval.Week
+            "1D" => BarTimeframe.Minute5,
+            "1W" => BarTimeframe.Hour1,
+            "1M" => BarTimeframe.Day,
+            "3M" => BarTimeframe.Day,
+            "1Y" => BarTimeframe.Day,
+            _ => BarTimeframe.Week
         };
 
         var marketBars = await _marketDataProvider.GetHistoricalBarsAsync(symbol, startDate, endDate, interval).ConfigureAwait(false);
 
-        return marketBars.Select(b => new Bar
+        return marketBars.Select(b => new MauiBar
         {
             Timestamp = b.Timestamp,
             Open = b.Open,
             High = b.High,
             Low = b.Low,
             Close = b.Close,
-            Volume = (long)b.Volume
+            Volume = b.Volume
         }).ToList();
     }
 
@@ -274,7 +291,7 @@ public sealed class RealOrderService : IOrderService
         _brokerFactory = brokerFactory ?? throw new ArgumentNullException(nameof(brokerFactory));
     }
 
-    public async Task<List<Order>> GetOpenOrdersAsync()
+    public async Task<List<MauiOrder>> GetOpenOrdersAsync()
     {
         // Get from Supabase (synced from broker)
         var orders = await _supabase
@@ -288,7 +305,7 @@ public sealed class RealOrderService : IOrderService
         return orders.Select(MapToOrder).ToList();
     }
 
-    public async Task<List<Order>> GetRecentOrdersAsync(int count)
+    public async Task<List<MauiOrder>> GetRecentOrdersAsync(int count)
     {
         var orders = await _supabase
             .From<OrderRecord>("orders")
@@ -436,16 +453,31 @@ public sealed class RealOrderService : IOrderService
         }
     }
 
-    private static Order MapToOrder(OrderRecord record) => new()
+    private static MauiOrder MapToOrder(OrderRecord record) => new()
     {
         OrderId = record.BrokerOrderId,
         Symbol = record.Symbol,
         Side = record.Side,
-        Quantity = (int)record.Quantity,
-        Price = record.LimitPrice ?? 0,
-        FilledPrice = record.AverageFillPrice ?? 0,
-        Status = record.Status,
-        CreatedAt = record.CreatedAt
+        OrderType = record.OrderType,
+        Quantity = record.Quantity,
+        FilledQuantity = record.FilledQuantity,
+        LimitPrice = record.LimitPrice,
+        StopPrice = record.StopPrice,
+        AverageFillPrice = record.AverageFillPrice,
+        Status = ParseOrderStatus(record.Status),
+        SubmittedAt = record.SubmittedAt ?? record.CreatedAt,
+        FilledAt = record.FilledAt
+    };
+
+    private static MauiOrderStatus ParseOrderStatus(string status) => status.ToLowerInvariant() switch
+    {
+        "new" or "pending_new" or "accepted" => MauiOrderStatus.Pending,
+        "partial" or "partially_filled" => MauiOrderStatus.PartiallyFilled,
+        "filled" => MauiOrderStatus.Filled,
+        "cancelled" or "canceled" => MauiOrderStatus.Cancelled,
+        "rejected" => MauiOrderStatus.Rejected,
+        "expired" => MauiOrderStatus.Expired,
+        _ => MauiOrderStatus.Pending
     };
 }
 
@@ -665,12 +697,12 @@ public sealed class BrokerFactory : IBrokerFactory
             "interactive_brokers" or "ib" => new IBBroker(new IBOptions
             {
                 ClientId = 1,
-                UsePaper = isPaper
+                UsePaperTrading = isPaper
             }),
-            "binance" => new Binance.BinanceBroker(new Binance.BinanceOptions
+            "binance" => new BinanceBroker(new BinanceOptions
             {
-                ApiKey = apiKey,
-                ApiSecret = apiSecret,
+                ApiKey = apiKey ?? string.Empty,
+                ApiSecret = apiSecret ?? string.Empty,
                 UseTestnet = isPaper
             }),
             _ => throw new NotSupportedException($"Broker not supported: {broker}")

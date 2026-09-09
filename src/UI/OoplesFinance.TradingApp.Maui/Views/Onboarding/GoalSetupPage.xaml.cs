@@ -3,32 +3,42 @@ namespace OoplesFinance.TradingApp.Maui.Views.Onboarding;
 public partial class GoalSetupPage : ContentPage
 {
     private string? _selectedGoal;
-    private Frame? _selectedFrame;
+    private Border? _selectedBorder;
 
     public GoalSetupPage()
     {
-        InitializeComponent();
-        TargetDatePicker.Date = DateTime.Today.AddYears(5);
+        App.LogError("GoalSetupPage", "Constructor starting");
+        try
+        {
+            InitializeComponent();
+            TargetDatePicker.Date = DateTime.Today.AddYears(5);
+            App.LogError("GoalSetupPage", "Constructor completed");
+        }
+        catch (Exception ex)
+        {
+            App.LogException("GoalSetupPage.Constructor", ex);
+            throw;
+        }
     }
 
     private void OnGoalSelected(object sender, EventArgs e)
     {
-        if (sender is not Frame frame) return;
+        if (sender is not Border border) return;
 
         // Deselect previous
-        if (_selectedFrame is not null)
+        if (_selectedBorder is not null)
         {
-            _selectedFrame.BorderColor = Color.FromArgb("#3D3D3D");
-            _selectedFrame.BackgroundColor = Color.FromArgb("#2D2D2D");
+            _selectedBorder.Stroke = Color.FromArgb("#334155");
+            _selectedBorder.BackgroundColor = Color.FromArgb("#1E293B");
         }
 
         // Select new
-        frame.BorderColor = Color.FromArgb("#4CAF50");
-        frame.BackgroundColor = Color.FromArgb("#1E3D1E");
-        _selectedFrame = frame;
+        border.Stroke = Color.FromArgb("#10B981");
+        border.BackgroundColor = Color.FromArgb("#1E3D1E");
+        _selectedBorder = border;
 
         // Get goal type from CommandParameter
-        if (frame.GestureRecognizers.FirstOrDefault() is TapGestureRecognizer tap)
+        if (border.GestureRecognizers.FirstOrDefault() is TapGestureRecognizer tap)
         {
             _selectedGoal = tap.CommandParameter?.ToString();
         }
@@ -52,7 +62,8 @@ public partial class GoalSetupPage : ContentPage
         }
 
         Preferences.Set("goal_type", _selectedGoal ?? "Growth");
-        Preferences.Set("goal_target_date", TargetDatePicker.Date.ToString("o"));
+        var targetDate = TargetDatePicker.Date ?? DateTime.Today.AddYears(5);
+        Preferences.Set("goal_target_date", targetDate.ToString("o"));
 
         if (decimal.TryParse(InitialInvestmentEntry.Text?.Replace("$", "").Replace(",", ""), out var initial))
         {

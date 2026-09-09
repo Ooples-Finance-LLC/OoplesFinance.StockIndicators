@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OoplesFinance.TradingApp.Maui.Views.Onboarding.RiskQuizPage"
              Title="Risk Assessment"
-             BackgroundColor="{StaticResource BackgroundColor}">
+             BackgroundColor="{StaticResource Background}">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="20">
 
@@ -11,15 +11,15 @@
         <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
             <Label Text="Step 1 of 3: Risk Assessment"
                    FontSize="14"
-                   TextColor="{StaticResource SecondaryTextColor}"/>
+                   TextColor="{StaticResource TextMuted}"/>
             <ProgressBar x:Name="ProgressBar"
                          Progress="0.33"
-                         ProgressColor="{StaticResource PrimaryColor}"
-                         HeightRequest="8"/>
+                         ProgressColor="{StaticResource Primary}"
+                         HeightRequest="6"/>
             <Label x:Name="QuestionCounter"
                    Text="Question 1 of 5"
                    FontSize="12"
-                   TextColor="{StaticResource SecondaryTextColor}"
+                   TextColor="{StaticResource TextMuted}"
                    HorizontalOptions="End"/>
         </VerticalStackLayout>
 
@@ -31,53 +31,55 @@
                       CurrentItemChanged="OnCurrentItemChanged">
             <CarouselView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                           CornerRadius="15"
-                           Padding="25"
-                           Margin="10"
-                           HasShadow="True">
+                    <Border Style="{StaticResource CardStyle}"
+                            Margin="10"
+                            Padding="25">
                         <VerticalStackLayout Spacing="25">
 
                             <Label Text="{Binding Question}"
-                                   FontSize="20"
+                                   FontSize="18"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalTextAlignment="Center"/>
 
                             <!-- Answer Options -->
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding Options}"
-                                                 Spacing="10">
+                                                 Spacing="12">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                                               BorderColor="{StaticResource BorderColor}"
-                                               CornerRadius="10"
-                                               Padding="15"
-                                               HasShadow="False">
-                                            <Frame.GestureRecognizers>
+                                        <Border BackgroundColor="{StaticResource Surface}"
+                                                Stroke="{StaticResource BorderColor}"
+                                                StrokeThickness="1"
+                                                Padding="15">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="10"/>
+                                            </Border.StrokeShape>
+                                            <Border.GestureRecognizers>
                                                 <TapGestureRecognizer Command="{Binding SelectCommand}"
                                                                       CommandParameter="{Binding .}"/>
-                                            </Frame.GestureRecognizers>
+                                            </Border.GestureRecognizers>
                                             <HorizontalStackLayout Spacing="15">
-                                                <Frame x:Name="RadioButton"
-                                                       BackgroundColor="Transparent"
-                                                       BorderColor="{StaticResource BorderColor}"
-                                                       CornerRadius="12"
-                                                       WidthRequest="24"
-                                                       HeightRequest="24"
-                                                       Padding="0"/>
+                                                <Border BackgroundColor="Transparent"
+                                                        Stroke="{StaticResource BorderColor}"
+                                                        StrokeThickness="2"
+                                                        WidthRequest="24"
+                                                        HeightRequest="24">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="12"/>
+                                                    </Border.StrokeShape>
+                                                </Border>
                                                 <Label Text="{Binding Text}"
-                                                       FontSize="16"
-                                                       TextColor="{StaticResource TextColor}"
+                                                       FontSize="15"
+                                                       TextColor="{StaticResource TextPrimary}"
                                                        VerticalOptions="Center"/>
                                             </HorizontalStackLayout>
-                                        </Frame>
+                                        </Border>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
 
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
@@ -89,12 +91,14 @@
                     Style="{StaticResource SecondaryButton}"
                     Clicked="OnBackClicked"
                     Grid.Column="0"
+                    HeightRequest="50"
                     IsVisible="False"/>
             <Button x:Name="NextButton"
                     Text="Next"
                     Style="{StaticResource PrimaryButton}"
                     Clicked="OnNextClicked"
-                    Grid.Column="1"/>
+                    Grid.Column="1"
+                    HeightRequest="50"/>
         </Grid>
 
     </Grid>

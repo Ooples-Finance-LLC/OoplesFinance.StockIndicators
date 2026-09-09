@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chart bars representing trading -->
+  <rect x="40" y="140" width="35" height="70" rx="4" fill="#FFFFFF"/>
+  <rect x="85" y="100" width="35" height="110" rx="4" fill="#FFFFFF"/>
+  <rect x="130" y="75" width="35" height="135" rx="4" fill="#FFFFFF"/>
+  <rect x="175" y="50" width="35" height="160" rx="4" fill="#FFFFFF"/>
+
+  <!-- Upward trend line -->
+  <path d="M30 180 L75 140 L120 100 L165 75 L210 45"
+        stroke="#4CAF50" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

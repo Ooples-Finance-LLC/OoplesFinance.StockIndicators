@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
-             xmlns:controls="clr-namespace:OoplesFinance.TradingApp.Maui.Controls"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
              x:Class="OoplesFinance.TradingApp.Maui.Views.DashboardPage"
              x:DataType="viewmodels:DashboardViewModel"
              Title="Dashboard"
@@ -13,41 +13,105 @@
         <ScrollView>
             <VerticalStackLayout Padding="15" Spacing="15">
 
-                <!-- Account Summary Card -->
-                <Border Style="{StaticResource CardStyle}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="Portfolio Value"
-                               Style="{StaticResource LabelMuted}"/>
-                        <Label Text="{Binding TotalPortfolioValue, StringFormat='${0:N2}'}"
-                               FontSize="32"
-                               FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimary}"/>
+                <!-- UI Mode Indicator (tap to toggle) -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="10"
+                        Margin="0,0,0,5">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleUIModeCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Border BackgroundColor="{StaticResource Primary}"
+                                Padding="8,4"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding UiModeLabel}"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="White"/>
+                        </Border>
+                        <Label Grid.Column="1"
+                               Text="Tap to change UI complexity"
+                               TextColor="{StaticResource TextMuted}"
+                               FontSize="11"
+                               VerticalOptions="Center"
+                               Margin="10,0,0,0"/>
+                        <Label Grid.Column="2"
+                               Text=">"
+                               TextColor="{StaticResource TextMuted}"
+                               FontSize="14"
+                               VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
 
-                        <Grid ColumnDefinitions="*,*" Margin="0,10,0,0">
+                <!-- Account Summary Card with Chart -->
+                <Border Style="{StaticResource CardStyle}" Padding="15">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label Text="Portfolio Value"
+                                       Style="{StaticResource LabelMuted}"
+                                       FontSize="12"/>
+                                <Label Text="{Binding TotalPortfolioValue, StringFormat='${0:N2}'}"
+                                       FontSize="32"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}"/>
+                            </VerticalStackLayout>
+                            <!-- Market Status Indicator -->
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Start">
+                                <Ellipse Fill="{Binding MarketStatusColor}"
+                                         WidthRequest="8"
+                                         HeightRequest="8"
+                                         VerticalOptions="Center"/>
+                                <Label Text="{Binding MarketStatusText}"
+                                       FontSize="11"
+                                       TextColor="{StaticResource TextMuted}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <!-- Portfolio Chart (hidden in beginner mode until unlocked) -->
+                        <lvc:CartesianChart Series="{Binding PortfolioChartSeries}"
+                                            XAxes="{Binding PortfolioXAxes}"
+                                            YAxes="{Binding PortfolioYAxes}"
+                                            HeightRequest="120"
+                                            TooltipPosition="Hidden"
+                                            ZoomMode="None"
+                                            IsVisible="{Binding ShowPortfolioChart}"/>
+
+                        <Grid ColumnDefinitions="*,*" Margin="0,5,0,0">
                             <VerticalStackLayout Grid.Column="0">
                                 <Label Text="Today's P/L"
                                        Style="{StaticResource LabelMuted}"
                                        FontSize="11"/>
-                                <Label Text="{Binding TodayPnL, StringFormat='${0:N2}'}"
-                                       FontSize="18"
-                                       FontAttributes="Bold"
-                                       TextColor="{Binding TodayPnLColor}"/>
-                                <Label Text="{Binding TodayPnLPercent, StringFormat='{0:P2}'}"
-                                       FontSize="12"
-                                       TextColor="{Binding TodayPnLColor}"/>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding TodayPnL, StringFormat='${0:N2}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding TodayPnLColor}"/>
+                                    <Label Text="{Binding TodayPnLPercent, StringFormat='({0:P2})'}"
+                                           FontSize="12"
+                                           TextColor="{Binding TodayPnLColor}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
                                 <Label Text="Total P/L"
                                        Style="{StaticResource LabelMuted}"
                                        FontSize="11"/>
-                                <Label Text="{Binding TotalPnL, StringFormat='${0:N2}'}"
-                                       FontSize="18"
-                                       FontAttributes="Bold"
-                                       TextColor="{Binding TotalPnLColor}"/>
-                                <Label Text="{Binding TotalPnLPercent, StringFormat='{0:P2}'}"
-                                       FontSize="12"
-                                       TextColor="{Binding TotalPnLColor}"/>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding TotalPnL, StringFormat='${0:N2}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding TotalPnLColor}"/>
+                                    <Label Text="{Binding TotalPnLPercent, StringFormat='({0:P2})'}"
+                                           FontSize="12"
+                                           TextColor="{Binding TotalPnLColor}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Grid>
                     </VerticalStackLayout>
@@ -119,48 +183,100 @@
                     </Grid>
                 </Border>
 
-                <!-- Top Movers Section -->
-                <Label Text="Top Positions"
-                       Style="{StaticResource SectionHeaderStyle}"/>
+                <!-- Top Positions Section -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Top Positions"
+                           Style="{StaticResource SectionHeaderStyle}"/>
+                    <Button Text="See All"
+                            Command="{Binding NavigateToPositionsCommand}"
+                            Style="{StaticResource LinkButtonStyle}"
+                            Grid.Column="1"
+                            VerticalOptions="Center"/>
+                </Grid>
 
                 <CollectionView ItemsSource="{Binding TopPositions}"
                                 SelectionMode="Single"
-                                SelectedItem="{Binding SelectedPosition}"
-                                SelectionChangedCommand="{Binding PositionSelectedCommand}"
-                                HeightRequest="200">
+                                SelectedItem="{Binding SelectedTopPosition}"
+                                SelectionChangedCommand="{Binding TopPositionTappedCommand}"
+                                HeightRequest="170">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
                     </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <Border Style="{StaticResource CardStyle}" Padding="20" WidthRequest="200">
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                                <Label Text="No Positions"
+                                       FontSize="14"
+                                       TextColor="{StaticResource TextMuted}"
+                                       HorizontalOptions="Center"/>
+                                <Button Text="Start Trading"
+                                        Command="{Binding NavigateToTradeCommand}"
+                                        Style="{StaticResource SmallButtonStyle}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="viewmodels:PositionSummaryViewModel">
+                        <DataTemplate x:DataType="viewmodels:PositionViewModel">
                             <Border Style="{StaticResource PositionCardStyle}"
-                                    WidthRequest="150">
-                                <VerticalStackLayout Spacing="5">
-                                    <Label Text="{Binding Symbol}"
-                                           FontSize="16"
-                                           FontAttributes="Bold"
-                                           TextColor="{StaticResource TextPrimary}"/>
+                                    WidthRequest="160">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:DashboardViewModel}}, Path=ViewPositionCommand}"
+                                        CommandParameter="{Binding}"/>
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="4">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="{Binding Symbol}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextPrimary}"/>
+                                        <Border BackgroundColor="{Binding PnLColor}"
+                                                Padding="5,2"
+                                                StrokeThickness="0"
+                                                VerticalOptions="Center">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="6"/>
+                                            </Border.StrokeShape>
+                                            <Label Text="{Binding UnrealizedPnLPercent, StringFormat='{0:P1}'}"
+                                                   FontSize="9"
+                                                   TextColor="White"/>
+                                        </Border>
+                                    </HorizontalStackLayout>
                                     <Label Text="{Binding Quantity, StringFormat='{0:N0} shares'}"
                                            Style="{StaticResource LabelMuted}"
-                                           FontSize="11"/>
-                                    <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
-                                           FontSize="14"
-                                           TextColor="{StaticResource TextPrimary}"/>
-                                    <Label Text="{Binding UnrealizedPnL, StringFormat='${0:N2}'}"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           TextColor="{Binding PnLColor}"/>
-                                    <Label Text="{Binding UnrealizedPnLPercent, StringFormat='{0:P2}'}"
-                                           FontSize="12"
-                                           TextColor="{Binding PnLColor}"/>
+                                           FontSize="10"/>
+
+                                    <!-- Mini sparkline -->
+                                    <lvc:CartesianChart Series="{Binding SparklineSeries}"
+                                                        XAxes="{Binding SparklineAxes}"
+                                                        YAxes="{Binding SparklineAxes}"
+                                                        HeightRequest="50"
+                                                        TooltipPosition="Hidden"
+                                                        ZoomMode="None"/>
+
+                                    <Grid ColumnDefinitions="*,*">
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"/>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                            <Label Text="{Binding UnrealizedPnL, StringFormat='{0:+0.00;-0.00}'}"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding PnLColor}"
+                                                   HorizontalOptions="End"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <!-- Recent Activity -->
-                <Grid ColumnDefinitions="*,Auto">
+                <!-- Recent Activity (hidden for beginners until unlocked) -->
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowRecentOrders}">
                     <Label Grid.Column="0"
                            Text="Recent Activity"
                            Style="{StaticResource SectionHeaderStyle}"/>
@@ -172,10 +288,15 @@
 
                 <CollectionView ItemsSource="{Binding RecentOrders}"
                                 SelectionMode="None"
-                                HeightRequest="180">
+                                HeightRequest="180"
+                                IsVisible="{Binding ShowRecentOrders}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:OrderSummaryViewModel">
                             <Border Style="{StaticResource ListItemStyle}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:DashboardViewModel}}, Path=ViewAllOrdersCommand}"/>
+                                </Border.GestureRecognizers>
                                 <Grid ColumnDefinitions="Auto,*,Auto" Padding="10">
                                     <BoxView Grid.Column="0"
                                              WidthRequest="4"
@@ -203,21 +324,86 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <!-- Market Status -->
-                <Border Style="{StaticResource CardStyle}">
-                    <HorizontalStackLayout Spacing="10">
-                        <Ellipse Fill="{Binding MarketStatusColor}"
-                                 WidthRequest="12"
-                                 HeightRequest="12"
-                                 VerticalOptions="Center"/>
-                        <Label Text="{Binding MarketStatus}"
-                               VerticalOptions="Center"
-                               TextColor="{StaticResource TextPrimary}"/>
-                        <Label Text="{Binding MarketStatusTime}"
-                               VerticalOptions="Center"
-                               Style="{StaticResource LabelMuted}"/>
-                    </HorizontalStackLayout>
+                <!-- AI Insights Section (Expert feature) -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="15"
+                        IsVisible="{Binding ShowAIInsights}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="AI Insights"
+                                   Style="{StaticResource SectionHeaderStyle}"/>
+                            <Border BackgroundColor="{StaticResource Primary}"
+                                    Padding="6,3"
+                                    StrokeThickness="0"
+                                    Grid.Column="1">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Label Text="AI"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="White"/>
+                            </Border>
+                        </Grid>
+                        <Label Text="AI-powered trading signals and market analysis are available."
+                               TextColor="{StaticResource TextMuted}"
+                               FontSize="13"/>
+                        <Button Text="View AI Analysis"
+                                Style="{StaticResource SecondaryButton}"
+                                HeightRequest="40"
+                                Command="{Binding ViewAIAnalysisCommand}"/>
+                    </VerticalStackLayout>
                 </Border>
+
+                <!-- Strategy Builder Promo (Expert feature) -->
+                <Border Style="{StaticResource CardStyle}"
+                        Padding="15"
+                        IsVisible="{Binding ShowStrategyBuilder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Strategy Builder"
+                                   Style="{StaticResource SectionHeaderStyle}"/>
+                            <Border BackgroundColor="{StaticResource Success}"
+                                    Padding="6,3"
+                                    StrokeThickness="0"
+                                    Grid.Column="1">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Label Text="PRO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="White"/>
+                            </Border>
+                        </Grid>
+                        <Label Text="Create automated trading strategies with our visual builder."
+                               TextColor="{StaticResource TextMuted}"
+                               FontSize="13"/>
+                        <Button Text="Open Strategy Builder"
+                                Style="{StaticResource SecondaryButton}"
+                                HeightRequest="40"
+                                Command="{Binding OpenStrategyBuilderCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Quick Actions -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0"
+                            Text="Buy"
+                            Style="{StaticResource SuccessButton}"
+                            Command="{Binding NavigateToTradeCommand}"
+                            HeightRequest="50"/>
+                    <Button Grid.Column="1"
+                            Text="Sell"
+                            Style="{StaticResource DangerButton}"
+                            Command="{Binding NavigateToTradeCommand}"
+                            HeightRequest="50"/>
+                    <Button Grid.Column="2"
+                            Text="Deposit"
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding DepositCommand}"
+                            HeightRequest="50"/>
+                </Grid>
 
             </VerticalStackLayout>
         </ScrollView>

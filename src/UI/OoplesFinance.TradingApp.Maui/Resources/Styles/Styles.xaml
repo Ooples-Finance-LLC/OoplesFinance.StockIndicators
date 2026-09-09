@@ -22,6 +22,13 @@
         <Setter Property="FontAttributes" Value="Bold"/>
     </Style>
 
+    <Style x:Key="SectionHeaderStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="Margin" Value="0,10,0,5"/>
+    </Style>
+
     <!-- Button Styles -->
     <Style x:Key="PrimaryButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
@@ -89,6 +96,13 @@
         <Setter Property="Padding" Value="5"/>
     </Style>
 
+    <Style x:Key="LinkButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource Primary}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
     <Style x:Key="TimeframeButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
         <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
@@ -121,6 +135,33 @@
         <Setter Property="FontSize" Value="14"/>
     </Style>
 
+    <!-- Alias for PrimaryButton -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButton}"/>
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButton}"/>
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource DangerButton}"/>
+
+    <Style x:Key="SmallButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="HeightRequest" Value="35"/>
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal"/>
+                    <VisualState x:Name="Pressed">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="{StaticResource Primary}"/>
+                            <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
     <!-- Card/Border Styles -->
     <Style x:Key="CardStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
@@ -134,6 +175,22 @@
         <Setter Property="Stroke" Value="{StaticResource BorderColor}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+    </Style>
+
+    <Style x:Key="SmallCardStyle" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource BorderColor}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+        <Setter Property="Padding" Value="10"/>
+    </Style>
+
+    <Style x:Key="PositionCardStyle" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource BorderColor}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+        <Setter Property="Padding" Value="15"/>
     </Style>
 
     <Style x:Key="SelectableItemStyle" TargetType="Border">

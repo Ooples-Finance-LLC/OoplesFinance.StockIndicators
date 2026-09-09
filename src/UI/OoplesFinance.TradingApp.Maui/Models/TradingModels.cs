@@ -223,3 +223,45 @@ public sealed class BacktestResult
     public decimal WinRate => TotalTrades > 0 ? (decimal)WinningTrades / TotalTrades : 0;
     public DateTime RunAt { get; set; }
 }
+
+/// <summary>
+/// Result of an order submission.
+/// </summary>
+public sealed class OrderResult
+{
+    public bool Success { get; set; }
+    public string OrderId { get; set; } = string.Empty;
+    public string? Message { get; set; }
+    public string? ErrorMessage { get; set; }
+
+    public static OrderResult Succeeded(string orderId, string? message = null) =>
+        new() { Success = true, OrderId = orderId, Message = message };
+
+    public static OrderResult Failed(string error) =>
+        new() { Success = false, ErrorMessage = error };
+}
+
+/// <summary>
+/// Status of a running strategy.
+/// </summary>
+public sealed class StrategyStatus
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public decimal PnL { get; set; }
+    public int TradesCount { get; set; }
+    public DateTime StartedAt { get; set; }
+    public DateTime? StoppedAt { get; set; }
+}
+
+/// <summary>
+/// Historical portfolio data.
+/// </summary>
+public sealed class PortfolioHistory
+{
+    public DateTime Date { get; set; }
+    public decimal PortfolioValue { get; set; }
+    public decimal DailyReturn { get; set; }
+    public decimal CumulativeReturn { get; set; }
+}

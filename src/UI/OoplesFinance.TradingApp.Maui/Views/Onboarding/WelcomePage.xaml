@@ -3,136 +3,148 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OoplesFinance.TradingApp.Maui.Views.Onboarding.WelcomePage"
              Title="Welcome"
-             BackgroundColor="{StaticResource BackgroundColor}">
+             BackgroundColor="{StaticResource Background}"
+             Shell.NavBarIsVisible="False">
 
     <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="30" VerticalOptions="Center">
+        <VerticalStackLayout Padding="30" Spacing="25" VerticalOptions="Center">
 
             <!-- Logo/Icon -->
-            <Frame BackgroundColor="{StaticResource PrimaryColor}"
-                   CornerRadius="50"
-                   WidthRequest="100"
-                   HeightRequest="100"
-                   HorizontalOptions="Center"
-                   Padding="20">
-                <Label Text="AI"
+            <Border BackgroundColor="{StaticResource Primary}"
+                    WidthRequest="100"
+                    HeightRequest="100"
+                    HorizontalOptions="Center"
+                    StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="50"/>
+                </Border.StrokeShape>
+                <Label Text="OT"
                        FontSize="36"
                        FontAttributes="Bold"
                        TextColor="White"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
-            </Frame>
+            </Border>
 
             <!-- Welcome Text -->
-            <Label Text="Welcome to AI Trading"
+            <Label Text="Ooples Trading"
                    FontSize="28"
                    FontAttributes="Bold"
-                   TextColor="{StaticResource TextColor}"
+                   TextColor="{StaticResource TextPrimary}"
                    HorizontalOptions="Center"/>
 
             <Label Text="Your intelligent trading companion that adapts to your experience level and helps you achieve your financial goals."
-                   FontSize="16"
-                   TextColor="{StaticResource SecondaryTextColor}"
+                   FontSize="15"
+                   TextColor="{StaticResource TextMuted}"
                    HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center"/>
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,10"/>
 
             <!-- Feature Cards -->
-            <Frame BackgroundColor="{StaticResource CardBackgroundColor}"
-                   CornerRadius="15"
-                   Padding="20"
-                   HasShadow="True">
-                <VerticalStackLayout Spacing="15">
+            <Border Style="{StaticResource CardStyle}" Padding="20">
+                <VerticalStackLayout Spacing="18">
 
                     <!-- Feature 1 -->
                     <HorizontalStackLayout Spacing="15">
-                        <Frame BackgroundColor="{StaticResource SuccessColor}"
-                               CornerRadius="20"
-                               WidthRequest="40"
-                               HeightRequest="40"
-                               Padding="0">
+                        <Border BackgroundColor="{StaticResource Success}"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22"/>
+                            </Border.StrokeShape>
                             <Label Text="1"
                                    TextColor="White"
                                    FontAttributes="Bold"
+                                   FontSize="18"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                        </Frame>
-                        <VerticalStackLayout>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center">
                             <Label Text="Personalized Experience"
-                                   FontSize="16"
+                                   FontSize="15"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"/>
+                                   TextColor="{StaticResource TextPrimary}"/>
                             <Label Text="UI adapts to your skill level"
-                                   FontSize="14"
-                                   TextColor="{StaticResource SecondaryTextColor}"/>
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextMuted}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
 
                     <!-- Feature 2 -->
                     <HorizontalStackLayout Spacing="15">
-                        <Frame BackgroundColor="{StaticResource PrimaryColor}"
-                               CornerRadius="20"
-                               WidthRequest="40"
-                               HeightRequest="40"
-                               Padding="0">
+                        <Border BackgroundColor="{StaticResource Primary}"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22"/>
+                            </Border.StrokeShape>
                             <Label Text="2"
                                    TextColor="White"
                                    FontAttributes="Bold"
+                                   FontSize="18"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                        </Frame>
-                        <VerticalStackLayout>
-                            <Label Text="AI-Powered Decisions"
-                                   FontSize="16"
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="AI-Powered Trading"
+                                   FontSize="15"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"/>
-                            <Label Text="RL agents manage your portfolio"
-                                   FontSize="14"
-                                   TextColor="{StaticResource SecondaryTextColor}"/>
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Smart algorithms for your portfolio"
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextMuted}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
 
                     <!-- Feature 3 -->
                     <HorizontalStackLayout Spacing="15">
-                        <Frame BackgroundColor="{StaticResource WarningColor}"
-                               CornerRadius="20"
-                               WidthRequest="40"
-                               HeightRequest="40"
-                               Padding="0">
+                        <Border BackgroundColor="{StaticResource Warning}"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="22"/>
+                            </Border.StrokeShape>
                             <Label Text="3"
                                    TextColor="White"
                                    FontAttributes="Bold"
+                                   FontSize="18"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                        </Frame>
-                        <VerticalStackLayout>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center">
                             <Label Text="Risk Protection"
-                                   FontSize="16"
+                                   FontSize="15"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"/>
+                                   TextColor="{StaticResource TextPrimary}"/>
                             <Label Text="Built-in safeguards and limits"
-                                   FontSize="14"
-                                   TextColor="{StaticResource SecondaryTextColor}"/>
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextMuted}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Get Started Button -->
             <Button Text="Get Started"
                     Style="{StaticResource PrimaryButton}"
                     Clicked="OnGetStartedClicked"
                     HorizontalOptions="Fill"
-                    HeightRequest="55"/>
+                    HeightRequest="55"
+                    FontSize="18"
+                    Margin="0,10,0,0"/>
 
             <!-- Already have account -->
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                 <Label Text="Already have an account?"
                        FontSize="14"
-                       TextColor="{StaticResource SecondaryTextColor}"/>
+                       TextColor="{StaticResource TextMuted}"/>
                 <Label Text="Sign In"
                        FontSize="14"
-                       TextColor="{StaticResource PrimaryColor}"
+                       TextColor="{StaticResource Primary}"
                        TextDecorations="Underline">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSignInTapped"/>

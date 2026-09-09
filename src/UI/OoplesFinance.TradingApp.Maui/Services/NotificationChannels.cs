@@ -553,7 +553,7 @@ public class MultiChannelNotificationService : IMultiChannelNotificationService
             switch (channel)
             {
                 case NotificationChannel.Push:
-                    tasks.Add(_pushNotifications.ShowNotificationAsync(notification.Title, notification.Message));
+                    tasks.Add(_pushNotifications.ShowLocalNotificationAsync(notification.Title, notification.Message));
                     break;
 
                 case NotificationChannel.Telegram when _telegram is not null:

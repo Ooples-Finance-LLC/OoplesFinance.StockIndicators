@@ -1,4 +1,3 @@
-using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OoplesFinance.TradingApp.Maui.Helpers;
@@ -7,8 +6,10 @@ using OoplesFinance.TradingApp.Maui.ViewModels;
 using OoplesFinance.TradingApp.Maui.Views;
 using OoplesFinance.TradingApp.Maui.Views.Onboarding;
 using OoplesFinance.StockIndicators.Builder.Cloud;
-using OoplesFinance.StockIndicators.Builder.Trading.MarketData;
+using OoplesFinance.StockIndicators.Builder.MarketData;
+using OoplesFinance.StockIndicators.Builder.Trading;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using LiveChartsCore.SkiaSharpView.Maui;
 using System.Reflection;
 using System.Text.Json;
 
@@ -46,7 +47,8 @@ public class AppSettings
 
     public class FeatureSettings
     {
-        public bool UseRealBackend { get; set; } = true;
+        // Default to mock services for development - set to true when API keys are configured
+        public bool UseRealBackend { get; set; } = false;
         public bool UseRedisCache { get; set; } = false;
     }
 
@@ -146,8 +148,8 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
             .UseSkiaSharp()
+            .UseLiveCharts()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -213,13 +215,20 @@ public static class MauiProgram
 
         if (Settings.Features.UseRealBackend)
         {
-            // Register Real Services (backed by Supabase and broker APIs)
+            // Register Direct Alpaca Services (no Supabase dependency for POC)
+            var alpacaOptions = new AlpacaOptions
+            {
+                ApiKey = Settings.Alpaca.ApiKey,
+                ApiSecret = Settings.Alpaca.ApiSecret,
+                UsePaper = Settings.Alpaca.UsePaper
+            };
+
             builder.Services.AddSingleton<ISettingsService, SettingsService>(); // Settings still local
-            builder.Services.AddSingleton<IBrokerConnectionService, RealBrokerConnectionService>();
-            builder.Services.AddSingleton<IPortfolioService, RealPortfolioService>();
-            builder.Services.AddSingleton<IMarketDataService, RealMarketDataService>();
-            builder.Services.AddSingleton<IOrderService, RealOrderService>();
-            builder.Services.AddSingleton<IAlertService, RealAlertService>();
+            builder.Services.AddSingleton<IBrokerConnectionService>(sp => new DirectAlpacaBrokerConnectionService(alpacaOptions));
+            builder.Services.AddSingleton<IPortfolioService>(sp => new DirectAlpacaPortfolioService(alpacaOptions));
+            builder.Services.AddSingleton<IMarketDataService>(sp => new DirectAlpacaMarketDataService(alpacaOptions));
+            builder.Services.AddSingleton<IOrderService>(sp => new DirectAlpacaOrderService(alpacaOptions));
+            builder.Services.AddSingleton<IAlertService, InMemoryAlertService>(); // In-memory for POC
             builder.Services.AddSingleton<INotificationService, NotificationService>(); // Platform-specific
             builder.Services.AddSingleton<IStrategyMonitorService, StrategyMonitorService>(); // TODO: Real implementation
 
@@ -234,12 +243,7 @@ public static class MauiProgram
             // Register Market Data Provider (Alpaca by default)
             builder.Services.AddSingleton<IMarketDataProvider>(sp =>
             {
-                return new AlpacaMarketDataProvider(new AlpacaMarketDataOptions
-                {
-                    ApiKey = Settings.Alpaca.ApiKey,
-                    ApiSecret = Settings.Alpaca.ApiSecret,
-                    UsePaper = Settings.Alpaca.UsePaper
-                });
+                return new AlpacaMarketDataProvider(alpacaOptions);
             });
         }
         else
@@ -263,6 +267,16 @@ public static class MauiProgram
             });
         }
 
+        // Register Indicator Service (v2 Builder API)
+        builder.Services.AddSingleton<IIndicatorService, IndicatorService>();
+
+        // Register AI Analysis Service (trading signals, regime detection, anomaly detection)
+        builder.Services.AddSingleton<IAIAnalysisService>(sp =>
+        {
+            var indicatorService = sp.GetRequiredService<IIndicatorService>();
+            return new AIAnalysisService(indicatorService);
+        });
+
         // Register ViewModels
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<PositionsViewModel>();
@@ -270,7 +284,13 @@ public static class MauiProgram
         builder.Services.AddTransient<OrderHistoryViewModel>();
         builder.Services.AddTransient<AlertsViewModel>();
         builder.Services.AddTransient<WatchlistViewModel>();
-        builder.Services.AddTransient<ChartViewModel>();
+        builder.Services.AddTransient<ChartViewModel>(sp =>
+        {
+            var marketDataService = sp.GetRequiredService<IMarketDataService>();
+            var indicatorService = sp.GetRequiredService<IIndicatorService>();
+            var aiService = sp.GetRequiredService<IAIAnalysisService>();
+            return new ChartViewModel(marketDataService, indicatorService, aiService);
+        });
         builder.Services.AddTransient<StrategyMonitorViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<LoginViewModel>();

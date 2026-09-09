@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:OoplesFinance.TradingApp.Maui.Converters"
              x:Class="OoplesFinance.TradingApp.Maui.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -8,6 +9,19 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:PnLColorConverter x:Key="PnLColorConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:OrderSideColorConverter x:Key="OrderSideColorConverter"/>
+            <converters:OrderStatusBackgroundConverter x:Key="OrderStatusBackgroundConverter"/>
+            <converters:OrderStatusTextConverter x:Key="OrderStatusTextConverter"/>
+            <converters:AlertCountColorConverter x:Key="AlertCountColorConverter"/>
+            <converters:StrategyStatusColorConverter x:Key="StrategyStatusColorConverter"/>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <converters:CurrencyConverter x:Key="CurrencyConverter"/>
+            <converters:PercentageConverter x:Key="PercentageConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

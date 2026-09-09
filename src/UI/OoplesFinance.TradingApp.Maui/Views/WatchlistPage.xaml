@@ -11,7 +11,8 @@
                  Command="{Binding RefreshCommand}">
         <CollectionView ItemsSource="{Binding Items}"
                         SelectionMode="Single"
-                        SelectionChangedCommand="{Binding TapItemCommand}">
+                        SelectedItem="{Binding SelectedItem}"
+                        SelectionChangedCommand="{Binding WatchlistItemSelectedCommand}">
             <CollectionView.EmptyView>
                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
                     <Label Text="No Symbols in Watchlist"
@@ -37,6 +38,11 @@
                         </SwipeView.RightItems>
 
                         <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:WatchlistViewModel}}, Path=TapItemCommand}"
+                                    CommandParameter="{Binding}"/>
+                            </Border.GestureRecognizers>
                             <Grid ColumnDefinitions="*,Auto" Padding="15">
                                 <VerticalStackLayout Grid.Column="0">
                                     <Label Text="{Binding Symbol}"

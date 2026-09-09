@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OoplesFinance.TradingApp.Maui.Views.Onboarding.GoalSetupPage"
              Title="Set Your Goal"
-             BackgroundColor="{StaticResource BackgroundColor}">
+             BackgroundColor="{StaticResource Background}">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="20">
 
@@ -11,10 +11,10 @@
         <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,0,0,20">
             <Label Text="Step 2 of 3: Financial Goal"
                    FontSize="14"
-                   TextColor="{StaticResource SecondaryTextColor}"/>
+                   TextColor="{StaticResource TextMuted}"/>
             <ProgressBar Progress="0.66"
-                         ProgressColor="{StaticResource PrimaryColor}"
-                         HeightRequest="8"/>
+                         ProgressColor="{StaticResource Primary}"
+                         HeightRequest="6"/>
         </VerticalStackLayout>
 
         <!-- Goal Selection -->
@@ -22,9 +22,9 @@
             <VerticalStackLayout Spacing="20">
 
                 <Label Text="What are you investing for?"
-                       FontSize="22"
+                       FontSize="20"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource TextColor}"
+                       TextColor="{StaticResource TextPrimary}"
                        HorizontalTextAlignment="Center"/>
 
                 <!-- Goal Options Grid -->
@@ -33,198 +33,216 @@
                             AlignItems="Center">
 
                     <!-- Retirement -->
-                    <Frame x:Name="RetirementGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="RetirementGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Retirement"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Beach]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Retirement"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                     <!-- Home Purchase -->
-                    <Frame x:Name="HomeGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="HomeGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Home"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Home]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Home Purchase"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                     <!-- Education -->
-                    <Frame x:Name="EducationGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="EducationGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Education"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Grad]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Education"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                     <!-- Emergency Fund -->
-                    <Frame x:Name="EmergencyGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="EmergencyGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Emergency"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Safe]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Emergency Fund"
-                                   FontSize="14"
+                                   FontSize="12"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                     <!-- Wealth Growth -->
-                    <Frame x:Name="GrowthGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="GrowthGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Growth"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Chart]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Wealth Growth"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                     <!-- Custom Goal -->
-                    <Frame x:Name="CustomGoal"
-                           BackgroundColor="{StaticResource CardBackgroundColor}"
-                           BorderColor="{StaticResource BorderColor}"
-                           CornerRadius="15"
-                           WidthRequest="150"
-                           HeightRequest="150"
-                           Margin="10"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
+                    <Border x:Name="CustomGoal"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            WidthRequest="140"
+                            HeightRequest="130"
+                            Margin="8"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnGoalSelected" CommandParameter="Custom"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
                             <Label Text="[Star]"
-                                   FontSize="36"
+                                   FontSize="32"
                                    HorizontalOptions="Center"/>
                             <Label Text="Custom Goal"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontAttributes="Bold"
-                                   TextColor="{StaticResource TextColor}"
+                                   TextColor="{StaticResource TextPrimary}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
 
                 </FlexLayout>
 
                 <!-- Goal Details (shown after selection) -->
-                <Frame x:Name="GoalDetailsFrame"
-                       BackgroundColor="{StaticResource CardBackgroundColor}"
-                       CornerRadius="15"
-                       Padding="20"
-                       IsVisible="False"
-                       Margin="0,10,0,0">
-                    <VerticalStackLayout Spacing="20">
+                <Border x:Name="GoalDetailsFrame"
+                        Style="{StaticResource CardStyle}"
+                        Padding="20"
+                        IsVisible="False"
+                        Margin="0,10,0,0">
+                    <VerticalStackLayout Spacing="15">
 
                         <Label Text="Target Amount"
-                               FontSize="14"
-                               TextColor="{StaticResource SecondaryTextColor}"/>
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"/>
                         <Entry x:Name="TargetAmountEntry"
                                Placeholder="$50,000"
                                Keyboard="Numeric"
-                               FontSize="18"
-                               TextColor="{StaticResource TextColor}"/>
+                               FontSize="16"
+                               TextColor="{StaticResource TextPrimary}"
+                               BackgroundColor="{StaticResource SurfaceLighter}"/>
 
                         <Label Text="Target Date"
-                               FontSize="14"
-                               TextColor="{StaticResource SecondaryTextColor}"/>
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"/>
                         <DatePicker x:Name="TargetDatePicker"
-                                    MinimumDate="{Binding Source={x:Static sys:DateTime.Today}, x:DataType=sys:DateTime}"
-                                    FontSize="18"
-                                    TextColor="{StaticResource TextColor}"
-                                    xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+                                    FontSize="16"
+                                    TextColor="{StaticResource TextPrimary}"/>
 
                         <Label Text="Initial Investment"
-                               FontSize="14"
-                               TextColor="{StaticResource SecondaryTextColor}"/>
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"/>
                         <Entry x:Name="InitialInvestmentEntry"
                                Placeholder="$1,000"
                                Keyboard="Numeric"
-                               FontSize="18"
-                               TextColor="{StaticResource TextColor}"/>
+                               FontSize="16"
+                               TextColor="{StaticResource TextPrimary}"
+                               BackgroundColor="{StaticResource SurfaceLighter}"/>
 
                         <Label Text="Monthly Contribution"
-                               FontSize="14"
-                               TextColor="{StaticResource SecondaryTextColor}"/>
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"/>
                         <Entry x:Name="MonthlyContributionEntry"
                                Placeholder="$200"
                                Keyboard="Numeric"
-                               FontSize="18"
-                               TextColor="{StaticResource TextColor}"/>
+                               FontSize="16"
+                               TextColor="{StaticResource TextPrimary}"
+                               BackgroundColor="{StaticResource SurfaceLighter}"/>
 
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
             </VerticalStackLayout>
         </ScrollView>
@@ -234,12 +252,14 @@
             <Button Text="Back"
                     Style="{StaticResource SecondaryButton}"
                     Clicked="OnBackClicked"
-                    Grid.Column="0"/>
+                    Grid.Column="0"
+                    HeightRequest="50"/>
             <Button x:Name="NextButton"
                     Text="Continue"
                     Style="{StaticResource PrimaryButton}"
                     Clicked="OnNextClicked"
                     Grid.Column="1"
+                    HeightRequest="50"
                     IsEnabled="False"/>
         </Grid>
 

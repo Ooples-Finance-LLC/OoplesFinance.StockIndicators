@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using StackExchange.Redis;
+using OoplesFinance.TradingApp.Maui.Models;
 
 namespace OoplesFinance.TradingApp.Maui.Services;
 
@@ -115,7 +116,7 @@ public class RedisCacheService : ICacheService, IAsyncDisposable
             if (typeof(T) == typeof(string))
                 return (T)(object)value.ToString();
 
-            return JsonSerializer.Deserialize<T>(value!, _jsonOptions);
+            return JsonSerializer.Deserialize<T>(value.ToString(), _jsonOptions);
         }
         catch (RedisConnectionException)
         {
@@ -133,7 +134,10 @@ public class RedisCacheService : ICacheService, IAsyncDisposable
             else
                 serialized = JsonSerializer.Serialize(value, _jsonOptions);
 
-            await _db.StringSetAsync(key, serialized, expiry);
+            if (expiry.HasValue)
+                await _db.StringSetAsync(key, serialized, expiry.Value);
+            else
+                await _db.StringSetAsync(key, serialized);
         }
         catch (RedisConnectionException)
         {
@@ -379,9 +383,9 @@ public class MemoryCacheService : ICacheService
         if (acquired)
         {
             // Auto-release after expiry
-            _ = Task.Delay(expiry, cancellationToken).ContinueWith(_ =>
+            _ = Task.Delay(expiry, cancellationToken).ContinueWith(task =>
             {
-                _locks.TryRemove(key, out _);
+                _locks.TryRemove(key, out bool _);
             }, TaskScheduler.Default);
         }
         return Task.FromResult(acquired);
@@ -422,35 +426,21 @@ public class CachedMarketDataService : IMarketDataService
             CacheTtl.Quote);
     }
 
-    public async Task<List<Quote>> GetQuotesAsync(IEnumerable<string> symbols)
+    public async Task<MarketStatus> GetMarketStatusAsync()
     {
-        var symbolList = symbols.ToList();
-        var cacheKey = CacheKeys.QuotesBatch(string.Join(",", symbolList.OrderBy(s => s)));
-
-        return await _cache.GetOrSetAsync(cacheKey,
-            () => _inner.GetQuotesAsync(symbolList),
-            CacheTtl.Quote) ?? new List<Quote>();
+        var key = CacheKeys.MarketStatus();
+        return await _cache.GetOrSetAsync(key,
+            () => _inner.GetMarketStatusAsync(),
+            CacheTtl.MarketStatus) ?? new MarketStatus();
     }
 
-    public async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, DateTime start, DateTime end)
+    public async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, int count)
     {
-        var key = CacheKeys.HistoricalBars(symbol, timeframe,
-            start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
+        var key = CacheKeys.HistoricalBars(symbol, timeframe, count.ToString(), "count");
 
         return await _cache.GetOrSetAsync(key,
-            () => _inner.GetHistoricalBarsAsync(symbol, timeframe, start, end),
+            () => _inner.GetHistoricalBarsAsync(symbol, timeframe, count),
             CacheTtl.HistoricalData) ?? new List<Bar>();
-    }
-
-    public Task SubscribeToQuotesAsync(IEnumerable<string> symbols, Action<Quote> onQuote)
-    {
-        // Real-time subscriptions bypass cache
-        return _inner.SubscribeToQuotesAsync(symbols, onQuote);
-    }
-
-    public Task UnsubscribeFromQuotesAsync(IEnumerable<string> symbols)
-    {
-        return _inner.UnsubscribeFromQuotesAsync(symbols);
     }
 }
 
@@ -470,39 +460,19 @@ public class CachedPortfolioService : IPortfolioService
         _userId = userId;
     }
 
+    public async Task<AccountInfo> GetAccountAsync()
+    {
+        var key = CacheKeys.UserProfile(_userId);
+        return await _cache.GetOrSetAsync(key,
+            () => _inner.GetAccountAsync(),
+            CacheTtl.UserProfile) ?? new AccountInfo();
+    }
+
     public async Task<List<Position>> GetPositionsAsync()
     {
         var key = CacheKeys.UserPositions(_userId);
         return await _cache.GetOrSetAsync(key,
             () => _inner.GetPositionsAsync(),
             CacheTtl.Positions) ?? new List<Position>();
-    }
-
-    public async Task<Position?> GetPositionAsync(string symbol)
-    {
-        var positions = await GetPositionsAsync();
-        return positions.FirstOrDefault(p => p.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public async Task<AccountInfo> GetAccountInfoAsync()
-    {
-        var key = CacheKeys.UserProfile(_userId);
-        return await _cache.GetOrSetAsync(key,
-            () => _inner.GetAccountInfoAsync(),
-            CacheTtl.UserProfile) ?? new AccountInfo();
-    }
-
-    public async Task<PortfolioHistory> GetPortfolioHistoryAsync(string period = "1M")
-    {
-        // Portfolio history can be cached longer
-        var key = $"{CacheKeys.UserPositions(_userId)}:history:{period}";
-        return await _cache.GetOrSetAsync(key,
-            () => _inner.GetPortfolioHistoryAsync(period),
-            CacheTtl.HistoricalData) ?? new PortfolioHistory();
-    }
-
-    public async Task InvalidateCacheAsync()
-    {
-        await _cache.RemoveByPatternAsync($"*:user:{_userId}:*");
     }
 }

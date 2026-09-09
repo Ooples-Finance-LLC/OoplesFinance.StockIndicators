@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:OoplesFinance.TradingApp.Maui.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
              x:Class="OoplesFinance.TradingApp.Maui.Views.PositionsPage"
              x:DataType="viewmodels:PositionsViewModel"
              Title="Positions"
@@ -87,45 +88,62 @@
                             </SwipeView.RightItems>
 
                             <Border Style="{StaticResource ListItemStyle}" Margin="15,5">
-                                <Grid ColumnDefinitions="*,Auto" Padding="15">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PositionsViewModel}}, Path=NavigateToPositionCommand}"
+                                        CommandParameter="{Binding}"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,80,Auto" Padding="15" ColumnSpacing="10">
+                                    <!-- Left: Symbol Info -->
                                     <VerticalStackLayout Grid.Column="0" Spacing="3">
-                                        <HorizontalStackLayout Spacing="10">
+                                        <HorizontalStackLayout Spacing="8">
                                             <Label Text="{Binding Symbol}"
                                                    FontSize="18"
                                                    FontAttributes="Bold"
                                                    TextColor="{StaticResource TextPrimary}"/>
                                             <Border BackgroundColor="{Binding SideColor}"
-                                                    Padding="8,2"
+                                                    Padding="6,2"
                                                     StrokeThickness="0">
                                                 <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="10"/>
+                                                    <RoundRectangle CornerRadius="8"/>
                                                 </Border.StrokeShape>
                                                 <Label Text="{Binding Side}"
-                                                       FontSize="10"
+                                                       FontSize="9"
                                                        TextColor="White"/>
                                             </Border>
                                         </HorizontalStackLayout>
-                                        <Label Text="{Binding Quantity, StringFormat='{0:N0} shares @ ${1:N2}', Path=AveragePrice}"
+                                        <Label Text="{Binding SharesDisplay}"
                                                Style="{StaticResource LabelMuted}"
                                                FontSize="12"/>
-                                        <Label Text="{Binding CompanyName}"
+                                        <Label Text="{Binding MarketValue, StringFormat='${0:N0}'}"
                                                Style="{StaticResource LabelMuted}"
-                                               FontSize="11"
-                                               LineBreakMode="TailTruncation"/>
+                                               FontSize="11"/>
                                     </VerticalStackLayout>
 
-                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="3">
+                                    <!-- Center: Sparkline Chart -->
+                                    <lvc:CartesianChart Grid.Column="1"
+                                                        Series="{Binding SparklineSeries}"
+                                                        XAxes="{Binding SparklineAxes}"
+                                                        YAxes="{Binding SparklineAxes}"
+                                                        TooltipPosition="Hidden"
+                                                        ZoomMode="None"
+                                                        HeightRequest="40"
+                                                        WidthRequest="80"/>
+
+                                    <!-- Right: Price & P/L -->
+                                    <VerticalStackLayout Grid.Column="2" HorizontalOptions="End" Spacing="2">
                                         <Label Text="{Binding CurrentPrice, StringFormat='${0:N2}'}"
-                                               FontSize="16"
+                                               FontSize="15"
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource TextPrimary}"
                                                HorizontalOptions="End"/>
-                                        <Label Text="{Binding UnrealizedPnL, StringFormat='${0:N2}'}"
-                                               FontSize="14"
+                                        <Label Text="{Binding UnrealizedPnL, StringFormat='{0:+0.00;-0.00}'}"
+                                               FontSize="13"
+                                               FontAttributes="Bold"
                                                TextColor="{Binding PnLColor}"
                                                HorizontalOptions="End"/>
                                         <Label Text="{Binding UnrealizedPnLPercent, StringFormat='{0:P2}'}"
-                                               FontSize="12"
+                                               FontSize="11"
                                                TextColor="{Binding PnLColor}"
                                                HorizontalOptions="End"/>
                                     </VerticalStackLayout>

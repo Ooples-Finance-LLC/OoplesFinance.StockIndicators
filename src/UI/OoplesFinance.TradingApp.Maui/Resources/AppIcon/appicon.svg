@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#1E88E5"/>
+
+  <!-- Chart bars representing trading -->
+  <rect x="100" y="280" width="60" height="120" rx="8" fill="#FFFFFF"/>
+  <rect x="180" y="200" width="60" height="200" rx="8" fill="#FFFFFF"/>
+  <rect x="260" y="160" width="60" height="240" rx="8" fill="#FFFFFF"/>
+  <rect x="340" y="120" width="60" height="280" rx="8" fill="#FFFFFF"/>
+
+  <!-- Upward trend line -->
+  <path d="M80 350 L160 280 L240 200 L320 160 L400 100"
+        stroke="#4CAF50" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Arrow head -->
+  <polygon points="420,80 400,100 420,120" fill="#4CAF50"/>
+</svg>

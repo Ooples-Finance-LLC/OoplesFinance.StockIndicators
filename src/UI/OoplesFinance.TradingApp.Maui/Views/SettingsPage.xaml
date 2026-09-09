@@ -59,6 +59,67 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- UI Experience Section -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Label Text="UI Experience"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout>
+                            <Label Text="Skill Level"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                            <Label Text="Adjusts UI complexity and available features"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="12"/>
+                        </VerticalStackLayout>
+                        <Picker Grid.Column="1"
+                                ItemsSource="{Binding UiModeOptions}"
+                                SelectedItem="{Binding SelectedUIMode}"
+                                WidthRequest="150"
+                                TextColor="{StaticResource TextPrimary}"/>
+                    </Grid>
+
+                    <Label Text="{Binding SkillLevelDescription}"
+                           TextColor="{StaticResource TextMuted}"
+                           FontSize="13"
+                           LineBreakMode="WordWrap"/>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource SurfaceLight}"
+                             Margin="0,5"/>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="8" ColumnSpacing="15">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Features Unlocked"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="11"/>
+                            <Label Text="{Binding UnlockedFeatureCount}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Achievements"
+                                   Style="{StaticResource LabelMuted}"
+                                   FontSize="11"/>
+                            <Label Text="{Binding AchievementCount}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Success}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Button Text="View All Achievements"
+                            Style="{StaticResource TextButton}"
+                            Command="{Binding ViewAchievementsCommand}"
+                            HorizontalOptions="Start"
+                            Margin="0,5,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Security Section -->
             <Border Style="{StaticResource CardStyle}">
                 <VerticalStackLayout Padding="15" Spacing="10">
