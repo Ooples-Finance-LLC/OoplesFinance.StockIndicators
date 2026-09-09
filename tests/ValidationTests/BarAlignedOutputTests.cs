@@ -65,6 +65,18 @@ public sealed class BarAlignedOutputTests
                     $"{method.DeclaringType?.Name}.{method.Name}: {produced.CustomValuesList.Count} values for {BarCount} bars");
             }
 
+            // SignalsList is indexed alongside TickerDataList too, and it is the series most easily
+            // forgotten: it is built in the same per-period loop as the levels but stored through a
+            // different setter, so an indicator can bar-align every number it publishes and still
+            // hand back one signal per period. Seven pivot indicators did exactly that.
+            if (produced.SignalsList is not null && produced.SignalsList.Count != 0
+                && produced.SignalsList.Count != BarCount)
+            {
+                offenders.Add(
+                    $"{method.DeclaringType?.Name}.{method.Name} [SignalsList]: "
+                    + $"{produced.SignalsList.Count} signals for {BarCount} bars");
+            }
+
             // The named output series are indexed alongside TickerDataList exactly as CustomValuesList is,
             // and an indicator can expand one and not the other - leaving a single indicator publishing two
             // different lengths from the same call. Check them too.

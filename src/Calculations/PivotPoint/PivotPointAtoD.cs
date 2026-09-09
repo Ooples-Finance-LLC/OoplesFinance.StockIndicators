@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -143,6 +143,16 @@ public static partial class Calculations
             { "M5", midpoint5List },
             { "M6", midpoint6List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.CamarillaPivotPoints;
@@ -206,6 +216,16 @@ public static partial class Calculations
             { "S1", supportLevel1List },
             { "R1", resistanceLevel1List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.DemarkPivotPoints;
@@ -267,6 +287,16 @@ public static partial class Calculations
             { "S1", supportLevel1List },
             { "R1", resistanceLevel1List }
         });
+        // Signals are produced per PERIOD in the loop above, exactly like the levels, so they need
+        // the same projection. Leaving them period-length puts every signal on the wrong bar and
+        // reintroduces on SignalsList the misalignment this method just removed from its levels.
+        if (signalsList is not null)
+        {
+            var barAlignedSignals = ExpandPeriodItemsToBars(signalsList, barGroupIndexes, Signal.None);
+            signalsList.Clear();
+            signalsList.AddRange(barAlignedSignals);
+        }
+
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(pivotList);
         stockData.IndicatorName = IndicatorName.DynamicPivotPoints;
