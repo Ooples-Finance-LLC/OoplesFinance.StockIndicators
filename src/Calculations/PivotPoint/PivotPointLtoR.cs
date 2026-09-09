@@ -51,6 +51,16 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
+
+        // BAR ALIGNMENT. Everything above is computed per PERIOD; the StockData this is stored on is
+        // per BAR, and callers index the two in parallel. Project each series onto the bars of its own
+        // period before storing. Causal: a period's level derives from the PRECEDING period, so it is
+        // already known when its own period opens.
+        var barGroupIndexes = GetInputLengthGroupIndexes(stockData, inputLength);
+        pp1List = ExpandPeriodValuesToBars(pp1List, barGroupIndexes);
+        pp2List = ExpandPeriodValuesToBars(pp2List, barGroupIndexes);
+        pp3List = ExpandPeriodValuesToBars(pp3List, barGroupIndexes);
+
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Pivot1", pp1List },
             { "Signal1", ppav1List },
