@@ -203,6 +203,73 @@ public class StockData : IStockData
         Count = _tickerDataList.Count;
     }
 
+    /// <summary>
+    /// Private constructor for <see cref="WithValues"/>. Shares the price series by reference rather
+    /// than copying them, so deriving a view is cheap enough to do inside a calculation.
+    /// </summary>
+    private StockData(StockData source, List<double> values)
+    {
+        source.EnsureColumns();
+
+        _openPrices = source._openPrices;
+        _highPrices = source._highPrices;
+        _lowPrices = source._lowPrices;
+        _closePrices = source._closePrices;
+        _volumes = source._volumes;
+        _dates = source._dates;
+        _inputValues = source._inputValues;
+        _columnsInitialized = true;
+        _rowsInitialized = false;
+        _tickerDataList = null;
+
+        CustomValuesList = values;
+        OutputValues = new Dictionary<string, List<double>>();
+        SignalsList = new List<Signal>();
+        InputName = source.InputName;
+        IndicatorName = IndicatorName.None;
+        Options = source.Options;
+        Count = source.Count;
+    }
+
+    /// <summary>
+    /// Returns a new <see cref="StockData"/> over the same bars, but with <paramref name="values"/> as
+    /// the series that calculations will read as their input.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the explicit form of chaining. Today an indicator hands its result to the next one by
+    /// writing <see cref="CustomValuesList"/> on the caller's own object, which means anything else
+    /// holding that object sees its input change underneath it - the cause of issue #145. A view
+    /// leaves the original untouched:
+    /// </para>
+    /// <code>
+    /// // implicit: mutates stockData, and every later call on it sees the new series
+    /// var bands = stockData.CalculateSma(20).CalculateBollingerBands();
+    ///
+    /// // explicit: stockData is unchanged, and the chained input is visible at the call site
+    /// var sma = stockData.CalculateSma(20).CustomValuesList;
+    /// var bands = stockData.WithValues(sma).CalculateBollingerBands();
+    /// </code>
+    /// <para>
+    /// The price series are shared by reference, not copied, so this is cheap. The returned object has
+    /// its own outputs, signals and indicator name.
+    /// </para>
+    /// </remarks>
+    /// <param name="values">The series to use as the calculation input.</param>
+    public StockData WithValues(IReadOnlyList<double> values)
+    {
+        if (values is null)
+        {
+            throw new ArgumentNullException(nameof(values));
+        }
+
+        // Reuse the caller's list when it already is one - WithValues does not take ownership, and
+        // copying a long series on every derivation is exactly the cost this is meant to avoid.
+        var list = values as List<double> ?? new List<double>(values);
+
+        return new StockData(this, list);
+    }
+
     public void EnsureColumnView()
     {
         EnsureColumns();
