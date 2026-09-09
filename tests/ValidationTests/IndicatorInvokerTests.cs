@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder;
+﻿using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Enums;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
@@ -9,12 +9,18 @@ public sealed class IndicatorInvokerTests
     public void Every_batch_calculation_is_reachable_by_its_reviewed_indicator_name()
     {
         var supported = IndicatorInvoker.GetSupportedIndicators();
-        var excluded = Enum.GetValues<IndicatorName>()
-            .Where(x => x != IndicatorName.None && !supported.Contains(x))
+        var allIndicators = Enum.GetValues<IndicatorName>()
+            .Where(x => x != IndicatorName.None)
             .ToArray();
+        var excluded = allIndicators.Where(x => !supported.Contains(x)).ToArray();
 
-        Assert.Equal(773, supported.Count);
+        // The contract is that reflection reaches every indicator except the single enum-only
+        // entry - stated here as the exclusion set rather than as a literal count. A hardcoded
+        // count says the same thing while also failing every time an indicator is legitimately
+        // added, which turns each new indicator into a cross-PR merge conflict. Both assertions
+        // still fail if reflection silently drops one: it lands in excluded and the count falls.
         Assert.Equal([IndicatorName.VolatilityIndexDynamicAverageIndicator], excluded);
+        Assert.Equal(allIndicators.Length - 1, supported.Count);
     }
 
     [Theory]
