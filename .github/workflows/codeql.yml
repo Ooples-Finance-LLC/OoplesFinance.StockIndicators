@@ -40,11 +40,23 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        # The build below compiles repository-controlled MSBuild inputs. Leaving the checkout
+        # token in .git/config makes it reachable from any of that, and nothing after this step
+        # performs a git operation, so there is nothing to persist it for.
+        persist-credentials: false
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.x
+          10.x
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -55,22 +67,20 @@ jobs:
         # queries: security-extended,security-and-quality
 
 
-    # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
-    # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
-
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-    #   If the Autobuild fails above, remove it and uncomment the following three lines.
-    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
-
-    # - run: |
-    #   echo "Run, Build Application using script"
-    #   ./location_of_script_within_repo/buildscript.sh
+    # Autobuild is not usable here. It walks the whole repository, which includes
+    # benchmarks/OoplesFinance.StockIndicators.Benchmarks. That project pulls in
+    # OoplesFinance.StockIndicators.Original.dll through an "Original" extern alias, via a
+    # HintPath into benchmarks/.baseline - a gitignored local worktree that does not exist
+    # on a runner. Autobuild therefore fails with
+    #   CS0430: The extern alias 'Original' was not specified in a /reference option
+    # then gives up with "Could not auto-detect a suitable build method", and the analysis
+    # step is skipped - so no code scanning has actually been running on this repository.
+    #
+    # Building the library explicitly analyses the code we ship and skips the benchmarks.
+    - name: Build for analysis
+      run: dotnet build src/OoplesFinance.StockIndicators.csproj --configuration Release --framework net10.0
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"

@@ -1208,6 +1208,8 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     SchaffTrendCycle,
     [Category(IndicatorType.Momentum)]
+    SchaffTrendCycleShk,
+    [Category(IndicatorType.Momentum)]
     SectorRotationModel,
     [Category(IndicatorType.Momentum)]
     SelfAdjustingRelativeStrengthIndex,
@@ -1443,6 +1445,8 @@ public enum IndicatorName
     UpsideDownsideVolume,
     [Category(IndicatorType.Volatility)]
     UpsidePotentialRatio,
+    [Category(IndicatorType.Trend)]
+    UtBotAlerts,
     [Category(IndicatorType.Momentum)]
     ValueChartIndicator,
     [Category(IndicatorType.Trend)]

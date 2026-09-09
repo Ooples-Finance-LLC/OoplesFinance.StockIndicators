@@ -1,4 +1,4 @@
-namespace OoplesFinance.StockIndicators.Builder.Notifications;
+﻿namespace OoplesFinance.StockIndicators.Builder.Notifications;
 
 /// <summary>
 /// Interface for notification channels.
@@ -747,33 +747,7 @@ public sealed class NotificationRoute
         }
 
         // Match by pattern
-        if (SignalPattern is string patternToMatch && patternToMatch.Length > 0)
-        {
-            if (patternToMatch == "*")
-            {
-                return true;
-            }
-
-            // Simple wildcard matching
-            if (patternToMatch.Contains("*"))
-            {
-                if (string.IsNullOrEmpty(notification.Name))
-                {
-                    return false;
-                }
-
-                var regexPattern = patternToMatch.Replace("*", ".*");
-                return System.Text.RegularExpressions.Regex.IsMatch(
-                    notification.Name,
-                    $"^{regexPattern}$",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase,
-                    TimeSpan.FromSeconds(1));
-            }
-
-            return string.Equals(notification.Name, patternToMatch, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return false;
+        return SignalPatternMatcher.IsMatch(SignalPattern, notification.Name);
     }
 }
 

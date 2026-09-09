@@ -1,0 +1,135 @@
+name: Auto-Fix PR Title
+
+# The repository requires linear history, so pull requests land as a single squashed commit whose
+# message is the PR TITLE. That title is therefore the thing release-please parses to decide the
+# next version and write the CHANGELOG - a non-conventional title means the change is invisible to
+# the release notes, and a mistyped one silently changes the version bump.
+#
+# Rather than fail the PR, this rewrites the title into conventional form and explains what it did.
+
+# pull_request_target, not pull_request. On a fork PR the pull_request event hands the job a
+# READ-ONLY token, so pulls.update returns 403, the script throws, and the advisory comment never
+# posts - the workflow would simply fail on every outside contribution, which is most of what it
+# exists to help with. Two of the currently open PRs come from forks.
+#
+# pull_request_target is safe HERE specifically because this job never checks out or executes any
+# pull-request content: it reads the title and the changed-file names through the API and writes
+# back a title and a comment. The workflow definition itself is also taken from the base branch, so
+# a pull request cannot alter what runs. Do not add actions/checkout of the PR ref to this file.
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-fix-pr-title:
+    name: Auto-Fix PR Title
+    # release-please titles its own Release PR ("chore(master): release x.y.z") and must not be edited.
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-fix PR title to conventional commits format
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            const pattern = /^(feat|fix|docs|refactor|perf|test|chore|ci|style|revert|build|deps)(\(.+\))?!?: .+/;
+
+            if (pattern.test(prTitle)) {
+              core.info(`PR title already valid: ${prTitle}`);
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+            const filenames = files.map(f => f.filename);
+            core.info(`Files changed: ${filenames.length}`);
+
+            const lowerTitle = prTitle.toLowerCase();
+            const isDoc = f => /\.(md|txt)$/.test(f);
+            const hasDocsFiles = filenames.some(isDoc);
+            const hasTestFiles = filenames.some(f => /(^|\/)tests?\//i.test(f) || /\.(spec|test)\./i.test(f));
+            const hasCIFiles = filenames.some(f => f.startsWith('.github/workflows/'));
+            const hasSrcFiles = filenames.some(f => /\.(cs|fs|vb)$/.test(f));
+
+            let type = 'chore';
+            let reasoning = 'default type';
+
+            if (lowerTitle.match(/^(add|implement|create|introduce)/)) {
+              type = 'feat'; reasoning = 'title starts with add/implement/create/introduce';
+            } else if (lowerTitle.match(/^(fix|correct|resolve|patch)/)) {
+              type = 'fix'; reasoning = 'title starts with fix/correct/resolve/patch';
+            } else if (lowerTitle.match(/^(update|improve|enhance|optimi[sz]e)/)) {
+              type = hasDocsFiles && !hasSrcFiles ? 'docs' : 'refactor';
+              reasoning = type === 'docs' ? 'updating documentation only' : 'title suggests improvement';
+            } else if (lowerTitle.match(/^(refactor|restructure|reorgani[sz]e)/)) {
+              type = 'refactor'; reasoning = 'title starts with refactor/restructure/reorganize';
+            } else if (lowerTitle.match(/^(deps|dependency|bump)/)) {
+              type = 'deps'; reasoning = 'title mentions a dependency update';
+            } else if (filenames.length > 0 && filenames.every(isDoc)) {
+              type = 'docs'; reasoning = 'only documentation files changed';
+            } else if (hasTestFiles && !hasSrcFiles) {
+              type = 'test'; reasoning = 'only test files changed';
+            } else if (hasCIFiles && !hasSrcFiles) {
+              type = 'ci'; reasoning = 'only CI/workflow files changed';
+            } else if (lowerTitle.includes('perf') || lowerTitle.includes('performance')) {
+              type = 'perf'; reasoning = 'title mentions performance';
+            }
+
+            let description = prTitle.trim();
+            description = description.charAt(0).toLowerCase() + description.slice(1);
+            const newTitle = `${type}: ${description}`;
+
+            core.info(`Original: ${prTitle}`);
+            core.info(`New:      ${newTitle}  (${type}: ${reasoning})`);
+
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              title: newTitle
+            });
+
+            // Version impact, as release-please actually computes it from release-please-config.json:
+            // only feat bumps the minor, fix and perf bump the patch, and a "!" or a BREAKING CHANGE
+            // footer bumps the major. Everything else lands in the changelog without moving the version.
+            const bump =
+              type === 'feat' ? 'MINOR version bump' :
+              (type === 'fix' || type === 'perf') ? 'PATCH version bump' :
+              'no version bump (still appears in the changelog)';
+
+            const comment = [
+              '**PR title auto-fixed**',
+              '',
+              'This repository squash-merges, so the PR title becomes the commit message on `master`,',
+              'and release-please reads it to decide the next version. The title was rewritten into',
+              '[Conventional Commits](https://www.conventionalcommits.org/) form:',
+              '',
+              '| | |',
+              '|---|---|',
+              '| Original | `' + prTitle + '` |',
+              '| New | `' + newTitle + '` |',
+              '| Detected type | `' + type + '` (' + reasoning + ') |',
+              '| Version impact | ' + bump + ' |',
+              '',
+              'If the detected type is wrong, just edit the title - this only rewrites titles that are',
+              'not already valid. Add `!` (for example `feat!:`) for a breaking change.'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: comment
+            });
