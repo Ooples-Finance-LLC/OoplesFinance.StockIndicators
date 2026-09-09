@@ -365,3 +365,19 @@ FodyWeavers.xsd
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+# Local settings with secrets (API keys, connection strings)
+appsettings.local.json
+appsettings.*.local.json
+*.local.json
+secrets.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Playwright test artifacts
+playwright-report/
+test-results/
+playwright/.cache/
