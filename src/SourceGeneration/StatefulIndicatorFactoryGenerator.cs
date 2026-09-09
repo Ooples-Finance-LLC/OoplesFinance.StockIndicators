@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
@@ -157,13 +157,34 @@ public class StatefulIndicatorFactoryGenerator : IIncrementalGenerator
         {
             null => "null",
             int i => i.ToString(CultureInfo.InvariantCulture),
-            double d => d.ToString("G17", CultureInfo.InvariantCulture) + (d == Math.Floor(d) ? ".0" : ""),
+            double d => FormatDoubleLiteral(d),
             float f => f.ToString("G9", CultureInfo.InvariantCulture) + "f",
             bool b => b ? "true" : "false",
             string s => $"\"{s}\"",
             _ when param.Type.TypeKind == TypeKind.Enum => $"{param.Type.ToDisplayString()}.{defaultValue}",
             _ => defaultValue.ToString()
         };
+    }
+
+    /// <summary>
+    /// Renders a double as a C# literal, appending ".0" only where that is actually valid.
+    /// </summary>
+    /// <remarks>
+    /// The suffix exists to make an integral value a double literal rather than an int. G17 however
+    /// switches to exponent form once the magnitude reaches about 1E17, and "1E+17.0" is not valid
+    /// C# - it would break the generated factory. An exponent already makes the literal a double,
+    /// so the suffix is needed only when the text carries neither a decimal point nor an exponent.
+    /// No indicator default is currently large enough to reach this, so it guards a latent break
+    /// rather than fixing a live one.
+    /// </remarks>
+    private static string FormatDoubleLiteral(double value)
+    {
+        var text = value.ToString("G17", CultureInfo.InvariantCulture);
+        var alreadyDouble = text.IndexOf('.') >= 0
+            || text.IndexOf('E') >= 0
+            || text.IndexOf('e') >= 0;
+
+        return alreadyDouble ? text : text + ".0";
     }
 
     private static void Execute(Compilation compilation, ImmutableArray<StateClassInfo?> stateClasses, SourceProductionContext context)
