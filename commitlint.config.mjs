@@ -31,5 +31,11 @@ export default {
     (message) => /^Merge (origin|upstream|master|main)/i.test(message),
     // Commits authored by GitHub Actions (auto-fixes, release-please, etc.).
     (message) => /Co-Authored-By: github-actions\[bot\]/.test(message),
+    // Dependabot composes its own subject and always capitalises "Bump". The commit-message
+    // prefix in .github/dependabot.yml makes the message conventional, but there is no setting
+    // that lowercases the verb, so config-conventional's subject-case rule rejects every one of
+    // its pull requests. Ignoring the bot's exact shape keeps subject-case strict for the commits
+    // we actually write, rather than relaxing the rule for everyone.
+    (message) => /^(deps|ci|build)(\(.+\))?!?: Bump /.test(message),
   ],
 };
