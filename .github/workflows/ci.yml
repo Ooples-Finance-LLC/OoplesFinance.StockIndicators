@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # dotnet build/test below run repository-controlled MSBuild inputs; the checkout token
           # has no reader after this step, so it should not be left in .git/config.
