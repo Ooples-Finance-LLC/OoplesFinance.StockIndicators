@@ -7,6 +7,7 @@ using Xunit;
 /// <summary>
 /// Integration tests for market data providers.
 /// These tests verify real-time and historical data retrieval.
+/// Requires ALPACA_API_KEY and ALPACA_API_SECRET environment variables.
 /// </summary>
 [Trait("Category", "Integration")]
 public class MarketDataIntegrationTests
@@ -14,7 +15,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests quote retrieval from Alpaca.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveQuote()
     {
         // Arrange
@@ -34,7 +35,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests historical bar retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveHistoricalBars()
     {
         // Arrange
@@ -65,7 +66,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests intraday bar retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveIntradayBars()
     {
         // Arrange
@@ -95,7 +96,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests multiple symbol quotes.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveMultipleQuotes()
     {
         // Arrange
@@ -115,7 +116,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests market data caching.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task MarketDataCache_ShouldCacheQuotes()
     {
         // Arrange
@@ -140,7 +141,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests order book retrieval (Level 2 data).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveOrderBook()
     {
         // Arrange
@@ -165,7 +166,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests quote streaming.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldStreamQuotes()
     {
         // Arrange
@@ -195,7 +196,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests trade streaming.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldStreamTrades()
     {
         // Arrange
@@ -225,7 +226,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests market data provider resilience to invalid symbols.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task MarketData_ShouldHandleInvalidSymbol()
     {
         // Arrange
@@ -246,7 +247,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests concurrent market data requests.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task MarketData_ShouldHandleConcurrentRequests()
     {
         // Arrange
@@ -265,7 +266,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests market snapshot retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveSnapshot()
     {
         // Arrange
@@ -282,7 +283,7 @@ public class MarketDataIntegrationTests
     /// <summary>
     /// Tests latest trade retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task AlpacaMarketData_ShouldRetrieveLatestTrade()
     {
         // Arrange
@@ -302,10 +303,19 @@ public class MarketDataIntegrationTests
 
     private static IMarketDataProvider CreateAlpacaProvider()
     {
+        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
+        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
+
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+        {
+            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
+            throw new InvalidOperationException("Credentials not available");
+        }
+
         var options = new AlpacaOptions
         {
-            ApiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY") ?? "test-key",
-            ApiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET") ?? "test-secret",
+            ApiKey = apiKey,
+            ApiSecret = apiSecret,
             UsePaper = true
         };
 
@@ -314,10 +324,19 @@ public class MarketDataIntegrationTests
 
     private static IMarketDataProvider CreateAlpacaProviderWithCache(MarketDataCache cache)
     {
+        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
+        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
+
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+        {
+            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
+            throw new InvalidOperationException("Credentials not available");
+        }
+
         var options = new AlpacaOptions
         {
-            ApiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY") ?? "test-key",
-            ApiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET") ?? "test-secret",
+            ApiKey = apiKey,
+            ApiSecret = apiSecret,
             UsePaper = true
         };
 
@@ -336,7 +355,7 @@ public class MarketDataQualityTests
     /// <summary>
     /// Tests that bar data has correct OHLC relationships.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Bars_ShouldHaveValidOHLCRelationships()
     {
         // Arrange
@@ -369,7 +388,7 @@ public class MarketDataQualityTests
     /// <summary>
     /// Tests that quote spreads are reasonable.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Quotes_ShouldHaveReasonableSpreads()
     {
         // Arrange
@@ -393,7 +412,7 @@ public class MarketDataQualityTests
     /// <summary>
     /// Tests that bars are in chronological order.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Bars_ShouldBeInChronologicalOrder()
     {
         // Arrange
@@ -418,7 +437,7 @@ public class MarketDataQualityTests
     /// <summary>
     /// Tests that bar timeframe enum contains all expected timeframes.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void BarTimeframe_ShouldContainExpectedValues()
     {
         var expectedTimeframes = new[]
@@ -443,10 +462,19 @@ public class MarketDataQualityTests
 
     private static IMarketDataProvider CreateAlpacaProvider()
     {
+        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
+        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
+
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+        {
+            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
+            throw new InvalidOperationException("Credentials not available");
+        }
+
         var options = new AlpacaOptions
         {
-            ApiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY") ?? "test-key",
-            ApiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET") ?? "test-secret",
+            ApiKey = apiKey,
+            ApiSecret = apiSecret,
             UsePaper = true
         };
 

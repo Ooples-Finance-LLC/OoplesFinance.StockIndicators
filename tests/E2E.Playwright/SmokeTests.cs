@@ -1,5 +1,7 @@
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+using NUnit.Framework;
+using System.Net.Http.Json;
 
 namespace OoplesFinance.E2E.Playwright;
 
@@ -49,14 +51,18 @@ public class PlaywrightTestBase : PageTest
     protected async Task<string> LoginUserAsync(string email, string password)
     {
         var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("apikey", TestConfig.SupabaseAnonKey);
+        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+
         var response = await client.PostAsJsonAsync(
             $"{TestConfig.SupabaseUrl}/auth/v1/token?grant_type=password",
-            new { email, password },
-            new System.Net.Http.Headers.MediaTypeHeaderValue("application/json"));
+            new { email, password });
 
         var body = await response.Content.ReadAsStringAsync();
         var json = System.Text.Json.JsonDocument.Parse(body);
-        return json.RootElement.GetProperty("access_token").GetString() ?? string.Empty;
+        return json.RootElement.TryGetProperty("access_token", out var token)
+            ? token.GetString() ?? string.Empty
+            : string.Empty;
     }
 }
 

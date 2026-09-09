@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Trading;
 using OoplesFinance.StockIndicators.Builder.Trading.Orders;
 using Xunit;
+using Xunit.Sdk;
 
 /// <summary>
 /// Integration tests for broker connections.
@@ -15,7 +16,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests basic broker account info retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrieveAccountInfo()
     {
         // Arrange - Using Alpaca paper trading as the test broker
@@ -33,7 +34,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests position retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrievePositions()
     {
         // Arrange
@@ -50,7 +51,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests market order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitMarketOrder_PaperTrading()
     {
         // Arrange
@@ -76,7 +77,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests limit order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitLimitOrder_PaperTrading()
     {
         // Arrange
@@ -108,7 +109,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests stop order submission (paper trading).
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldSubmitStopOrder_PaperTrading()
     {
         // Arrange
@@ -140,7 +141,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests order cancellation.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldCancelOrder()
     {
         // Arrange
@@ -169,7 +170,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests order status retrieval.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldRetrieveOrderStatus()
     {
         // Arrange
@@ -202,7 +203,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests position closing.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldClosePosition()
     {
         // Arrange
@@ -232,7 +233,7 @@ public class BrokerIntegrationTests
     /// <summary>
     /// Tests concurrent order submission.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public async Task Broker_ShouldHandleConcurrentOrders()
     {
         // Arrange
@@ -266,11 +267,20 @@ public class BrokerIntegrationTests
 
     private static IBroker CreateTestBroker()
     {
-        // Use environment variables or test configuration for credentials
+        var apiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY");
+        var apiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET");
+
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+        {
+            Skip.If(true, "Alpaca credentials not available. Set ALPACA_API_KEY and ALPACA_API_SECRET environment variables.");
+            // This line won't execute due to Skip, but satisfies the compiler
+            throw new InvalidOperationException("Credentials not available");
+        }
+
         var options = new AlpacaOptions
         {
-            ApiKey = Environment.GetEnvironmentVariable("ALPACA_API_KEY") ?? "test-key",
-            ApiSecret = Environment.GetEnvironmentVariable("ALPACA_API_SECRET") ?? "test-secret",
+            ApiKey = apiKey,
+            ApiSecret = apiSecret,
             UsePaper = true // Always use paper trading for tests
         };
 
@@ -289,7 +299,7 @@ public class CrossBrokerConsistencyTests
     /// <summary>
     /// Tests that order types enum contains all basic types.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AllBrokers_ShouldSupportBasicOrderTypes()
     {
         // Verify that OrderType enum covers all basic types
@@ -311,7 +321,7 @@ public class CrossBrokerConsistencyTests
     /// <summary>
     /// Tests that order sides enum contains buy and sell.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AllBrokers_ShouldSupportOrderSides()
     {
         var requiredSides = new[]
@@ -330,7 +340,7 @@ public class CrossBrokerConsistencyTests
     /// <summary>
     /// Tests that broker order status enum contains all required statuses.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AllBrokers_ShouldSupportOrderStatuses()
     {
         var requiredStatuses = new[]
@@ -352,7 +362,7 @@ public class CrossBrokerConsistencyTests
     /// <summary>
     /// Tests that time in force enum contains all required options.
     /// </summary>
-    [Fact]
+    [SkippableFact]
     public void AllBrokers_ShouldSupportTimeInForce()
     {
         var requiredTif = new[]
