@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Fork note: net461 dropped — the platform consuming this is net10-only,
-         and the net461 shim chain conflicts with the Alpaca SDK transitive deps. -->
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net8.0;net461</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -107,7 +105,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <PackageReference Include="System.Memory" Version="4.6.0" />
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Buffers" Version="4.6.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.Json" Version="6.0.11" />
   </ItemGroup>

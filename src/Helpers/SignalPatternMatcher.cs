@@ -1,4 +1,4 @@
-//     Ooples Finance Stock Indicator Library
+﻿//     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
 //     Copyright © Franklin Moormann, 2020-2022
@@ -39,7 +39,10 @@ internal static class SignalPatternMatcher
     /// <returns><c>true</c> when the value matches the pattern; otherwise <c>false</c>.</returns>
     public static bool IsMatch(string? pattern, string? value)
     {
-        if (string.IsNullOrEmpty(pattern) || value is null)
+        // Written as an explicit null/length test rather than string.IsNullOrEmpty
+        // because the net461 reference assemblies lack the NotNullWhen annotation,
+        // so the compiler cannot narrow the nullable pattern through that call.
+        if (pattern is null || pattern.Length == 0 || value is null)
         {
             return false;
         }
