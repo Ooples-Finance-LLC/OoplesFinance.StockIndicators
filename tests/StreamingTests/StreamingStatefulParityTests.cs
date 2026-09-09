@@ -661,6 +661,27 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
+                new StatefulIndicatorSpec("SchaffTrendCycleShk.Stc",
+                    () => new SchaffTrendCycleShkState(MovingAvgType.ExponentialMovingAverage, 23, 50, 10, 3, 3),
+                    data => data.CalculateSchaffTrendCycleShk(MovingAvgType.ExponentialMovingAverage, 23, 50, 10, 3, 3)
+                        .OutputValues["Stc"], "Stc")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UtBotAlerts.TrailingStop",
+                    () => new UtBotAlertsState(MovingAvgType.WildersSmoothingMethod, 10, 1),
+                    data => data.CalculateUtBotAlerts(MovingAvgType.WildersSmoothingMethod, 10, 1)
+                        .OutputValues["TrailingStop"], "TrailingStop")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UtBotAlerts.Position",
+                    () => new UtBotAlertsState(MovingAvgType.WildersSmoothingMethod, 10, 1),
+                    data => data.CalculateUtBotAlerts(MovingAvgType.WildersSmoothingMethod, 10, 1)
+                        .OutputValues["Position"], "Position")
+            };
+            yield return new object[]
+            {
                 new StatefulIndicatorSpec("KeltnerChannels.MiddleBand",
                     () => new KeltnerChannelsState(MovingAvgType.ExponentialMovingAverage, 20, 10, 2),
                     data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
