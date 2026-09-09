@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentAssertions;
 using OoplesFinance.StockIndicators.Models;
 
@@ -30,6 +30,7 @@ public sealed class BarAlignedOutputTests
     public void Every_batch_indicator_returns_one_value_per_bar()
     {
         var offenders = new List<string>();
+        var throwers = new List<string>();
         var checkedCount = 0;
 
         foreach (var method in BatchIndicatorMethods())
@@ -41,10 +42,14 @@ public sealed class BarAlignedOutputTests
             {
                 result = method.Invoke(null, BuildArguments(method, stockData));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // An indicator that cannot run on this shape is a different concern; this test is about the
-                // LENGTH of what it returns when it does run.
+                // Recorded rather than skipped. Swallowing here would let an indicator that CRASHES on this
+                // input pass the sweep by never being measured - which is exactly how
+                // CalculatePivotPointAverage hid an ArgumentOutOfRangeException while the sweep still
+                // reported no offenders.
+                throwers.Add(
+                    $"{method.DeclaringType?.Name}.{method.Name}: {(ex.InnerException ?? ex).GetType().Name}");
                 continue;
             }
 
@@ -59,9 +64,25 @@ public sealed class BarAlignedOutputTests
                 offenders.Add(
                     $"{method.DeclaringType?.Name}.{method.Name}: {produced.CustomValuesList.Count} values for {BarCount} bars");
             }
+
+            // The named output series are indexed alongside TickerDataList exactly as CustomValuesList is,
+            // and an indicator can expand one and not the other - leaving a single indicator publishing two
+            // different lengths from the same call. Check them too.
+            foreach (var output in produced.OutputValues)
+            {
+                if (output.Value.Count != 0 && output.Value.Count != BarCount)
+                {
+                    offenders.Add(
+                        $"{method.DeclaringType?.Name}.{method.Name} [{output.Key}]: "
+                        + $"{output.Value.Count} values for {BarCount} bars");
+                }
+            }
         }
 
         checkedCount.Should().BeGreaterThan(100, "the reflection sweep should reach most of the catalog");
+        throwers.Should().BeEmpty(
+            "an indicator that throws on a plain intraday series can never be measured by this sweep, so a "
+            + "crash reads as a pass:" + Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", throwers));
         offenders.Should().BeEmpty(
             "every indicator must return one value per bar, or callers indexing it alongside TickerDataList "
             + "read misaligned data:\n  " + string.Join("\n  ", offenders));
