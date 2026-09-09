@@ -15,7 +15,6 @@ public sealed class EhlersTests : GlobalTestData
         results.Should().NotBeNullOrEmpty();
         results.Count.Should().Be(stockData.Count);
     }
-
     [Fact]
     public void CalculateEhlersRoofingFilterV2_ReturnsProperValues()
     {

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <BaselineTargetFramework>net10.0</BaselineTargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <UseBaseline>true</UseBaseline>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseBaseline)'=='true'">
+    <DefineConstants>$(DefineConstants);BASELINE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OoplesFinance.StockIndicators.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseBaseline)'=='true'">
+    <Reference Include="OoplesFinance.StockIndicators.Original">
+      <HintPath>..\.baseline\src\bin\$(Configuration)\$(BaselineTargetFramework)\OoplesFinance.StockIndicators.Original.dll</HintPath>
+      <Aliases>Original</Aliases>
+    </Reference>
+  </ItemGroup>
+</Project>

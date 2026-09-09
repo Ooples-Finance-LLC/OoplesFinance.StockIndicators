@@ -8,10 +8,335 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
+// Suppress obsolete warnings for internal Calculate* method calls - this helper
+// needs to invoke these methods to provide the dynamic indicator invocation API.
+#pragma warning disable CS0618
+
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
+using System.Runtime.CompilerServices;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 public static class CalculationsHelper
 {
+    private static readonly ConditionalWeakTable<StockData, Dictionary<DerivedSeriesKind, List<double>>> DerivedSeriesCache
+        = new();
+
+    public static T GetLastOrDefault<T>(IReadOnlyList<T> list)
+    {
+        return list.Count > 0 ? list[list.Count - 1] : default!;
+    }
+
+    private static double SumValues(IReadOnlyList<double> values)
+    {
+        if (values.Count == 0)
+        {
+            return 0;
+        }
+
+#if NET8_0_OR_GREATER
+        if (values is List<double> list)
+        {
+            return VectorMath.Sum(SpanCompat.AsReadOnlySpan(list));
+        }
+
+        if (values is double[] array)
+        {
+            return VectorMath.Sum(array);
+        }
+#endif
+
+        var sum = 0d;
+        for (var i = 0; i < values.Count; i++)
+        {
+            sum += values[i];
+        }
+
+        return sum;
+    }
+
+    internal static List<double> GetDifferenceList(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    {
+        if (left.Count != right.Count)
+        {
+            throw new ArgumentException("Input lists must have the same length.");
+        }
+
+        var count = left.Count;
+#if NET8_0_OR_GREATER
+        if (left is List<double> leftList && right is List<double> rightList)
+        {
+            var output = SpanCompat.CreateOutputBuffer(count);
+            VectorMath.Diff(SpanCompat.AsReadOnlySpan(leftList), SpanCompat.AsReadOnlySpan(rightList), output.Span);
+            return output.ToList();
+        }
+
+        if (left is double[] leftArray && right is double[] rightArray)
+        {
+            var output = SpanCompat.CreateOutputBuffer(count);
+            VectorMath.Diff(leftArray, rightArray, output.Span);
+            return output.ToList();
+        }
+#endif
+
+        var list = new List<double>(count);
+        for (var i = 0; i < count; i++)
+        {
+            list.Add(left[i] - right[i]);
+        }
+
+        return list;
+    }
+
+    private static bool SequenceEqualValues(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            if (left[i] != right[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static void SetOutputValues(this StockData stockData, Func<Dictionary<string, List<double>>> outputFactory)
+    {
+        if (!ShouldIncludeOutputValues(stockData))
+        {
+            stockData.OutputValues?.Clear();
+            return;
+        }
+
+        var outputs = outputFactory();
+        if (TryGetRoundingDigits(stockData, out var roundingDigits))
+        {
+            outputs = RoundOutputValues(outputs, roundingDigits);
+        }
+
+        stockData.OutputValues = outputs;
+    }
+
+    public static List<Signal>? CreateSignalsList(StockData stockData, int capacity = 0)
+    {
+        if (!ShouldIncludeSignals(stockData))
+        {
+            return null;
+        }
+
+        if (capacity <= 0)
+        {
+            capacity = stockData.Count;
+        }
+
+        return capacity > 0 ? new List<Signal>(capacity) : new List<Signal>();
+    }
+
+    public static void SetSignals(this StockData stockData, List<Signal>? signalsList)
+    {
+        if (!ShouldIncludeSignals(stockData) || signalsList == null)
+        {
+            stockData.SignalsList?.Clear();
+            return;
+        }
+
+        stockData.SignalsList = signalsList;
+    }
+
+    public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
+    {
+        if (!ShouldIncludeCustomValues(stockData))
+        {
+            stockData.CustomValuesList?.Clear();
+            return;
+        }
+
+        if (TryGetRoundingDigits(stockData, out var roundingDigits))
+        {
+            stockData.CustomValuesList = RoundValuesList(customValuesList, roundingDigits);
+            return;
+        }
+
+        stockData.CustomValuesList = customValuesList;
+    }
+
+    private static bool ShouldIncludeOutputValues(StockData stockData)
+    {
+        return stockData.Options?.IncludeOutputValues ?? true;
+    }
+
+    private static bool ShouldIncludeSignals(StockData stockData)
+    {
+        return stockData.Options?.IncludeSignals ?? true;
+    }
+
+    private static bool ShouldIncludeCustomValues(StockData stockData)
+    {
+        return stockData.Options?.IncludeCustomValues ?? true;
+    }
+
+    private static bool TryGetRoundingDigits(StockData stockData, out int roundingDigits)
+    {
+        var digits = stockData.Options?.RoundingDigits;
+        if (!digits.HasValue)
+        {
+            roundingDigits = 0;
+            return false;
+        }
+
+        roundingDigits = digits.Value;
+        if (roundingDigits < -15)
+        {
+            roundingDigits = -15;
+        }
+        else if (roundingDigits > 15)
+        {
+            roundingDigits = 15;
+        }
+
+        return true;
+    }
+
+    internal static List<double> GetDerivedSeriesList(StockData stockData, DerivedSeriesKind kind)
+    {
+        if (!CanCacheDerivedSeries(stockData))
+        {
+            return BuildDerivedSeriesList(stockData, kind);
+        }
+
+        var cache = DerivedSeriesCache.GetOrCreateValue(stockData);
+        if (cache.TryGetValue(kind, out var cached))
+        {
+            return cached;
+        }
+
+        var series = BuildDerivedSeriesList(stockData, kind);
+        cache[kind] = series;
+        return series;
+    }
+
+    internal static List<double> GetTrueRangeList(StockData stockData)
+    {
+        return GetDerivedSeriesList(stockData, DerivedSeriesKind.TrueRange);
+    }
+
+    private static bool CanCacheDerivedSeries(StockData stockData)
+    {
+        if (!(stockData.Options?.EnableDerivedSeriesCache ?? true))
+        {
+            return false;
+        }
+
+        return stockData.CustomValuesList == null || stockData.CustomValuesList.Count == 0;
+    }
+
+    private static IReadOnlyList<double> GetDerivedCloseList(StockData stockData)
+    {
+        if (stockData.CustomValuesList != null && stockData.CustomValuesList.Count > 0)
+        {
+            return stockData.CustomValuesList;
+        }
+
+        return stockData.ClosePrices;
+    }
+
+    private static List<double> BuildDerivedSeriesList(StockData stockData, DerivedSeriesKind kind)
+    {
+        var count = stockData.Count;
+        var list = new List<double>(count);
+        if (count == 0)
+        {
+            return list;
+        }
+
+        var highs = stockData.HighPrices;
+        var lows = stockData.LowPrices;
+        var opens = stockData.OpenPrices;
+        var closes = GetDerivedCloseList(stockData);
+
+        switch (kind)
+        {
+            case DerivedSeriesKind.Hl2:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i]) / 2);
+                }
+                break;
+            case DerivedSeriesKind.Hlc3:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i] + closes[i]) / 3);
+                }
+                break;
+            case DerivedSeriesKind.Ohlc4:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((opens[i] + highs[i] + lows[i] + closes[i]) / 4);
+                }
+                break;
+            case DerivedSeriesKind.WeightedClose:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((highs[i] + lows[i] + (closes[i] * 2)) / 4);
+                }
+                break;
+            case DerivedSeriesKind.AveragePrice:
+                for (var i = 0; i < count; i++)
+                {
+                    list.Add((opens[i] + closes[i]) / 2);
+                }
+                break;
+            case DerivedSeriesKind.TrueRange:
+                for (var i = 0; i < count; i++)
+                {
+                    // For the first bar, use current close as prevClose (TR = High - Low)
+                    // This avoids artificially high TR values when there's no previous bar
+                    var prevClose = i >= 1 ? closes[i - 1] : closes[i];
+                    list.Add(CalculateTrueRange(highs[i], lows[i], prevClose));
+                }
+                break;
+            default:
+                break;
+        }
+
+        return list;
+    }
+
+    private static List<double> RoundValuesList(List<double> values, int roundingDigits)
+    {
+        var count = values.Count;
+        var rounded = new List<double>(count);
+        for (var i = 0; i < count; i++)
+        {
+            rounded.Add(Math.Round(values[i], roundingDigits));
+        }
+
+        return rounded;
+    }
+
+    private static Dictionary<string, List<double>> RoundOutputValues(Dictionary<string, List<double>> outputs, int roundingDigits)
+    {
+        var rounded = new Dictionary<string, List<double>>(outputs.Count);
+        foreach (var kvp in outputs)
+        {
+            rounded[kvp.Key] = RoundValuesList(kvp.Value, roundingDigits);
+        }
+
+        return rounded;
+    }
+
     /// <summary>
     /// Calculates the user chosen moving average with user's custom settings
     /// </summary>
@@ -22,14 +347,628 @@ public static class CalculationsHelper
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
-    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null, 
+    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,        
         int? fastLength = null, int? slowLength = null)
     {
         List<double> movingAvgList = new();
 
         if (customValuesList != null)
         {
-            stockData.CustomValuesList = customValuesList;
+            stockData.SetCustomValues(customValuesList);
+        }
+
+        // Fast path for moving averages with simple (input, output, length) Core signatures
+        // Note: All Core methods have been verified to match Calculate methods
+        if (movingAvgType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage
+            or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod
+            or MovingAvgType.DoubleExponentialMovingAverage or MovingAvgType.TripleExponentialMovingAverage
+            or MovingAvgType.HullMovingAverage or MovingAvgType.McGinleyDynamicIndicator
+            or MovingAvgType.TillsonT3MovingAverage or MovingAvgType.VariableIndexDynamicAverage
+            or MovingAvgType.VariableMovingAverage or MovingAvgType.ArnaudLegouxMovingAverage
+            or MovingAvgType.LeastSquaresMovingAverage or MovingAvgType.SineWeightedMovingAverage
+            or MovingAvgType.RegularizedExponentialMovingAverage or MovingAvgType.JurikMovingAverage
+            or MovingAvgType.EndPointWeightedMovingAverage or MovingAvgType.CubedWeightedMovingAverage
+            or MovingAvgType.NaturalMovingAverage or MovingAvgType.AlphaDecreasingExponentialMovingAverage
+            or MovingAvgType.AdaptiveExponentialMovingAverage or MovingAvgType.AutonomousRecursiveMovingAverage
+            or MovingAvgType.AdaptiveLeastSquares or MovingAvgType.ParabolicWeightedMovingAverage
+            or MovingAvgType.UltimateMovingAverage or MovingAvgType.SquareRootWeightedMovingAverage
+            or MovingAvgType.Spencer15PointMovingAverage or MovingAvgType.Spencer21PointMovingAverage
+            or MovingAvgType.SlowSmoothedMovingAverage or MovingAvgType.QuickMovingAverage
+            or MovingAvgType.EhlersBetterExponentialMovingAverage or MovingAvgType.PentupleExponentialMovingAverage
+            or MovingAvgType.QuadrupleExponentialMovingAverage or MovingAvgType.EhlersZeroLagExponentialMovingAverage
+            or MovingAvgType.EhlersFractalAdaptiveMovingAverage or MovingAvgType.EhlersAdaptiveLaguerreFilter
+            or MovingAvgType.DampedSineWaveWeightedFilter or MovingAvgType.FibonacciWeightedMovingAverage
+            or MovingAvgType.GeneralizedDoubleExponentialMovingAverage or MovingAvgType.Ehlers2PoleButterworthFilterV1
+            or MovingAvgType.Ehlers2PoleButterworthFilterV2 or MovingAvgType.Ehlers3PoleButterworthFilterV1
+            or MovingAvgType.Ehlers3PoleButterworthFilterV2 or MovingAvgType.Ehlers2PoleSuperSmootherFilterV1
+            or MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 or MovingAvgType.Ehlers3PoleSuperSmootherFilter
+            or MovingAvgType.EhlersSimpleDecycler or MovingAvgType.EhlersHammingMovingAverage
+            or MovingAvgType.DistanceWeightedMovingAverage or MovingAvgType.EhlersFilter
+            or MovingAvgType.EhlersFiniteImpulseResponseFilter or MovingAvgType.EhlersInfiniteImpulseResponseFilter
+            or MovingAvgType.TriangularMovingAverage or MovingAvgType.LinearRegression
+            or MovingAvgType.SymmetricallyWeightedMovingAverage or MovingAvgType.RepulsionMovingAverage
+            or MovingAvgType.EhlersHannMovingAverage or MovingAvgType.EhlersTriangleMovingAverage
+            or MovingAvgType.ZeroLagExponentialMovingAverage or MovingAvgType.HoltExponentialMovingAverage
+            or MovingAvgType.KaufmanAdaptiveMovingAverage or MovingAvgType.EhlersSuperSmootherFilter
+            or MovingAvgType.EhlersDeviationScaledMovingAverage
+            // New fast path types
+            or MovingAvgType.AhrensMovingAverage or MovingAvgType.DoubleExponentialSmoothing
+            or MovingAvgType.CompoundRatioMovingAverage or MovingAvgType.CorrectedMovingAverage
+            or MovingAvgType.DynamicallyAdjustableFilter or MovingAvgType.DynamicallyAdjustableMovingAverage
+            or MovingAvgType.LinearWeightedMovingAverage or MovingAvgType.LeoMovingAverage
+            or MovingAvgType.McNichollMovingAverage or MovingAvgType._3HMA
+            or MovingAvgType.ZeroLagTripleExponentialMovingAverage or MovingAvgType.ZeroLowLagMovingAverage
+            or MovingAvgType.WildersSummationMethod or MovingAvgType.SimplifiedWeightedMovingAverage
+            or MovingAvgType.SimplifiedLeastSquaresMovingAverage or MovingAvgType.SharpModifiedMovingAverage
+            or MovingAvgType.TillsonIE2 or MovingAvgType.RecursiveMovingTrendAverage
+            or MovingAvgType.QuadraticMovingAverage or MovingAvgType.MultiDepthZeroLagExponentialMovingAverage
+            or MovingAvgType.HullEstimate or MovingAvgType.InverseDistanceWeightedMovingAverage
+            or MovingAvgType.Trimean or MovingAvgType.WellRoundedMovingAverage
+            or MovingAvgType.LinearRegressionLine or MovingAvgType.LinearExtrapolation
+            or MovingAvgType.JsaMovingAverage
+            // Phase 2 fast path types (58 additional Core methods)
+            or MovingAvgType.SelfWeightedMovingAverage or MovingAvgType.HendersonWeightedMovingAverage
+            or MovingAvgType.FareySequenceWeightedMovingAverage or MovingAvgType.RightSidedRickerMovingAverage
+            or MovingAvgType.HampelFilter or MovingAvgType.SequentiallyFilteredMovingAverage
+            or MovingAvgType.KalmanSmoother or MovingAvgType.ModularFilter
+            or MovingAvgType.RetentionAccelerationFilter or MovingAvgType.SettingLessTrendStepFiltering
+            or MovingAvgType.ShapeshiftingMovingAverage or MovingAvgType.VariableLengthMovingAverage
+            or MovingAvgType.EhlersGaussianFilter or MovingAvgType.EhlersRecursiveMedianFilter
+            or MovingAvgType._1LCLeastSquaresMovingAverage or MovingAvgType.EhlersDeviationScaledSuperSmoother
+            or MovingAvgType.EhlersOptimumEllipticFilter or MovingAvgType.EhlersModifiedOptimumEllipticFilter
+            or MovingAvgType.EhlersChebyshevLowPassFilter or MovingAvgType.EhlersAverageErrorFilter
+            or MovingAvgType.EhlersAllPassPhaseShifter or MovingAvgType.PolynomialLeastSquaresMovingAverage
+            or MovingAvgType.QuadraticLeastSquaresMovingAverage or MovingAvgType.QuadraticRegression
+            or MovingAvgType.FollowingAdaptiveMovingAverage or MovingAvgType.VariableAdaptiveMovingAverage
+            or MovingAvgType.VerticalHorizontalMovingAverage or MovingAvgType.EdgePreservingFilter
+            or MovingAvgType.AutoFilter or MovingAvgType.FallingRisingFilter
+            or MovingAvgType.HybridConvolutionFilter or MovingAvgType.IIRLeastSquaresEstimate
+            or MovingAvgType.GeneralFilterEstimator or MovingAvgType.MovingAverageV3
+            or MovingAvgType.MovingAverageAdaptiveQ or MovingAvgType.TStepLeastSquaresMovingAverage
+            or MovingAvgType.ParametricCorrectiveLinearMovingAverage or MovingAvgType.ParametricKalmanFilter
+            or MovingAvgType.R2AdaptiveRegression or MovingAvgType.Svama
+            or MovingAvgType.VolatilityMovingAverage or MovingAvgType.VolatilityWaveMovingAverage
+            or MovingAvgType.PoweredKaufmanAdaptiveMovingAverage or MovingAvgType.EhlersLeadingIndicator
+            or MovingAvgType.EhlersMedianAverageAdaptiveFilter or MovingAvgType.EhlersDistanceCoefficientFilter
+            or MovingAvgType.EhlersNoiseEliminationTechnology or MovingAvgType.BryantAdaptiveMovingAverage
+            or MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage or MovingAvgType.EhlersVariableIndexDynamicAverage
+            or MovingAvgType.EhlersKaufmanAdaptiveMovingAverage or MovingAvgType.EhlersMesaAdaptiveMovingAverage
+            or MovingAvgType.AdaptiveMovingAverage or MovingAvgType.EhlersLaguerreFilter
+            // Phase 3 fast path types (7 additional Core methods for remaining single-input types)
+            or MovingAvgType.ReverseEngineeringRelativeStrengthIndex or MovingAvgType.ReverseMovingAverageConvergenceDivergence
+            or MovingAvgType.OptimalWeightedMovingAverage or MovingAvgType.LightLeastSquaresMovingAverage
+            or MovingAvgType.FisherLeastSquaresMovingAverage or MovingAvgType.OvershootReductionMovingAverage
+            or MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage)
+        {
+            var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
+            var count = inputList.Count;
+            var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+            var outputSpan = outputBuffer.Span;
+
+            switch (movingAvgType)
+            {
+                case MovingAvgType.SimpleMovingAverage:
+                    MovingAverageCore.SimpleMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WeightedMovingAverage:
+                    MovingAverageCore.WeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ExponentialMovingAverage:
+                    MovingAverageCore.ExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WildersSmoothingMethod:
+                    MovingAverageCore.WellesWilderMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DoubleExponentialMovingAverage:
+                    MovingAverageCore.DoubleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TripleExponentialMovingAverage:
+                    MovingAverageCore.TripleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HullMovingAverage:
+                    MovingAverageCore.HullMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.McGinleyDynamicIndicator:
+                    MovingAverageCore.McGinleyDynamic(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TillsonT3MovingAverage:
+                    MovingAverageCore.T3MovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableIndexDynamicAverage:
+                    MovingAverageCore.Vidya(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableMovingAverage:
+                    MovingAverageCore.VariableMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ArnaudLegouxMovingAverage:
+                    MovingAverageCore.ArnaudLegouxMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LeastSquaresMovingAverage:
+                    MovingAverageCore.LeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SineWeightedMovingAverage:
+                    MovingAverageCore.SineWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RegularizedExponentialMovingAverage:
+                    MovingAverageCore.RegularizedEma(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.JurikMovingAverage:
+                    MovingAverageCore.JurikMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EndPointWeightedMovingAverage:
+                    MovingAverageCore.EndPointMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.CubedWeightedMovingAverage:
+                    MovingAverageCore.CubedWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.NaturalMovingAverage:
+                    MovingAverageCore.NaturalMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AlphaDecreasingExponentialMovingAverage:
+                    MovingAverageCore.AlphaDecreasingEma(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveExponentialMovingAverage:
+                    MovingAverageCore.AdaptiveExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AutonomousRecursiveMovingAverage:
+                    MovingAverageCore.AutonomousRecursiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveLeastSquares:
+                    MovingAverageCore.AdaptiveLeastSquares(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ParabolicWeightedMovingAverage:
+                    MovingAverageCore.ParabolicWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.UltimateMovingAverage:
+                    MovingAverageCore.UltimateMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SquareRootWeightedMovingAverage:
+                    MovingAverageCore.SquareRootWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Spencer15PointMovingAverage:
+                    MovingAverageCore.Spencer15PointMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Spencer21PointMovingAverage:
+                    MovingAverageCore.Spencer21PointMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SlowSmoothedMovingAverage:
+                    MovingAverageCore.SlowSmoothedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuickMovingAverage:
+                    MovingAverageCore.QuickMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersBetterExponentialMovingAverage:
+                    MovingAverageCore.EhlersBetterExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.PentupleExponentialMovingAverage:
+                    MovingAverageCore.PentupleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadrupleExponentialMovingAverage:
+                    MovingAverageCore.QuadrupleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersZeroLagExponentialMovingAverage:
+                    MovingAverageCore.EhlersZeroLagExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersFractalAdaptiveMovingAverage:
+                    MovingAverageCore.EhlersFractalAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersAdaptiveLaguerreFilter:
+                    MovingAverageCore.EhlersAdaptiveLaguerreFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DampedSineWaveWeightedFilter:
+                    MovingAverageCore.DampedSineWaveWeightedFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FibonacciWeightedMovingAverage:
+                    MovingAverageCore.FibonacciWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.GeneralizedDoubleExponentialMovingAverage:
+                    MovingAverageCore.GeneralizedDoubleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers2PoleButterworthFilterV1:
+                    MovingAverageCore.Ehlers2PoleButterworthFilterV1(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers2PoleButterworthFilterV2:
+                    MovingAverageCore.Ehlers2PoleButterworthFilterV2(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers3PoleButterworthFilterV1:
+                    MovingAverageCore.Ehlers3PoleButterworthFilterV1(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers3PoleButterworthFilterV2:
+                    MovingAverageCore.Ehlers3PoleButterworthFilterV2(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers2PoleSuperSmootherFilterV1:
+                    MovingAverageCore.Ehlers2PoleSuperSmootherFilterV1(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers2PoleSuperSmootherFilterV2:
+                    MovingAverageCore.Ehlers2PoleSuperSmootherFilterV2(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Ehlers3PoleSuperSmootherFilter:
+                    MovingAverageCore.Ehlers3PoleSuperSmootherFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersSimpleDecycler:
+                    MovingAverageCore.EhlersDecycler(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersHammingMovingAverage:
+                    MovingAverageCore.EhlersHammingMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DistanceWeightedMovingAverage:
+                    MovingAverageCore.DistanceWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersFilter:
+                    MovingAverageCore.EhlersFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersFiniteImpulseResponseFilter:
+                    MovingAverageCore.EhlersFiniteImpulseResponseFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersInfiniteImpulseResponseFilter:
+                    MovingAverageCore.EhlersInfiniteImpulseResponseFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TriangularMovingAverage:
+                    MovingAverageCore.TriangularMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LinearRegression:
+                    MovingAverageCore.LinearRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SymmetricallyWeightedMovingAverage:
+                    MovingAverageCore.SymmetricallyWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RepulsionMovingAverage:
+                    MovingAverageCore.RepulsionMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersHannMovingAverage:
+                    MovingAverageCore.EhlersHannMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersTriangleMovingAverage:
+                    MovingAverageCore.EhlersTriangleMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ZeroLagExponentialMovingAverage:
+                    MovingAverageCore.ZeroLagEma(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HoltExponentialMovingAverage:
+                    MovingAverageCore.HoltExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.KaufmanAdaptiveMovingAverage:
+                    MovingAverageCore.KaufmanAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersSuperSmootherFilter:
+                    MovingAverageCore.SuperSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDeviationScaledMovingAverage:
+                    MovingAverageCore.EhlersDeviationScaledMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                // New fast path types
+                case MovingAvgType.AhrensMovingAverage:
+                    MovingAverageCore.AhrensMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DoubleExponentialSmoothing:
+                    MovingAverageCore.DoubleExponentialSmoothing(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.CompoundRatioMovingAverage:
+                    MovingAverageCore.CompoundRatioMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.CorrectedMovingAverage:
+                    MovingAverageCore.CorrectedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DynamicallyAdjustableFilter:
+                    MovingAverageCore.DynamicallyAdjustableFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.DynamicallyAdjustableMovingAverage:
+                    MovingAverageCore.DynamicallyAdjustableMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LinearWeightedMovingAverage:
+                    MovingAverageCore.LinearWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LeoMovingAverage:
+                    MovingAverageCore.LeoMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.McNichollMovingAverage:
+                    MovingAverageCore.McNichollMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType._3HMA:
+                    MovingAverageCore.ThreeHMA(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ZeroLagTripleExponentialMovingAverage:
+                    MovingAverageCore.ZeroLagTripleExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ZeroLowLagMovingAverage:
+                    MovingAverageCore.ZeroLowLagMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WildersSummationMethod:
+                    MovingAverageCore.WildersSummationMethod(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SimplifiedWeightedMovingAverage:
+                    MovingAverageCore.SimplifiedWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SimplifiedLeastSquaresMovingAverage:
+                    MovingAverageCore.SimplifiedLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SharpModifiedMovingAverage:
+                    MovingAverageCore.SharpModifiedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TillsonIE2:
+                    MovingAverageCore.TillsonIE2(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RecursiveMovingTrendAverage:
+                    MovingAverageCore.RecursiveMovingTrendAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadraticMovingAverage:
+                    MovingAverageCore.QuadraticMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MultiDepthZeroLagExponentialMovingAverage:
+                    MovingAverageCore.MultiDepthZeroLagExponentialMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HullEstimate:
+                    MovingAverageCore.HullEstimate(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.InverseDistanceWeightedMovingAverage:
+                    MovingAverageCore.InverseDistanceWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Trimean:
+                    MovingAverageCore.Trimean(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WellRoundedMovingAverage:
+                    MovingAverageCore.WellRoundedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LinearRegressionLine:
+                    MovingAverageCore.LinearRegressionLine(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LinearExtrapolation:
+                    MovingAverageCore.LinearExtrapolation(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.JsaMovingAverage:
+                    MovingAverageCore.JsaMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                // Phase 2 fast path cases (58 additional Core methods)
+                case MovingAvgType.SelfWeightedMovingAverage:
+                    MovingAverageCore.SelfWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HendersonWeightedMovingAverage:
+                    MovingAverageCore.HendersonWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FareySequenceWeightedMovingAverage:
+                    MovingAverageCore.FareySequenceWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RightSidedRickerMovingAverage:
+                    MovingAverageCore.RightSidedRickerMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HampelFilter:
+                    MovingAverageCore.HampelFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SequentiallyFilteredMovingAverage:
+                    MovingAverageCore.SequentiallyFilteredMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.KalmanSmoother:
+                    MovingAverageCore.KalmanSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ModularFilter:
+                    MovingAverageCore.ModularFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RetentionAccelerationFilter:
+                    MovingAverageCore.RetentionAccelerationFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.SettingLessTrendStepFiltering:
+                    MovingAverageCore.SettingLessTrendStepFiltering(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ShapeshiftingMovingAverage:
+                    MovingAverageCore.ShapeshiftingMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableLengthMovingAverage:
+                    MovingAverageCore.VariableLengthMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersGaussianFilter:
+                    MovingAverageCore.EhlersGaussianFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersRecursiveMedianFilter:
+                    MovingAverageCore.EhlersRecursiveMedianFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType._1LCLeastSquaresMovingAverage:
+                    MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDeviationScaledSuperSmoother:
+                    MovingAverageCore.EhlersDeviationScaledSuperSmoother(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersOptimumEllipticFilter:
+                    MovingAverageCore.EhlersOptimumEllipticFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersModifiedOptimumEllipticFilter:
+                    MovingAverageCore.EhlersModifiedOptimumEllipticFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersChebyshevLowPassFilter:
+                    MovingAverageCore.EhlersChebyshevLowPassFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersAverageErrorFilter:
+                    MovingAverageCore.EhlersAverageErrorFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersAllPassPhaseShifter:
+                    MovingAverageCore.EhlersAllPassPhaseShifter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.PolynomialLeastSquaresMovingAverage:
+                    MovingAverageCore.PolynomialLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadraticLeastSquaresMovingAverage:
+                    MovingAverageCore.QuadraticLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.QuadraticRegression:
+                    MovingAverageCore.QuadraticRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FollowingAdaptiveMovingAverage:
+                    MovingAverageCore.FollowingAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VariableAdaptiveMovingAverage:
+                    MovingAverageCore.VariableAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VerticalHorizontalMovingAverage:
+                    MovingAverageCore.VerticalHorizontalMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EdgePreservingFilter:
+                    MovingAverageCore.EdgePreservingFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AutoFilter:
+                    MovingAverageCore.AutoFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FallingRisingFilter:
+                    MovingAverageCore.FallingRisingFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.HybridConvolutionFilter:
+                    MovingAverageCore.HybridConvolutionFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.IIRLeastSquaresEstimate:
+                    MovingAverageCore.IIRLeastSquaresEstimate(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.GeneralFilterEstimator:
+                    MovingAverageCore.GeneralFilterEstimator(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MovingAverageV3:
+                    MovingAverageCore.MovingAverageV3(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MovingAverageAdaptiveQ:
+                    MovingAverageCore.MovingAverageAdaptiveQ(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.TStepLeastSquaresMovingAverage:
+                    MovingAverageCore.TStepLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ParametricCorrectiveLinearMovingAverage:
+                    MovingAverageCore.ParametricCorrectiveLinearMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ParametricKalmanFilter:
+                    MovingAverageCore.ParametricKalmanFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.R2AdaptiveRegression:
+                    MovingAverageCore.R2AdaptiveRegression(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.Svama:
+                    MovingAverageCore.Svama(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolatilityMovingAverage:
+                    MovingAverageCore.VolatilityMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolatilityWaveMovingAverage:
+                    MovingAverageCore.VolatilityWaveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.PoweredKaufmanAdaptiveMovingAverage:
+                    MovingAverageCore.PoweredKaufmanAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersLeadingIndicator:
+                    MovingAverageCore.EhlersLeadingIndicator(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersMedianAverageAdaptiveFilter:
+                    MovingAverageCore.EhlersMedianAverageAdaptiveFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersDistanceCoefficientFilter:
+                    MovingAverageCore.EhlersDistanceCoefficientFilter(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersNoiseEliminationTechnology:
+                    MovingAverageCore.EhlersNoiseEliminationTechnology(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.BryantAdaptiveMovingAverage:
+                    MovingAverageCore.BryantAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage:
+                    MovingAverageCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersVariableIndexDynamicAverage:
+                    MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersKaufmanAdaptiveMovingAverage:
+                    MovingAverageCore.EhlersKaufmanAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersMesaAdaptiveMovingAverage:
+                    MovingAverageCore.EhlersMesaAdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AdaptiveMovingAverage:
+                    MovingAverageCore.AdaptiveMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.EhlersLaguerreFilter:
+                    MovingAverageCore.EhlersLaguerreFilter(inputSpan, outputSpan);
+                    break;
+                // Phase 3: Remaining single-input complex types
+                case MovingAvgType.ReverseEngineeringRelativeStrengthIndex:
+                    MovingAverageCore.ReverseEngineeringRsi(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ReverseMovingAverageConvergenceDivergence:
+                    MovingAverageCore.ReverseMovingAverageConvergenceDivergence(inputSpan, outputSpan, fastLength ?? 12, slowLength ?? 26);
+                    break;
+                case MovingAvgType.OptimalWeightedMovingAverage:
+                    MovingAverageCore.OptimalWeightedMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.LightLeastSquaresMovingAverage:
+                    MovingAverageCore.LightLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.FisherLeastSquaresMovingAverage:
+                    MovingAverageCore.FisherLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.OvershootReductionMovingAverage:
+                    MovingAverageCore.OvershootReductionMovingAverage(inputSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage:
+                    MovingAverageCore.KaufmanAdaptiveLeastSquaresMovingAverage(inputSpan, outputSpan, length);
+                    break;
+            }
+
+            movingAvgList = outputBuffer.ToList();
+            stockData.SetCustomValues(movingAvgList);
+            return movingAvgList;
+        }
+
+        // Fast path for multi-input moving averages (require OHLC/volume data)
+        if (movingAvgType is MovingAvgType.ElasticVolumeWeightedMovingAverageV1 or MovingAvgType.ElasticVolumeWeightedMovingAverageV2
+            or MovingAvgType.VolumeAdjustedMovingAverage or MovingAvgType.WindowedVolumeWeightedMovingAverage
+            or MovingAvgType.VolumeWeightedMovingAverage or MovingAvgType.MiddleHighLowMovingAverage
+            or MovingAvgType.EquityMovingAverage or MovingAvgType.RatioOCHLAverager
+            or MovingAvgType.VolumeWeightedAveragePrice or MovingAvgType.TrueRangeAdjustedExponentialMovingAverage
+            or MovingAvgType.AtrFilteredExponentialMovingAverage)
+        {
+            var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
+            var count = inputList.Count;
+            var inputSpan = SpanCompat.AsReadOnlySpan(customValuesList ?? inputList);
+            var highSpan = SpanCompat.AsReadOnlySpan(highList);
+            var lowSpan = SpanCompat.AsReadOnlySpan(lowList);
+            var openSpan = SpanCompat.AsReadOnlySpan(openList);
+            var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
+            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
+            var outputSpan = outputBuffer.Span;
+
+            switch (movingAvgType)
+            {
+                case MovingAvgType.ElasticVolumeWeightedMovingAverageV1:
+                    MovingAverageCore.ElasticVolumeWeightedMovingAverageV1(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.ElasticVolumeWeightedMovingAverageV2:
+                    MovingAverageCore.ElasticVolumeWeightedMovingAverageV2(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolumeAdjustedMovingAverage:
+                    MovingAverageCore.VolumeAdjustedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.WindowedVolumeWeightedMovingAverage:
+                    MovingAverageCore.WindowedVolumeWeightedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.VolumeWeightedMovingAverage:
+                    MovingAverageCore.VolumeWeightedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.MiddleHighLowMovingAverage:
+                    MovingAverageCore.MiddleHighLowMovingAverage(highSpan, lowSpan, outputSpan, slowLength ?? length, fastLength ?? 10);
+                    break;
+                case MovingAvgType.EquityMovingAverage:
+                    MovingAverageCore.EquityMovingAverage(inputSpan, volumeSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.RatioOCHLAverager:
+                    MovingAverageCore.RatioOchlAverager(openSpan, inputSpan, highSpan, lowSpan, outputSpan);
+                    break;
+                case MovingAvgType.VolumeWeightedAveragePrice:
+                    MovingAverageCore.VolumeWeightedAveragePrice(inputSpan, highSpan, lowSpan, volumeSpan, outputSpan);
+                    break;
+                case MovingAvgType.TrueRangeAdjustedExponentialMovingAverage:
+                    MovingAverageCore.TrueRangeAdjustedExponentialMovingAverage(inputSpan, highSpan, lowSpan, outputSpan, length);
+                    break;
+                case MovingAvgType.AtrFilteredExponentialMovingAverage:
+                    MovingAverageCore.AtrFilteredExponentialMovingAverage(inputSpan, highSpan, lowSpan, outputSpan, length);
+                    break;
+            }
+
+            movingAvgList = outputBuffer.ToList();
+            stockData.SetCustomValues(movingAvgList);
+            return movingAvgList;
         }
 
         switch (movingAvgType)
@@ -542,23 +1481,23 @@ public static class CalculationsHelper
             InputName.Low => stockData.LowPrices,
             InputName.High => stockData.HighPrices,
             InputName.Volume => stockData.Volumes,
-            InputName.TypicalPrice => stockData.CalculateTypicalPrice().CustomValuesList,
-            InputName.FullTypicalPrice => stockData.CalculateFullTypicalPrice().CustomValuesList,
-            InputName.MedianPrice => stockData.CalculateMedianPrice().CustomValuesList,
-            InputName.WeightedClose => stockData.CalculateWeightedClose().CustomValuesList,
+            InputName.TypicalPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Hlc3),
+            InputName.FullTypicalPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Ohlc4),
+            InputName.MedianPrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.Hl2),
+            InputName.WeightedClose => GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose),
             InputName.Open => stockData.OpenPrices,
             InputName.AdjustedClose => stockData.ClosePrices,
             InputName.Midpoint => stockData.CalculateMidpoint().CustomValuesList,
             InputName.Midprice => stockData.CalculateMidprice().CustomValuesList,
-            InputName.AveragePrice => stockData.CalculateAveragePrice().CustomValuesList,
+            InputName.AveragePrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.AveragePrice),
             _ => stockData.ClosePrices,
         };
 
         if (inputList.Count > 0)
         {
-            var sum = inputList.Sum();
-
-            if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
+            var sum = SumValues(inputList);
+            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
+            if (isVolumeInput)
             {
                 var minMaxList = GetMaxAndMinValuesList(inputList, 0);
                 highList = minMaxList.Item1;
@@ -566,8 +1505,19 @@ public static class CalculationsHelper
             }
             else
             {
-                highList = stockData.HighPrices;
-                lowList = stockData.LowPrices;
+                var lowSum = SumValues(stockData.LowPrices);
+                var highSum = SumValues(stockData.HighPrices);
+                if (sum < lowSum || sum > highSum)
+                {
+                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
+                    highList = minMaxList.Item1;
+                    lowList = minMaxList.Item2;
+                }
+                else
+                {
+                    highList = stockData.HighPrices;
+                    lowList = stockData.LowPrices;
+                }
             }
         }
         else
@@ -615,9 +1565,9 @@ public static class CalculationsHelper
 
         if (inputList.Count > 0)
         {
-            var sum = inputList.Sum();
-
-            if (inputList.SequenceEqual(stockData.Volumes) || sum < stockData.LowPrices.Sum() || sum > stockData.HighPrices.Sum())
+            var sum = SumValues(inputList);
+            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
+            if (isVolumeInput)
             {
                 var minMaxList = GetMaxAndMinValuesList(inputList, 0);
                 highList = minMaxList.Item1;
@@ -625,8 +1575,19 @@ public static class CalculationsHelper
             }
             else
             {
-                highList = stockData.HighPrices;
-                lowList = stockData.LowPrices;
+                var lowSum = SumValues(stockData.LowPrices);
+                var highSum = SumValues(stockData.HighPrices);
+                if (sum < lowSum || sum > highSum)
+                {
+                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
+                    highList = minMaxList.Item1;
+                    lowList = minMaxList.Item2;
+                }
+                else
+                {
+                    highList = stockData.HighPrices;
+                    lowList = stockData.LowPrices;
+                }
             }
         }
         else
@@ -651,53 +1612,113 @@ public static class CalculationsHelper
     public static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> volumeList)
         GetInputValuesList(StockData stockData, InputLength inputLength)
     {
-        List<double> inputList = new();
-        List<double> highList = new();
-        List<double> lowList = new();
-        List<double> openList = new();
-        List<double> volumeList = new();
+        var capacity = stockData.TickerDataList.Count;
+        List<double> inputList = new(capacity);
+        List<double> highList = new(capacity);
+        List<double> lowList = new(capacity);
+        List<double> openList = new(capacity);
+        List<double> volumeList = new(capacity);
+        var parentGroups = new Dictionary<DateTime, InputLengthGroup>();
+        var parentOrder = new List<DateTime>();
+        var tickerDataList = stockData.TickerDataList;
 
-        var groupedDatesParent = stockData.TickerDataList.GroupBy(x => x.Date.Date);
-        for (var i = 0; i < groupedDatesParent.Count(); i++)
+        for (var i = 0; i < tickerDataList.Count; i++)
         {
-            var parent = groupedDatesParent.ElementAt(i);
+            var ticker = tickerDataList[i];
+            var parentKey = ticker.Date.Date;
 
-            IEnumerable<IGrouping<int, TickerData>> groupedDatesChild = inputLength switch
+            if (!parentGroups.TryGetValue(parentKey, out var parentGroup))
             {
-                InputLength.Minute => parent.GroupBy(x => x.Date.Minute),
-                InputLength.Hour => parent.GroupBy(x => x.Date.Hour),
-                InputLength.Day => parent.GroupBy(x => x.Date.Day),
-                InputLength.Week => parent.GroupBy(x => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(x.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)),
-                InputLength.Month => parent.GroupBy(x => x.Date.Month),
-                InputLength.Year => parent.GroupBy(x => x.Date.Year),
-                _ => parent.GroupBy(x => x.Date.Day),
+                parentGroup = new InputLengthGroup();
+                parentGroups[parentKey] = parentGroup;
+                parentOrder.Add(parentKey);
+            }
+
+            var childKey = inputLength switch
+            {
+                InputLength.Minute => ticker.Date.Minute,
+                InputLength.Hour => ticker.Date.Hour,
+                InputLength.Day => ticker.Date.Day,
+                InputLength.Week => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(ticker.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                InputLength.Month => ticker.Date.Month,
+                InputLength.Year => ticker.Date.Year,
+                _ => ticker.Date.Day,
             };
 
-            for (var j = 0; j < groupedDatesChild.Count(); j++)
+            if (!parentGroup.Children.TryGetValue(childKey, out var childGroup))
             {
-                var groupedDates = groupedDatesChild.ElementAt(j);
+                childGroup = new OhlcvAggregate();
+                parentGroup.Children[childKey] = childGroup;
+                parentGroup.ChildOrder.Add(childKey);
+            }
 
-                if (groupedDates.Any())
+            childGroup.Add(ticker);
+        }
+
+        for (var i = 0; i < parentOrder.Count; i++)
+        {
+            var parentGroup = parentGroups[parentOrder[i]];
+            var childOrder = parentGroup.ChildOrder;
+            for (var j = 0; j < childOrder.Count; j++)
+            {
+                var childGroup = parentGroup.Children[childOrder[j]];
+                if (!childGroup.HasValue)
                 {
-                    var high = groupedDates.Max(x => x.High);
-                    highList.Add(high);
-
-                    var low = groupedDates.Min(x => x.Low);
-                    lowList.Add(low);
-
-                    var volume = groupedDates.Sum(x => x.Volume);
-                    volumeList.Add(volume);
-
-                    var open = groupedDates.First().Open;
-                    openList.Add(open);
-
-                    var close = groupedDates.Last().Close;
-                    inputList.Add(close);
+                    continue;
                 }
+
+                highList.Add(childGroup.High);
+                lowList.Add(childGroup.Low);
+                volumeList.Add(childGroup.Volume);
+                openList.Add(childGroup.Open);
+                inputList.Add(childGroup.Close);
             }
         }
 
         return (inputList, highList, lowList, openList, volumeList);
+    }
+
+    private sealed class InputLengthGroup
+    {
+        public Dictionary<int, OhlcvAggregate> Children { get; } = new();
+        public List<int> ChildOrder { get; } = new();
+    }
+
+    private sealed class OhlcvAggregate
+    {
+        public bool HasValue { get; private set; }
+        public double Open { get; private set; }
+        public double High { get; private set; }
+        public double Low { get; private set; }
+        public double Close { get; private set; }
+        public double Volume { get; private set; }
+
+        public void Add(TickerData ticker)
+        {
+            if (!HasValue)
+            {
+                Open = ticker.Open;
+                High = ticker.High;
+                Low = ticker.Low;
+                Close = ticker.Close;
+                Volume = ticker.Volume;
+                HasValue = true;
+                return;
+            }
+
+            if (ticker.High > High)
+            {
+                High = ticker.High;
+            }
+
+            if (ticker.Low < Low)
+            {
+                Low = ticker.Low;
+            }
+
+            Volume += ticker.Volume;
+            Close = ticker.Close;
+        }
     }
 
     /// <summary>
@@ -746,22 +1767,18 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> inputs, int length)
     {
-        List<double> highestValuesList = new();
-        List<double> lowestValuesList = new();
-        List<double> inputList = new();
+        var count = inputs.Count;
+        List<double> highestValuesList = new(count);
+        List<double> lowestValuesList = new(count);
+        var windowLength = Math.Max(length, 2);
+        var window = new RollingMinMax(windowLength);
 
         for (var i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            inputList.Add(input);
-
-            var list = inputList.TakeLastExt(Math.Max(length, 2)).ToList();
-
-            var highestValue = list.Max();
-            highestValuesList.Add(highestValue);
-
-            var lowestValue = list.Min();
-            lowestValuesList.Add(lowestValue);
+            window.Add(input);
+            highestValuesList.Add(window.Max);
+            lowestValuesList.Add(window.Min);
         }
 
         return (highestValuesList, lowestValuesList);
@@ -776,25 +1793,20 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> highList, List<double> lowList, int length)
     {
-        List<double> highestList = new();
-        List<double> lowestList = new();
-        List<double> tempHighList = new();
-        List<double> tempLowList = new();
         var count = highList.Count == lowList.Count ? highList.Count : 0;
+        List<double> highestList = new(count);
+        List<double> lowestList = new(count);
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
 
         for (var i = 0; i < count; i++)
         {
             var high = highList[i];
-            tempHighList.Add(high);
-
             var low = lowList[i];
-            tempLowList.Add(low);
-
-            var highest = tempHighList.TakeLastExt(length).Max();
-            highestList.Add(highest);
-
-            var lowest = tempLowList.TakeLastExt(length).Min();
-            lowestList.Add(lowest);
+            highWindow.Add(high);
+            lowWindow.Add(low);
+            highestList.Add(highWindow.Max);
+            lowestList.Add(lowWindow.Min);
         }
 
         return (highestList, lowestList);
@@ -829,18 +1841,46 @@ public static class CalculationsHelper
         if (0 == count)
             yield break;
 
-        if (source is ICollection<T> collection)
+        if (source is IList<T> list)
         {
-            foreach (var item in source.Skip(Math.Max(0, collection.Count - count)))
-                yield return item;
+            var start = Math.Max(0, list.Count - count);
+            for (var i = start; i < list.Count; i++)
+                yield return list[i];
 
             yield break;
         }
 
-        if (source is IReadOnlyCollection<T> collection1)
+        if (source is IReadOnlyList<T> readOnlyList)
         {
-            foreach (var item in source.Skip(Math.Max(0, collection1.Count - count)))
-                yield return item;
+            var start = Math.Max(0, readOnlyList.Count - count);
+            for (var i = start; i < readOnlyList.Count; i++)
+                yield return readOnlyList[i];
+
+            yield break;
+        }
+
+        if (source is ICollection<T> collection)
+        {
+            var skip = Math.Max(0, collection.Count - count);
+            var index = 0;
+            foreach (var item in source)
+            {
+                if (index++ >= skip)
+                    yield return item;
+            }
+
+            yield break;
+        }
+
+        if (source is IReadOnlyCollection<T> readOnlyCollection)
+        {
+            var skip = Math.Max(0, readOnlyCollection.Count - count);
+            var index = 0;
+            foreach (var item in source)
+            {
+                if (index++ >= skip)
+                    yield return item;
+            }
 
             yield break;
         }
@@ -855,7 +1895,7 @@ public static class CalculationsHelper
             result.Enqueue(item);
         }
 
-        foreach (var _ in result)
+        while (result.Count > 0)
             yield return result.Dequeue();
     }
 
@@ -867,7 +1907,8 @@ public static class CalculationsHelper
     /// <returns></returns>
     public static double PercentileNearestRank(this IEnumerable<double> sequence, double percentile)
     {
-        var list = sequence.OrderBy(i => i).ToList();
+        var list = new List<double>(sequence);
+        list.Sort();
         var n = list.Count;
         var rank = n > 0 ? (int)Math.Ceiling(percentile / 100 * n) : 0;
 
@@ -913,3 +1954,14 @@ public static class CalculationsHelper
         list.Add(Math.Round(value, digits));
     }
 }
+
+internal enum DerivedSeriesKind
+{
+    Hl2,
+    Hlc3,
+    Ohlc4,
+    WeightedClose,
+    AveragePrice,
+    TrueRange
+}
+
