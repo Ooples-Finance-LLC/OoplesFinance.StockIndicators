@@ -2484,6 +2484,33 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     () => new HurstCycleChannelState(),
                     data => data.CalculateHurstCycleChannel().OutputValues["FastMiddleBand"])
             };
+            // The slow bands diverged from the batch because the batch computed its slow ATR against
+            // the fast one - CalculateAverageTrueRange publishes onto CustomValuesList and the second
+            // call read it back. The fast bands agreed precisely because they were computed first.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastUpperBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["FastUpperBand"], "FastUpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastLowerBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["FastLowerBand"], "FastLowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.SlowUpperBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["SlowUpperBand"], "SlowUpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.SlowLowerBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["SlowLowerBand"], "SlowLowerBand")
+            };
             yield return new object[]
             {
                 new StatefulIndicatorSpec("HybridConvolutionFilter",

@@ -13782,8 +13782,8 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         _diff2Sum3 = new RollingWindowSum(resolved3);
         _dmiSum = new RollingWindowSum(resolved1);
         _stdDev1 = new StandardDeviationVolatilityState(maType, resolved1, inputName);
-        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, _ => _stdDev1Value);
-        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, _ => _stdDev2Value);
+        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, inputName);
+        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, inputName);
         _cmo5Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo10Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo20Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
@@ -13810,8 +13810,8 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         _diff2Sum3 = new RollingWindowSum(resolved3);
         _dmiSum = new RollingWindowSum(resolved1);
         _stdDev1 = new StandardDeviationVolatilityState(maType, resolved1, selector);
-        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, _ => _stdDev1Value);
-        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, _ => _stdDev2Value);
+        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, selector);
+        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, selector);
         _cmo5Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo10Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo20Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);

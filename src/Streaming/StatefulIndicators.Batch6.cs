@@ -878,7 +878,7 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
         _fastLength = Math.Max(1, fastLength);
         _slowLength = Math.Max(1, slowLength);
         _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _fastLength, inputName);
-        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, _ => _fastStdDevValue);
+        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, inputName);
         _input = new StreamingInputResolver(inputName, null);
         _kValues = new PooledRingBuffer<double>(_slowLength);
     }
@@ -893,7 +893,7 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
         _fastLength = Math.Max(1, fastLength);
         _slowLength = Math.Max(1, slowLength);
         _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _fastLength, selector);
-        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, _ => _fastStdDevValue);
+        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, selector);
         _input = new StreamingInputResolver(InputName.Close, selector);
         _kValues = new PooledRingBuffer<double>(_slowLength);
     }

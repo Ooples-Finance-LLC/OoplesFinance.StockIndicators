@@ -2126,7 +2126,9 @@ public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // First bar has no predecessor, so its true range is the bar's own range - the rule the batch
+        // side states in BuildDerivedSeriesList. Also covered for every state by #146.
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var sclAtr = _sclAtrSmoother.Next(tr, isFinal);
         var mclAtr = _mclAtrSmoother.Next(tr, isFinal);
