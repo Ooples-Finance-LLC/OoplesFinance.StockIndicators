@@ -2202,34 +2202,30 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
 
     public UltimateTraderOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10,
         int lbLength = 5, int smoothLength = 4, int rangeLength = 2, InputName inputName = InputName.Close)
+        : this(maType, length, lbLength, smoothLength, rangeLength, inputName, null)
     {
-        var resolvedLb = Math.Max(1, lbLength);
-        var resolvedRange = Math.Max(1, rangeLength);
-        _ = length;
-        _trEnvelopeMax = new RollingWindowMax(EnvelopeLength);
-        _trEnvelopeMin = new RollingWindowMin(EnvelopeLength);
-        _volEnvelopeMax = new RollingWindowMax(EnvelopeLength);
-        _volEnvelopeMin = new RollingWindowMin(EnvelopeLength);
-        _trMax = new RollingWindowMax(resolvedLb);
-        _trMin = new RollingWindowMin(resolvedLb);
-        _volMax = new RollingWindowMax(resolvedLb);
-        _volMin = new RollingWindowMin(resolvedLb);
-        _rangeHigh = new RollingWindowMax(resolvedRange);
-        _rangeLow = new RollingWindowMin(resolvedRange);
-        _dxiAvgSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLb);
-        _dxisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _dxissSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, null);
     }
 
     public UltimateTraderOscillatorState(MovingAvgType maType, int length, int lbLength, int smoothLength, int rangeLength,
         Func<OhlcvBar, double> selector)
+        : this(maType, length, lbLength, smoothLength, rangeLength, InputName.Close,
+            selector ?? throw new ArgumentNullException(nameof(selector)))
     {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
+    }
 
+    /// <summary>
+    /// The one place the windows and smoothers are built.
+    /// </summary>
+    /// <remarks>
+    /// The two public constructors differ only in how the input is selected - by name, or by a
+    /// caller-supplied delegate - so everything else was written out twice. Adding the envelope
+    /// windows for issue #167 made that second copy large enough for SonarCloud to fail the
+    /// duplication gate, which is a fair reading: two copies of a construction sequence are two
+    /// places to forget a field the next time one is added.
+    /// </remarks>
+    private UltimateTraderOscillatorState(MovingAvgType maType, int length, int lbLength, int smoothLength,
+        int rangeLength, InputName inputName, Func<OhlcvBar, double>? selector)
+    {
         var resolvedLb = Math.Max(1, lbLength);
         var resolvedRange = Math.Max(1, rangeLength);
         _ = length;
@@ -2246,7 +2242,7 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         _dxiAvgSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLb);
         _dxisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _dxissSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(inputName, selector);
     }
 
     public IndicatorName Name => IndicatorName.UltimateTraderOscillator;
