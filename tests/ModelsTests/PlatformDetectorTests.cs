@@ -18,25 +18,13 @@ public sealed class PlatformDetectorTests
         second.Should().BeSameAs(first, "nothing here changes while a process runs");
     }
 
-    /// <summary>
-    /// The epic asks for detection under a millisecond once cached.
-    /// </summary>
-    [Fact]
-    public void ReadingCachedCapabilitiesIsEffectivelyFree()
-    {
-        _ = PlatformDetector.Capabilities;
-
-        var stopwatch = Stopwatch.StartNew();
-        for (var i = 0; i < 1000; i++)
-        {
-            _ = PlatformDetector.Capabilities;
-        }
-
-        stopwatch.Stop();
-
-        stopwatch.Elapsed.TotalMilliseconds.Should().BeLessThan(1,
-            "a thousand reads should not add up to a millisecond, let alone one read");
-    }
+    // A sibling test used to assert the epic's "under a millisecond, cached" directly: a thousand
+    // reads inside a Stopwatch, under one millisecond total. It was removed rather than relaxed.
+    // Stopwatch.Elapsed includes thread descheduling, so it measured the load on the machine running
+    // it - passing on an idle laptop, failing on a busy CI worker, for identical code. The property
+    // that MAKES the requirement true is the one above: detection happens once and every later read
+    // is the same object, after which a read is a field access whatever the scheduler is doing. If
+    // the timing itself ever needs guarding it belongs in a benchmark with warmup, not a unit test.
 
     [Fact]
     public void ReportsSomethingAboutTheMachineItIsRunningOn()
