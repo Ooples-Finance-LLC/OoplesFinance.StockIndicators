@@ -743,6 +743,20 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         sb.AppendLine("/// </summary>");
         sb.AppendLine("public sealed partial class IndicatorCatalog");
         sb.AppendLine("{");
+        sb.AppendLine("    /// <summary>");
+        sb.AppendLine("    /// Turns the catalog's single optional length knob into the parameter array the streaming");
+        sb.AppendLine("    /// state factory reads.");
+        sb.AppendLine("    /// </summary>");
+        sb.AppendLine("    /// <remarks>");
+        sb.AppendLine("    /// An omitted length must produce an EMPTY array, not a placeholder value. Every state");
+        sb.AppendLine("    /// constructor already declares its own default - 13 bars for the Alligator's jaw, 20 for a");
+        sb.AppendLine("    /// Bollinger basis, 100 for the long-horizon Ehlers filters - and the factory falls back to it");
+        sb.AppendLine("    /// only when the array is short. Passing a value here would override every one of them; the");
+        sb.AppendLine("    /// catalog previously passed a hardcoded 14, which silently disagreed with the batch");
+        sb.AppendLine("    /// Calculate* default for 390 of the 545 indicators that take an int length.");
+        sb.AppendLine("    /// </remarks>");
+        sb.AppendLine("    private static object[] LengthParameters(int? length) =>");
+        sb.AppendLine("        length.HasValue ? new object[] { length.Value } : System.Array.Empty<object>();");
 
         var generatedCount = 0;
         foreach (var indicatorName in indicatorNames)
@@ -766,11 +780,12 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             {
                 // Multi-output indicator - generate method returning result type
                 var resultTypeName = $"{methodName}Result";
-                sb.AppendLine($"    public {resultTypeName} {methodName}(int length = 14, SeriesHandle? input = null)");
+                sb.AppendLine($"    /// <param name=\"length\">The lookback length, or <see langword=\"null\"/> to use this indicator's own default.</param>");
+                sb.AppendLine($"    public {resultTypeName} {methodName}(int? length = null, SeriesHandle? input = null)");
                 sb.AppendLine("    {");
                 sb.AppendLine("        var series = input ?? Price();");
                 sb.AppendLine("        var seriesKey = _builder.ResolveSeriesKey(series);");
-                sb.AppendLine($"        var opts = new GenericIndicatorOptions(new object[] {{ length }});");
+                sb.AppendLine($"        var opts = new GenericIndicatorOptions(LengthParameters(length));");
 
                 for (int i = 0; i < outputs.Length; i++)
                 {
@@ -786,10 +801,11 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
             else
             {
                 // Single-output indicator
-                sb.AppendLine($"    public SeriesHandle {methodName}(int length = 14, SeriesHandle? input = null, IndicatorKey? key = null)");
+                sb.AppendLine($"    /// <param name=\"length\">The lookback length, or <see langword=\"null\"/> to use this indicator's own default.</param>");
+                sb.AppendLine($"    public SeriesHandle {methodName}(int? length = null, SeriesHandle? input = null, IndicatorKey? key = null)");
                 sb.AppendLine("    {");
                 sb.AppendLine("        var series = input ?? Price();");
-                sb.AppendLine($"        var spec = IndicatorSpecs.Create(IndicatorName.{indicatorName}, new GenericIndicatorOptions(new object[] {{ length }}), IndicatorOutput.Primary);");
+                sb.AppendLine($"        var spec = IndicatorSpecs.Create(IndicatorName.{indicatorName}, new GenericIndicatorOptions(LengthParameters(length)), IndicatorOutput.Primary);");
                 sb.AppendLine("        return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);");
                 sb.AppendLine("    }");
             }

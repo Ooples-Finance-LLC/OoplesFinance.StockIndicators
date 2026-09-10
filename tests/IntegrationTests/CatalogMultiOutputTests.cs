@@ -27,9 +27,9 @@ public sealed class CatalogMultiOutputTests : GlobalTestData
         builder.ConfigureIndicators(catalog =>
         {
             var result = catalog.AlligatorIndex();
-            jaw = result.Lips;
+            jaw = result.Jaws;
             teeth = result.Teeth;
-            lips = result.Jaws;
+            lips = result.Lips;
         });
 
         var runtime = builder.Build();
@@ -53,14 +53,25 @@ public sealed class CatalogMultiOutputTests : GlobalTestData
     {
         var (runtime, jaw, teeth, lips) = BuildAlligator();
 
-        foreach (var (name, handle) in new[] { ("Lips", jaw), ("Teeth", teeth), ("Lips", lips) })
+        var batch = new StockData(StockTestData.Take(200)).CalculateAlligatorIndex();
+
+        foreach (var (name, handle) in new[] { ("Jaws", jaw), ("Teeth", teeth), ("Lips", lips) })
         {
             runtime.Subscribe(handle);
-            var series = runtime.GetSeries(handle);
+            var series = runtime.GetSeries(handle).ToList();
 
             series.Count.Should().BeGreaterThan(0, $"{name} should produce output values");
             series.Count(v => !double.IsNaN(v) && v != 0)
                 .Should().BeGreaterThan(0, $"{name} should have values that are not all zero or NaN");
+
+            // Against the NAMED batch output, not merely against zero. "Produces values" is true of
+            // any three series, including three copies of one - which is the defect this file exists
+            // to catch, since five of six multi-output catalog results once returned byte-identical
+            // series. Pinning each handle to the output it claims to be is what makes that visible.
+            var expected = batch.OutputValues[name];
+            var overlap = Math.Min(series.Count, expected.Count);
+            series.Take(overlap).Should().Equal(expected.Take(overlap),
+                $"the catalog handle for {name} must be that output, not another of them");
         }
     }
 
@@ -77,7 +88,12 @@ public sealed class CatalogMultiOutputTests : GlobalTestData
         var teethSeries = runtime.GetSeries(teeth).ToList();
         var lipsSeries = runtime.GetSeries(lips).ToList();
 
-        jawSeries.Should().NotEqual(teethSeries, "the lips and the teeth are different series");
-        teethSeries.Should().NotEqual(lipsSeries, "the teeth and the jaws are different series");
+        jawSeries.Should().NotEqual(teethSeries, "the jaws and the teeth are different series");
+        teethSeries.Should().NotEqual(lipsSeries, "the teeth and the lips are different series");
+
+        // The third pair, which was missing. Jaws and Lips are the two the helper bound the wrong
+        // way round, so this is exactly the comparison a Jaws/Lips swap or duplication shows up in -
+        // and the only one of the three that was absent.
+        jawSeries.Should().NotEqual(lipsSeries, "the jaws and the lips are different series");
     }
 }
