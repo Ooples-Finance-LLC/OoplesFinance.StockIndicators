@@ -1517,9 +1517,13 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        // Batch contamination: GetMovingAverageList sets CustomValuesList = yMaList, then
-        // CalculateStandardDeviationVolatility uses yMaList (not original close prices)
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
+        // This used to read the moving average rather than price, mirroring the batch side, which was
+        // contaminated exactly as the note here described: GetMovingAverageList left CustomValuesList
+        // holding yMaList and the standard deviation that followed measured that. A regression line
+        // needs the dispersion of y itself. Both sides now do - issue #145.
+        // Was reading the moving average rather than the input series, mirroring a batch side that
+        // had been contaminated by GetMovingAverageList. Both now measure the input - issue #145.
+        _yStdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -1536,7 +1540,7 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
         // Batch contamination: stdDev uses yMa values, not original input values
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
+        _yStdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }

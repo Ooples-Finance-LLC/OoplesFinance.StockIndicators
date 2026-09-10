@@ -399,8 +399,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
+        // Resolved before the moving average, which would otherwise become the close series the true
+        // range is measured against - issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData);
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, length);
+
+        // Deliberate: the standard deviation below is of the average true range, not of price, so the
+        // custom values are set on purpose here. Only the true range itself was wrong.
         stockData.SetCustomValues(atrList);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
 

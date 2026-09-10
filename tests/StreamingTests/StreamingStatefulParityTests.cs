@@ -174,6 +174,20 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     () => new AroonOscillatorState(25),
                     data => data.CalculateAroonOscillator(25).CustomValuesList)
             };
+            // Up and Down are the primary form of Aroon and were computed then discarded until #170.
+            // The oscillator alone cannot distinguish 100 and 100 from 0 and 0.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AroonOscillator.AroonUp",
+                    () => new AroonOscillatorState(25),
+                    data => data.CalculateAroonOscillator(25).OutputValues["AroonUp"], "AroonUp")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AroonOscillator.AroonDown",
+                    () => new AroonOscillatorState(25),
+                    data => data.CalculateAroonOscillator(25).OutputValues["AroonDown"], "AroonDown")
+            };
             yield return new object[]
             {
                 new StatefulIndicatorSpec("BearPowerIndicator",
@@ -2469,6 +2483,33 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                 new StatefulIndicatorSpec("HurstCycleChannel.FastMiddleBand",
                     () => new HurstCycleChannelState(),
                     data => data.CalculateHurstCycleChannel().OutputValues["FastMiddleBand"])
+            };
+            // The slow bands diverged from the batch because the batch computed its slow ATR against
+            // the fast one - CalculateAverageTrueRange publishes onto CustomValuesList and the second
+            // call read it back. The fast bands agreed precisely because they were computed first.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastUpperBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["FastUpperBand"], "FastUpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastLowerBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["FastLowerBand"], "FastLowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.SlowUpperBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["SlowUpperBand"], "SlowUpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.SlowLowerBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel().OutputValues["SlowLowerBand"], "SlowLowerBand")
             };
             yield return new object[]
             {

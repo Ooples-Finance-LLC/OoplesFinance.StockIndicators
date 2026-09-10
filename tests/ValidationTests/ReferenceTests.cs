@@ -1311,11 +1311,12 @@ public sealed class ReferenceTests
 
         builder.ConfigureIndicators(catalog =>
         {
-            // CalculateAroonOscillator computes aroonUp and aroonDown internally but publishes only
-            // their difference, so .Up and .Down never existed - the catalog fabricated them and both
-            // silently resolved to the oscillator. What is testable here is the oscillator's own range.
-            upHandle = catalog.AroonOscillator(length);
-            downHandle = upHandle;
+            // These are real series now. Aroon Up and Down were computed and discarded, so the catalog
+            // members that claimed to expose them both resolved to the oscillator instead - which is
+            // why this test passed while reading the same series twice. See #170.
+            var aroon = catalog.AroonOscillator(length);
+            upHandle = aroon.AroonUp;
+            downHandle = aroon.AroonDown;
         });
 
         using var runtime = builder.Build();
@@ -1324,17 +1325,29 @@ public sealed class ReferenceTests
         runtime.Subscribe(downHandle!.Value);
 
 
-        var oscillator = runtime.GetSeries(upHandle!.Value).ToArray();
-        var valid = oscillator.Where(v => !double.IsNaN(v)).ToArray();
+        var aroonUp = runtime.GetSeries(upHandle!.Value).ToArray();
+        var aroonDown = runtime.GetSeries(downHandle!.Value).ToArray();
 
-        valid.Should().NotBeEmpty($"Aroon({length}) should have valid values");
+        var validUp = aroonUp.Where(v => !double.IsNaN(v)).ToArray();
+        var validDown = aroonDown.Where(v => !double.IsNaN(v)).ToArray();
 
-        foreach (var value in valid)
+        validUp.Should().NotBeEmpty($"Aroon Up({length}) should have valid values");
+        validDown.Should().NotBeEmpty($"Aroon Down({length}) should have valid values");
+
+        // Each is (length - barsSinceExtreme) / length * 100, so each is bounded by 0 and 100.
+        foreach (var value in validUp)
         {
-            // aroonUp and aroonDown are each 0..100, so their difference is -100..100.
-            value.Should().BeGreaterThanOrEqualTo(-100, $"Aroon({length}) oscillator is bounded below by -100");
-            value.Should().BeLessThanOrEqualTo(100, $"Aroon({length}) oscillator is bounded above by 100");
+            value.Should().BeGreaterThanOrEqualTo(0, $"Aroon Up({length}) is bounded below by 0");
+            value.Should().BeLessThanOrEqualTo(100, $"Aroon Up({length}) is bounded above by 100");
         }
+
+        foreach (var value in validDown)
+        {
+            value.Should().BeGreaterThanOrEqualTo(0, $"Aroon Down({length}) is bounded below by 0");
+            value.Should().BeLessThanOrEqualTo(100, $"Aroon Down({length}) is bounded above by 100");
+        }
+
+        validUp.Should().NotEqual(validDown, "Up and Down are different series, not the oscillator twice");
 
     }
 

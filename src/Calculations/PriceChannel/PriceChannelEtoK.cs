@@ -296,8 +296,13 @@ public static partial class Calculations
         var scl_2 = MinOrMax((int)Math.Ceiling((double)scl / 2));
         var mcl_2 = MinOrMax((int)Math.Ceiling((double)mcl / 2));
 
-        var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).CustomValuesList;
-        var mclAtrList = CalculateAverageTrueRange(stockData, maType, mcl).CustomValuesList;
+        // Both true ranges are of price. CalculateAverageTrueRange publishes its result onto
+        // stockData.CustomValuesList, so the second call measured the first one's ATR as its close
+        // series - which is why the fast bands agreed with the streaming state and the slow ones did
+        // not. Issue #145, and the first half of #167.
+        var atrSource = IndicatorSource.Resolve(stockData);
+        var sclAtrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, scl);
+        var mclAtrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, mcl);
         var sclRmaList = GetMovingAverageList(stockData, maType, scl, inputList);
         var mclRmaList = GetMovingAverageList(stockData, maType, mcl, inputList);
 
