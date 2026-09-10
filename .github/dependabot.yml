@@ -22,6 +22,15 @@ updates:
     # Deliberately no `ignore` rule for major updates. The test-tooling majors that came through
     # recently - coverlet 6 to 10, Microsoft.NET.Test.Sdk 17 to 18, FluentAssertions 6 to 8 - are
     # exactly the updates this repository has been taking, so suppressing majors would hide them.
+    # The ONE exception. Microsoft.CodeAnalysis.CSharp/.Analyzers in the source generator are not an
+    # ordinary dependency: csc refuses to load an analyzer built against a Roslyn newer than the running
+    # compiler (CS9057), so that version is the MINIMUM .NET SDK every consumer of this package is forced
+    # onto. #155 raised it 4.8.0 -> 5.9.0 and made the package unbuildable on SDK 10.0.1xx, which broke a
+    # downstream production deployment. Bumping it is a breaking change to consumers, so it is a deliberate
+    # decision rather than a bot update.
+    ignore:
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+      - dependency-name: "Microsoft.CodeAnalysis.Analyzers"
 
   # GitHub Actions updates. The workflows pin actions to a commit SHA, which is the safe way to use
   # a third-party action but also freezes it - nothing tells you an update exists. Dependabot is
