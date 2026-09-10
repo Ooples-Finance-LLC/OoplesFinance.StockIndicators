@@ -270,6 +270,62 @@ public class StockData : IStockData
         return new StockData(this, list);
     }
 
+    /// <summary>
+    /// Returns a view over the same bars whose input series is this result's named output, so the next
+    /// calculation continues from that series.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Chaining an indicator onto another already works without any special syntax, because
+    /// <c>Calculate*</c> takes a <see cref="StockData"/> and returns one:
+    /// </para>
+    /// <code>
+    /// data.CalculateSimpleMovingAverage(20).CalculateBollingerBands();
+    /// </code>
+    /// <para>
+    /// What that cannot express is <i>which</i> series to continue from when a result publishes several.
+    /// That is a question about the result, so it belongs here rather than in some separate step the
+    /// caller has to learn:
+    /// </para>
+    /// <code>
+    /// var bands = data.CalculateBollingerBands();
+    /// var upperRsi = bands.SeriesView("UpperBand").CalculateRsi(14);
+    /// var lowerRsi = bands.SeriesView("LowerBand").CalculateRsi(14);
+    /// </code>
+    /// <para>
+    /// The view is a <see cref="StockData"/>, so every existing calculation chains off it unchanged, and
+    /// because it is a view rather than a mutation both <c>bands</c> and the original data are untouched
+    /// - one result can be branched as many ways as you like.
+    /// </para>
+    /// <para>
+    /// Generated accessors call this, so <c>bands.UpperBand()</c> fails to compile on a misspelling
+    /// rather than failing here at run time.
+    /// </para>
+    /// </remarks>
+    /// <param name="outputName">The published output to continue from.</param>
+    /// <exception cref="CalculationException">
+    /// Thrown when this result publishes no output of that name. The message lists what it does publish.
+    /// </exception>
+    public StockData SeriesView(string outputName)
+    {
+        if (outputName is null || outputName.Length == 0)
+        {
+            throw new ArgumentException("An output name is required.", nameof(outputName));
+        }
+
+        if (OutputValues is null || !OutputValues.TryGetValue(outputName, out var series))
+        {
+            var available = OutputValues is null || OutputValues.Count == 0
+                ? "none"
+                : string.Join(", ", OutputValues.Keys);
+
+            throw new CalculationException(
+                $"{IndicatorName} does not publish an output named '{outputName}'. Available outputs: {available}.");
+        }
+
+        return WithValues(series);
+    }
+
     public void EnsureColumnView()
     {
         EnsureColumns();

@@ -326,4 +326,67 @@ public sealed class IndicatorSourceTests : GlobalTestData
             "this is issue #145: the moving average redefined the series the standard deviation reads, "
             + "so it measures the spread of the average instead of the spread of price");
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // SeriesView: continue from a named output. No chaining primitive on the input - the question of
+    // which series to continue from belongs to the result, so it is answered there.
+    // ---------------------------------------------------------------------------------------------
+
+    [Fact]
+    public void SeriesView_ContinuesFromTheNamedOutput()
+    {
+        var bands = CreateData().CalculateBollingerBands();
+
+        var view = bands.SeriesView("UpperBand");
+
+        view.CustomValuesList.Should().BeSameAs(bands.OutputValues["UpperBand"]);
+    }
+
+    [Fact]
+    public void SeriesView_LetsAnyExistingCalculationChainOffAMultiOutputResult()
+    {
+        var bands = CreateData().CalculateBollingerBands();
+
+        var upperRsi = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(length: 14)
+            .CustomValuesList;
+
+        // The same RSI computed by handing the series over explicitly.
+        var expected = CreateData().WithValues(bands.OutputValues["UpperBand"])
+            .CalculateRelativeStrengthIndex(length: 14).CustomValuesList;
+
+        upperRsi.Should().HaveCount(expected.Count);
+        for (var i = 0; i < expected.Count; i++)
+        {
+            upperRsi[i].Should().BeApproximately(expected[i], Tolerance, $"index {i}");
+        }
+    }
+
+    [Fact]
+    public void SeriesView_BranchesWithoutDisturbingTheResultOrTheSource()
+    {
+        var data = CreateData();
+        var bands = data.CalculateBollingerBands();
+        var upperBefore = new List<double>(bands.OutputValues["UpperBand"]);
+
+        var upper = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(length: 14);
+        var lower = bands.SeriesView("LowerBand").CalculateRelativeStrengthIndex(length: 14);
+
+        upper.CustomValuesList.Should().NotEqual(lower.CustomValuesList,
+            "two branches off one result must be independent");
+        bands.OutputValues["UpperBand"].Should().Equal(upperBefore,
+            "branching must not disturb the result it came from");
+        data.CustomValuesList.Should().BeEmpty("nor the data it came from");
+    }
+
+    [Fact]
+    public void SeriesView_NamesTheAvailableOutputsWhenAskedForOneThatDoesNotExist()
+    {
+        var bands = CreateData().CalculateBollingerBands();
+
+        var act = () => bands.SeriesView("MiddleBnd");
+
+        act.Should().Throw<CalculationException>()
+            .WithMessage("*MiddleBnd*")
+            .WithMessage("*UpperBand*", "the message should say what is actually available");
+    }
 }
