@@ -41,7 +41,7 @@ public sealed class IndicatorInvariantTests
     };
 
     /// <summary>
-    /// Indicators that still move on a market that never moved. Each is a defect; see issue #177.
+    /// Indicators that still move on a market that never moved. Each is a defect; see issue #178.
     /// </summary>
     /// <remarks>
     /// Three were found by this test and fixed rather than listed: PercentChangeOscillator divided by
@@ -73,7 +73,7 @@ public sealed class IndicatorInvariantTests
 
     /// <summary>
     /// Indicators publishing an upper band below their middle, or a middle below their lower. Each is
-    /// a defect; see issue #177.
+    /// a defect; see issue #178.
     /// </summary>
     /// <remarks>
     /// Two mechanisms account for most of them. FractalChaosBands computes its middle as the mean of
