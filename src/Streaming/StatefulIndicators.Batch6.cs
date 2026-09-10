@@ -676,7 +676,7 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
     private readonly PooledRingBuffer<double> _lows;
     private readonly StreamingInputResolver _input;
     private readonly int _length2;
-    private double _prevClose;
+    private double _prevValue;
     private double _prevAtrUp;
     private double _prevAtrDn;
     private bool _hasPrev;
@@ -716,7 +716,7 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
         _lowWindow.Reset();
         _highs.Clear();
         _lows.Clear();
-        _prevClose = 0;
+        _prevValue = 0;
         _prevAtrUp = 0;
         _prevAtrDn = 0;
         _hasPrev = false;
@@ -724,10 +724,17 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // The batch takes the true-range previous value from the SELECTED input series, not from
+        // close: CalculateDrunkardWalk reads inputList out of GetInputValuesList and passes
+        // inputList[i - 1] - or inputList[i] on the first bar - to CalculateTrueRange, while the
+        // high and low come from highList/lowList. This state accepted an InputName and a selector,
+        // built a resolver from them, and then never read it, so anything but the default input
+        // silently disagreed with the batch. Highs and lows stay on the bar, as they do there.
+        var value = _input.GetValue(bar);
+        var prevValue = _hasPrev ? _prevValue : value;
         var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var dnRun = StreamingWindowMath.LastOffset(_highs, bar.High, highestHigh);
         var upRun = StreamingWindowMath.LastOffset(_lows, bar.Low, lowestLow);
 
@@ -747,7 +754,7 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
         {
             _highs.TryAdd(bar.High, out _);
             _lows.TryAdd(bar.Low, out _);
-            _prevClose = bar.Close;
+            _prevValue = value;
             _prevAtrUp = atrUp;
             _prevAtrDn = atrDn;
             _hasPrev = true;
