@@ -104,6 +104,11 @@ Range Bands published 'Short' with 3 values for 200 bars.
 
 **A primary is optional.** Without `SetPrimary`, a chain continues from the first output you publish.
 
+**The primary series follows the same rule.** `SetPrimary` rejects a series that does not have one
+value per bar, exactly as `Publish` does. It matters more there, not less: the primary is what a
+chained calculation continues from, so a misaligned one is read against the wrong bars by the *next*
+indicator, or indexed past its end, with nothing at the point of the mistake to say what went wrong.
+
 ## Why the helpers take the series as a parameter
 
 `MovingAverage` and `StandardDeviation` both take the series they measure. That is deliberate, and it

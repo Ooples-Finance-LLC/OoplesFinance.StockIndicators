@@ -195,6 +195,19 @@ public abstract class IndicatorBase
             throw new ArgumentNullException(nameof(values));
         }
 
+        // The same bar-count rule Publish enforces on named outputs. The primary series is the one
+        // Run hands to WithValues, so it becomes the input of whatever is chained next - a
+        // misaligned primary is read against the wrong bars there, or indexed past its end, with
+        // nothing at the point of the mistake to say so. Publish already refuses this for a series
+        // nobody chains from; the one that IS chained from should not be the lenient case.
+        if (values.Count != Count)
+        {
+            throw new CalculationException(
+                $"{Name} set a primary series of {values.Count} values for {Count} bars. The primary "
+                + "series is what a chained calculation continues from, so it must have one value "
+                + "per bar.");
+        }
+
         _primary = values;
     }
 
