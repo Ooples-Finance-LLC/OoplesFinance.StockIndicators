@@ -732,6 +732,22 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             //
             //   HurstCycleChannel slow bands and UltimateTraderOscillator - unrelated batch/streaming
             //   divergences (the fast Hurst bands below do agree, so it is specific to the slow leg).
+            //
+            // BollingerBandsAverageTrueRange is a FIFTH instance of that first group, and the only one
+            // that does not look like one: it has a passing spec further down, so it reads as settled.
+            // It is not. CalculateBollingerBandsAvgTrueRange calls
+            // GetMovingAverageList(stockData, maType, atrLength, inputList), which leaves that average
+            // on StockData, and then asks the same object for an ATR - so its true range is measured
+            // from the 22-bar average of the input, not from the previous price. The streaming state
+            // mirrors that deliberately (_atrMaSmoother is built with the same maType and atrLength),
+            // which is the only reason the two agree.
+            //
+            // Measured, because reading the call order suggests the opposite: at index 54 the batch's
+            // AtrDev implies an ATR of 8.65854338842975, which is SMA22 of the true range taken
+            // against the average (8.658543388429747) and not against price (5.117840909090909) -
+            // the latter being what CalculateAverageTrueRange returns on a clean StockData. Changing
+            // the streaming side to use price therefore BREAKS parity rather than fixing it; that was
+            // tried here and reverted. Whichever way #145 settles, both sides have to move together.
             yield return new object[]
             {
                 new StatefulIndicatorSpec("AverageTrueRangeChannel.UpperBand",
