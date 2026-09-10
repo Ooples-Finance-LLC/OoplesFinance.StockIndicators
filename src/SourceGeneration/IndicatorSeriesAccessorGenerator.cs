@@ -40,6 +40,7 @@ namespace OoplesFinance.StockIndicators.SourceGeneration;
 public class IndicatorSeriesAccessorGenerator : IIncrementalGenerator
 {
     private const string AccessorNamespace = "OoplesFinance.StockIndicators.Series";
+    private const string LibraryAssemblyName = "OoplesFinance.StockIndicators";
 
     /// <summary>
     /// Names that would collide with something already on <see cref="object"/> or on StockData itself.
@@ -61,7 +62,22 @@ public class IndicatorSeriesAccessorGenerator : IIncrementalGenerator
             .Where(static names => names.Length > 0)
             .Collect();
 
-        context.RegisterSourceOutput(outputNames, static (spc, names) => Emit(spc, names));
+        // The generator ships inside the package, so it also runs in every consumer's compilation.
+        // These types live in this library's namespace and are already compiled into its assembly;
+        // emitting them again on the consumer side would give two classes with the same full name and
+        // ambiguous extension methods between them. Custom indicators written by a consumer get their
+        // own generator with its own output rather than a second copy of this one.
+        var guarded = context.CompilationProvider.Combine(outputNames);
+
+        context.RegisterSourceOutput(guarded, static (spc, source) =>
+        {
+            if (source.Left.AssemblyName != LibraryAssemblyName)
+            {
+                return;
+            }
+
+            Emit(spc, source.Right);
+        });
     }
 
     private static bool IsSetOutputValuesInvocation(SyntaxNode node)

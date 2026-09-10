@@ -54,7 +54,20 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Collect();
 
-        context.RegisterSourceOutput(indicators, static (spc, items) => Emit(spc, items));
+        // Guarded for the same reason as the accessors: this generator ships in the package and runs
+        // in consumer compilations too, where emitting GeneratedIndicatorOutputs again would collide
+        // with the copy already compiled into this library.
+        var guarded = context.CompilationProvider.Combine(indicators);
+
+        context.RegisterSourceOutput(guarded, static (spc, source) =>
+        {
+            if (source.Left.AssemblyName != "OoplesFinance.StockIndicators")
+            {
+                return;
+            }
+
+            Emit(spc, source.Right);
+        });
     }
 
     /// <summary>

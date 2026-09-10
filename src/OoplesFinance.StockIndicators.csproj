@@ -104,6 +104,19 @@
     <Analyzer Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll" />
   </ItemGroup>
 
+  <!--
+    Ship the generator inside the package as well, not only use it while building this project.
+    Without this the published nupkg holds three lib folders and nothing else, so a consumer gets no
+    generation at all - no series accessors, no output map, and no way for an indicator they write
+    themselves to take part in any of it. analyzers/dotnet/cs is where the SDK looks.
+  -->
+  <ItemGroup>
+    <None Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <!-- These two move together. System.Memory 4.6.3 and System.Text.Json 10 both require
          System.Buffers >= 4.6.1, and leaving either half behind is a fatal NU1605 downgrade on
