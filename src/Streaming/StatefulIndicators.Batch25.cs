@@ -2175,6 +2175,18 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
 
 public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    /// <summary>GetMaxAndMinValuesList clamps its window to a minimum of two.</summary>
+    private const int EnvelopeLength = 2;
+
+    // The batch side feeds each of these series through GetInputValuesList, which has no high or low
+    // for a synthetic series and substitutes a two-bar envelope of the series itself. The stochastic's
+    // own lookback is then applied on top of that, so its effective window is one bar longer than the
+    // lookback asked for. These pairs reproduce that envelope; without them this state used a plain
+    // lookback window and drifted from the batch from bar 15 onward. See issue #167.
+    private readonly RollingWindowMax _trEnvelopeMax;
+    private readonly RollingWindowMin _trEnvelopeMin;
+    private readonly RollingWindowMax _volEnvelopeMax;
+    private readonly RollingWindowMin _volEnvelopeMin;
     private readonly RollingWindowMax _trMax;
     private readonly RollingWindowMin _trMin;
     private readonly RollingWindowMax _volMax;
@@ -2194,6 +2206,10 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var resolvedLb = Math.Max(1, lbLength);
         var resolvedRange = Math.Max(1, rangeLength);
         _ = length;
+        _trEnvelopeMax = new RollingWindowMax(EnvelopeLength);
+        _trEnvelopeMin = new RollingWindowMin(EnvelopeLength);
+        _volEnvelopeMax = new RollingWindowMax(EnvelopeLength);
+        _volEnvelopeMin = new RollingWindowMin(EnvelopeLength);
         _trMax = new RollingWindowMax(resolvedLb);
         _trMin = new RollingWindowMin(resolvedLb);
         _volMax = new RollingWindowMax(resolvedLb);
@@ -2217,6 +2233,10 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var resolvedLb = Math.Max(1, lbLength);
         var resolvedRange = Math.Max(1, rangeLength);
         _ = length;
+        _trEnvelopeMax = new RollingWindowMax(EnvelopeLength);
+        _trEnvelopeMin = new RollingWindowMin(EnvelopeLength);
+        _volEnvelopeMax = new RollingWindowMax(EnvelopeLength);
+        _volEnvelopeMin = new RollingWindowMin(EnvelopeLength);
         _trMax = new RollingWindowMax(resolvedLb);
         _trMin = new RollingWindowMin(resolvedLb);
         _volMax = new RollingWindowMax(resolvedLb);
@@ -2233,6 +2253,10 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
 
     public void Reset()
     {
+        _trEnvelopeMax.Reset();
+        _trEnvelopeMin.Reset();
+        _volEnvelopeMax.Reset();
+        _volEnvelopeMin.Reset();
         _trMax.Reset();
         _trMin.Reset();
         _volMax.Reset();
@@ -2254,14 +2278,18 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var open = bar.Open;
         var prevClose = _hasPrev ? _prevClose : 0;
         var tr = CalculationsHelper.CalculateTrueRange(high, low, prevClose);
-        var trHigh = isFinal ? _trMax.Add(tr, out _) : _trMax.Preview(tr, out _);
-        var trLow = isFinal ? _trMin.Add(tr, out _) : _trMin.Preview(tr, out _);
+        var trEnvelopeHigh = isFinal ? _trEnvelopeMax.Add(tr, out _) : _trEnvelopeMax.Preview(tr, out _);
+        var trEnvelopeLow = isFinal ? _trEnvelopeMin.Add(tr, out _) : _trEnvelopeMin.Preview(tr, out _);
+        var trHigh = isFinal ? _trMax.Add(trEnvelopeHigh, out _) : _trMax.Preview(trEnvelopeHigh, out _);
+        var trLow = isFinal ? _trMin.Add(trEnvelopeLow, out _) : _trMin.Preview(trEnvelopeLow, out _);
         var trRange = trHigh - trLow;
         var trSto = trRange != 0 ? MathHelper.MinOrMax((tr - trLow) / trRange * 100, 100, 0) : 0;
 
         var volume = bar.Volume;
-        var volHigh = isFinal ? _volMax.Add(volume, out _) : _volMax.Preview(volume, out _);
-        var volLow = isFinal ? _volMin.Add(volume, out _) : _volMin.Preview(volume, out _);
+        var volEnvelopeHigh = isFinal ? _volEnvelopeMax.Add(volume, out _) : _volEnvelopeMax.Preview(volume, out _);
+        var volEnvelopeLow = isFinal ? _volEnvelopeMin.Add(volume, out _) : _volEnvelopeMin.Preview(volume, out _);
+        var volHigh = isFinal ? _volMax.Add(volEnvelopeHigh, out _) : _volMax.Preview(volEnvelopeHigh, out _);
+        var volLow = isFinal ? _volMin.Add(volEnvelopeLow, out _) : _volMin.Preview(volEnvelopeLow, out _);
         var volRange = volHigh - volLow;
         var vSto = volRange != 0 ? MathHelper.MinOrMax((volume - volLow) / volRange * 100, 100, 0) : 0;
 
@@ -2306,6 +2334,10 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
 
     public void Dispose()
     {
+        _trEnvelopeMax.Dispose();
+        _trEnvelopeMin.Dispose();
+        _volEnvelopeMax.Dispose();
+        _volEnvelopeMin.Dispose();
         _trMax.Dispose();
         _trMin.Dispose();
         _volMax.Dispose();
