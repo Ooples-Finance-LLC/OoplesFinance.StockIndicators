@@ -879,6 +879,8 @@ public static partial class Calculations
     public static StockData CalculateAroonOscillator(this StockData stockData, int length = 25)
     {
         List<double> aroonOscillatorList = new(stockData.Count);
+        List<double> aroonUpList = new(stockData.Count);
+        List<double> aroonDownList = new(stockData.Count);
         List<double> tempList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -898,6 +900,9 @@ public static partial class Calculations
             var aroonUp = (double)(length - daysSinceMax) / length * 100;
             var aroonDown = (double)(length - daysSinceMin) / length * 100;
 
+            aroonUpList.Add(aroonUp);
+            aroonDownList.Add(aroonDown);
+
             var prevAroonOscillator = GetLastOrDefault(aroonOscillatorList);
             var aroonOscillator = aroonUp - aroonDown;
             aroonOscillatorList.Add(aroonOscillator);
@@ -906,8 +911,14 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
+        // Up and Down are the primary form of this indicator; the oscillator is their difference and
+        // cannot be inverted back into them. An oscillator of zero is 100 and 100, both trends strong,
+        // or 0 and 0, both stale - opposite readings. Both series were already being computed here and
+        // then discarded. See issue #170.
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Aroon", aroonOscillatorList }
+            { "Aroon", aroonOscillatorList },
+            { "AroonUp", aroonUpList },
+            { "AroonDown", aroonDownList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(aroonOscillatorList);

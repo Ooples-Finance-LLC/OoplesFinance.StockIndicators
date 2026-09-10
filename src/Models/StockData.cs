@@ -203,6 +203,129 @@ public class StockData : IStockData
         Count = _tickerDataList.Count;
     }
 
+    /// <summary>
+    /// Private constructor for <see cref="WithValues"/>. Shares the price series by reference rather
+    /// than copying them, so deriving a view is cheap enough to do inside a calculation.
+    /// </summary>
+    private StockData(StockData source, List<double> values)
+    {
+        source.EnsureColumns();
+
+        _openPrices = source._openPrices;
+        _highPrices = source._highPrices;
+        _lowPrices = source._lowPrices;
+        _closePrices = source._closePrices;
+        _volumes = source._volumes;
+        _dates = source._dates;
+        _inputValues = source._inputValues;
+        _columnsInitialized = true;
+        _rowsInitialized = false;
+        _tickerDataList = null;
+
+        CustomValuesList = values;
+        OutputValues = new Dictionary<string, List<double>>();
+        SignalsList = new List<Signal>();
+        InputName = source.InputName;
+        IndicatorName = IndicatorName.None;
+        Options = source.Options;
+        Count = source.Count;
+    }
+
+    /// <summary>
+    /// Returns a new <see cref="StockData"/> over the same bars, but with <paramref name="values"/> as
+    /// the series that calculations will read as their input.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the explicit form of chaining. Today an indicator hands its result to the next one by
+    /// writing <see cref="CustomValuesList"/> on the caller's own object, which means anything else
+    /// holding that object sees its input change underneath it - the cause of issue #145. A view
+    /// leaves the original untouched:
+    /// </para>
+    /// <code>
+    /// // implicit: mutates stockData, and every later call on it sees the new series
+    /// var bands = stockData.CalculateSma(20).CalculateBollingerBands();
+    ///
+    /// // explicit: stockData is unchanged, and the chained input is visible at the call site
+    /// var sma = stockData.CalculateSma(20).CustomValuesList;
+    /// var bands = stockData.WithValues(sma).CalculateBollingerBands();
+    /// </code>
+    /// <para>
+    /// The price series are shared by reference, not copied, so this is cheap. The returned object has
+    /// its own outputs, signals and indicator name.
+    /// </para>
+    /// </remarks>
+    /// <param name="values">The series to use as the calculation input.</param>
+    public StockData WithValues(IReadOnlyList<double> values)
+    {
+        if (values is null)
+        {
+            throw new ArgumentNullException(nameof(values));
+        }
+
+        // Reuse the caller's list when it already is one - WithValues does not take ownership, and
+        // copying a long series on every derivation is exactly the cost this is meant to avoid.
+        var list = values as List<double> ?? new List<double>(values);
+
+        return new StockData(this, list);
+    }
+
+    /// <summary>
+    /// Returns a view over the same bars whose input series is this result's named output, so the next
+    /// calculation continues from that series.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Chaining an indicator onto another already works without any special syntax, because
+    /// <c>Calculate*</c> takes a <see cref="StockData"/> and returns one:
+    /// </para>
+    /// <code>
+    /// data.CalculateSimpleMovingAverage(20).CalculateBollingerBands();
+    /// </code>
+    /// <para>
+    /// What that cannot express is <i>which</i> series to continue from when a result publishes several.
+    /// That is a question about the result, so it belongs here rather than in some separate step the
+    /// caller has to learn:
+    /// </para>
+    /// <code>
+    /// var bands = data.CalculateBollingerBands();
+    /// var upperRsi = bands.SeriesView("UpperBand").CalculateRsi(14);
+    /// var lowerRsi = bands.SeriesView("LowerBand").CalculateRsi(14);
+    /// </code>
+    /// <para>
+    /// The view is a <see cref="StockData"/>, so every existing calculation chains off it unchanged, and
+    /// because it is a view rather than a mutation both <c>bands</c> and the original data are untouched
+    /// - one result can be branched as many ways as you like.
+    /// </para>
+    /// <para>
+    /// Generated accessors call this, so <c>bands.UpperBand()</c> fails to compile on a misspelling
+    /// rather than failing here at run time.
+    /// </para>
+    /// </remarks>
+    /// <param name="outputName">The published output to continue from.</param>
+    /// <exception cref="CalculationException">
+    /// Thrown when this result publishes no output of that name. The message lists what it does publish.
+    /// </exception>
+    public StockData SeriesView(string outputName)
+    {
+        if (outputName is null || outputName.Length == 0)
+        {
+            throw new ArgumentException("An output name is required.", nameof(outputName));
+        }
+
+        if (OutputValues is null || !OutputValues.TryGetValue(outputName, out var series))
+        {
+            var available = OutputValues is null || OutputValues.Count == 0
+                ? "none"
+                : string.Join(", ", OutputValues.Keys);
+
+            throw new CalculationException(
+                $"{IndicatorName} does not publish an output named '{outputName}'. Available outputs: {available}.");
+        }
+
+        return WithValues(series);
+    }
+
     public void EnsureColumnView()
     {
         EnsureColumns();

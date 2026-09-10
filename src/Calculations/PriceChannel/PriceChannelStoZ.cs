@@ -70,9 +70,13 @@ public static partial class Calculations
         List<double> lowerBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // Resolved before any moving average runs. CalculateAverageTrueRange takes its close series
+        // from stockData.CustomValuesList, which the moving average above overwrites, so the true
+        // range was being measured against that average rather than against price. See issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -447,9 +451,13 @@ public static partial class Calculations
         List<double> lbandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // Resolved before any moving average runs. CalculateAverageTrueRange takes its close series
+        // from stockData.CustomValuesList, which the moving average above overwrites, so the true
+        // range was being measured against that average rather than against price. See issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData);
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1067,10 +1075,14 @@ public static partial class Calculations
         List<double> scalperList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        // Resolved before any moving average runs. CalculateAverageTrueRange takes its close series
+        // from stockData.CustomValuesList, which the moving average above overwrites, so the true
+        // range was being measured against that average rather than against price. See issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var smaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, length2);
 
         for (var i = 0; i < stockData.Count; i++)
         {

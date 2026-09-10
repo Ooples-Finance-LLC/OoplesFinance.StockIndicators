@@ -152,7 +152,88 @@ var handle = indicators.Calculate(
 
 ### Removed
 
-- None - all v1.x methods are still available (will be deprecated in v3.0)
+- All v1.x `Calculate*` methods are still available (they will be deprecated in v3.0).
+- `TrixResult` is gone. `IndicatorCatalog.Trix()` now returns a plain `SeriesHandle`.
+- `AroonOscillatorResult.Up`, `.Down` and `.Oscillator` are gone, as are
+  `AlligatorIndexResult.Jaw` and `GatorOscillatorResult.Upper` / `.Lower`. The result types
+  survive; the members are renamed to the outputs the indicators actually publish.
+
+#### Why: the removed members never worked
+
+The catalog generator was given a hand-maintained list of which indicators publish more than one
+output and under what names. That list had drifted from the calculations in five of its six entries:
+
+| Indicator | The list said | The calculation publishes |
+|---|---|---|
+| `AroonOscillator` | `Up`, `Down`, `Oscillator` | `Aroon`, `AroonUp`, `AroonDown` |
+| `AlligatorIndex` | `Jaw`, `Teeth`, `Lips` | `Lips`, `Teeth`, `Jaws` |
+| `GatorOscillator` | `Upper`, `Lower` | `Top`, `Bottom` |
+| `Trix` | `Trix`, `Signal` | one output only |
+| `PPO` | `Ppo`, `Signal`, `Histogram` | (key never matched `IndicatorName`) |
+| `ElderRayIndex` | `BullPower`, `BearPower` | `BullPower`, `BearPower` |
+
+Handles were generated for outputs that do not exist, and resolving a handle for an output an
+indicator does not publish fell back to the primary series without raising anything. So
+`aroon.Up`, `aroon.Down` and `aroon.Oscillator` were three names for one series, `trix.Trix` and
+`trix.Signal` were the same series, and every band of `gator` and `alligator` came back identical.
+The names are now read out of the calculations' own `SetOutputValues` calls, so the catalog can no
+longer describe an output that is not there.
+
+`PPO` is deliberately still a plain handle: its list key never matched the `IndicatorName` member,
+so it has always returned one, and giving it a result type now would be a new API rather than a
+repair.
+
+#### Migrating
+
+```csharp
+// Before - .Up, .Down and .Oscillator were three names for the oscillator series
+var aroon = indicators.AroonOscillator(25);
+var osc = runtime.GetSeries(aroon.Oscillator);
+var up = runtime.GetSeries(aroon.Up);       // same series as osc
+
+// After - Aroon is the oscillator; AroonUp and AroonDown are the real component series
+var aroon = indicators.AroonOscillator(25);
+var osc = runtime.GetSeries(aroon.Aroon);
+var up = runtime.GetSeries(aroon.AroonUp);
+var down = runtime.GetSeries(aroon.AroonDown);
+```
+
+```csharp
+// Before - .Signal was the same series as .Trix
+var trix = indicators.Trix(14);
+var line = runtime.GetSeries(trix.Trix);
+
+// After - Trix publishes one series, so the catalog returns one handle
+var trix = indicators.Trix(14);
+var line = runtime.GetSeries(trix);
+```
+
+If you need a Trix signal line, chain a moving average over the Trix handle yourself; the catalog no
+longer supplies one that is secretly the Trix series itself.
+
+```csharp
+// Before - .Jaw silently resolved to the primary series (Lips)
+var alligator = indicators.AlligatorIndex();
+var jaw = runtime.GetSeries(alligator.Jaw);
+
+// After - the member is named for the output the indicator publishes
+var alligator = indicators.AlligatorIndex();
+var jaws = runtime.GetSeries(alligator.Jaws);
+```
+
+```csharp
+// Before - Upper and Lower both resolved to the primary series
+var gator = indicators.GatorOscillator();
+var upper = runtime.GetSeries(gator.Upper);
+var lower = runtime.GetSeries(gator.Lower);
+
+// After
+var gator = indicators.GatorOscillator();
+var top = runtime.GetSeries(gator.Top);
+var bottom = runtime.GetSeries(gator.Bottom);
+```
+
+`ElderRayIndexResult` is unchanged: it is the one entry the old list had right.
 
 ### Changed
 

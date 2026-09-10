@@ -3524,7 +3524,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
     private readonly RollingWindowMax _highWindow;
     private readonly RollingWindowMin _lowWindow;
     private readonly StreamingInputResolver _input;
-    private double _prevSma;
+    private double _prevValue;
     private bool _hasPrev;
 
     public ScalpersChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 15,
@@ -3563,7 +3563,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         _atrSmoother.Reset();
         _highWindow.Reset();
         _lowWindow.Reset();
-        _prevSma = 0;
+        _prevValue = 0;
         _hasPrev = false;
     }
 
@@ -3572,8 +3572,11 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
         // Match batch behavior: ATR uses the prior SMA values as the close series.
-        var prevSma = _hasPrev ? _prevSma : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevSma);
+        // The batch side measured this true range against a moving average, and this mirrored it to
+        // stay in parity. Both now measure it against price, which is what a true range is, and the
+        // first bar seeds from its own value so the opening range is the bar's range - see #145, #146.
+        var prevValue = _hasPrev ? _prevValue : value;
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
@@ -3581,7 +3584,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
 
         if (isFinal)
         {
-            _prevSma = sma;
+            _prevValue = value;
             _hasPrev = true;
         }
 
@@ -8037,9 +8040,11 @@ public sealed class AroonOscillatorState : IStreamingIndicatorState, IDisposable
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(1)
+            outputs = new Dictionary<string, double>(3)
             {
-                { "Aroon", aroon }
+                { "Aroon", aroon },
+                { "AroonUp", aroonUp },
+                { "AroonDown", aroonDown }
             };
         }
 
@@ -9797,7 +9802,9 @@ public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorStat
     {
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _smaValue);
+        // Was reading the moving average rather than the input series, mirroring a batch side that
+        // had been contaminated by GetMovingAverageList. Both now measure the input - issue #145.
+        _stdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _correlation = new RollingWindowCorrelation(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -9811,7 +9818,7 @@ public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorStat
 
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _smaValue);
+        _stdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _correlation = new RollingWindowCorrelation(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
@@ -12404,13 +12411,15 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // is a different statistic besides. See RollingStandardDeviationState.
+    private readonly RollingStandardDeviationState _stdDev;
     private readonly RollingWindowSum _probUpperUp;
     private readonly RollingWindowSum _probUpperDown;
     private readonly RollingWindowSum _probBasisUp;
     private readonly RollingWindowSum _probBasisDown;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BayesianOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
         double stdDevMult = 2.5, double lowerThreshold = 15, InputName inputName = InputName.Close)
@@ -12419,7 +12428,7 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _probUpperUp = new RollingWindowSum(resolved);
         _probUpperDown = new RollingWindowSum(resolved);
         _probBasisUp = new RollingWindowSum(resolved);
@@ -12439,7 +12448,7 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _probUpperUp = new RollingWindowSum(resolved);
         _probUpperDown = new RollingWindowSum(resolved);
         _probBasisUp = new RollingWindowSum(resolved);
@@ -12457,15 +12466,13 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
         _probUpperDown.Reset();
         _probBasisUp.Reset();
         _probBasisDown.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
 
         var upperUpSeq = value > upper ? 1 : 0;
@@ -12525,7 +12532,6 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
     public void Dispose()
     {
         _basisSmoother.Dispose();
-        _stdDev.Dispose();
         _probUpperUp.Dispose();
         _probUpperDown.Dispose();
         _probBasisUp.Dispose();
@@ -12678,12 +12684,14 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // is a different statistic besides. See RollingStandardDeviationState.
+    private readonly RollingStandardDeviationState _stdDev;
     private readonly IMovingAverageSmoother _atrMaSmoother;
     private readonly IMovingAverageSmoother _atrSmoother;
     private readonly StreamingInputResolver _input;
-    private double _prevAtrMa;
-    private double _basisValue;
+    private double _prevValue;
     private bool _hasPrev;
 
     public BollingerBandsAverageTrueRangeState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int atrLength = 22,
@@ -12691,7 +12699,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
     {
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length), _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(Math.Max(1, length));
         _atrMaSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
         _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
         _input = new StreamingInputResolver(inputName, null);
@@ -12707,7 +12715,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
 
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length), _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(Math.Max(1, length));
         _atrMaSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
         _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -12721,8 +12729,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
         _stdDev.Reset();
         _atrMaSmoother.Reset();
         _atrSmoother.Reset();
-        _prevAtrMa = 0;
-        _basisValue = 0;
+        _prevValue = 0;
         _hasPrev = false;
     }
 
@@ -12730,20 +12737,22 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
         var atrMa = _atrMaSmoother.Next(value, isFinal);
-        var prevAtrMa = _hasPrev ? _prevAtrMa : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevAtrMa);
+        // The batch side measured this true range against a moving average, and this mirrored it to
+        // stay in parity. Both now measure it against price, which is what a true range is, and the
+        // first bar seeds from its own value so the opening range is the bar's range - see #145, #146.
+        var prevValue = _hasPrev ? _prevValue : value;
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var bbDiff = upper - lower;
         var atrDev = bbDiff != 0 ? atr / bbDiff : 0;
 
         if (isFinal)
         {
-            _prevAtrMa = atrMa;
+            _prevValue = value;
             _hasPrev = true;
         }
 
@@ -12762,7 +12771,6 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
     public void Dispose()
     {
         _basisSmoother.Dispose();
-        _stdDev.Dispose();
         _atrMaSmoother.Dispose();
         _atrSmoother.Dispose();
     }
@@ -12860,9 +12868,11 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // is a different statistic besides. See RollingStandardDeviationState.
+    private readonly RollingStandardDeviationState _stdDev;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BollingerBandsPercentBState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, InputName inputName = InputName.Close)
@@ -12870,7 +12880,7 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -12885,7 +12895,7 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -12895,15 +12905,13 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
     {
         _basisSmoother.Reset();
         _stdDev.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
         var pctB = upper - lower != 0 ? (value - lower) / (upper - lower) * 100 : 0;
@@ -12923,7 +12931,6 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
     public void Dispose()
     {
         _basisSmoother.Dispose();
-        _stdDev.Dispose();
     }
 }
 
@@ -12931,9 +12938,11 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // is a different statistic besides. See RollingStandardDeviationState.
+    private readonly RollingStandardDeviationState _stdDev;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BollingerBandsWidthState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, InputName inputName = InputName.Close)
@@ -12941,7 +12950,7 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -12955,7 +12964,7 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
         _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _basisValue);
+        _stdDev = new RollingStandardDeviationState(resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -12965,15 +12974,13 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
     {
         _basisSmoother.Reset();
         _stdDev.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
         var bbWidth = basis != 0 ? (upper - lower) / basis : 0;
@@ -12993,7 +13000,6 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
     public void Dispose()
     {
         _basisSmoother.Dispose();
-        _stdDev.Dispose();
     }
 }
 
@@ -13764,8 +13770,8 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         _diff2Sum3 = new RollingWindowSum(resolved3);
         _dmiSum = new RollingWindowSum(resolved1);
         _stdDev1 = new StandardDeviationVolatilityState(maType, resolved1, inputName);
-        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, _ => _stdDev1Value);
-        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, _ => _stdDev2Value);
+        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, inputName);
+        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, inputName);
         _cmo5Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo10Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo20Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
@@ -13792,8 +13798,8 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         _diff2Sum3 = new RollingWindowSum(resolved3);
         _dmiSum = new RollingWindowSum(resolved1);
         _stdDev1 = new StandardDeviationVolatilityState(maType, resolved1, selector);
-        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, _ => _stdDev1Value);
-        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, _ => _stdDev2Value);
+        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, selector);
+        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, selector);
         _cmo5Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo10Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo20Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);

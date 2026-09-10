@@ -564,7 +564,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var devList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -721,7 +723,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1286,8 +1290,12 @@ public static partial class Calculations
         double tempSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var shortStdDevList = CalculateStandardDeviationVolatility(stockData, length: fastLength).CustomValuesList;
-        var longStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        // Both measure the input. The second used to measure the first one's output, because the first
+        // publishes onto stockData.CustomValuesList - so the long window was the dispersion of the short
+        // window's dispersion, and the ratio between them no longer compared two horizons of the same
+        // series. Issue #145.
+        var shortStdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(length: fastLength).CustomValuesList;
+        var longStdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(length: slowLength).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
