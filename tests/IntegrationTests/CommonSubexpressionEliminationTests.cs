@@ -1,4 +1,6 @@
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Builder.Specs;
+using BarTimeframe = OoplesFinance.StockIndicators.Streaming.BarTimeframe;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.IntegrationTests;
 
@@ -158,6 +160,65 @@ public sealed class CommonSubexpressionEliminationTests : GlobalTestData
 
         second.Should().NotBe(first, "with elimination off the graph is built exactly as before");
     }
+
+    /// <summary>
+    /// Two different parameter lists never produce the same key, even when the text inside them
+    /// contains the characters the key uses as separators.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the one failure this type must not have. A missed match only costs time - the work
+    /// happens twice and both answers are right. A false match hands one computation the other's
+    /// numbers, silently, with no exception and no wrong-looking value to notice.
+    /// </para>
+    /// <para>
+    /// Both cases below produced a byte-identical key before the length prefix went in, because a
+    /// string was written as <c>"text";</c> and a string containing <c>";</c> could close its own
+    /// quote and open the next one. Verified by reverting the fix: both fail, and the
+    /// matches-itself test below still passes, so the prefix did not simply make every key unique.
+    /// A third case, <c>[""]</c> against <c>["", ""]</c>, was dropped because it passed under the
+    /// old scheme too and so proved nothing.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(new object[] { "a\";\"b" }, new object[] { "a", "b" })]
+    [InlineData(new object[] { "x\";\"y\";\"z" }, new object[] { "x", "y", "z" })]
+    public void TextInsideAKeyCannotForgeAFieldBoundary(object[] first, object[] second)
+    {
+        var input = new SeriesHandle(7);
+        var seriesKey = new SeriesKey(SymbolId.From("AAPL"), BarTimeframe.Minutes(1));
+
+        var firstKey = KeyFor(seriesKey, input, first);
+        var secondKey = KeyFor(seriesKey, input, second);
+
+        firstKey.Should().NotBeNull();
+        secondKey.Should().NotBeNull();
+        secondKey.Should().NotBe(firstKey,
+            $"{first.Length} parameters and {second.Length} are different computations");
+    }
+
+    /// <summary>
+    /// The same awkward parameter list still matches itself, so the length prefix did not simply
+    /// make every key unique.
+    /// </summary>
+    [Fact]
+    public void TheSameAwkwardParametersStillMatchThemselves()
+    {
+        var input = new SeriesHandle(7);
+        var seriesKey = new SeriesKey(SymbolId.From("AAPL"), BarTimeframe.Minutes(1));
+        var parameters = new object[] { "a\";\"b" };
+
+        var firstKey = KeyFor(seriesKey, input, parameters);
+        var secondKey = KeyFor(seriesKey, input, new object[] { "a\";\"b" });
+
+        secondKey.Should().Be(firstKey, "the same computation is the same key whatever it is called");
+        secondKey?.GetHashCode().Should().Be(firstKey?.GetHashCode());
+    }
+
+    private static IndicatorNodeKey? KeyFor(SeriesKey seriesKey, SeriesHandle input, object[] parameters) =>
+        IndicatorNodeKey.TryCreate(seriesKey, input,
+            new IndicatorSpec(IndicatorName.SimpleMovingAverage, new GenericIndicatorOptions(parameters),
+                IndicatorOutput.Primary));
 
     private static List<double> Compute(bool useElimination)
     {

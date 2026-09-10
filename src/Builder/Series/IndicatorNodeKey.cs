@@ -63,14 +63,32 @@ internal sealed class IndicatorNodeKey : IEquatable<IndicatorNodeKey>
         }
 
         var builder = new StringBuilder();
-        builder.Append(seriesKey.Symbol).Append('|')
-            .Append(seriesKey.Timeframe).Append('|')
-            .Append(input.Id).Append('|')
+        AppendText(builder, seriesKey.Symbol.ToString());
+        AppendText(builder, seriesKey.Timeframe?.ToString());
+        builder.Append(input.Id).Append('|')
             .Append((int)spec.Name).Append('|')
-            .Append((int)spec.Output).Append('|')
-            .Append(spec.Options.GetType().FullName).Append('|');
+            .Append((int)spec.Output).Append('|');
+        AppendText(builder, spec.Options.GetType().FullName);
 
         return TryAppendValue(builder, spec.Options, 0) ? new IndicatorNodeKey(builder.ToString()) : null;
+    }
+
+    /// <summary>
+    /// Appends free-form text length-first, so it cannot forge a field boundary.
+    /// </summary>
+    /// <remarks>
+    /// A cache key assembled by concatenating text around separators is only unambiguous while the
+    /// text cannot contain a separator. A symbol is an arbitrary caller-supplied string, and nothing
+    /// stops one containing '|': symbol "A" with timeframe "B|C" and symbol "A|B" with timeframe "C"
+    /// would otherwise produce the same key. A colliding key here means two different computations
+    /// silently share one node and one of them returns the other's numbers - the failure mode this
+    /// type is most obliged to rule out - so the length prefix is worth the four characters even
+    /// though no timeframe in the library renders with a '|' today.
+    /// </remarks>
+    private static void AppendText(StringBuilder builder, string? text)
+    {
+        var value = text ?? string.Empty;
+        builder.Append(value.Length).Append(':').Append(value).Append('|');
     }
 
     private static bool TryAppendValue(StringBuilder builder, object? value, int depth)
@@ -87,7 +105,12 @@ internal sealed class IndicatorNodeKey : IEquatable<IndicatorNodeKey>
                 builder.Append("~null~;");
                 return true;
             case string text:
-                builder.Append('"').Append(text).Append("\";");
+                // Length-first, for the same reason as AppendText: a quoted string parameter
+                // containing the closing delimiter would otherwise be indistinguishable from two
+                // parameters. No indicator takes a string parameter today; the invariant should not
+                // depend on that staying true.
+                AppendText(builder, text);
+                builder.Append(';');
                 return true;
             case bool flag:
                 builder.Append(flag ? "true;" : "false;");
