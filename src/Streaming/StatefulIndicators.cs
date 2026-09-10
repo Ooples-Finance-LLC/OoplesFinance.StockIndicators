@@ -12411,8 +12411,8 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    // Sigma of PRICE, over the window. Feeding _basisValue in here made this the dispersion of
-    // the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
     // is a different statistic besides. See RollingStandardDeviationState.
     private readonly RollingStandardDeviationState _stdDev;
     private readonly RollingWindowSum _probUpperUp;
@@ -12420,7 +12420,6 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
     private readonly RollingWindowSum _probBasisUp;
     private readonly RollingWindowSum _probBasisDown;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BayesianOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
         double stdDevMult = 2.5, double lowerThreshold = 15, InputName inputName = InputName.Close)
@@ -12467,14 +12466,12 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
         _probUpperDown.Reset();
         _probBasisUp.Reset();
         _probBasisDown.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
         var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
 
@@ -12687,15 +12684,14 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    // Sigma of PRICE, over the window. Feeding _basisValue in here made this the dispersion of
-    // the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
     // is a different statistic besides. See RollingStandardDeviationState.
     private readonly RollingStandardDeviationState _stdDev;
     private readonly IMovingAverageSmoother _atrMaSmoother;
     private readonly IMovingAverageSmoother _atrSmoother;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
-    private double _basisValue;
     private bool _hasPrev;
 
     public BollingerBandsAverageTrueRangeState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int atrLength = 22,
@@ -12734,7 +12730,6 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
         _atrMaSmoother.Reset();
         _atrSmoother.Reset();
         _prevValue = 0;
-        _basisValue = 0;
         _hasPrev = false;
     }
 
@@ -12742,7 +12737,6 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
         var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
@@ -12874,12 +12868,11 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    // Sigma of PRICE, over the window. Feeding _basisValue in here made this the dispersion of
-    // the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
     // is a different statistic besides. See RollingStandardDeviationState.
     private readonly RollingStandardDeviationState _stdDev;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BollingerBandsPercentBState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, InputName inputName = InputName.Close)
@@ -12912,14 +12905,12 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
     {
         _basisSmoother.Reset();
         _stdDev.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
         var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
@@ -12947,12 +12938,11 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    // Sigma of PRICE, over the window. Feeding _basisValue in here made this the dispersion of
-    // the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
+    // Sigma of PRICE, over the window. Feeding the smoothed basis in here made this the dispersion
+    // of the moving average - the streaming mirror of issue #145 - and StandardDeviationVolatility
     // is a different statistic besides. See RollingStandardDeviationState.
     private readonly RollingStandardDeviationState _stdDev;
     private readonly StreamingInputResolver _input;
-    private double _basisValue;
 
     public BollingerBandsWidthState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, InputName inputName = InputName.Close)
@@ -12984,14 +12974,12 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
     {
         _basisSmoother.Reset();
         _stdDev.Reset();
-        _basisValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
-        _basisValue = basis;
         var stdDev = _stdDev.Next(value, isFinal);
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
