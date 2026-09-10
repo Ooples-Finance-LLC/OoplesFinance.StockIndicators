@@ -174,6 +174,20 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     () => new AroonOscillatorState(25),
                     data => data.CalculateAroonOscillator(25).CustomValuesList)
             };
+            // Up and Down are the primary form of Aroon and were computed then discarded until #170.
+            // The oscillator alone cannot distinguish 100 and 100 from 0 and 0.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AroonOscillator.AroonUp",
+                    () => new AroonOscillatorState(25),
+                    data => data.CalculateAroonOscillator(25).OutputValues["AroonUp"], "AroonUp")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AroonOscillator.AroonDown",
+                    () => new AroonOscillatorState(25),
+                    data => data.CalculateAroonOscillator(25).OutputValues["AroonDown"], "AroonDown")
+            };
             yield return new object[]
             {
                 new StatefulIndicatorSpec("BearPowerIndicator",

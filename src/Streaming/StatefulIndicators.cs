@@ -8040,9 +8040,11 @@ public sealed class AroonOscillatorState : IStreamingIndicatorState, IDisposable
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(1)
+            outputs = new Dictionary<string, double>(3)
             {
-                { "Aroon", aroon }
+                { "Aroon", aroon },
+                { "AroonUp", aroonUp },
+                { "AroonDown", aroonDown }
             };
         }
 
