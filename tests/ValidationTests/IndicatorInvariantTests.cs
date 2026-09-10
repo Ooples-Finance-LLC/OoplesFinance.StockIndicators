@@ -68,7 +68,34 @@ public sealed class IndicatorInvariantTests
         IndicatorName.TrendForceHistogram,
         IndicatorName.AdaptiveMovingAverage,
         IndicatorName.IIRLeastSquaresEstimate,
-        IndicatorName.EhlersEnhancedSignalToNoiseRatio
+        IndicatorName.EhlersEnhancedSignalToNoiseRatio,
+
+        // Found only once this invariant looked at NAMED series as well as the primary one. Each of
+        // these leaves its primary series empty, so the check used to return before reading
+        // anything - 117 of the 775 indicators here are shaped that way. Measured spread over the
+        // last hundred of a thousand identical bars:
+        //
+        //   GChannels                            LowerBand  50
+        //   StationaryExtrapolatedLevels         UpperBand  34.8
+        //   PseudoPolynomialChannel              UpperBand  8.09
+        //   PeriodicChannel                      UpperBand  6.88
+        //   TimeSeriesForecast                   UpperBand  4.88
+        //   FlaggingBands                        UpperBand  1.93
+        //   VervoortModifiedBollingerBandIndicator      K   0.175
+        //   MeanAbsoluteErrorBands               UpperBand  0.143
+        //   QuasiWhiteNoise                   WhiteNoiseMa  0.0115
+        //
+        // A band that widens forever on a market that never moves is reading a signal that is not
+        // in the data, the same way the three fixed above were.
+        IndicatorName.FlaggingBands,
+        IndicatorName.GChannels,
+        IndicatorName.MeanAbsoluteErrorBands,
+        IndicatorName.PeriodicChannel,
+        IndicatorName.PseudoPolynomialChannel,
+        IndicatorName.QuasiWhiteNoise,
+        IndicatorName.StationaryExtrapolatedLevels,
+        IndicatorName.TimeSeriesForecast,
+        IndicatorName.VervoortModifiedBollingerBandIndicator
     };
 
     /// <summary>
@@ -151,10 +178,47 @@ public sealed class IndicatorInvariantTests
     [MemberData(nameof(AllIndicators))]
     public void ProducesTheSameValuesEveryTime(IndicatorName name)
     {
-        var first = IndicatorInvoker.Invoke(Market.Real(), name).CustomValuesList;
-        var second = IndicatorInvoker.Invoke(Market.Real(), name).CustomValuesList;
+        var first = AllSeries(IndicatorInvoker.Invoke(Market.Real(), name));
+        var second = AllSeries(IndicatorInvoker.Invoke(Market.Real(), name));
 
-        second.Should().Equal(first, "the same bars must give the same answer");
+        second.Keys.Should().BeEquivalentTo(first.Keys, "the same bars must publish the same series");
+
+        foreach (var series in first)
+        {
+            second[series.Key].Should().Equal(series.Value,
+                $"the same bars must give the same '{series.Key}'");
+        }
+    }
+
+    /// <summary>
+    /// Every series an indicator publishes: the primary one, and each named output.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Reading <c>CustomValuesList</c> alone leaves a sixth of the catalogue untested. Measured
+    /// across the 775 indicators reachable through <see cref="IndicatorInvoker"/>: 117 leave the
+    /// primary series EMPTY and publish only named outputs - every Bollinger variant, the Ehlers
+    /// oscillators that emit two components, anything band-shaped. For those, comparing primary
+    /// series compares two empty lists and passes whatever the indicator does.
+    /// </para>
+    /// <para>
+    /// The primary series is kept under its own key rather than merged, so a regression that empties
+    /// it is a missing key rather than a silently shorter comparison.
+    /// </para>
+    /// </remarks>
+    private static Dictionary<string, List<double>> AllSeries(StockData result)
+    {
+        var series = new Dictionary<string, List<double>>(StringComparer.Ordinal)
+        {
+            ["<primary>"] = result.CustomValuesList,
+        };
+
+        foreach (var output in result.OutputValues)
+        {
+            series[output.Key] = output.Value;
+        }
+
+        return series;
     }
 
     /// <summary>
@@ -205,19 +269,27 @@ public sealed class IndicatorInvariantTests
             return;
         }
 
-        var values = IndicatorInvoker.Invoke(Market.Flat(FlatBars), name).CustomValuesList;
-        if (values.Count != FlatBars)
+        // Every published series, not just the primary one. 117 of the 775 indicators here leave
+        // the primary empty and publish only named outputs, and this returned before looking at any
+        // of them - so a band that never settles passed as long as its primary series was absent.
+        var published = AllSeries(IndicatorInvoker.Invoke(Market.Flat(FlatBars), name));
+
+        foreach (var series in published)
         {
-            return;
+            var values = series.Value;
+            if (values.Count != FlatBars)
+            {
+                continue;
+            }
+
+            var settled = values.Skip(SettledFrom).ToList();
+            settled.Should().OnlyContain(v => !double.IsNaN(v) && !double.IsInfinity(v),
+                $"a flat market cannot produce an undefined reading in '{series.Key}'");
+
+            var spread = settled.Max() - settled.Min();
+            spread.Should().BeLessThan(1e-6,
+                $"{name} still moves '{series.Key}' by {spread:G6} after {SettledFrom} identical bars");
         }
-
-        var settled = values.Skip(SettledFrom).ToList();
-        settled.Should().OnlyContain(v => !double.IsNaN(v) && !double.IsInfinity(v),
-            "a flat market cannot produce an undefined reading");
-
-        var spread = settled.Max() - settled.Min();
-        spread.Should().BeLessThan(1e-6,
-            $"{name} still moves by {spread:G6} after {SettledFrom} identical bars");
     }
 
     /// <summary>
