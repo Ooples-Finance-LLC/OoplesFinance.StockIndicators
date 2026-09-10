@@ -373,3 +373,6 @@ secrets.json
 .env
 .env.local
 .env.*.local
+
+# Local tooling cache, never part of the package or the build.
+.token-optimizer/
