@@ -703,10 +703,20 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                     data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
                         .OutputValues["LowerBand"], "LowerBand")
             };
-            // #146: every state below feeds an ATR into a non-primary output. The harness could only
+            // #146: the states below feed an ATR into a non-primary output. The harness could only
             // read Result.Value until #144 added an output key, so these series were never compared
             // against their batch counterparts - which is exactly how the zero-seeded first-bar true
-            // range survived. All eleven of the specs that follow fail on the pre-fix seed.
+            // range survived.
+            //
+            // Exactly eleven specs fail on the pre-fix seed, and they are NOT the whole run that
+            // follows: AverageTrueRangeChannel (2), BollingerBandsFibonacciRatios (2),
+            // DynamicSupportAndResistance (2), HurstCycleChannel (2) and TrendTraderBands (3).
+            // ScalpersChannel and DrunkardWalk are listed among them and pass either way - they are
+            // here for coverage of the same output-key path, not because the seed moved them.
+            //
+            // Measured rather than counted: revert the src half of the fix commit, keep this file,
+            // and rerun. Counting the specs between this comment and the next group gives fourteen
+            // and is the wrong number.
             //
             // Listed explicitly rather than generated from the catalog, so that a state which stops
             // publishing one of these keys fails loudly instead of silently dropping coverage.
