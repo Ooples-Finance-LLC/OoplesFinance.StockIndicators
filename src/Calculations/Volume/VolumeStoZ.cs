@@ -142,8 +142,13 @@ public static partial class Calculations
         RollingSum vmnSum = new();
         var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
 
+        // The true range must be in price units: it is compared against a price difference below, as
+        // mf > mc where mc is a tenth of it. Taken from CustomValuesList it was measured against the
+        // smoothed VOLUME, which is orders of magnitude larger, so mf > mc could effectively never be
+        // true and both volume buckets stayed empty. Issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData).With(inputList);
         var mavList = GetMovingAverageList(stockData, maType, length, volumeList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
