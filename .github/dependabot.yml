@@ -22,6 +22,27 @@ updates:
     # Deliberately no `ignore` rule for major updates. The test-tooling majors that came through
     # recently - coverlet 6 to 10, Microsoft.NET.Test.Sdk 17 to 18, FluentAssertions 6 to 8 - are
     # exactly the updates this repository has been taking, so suppressing majors would hide them.
+    #
+    # The two exceptions below are not ordinary dependencies. The source generator's Roslyn
+    # reference is a COMPATIBILITY FLOOR: csc refuses to load an analyzer built against a Roslyn
+    # newer than itself (CS9057), so this reference decides the minimum .NET SDK anyone building
+    # this repository from source is forced onto.
+    #
+    # This has already happened once. PR #155 took the 4.8.0 -> 5.9.0 bump as routine, CI stayed
+    # green because it resolves 10.x to the newest SDK, and the repository silently stopped
+    # building on SDK 10.0.1xx - breaking a downstream production deployment. PR #179 was the bot
+    # proposing exactly the same change again, caught only by SourceGeneratorRoslynFloorTests.
+    #
+    # Ignored at every version rather than pinned to a range, because a bump above the floor breaks
+    # source consumers and a bump below it buys nothing. Both carry PrivateAssets="all" and the
+    # published package ships no analyzer, so nothing here reaches a package consumer at runtime.
+    #
+    # To raise the floor deliberately, remove these entries, change the constants in
+    # SourceGeneratorRoslynFloorTests, and say in the commit message which SDK becomes the new
+    # minimum - it is a breaking change for source consumers and should read like one.
+    ignore:
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+      - dependency-name: "Microsoft.CodeAnalysis.Analyzers"
 
   # GitHub Actions updates. The workflows pin actions to a commit SHA, which is the safe way to use
   # a third-party action but also freezes it - nothing tells you an update exists. Dependabot is
