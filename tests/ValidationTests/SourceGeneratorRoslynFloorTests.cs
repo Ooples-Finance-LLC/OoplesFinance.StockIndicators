@@ -16,13 +16,17 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 ///       version '5.0.0.0'
 /// </code>
 ///
-/// <para>So this reference sets the <b>minimum .NET SDK every consumer of this package is forced onto</b>.
-/// PR #155 raised it 4.8.0 → 5.9.0 as a routine dependency bump. Nothing here failed — the repository's own CI
-/// runs a current SDK — but the published package silently stopped building on SDK 10.0.1xx, whose compiler is
-/// 5.0, and that broke a downstream production deployment.</para>
+/// <para>So this reference sets the <b>minimum .NET SDK anyone who builds this repository from source is
+/// forced onto</b>. The published NuGet package ships no analyzer — the generator's output is compiled into
+/// <c>lib/*.dll</c> — so package consumers are unaffected; source consumers, such as a platform referencing
+/// this repository as a submodule, are not. PR #155 raised it 4.8.0 → 5.9.0 as a routine dependency bump.
+/// Nothing here failed — CI resolves <c>10.x</c> to the newest SDK — but the repository silently stopped
+/// building on SDK 10.0.1xx, whose compiler is 5.0, and that broke a downstream production deployment.</para>
 ///
 /// <para>A comment in the csproj is not enough to prevent a repeat, because the thing that raised it was a bot
-/// and the thing that missed it was a green build on a newer SDK. This asserts the floor.</para>
+/// and the thing that missed it was a green build on a newer SDK. This asserts the floor as a fast local
+/// signal; the CI <c>minimum-sdk</c> job is the general one, since it actually compiles on the oldest
+/// supported SDK and so catches whatever raises a floor next, not just these two packages.</para>
 ///
 /// <para><b>To raise it deliberately</b>, change the constants here in the same commit and say in the message
 /// which SDK becomes the new minimum — that is a breaking change for consumers and should read like one.</para>

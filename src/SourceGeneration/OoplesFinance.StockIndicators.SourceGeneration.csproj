@@ -17,14 +17,18 @@
            CSC : error CS9057: Analyzer assembly ... cannot be used because it references version
                  '5.9.0.0' of the compiler, which is newer than the currently running version '5.0.0.0'
 
-         So this reference is not "which Roslyn do we want" - it is the MINIMUM SDK every consumer of this
-         package is forced onto. #155 raised it 4.8.0 -> 5.9.0, which silently made the package unbuildable
-         on .NET SDK 10.0.1xx (compiler 5.0) and broke a downstream production deployment.
+         So this reference is not "which Roslyn do we want" - it is the MINIMUM SDK anyone who BUILDS THIS
+         REPOSITORY FROM SOURCE is forced onto. (The published NuGet package ships no analyzer - the
+         generator's output is compiled into lib/*.dll - so package consumers are unaffected. Source
+         consumers, such as a platform referencing this repo as a submodule, are not.) #155 raised it
+         4.8.0 -> 5.9.0, which silently made this repository unbuildable on .NET SDK 10.0.1xx
+         (compiler 5.0) and broke a downstream production deployment.
 
          The generators here use only IIncrementalGenerator, CreateSyntaxProvider and
          RegisterPostInitializationOutput, all present since Roslyn 4.0, so 4.8.0 costs nothing and keeps
-         the package usable from the .NET 8 SDK onward. Dependabot is told to leave these alone in
-         .github/dependabot.yml, and SourceGeneratorRoslynFloorTests fails if they move. -->
+         this repository buildable from the .NET 8 SDK onward. SourceGeneratorRoslynFloorTests fails fast
+         if they move, and the CI minimum-sdk job compiles on the oldest supported SDK so the whole
+         class of floor-raising change is caught, not just this one package. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
     <PackageReference Include="System.Memory" Version="4.6.3" />
