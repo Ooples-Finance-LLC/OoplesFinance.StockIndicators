@@ -130,11 +130,10 @@ public abstract class IndicatorBase
         if (primary is null && outputs.Count > 0)
         {
             // An indicator that published outputs but named no primary chains from its first one.
-            foreach (var series in outputs.Values)
-            {
-                primary = series;
-                break;
-            }
+            // Written as a loop that breaks on its first iteration until SonarCloud pointed out that
+            // is just First() spelled at length - and a loop whose body cannot run twice reads as if
+            // it might, which is the actual cost.
+            primary = outputs.Values.First();
         }
 
         var result = data.WithValues(primary ?? new List<double>());
