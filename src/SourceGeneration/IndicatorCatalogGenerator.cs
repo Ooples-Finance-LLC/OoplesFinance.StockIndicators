@@ -579,17 +579,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         "SectorRotationModel",
     };
 
-    // Multi-output indicators that need special Result types
-    private static readonly Dictionary<string, string[]> MultiOutputIndicators = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Format: IndicatorName -> Output property names
-        ["AroonOscillator"] = new[] { "Up", "Down", "Oscillator" },
-        ["ElderRayIndex"] = new[] { "BullPower", "BearPower" },
-        ["AlligatorIndex"] = new[] { "Jaw", "Teeth", "Lips" },
-        ["GatorOscillator"] = new[] { "Upper", "Lower" },
-        ["Trix"] = new[] { "Trix", "Signal" },
-        ["PPO"] = new[] { "Ppo", "Signal", "Histogram" },
-    };
+    // Which indicators publish more than one output, and under what names, is read out of the
+    // SetOutputValues calls in the calculations rather than listed here. The list that used to live
+    // here had drifted from the code in five of its six entries: it claimed AlligatorIndex publishes
+    // "Jaw" (it publishes "Jaws", and in a different order), that GatorOscillator publishes
+    // Upper/Lower (it publishes Top/Bottom), and that Trix and AroonOscillator have a second output at
+    // all - they each publish exactly one. Handles were generated for outputs that do not exist, and
+    // resolving them silently returned the primary series, so every band of a multi-output result came
+    // back identical.
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -610,11 +607,73 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetEnumSemanticTarget(ctx))
             .Where(static m => m is not null);
 
+        // Read each indicator's published output names out of its calculation, so the catalog's
+        // multi-output result types cannot describe outputs the indicators do not have.
+        var publishedOutputs = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IndicatorOutputMapGenerator.IsCalculationMethod(node),
+                transform: static (ctx, _) => IndicatorOutputMapGenerator.ReadPublishedOutputs(ctx.Node))
+            .Where(static x => x is not null)
+            .Collect();
+
         // Combine with compilation
-        var compilationAndEnums = context.CompilationProvider.Combine(enumDeclarations.Collect());
+        var compilationAndEnums = context.CompilationProvider
+            .Combine(enumDeclarations.Collect())
+            .Combine(publishedOutputs);
 
         // Generate source
-        context.RegisterSourceOutput(compilationAndEnums, static (spc, source) => Execute(source.Left, source.Right!, spc));
+        context.RegisterSourceOutput(compilationAndEnums, static (spc, source) =>
+            Execute(source.Left.Left, source.Left.Right!, BuildMultiOutputMap(source.Right), spc));
+    }
+
+    /// <summary>
+    /// Collapses the per-method readings into one entry per indicator, keeping only those that publish
+    /// more than one output - those are the ones that need a result type with named members.
+    /// </summary>
+    private static Dictionary<string, string[]> BuildMultiOutputMap(
+        ImmutableArray<IndicatorOutputMapGenerator.PublishedOutputs?> readings)
+    {
+        var best = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var reading in readings)
+        {
+            if (reading is null)
+            {
+                continue;
+            }
+
+            if (!best.TryGetValue(reading.IndicatorName, out var existing) || reading.Keys.Count > existing.Count)
+            {
+                best[reading.IndicatorName] = reading.Keys;
+            }
+        }
+
+        // Only the indicators that already had result types are given one. The names and the order now
+        // come from the code instead of from a list, which is the point - but emitting a result type
+        // for every one of the several hundred indicators that publish more than one output would
+        // change the shape of the catalog far beyond fixing what was wrong, and the emitter below was
+        // written for a handful of hand-picked cases. Widening that is a separate decision.
+        var eligible = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "AroonOscillator", "ElderRayIndex", "AlligatorIndex", "GatorOscillator", "Trix"
+        };
+
+        // PercentagePriceOscillator is deliberately absent. The old list keyed it as "PPO", which never
+        // matched the IndicatorName member, so it has always returned a plain handle - adding it now
+        // would be a new API change rather than a repair.
+
+        var map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in best)
+        {
+            // An indicator publishing a single output is not multi-output, whatever a list once said.
+            // Trix and AroonOscillator each publish exactly one, so they get a plain handle and the
+            // fabricated .Signal, .Up and .Down members disappear rather than resolving to the primary.
+            if (entry.Value.Count > 1 && eligible.Contains(entry.Key))
+            {
+                map[entry.Key] = entry.Value.ToArray();
+            }
+        }
+
+        return map;
     }
 
     private static bool IsCandidateEnum(SyntaxNode node)
@@ -635,7 +694,8 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static void Execute(Compilation compilation, ImmutableArray<EnumDeclarationSyntax?> enums, SourceProductionContext context)
+    private static void Execute(Compilation compilation, ImmutableArray<EnumDeclarationSyntax?> enums,
+        Dictionary<string, string[]> multiOutputIndicators, SourceProductionContext context)
     {
         if (enums.IsDefaultOrEmpty)
         {
@@ -660,13 +720,14 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
         }
 
         // Generate IndicatorCatalog.g.cs
-        GenerateIndicatorCatalog(context, indicatorNames);
+        GenerateIndicatorCatalog(context, indicatorNames, multiOutputIndicators);
 
         // Generate IndicatorCompute.g.cs
         GenerateIndicatorCompute(context, indicatorNames);
     }
 
-    private static void GenerateIndicatorCatalog(SourceProductionContext context, List<string> indicatorNames)
+    private static void GenerateIndicatorCatalog(SourceProductionContext context, List<string> indicatorNames,
+        Dictionary<string, string[]> MultiOutputIndicators)
     {
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated/>");

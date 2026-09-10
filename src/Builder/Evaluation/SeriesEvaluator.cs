@@ -180,7 +180,36 @@ internal sealed class SeriesEvaluator
     private static double[] ComputeWithV2(StockData data, IndicatorSpec spec)
     {
         var state = StatefulIndicatorFactory.Create(spec);
-        return BatchCompute.ComputeAll(data, state);
+
+        // Ask for the slot the caller actually requested. Without this every output of a multi-output
+        // indicator returned the primary series - three identical bands from one Alligator.
+        return BatchCompute.ComputeAll(data, state, ResolveOutputKey(spec));
+    }
+
+    /// <summary>
+    /// The output key this spec is asking for, or null when it wants the primary value.
+    /// </summary>
+    private static string? ResolveOutputKey(IndicatorSpec spec)
+    {
+        if (spec.Output == IndicatorOutput.Primary)
+        {
+            return null;
+        }
+
+        // Go through the registry, not straight to the generated map: the registry consults explicit
+        // registrations first, which is how an indicator whose key does not resemble its slot name is
+        // pinned - DonchianChannels publishes UpperChannel for the UpperBand slot.
+        var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
+        if (key is not null)
+        {
+            return key;
+        }
+
+        var available = GeneratedIndicatorOutputs.KeysFor(spec.Name);
+        var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
+
+        throw new CalculationException(
+            $"{spec.Name} does not publish a {spec.Output} output. Available outputs: {availableText}.");
     }
 
     /// <summary>
@@ -370,6 +399,19 @@ internal sealed class SeriesEvaluator
             return list.ToArray();
         }
 
+        // Only the primary slot may fall back to CustomValuesList - that is where an indicator with a
+        // single output publishes it. Any other slot resolving to nothing means the caller asked for a
+        // series this indicator does not produce, and answering with the primary series would be a
+        // wrong number rather than an error.
+        if (spec.Output != IndicatorOutput.Primary)
+        {
+            var available = GeneratedIndicatorOutputs.KeysFor(spec.Name);
+            var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
+
+            throw new CalculationException(
+                $"{spec.Name} does not publish a {spec.Output} output. Available outputs: {availableText}.");
+        }
+
         return result.CustomValuesList.ToArray();
     }
 }
@@ -444,7 +486,9 @@ public static class IndicatorOutputRegistry
                     return key;
                 }
             }
-            return null;
+            return GeneratedIndicatorOutputs.TryGetKey(name, output, out var generatedPrimary)
+                ? generatedPrimary
+                : null;
         }
 
         lock (RegistryLock)
@@ -455,16 +499,12 @@ public static class IndicatorOutputRegistry
             }
         }
 
-        // Fallback mappings for common output types
-        return output switch
-        {
-            IndicatorOutput.UpperBand => "UpperBand",
-            IndicatorOutput.MiddleBand => "MiddleBand",
-            IndicatorOutput.LowerBand => "LowerBand",
-            IndicatorOutput.Signal => "Signal",
-            IndicatorOutput.Histogram => "Histogram",
-            _ => null
-        };
+        // No guessing. This used to turn IndicatorOutput.Signal into the literal string "Signal" for
+        // every indicator, and callers then quietly substituted the primary series when that key did
+        // not exist - so Alligator, Gator, Aroon, Elder Ray and Trix each returned the same series for
+        // every band. The generated map below is read out of the SetOutputValues calls themselves, so a
+        // slot either has a key the indicator genuinely publishes or it has none.
+        return GeneratedIndicatorOutputs.TryGetKey(name, output, out var generated) ? generated : null;
     }
 
     /// <summary>
