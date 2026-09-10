@@ -144,7 +144,7 @@ public static class PlatformDetector
     /// Taken from what the published packages actually contain and from the names
     /// AiDotNet.Tensors loads, rather than from the package identifier - the two do not match.
     /// </remarks>
-    private static IEnumerable<string> GetNativeLibraryNames(AccelerationPackage package)
+    internal static IEnumerable<string> GetNativeLibraryNames(AccelerationPackage package)
     {
         switch (package)
         {
@@ -166,13 +166,24 @@ public static class PlatformDetector
                 // cuBLAS is what the package carries, so its presence is what package presence
                 // means here. Driver capability is a different question and belongs to a driver
                 // probe, not to this one.
+                // Every CUDA major AiDotNet.Tensors itself probes, newest first, and not just the
+                // one this machine happens to have. CuBlasNative carries the same two lists
+                // (CublasWindowsCandidates / CublasLinuxCandidates) because a package built on one
+                // OS bakes in the other's name; pinning a single major here would report Cuda
+                // missing on a CUDA 13 machine that has AiDotNet.Native.CUDA deployed - the same
+                // wrong answer as the driver false-positive above, just in the other direction and
+                // on the newer runtime.
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    yield return "cublas64_13";
                     yield return "cublas64_12";
+                    yield return "cublas64_11";
                 }
                 else
                 {
+                    yield return "libcublas.so.13";
                     yield return "libcublas.so.12";
+                    yield return "libcublas.so.11";
                     yield return "libcublas.so";
                 }
 

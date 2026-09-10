@@ -8,9 +8,8 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
-using System.Text;
-
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace OoplesFinance.StockIndicators.Platform;
 

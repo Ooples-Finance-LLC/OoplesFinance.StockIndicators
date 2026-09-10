@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Diagnostics;
 using OoplesFinance.StockIndicators.Exceptions;
 using OoplesFinance.StockIndicators.Platform;
@@ -146,5 +147,48 @@ public sealed class PlatformDetectorTests
             capabilities.Supports(feature).Should().BeTrue(
                 $"{feature} is listed, so it must also answer true when asked directly");
         }
+    }
+
+    /// <summary>
+    /// The cuBLAS names probed for, pinned against the list AiDotNet.Tensors probes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every wrong answer this detector can give comes from this list, and neither direction is
+    /// visible without a test. Listing the NVIDIA driver (nvcuda / libcuda) made Has(Cuda) true on
+    /// any machine with an NVIDIA card, whether or not AiDotNet.Native.CUDA was deployed. Pinning a
+    /// single CUDA major makes it false on a machine that has the package but a newer toolkit.
+    /// Both look like a working probe from the outside.
+    /// </para>
+    /// <para>
+    /// The expected values are AiDotNet.Tensors' CuBlasNative.CublasWindowsCandidates and
+    /// CublasLinuxCandidates, which is what actually loads cuBLAS at run time. When Tensors adds a
+    /// major, this fails and says so rather than quietly reporting the package missing.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void TheCudaProbeCoversEveryToolkitMajorTensorsLoads()
+    {
+        var names = PlatformDetector.GetNativeLibraryNames(AccelerationPackage.Cuda).ToList();
+
+        names.Should().NotContain(n => n.Contains("nvcuda", StringComparison.OrdinalIgnoreCase),
+            "nvcuda is the NVIDIA driver and says nothing about whether the package is deployed");
+        names.Should().NotContain(n => n.StartsWith("libcuda.", StringComparison.OrdinalIgnoreCase),
+            "libcuda is the NVIDIA driver, not cuBLAS");
+
+        var expected = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new[] { "cublas64_13", "cublas64_12", "cublas64_11" }
+            : new[] { "libcublas.so.13", "libcublas.so.12", "libcublas.so.11", "libcublas.so" };
+
+        names.Should().Equal(expected,
+            "the probe must try the same cuBLAS names, newest first, that AiDotNet.Tensors loads");
+    }
+
+    [Theory]
+    [InlineData(AccelerationPackage.OpenBlas, "libopenblas")]
+    [InlineData(AccelerationPackage.ClBlast, "clblast")]
+    public void TheOtherProbesNameWhatThosePackagesDeploy(AccelerationPackage package, string expected)
+    {
+        PlatformDetector.GetNativeLibraryNames(package).Should().Contain(expected);
     }
 }
