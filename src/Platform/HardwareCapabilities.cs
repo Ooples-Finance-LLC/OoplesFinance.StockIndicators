@@ -10,6 +10,8 @@
 
 using System.Text;
 
+using System.Collections.ObjectModel;
+
 namespace OoplesFinance.StockIndicators.Platform;
 
 /// <summary>
@@ -69,6 +71,18 @@ public enum AccelerationPackage
 public sealed class HardwareCapabilities
 {
     private readonly HashSet<CpuFeature> _cpuFeatures;
+
+    /// <summary>
+    /// An immutable view of <see cref="_cpuFeatures"/>, built once.
+    /// </summary>
+    /// <remarks>
+    /// The set itself stays private because <see cref="Supports"/> wants its O(1) lookup. Handing
+    /// the set out as <c>IReadOnlyCollection</c> only hides mutation behind a cast: a caller can
+    /// cast back to <c>HashSet&lt;CpuFeature&gt;</c> and add or remove entries, and because
+    /// <see cref="PlatformDetector.Capabilities"/> detects once and caches, that would change what
+    /// Supports and Describe report for the rest of the process.
+    /// </remarks>
+    private readonly ReadOnlyCollection<CpuFeature> _cpuFeatureView;
     private readonly Dictionary<AccelerationPackage, bool> _packageProbes = new();
     private readonly Func<AccelerationPackage, bool> _probe;
     private readonly object _probeLock = new();
@@ -84,6 +98,7 @@ public sealed class HardwareCapabilities
         string processArchitecture)
     {
         _cpuFeatures = cpuFeatures;
+        _cpuFeatureView = new List<CpuFeature>(cpuFeatures).AsReadOnly();
         _probe = probe;
         IsVectorHardwareAccelerated = isVectorHardwareAccelerated;
         VectorByteCount = vectorByteCount;
@@ -123,7 +138,7 @@ public sealed class HardwareCapabilities
     }
 
     /// <summary>Every instruction set that was detected.</summary>
-    public IReadOnlyCollection<CpuFeature> CpuFeatures => _cpuFeatures;
+    public IReadOnlyCollection<CpuFeature> CpuFeatures => _cpuFeatureView;
 
     /// <summary>
     /// Every acceleration package that is available.
@@ -142,7 +157,10 @@ public sealed class HardwareCapabilities
                 }
             }
 
-            return found;
+            // A fresh list each call, so mutating it could not corrupt anything cached - but the
+            // two collection properties should promise the same thing rather than differ by
+            // accident.
+            return found.AsReadOnly();
         }
     }
 
