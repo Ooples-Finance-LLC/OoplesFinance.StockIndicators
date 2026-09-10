@@ -9,7 +9,6 @@
 //     that you include my copyright info and my contact info in a comment
 
 using System.Numerics;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 #if NET8_0_OR_GREATER
@@ -106,43 +105,80 @@ public static class PlatformDetector
     }
 
     /// <summary>
-    /// Whether an optional package can be loaded in this process.
+    /// Whether the native library behind an acceleration package can be loaded in this process.
     /// </summary>
     /// <remarks>
-    /// Asked by name so that the core library never references these assemblies. A package that is not
-    /// installed produces a load failure, which is the answer rather than an error - hence the catch,
-    /// which is deliberately not logged: this runs before any logger exists and a missing optional
-    /// package is the ordinary case, not a fault.
+    /// <para>
+    /// These packages carry no managed assembly - the published AiDotNet.Native.OpenBLAS contains a
+    /// .targets file and <c>runtimes/win-x64/native/libopenblas.dll</c>, and nothing under lib/ - so
+    /// there is no assembly to load and asking for one would report every package as missing however
+    /// it was named. What can be asked is whether the operating system will load the native library
+    /// the package deploys, which is how AiDotNet.Tensors itself decides, in
+    /// <c>NativeLibraryDetector</c>.
+    /// </para>
+    /// <para>
+    /// On .NET Framework there is no NativeLibrary, so this reports false rather than guessing.
+    /// </para>
     /// </remarks>
     private static bool IsPackagePresent(AccelerationPackage package)
     {
-        var assemblyName = GetAssemblyName(package);
+#if NET8_0_OR_GREATER
+        foreach (var candidate in GetNativeLibraryNames(package))
+        {
+            if (NativeLibrary.TryLoad(candidate, out var handle))
+            {
+                NativeLibrary.Free(handle);
 
-        try
-        {
-            return Assembly.Load(new AssemblyName(assemblyName)) is not null;
+                return true;
+            }
         }
-        catch (FileNotFoundException)
+#endif
+
+        return false;
+    }
+
+    /// <summary>
+    /// The native libraries a package deploys, by platform.
+    /// </summary>
+    /// <remarks>
+    /// Taken from what the published packages actually contain and from the names
+    /// AiDotNet.Tensors loads, rather than from the package identifier - the two do not match.
+    /// </remarks>
+    private static IEnumerable<string> GetNativeLibraryNames(AccelerationPackage package)
+    {
+        switch (package)
         {
-            return false;
-        }
-        catch (FileLoadException)
-        {
-            return false;
-        }
-        catch (BadImageFormatException)
-        {
-            return false;
+            case AccelerationPackage.OpenBlas:
+                yield return "libopenblas";
+                yield return "openblas";
+                break;
+            case AccelerationPackage.ClBlast:
+                yield return "clblast";
+                break;
+            case AccelerationPackage.Cuda:
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    yield return "nvcuda.dll";
+                    yield return "cublas64_12";
+                }
+                else
+                {
+                    yield return "libcuda.so.1";
+                    yield return "libcuda.so";
+                    yield return "libcublas.so.12";
+                }
+
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(package), package, "Unknown acceleration package.");
         }
     }
 
-    private static string GetAssemblyName(AccelerationPackage package) => package switch
+    internal static string GetPackageId(AccelerationPackage package) => package switch
     {
-        AccelerationPackage.OpenBlas => "AiDotNet.Tensors.OpenBLAS",
-        AccelerationPackage.ClBlast => "AiDotNet.Tensors.CLBlast",
-        AccelerationPackage.Cuda => "AiDotNet.Tensors.CUDA",
+        AccelerationPackage.OpenBlas => "AiDotNet.Native.OpenBLAS",
+        AccelerationPackage.ClBlast => "AiDotNet.Native.CLBlast",
+        AccelerationPackage.Cuda => "AiDotNet.Native.CUDA",
         _ => throw new ArgumentOutOfRangeException(nameof(package), package, "Unknown acceleration package.")
     };
-
-    internal static string GetPackageId(AccelerationPackage package) => GetAssemblyName(package);
 }

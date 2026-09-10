@@ -116,7 +116,24 @@ public sealed class PlatformDetectorTests
         act.Should().Throw<MissingAccelerationPackageException>()
             .Where(e => e.Package == AccelerationPackage.Cuda)
             .WithMessage("*dotnet add package*", "the useful part is what to do next")
-            .WithMessage("*AiDotNet.Tensors.CUDA*");
+            .WithMessage("*AiDotNet.Native.CUDA*", "the package is published under that identifier");
+    }
+
+    /// <summary>
+    /// The identifiers have to be the ones actually on NuGet, or the message tells people to install
+    /// something that does not exist.
+    /// </summary>
+    [Theory]
+    [InlineData(AccelerationPackage.OpenBlas, "AiDotNet.Native.OpenBLAS")]
+    [InlineData(AccelerationPackage.ClBlast, "AiDotNet.Native.CLBlast")]
+    [InlineData(AccelerationPackage.Cuda, "AiDotNet.Native.CUDA")]
+    public void NamesThePackageAsItIsPublished(AccelerationPackage package, string expected)
+    {
+        var exception = new MissingAccelerationPackageException(package);
+
+        exception.Message.Should().Contain(expected);
+        exception.Message.Should().NotContain("AiDotNet.Tensors.",
+            "these ship as AiDotNet.Native.*; the Tensors-prefixed names were never published");
     }
 
     [Fact]
