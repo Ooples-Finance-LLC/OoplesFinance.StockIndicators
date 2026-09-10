@@ -25,6 +25,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="..\src\OoplesFinance.StockIndicators.csproj" />
+    <ProjectReference Include="..\src\Trading\OoplesFinance.StockIndicators.Trading.csproj" />
     <ProjectReference Include="..\examples\OoplesFinance.StockIndicators.FXMacroData\OoplesFinance.StockIndicators.FXMacroData.csproj" />
     <PackageReference Include="System.Linq.Async" Version="7.0.1" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.5.85" />
