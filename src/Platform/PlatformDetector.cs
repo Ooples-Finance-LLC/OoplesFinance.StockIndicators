@@ -156,16 +156,24 @@ public static class PlatformDetector
                 yield return "clblast";
                 break;
             case AccelerationPackage.Cuda:
+                // cuBLAS only. nvcuda / libcuda is the NVIDIA DRIVER, which ships with any NVIDIA
+                // GPU installation and says nothing about whether AiDotNet.Native.CUDA is
+                // deployed - and it was listed first, so on any machine with an NVIDIA card
+                // Has(Cuda) returned true and Require(Cuda) returned quietly instead of throwing
+                // MissingAccelerationPackageException. That is precisely backwards: the whole point
+                // of Require is to tell a caller the package is missing.
+                //
+                // cuBLAS is what the package carries, so its presence is what package presence
+                // means here. Driver capability is a different question and belongs to a driver
+                // probe, not to this one.
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    yield return "nvcuda.dll";
                     yield return "cublas64_12";
                 }
                 else
                 {
-                    yield return "libcuda.so.1";
-                    yield return "libcuda.so";
                     yield return "libcublas.so.12";
+                    yield return "libcublas.so";
                 }
 
                 break;
