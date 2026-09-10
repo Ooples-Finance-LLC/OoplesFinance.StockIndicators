@@ -311,12 +311,16 @@ public static partial class Calculations
         List<double> atrDevList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // Resolved before any moving average runs. CalculateAverageTrueRange takes its close series
+        // from stockData.CustomValuesList, which the moving average above overwrites, so the true
+        // range was being measured against that average rather than against price. See issue #145.
+        var atrSource = IndicatorSource.Resolve(stockData);
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
         var upperBandList = bollingerBands.OutputValues["UpperBand"];
         var lowerBandList = bollingerBands.OutputValues["LowerBand"];
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
+        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, atrLength);
 
         double prevAtrDev = 0;
         for (var i = 0; i < stockData.Count; i++)

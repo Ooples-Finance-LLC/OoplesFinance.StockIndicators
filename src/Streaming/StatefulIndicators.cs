@@ -3524,7 +3524,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
     private readonly RollingWindowMax _highWindow;
     private readonly RollingWindowMin _lowWindow;
     private readonly StreamingInputResolver _input;
-    private double _prevSma;
+    private double _prevValue;
     private bool _hasPrev;
 
     public ScalpersChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 15,
@@ -3563,7 +3563,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         _atrSmoother.Reset();
         _highWindow.Reset();
         _lowWindow.Reset();
-        _prevSma = 0;
+        _prevValue = 0;
         _hasPrev = false;
     }
 
@@ -3572,8 +3572,11 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
         // Match batch behavior: ATR uses the prior SMA values as the close series.
-        var prevSma = _hasPrev ? _prevSma : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevSma);
+        // The batch side measured this true range against a moving average, and this mirrored it to
+        // stay in parity. Both now measure it against price, which is what a true range is, and the
+        // first bar seeds from its own value so the opening range is the bar's range - see #145, #146.
+        var prevValue = _hasPrev ? _prevValue : value;
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
@@ -3581,7 +3584,7 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
 
         if (isFinal)
         {
-            _prevSma = sma;
+            _prevValue = value;
             _hasPrev = true;
         }
 
@@ -12687,7 +12690,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
     private readonly IMovingAverageSmoother _atrMaSmoother;
     private readonly IMovingAverageSmoother _atrSmoother;
     private readonly StreamingInputResolver _input;
-    private double _prevAtrMa;
+    private double _prevValue;
     private double _basisValue;
     private bool _hasPrev;
 
@@ -12726,7 +12729,7 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
         _stdDev.Reset();
         _atrMaSmoother.Reset();
         _atrSmoother.Reset();
-        _prevAtrMa = 0;
+        _prevValue = 0;
         _basisValue = 0;
         _hasPrev = false;
     }
@@ -12740,15 +12743,18 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
         var upper = basis + (stdDev * _stdDevMult);
         var lower = basis - (stdDev * _stdDevMult);
         var atrMa = _atrMaSmoother.Next(value, isFinal);
-        var prevAtrMa = _hasPrev ? _prevAtrMa : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevAtrMa);
+        // The batch side measured this true range against a moving average, and this mirrored it to
+        // stay in parity. Both now measure it against price, which is what a true range is, and the
+        // first bar seeds from its own value so the opening range is the bar's range - see #145, #146.
+        var prevValue = _hasPrev ? _prevValue : value;
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var bbDiff = upper - lower;
         var atrDev = bbDiff != 0 ? atr / bbDiff : 0;
 
         if (isFinal)
         {
-            _prevAtrMa = atrMa;
+            _prevValue = value;
             _hasPrev = true;
         }
 
