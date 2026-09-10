@@ -7,6 +7,44 @@ on:
     branches: [master, main]
 
 jobs:
+  # Builds on the OLDEST supported .NET 10 SDK, which the main job never does.
+  #
+  # `dotnet-version: 10.x` resolves to the NEWEST 10.x SDK, so any change that raises a toolchain
+  # floor stays green here and fails only on someone else's machine. That is not hypothetical: #155
+  # bumped the source generator's Microsoft.CodeAnalysis.CSharp 4.8.0 -> 5.9.0, CI was green, and a
+  # downstream consumer building this repository from source hit
+  #
+  #   CSC : error CS9057: Analyzer assembly ... references version '5.9.0.0' of the compiler,
+  #         which is newer than the currently running version '5.0.0.0'
+  #
+  # A source generator is loaded by the compiler, so the Roslyn version it references is the minimum
+  # SDK any source consumer is forced onto. Asserting a version number in a test catches that one
+  # package; actually compiling on the oldest supported SDK catches the whole class, including
+  # whatever raises a floor next.
+  #
+  # 10.0.1xx is the first .NET 10 feature band (compiler 5.0). Raise it only as a deliberate decision
+  # to drop support for older SDKs, and say so in the commit.
+  minimum-sdk:
+    name: Build on the oldest supported SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup the oldest supported .NET 10 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.1xx
+
+      - name: Report the SDK and compiler actually in use
+        run: dotnet --version
+
+      - name: Build the library, which builds and loads the source generator
+        run: dotnet build src/OoplesFinance.StockIndicators.csproj --configuration Release --framework net10.0
+
   build-and-test:
     runs-on: windows-latest
 
