@@ -1275,7 +1275,11 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevPcc = GetLastOrDefault(percentChangeList);
-            var pcc = prevValue - 1 != 0 ? prevPcc + (currentValue / (prevValue - 1)) : 0;
+            // A percent change is (current / previous) - 1. The subtraction used to sit inside the
+            // divisor - current / (previous - 1) - which is a different quantity entirely: at a price
+            // of 100 it is 100/99, so the running total climbed by about 1.01 every bar no matter what
+            // price did. On a market that never moved it reached 909 after 900 bars.
+            var pcc = prevValue != 0 ? prevPcc + ((currentValue / prevValue) - 1) : 0;
             percentChangeList.Add(pcc);
         }
 

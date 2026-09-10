@@ -2398,7 +2398,10 @@ public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
         if (isFinal)
         {
             _prevS = s;
-            _prevSEma = prevSEma;
+
+            // Keep the value just computed, not the one it came from. Storing prevSEma left this
+            // pinned at zero and the estimate diverged, matching the batch defect it mirrored.
+            _prevSEma = sEma;
             _hasPrev = true;
         }
 

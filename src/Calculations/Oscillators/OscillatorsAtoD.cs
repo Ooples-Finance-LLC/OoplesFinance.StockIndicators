@@ -679,7 +679,10 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
 
             var prevValue = GetLastOrDefault(valueList);
-            var value = currentLow >= prevHigh ? prevValue + increment : currentHigh <= prevLow ? prevValue - increment : prevValue;
+            // Strict comparisons: a gap means this bar's low is above the previous high, not level
+            // with it. With >= and <=, a market that never moved counted a gap up on every bar - the
+            // low equals the previous high - and the accumulator simply returned the bar number.
+            var value = currentLow > prevHigh ? prevValue + increment : currentHigh < prevLow ? prevValue - increment : prevValue;
             valueList.Add(value);
         }
 

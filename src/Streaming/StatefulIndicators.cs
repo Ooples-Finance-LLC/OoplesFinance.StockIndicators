@@ -7677,8 +7677,10 @@ public sealed class ConditionalAccumulatorState : IStreamingIndicatorState, IDis
     {
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var value = bar.Low >= prevHigh ? _value + _increment
-            : bar.High <= prevLow ? _value - _increment
+        // Strict, as on the batch side: a gap means this bar's low is above the previous high, not
+        // level with it.
+        var value = bar.Low > prevHigh ? _value + _increment
+            : bar.High < prevLow ? _value - _increment
             : _value;
         var signal = _signal.Next(value, isFinal);
 

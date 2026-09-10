@@ -656,7 +656,12 @@ public static partial class Calculations
             var prevS = i >= 1 ? sList[i - 1] : currentValue;
             var prevSEma = GetLastOrDefault(sEmaList);
             var sEma = CalculateEMA(prevS, prevSEma, halfLength);
-            sEmaList.Add(prevSEma);
+
+            // Record the value just computed, not the one it was computed from. Adding prevSEma left
+            // the list pinned at its initial zero, so every sEma was taken against zero rather than
+            // against a running average, and the estimate diverged - 2024 and climbing on a market
+            // priced at 100.
+            sEmaList.Add(sEma);
 
             var s = (a * currentValue) + prevS - (a * sEma);
             sList.Add(s);
