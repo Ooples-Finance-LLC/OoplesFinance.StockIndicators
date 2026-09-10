@@ -44,7 +44,8 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
 /// </remarks>
 public sealed class StreamingCustomInputTests : GlobalTestData
 {
-    private const int Bars = 70;
+    /// <summary>The whole fixture, so long-window indicators get as much warmup as exists.</summary>
+    private const int Bars = 251;
 
     [Fact]
     public void StreamingRespondsToACustomInputExactlyWhenTheBatchDoes()
@@ -74,8 +75,20 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             bool streamMoved;
             try
             {
-                batchMoved = BatchRespondsToInput(batch, bars);
-                streamMoved = StreamingRespondsToSelector(pair.Value, bars);
+                var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, InputName.Close));
+                var batchOnMedian = Flatten((StockData)InvokeBatch(batch, bars, InputName.MedianPrice));
+                var streamOnClose = Run(Build(pair.Value.ByName, pair.Value.Args, InputName.Close), bars);
+                var streamOnMedian = Run(Build(pair.Value.BySelector, pair.Value.Args, (Func<OhlcvBar, double>)Median), bars);
+
+                // An indicator whose window never fills over this fixture - the catalogue has
+                // defaults as long as 550 against 251 bars - emits nothing but zeros, and "no
+                // difference" then means "no signal" rather than "ignores the input". Refusing a
+                // verdict is the honest reading; concluding from it produced a false accusation
+                // against QuadraticLeastSquaresMovingAverage.
+                if (Silent(streamOnClose) || Silent(batchOnClose)) { unpaired++; continue; }
+
+                batchMoved = Differs(batchOnClose, batchOnMedian);
+                streamMoved = Differs(streamOnClose, streamOnMedian);
             }
             catch
             {
@@ -102,6 +115,49 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     }
 
     private static double Median(OhlcvBar bar) => (bar.High + bar.Low) / 2;
+
+    /// <summary>
+    /// Runs a batch indicator on a given input series, using whichever lever that indicator exposes.
+    /// </summary>
+    /// <remarks>
+    /// The catalogue has two ways of accepting an input series and they are not interchangeable.
+    /// Most indicators read it from the StockData - CustomValuesList if chained, else InputValues -
+    /// so chaining is how a caller changes it. A minority declare an <c>InputName</c> parameter and
+    /// resolve through the two-argument <c>GetInputValuesList(inputName, stockData)</c>, which never
+    /// looks at the chained series at all; AwesomeOscillator is one, and it defaults to
+    /// <c>MedianPrice</c> rather than close.
+    ///
+    /// Testing only the chaining lever reported those as ignoring their input, which they do not -
+    /// they ignore that particular lever. Each is driven the way it actually accepts input.
+    /// </remarks>
+    private static object InvokeBatch(MethodInfo batch, List<TickerData> bars, InputName input)
+    {
+        var ps = batch.GetParameters();
+        var args = new object?[ps.Length];
+        for (var i = 1; i < ps.Length; i++) { args[i] = ps[i].DefaultValue; }
+
+        var byParameter = Array.FindIndex(ps, p => p.ParameterType == typeof(InputName));
+        if (byParameter > 0)
+        {
+            args[0] = new StockData(bars);
+            args[byParameter] = input;
+        }
+        else
+        {
+            args[0] = input == InputName.MedianPrice
+                ? new StockData(bars).CalculateMedianPrice()
+                : new StockData(bars);
+        }
+
+        return batch.Invoke(null, args)!;
+    }
+
+    private static IStreamingIndicatorState Build(ConstructorInfo ctor, object?[] args, object last) =>
+        (IStreamingIndicatorState)ctor.Invoke(args.Append<object?>(last).ToArray())!;
+
+    /// <summary>Whether a run produced nothing to compare.</summary>
+    private static bool Silent(Dictionary<string, List<double>> series) =>
+        series.Values.All(s => s.All(v => v == 0 || double.IsNaN(v)));
 
     /// <summary>
     /// An (InputName, selector) constructor pair differing only in the final parameter, plus the
@@ -150,31 +206,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
                 && m.GetParameters().Skip(1).All(p => p.HasDefaultValue));
     }
 
-    private static bool BatchRespondsToInput(MethodInfo batch, List<TickerData> bars)
-    {
-        var args = new object?[batch.GetParameters().Length];
-        for (var i = 1; i < args.Length; i++) { args[i] = batch.GetParameters()[i].DefaultValue; }
 
-        args[0] = new StockData(bars);
-        var onClose = Flatten((StockData)batch.Invoke(null, args)!);
-
-        // Chaining is how a batch caller supplies a different series.
-        args[0] = new StockData(bars).CalculateMedianPrice();
-        var onMedian = Flatten((StockData)batch.Invoke(null, args)!);
-
-        return Differs(onClose, onMedian);
-    }
-
-    private static bool StreamingRespondsToSelector(
-        (ConstructorInfo ByName, ConstructorInfo BySelector, object?[] Args) pair, List<TickerData> bars)
-    {
-        var onClose = Run(
-            (IStreamingIndicatorState)pair.ByName.Invoke(pair.Args.Append<object?>(InputName.Close).ToArray())!, bars);
-        var onMedian = Run(
-            (IStreamingIndicatorState)pair.BySelector.Invoke(pair.Args.Append<object?>((Func<OhlcvBar, double>)Median).ToArray())!, bars);
-
-        return Differs(onClose, onMedian);
-    }
 
     /// <summary>Every published series of a batch result, keyed by output name.</summary>
     private static Dictionary<string, List<double>> Flatten(StockData result)
