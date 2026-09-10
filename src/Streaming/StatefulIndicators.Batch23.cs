@@ -891,7 +891,17 @@ public sealed class StandardPivotPointsState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
+        // bar.Close, not the resolver. Pivot points are defined on the previous period's OHLC, and
+        // the batch says so structurally: CalculateStandardPivotPoints resolves through
+        // GetInputValuesList(stockData, inputLength), which rebuilds every series from
+        // TickerDataList by period and never consults CustomValuesList or InputValues. A chained
+        // series is invisible to it by construction.
+        //
+        // Reading the resolver here let a streaming caller compute "pivot points" on a series the
+        // batch has no way to accept, so the two engines disagreed whenever a selector was supplied.
+        // The InputName and selector constructor overloads remain for signature uniformity across
+        // the catalogue; for this indicator they have nothing to select.
+        var close = bar.Close;
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         var prevClose = _hasPrev ? _prevClose : 0;
