@@ -2787,7 +2787,9 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
         stockData.SetCustomValues(indexList);
         var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         for (var i = 0; i < stockData.Count; i++)

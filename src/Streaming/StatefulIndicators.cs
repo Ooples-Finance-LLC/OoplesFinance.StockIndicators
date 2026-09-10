@@ -9800,7 +9800,9 @@ public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorStat
     {
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _smaValue);
+        // Was reading the moving average rather than the input series, mirroring a batch side that
+        // had been contaminated by GetMovingAverageList. Both now measure the input - issue #145.
+        _stdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _correlation = new RollingWindowCorrelation(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -9814,7 +9816,7 @@ public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorStat
 
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _smaValue);
+        _stdDev = new StandardDeviationVolatilityState(maType, _length, bar => _input.GetValue(bar));
         _correlation = new RollingWindowCorrelation(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }

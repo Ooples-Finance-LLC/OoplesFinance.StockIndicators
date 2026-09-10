@@ -122,7 +122,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -374,7 +376,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var varList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var varList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -3088,7 +3092,9 @@ public static partial class Calculations
         var aboveSumWindow = new RollingSum();
 
         var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
+        // Measured on inputList, not on whatever the moving average above left behind. Taken from
+        // stockData this was the dispersion of that average rather than of the series itself - #145.
+        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length1).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {
