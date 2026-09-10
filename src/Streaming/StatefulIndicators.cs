@@ -7678,9 +7678,13 @@ public sealed class ConditionalAccumulatorState : IStreamingIndicatorState, IDis
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         // Strict, as on the batch side: a gap means this bar's low is above the previous high, not
-        // level with it.
-        var value = bar.Low > prevHigh ? _value + _increment
-            : bar.High < prevLow ? _value - _increment
+        // level with it. And the first bar cannot gap at all - there is no previous bar to gap from,
+        // and comparing against the 0 sentinel made bar.Low > prevHigh true for any positively
+        // priced instrument, counting a gap up on bar 0 and carrying that increment forward.
+        var value = _hasPrev
+            ? bar.Low > prevHigh ? _value + _increment
+                : bar.High < prevLow ? _value - _increment
+                : _value
             : _value;
         var signal = _signal.Next(value, isFinal);
 

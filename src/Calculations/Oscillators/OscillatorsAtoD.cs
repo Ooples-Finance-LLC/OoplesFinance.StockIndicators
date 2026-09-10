@@ -682,7 +682,14 @@ public static partial class Calculations
             // Strict comparisons: a gap means this bar's low is above the previous high, not level
             // with it. With >= and <=, a market that never moved counted a gap up on every bar - the
             // low equals the previous high - and the accumulator simply returned the bar number.
-            var value = currentLow > prevHigh ? prevValue + increment : currentHigh < prevLow ? prevValue - increment : prevValue;
+            // The first bar has no predecessor and therefore cannot gap. prevHigh and prevLow are
+            // the 0 sentinel there, so currentLow > prevHigh is true for any positively priced
+            // instrument: bar 0 was counted as a gap up, and every later value carried that extra
+            // increment. The strict comparisons below were already corrected once for a market that
+            // never moves; this is the same class of defect at the other end of the series.
+            var value = i >= 1
+                ? currentLow > prevHigh ? prevValue + increment : currentHigh < prevLow ? prevValue - increment : prevValue
+                : prevValue;
             valueList.Add(value);
         }
 
