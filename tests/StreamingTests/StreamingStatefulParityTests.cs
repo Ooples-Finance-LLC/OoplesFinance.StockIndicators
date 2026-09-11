@@ -157,8 +157,8 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             yield return new object[]
             {
                 new StatefulIndicatorSpec("ChartmillValueIndicator.Cmvc",
-                    () => new ChartmillValueIndicatorState(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice, 5),
-                    data => data.CalculateChartmillValueIndicator(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice, 5)
+                    () => new ChartmillValueIndicatorState(MovingAvgType.SimpleMovingAverage, 5),
+                    data => data.CalculateChartmillValueIndicator(MovingAvgType.SimpleMovingAverage, 5)
                         .OutputValues["Cmvc"])
             };
             yield return new object[]
@@ -211,8 +211,8 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             yield return new object[]
             {
                 new StatefulIndicatorSpec("ChopZone",
-                    () => new ChopZoneState(MovingAvgType.ExponentialMovingAverage, InputName.TypicalPrice, 30, 34),
-                    data => data.CalculateChopZone(MovingAvgType.ExponentialMovingAverage, InputName.TypicalPrice, 30, 34)
+                    () => new ChopZoneState(MovingAvgType.ExponentialMovingAverage, 30, 34),
+                    data => data.CalculateChopZone(MovingAvgType.ExponentialMovingAverage, 30, 34)
                         .CustomValuesList)
             };
             yield return new object[]

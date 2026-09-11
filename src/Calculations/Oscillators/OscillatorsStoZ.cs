@@ -423,11 +423,11 @@ public static partial class Calculations
     public static StockData CalculateWoodieCommodityChannelIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 6, int slowLength = 14)
     {
-        // Each component that takes its own inputName reads the CALLER's series. Those methods
-        // let a chained series win over their named input, and by the time this calculation calls
-        // them an earlier component has already published its output onto CustomValuesList - which
-        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
-        // their own named input exactly as before.
+        // The components that read their own default input - a typical or median price - read the
+        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
+        // an earlier component has already published its output onto CustomValuesList, which they would
+        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
+        // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
         List<double> histogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -791,15 +791,14 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateValueChartIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-       InputName inputName = InputName.MedianPrice, int length = 5)
+    public static StockData CalculateValueChartIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
     {
         List<double> vOpenList = new(stockData.Count);
         List<double> vHighList = new(stockData.Count);
         List<double> vLowList = new(stockData.Count);
         List<double> vCloseList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         var varp = MinOrMax((int)Math.Ceiling((double)length / 5));
 
@@ -893,7 +892,7 @@ public static partial class Calculations
     /// <param name="stdDevMult"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateVervoortSmoothedOscillator(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateVervoortSmoothedOscillator(this StockData stockData,
         int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
     {
         List<double> rainbowList = new(stockData.Count);
@@ -903,7 +902,7 @@ public static partial class Calculations
         List<double> fastKList = new(stockData.Count);
         List<double> skList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length2);
         var rbcWindow = new RollingMinMax(length2);
         var fastKSumWindow = new RollingSum();
@@ -1008,7 +1007,7 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVervoortHeikenAshiLongTermCandlestickOscillator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, InputName inputName = InputName.FullTypicalPrice, int length = 55,
+        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 55,
         double factor = 1.1)
     {
         List<double> haoList = new(stockData.Count);
@@ -1022,7 +1021,7 @@ public static partial class Calculations
         List<bool> dtrList = new(stockData.Count);
         List<double> hacoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1350,7 +1349,7 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVervoortHeikenAshiCandlestickOscillator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage, InputName inputName = InputName.FullTypicalPrice, int length = 34)
+        MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage, int length = 34)
     {
         List<double> haoList = new(stockData.Count);
         List<double> hacList = new(stockData.Count);
@@ -1363,7 +1362,7 @@ public static partial class Calculations
         List<bool> upTrendList = new(stockData.Count);
         List<double> hacoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2122,11 +2121,11 @@ public static partial class Calculations
         int macdLength3 = 9, int bullBearLength = 13, int williamRLength = 14, int maLength1 = 10, int maLength2 = 20, int maLength3 = 30, 
         int maLength4 = 50, int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9)
     {
-        // Each component that takes its own inputName reads the CALLER's series. Those methods
-        // let a chained series win over their named input, and by the time this calculation calls
-        // them an earlier component has already published its output onto CustomValuesList - which
-        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
-        // their own named input exactly as before.
+        // The components that read their own default input - a typical or median price - read the
+        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
+        // an earlier component has already published its output onto CustomValuesList, which they would
+        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
+        // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
         List<double> maRatingList = new(stockData.Count);
         List<double> oscRatingList = new(stockData.Count);

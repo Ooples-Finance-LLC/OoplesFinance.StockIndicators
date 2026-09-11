@@ -205,7 +205,7 @@ public static partial class Calculations
     /// <param name="divisor"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateHawkeyeVolumeIndicator(this StockData stockData, InputName inputName = InputName.MedianPrice, int length = 200,
+    public static StockData CalculateHawkeyeVolumeIndicator(this StockData stockData, int length = 200,
         double divisor = 3.6)
     {
         List<double> tempRangeList = new(stockData.Count);
@@ -215,7 +215,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum volumeSum = new();
         RollingSum rangeSum = new();
-        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -283,12 +283,12 @@ public static partial class Calculations
     /// <param name="pointValue"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateHerrickPayoffIndex(this StockData stockData, InputName inputName = InputName.MedianPrice, double pointValue = 100)
+    public static StockData CalculateHerrickPayoffIndex(this StockData stockData, double pointValue = 100)
     {
         List<double> kList = new(stockData.Count);
         List<double> hpicList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, openList, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

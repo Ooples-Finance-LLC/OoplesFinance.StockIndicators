@@ -134,7 +134,7 @@ public static partial class Calculations
     /// <param name="stdDev4"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateKaseDevStopV1(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateKaseDevStopV1(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20, double stdDev1 = 0,
         double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
     {
@@ -144,7 +144,7 @@ public static partial class Calculations
         List<double> dev3List = new(stockData.Count);
         List<double> dtrList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -13,7 +13,7 @@ public static partial class Calculations
     /// <param name="signalLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateImpulseMovingAverageConvergenceDivergence(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateImpulseMovingAverageConvergenceDivergence(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
     {
         List<double> macdList = new(stockData.Count);
@@ -21,7 +21,7 @@ public static partial class Calculations
         List<double> macdHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum macdSum = new();
-        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var typicalPriceZeroLagEmaList = GetMovingAverageList(stockData, MovingAvgType.ZeroLagExponentialMovingAverage, length, inputList);
         var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);

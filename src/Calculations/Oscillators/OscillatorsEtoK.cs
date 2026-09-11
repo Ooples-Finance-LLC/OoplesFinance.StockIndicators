@@ -473,11 +473,11 @@ public static partial class Calculations
         int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1,
         int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
     {
-        // Each component that takes its own inputName reads the CALLER's series. Those methods
-        // let a chained series win over their named input, and by the time this calculation calls
-        // them an earlier component has already published its output onto CustomValuesList - which
-        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
-        // their own named input exactly as before.
+        // The components that read their own default input - a typical or median price - read the
+        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
+        // an earlier component has already published its output onto CustomValuesList, which they would
+        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
+        // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
         List<double> iidxList = new(stockData.Count);
         List<double> tempMacdList = new(stockData.Count);
@@ -2803,12 +2803,12 @@ public static partial class Calculations
     /// <param name="inputName"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEarningSupportResistanceLevels(this StockData stockData, InputName inputName = InputName.MedianPrice)
+    public static StockData CalculateEarningSupportResistanceLevels(this StockData stockData)
     {
         List<double> mode1List = new(stockData.Count);
         List<double> mode2List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

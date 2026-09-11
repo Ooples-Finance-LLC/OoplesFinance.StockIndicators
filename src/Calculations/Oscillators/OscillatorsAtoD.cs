@@ -601,15 +601,14 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateChartmillValueIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
-        InputName inputName = InputName.MedianPrice, int length = 5)
+    public static StockData CalculateChartmillValueIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
     {
         List<double> cmvCList = new(stockData.Count);
         List<double> cmvOList = new(stockData.Count);
         List<double> cmvHList = new(stockData.Count);
         List<double> cmvLList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
         var fList = GetMovingAverageList(stockData, maType, length, inputList);
@@ -787,12 +786,11 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateChopZone(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
-        InputName inputName = InputName.TypicalPrice, int length1 = 30, int length2 = 34)
+    public static StockData CalculateChopZone(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 34)
     {
         List<double> emaAngleList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var emaList = GetMovingAverageList(stockData, maType, length2, closeList);
@@ -929,8 +927,7 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateConfluenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
-        InputName inputName = InputName.FullTypicalPrice, int length = 10)
+    public static StockData CalculateConfluenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
         List<double> value5List = new(stockData.Count);
         List<double> value6List = new(stockData.Count);
@@ -941,7 +938,7 @@ public static partial class Calculations
         List<double> value70List = new(stockData.Count);
         List<double> confluenceList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, closeList, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
         var errSumWindow = new RollingSum();
         var value70SumWindow = new RollingSum();
 

@@ -183,7 +183,7 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVervoortModifiedBollingerBandIndicator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, InputName inputName = InputName.FullTypicalPrice, int length1 = 18,
+        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18,
         int length2 = 200, int smoothLength = 8, double stdDevMult = 1.6)
     {
         List<double> haOpenList = new(stockData.Count);
@@ -194,7 +194,7 @@ public static partial class Calculations
         List<double> lbList = new(stockData.Count);
         List<double> percbSignalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

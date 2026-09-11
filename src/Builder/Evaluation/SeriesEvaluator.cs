@@ -273,7 +273,7 @@ internal sealed class SeriesEvaluator
             });
         }
 
-        return new StockData(tickerList, InputName.Close);
+        return new StockData(tickerList);
     }
 
     /// <summary>

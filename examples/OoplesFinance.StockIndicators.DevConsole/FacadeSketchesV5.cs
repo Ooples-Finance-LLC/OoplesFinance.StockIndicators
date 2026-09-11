@@ -1280,7 +1280,7 @@ internal static class FacadeSketchesV5
 
         private static StockData CloneWithCustomValues(StockData baseData, double[] customValues)
         {
-            var clone = new StockData(baseData.TickerDataList, baseData.InputName)
+            var clone = new StockData(baseData.TickerDataList)
             {
                 Options = baseData.Options,
                 CustomValuesList = new List<double>(customValues)

@@ -200,7 +200,7 @@ public static partial class Calculations
     /// <param name="inputName">Name of the input.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData, InputName inputName = InputName.TypicalPrice)
+    public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData)
     {
         List<double> vwapList = new(stockData.Count);
         List<double> tempVolList = new(stockData.Count);
@@ -208,7 +208,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         double tempVolSum = 0;
         double tempVolPriceSum = 0;
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

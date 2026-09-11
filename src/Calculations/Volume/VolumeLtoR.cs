@@ -11,7 +11,7 @@ public static partial class Calculations
     /// <param name="length">The length.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateMoneyFlowIndex(this StockData stockData, InputName inputName = InputName.TypicalPrice, int length = 14)
+    public static StockData CalculateMoneyFlowIndex(this StockData stockData, int length = 14)
     {
         List<double> mfiList = new(stockData.Count);
         List<double> posMoneyFlowList = new(stockData.Count);
@@ -19,7 +19,7 @@ public static partial class Calculations
         var posMoneyFlowSumWindow = new RollingSum();
         var negMoneyFlowSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

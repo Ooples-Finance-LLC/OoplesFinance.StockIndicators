@@ -24,7 +24,6 @@ public class StockData : IStockData
     private bool _columnsInitialized;
     private bool _rowsInitialized;
 
-    public InputName InputName { get; set; }
     public IndicatorName IndicatorName { get; set; }
 
     public List<double> InputValues
@@ -155,7 +154,7 @@ public class StockData : IStockData
     /// <param name="volumes"></param>
     /// <param name="dates"></param>
     public StockData(IEnumerable<double> openPrices, IEnumerable<double> highPrices, IEnumerable<double> lowPrices, IEnumerable<double> closePrices,
-        IEnumerable<double> volumes, IEnumerable<DateTime> dates, InputName inputName = InputName.Close)
+        IEnumerable<double> volumes, IEnumerable<DateTime> dates)
     {
         _openPrices = new List<double>(openPrices);
         _highPrices = new List<double>(highPrices);
@@ -169,7 +168,6 @@ public class StockData : IStockData
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
-        InputName = inputName;
         IndicatorName = IndicatorName.None;
         Options = new IndicatorOptions();
         Count = CalculateCount(_openPrices, _highPrices, _lowPrices, _closePrices, _volumes, _dates);
@@ -179,7 +177,7 @@ public class StockData : IStockData
     /// Initializes the StockData Class using classic list of ticker information
     /// </summary>
     /// <param name="tickerDataList"></param>
-    public StockData(IEnumerable<TickerData> tickerDataList, InputName inputName = InputName.Close)
+    public StockData(IEnumerable<TickerData> tickerDataList)
     {
         _tickerDataList = new List<TickerData>();
         foreach (var ticker in tickerDataList)
@@ -198,7 +196,6 @@ public class StockData : IStockData
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
-        InputName = inputName;
         Options = new IndicatorOptions();
         Count = _tickerDataList.Count;
     }

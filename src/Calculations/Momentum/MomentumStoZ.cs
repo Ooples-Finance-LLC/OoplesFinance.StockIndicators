@@ -18,15 +18,15 @@ public static partial class Calculations
     /// <param name="stdDevMult"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateUltimateMomentumIndicator(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateUltimateMomentumIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19, int length3 = 21, int length4 = 39,
         int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
-        // Each component that takes its own inputName reads the CALLER's series. Those methods
-        // let a chained series win over their named input, and by the time this calculation calls
-        // them an earlier component has already published its output onto CustomValuesList - which
-        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
-        // their own named input exactly as before.
+        // The components that read their own default input - a typical or median price - read the
+        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
+        // an earlier component has already published its output onto CustomValuesList, which they would
+        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
+        // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -39,11 +39,11 @@ public static partial class Calculations
         stockData.RestoreInputSeries(callerSeries);
         var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi1List = CalculateMoneyFlowIndex(stockData, inputName, length2).CustomValuesList;
+        var mfi1List = CalculateMoneyFlowIndex(stockData, length2).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi2List = CalculateMoneyFlowIndex(stockData, inputName, length3).CustomValuesList;
+        var mfi2List = CalculateMoneyFlowIndex(stockData, length3).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi3List = CalculateMoneyFlowIndex(stockData, inputName, length4).CustomValuesList;
+        var mfi3List = CalculateMoneyFlowIndex(stockData, length4).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
         {

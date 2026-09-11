@@ -312,7 +312,7 @@ public static partial class Calculations
     /// <param name="lbLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateBreakoutRelativeStrengthIndex(this StockData stockData, InputName inputName = InputName.FullTypicalPrice,
+    public static StockData CalculateBreakoutRelativeStrengthIndex(this StockData stockData,
         int length = 14, int lbLength = 2)
     {
         List<double> brsiList = new(stockData.Count);
@@ -324,7 +324,7 @@ public static partial class Calculations
         RollingSum volumeSumWindow = new();
         RollingSum posPowerSumWindow = new();
         RollingSum negPowerSumWindow = new();
-        var (inputList, highList, lowList, openList, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, volumeList) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {

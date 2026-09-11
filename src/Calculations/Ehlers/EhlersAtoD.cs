@@ -2404,13 +2404,13 @@ public static partial class Calculations
     /// <param name="constant"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV1(this StockData stockData, InputName inputName = InputName.TypicalPrice, double cycPart = 1,
+    public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV1(this StockData stockData, double cycPart = 1,
         double constant = 0.015)
     {
         List<double> acciList = new(stockData.Count);
         List<double> acciEmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var spList = GetOutputValuesInternal(stockData,
             data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
@@ -2472,7 +2472,7 @@ public static partial class Calculations
     /// <param name="constant"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersCommodityChannelIndexInverseFisherTransform(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateEhlersCommodityChannelIndexInverseFisherTransform(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20, int signalLength = 9, double constant = 0.015)
     {
         length = Math.Max(length, 1);
@@ -2482,7 +2482,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var cciList = GetCustomValuesListInternal(stockData,
-            data => CalculateCommodityChannelIndex(data, inputName, maType, length, constant));
+            data => CalculateCommodityChannelIndex(data, maType, length, constant));
 
         for (var i = 0; i < stockData.Count; i++)
         {
