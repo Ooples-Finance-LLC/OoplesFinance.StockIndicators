@@ -787,7 +787,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
@@ -884,7 +883,6 @@ public static partial class Calculations
     /// Calculates the Vervoort Smoothed Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="length3"></param>
@@ -1001,7 +999,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <param name="factor"></param>
     /// <returns></returns>
@@ -1344,7 +1341,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]

@@ -123,7 +123,6 @@ public static partial class Calculations
     /// Calculates the Kase Dev Stop V1
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>

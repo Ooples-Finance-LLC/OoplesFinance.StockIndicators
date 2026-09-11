@@ -7,7 +7,6 @@ public static partial class Calculations
     /// Calculates the Impulse Percentage Price Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <param name="signalLength"></param>

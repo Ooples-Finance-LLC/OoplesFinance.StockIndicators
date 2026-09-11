@@ -175,7 +175,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="smoothLength"></param>

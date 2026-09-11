@@ -1072,7 +1072,6 @@ public static partial class Calculations
     /// Calculates the Wave Trend Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>

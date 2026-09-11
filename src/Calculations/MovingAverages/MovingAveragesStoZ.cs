@@ -197,7 +197,6 @@ public static partial class Calculations
     /// Calculates the volume weighted average price.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData)

@@ -2399,7 +2399,6 @@ public static partial class Calculations
     /// Calculates the Ehlers Adaptive Commodity Channel Index V1
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="cycPart"></param>
     /// <param name="constant"></param>
     /// <returns></returns>
@@ -2465,7 +2464,6 @@ public static partial class Calculations
     /// Calculates the Ehlers Commodity Channel Index Inverse Fisher Transform
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <param name="signalLength"></param>

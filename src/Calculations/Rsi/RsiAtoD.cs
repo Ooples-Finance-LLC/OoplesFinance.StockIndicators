@@ -307,7 +307,6 @@ public static partial class Calculations
     /// Calculates the Breakout Relative Strength Index
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <param name="lbLength"></param>
     /// <returns></returns>

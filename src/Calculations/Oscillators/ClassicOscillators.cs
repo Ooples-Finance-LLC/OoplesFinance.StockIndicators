@@ -11,7 +11,6 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="length">The length.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="constant">The constant.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
@@ -65,7 +64,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="fastLength">Length of the fast.</param>
     /// <param name="slowLength">Length of the slow.</param>
     /// <returns></returns>
@@ -108,7 +106,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="fastLength">Length of the fast.</param>
     /// <param name="slowLength">Length of the slow.</param>
     /// <param name="smoothLength">Length of the smooth.</param>
@@ -388,7 +385,6 @@ public static partial class Calculations
     /// Calculates the index of the alligator.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="iawLength">Length of the iaw.</param>
     /// <param name="iawOffset">The iaw offset.</param>
@@ -447,7 +443,6 @@ public static partial class Calculations
     /// Calculates the gator oscillator.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="jawLength">Length of the jaw.</param>
     /// <param name="jawOffset">The jaw offset.</param>
