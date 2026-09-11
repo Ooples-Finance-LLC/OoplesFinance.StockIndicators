@@ -494,35 +494,25 @@ public static partial class Calculations
         var rocSumWindow = new RollingSum();
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: rsiLength).CustomValuesList;
-        // Reset CustomValuesList to prevent contamination of derived series (TypicalPrice uses CustomValuesList as close)
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
-        stockData.SetInputSeries(new List<double>(callerSeries));
+        // Each component reads the caller's series; each Calculate call leaves its own output on CustomValuesList.
+        stockData.RestoreInputSeries(callerSeries);
         var cciList = CalculateCommodityChannelIndex(stockData, length: cciLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
-        stockData.SetInputSeries(new List<double>(callerSeries));
+        stockData.RestoreInputSeries(callerSeries);
         var mfiList = CalculateMoneyFlowIndex(stockData, length: mfiLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var macdList = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength,
             signalLength: signalLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var bbIndicatorList = CalculateBollingerBandsPercentB(stockData, stdDevMult: stdDevMult, length: bbLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var dpoList = CalculateDetrendedPriceOscillator(stockData, length: dpoLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var rocList = CalculateRateOfChange(stockData, length: rocLength).CustomValuesList;
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var stochasticList = CalculateStochasticOscillator(stockData, length: stochLength, smoothLength1: stochKLength, smoothLength2: stochDLength);
         var stochKList = stochasticList.OutputValues["FastD"];
         var stochDList = stochasticList.OutputValues["SlowD"];
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var emvList = CalculateEaseOfMovement(stockData, length: emoLength, divisor: divisor).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

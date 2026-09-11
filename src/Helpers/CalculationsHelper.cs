@@ -397,10 +397,18 @@ public static class CalculationsHelper
             return list;
         }
 
-        var highs = stockData.HighPrices;
-        var lows = stockData.LowPrices;
         var opens = stockData.OpenPrices;
         var closes = GetDerivedCloseList(stockData);
+        IReadOnlyList<double> highs = stockData.HighPrices;
+        IReadOnlyList<double> lows = stockData.LowPrices;
+        if (!ReferenceEquals(closes, stockData.ClosePrices) && !SequenceEqualValues(closes, stockData.ClosePrices))
+        {
+            // A chained series stands in for the close, and each bar's range follows the per-bar rule, as
+            // GetInputValuesList and the streaming CustomInputState apply it. Built from the real high and low
+            // around a custom close, a true range measured the gap between two different series: a log-close
+            // of about 5 against highs near 180 gave ATR bands of +-400.
+            (highs, lows) = GetCustomRangeLists(closes, stockData.HighPrices, stockData.LowPrices);
+        }
 
         switch (kind)
         {
@@ -1701,7 +1709,9 @@ public static class CalculationsHelper
         }
 
         openList = stockData.OpenPrices;
-        closeList = stockData.ClosePrices;
+        // A chained series stands in for the close, as it does in the bar CustomInputState hands a streaming
+        // state; the named input only decides what is read when nothing was chained.
+        closeList = stockData.CustomValuesList is { Count: > 0 } ? inputList : stockData.ClosePrices;
         volumeList = stockData.Volumes;
 
         return (inputList, highList, lowList, openList, closeList, volumeList);
