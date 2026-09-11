@@ -161,8 +161,8 @@ public static class CalculationsHelper
     /// <remarks>
     /// Not SetCustomValues. That publishes an indicator's OUTPUT, and honours IncludeCustomValues (which can
     /// drop it) and RoundingDigits (which rounds it). A caller's input series is neither: with
-    /// IncludeCustomValues off SetCustomValues clears it in place, and with RoundingDigits set the next
-    /// calculation would compute on rounded input.
+    /// IncludeCustomValues off, SetCustomValues cleared it and UseInput silently did nothing, and with
+    /// RoundingDigits set the next indicator computed on rounded input.
     /// </remarks>
     internal static void SetInputSeries(this StockData stockData, List<double> series) =>
         stockData.CustomValuesList = series;

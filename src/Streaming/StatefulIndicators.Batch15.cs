@@ -194,7 +194,7 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
     }
 }
 
-public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable
+public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _smaLength;
     private readonly RelativeStrengthIndexState _rsi;
@@ -244,6 +244,14 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.InsyncIndex;
+
+    // No resolver of its own: the inner states that default to a typical or median price are the
+    // ones that must switch to reading the close when this state is wrapped.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_cci).ReadCloseAsInput();
+        ((ICustomInputConsumer)_mfi).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

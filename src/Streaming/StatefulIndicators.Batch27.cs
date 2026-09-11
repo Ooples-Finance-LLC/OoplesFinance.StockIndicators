@@ -1325,7 +1325,7 @@ public sealed class WindowedVolumeWeightedMovingAverageState : IStreamingIndicat
     }
 }
 
-public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState, IDisposable
+public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _slowCci;
     private readonly CommodityChannelIndexState _fastCci;
@@ -1338,6 +1338,14 @@ public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState,
     }
 
     public IndicatorName Name => IndicatorName.WoodieCommodityChannelIndex;
+
+    // No resolver of its own: the inner states that default to a typical or median price are the
+    // ones that must switch to reading the close when this state is wrapped.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_slowCci).ReadCloseAsInput();
+        ((ICustomInputConsumer)_fastCci).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

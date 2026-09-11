@@ -156,6 +156,9 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             $"build the state with its defaults; {cannotTakeInput.Count} cannot be built: " +
             $"{string.Join(", ", cannotTakeInput)}");
 
+        couldNotRun.Should().BeEmpty(
+            $"every indicator must complete both the batch and the streaming run: {string.Join(", ", couldNotRun)}");
+
         disagreements.Should().BeEmpty(
             $"streaming and batch must agree about what the {series} input series controls. " +
             $"{compared} indicators compared, {unpaired} without a comparable run " +
@@ -203,11 +206,12 @@ public sealed class StreamingCustomInputTests : GlobalTestData
 
         args[0] = data;
 
-        return batch.Invoke(null, args)!;
+        return batch.Invoke(null, args)
+            ?? throw new InvalidOperationException($"{batch.Name} returned null instead of its StockData");
     }
 
     private static IStreamingIndicatorState Build((ConstructorInfo Ctor, object?[] Args) build) =>
-        (IStreamingIndicatorState)build.Ctor.Invoke(build.Args)!;
+        (IStreamingIndicatorState)build.Ctor.Invoke(build.Args);
 
     /// <summary>Whether a run produced nothing to compare.</summary>
     private static bool Silent(Dictionary<string, List<double>> series) =>
@@ -239,6 +243,8 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     /// <summary>The batch twin, by the catalogue's naming convention: XyzState -&gt; CalculateXyz.</summary>
     private static MethodInfo? FindBatchMethod(string stateTypeName)
     {
+        if (!stateTypeName.EndsWith("State", StringComparison.Ordinal)) { return null; }
+
         var name = "Calculate" + stateTypeName[..^"State".Length];
 
         return typeof(StockData).Assembly.GetTypes()
@@ -293,12 +299,15 @@ public sealed class StreamingCustomInputTests : GlobalTestData
 
     private static bool Differs(Dictionary<string, List<double>> a, Dictionary<string, List<double>> b)
     {
-        foreach (var key in a.Keys)
+        // The union of both runs' keys, and unequal lengths count as a difference: absent data is not
+        // agreement. Iterating one side's keys, bounded by the shorter series, read "only the second run
+        // published this" or "one run stopped early" as "no change".
+        foreach (var key in a.Keys.Union(b.Keys, StringComparer.Ordinal))
         {
-            if (!b.TryGetValue(key, out var other)) { return true; }
+            if (!a.TryGetValue(key, out var mine) || !b.TryGetValue(key, out var other)) { return true; }
+            if (mine.Count != other.Count) { return true; }
 
-            var mine = a[key];
-            for (var i = 0; i < Math.Min(mine.Count, other.Count) && i < Bars; i++)
+            for (var i = 0; i < mine.Count; i++)
             {
                 if (double.IsNaN(mine[i]) && double.IsNaN(other[i])) { continue; }
                 // Relative, not absolute. A series in the millions - volume, an accumulation line - carries

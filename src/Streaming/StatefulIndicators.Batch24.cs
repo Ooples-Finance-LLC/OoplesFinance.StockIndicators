@@ -5,7 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
-public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposable
+public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _uoLength1;
     private readonly int _uoLength2;
@@ -113,6 +113,14 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     }
 
     public IndicatorName Name => IndicatorName.TechnicalRatings;
+
+    // No resolver of its own: the inner states that default to a typical or median price are the
+    // ones that must switch to reading the close when this state is wrapped.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_ao).ReadCloseAsInput();
+        ((ICustomInputConsumer)_cci).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

@@ -75,4 +75,36 @@ public sealed class UseInputTests : GlobalTestData
 
         second.Should().Equal(first, "UseInput resets the series, so reusing it does not continue the old window");
     }
+
+    /// <summary>
+    /// IncludeCustomValues decides whether an indicator's OUTPUT is published; it must not decide whether the
+    /// caller's input reaches the indicator. It used to: the series was cleared and the SMA ran on the close.
+    /// </summary>
+    [Fact]
+    public void TheInputIsUsedWhenCustomValuesAreNotPublished()
+    {
+        var tickers = Tickers();
+
+        var published = new StockData(tickers).UseInput(InputSeries.MedianPrice).CalculateSimpleMovingAverage(20);
+        var unpublished = new StockData(tickers) { Options = new IndicatorOptions { IncludeCustomValues = false } }
+            .UseInput(InputSeries.MedianPrice).CalculateSimpleMovingAverage(20);
+        var onClose = new StockData(tickers).CalculateSimpleMovingAverage(20);
+
+        unpublished.OutputValues.Should().BeEquivalentTo(published.OutputValues);
+        unpublished.OutputValues.Should().NotBeEquivalentTo(onClose.OutputValues,
+            "the control: if the input were dropped this is what the indicator would compute");
+    }
+
+    /// <summary>RoundingDigits rounds what an indicator publishes, never what it computes on.</summary>
+    [Fact]
+    public void TheInputIsNotRoundedByTheOutputRounding()
+    {
+        var tickers = Tickers();
+
+        var input = new StockData(tickers) { Options = new IndicatorOptions { RoundingDigits = 2 } }
+            .UseInput(InputSeries.Of(bar => bar.Close / 3)).CustomValuesList;
+
+        input.Should().Equal(tickers.Select(t => t.Close / 3));
+        input.Should().Contain(v => v != Math.Round(v, 2), "the control: a third of a price is not a whole cent");
+    }
 }

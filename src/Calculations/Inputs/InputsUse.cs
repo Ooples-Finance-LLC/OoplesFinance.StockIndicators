@@ -58,7 +58,7 @@ public static partial class Calculations
             values.Add(series.Next(bar, isFinal: true));
         }
 
-        stockData.SetCustomValues(values);
+        stockData.SetInputSeries(values);
 
         return stockData;
     }
