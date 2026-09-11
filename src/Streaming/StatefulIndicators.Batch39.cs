@@ -140,6 +140,7 @@ internal sealed class RelativeVolatilityIndexCore : IDisposable
 /// <remarks>
 /// The streaming twin of <c>Calculations.CalculateRelativeVolatilityIndexHigh</c>.
 /// </remarks>
+[PrimaryOutput("RviHigh")]
 public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState, IDisposable
 {
     private readonly RelativeVolatilityIndexCore _core;
@@ -185,6 +186,7 @@ public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState,
 /// The streaming twin of <c>Calculations.CalculateRelativeVolatilityIndexLow</c>, and the mirror of
 /// <see cref="RelativeVolatilityIndexHighState"/>.
 /// </remarks>
+[PrimaryOutput("RviLow")]
 public sealed class RelativeVolatilityIndexLowState : IStreamingIndicatorState, IDisposable
 {
     private readonly RelativeVolatilityIndexCore _core;
@@ -230,6 +232,7 @@ public sealed class RelativeVolatilityIndexLowState : IStreamingIndicatorState, 
 /// The streaming twin of <c>Calculations.CalculateIchimokuChikouSpan</c>: the close itself, published at the
 /// bar that carries it, with the backward shift left to whatever draws the chart.
 /// </remarks>
+[PrimaryOutput("ChikouSpan")]
 public sealed class IchimokuChikouSpanState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -266,6 +269,7 @@ public sealed class IchimokuChikouSpanState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateSmoothedWilliamsR</c>. Both the bars before the window
 /// fills and a window with no range read the midpoint of minus fifty, as the batch engine reads them.
 /// </remarks>
+[PrimaryOutput("Swr")]
 public sealed class SmoothedWilliamsRState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -372,6 +376,7 @@ public sealed class SmoothedWilliamsRState : IStreamingIndicatorState, IDisposab
 /// The streaming twin of <c>Calculations.CalculateNormalizedMacd</c>. Both averages start at the first
 /// bar's value rather than warming up, and that first bar, having no change behind it, publishes zero.
 /// </remarks>
+[PrimaryOutput("NormalizedMacd")]
 public sealed class NormalizedMacdState : IStreamingIndicatorState
 {
     private readonly double _fastK;

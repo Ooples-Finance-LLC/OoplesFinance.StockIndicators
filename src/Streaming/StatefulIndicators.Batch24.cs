@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Tr")]
 public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _uoLength1;
@@ -377,6 +378,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("TfsMob")]
 public sealed class TFSMboIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fast;
@@ -433,6 +435,7 @@ public sealed class TFSMboIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Ppo")]
 public sealed class TFSMboPercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fast;
@@ -490,6 +493,7 @@ public sealed class TFSMboPercentagePriceOscillatorState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Tether")]
 public sealed class TFSTetherLineIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -538,6 +542,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Tabf")]
 public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -621,6 +626,7 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("TotalPower")]
 public sealed class TotalPowerIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -684,6 +690,7 @@ public sealed class TotalPowerIndicatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Tpx")]
 public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -774,6 +781,7 @@ public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDispos
 }
 }
 
+[PrimaryOutput("Tdi")]
 public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsi;
@@ -847,6 +855,7 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Tvi")]
 public sealed class TradeVolumeIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -910,6 +919,7 @@ public sealed class TradeVolumeIndexState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Tmmso")]
 public sealed class TradingMadeMoreSimplerOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1005,6 +1015,7 @@ public sealed class TradingMadeMoreSimplerOscillatorState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Tfsvo")]
 public sealed class TFSVolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1053,6 +1064,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Tri")]
 public sealed class TheRangeIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1125,6 +1137,7 @@ public sealed class TheRangeIndicatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Tlmo")]
 public sealed class TickLineMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _smoothLength;
@@ -1202,6 +1215,7 @@ public sealed class TickLineMomentumOscillatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Ie2")]
 public sealed class TillsonIE2State : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
@@ -1262,6 +1276,7 @@ public sealed class TillsonIE2State : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("T3")]
 public sealed class TillsonT3MovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1339,6 +1354,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Median")]
 public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1438,6 +1454,7 @@ public sealed class TimeAndMoneyChannelState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("UpperBand")]
 public sealed class TimePriceIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1520,6 +1537,7 @@ public sealed class TimePriceIndicatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Am")]
 public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable   
 {
     private readonly RollingWindowMax _highWindow;
@@ -1583,6 +1601,7 @@ public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Tai")]
 public sealed class TrendAnalysisIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _inputSmoother;
@@ -1644,6 +1663,7 @@ public sealed class TrendAnalysisIndexState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Tai")]
 public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _slowMa;
@@ -1708,6 +1728,7 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("TcfPlus")]
 public sealed class TrendContinuationFactorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _diffPlusSum;
@@ -1786,6 +1807,7 @@ public sealed class TrendContinuationFactorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Tdi")]
 public sealed class TrendDetectionIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1861,6 +1883,7 @@ public sealed class TrendDetectionIndexState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Tdfi")]
 public sealed class TrendDirectionForceIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1947,6 +1970,7 @@ public sealed class TrendDirectionForceIndexState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Trender")]
 public sealed class TrenderState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -2072,6 +2096,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Tei")]
 public sealed class TrendExhaustionIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;

@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Cti")]
 public sealed class CoralTrendIndicatorState : IStreamingIndicatorState
 {
     private readonly double _c1;
@@ -82,6 +83,7 @@ public sealed class CoralTrendIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Dppmo")]
 public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _smPmol2;
@@ -155,6 +157,7 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Dm")]
 public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _maxSmoother;
@@ -221,6 +224,7 @@ public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class DemarkPivotPointsState : IStreamingIndicatorState
 {
     private double _prevClose;
@@ -281,6 +285,7 @@ public sealed class DemarkPivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Dpr")]
 public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _bpSum;
@@ -350,6 +355,7 @@ public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Dpr")]
 public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _bpSum;
@@ -402,6 +408,7 @@ public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Drei")]
 public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _s1Sum;
@@ -486,6 +493,7 @@ public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Drp")]
 public sealed class DemarkReversalPointsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -549,6 +557,7 @@ public sealed class DemarkReversalPointsState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Dsi")]
 public sealed class DemarkSetupIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -610,6 +619,7 @@ public sealed class DemarkSetupIndicatorState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Macd")]
 public sealed class DiNapoliMovingAverageConvergenceDivergenceState : IStreamingIndicatorState
 {
     private readonly double _scAlpha;
@@ -670,6 +680,7 @@ public sealed class DiNapoliMovingAverageConvergenceDivergenceState : IStreaming
     }
 }
 
+[PrimaryOutput("Ppo")]
 public sealed class DiNapoliPercentagePriceOscillatorState : IStreamingIndicatorState
 {
     private readonly double _scAlpha;
@@ -729,6 +740,7 @@ public sealed class DiNapoliPercentagePriceOscillatorState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Dpso")]
 public sealed class DiNapoliPreferredStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _length2;
@@ -795,6 +807,7 @@ public sealed class DiNapoliPreferredStochasticOscillatorState : IStreamingIndic
     }
 }
 
+[PrimaryOutput("Dwma")]
 public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -861,6 +874,7 @@ public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("DmiStochastic")]
 public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _dmPlus;
@@ -969,6 +983,7 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Dema")]
 public sealed class DoubleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1017,6 +1032,7 @@ public sealed class DoubleExponentialMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Des")]
 public sealed class DoubleExponentialSmoothingState : IStreamingIndicatorState
 {
     private readonly double _alpha;
@@ -1065,6 +1081,7 @@ public sealed class DoubleExponentialSmoothingState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Dsrsi")]
 public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _maxWindow;
@@ -1146,6 +1163,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Dss")]
 public sealed class DoubleSmoothedStochasticState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1224,6 +1242,7 @@ public sealed class DoubleSmoothedStochasticState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Dso")]
 public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _maxWindow;
@@ -1287,6 +1306,7 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Eom")]
 public sealed class EaseOfMovementState : IStreamingIndicatorState
 {
     private readonly double _divisor;

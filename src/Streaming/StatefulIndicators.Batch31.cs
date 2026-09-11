@@ -11,6 +11,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// The streaming twin of <c>Calculations.CalculateHighestHigh</c>. The window expands rather than warming
 /// up, and a preview bar is measured against the window without joining it.
 /// </remarks>
+[PrimaryOutput("HighestHigh")]
 public sealed class HighestHighState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _window;
@@ -59,6 +60,7 @@ public sealed class HighestHighState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateLowestLow</c>. The window expands rather than warming up,
 /// and a preview bar is measured against the window without joining it.
 /// </remarks>
+[PrimaryOutput("LowestLow")]
 public sealed class LowestLowState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMin _window;
@@ -107,6 +109,7 @@ public sealed class LowestLowState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateRollingMax</c>. Unlike the highest high, this measures the
 /// series being streamed - the caller's own values when they supply them - not the bar's high.
 /// </remarks>
+[PrimaryOutput("RollingMax")]
 public sealed class RollingMaxState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _window;
@@ -155,6 +158,7 @@ public sealed class RollingMaxState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateRollingMin</c>. Unlike the lowest low, this measures the
 /// series being streamed - the caller's own values when they supply them - not the bar's low.
 /// </remarks>
+[PrimaryOutput("RollingMin")]
 public sealed class RollingMinState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMin _window;
@@ -203,6 +207,7 @@ public sealed class RollingMinState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateCumulativeSum</c>. It has no length and never warms up; a
 /// preview bar is added to the total that would result without keeping it.
 /// </remarks>
+[PrimaryOutput("CumulativeSum")]
 public sealed class CumulativeSumState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;

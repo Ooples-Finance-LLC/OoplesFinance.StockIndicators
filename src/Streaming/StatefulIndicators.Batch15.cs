@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Ppo")]
 public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _signalLength;
@@ -78,6 +79,7 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Inertia")]
 public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RelativeVolatilityIndexEngine _rviHigh;
@@ -130,6 +132,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Ir")]
 public sealed class InformationRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -195,6 +198,7 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Iidx")]
 public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _smaLength;
@@ -367,6 +371,7 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
     }
 }
 
+[PrimaryOutput("Ibs")]
 public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -425,6 +430,7 @@ public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class InterquartileRangeBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -483,6 +489,7 @@ public sealed class InterquartileRangeBandsState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Idwma")]
 public sealed class InverseDistanceWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -546,6 +553,7 @@ public sealed class InverseDistanceWeightedMovingAverageState : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Iffzs")]
 public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly FastZScoreState _fastZScore;
@@ -586,6 +594,7 @@ public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Ifzs")]
 public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
@@ -639,6 +648,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Jo")]
 public sealed class JapaneseCorrelationCoefficientState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -716,6 +726,7 @@ public sealed class JapaneseCorrelationCoefficientState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Rsx")]
 public sealed class JmaRsxCloneState : IStreamingIndicatorState
 {
     private readonly int _length;
@@ -833,6 +844,7 @@ public sealed class JmaRsxCloneState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Jrcfd")]
 public sealed class JrcFractalDimensionState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -949,6 +961,7 @@ public sealed class JrcFractalDimensionState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Jma")]
 public sealed class JsaMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -998,6 +1011,7 @@ public sealed class JsaMovingAverageState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Jma")]
 public sealed class JurikMovingAverageState : IStreamingIndicatorState
 {
     private readonly double _phaseRatio;
@@ -1060,6 +1074,7 @@ public sealed class JurikMovingAverageState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Ks")]
 public sealed class KalmanSmootherState : IStreamingIndicatorState
 {
     private readonly double _smoothFactor;
@@ -1115,6 +1130,7 @@ public sealed class KalmanSmootherState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Ko")]
 public sealed class KarobeinOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -1186,6 +1202,7 @@ public sealed class KarobeinOscillatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Kcd")]
 public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
     private readonly KasePeakOscillatorV1Engine _engine;
@@ -1231,6 +1248,7 @@ public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Dev1")]
 public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -1338,6 +1356,7 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
     }
 }
 
+[PrimaryOutput("Dev1")]
 public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -1447,6 +1466,7 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("KaseUp")]
 public sealed class KaseIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _volumeSma;
@@ -1525,6 +1545,7 @@ public sealed class KaseIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Kpo")]
 public sealed class KasePeakOscillatorV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly KasePeakOscillatorV1Engine _engine;
@@ -1575,6 +1596,7 @@ public sealed class KasePeakOscillatorV1State : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Kpo")]
 public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly int _fastLength;
@@ -1688,6 +1710,7 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("KsdiUp")]
 public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1766,6 +1789,7 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
@@ -1828,6 +1852,7 @@ public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Kaco")]
 public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _srcMa;

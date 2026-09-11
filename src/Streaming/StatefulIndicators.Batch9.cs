@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Deli")]
 public sealed class EhlersDetrendedLeadingIndicatorState : IStreamingIndicatorState
 {
     private readonly double _alpha;
@@ -81,6 +82,7 @@ public sealed class EhlersDetrendedLeadingIndicatorState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Edsma")]
 public sealed class EhlersDeviationScaledMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersDeviationScaledMovingAverageEngine _engine;
@@ -125,6 +127,7 @@ public sealed class EhlersDeviationScaledMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Edsss")]
 public sealed class EhlersDeviationScaledSuperSmootherState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -215,6 +218,7 @@ public sealed class EhlersDeviationScaledSuperSmootherState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Edft")]
 public sealed class EhlersDiscreteFourierTransformState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _minLength;
@@ -332,6 +336,7 @@ public sealed class EhlersDiscreteFourierTransformState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Edftse")]
 public sealed class EhlersDiscreteFourierTransformSpectralEstimateState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -420,6 +425,7 @@ public sealed class EhlersDiscreteFourierTransformSpectralEstimateState : IStrea
     }
 }
 
+[PrimaryOutput("Edcf")]
 public sealed class EhlersDistanceCoefficientFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -485,6 +491,7 @@ public sealed class EhlersDistanceCoefficientFilterState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("V2")]
 public sealed class EhlersDominantCycleTunedBypassFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha1;
@@ -579,6 +586,7 @@ public sealed class EhlersDominantCycleTunedBypassFilterState : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Edddc")]
 public sealed class EhlersDualDifferentiatorDominantCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -680,6 +688,7 @@ public sealed class EhlersDualDifferentiatorDominantCycleState : IStreamingIndic
     }
 }
 
+[PrimaryOutput("Eoti")]
 public sealed class EhlersEarlyOnsetTrendIndicatorState : IStreamingIndicatorState
 {
     private readonly double _k;
@@ -738,6 +747,7 @@ public sealed class EhlersEarlyOnsetTrendIndicatorState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Esnr")]
 public sealed class EhlersEnhancedSignalToNoiseRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -823,6 +833,7 @@ public sealed class EhlersEnhancedSignalToNoiseRatioState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Ebsi")]
 public sealed class EhlersEvenBetterSineWaveIndicatorState : IStreamingIndicatorState
 {
     private readonly double _a1;
@@ -898,6 +909,7 @@ public sealed class EhlersEvenBetterSineWaveIndicatorState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Ef")]
 public sealed class EhlersFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -960,6 +972,7 @@ public sealed class EhlersFilterState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Efirf")]
 public sealed class EhlersFiniteImpulseResponseFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _coef1;
@@ -1031,6 +1044,7 @@ public sealed class EhlersFiniteImpulseResponseFilterState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Efdso")]
 public sealed class EhlersFisherizedDeviationScaledOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly StreamingInputResolver _input;
@@ -1110,6 +1124,7 @@ public sealed class EhlersFisherizedDeviationScaledOscillatorState : IStreamingI
     }
 }
 
+[PrimaryOutput("Eft")]
 public sealed class EhlersFisherTransformState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _maxWindow;
@@ -1175,6 +1190,7 @@ public sealed class EhlersFisherTransformState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Efmd")]
 public sealed class EhlersFMDemodulatorIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _fastLength;
@@ -1222,6 +1238,7 @@ public sealed class EhlersFMDemodulatorIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Wave")]
 public sealed class EhlersFourierSeriesAnalysisState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1368,6 +1385,7 @@ public sealed class EhlersFourierSeriesAnalysisState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Fama")]
 public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1473,6 +1491,7 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Egf4")]
 public sealed class EhlersGaussianFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha1;
@@ -1572,6 +1591,7 @@ public sealed class EhlersGaussianFilterState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Ehma")]
 public sealed class EhlersHammingMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

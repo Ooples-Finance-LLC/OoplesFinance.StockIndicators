@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// forward, so where the high is equalled more than once the most recent occurrence wins, as it does in the
 /// batch engine.
 /// </remarks>
+[PrimaryOutput("AroonUp")]
 public sealed class AroonUpState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -89,6 +90,7 @@ public sealed class AroonUpState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateAroonDown</c>, and the mirror of
 /// <see cref="AroonUpState"/>.
 /// </remarks>
+[PrimaryOutput("AroonDown")]
 public sealed class AroonDownState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -164,6 +166,7 @@ public sealed class AroonDownState : IStreamingIndicatorState, IDisposable
 /// <see cref="AverageTrueRangeState"/> rather than averaging a range of its own, so the range it doubles is
 /// the one the batch engine averages.
 /// </remarks>
+[PrimaryOutput("Acw")]
 public sealed class AtrChannelWidthState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _multiplier;
@@ -213,6 +216,7 @@ public sealed class AtrChannelWidthState : IStreamingIndicatorState, IDisposable
 /// <c>EmaState</c> the batch path's exponential average is built on, and its range from
 /// <see cref="AverageTrueRangeState"/>, so neither can drift from the batch engine.
 /// </remarks>
+[PrimaryOutput("Kcw")]
 public sealed class KeltnerChannelWidthState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _multiplier;

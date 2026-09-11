@@ -11,6 +11,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// The streaming twin of <c>Calculations.CalculateCloseToCloseVolatility</c>. The window holds one return
 /// per bar, including the first bar's return of zero, so the two engines measure the same window.
 /// </remarks>
+[PrimaryOutput("Ctcv")]
 public sealed class CloseToCloseVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -97,6 +98,7 @@ public sealed class CloseToCloseVolatilityState : IStreamingIndicatorState, IDis
 /// The streaming twin of <c>Calculations.CalculateParkinsonVolatility</c>. The window holds each bar's
 /// squared logarithm of high over low, which is all the estimator needs from a bar.
 /// </remarks>
+[PrimaryOutput("Pv")]
 public sealed class ParkinsonVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -169,6 +171,7 @@ public sealed class ParkinsonVolatilityState : IStreamingIndicatorState, IDispos
 /// The streaming twin of <c>Calculations.CalculateRogersSatchellVolatility</c>. The window holds each bar's
 /// own contribution, which reads its high and low against both its open and its close.
 /// </remarks>
+[PrimaryOutput("Rsv")]
 public sealed class RogersSatchellVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -244,6 +247,7 @@ public sealed class RogersSatchellVolatilityState : IStreamingIndicatorState, ID
 /// The streaming twin of <c>Calculations.CalculateTypicalPriceVolatility</c>. Quoted in the price's own
 /// units rather than annualised.
 /// </remarks>
+[PrimaryOutput("Tpv")]
 public sealed class TypicalPriceVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
