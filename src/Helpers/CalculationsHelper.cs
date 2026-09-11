@@ -523,7 +523,7 @@ public static class CalculationsHelper
     /// MovingAverageFastPathTests holds every type to its indicator, so a type joins this set only once its fast
     /// path matches. 120 fast paths did not - some by a warmup convention, most by a different formula, a few
     /// diverging numerically - and an optimisation that changes the answer is a different indicator under the
-    /// same name.
+    /// same name. KAMA and linear regression rejoined once their indicators were corrected to match; 118 remain.
     /// </remarks>
     private static readonly HashSet<MovingAvgType> VerifiedFastPaths = new()
     {
@@ -549,6 +549,8 @@ public static class CalculationsHelper
         MovingAvgType.ExponentialMovingAverage,
         MovingAvgType.FareySequenceWeightedMovingAverage,
         MovingAvgType.HendersonWeightedMovingAverage,
+        MovingAvgType.KaufmanAdaptiveMovingAverage,
+        MovingAvgType.LinearRegression,
         MovingAvgType.LinearWeightedMovingAverage,
         MovingAvgType.McGinleyDynamicIndicator,
         MovingAvgType.McNichollMovingAverage,

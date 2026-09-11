@@ -317,6 +317,21 @@ adaptive Ehlers indicators divided the previous bar's powers by the forming bar'
 `BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
 the batch twin of the streaming state of the same name.
 
+**`MovingAvgType` means the indicator of that name.** `GetMovingAverageList` smoothed through span fast
+paths meant to reproduce the indicator of the same name, and 120 of 162 did not (a different formula, a
+different warmup, or a numerical blow-up). Every type is now computed by its indicator unless its fast path
+is verified to match it (`MovingAverageFastPathTests` holds every type to its indicator). Batch indicators
+that smooth with one of the 118 unverified types, whether by default or through a `maType` you pass, give
+the indicator's values. Routing also corrected the indicators it exposed:
+
+- **Kaufman's Adaptive Moving Average** passes the price through until its efficiency window fills, then
+  recurses from it, as TA-Lib and Pine seed it. It was seeded at 0 in both engines, crawled up from zero, and
+  on a flat market was still converging thousands of bars later.
+- **Linear Regression** fits the bars there are during its warmup rather than the full length, as though
+  the missing points sat at the origin. Projection Bands, Bandwidth and Oscillator follow.
+- Asking `GetMovingAverageList` for the dynamically adjustable, adaptive, Ehlers adaptive Laguerre or middle
+  high-low average without a fast length now uses the indicator's own default instead of 0.
+
 ### New Dependencies (net461 only)
 
 - `System.Net.Http` 4.3.4
