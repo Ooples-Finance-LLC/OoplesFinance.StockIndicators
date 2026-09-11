@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Vfi")]
 public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length1;
@@ -106,6 +107,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Vpni")]
 public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
@@ -199,6 +201,7 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Vpci")]
 public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _vwmaFastSum;
@@ -299,6 +302,7 @@ public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Vwap")]
 public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
     private StreamingInputResolver _input;
@@ -348,6 +352,7 @@ public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Vwma")]
 public sealed class VolumeWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _volumePriceSum;
@@ -399,6 +404,7 @@ public sealed class VolumeWeightedMovingAverageState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Vwrsi")]
 public sealed class VolumeWeightedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _upMa;
@@ -470,6 +476,7 @@ public sealed class VolumeWeightedRelativeStrengthIndexState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class VortexBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _basisMa;
@@ -523,6 +530,7 @@ public sealed class VortexBandsState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Vi")]
 public sealed class VostroIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -605,6 +613,7 @@ public sealed class VostroIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("T1")]
 public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _bbLength;
@@ -701,6 +710,7 @@ public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Wami")]
 public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _diffWma;
@@ -766,6 +776,7 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Wto")]
 public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _esaMa;
@@ -829,6 +840,7 @@ public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Wws")]
 public sealed class WellesWilderSummationState : IStreamingIndicatorState
 {
     private readonly int _length;
@@ -871,6 +883,7 @@ public sealed class WellesWilderSummationState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Wwvs")]
 public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _factor;
@@ -947,6 +960,7 @@ public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Wrma")]
 public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
 {
     private readonly int _length;
@@ -1018,6 +1032,7 @@ public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Wad")]
 public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorState
 {
     private double _prevClose;
@@ -1067,6 +1082,7 @@ public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("UpFractal")]
 public sealed class WilliamsFractalsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1154,6 +1170,7 @@ public sealed class WilliamsFractalsState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("S1")]
 public sealed class WilsonRelativePriceChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _overbought;
@@ -1235,6 +1252,7 @@ public sealed class WilsonRelativePriceChannelState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Wvwma")]
 public sealed class WindowedVolumeWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1325,6 +1343,7 @@ public sealed class WindowedVolumeWeightedMovingAverageState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("FastCci")]
 public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _slowCci;
@@ -1380,6 +1399,7 @@ public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class WoodiePivotPointsState : IStreamingIndicatorState
 {
     private double _prevHigh;
@@ -1451,6 +1471,7 @@ public sealed class WoodiePivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Zscore")]
 public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother? _meanMa;
@@ -1511,6 +1532,7 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Zema")]
 public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1562,6 +1584,7 @@ public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Filter")]
 public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1662,6 +1685,7 @@ public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Ztema")]
 public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _tma1;
@@ -1713,6 +1737,7 @@ public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndic
     }
 }
 
+[PrimaryOutput("Zllma")]
 public sealed class ZeroLowLagMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Tfh")]
 public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -92,6 +93,7 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Tif")]
 public sealed class TrendImpulseFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -163,6 +165,7 @@ public sealed class TrendImpulseFilterState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Tii")]
 public sealed class TrendIntensityIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _slowSmoother;
@@ -220,6 +223,7 @@ public sealed class TrendIntensityIndexState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Tpr")]
 public sealed class TrendPersistenceRateState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -296,6 +300,7 @@ public sealed class TrendPersistenceRateState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Ts")]
 public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -354,6 +359,7 @@ public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _mult;
@@ -455,6 +461,7 @@ public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Ttf")]
 public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -525,6 +532,7 @@ public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Tr")]
 public sealed class TreynorRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -589,6 +597,7 @@ public sealed class TreynorRatioState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("To")]
 public sealed class TrigonometricOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly LinearRegressionState _sRegression;
@@ -651,6 +660,7 @@ public sealed class TrigonometricOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Trimean")]
 public sealed class TrimeanState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -706,6 +716,7 @@ public sealed class TrimeanState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Tema")]
 public sealed class TripleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -760,6 +771,7 @@ public sealed class TripleExponentialMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Tslsma")]
 public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _smaSmoother;
@@ -861,6 +873,7 @@ public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Sbs")]
 public sealed class TTMScalperIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly PooledRingBuffer<double> _closes;
@@ -927,6 +940,7 @@ public sealed class TTMScalperIndicatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Ts")]
 public sealed class TurboScalerState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _smaSmoother;
@@ -1005,6 +1019,7 @@ public sealed class TurboScalerState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Tsf")]
 public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1083,6 +1098,7 @@ public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Tsf")]
 public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1166,6 +1182,7 @@ public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("BullLine")]
 public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _closeSmoother;
@@ -1248,6 +1265,7 @@ public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Tmf")]
 public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _adSmoother;
@@ -1313,6 +1331,7 @@ public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Uti")]
 public sealed class UberTrendIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _advSum;
@@ -1391,6 +1410,7 @@ public sealed class UberTrendIndicatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Cts")]
 public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1467,6 +1487,7 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Utm")]
 public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly McClellanOscillatorState _mo;
@@ -1552,6 +1573,7 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Uma")]
 public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _minLength;
@@ -1659,6 +1681,7 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly UltimateMovingAverageState _uma;
@@ -1709,6 +1732,7 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Uo")]
 public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _bpSum1;
@@ -1800,6 +1824,7 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Uto")]
 public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable
 {
     /// <summary>GetMaxAndMinValuesList clamps its window to a minimum of two.</summary>

@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// <c>MovingAverageCore.SimpleMovingAverage</c> sums, so the two engines agree to the last bit, and it
 /// publishes zero until the window fills.
 /// </remarks>
+[PrimaryOutput("Adr")]
 public sealed class AverageDayRangeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -64,6 +65,7 @@ public sealed class AverageDayRangeState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateTrueRange</c>. The close it measures against is the series
 /// being streamed, so a caller's own values are honoured as the batch engine honours them.
 /// </remarks>
+[PrimaryOutput("TrueRange")]
 public sealed class TrueRangeState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -116,6 +118,7 @@ public sealed class TrueRangeState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateRange</c>. It looks at no other bar, so it keeps no state
 /// and a preview bar costs it nothing.
 /// </remarks>
+[PrimaryOutput("Range")]
 public sealed class RangeState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -156,6 +159,7 @@ public sealed class RangeState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateSimpleReturns</c>. Until the window holds a value that far
 /// back, and whenever that value is zero, it publishes zero.
 /// </remarks>
+[PrimaryOutput("Returns")]
 public sealed class SimpleReturnsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -216,6 +220,7 @@ public sealed class SimpleReturnsState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateLogReturns</c>. A bar with no value that far back, or with
 /// a value of zero or less at either end, has no logarithm to take and publishes zero.
 /// </remarks>
+[PrimaryOutput("Returns")]
 public sealed class LogReturnsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

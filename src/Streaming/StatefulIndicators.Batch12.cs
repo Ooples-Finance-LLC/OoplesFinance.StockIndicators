@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Evwma")]
 public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly double _mult;
@@ -62,6 +63,7 @@ public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Evwma")]
 public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _volumeSum;
@@ -116,6 +118,7 @@ public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Emt")]
 public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -177,6 +180,7 @@ public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Eszs")]
 public sealed class ElderSafeZoneStopsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -280,6 +284,7 @@ public sealed class ElderSafeZoneStopsState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Ewo")]
 public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -336,6 +341,7 @@ public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Wa")]
 public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _emaA;
@@ -408,6 +414,7 @@ public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Epma")]
 public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly double[] _weights;
@@ -474,6 +481,7 @@ public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Ei")]
 public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -536,6 +544,7 @@ public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Ewr")]
 public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _srcMax;
@@ -635,6 +644,7 @@ public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Eqma")]
 public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _chgXSum;
@@ -712,6 +722,7 @@ public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Eco")]
 public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _xcoEma1;
@@ -778,6 +789,7 @@ public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Ecsi")]
 public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -886,6 +898,7 @@ public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Emdi")]
 public sealed class ErgodicMeanDeviationIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -945,6 +958,7 @@ public sealed class ErgodicMeanDeviationIndicatorState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Macd")]
 public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1002,6 +1016,7 @@ public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingI
     }
 }
 
+[PrimaryOutput("Ppo")]
 public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1060,6 +1075,7 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Etsi")]
 public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _diffEma1;
@@ -1148,6 +1164,7 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Etsi2")]
 public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _diffEma1;
@@ -1269,6 +1286,7 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Frf")]
 public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha;
@@ -1340,6 +1358,7 @@ public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Fswma")]
 public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly double[] _weights;
@@ -1424,6 +1443,7 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Fsk")]
 public sealed class FastandSlowKurtosisOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

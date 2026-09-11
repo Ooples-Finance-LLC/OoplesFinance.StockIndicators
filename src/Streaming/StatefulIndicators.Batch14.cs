@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Top")]
 public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _jawOffset;
@@ -96,6 +97,7 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Gfe")]
 public sealed class GeneralFilterEstimatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -163,6 +165,7 @@ public sealed class GeneralFilterEstimatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Gdema")]
 public sealed class GeneralizedDoubleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -214,6 +217,7 @@ public sealed class GeneralizedDoubleExponentialMovingAverageState : IStreamingI
     }
 }
 
+[PrimaryOutput("GOsc")]
 public sealed class GOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -269,6 +273,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Gtf")]
 public sealed class GrandTrendForecastingState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -359,6 +364,7 @@ public sealed class GrandTrendForecastingState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Gla")]
 public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _atrSmoother;
@@ -427,6 +433,7 @@ public sealed class GroverLlorensActivatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Glco")]
 public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _atrSmoother;
@@ -502,6 +509,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Cbl")]
 public sealed class GuppyCountBackLineState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -601,6 +609,7 @@ public sealed class GuppyCountBackLineState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("FastDistance")]
 public sealed class GuppyDistanceIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -715,6 +724,7 @@ public sealed class GuppyDistanceIndicatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("SuperGmmaOsc")]
 public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema3;
@@ -911,6 +921,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Ht")]
 public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1070,6 +1081,7 @@ public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Hf")]
 public sealed class HampelFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1138,6 +1150,7 @@ public sealed class HampelFilterState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Up")]
 public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState, ICustomInputConsumer
 {
     private readonly double _divisor;
@@ -1199,6 +1212,7 @@ public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState, ICus
     }
 }
 
+[PrimaryOutput("Hwma")]
 public sealed class HendersonWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly double[] _weights;
@@ -1275,6 +1289,7 @@ public sealed class HendersonWeightedMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Hpi")]
 public sealed class HerrickPayoffIndexState : IStreamingIndicatorState, ICustomInputConsumer
 {
     private readonly double _pointValue;
@@ -1341,6 +1356,7 @@ public sealed class HerrickPayoffIndexState : IStreamingIndicatorState, ICustomI
     }
 }
 
+[PrimaryOutput("Zmbti")]
 public sealed class HighLowIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1424,6 +1440,7 @@ public sealed class HighLowIndexState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
@@ -1509,6 +1526,7 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Hema")]
 public sealed class HoltExponentialMovingAverageState : IStreamingIndicatorState
 {
     private readonly double _alpha;
@@ -1564,6 +1582,7 @@ public sealed class HoltExponentialMovingAverageState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("He")]
 public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _wma;
@@ -1612,6 +1631,7 @@ public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class HurstBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1697,6 +1717,7 @@ public sealed class HurstBandsState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("FastMiddleBand")]
 public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _sclOffset;
@@ -1809,6 +1830,7 @@ public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Hcf")]
 public sealed class HybridConvolutionFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1871,6 +1893,7 @@ public sealed class HybridConvolutionFilterState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("TenkanSen")]
 public sealed class IchimokuCloudState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _tenkanHigh;
@@ -1944,6 +1967,7 @@ public sealed class IchimokuCloudState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("IIRLse")]
 public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
 {
     private readonly double _a;
@@ -2001,6 +2025,7 @@ public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Macd")]
 public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _signalLength;

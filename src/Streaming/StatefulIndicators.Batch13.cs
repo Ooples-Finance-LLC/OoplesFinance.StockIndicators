@@ -6,6 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Fsrsi")]
 public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreamingIndicatorState, IDisposable
 {
     // RSI state (computes RSI on close prices)
@@ -89,6 +90,7 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
     }
 }
 
+[PrimaryOutput("Fsst")]
 public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly FastandSlowKurtosisOscillatorState _fsk;
@@ -155,6 +157,7 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Fsdo")]
 public sealed class FastSlowDegreeOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -270,6 +273,7 @@ public sealed class FastSlowDegreeOscillatorState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Fgi")]
 public sealed class FearAndGreedIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastTrUp;
@@ -351,6 +355,7 @@ public sealed class FearAndGreedIndicatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class FibonacciPivotPointsState : IStreamingIndicatorState
 {
     private double _prevClose;
@@ -422,6 +427,7 @@ public sealed class FibonacciPivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("UpperBand")]
 public sealed class FibonacciRetraceState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length2;
@@ -482,6 +488,7 @@ public sealed class FibonacciRetraceState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Fwma")]
 public sealed class FibonacciWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly double[] _weights;
@@ -550,6 +557,7 @@ public sealed class FibonacciWeightedMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Fve")]
 public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -618,6 +626,7 @@ public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Fo")]
 public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _v3Smoother;
@@ -694,6 +703,7 @@ public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Flsma")]
 public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -791,6 +801,7 @@ public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Ftso")]
 public sealed class FisherTransformStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _wma1;
@@ -909,6 +920,7 @@ public sealed class FisherTransformStochasticOscillatorState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -991,6 +1003,7 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class FloorPivotPointsState : IStreamingIndicatorState
 {
     private int _index;
@@ -1054,6 +1067,7 @@ public sealed class FloorPivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Frsi")]
 public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1110,6 +1124,7 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Fi")]
 public sealed class ForceIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _smoother;
@@ -1164,6 +1179,7 @@ public sealed class ForceIndexState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Fo")]
 public sealed class ForecastOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -1219,6 +1235,7 @@ public sealed class ForecastOscillatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly PooledRingBuffer<double> _highs;
@@ -1288,6 +1305,7 @@ public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Fco")]
 public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly PooledRingBuffer<double> _highs;
@@ -1355,6 +1373,7 @@ public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Fom")]
 public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1471,6 +1490,7 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Close")]
 public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsiC;
@@ -1529,6 +1549,7 @@ public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("FXSniper")]
 public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _cciState;
@@ -1620,6 +1641,7 @@ public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Glma")]
 public sealed class GainLossMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _glmaSmoother;
@@ -1681,6 +1703,7 @@ public sealed class GainLossMovingAverageState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Ghla")]
 public sealed class GannHiLoActivatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _highMa;
@@ -1748,6 +1771,7 @@ public sealed class GannHiLoActivatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Gso")]
 public sealed class GannSwingOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1820,6 +1844,7 @@ public sealed class GannSwingOscillatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Gto")]
 public sealed class GannTrendOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;

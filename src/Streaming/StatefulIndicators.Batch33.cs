@@ -11,6 +11,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// The streaming twin of <c>Calculations.CalculateCoefficientOfVariation</c>. The window holds the values
 /// already final, so a preview bar is measured against them without joining them.
 /// </remarks>
+[PrimaryOutput("Cv")]
 public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -90,6 +91,7 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
 /// The streaming twin of <c>Calculations.CalculateDownsideDeviation</c>. Each return needs the value before
 /// it, so the window holds one more value than the window of returns it measures.
 /// </remarks>
+[PrimaryOutput("Dd")]
 public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -164,6 +166,7 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
 /// The streaming twin of <c>Calculations.CalculateSkewness</c>: the population third moment over the cube
 /// of the population standard deviation.
 /// </remarks>
+[PrimaryOutput("Skewness")]
 public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -246,6 +249,7 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateRSquared</c>: the square of the correlation between the
 /// window's values and the bar numbers they sit on.
 /// </remarks>
+[PrimaryOutput("RSquared")]
 public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -319,6 +323,7 @@ public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculatePercentRank</c>. The window holds only the bars before
 /// this one, so a value is never ranked against itself.
 /// </remarks>
+[PrimaryOutput("PercentRank")]
 public sealed class PercentRankState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -385,6 +390,7 @@ public sealed class PercentRankState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateMedianValue</c>. Until the window fills there is no
 /// median to take, and the bar publishes its own value rather than zero.
 /// </remarks>
+[PrimaryOutput("MedianValue")]
 public sealed class MedianValueState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
