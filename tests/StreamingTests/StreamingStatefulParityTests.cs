@@ -11,6 +11,20 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
     {
         get
         {
+            // Withheld from #166: this diverged from bar 15 because the batch stochastic sees a two-bar
+            // envelope of the true range as its high and low, which widens its lookback by one bar.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UltimateTraderOscillator.Uto",
+                    () => new UltimateTraderOscillatorState(),
+                    data => data.CalculateUltimateTraderOscillator().OutputValues["Uto"], "Uto")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UltimateTraderOscillator.Signal",
+                    () => new UltimateTraderOscillatorState(),
+                    data => data.CalculateUltimateTraderOscillator().OutputValues["Signal"], "Signal")
+            };
             yield return new object[]
             {
                 new StatefulIndicatorSpec("UlcerIndex",
