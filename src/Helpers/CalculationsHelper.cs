@@ -515,10 +515,71 @@ public static class CalculationsHelper
         }
     }
 
+    /// <summary>
+    /// The moving-average types whose span fast path is verified to compute exactly what the indicator of the
+    /// same name computes. Every other type is computed by its indicator.
+    /// </summary>
+    /// <remarks>
+    /// MovingAverageFastPathTests holds every type to its indicator, so a type joins this set only once its fast
+    /// path matches. 120 fast paths did not - some by a warmup convention, most by a different formula, a few
+    /// diverging numerically - and an optimisation that changes the answer is a different indicator under the
+    /// same name.
+    /// </remarks>
+    private static readonly HashSet<MovingAvgType> VerifiedFastPaths = new()
+    {
+        MovingAvgType.AhrensMovingAverage,
+        MovingAvgType.CompoundRatioMovingAverage,
+        MovingAvgType.DistanceWeightedMovingAverage,
+        MovingAvgType.DoubleExponentialMovingAverage,
+        MovingAvgType.DoubleExponentialSmoothing,
+        MovingAvgType.Ehlers2PoleButterworthFilterV1,
+        MovingAvgType.Ehlers2PoleButterworthFilterV2,
+        MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
+        MovingAvgType.Ehlers2PoleSuperSmootherFilterV2,
+        MovingAvgType.Ehlers3PoleButterworthFilterV1,
+        MovingAvgType.Ehlers3PoleButterworthFilterV2,
+        MovingAvgType.Ehlers3PoleSuperSmootherFilter,
+        MovingAvgType.EhlersHammingMovingAverage,
+        MovingAvgType.EhlersHannMovingAverage,
+        MovingAvgType.EhlersLaguerreFilter,
+        MovingAvgType.EhlersModifiedOptimumEllipticFilter,
+        MovingAvgType.EhlersNoiseEliminationTechnology,
+        MovingAvgType.EhlersTriangleMovingAverage,
+        MovingAvgType.ElasticVolumeWeightedMovingAverageV2,
+        MovingAvgType.ExponentialMovingAverage,
+        MovingAvgType.FareySequenceWeightedMovingAverage,
+        MovingAvgType.HendersonWeightedMovingAverage,
+        MovingAvgType.LinearWeightedMovingAverage,
+        MovingAvgType.McGinleyDynamicIndicator,
+        MovingAvgType.McNichollMovingAverage,
+        MovingAvgType.RepulsionMovingAverage,
+        MovingAvgType.ReverseEngineeringRelativeStrengthIndex,
+        MovingAvgType.SelfWeightedMovingAverage,
+        MovingAvgType.SimpleMovingAverage,
+        MovingAvgType.SymmetricallyWeightedMovingAverage,
+        MovingAvgType.TillsonT3MovingAverage,
+        MovingAvgType.TriangularMovingAverage,
+        MovingAvgType.TripleExponentialMovingAverage,
+        MovingAvgType.TrueRangeAdjustedExponentialMovingAverage,
+        MovingAvgType.VariableIndexDynamicAverage,
+        MovingAvgType.VariableMovingAverage,
+        MovingAvgType.VolumeWeightedAveragePrice,
+        MovingAvgType.WeightedMovingAverage,
+        MovingAvgType.WildersSmoothingMethod,
+        MovingAvgType.ZeroLagExponentialMovingAverage,
+        MovingAvgType.ZeroLagTripleExponentialMovingAverage,
+        MovingAvgType._3HMA,
+    };
+
     private static List<double> GetMovingAverageListCore(StockData stockData, MovingAvgType movingAvgType, int length,
         List<double>? customValuesList, int? fastLength, int? slowLength)
     {
         List<double> movingAvgList = new();
+
+        if (!VerifiedFastPaths.Contains(movingAvgType))
+        {
+            return GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+        }
 
         // Fast path for moving averages with simple (input, output, length) Core signatures
         // Note: All Core methods have been verified to match Calculate methods
@@ -1166,7 +1227,11 @@ public static class CalculationsHelper
                 movingAvgList = stockData.CalculateAdaptiveLeastSquares(length: length).ChainedValues;
                 break;
             case MovingAvgType.AdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateAdaptiveMovingAverage(fastLength ?? default, slowLength ?? length, length).ChainedValues;
+                // An unspecified fast length means the indicator's own default, not 0: passing
+                // `fastLength ?? default` handed it a zero length, which threw or degenerated.
+                movingAvgList = (fastLength is { } adaptiveFast
+                    ? stockData.CalculateAdaptiveMovingAverage(adaptiveFast, slowLength ?? length, length)
+                    : stockData.CalculateAdaptiveMovingAverage(slowLength: slowLength ?? length, length: length)).ChainedValues;
                 break;
             case MovingAvgType.AhrensMovingAverage:
                 movingAvgList = stockData.CalculateAhrensMovingAverage(length).ChainedValues;
@@ -1214,7 +1279,11 @@ public static class CalculationsHelper
                 movingAvgList = stockData.CalculateDynamicallyAdjustableFilter(length).ChainedValues;
                 break;
             case MovingAvgType.DynamicallyAdjustableMovingAverage:
-                movingAvgList = stockData.CalculateDynamicallyAdjustableMovingAverage(fastLength ?? default, slowLength ?? length).ChainedValues;
+                // An unspecified fast length means the indicator's own default, not 0: passing
+                // `fastLength ?? default` handed it a zero length, which threw or degenerated.
+                movingAvgList = (fastLength is { } damaFast
+                    ? stockData.CalculateDynamicallyAdjustableMovingAverage(damaFast, slowLength ?? length)
+                    : stockData.CalculateDynamicallyAdjustableMovingAverage(slowLength: slowLength ?? length)).ChainedValues;
                 break;
             case MovingAvgType.EdgePreservingFilter:
                 movingAvgList = stockData.CalculateEdgePreservingFilter(length: length).ChainedValues;
@@ -1241,7 +1310,11 @@ public static class CalculationsHelper
                 movingAvgList = stockData.CalculateEhlers3PoleSuperSmootherFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersAdaptiveLaguerreFilter:
-                movingAvgList = stockData.CalculateEhlersAdaptiveLaguerreFilter(slowLength ?? length, fastLength ?? default).ChainedValues;
+                // An unspecified fast length means the indicator's own default, not 0: passing
+                // `fastLength ?? default` handed it a zero length, which threw or degenerated.
+                movingAvgList = (fastLength is { } laguerreFast
+                    ? stockData.CalculateEhlersAdaptiveLaguerreFilter(slowLength ?? length, laguerreFast)
+                    : stockData.CalculateEhlersAdaptiveLaguerreFilter(length1: slowLength ?? length)).ChainedValues;
                 break;
             case MovingAvgType.EhlersAllPassPhaseShifter:
                 movingAvgList = stockData.CalculateEhlersAllPassPhaseShifter(length: length).ChainedValues;
@@ -1426,7 +1499,11 @@ public static class CalculationsHelper
                 movingAvgList = stockData.CalculateMcNichollMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.MiddleHighLowMovingAverage:
-                movingAvgList = stockData.CalculateMiddleHighLowMovingAverage(length1: slowLength ?? length, length2: fastLength ?? default).ChainedValues;
+                // An unspecified fast length means the indicator's own default, not 0: passing
+                // `fastLength ?? default` handed it a zero length, which threw or degenerated.
+                movingAvgList = (fastLength is { } middleFast
+                    ? stockData.CalculateMiddleHighLowMovingAverage(length1: slowLength ?? length, length2: middleFast)
+                    : stockData.CalculateMiddleHighLowMovingAverage(length1: slowLength ?? length)).ChainedValues;
                 break;
             case MovingAvgType.ModularFilter:
                 movingAvgList = stockData.CalculateModularFilter(length: length).ChainedValues;

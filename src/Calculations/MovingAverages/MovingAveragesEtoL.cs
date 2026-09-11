@@ -160,7 +160,10 @@ public static partial class Calculations
 
             var sc = Pow((efficiencyRatio * (fastAlpha - slowAlpha)) + slowAlpha, 2);
             var prevKama = GetLastOrDefault(kamaList);
-            var currentKAMA = (sc * currentValue) + ((1 - sc) * prevKama);
+            // The price until the efficiency window is full, then Kaufman's recursion from it - as TA-Lib and
+            // Pine's nz(kama[1], src) seed it. Seeded at 0 it crawled up from zero, and on a flat market
+            // (efficiency 0, smoothing (2/31)^2) it was still converging thousands of bars later.
+            var currentKAMA = i < length ? currentValue : prevKama + (sc * (currentValue - prevKama));
             kamaList.Add(currentKAMA);
 
             var signal = GetCompareSignal(currentValue - currentKAMA, prevValue - prevKama);

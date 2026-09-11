@@ -89,11 +89,14 @@ public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState
     private readonly double _fastAlpha;
     private readonly double _slowAlpha;
     private readonly StreamingInputResolver _input;
+    private readonly int _length;
     private double _prevKama;
+    private int _count;
 
     public KaufmanAdaptiveMovingAverageState(int length = 10, int fastLength = 2, int slowLength = 30)
     {
         var resolved = Math.Max(1, length);
+        _length = resolved;
         _er = new EfficiencyRatioState(resolved);
         _fastAlpha = 2d / (Math.Max(1, fastLength) + 1);
         _slowAlpha = 2d / (Math.Max(1, slowLength) + 1);
@@ -106,6 +109,7 @@ public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState
     {
         _er.Reset();
         _prevKama = 0;
+        _count = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -113,11 +117,16 @@ public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
         var er = _er.Next(value, isFinal);
         var sc = MathHelper.Pow((er * (_fastAlpha - _slowAlpha)) + _slowAlpha, 2);
-        var kama = (sc * value) + ((1 - sc) * _prevKama);
+        // The price until the efficiency window is full, then the recursion from it, as the batch seeds it.
+        var kama = _count < _length ? value : _prevKama + (sc * (value - _prevKama));
 
         if (isFinal)
         {
             _prevKama = kama;
+            if (_count < _length)
+            {
+                _count++;
+            }
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
