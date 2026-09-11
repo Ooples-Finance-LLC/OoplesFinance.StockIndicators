@@ -601,7 +601,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] < value)
+                if (_window[i].CompareTo(value) < 0)
                 {
                     count++;
                 }
@@ -620,7 +620,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] <= value)
+                if (_window[i].CompareTo(value) <= 0)
                 {
                     count++;
                 }
@@ -762,11 +762,15 @@ internal sealed class OrderStatisticTree
             return new Node(key, Random.Next());
         }
 
-        if (key == node.Key)
+        // One total order for every operation, double.CompareTo's, in which NaN equals itself and sorts
+        // first. With == and < a NaN went right on insert and was never found on removal, so a preview
+        // that inserted and removed it left a node behind.
+        var order = key.CompareTo(node.Key);
+        if (order == 0)
         {
             node.Count++;
         }
-        else if (key < node.Key)
+        else if (order < 0)
         {
             node.Left = Insert(node.Left, key);
             if (node.Left.Priority > node.Priority)
@@ -794,7 +798,8 @@ internal sealed class OrderStatisticTree
             return null;
         }
 
-        if (key == node.Key)
+        var order = key.CompareTo(node.Key);
+        if (order == 0)
         {
             if (node.Count > 1)
             {
@@ -822,7 +827,7 @@ internal sealed class OrderStatisticTree
                 }
             }
         }
-        else if (key < node.Key)
+        else if (order < 0)
         {
             node.Left = Remove(node.Left, key);
         }
@@ -842,7 +847,7 @@ internal sealed class OrderStatisticTree
             return 0;
         }
 
-        if (key <= node.Key)
+        if (key.CompareTo(node.Key) <= 0)
         {
             return CountLessThan(node.Left, key);
         }
@@ -857,7 +862,7 @@ internal sealed class OrderStatisticTree
             return 0;
         }
 
-        if (key < node.Key)
+        if (key.CompareTo(node.Key) < 0)
         {
             return CountLessThanOrEqual(node.Left, key);
         }
