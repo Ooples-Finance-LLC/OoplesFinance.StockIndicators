@@ -59,10 +59,17 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         InRange,
 
         /// <summary>
-        /// The close divided by 100: outside every bar's range, so high and low come from the series
-        /// itself under the per-bar rule. Only this series exercises that half of the rule; on the
-        /// median series alone it went untested and 43 indicators disagreed on it.
+        /// The natural log of the close: outside every bar's range, so high and low come from the
+        /// series itself under the per-bar rule, and a non-linear transform, so it is a genuinely
+        /// different series even to an indicator that ignores scale.
         /// </summary>
+        /// <remarks>
+        /// The first out-of-range probe divided the close by 100. That is a pure rescale, and a
+        /// scale-invariant indicator - momentum as a ratio, a z-score, anything normalised - is right
+        /// to give the same answer for it, so the probe could not tell a correct "ignores" from a
+        /// defect. What it reported instead was floating-point noise on whichever side happened to
+        /// round differently.
+        /// </remarks>
         OutOfRange,
     }
 
@@ -160,10 +167,10 @@ public sealed class StreamingCustomInputTests : GlobalTestData
 
     private static double Median(OhlcvBar bar) => (bar.High + bar.Low) / 2;
 
-    private static double ScaledClose(OhlcvBar bar) => bar.Close / 100;
+    private static double LogClose(OhlcvBar bar) => Math.Log(bar.Close);
 
     private static Func<OhlcvBar, double> Selector(CustomSeries series) =>
-        series == CustomSeries.InRange ? Median : ScaledClose;
+        series == CustomSeries.InRange ? Median : LogClose;
 
     /// <summary>
     /// Runs a batch indicator on a close series or a median-price series chained in front of it.
@@ -189,7 +196,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         var values = custom switch
         {
             CustomSeries.InRange => data.HighPrices.Zip(data.LowPrices, (h, l) => (h + l) / 2).ToList(),
-            CustomSeries.OutOfRange => data.ClosePrices.Select(c => c / 100).ToList(),
+            CustomSeries.OutOfRange => data.ClosePrices.Select(c => Math.Log(c)).ToList(),
             _ => new List<double>(data.ClosePrices),
         };
         data.SetCustomValues(values);
@@ -294,7 +301,12 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             for (var i = 0; i < Math.Min(mine.Count, other.Count) && i < Bars; i++)
             {
                 if (double.IsNaN(mine[i]) && double.IsNaN(other[i])) { continue; }
-                if (Math.Abs(mine[i] - other[i]) > 1e-12) { return true; }
+                // Relative, not absolute. A series in the millions - volume, an accumulation line - carries
+                // more than 1e-12 of rounding noise from reordered arithmetic alone, and an absolute
+                // threshold read that noise as "responds". A real response to a different input series
+                // differs by orders of magnitude more than a part in a billion.
+                var scale = Math.Max(1.0, Math.Max(Math.Abs(mine[i]), Math.Abs(other[i])));
+                if (Math.Abs(mine[i] - other[i]) > 1e-9 * scale) { return true; }
             }
         }
 

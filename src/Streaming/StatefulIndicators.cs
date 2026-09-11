@@ -354,9 +354,9 @@ public sealed class HullMovingAverageState : IStreamingIndicatorState, IDisposab
 }
 
 
-public sealed class AveragePriceState : IStreamingIndicatorState, ICustomInputConsumer
+public sealed class AveragePriceState : IStreamingIndicatorState
 {
-    private StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input;
 
     public AveragePriceState()
     {
@@ -374,9 +374,6 @@ public sealed class AveragePriceState : IStreamingIndicatorState, ICustomInputCo
     }
 
     public IndicatorName Name => IndicatorName.AveragePrice;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -398,9 +395,9 @@ public sealed class AveragePriceState : IStreamingIndicatorState, ICustomInputCo
     }
 }
 
-public sealed class FullTypicalPriceState : IStreamingIndicatorState, ICustomInputConsumer
+public sealed class FullTypicalPriceState : IStreamingIndicatorState
 {
-    private StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input;
 
     public FullTypicalPriceState()
     {
@@ -418,9 +415,6 @@ public sealed class FullTypicalPriceState : IStreamingIndicatorState, ICustomInp
     }
 
     public IndicatorName Name => IndicatorName.FullTypicalPrice;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -442,9 +436,9 @@ public sealed class FullTypicalPriceState : IStreamingIndicatorState, ICustomInp
     }
 }
 
-public sealed class MedianPriceState : IStreamingIndicatorState, ICustomInputConsumer
+public sealed class MedianPriceState : IStreamingIndicatorState
 {
-    private StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input;
 
     public MedianPriceState()
     {
@@ -462,9 +456,6 @@ public sealed class MedianPriceState : IStreamingIndicatorState, ICustomInputCon
     }
 
     public IndicatorName Name => IndicatorName.MedianPrice;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -486,9 +477,9 @@ public sealed class MedianPriceState : IStreamingIndicatorState, ICustomInputCon
     }
 }
 
-public sealed class TypicalPriceState : IStreamingIndicatorState, ICustomInputConsumer
+public sealed class TypicalPriceState : IStreamingIndicatorState
 {
-    private StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input;
 
     public TypicalPriceState()
     {
@@ -506,9 +497,6 @@ public sealed class TypicalPriceState : IStreamingIndicatorState, ICustomInputCo
     }
 
     public IndicatorName Name => IndicatorName.TypicalPrice;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -530,9 +518,9 @@ public sealed class TypicalPriceState : IStreamingIndicatorState, ICustomInputCo
     }
 }
 
-public sealed class WeightedCloseState : IStreamingIndicatorState, ICustomInputConsumer
+public sealed class WeightedCloseState : IStreamingIndicatorState
 {
-    private StreamingInputResolver _input;
+    private readonly StreamingInputResolver _input;
 
     public WeightedCloseState()
     {
@@ -550,9 +538,6 @@ public sealed class WeightedCloseState : IStreamingIndicatorState, ICustomInputC
     }
 
     public IndicatorName Name => IndicatorName.WeightedClose;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

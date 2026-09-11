@@ -1853,6 +1853,29 @@ public static class CalculationsHelper
         var parentOrder = new List<DateTime>();
         var tickerDataList = stockData.TickerDataList;
 
+        // A chained series is the close of every bar, and each bar's high and low follow the per-bar
+        // rule (GetCustomRangeLists); the periods are then built from those adjusted bars exactly as
+        // they are built from the real ones - open first, high the max, low the min, close last. This
+        // used to rebuild from TickerDataList whatever was chained in front, so every pivot point
+        // silently ignored a custom series.
+        var chained = stockData.CustomValuesList is { Count: > 0 } custom && custom.Count == tickerDataList.Count
+            ? custom
+            : null;
+        List<double>? customHighs = null;
+        List<double>? customLows = null;
+        if (chained != null)
+        {
+            var highs = new List<double>(tickerDataList.Count);
+            var lows = new List<double>(tickerDataList.Count);
+            for (var k = 0; k < tickerDataList.Count; k++)
+            {
+                highs.Add(tickerDataList[k].High);
+                lows.Add(tickerDataList[k].Low);
+            }
+
+            (customHighs, customLows) = GetCustomRangeLists(chained, highs, lows);
+        }
+
         for (var i = 0; i < tickerDataList.Count; i++)
         {
             var ticker = tickerDataList[i];
@@ -1883,7 +1906,14 @@ public static class CalculationsHelper
                 parentGroup.ChildOrder.Add(childKey);
             }
 
-            childGroup.Add(ticker);
+            if (chained != null && customHighs != null && customLows != null)
+            {
+                childGroup.Add(ticker.Open, customHighs[i], customLows[i], chained[i], ticker.Volume);
+            }
+            else
+            {
+                childGroup.Add(ticker);
+            }
         }
 
         for (var i = 0; i < parentOrder.Count; i++)
@@ -1924,31 +1954,34 @@ public static class CalculationsHelper
         public double Close { get; private set; }
         public double Volume { get; private set; }
 
-        public void Add(TickerData ticker)
+        public void Add(TickerData ticker) =>
+            Add(ticker.Open, ticker.High, ticker.Low, ticker.Close, ticker.Volume);
+
+        public void Add(double open, double high, double low, double close, double volume)
         {
             if (!HasValue)
             {
-                Open = ticker.Open;
-                High = ticker.High;
-                Low = ticker.Low;
-                Close = ticker.Close;
-                Volume = ticker.Volume;
+                Open = open;
+                High = high;
+                Low = low;
+                Close = close;
+                Volume = volume;
                 HasValue = true;
                 return;
             }
 
-            if (ticker.High > High)
+            if (high > High)
             {
-                High = ticker.High;
+                High = high;
             }
 
-            if (ticker.Low < Low)
+            if (low < Low)
             {
-                Low = ticker.Low;
+                Low = low;
             }
 
-            Volume += ticker.Volume;
-            Close = ticker.Close;
+            Volume += volume;
+            Close = close;
         }
     }
 
