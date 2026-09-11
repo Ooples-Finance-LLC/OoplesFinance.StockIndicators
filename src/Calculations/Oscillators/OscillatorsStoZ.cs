@@ -632,7 +632,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var macd1List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).CustomValuesList;
+        // The explosion line is the Bollinger width of the prices, not of the MACD just published.
+        stockData.RestoreInputSeries(callerSeries);
         var bbList = CalculateBollingerBands(stockData, length: fastLength);
         var upperBollingerBandList = bbList.OutputValues["UpperBand"];
         var lowerBollingerBandList = bbList.OutputValues["LowerBand"];
@@ -1697,9 +1700,14 @@ public static partial class Calculations
 
         var ma1List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, inputList);
         var ma2List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length3, inputList);
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var ltRocList = CalculateRateOfChange(stockData, length2).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var mtRocList = CalculateRateOfChange(stockData, length4).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: length9).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var ppoHistList = CalculatePercentagePriceOscillator(stockData, MovingAvgType.ExponentialMovingAverage, length5, length6, length7).
             OutputValues["Histogram"];
 
@@ -1814,8 +1822,12 @@ public static partial class Calculations
         List<double> bufHistNoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var stochastic1List = CalculateStochasticOscillator(stockData, maType, length: length2, smoothLength, smoothLength).OutputValues["FastD"];
+        stockData.RestoreInputSeries(callerSeries);
         var stochastic2List = CalculateStochasticOscillator(stockData, maType, length: length1, smoothLength, smoothLength).OutputValues["FastD"];
 
         for (var i = 0; i < stockData.Count; i++)

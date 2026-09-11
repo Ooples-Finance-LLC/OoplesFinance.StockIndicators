@@ -3672,41 +3672,30 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        // McNicholl's zero-lag EMA, the same as CalculateMcNichollMovingAverage:
+        // ((2 - alpha) * ema1 - ema2) / (1 - alpha), with ema2 the EMA of ema1. This fast path returned
+        // ema + EMA(price - ema), a different average, so MovingAvgType.McNichollMovingAverage meant one thing
+        // here and another in the indicator.
+        var alpha = 2d / (length + 1);
+        var pool = ArrayPool<double>.Shared;
+        var ema1Buffer = pool.Rent(input.Length);
+        var ema2Buffer = pool.Rent(input.Length);
         try
         {
-            var ema = emaBuffer.AsSpan(0, input.Length);
-            ExponentialMovingAverage(input, ema, length);
+            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+            var ema2 = ema2Buffer.AsSpan(0, input.Length);
+            ExponentialMovingAverage(input, ema1, length);
+            ExponentialMovingAverage(ema1, ema2, length);
 
-            // Compute difference and EMA of difference
-            var diffBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-            var diffEmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-            try
+            for (var i = 0; i < input.Length; i++)
             {
-                var diff = diffBuffer.AsSpan(0, input.Length);
-                var diffEma = diffEmaBuffer.AsSpan(0, input.Length);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    diff[i] = input[i] - ema[i];
-                }
-
-                ExponentialMovingAverage(diff, diffEma, length);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    output[i] = ema[i] + diffEma[i];
-                }
-            }
-            finally
-            {
-                ArrayPool<double>.Shared.Return(diffBuffer);
-                ArrayPool<double>.Shared.Return(diffEmaBuffer);
+                output[i] = 1 - alpha != 0 ? (((2 - alpha) * ema1[i]) - ema2[i]) / (1 - alpha) : 0;
             }
         }
         finally
         {
-            ArrayPool<double>.Shared.Return(emaBuffer);
+            pool.Return(ema1Buffer);
+            pool.Return(ema2Buffer);
         }
     }
 

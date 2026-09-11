@@ -1766,8 +1766,8 @@ public sealed class TimePriceIndicatorState : IStreamingIndicatorState, IDisposa
 
         var a = _index - lastRisingIndex;
         var b = _index - lastFallingIndex;
-        var upper = _length != 0 ? ((a > _length ? _length : a) / (double)_length) - 0.55 : 0;
-        var lower = _length != 0 ? ((b > _length ? _length : b) / (double)_length) - 0.55 : 0;
+        var upper = _length != 0 ? ((a > _length ? _length : a) / (double)_length) - 0.5 : 0;
+        var lower = _length != 0 ? ((b > _length ? _length : b) / (double)_length) - 0.5 : 0;
 
         if (isFinal)
         {
