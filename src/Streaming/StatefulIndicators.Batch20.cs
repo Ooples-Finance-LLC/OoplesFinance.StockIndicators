@@ -1185,7 +1185,7 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
     private double _nValue;
     private double _n2Value;
 
-    public QuadraticLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 550,
+    public QuadraticLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50,
         int forecastLength = 14, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);

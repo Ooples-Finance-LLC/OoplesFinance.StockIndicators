@@ -1078,7 +1078,7 @@ public sealed class ErgodicMeanDeviationIndicatorState : IStreamingIndicatorStat
     private readonly StreamingInputResolver _input;
 
     public ErgodicMeanDeviationIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 55,
+        int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5,
         InputName inputName = InputName.Close)
     {
         _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
