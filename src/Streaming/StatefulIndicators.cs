@@ -3466,19 +3466,6 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
-    public KeltnerChannelsState(MovingAvgType maType, int length1, int length2, double multFactor,
-        Func<OhlcvBar, double> selector, MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _atrSmoother = MovingAverageSmootherFactory.Create(atrMaType, Math.Max(1, length2));
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _mult = multFactor;
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
 
     public IndicatorName Name => IndicatorName.KeltnerChannels;
 
