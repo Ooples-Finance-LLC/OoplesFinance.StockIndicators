@@ -5,6 +5,11 @@ using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
 
+// The arms below still read typed options that are obsolete because their batch indicator has nothing they could
+// set. Those arms are not served unless verified, and BuilderArmTests fails any served arm whose result such an
+// option changes; the reads go when the options do.
+#pragma warning disable CS0618
+
 namespace OoplesFinance.StockIndicators.Builder.Compute;
 
 /// <summary>

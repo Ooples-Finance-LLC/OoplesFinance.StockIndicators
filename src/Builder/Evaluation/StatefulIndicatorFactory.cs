@@ -109,7 +109,7 @@ internal static partial class StatefulIndicatorFactory
             ChaikinOscillatorSpecOptions co => new ChaikinOscillatorState(fastLength: co.FastLength, slowLength: co.SlowLength),
             EmvSpecOptions emv => new EaseOfMovementState(divisor: emv.Length),
             KvoSpecOptions kvo => new KlingerVolumeOscillatorState(fastLength: kvo.Length),
-            MassIndexSpecOptions mi => new MassIndexState(length1: mi.EmaLength),
+            MassIndexSpecOptions mi => new MassIndexState(length1: mi.EmaLength, length2: mi.EmaLength, length3: mi.SumLength),
 
             // Price/Trend - using named parameters to skip MovingAvgType defaults
             VhfSpecOptions vhf => new VerticalHorizontalFilterState(length: vhf.Length),
@@ -122,7 +122,7 @@ internal static partial class StatefulIndicatorFactory
             AwesomeOscillatorSpecOptions ao => new AwesomeOscillatorState(fastLength: ao.Length),
             AcceleratorOscillatorSpecOptions aco => new AcceleratorOscillatorState(fastLength: aco.Length),
             FisherTransformSpecOptions ft => new EhlersFisherTransformState(length: ft.Length),
-            ConnorsRsiSpecOptions crsi => new ConnorsRelativeStrengthIndexState(length1: crsi.Length),
+            ConnorsRsiSpecOptions crsi => new ConnorsRelativeStrengthIndexState(length2: crsi.Length),
             PmoSpecOptions pmo => new DecisionPointPriceMomentumOscillatorState(length1: pmo.Length),
             KstSpecOptions kst => new KnowSureThingState(length1: kst.Length),
             ChoppinessIndexSpecOptions ci => new ChoppinessIndexState(length: ci.Length),
@@ -131,13 +131,13 @@ internal static partial class StatefulIndicatorFactory
             BullPowerSpecOptions bp => new BullPowerIndicatorState(length: bp.Length),
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
-            StcSpecOptions stc => new SchaffTrendCycleState(fastLength: stc.Length),
+            StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
             PzoSpecOptions pzo => new PriceZoneOscillatorState(length: pzo.Length),
             PgoSpecOptions pgo => new PrettyGoodOscillatorState(length: pgo.Length),
             VortexPositiveSpecOptions vp => new VortexIndicatorState(length: vp.Length),
             VortexNegativeSpecOptions vn => new VortexIndicatorState(length: vn.Length),
             TrendIntensityIndexSpecOptions tii => new TrendIntensityIndexState(fastLength: tii.Length),
-            StochRsiSpecOptions srsi => new StochasticRelativeStrengthIndexState(length: srsi.RsiLength, smoothLength1: srsi.StochLength),
+            StochRsiSpecOptions srsi => new StochasticRelativeStrengthIndexState(length: srsi.RsiLength, stochLength: srsi.StochLength),
             PvoSpecOptions pvo => new PercentageVolumeOscillatorState(fastLength: pvo.Length),
             RviSpecOptions rvi => new RelativeVigorIndexState(length: rvi.Length),
 

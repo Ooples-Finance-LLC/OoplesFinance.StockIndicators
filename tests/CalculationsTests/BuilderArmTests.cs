@@ -24,7 +24,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.CalculationsTests;
 /// </remarks>
 public sealed class BuilderArmTests : GlobalTestData
 {
-    private static readonly List<Type> OptionTypes = typeof(IIndicatorSpecOptions).Assembly.GetTypes()
+    internal static readonly List<Type> OptionTypes = typeof(IIndicatorSpecOptions).Assembly.GetTypes()
         .Where(t => t.IsClass && !t.IsAbstract && typeof(IIndicatorSpecOptions).IsAssignableFrom(t)
             && t != typeof(GenericIndicatorOptions))
         .OrderBy(t => t.Name, StringComparer.Ordinal)
@@ -162,7 +162,7 @@ public sealed class BuilderArmTests : GlobalTestData
 
     private static bool Same(double[] a, double[] b) => a.Length == b.Length && !a.Where((v, i) => !IsClose(v, b[i])).Any();
 
-    private static IIndicatorSpecOptions? Create(Type type, bool alternate)
+    internal static IIndicatorSpecOptions? Create(Type type, bool alternate)
     {
         var ctor = type.GetConstructors()
             .OrderByDescending(c => c.GetParameters().Length)
