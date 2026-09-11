@@ -305,6 +305,53 @@ public static class CalculationsHelper
         return output;
     }
 
+    /// <summary>
+    /// The volume-weighted mean of each bar's trailing window of <paramref name="input"/>, partial at the start.
+    /// </summary>
+    /// <remarks>sum(volume * value, length) / sum(volume, length), as LazyBear's calc_zvwap takes its mean.</remarks>
+    internal static List<double> GetRollingVolumeWeightedMeanList(List<double> input, List<double> volumes, int length)
+    {
+        length = Math.Max(1, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            double volumePriceSum = 0, volumeSum = 0;
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
+            {
+                volumePriceSum += volumes[j] * input[j];
+                volumeSum += volumes[j];
+            }
+
+            output.Add(volumeSum != 0 ? volumePriceSum / volumeSum : 0);
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Each value's distance from its mean in units of sqrt(sma((value - mean)^2, length)): LazyBear's
+    /// calc_zvwap, with the squared distances averaged exactly over the window.
+    /// </summary>
+    internal static List<double> GetZScoreList(List<double> input, List<double> means, int length)
+    {
+        var devSquared = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var deviation = input[i] - means[i];
+            devSquared.Add(deviation * deviation);
+        }
+
+        var variance = GetExactWindowAverageList(devSquared, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var deviationSd = Math.Sqrt(variance[i]);
+            output.Add(deviationSd != 0 ? (input[i] - means[i]) / deviationSd : 0);
+        }
+
+        return output;
+    }
+
     internal static List<double> GetTrueRangeList(StockData stockData)
     {
         return GetDerivedSeriesList(stockData, DerivedSeriesKind.TrueRange);

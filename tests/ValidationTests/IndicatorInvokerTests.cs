@@ -14,13 +14,14 @@ public sealed class IndicatorInvokerTests
             .ToArray();
         var excluded = allIndicators.Where(x => !supported.Contains(x)).ToArray();
 
-        // The contract is that reflection reaches every indicator except the single enum-only
-        // entry - stated here as the exclusion set rather than as a literal count. A hardcoded
-        // count says the same thing while also failing every time an indicator is legitimately
-        // added, which turns each new indicator into a cross-PR merge conflict. Both assertions
-        // still fail if reflection silently drops one: it lands in excluded and the count falls.
-        Assert.Equal([IndicatorName.VolatilityIndexDynamicAverageIndicator], excluded);
-        Assert.Equal(allIndicators.Length - 1, supported.Count);
+        // The contract is that reflection reaches every indicator - stated here as the exclusion set
+        // rather than as a literal count. A hardcoded count says the same thing while also failing
+        // every time an indicator is legitimately added, which turns each new indicator into a
+        // cross-PR merge conflict. Both assertions still fail if reflection silently drops one: it
+        // lands in excluded and the count falls. VolatilityIndexDynamicAverageIndicator used to be
+        // the one enum entry with no batch method; it now has one, so there is no exclusion left.
+        Assert.Empty(excluded);
+        Assert.Equal(allIndicators.Length, supported.Count);
     }
 
     [Theory]

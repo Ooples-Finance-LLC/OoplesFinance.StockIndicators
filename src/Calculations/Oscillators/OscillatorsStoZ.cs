@@ -77,19 +77,20 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var vwapList = GetMovingAverageList(stockData, maType, length, inputList);
-        stockData.SetCustomValues(vwapList);
-        var vwapSdList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // LazyBear's calc_zvwap. The mean is a rolling volume-weighted mean over `length` (the chosen moving
+        // average, for any other type) and the width is sqrt(sma((price - mean)^2, length)). This used the VWAP
+        // fast path's cumulative average as the mean and the deviation of that mean series as the width.
+        var meanList = maType == MovingAvgType.VolumeWeightedAveragePrice
+            ? GetRollingVolumeWeightedMeanList(inputList, stockData.Volumes, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
+        var zscoreValues = GetZScoreList(inputList, meanList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
             var prevZScore1 = i >= 1 ? zscoreList[i - 1] : 0;
             var prevZScore2 = i >= 2 ? zscoreList[i - 2] : 0;
-            var mean = vwapList[i];
-            var vwapsd = vwapSdList[i];
 
-            var zscore = vwapsd != 0 ? (currentValue - mean) / vwapsd : 0;
+            var zscore = zscoreValues[i];
             zscoreList.Add(zscore);
 
             var signal = GetRsiSignal(zscore - prevZScore1, prevZScore1 - prevZScore2, zscore, prevZScore1, 2, -2);

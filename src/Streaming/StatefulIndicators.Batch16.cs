@@ -1972,10 +1972,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _gamma;
-    private readonly int _zLength;
-    private readonly PooledRingBuffer<double> _volumePrices;
-    private readonly PooledRingBuffer<double> _volumes;
-    private readonly PooledRingBuffer<double> _devSquares;
+    private readonly RollingVolumeWeightedMean _vwapMean;
+    private readonly RollingZScore _zScore;
     private double _l0;
     private double _l1;
     private double _l2;
@@ -2005,10 +2003,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = input;
         _gamma = gamma;
-        _zLength = Math.Max(1, length1);
-        _volumePrices = new PooledRingBuffer<double>(_zLength);
-        _volumes = new PooledRingBuffer<double>(_zLength);
-        _devSquares = new PooledRingBuffer<double>(_zLength);
+        _vwapMean = new RollingVolumeWeightedMean(Math.Max(1, length1));
+        _zScore = new RollingZScore(Math.Max(1, length1));
     }
 
     public IndicatorName Name => IndicatorName.MacZVwapIndicator;
@@ -2019,9 +2015,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _fastSmoother.Reset();
         _slowSmoother.Reset();
         _signalSmoother.Reset();
-        _volumePrices.Clear();
-        _volumes.Clear();
-        _devSquares.Clear();
+        _vwapMean.Reset();
+        _zScore.Reset();
         _l0 = 0;
         _l1 = 0;
         _l2 = 0;
@@ -2038,11 +2033,8 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
 
         // LazyBear's calc_zvwap: the distance of the price from its rolling volume-weighted mean, in units of
         // sqrt(sma((price - mean)^2, length1)). Summed over the window oldest first, as the batch does.
-        var mean = SafeRatio(WindowSum(_volumePrices, bar.Volume * value, isFinal), WindowSum(_volumes, bar.Volume, isFinal));
-        var devSquared = (value - mean) * (value - mean);
-        var variance = WindowAverage(_devSquares, devSquared, isFinal);
-        var vwapSd = Math.Sqrt(variance);
-        var zscore = vwapSd != 0 ? (value - mean) / vwapSd : 0;
+        var mean = _vwapMean.Next(value, bar.Volume, isFinal);
+        var zscore = _zScore.Next(value, mean, isFinal);
 
         var macd = fastMa - slowMa;
         var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
@@ -2089,55 +2081,10 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _slowSmoother.Dispose();
         _signalSmoother.Dispose();
         _stdDev.Dispose();
-        _volumePrices.Dispose();
-        _volumes.Dispose();
-        _devSquares.Dispose();
+        _vwapMean.Dispose();
+        _zScore.Dispose();
     }
 
-    private static double SafeRatio(double numerator, double denominator) => denominator != 0 ? numerator / denominator : 0;
-
-    /// <summary>The sum of the last window values including <paramref name="value"/>; the window may be partial.</summary>
-    private double WindowSum(PooledRingBuffer<double> window, double value, bool isFinal)
-    {
-        var start = window.Count >= _zLength ? 1 : 0;
-        double sum = 0;
-        for (var i = start; i < window.Count; i++)
-        {
-            sum += window[i];
-        }
-
-        sum += value;
-        if (isFinal)
-        {
-            window.TryAdd(value, out _);
-        }
-
-        return sum;
-    }
-
-    /// <summary>The average of a full window including <paramref name="value"/>; 0 until the window is full.</summary>
-    private double WindowAverage(PooledRingBuffer<double> window, double value, bool isFinal)
-    {
-        var kept = Math.Min(window.Count, _zLength - 1);
-        double average = 0;
-        if (kept + 1 >= _zLength)
-        {
-            double sum = 0;
-            for (var i = window.Count - kept; i < window.Count; i++)
-            {
-                sum += window[i];
-            }
-
-            average = (sum + value) / _zLength;
-        }
-
-        if (isFinal)
-        {
-            window.TryAdd(value, out _);
-        }
-
-        return average;
-    }
 }
 
 public sealed class MarketDirectionIndicatorState : IStreamingIndicatorState

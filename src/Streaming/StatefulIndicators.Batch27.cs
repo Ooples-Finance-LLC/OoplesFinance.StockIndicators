@@ -1706,56 +1706,31 @@ public sealed class WoodiePivotPointsState : IStreamingIndicatorState
 
 public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposable
 {
-    private readonly MovingAvgType _maType;
-    private readonly int _length;
     private readonly IMovingAverageSmoother? _meanMa;
-    private readonly StandardDeviationVolatilityState? _stdDev;
+    private readonly RollingVolumeWeightedMean _vwapMean;
+    private readonly RollingZScore _zScore;
     private readonly StreamingInputResolver _input;
-    private readonly StreamingInputResolver _vwapInput;
-    private double _inputValue;
-    private double _cumVolume;
-    private double _cumVolumePrice;
 
     public ZDistanceFromVwapState(MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice, int length = 20,
         InputName inputName = InputName.Close)
+        : this(maType, length, new StreamingInputResolver(inputName, null))
     {
-        _maType = maType;
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-
-        if (_maType == MovingAvgType.VolumeWeightedAveragePrice)
-        {
-            _vwapInput = new StreamingInputResolver(InputName.TypicalPrice, null);
-        }
-        else
-        {
-            _vwapInput = default;
-            _meanMa = MovingAverageSmootherFactory.Create(_maType, _length);
-            _stdDev = new StandardDeviationVolatilityState(_maType, _length, _ => _inputValue);
-        }
     }
 
     public ZDistanceFromVwapState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
+        : this(maType, length, new StreamingInputResolver(InputName.Close,
+            selector ?? throw new ArgumentNullException(nameof(selector))))
     {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
+    }
 
-        _maType = maType;
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-
-        if (_maType == MovingAvgType.VolumeWeightedAveragePrice)
-        {
-            _vwapInput = new StreamingInputResolver(InputName.TypicalPrice, null);
-        }
-        else
-        {
-            _vwapInput = default;
-            _meanMa = MovingAverageSmootherFactory.Create(_maType, _length);
-            _stdDev = new StandardDeviationVolatilityState(_maType, _length, _ => _inputValue);
-        }
+    private ZDistanceFromVwapState(MovingAvgType maType, int length, StreamingInputResolver input)
+    {
+        var resolved = Math.Max(1, length);
+        // LazyBear's calc_zvwap: a rolling volume-weighted mean for the VWAP type, the chosen average otherwise.
+        _meanMa = maType == MovingAvgType.VolumeWeightedAveragePrice ? null : MovingAverageSmootherFactory.Create(maType, resolved);
+        _vwapMean = new RollingVolumeWeightedMean(resolved);
+        _zScore = new RollingZScore(resolved);
+        _input = input;
     }
 
     public IndicatorName Name => IndicatorName.ZDistanceFromVwap;
@@ -1763,41 +1738,15 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     public void Reset()
     {
         _meanMa?.Reset();
-        _stdDev?.Reset();
-        _inputValue = 0;
-        _cumVolume = 0;
-        _cumVolumePrice = 0;
+        _vwapMean.Reset();
+        _zScore.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        _inputValue = value;
-
-        double mean;
-        double stdDev;
-        if (_maType == MovingAvgType.VolumeWeightedAveragePrice)
-        {
-            var vwapValue = _vwapInput.GetValue(bar);
-            var volume = bar.Volume;
-            var volumeSum = _cumVolume + volume;
-            var volumePriceSum = _cumVolumePrice + (vwapValue * volume);
-            mean = volumeSum != 0 ? volumePriceSum / volumeSum : 0;
-            stdDev = mean >= 0 ? MathHelper.Sqrt(mean) : 0;
-
-            if (isFinal)
-            {
-                _cumVolume = volumeSum;
-                _cumVolumePrice = volumePriceSum;
-            }
-        }
-        else
-        {
-            mean = _meanMa!.Next(value, isFinal);
-            stdDev = _stdDev!.Update(bar, isFinal, includeOutputs: false).Value;
-        }
-
-        var zscore = stdDev != 0 ? (value - mean) / stdDev : 0;
+        var mean = _meanMa is null ? _vwapMean.Next(value, bar.Volume, isFinal) : _meanMa.Next(value, isFinal);
+        var zscore = _zScore.Next(value, mean, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1814,7 +1763,8 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     public void Dispose()
     {
         _meanMa?.Dispose();
-        _stdDev?.Dispose();
+        _vwapMean.Dispose();
+        _zScore.Dispose();
     }
 }
 
