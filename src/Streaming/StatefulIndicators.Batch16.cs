@@ -1503,11 +1503,9 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
     private readonly RollingWindowCorrelation _correlation;
     private readonly IMovingAverageSmoother _yMa;
     private readonly IMovingAverageSmoother _xMa;
-    private readonly StandardDeviationVolatilityState _yStdDev;
-    private readonly StandardDeviationVolatilityState _xStdDev;
+    private readonly RollingStandardDeviation _yStdDev;
+    private readonly RollingStandardDeviation _xStdDev;
     private readonly StreamingInputResolver _input;
-    private double _indexValue;
-    private double _yMaValue;
     private int _index;
 
     public LinearRegressionLineState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
@@ -1517,10 +1515,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        // Batch contamination: GetMovingAverageList sets CustomValuesList = yMaList, then
-        // CalculateStandardDeviationVolatility uses yMaList (not original close prices)
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
-        _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _yStdDev = new RollingStandardDeviation(_length);
+        _xStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -1535,9 +1531,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        // Batch contamination: stdDev uses yMa values, not original input values
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
-        _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _yStdDev = new RollingStandardDeviation(_length);
+        _xStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1550,8 +1545,6 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _xMa.Reset();
         _yStdDev.Reset();
         _xStdDev.Reset();
-        _indexValue = 0;
-        _yMaValue = 0;
         _index = 0;
     }
 
@@ -1559,7 +1552,6 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
     {
         var value = _input.GetValue(bar);
         var x = (double)_index;
-        _indexValue = x;
 
         var corr = isFinal
             ? _correlation.Add(value, x, out _)
@@ -1567,10 +1559,10 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
         var yMa = _yMa.Next(value, isFinal);
         var xMa = _xMa.Next(x, isFinal);
-        // Must set _yMaValue before _yStdDev.Update() since stdDev uses selector that returns _yMaValue
-        _yMaValue = yMa;
-        var my = _yStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var mx = _xStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index
+        // themselves - so the line is the least-squares fit of the window, evaluated at this bar.
+        var my = _yStdDev.Next(value, isFinal);
+        var mx = _xStdDev.Next(x, isFinal);
         var slope = mx != 0 ? corr * (my / mx) : 0;
         var inter = yMa - (slope * xMa);
         var reg = (x * slope) + inter;

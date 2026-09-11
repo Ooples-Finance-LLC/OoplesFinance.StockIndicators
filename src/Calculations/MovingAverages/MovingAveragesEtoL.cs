@@ -580,7 +580,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var myList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index themselves.
+        var myList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -597,8 +598,7 @@ public static partial class Calculations
         }
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
-        stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList; ;
+        var mxList = GetStandardDeviationList(xList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = myList[i];

@@ -298,11 +298,16 @@ public static partial class Calculations
         List<double> atrDevList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var callerSeries = new List<double>(stockData.CustomValuesList);
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
         var upperBandList = bollingerBands.OutputValues["UpperBand"];
         var lowerBandList = bollingerBands.OutputValues["LowerBand"];
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
+        // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
+        // caller's series, which is what its true range is a range of.
+        stockData.SetInputSeries(new List<double>(callerSeries));
+        stockData.SignalsList = new List<Signal>();
         var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
 
         double prevAtrDev = 0;
