@@ -137,8 +137,7 @@ public static class StreamingPerformanceRunner
         var subscriptionOptions = new IndicatorSubscriptionOptions
         {
             IncludeUpdates = true,
-            IncludeOutputValues = includeOutputs,
-            InputName = InputName.Close
+            IncludeOutputValues = includeOutputs
         };
 
         var updateCount = 0L;

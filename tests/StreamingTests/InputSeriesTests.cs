@@ -18,17 +18,17 @@ public sealed class InputSeriesTests : GlobalTestData
     /// <summary>The migration table: each preset and the input name it replaces.</summary>
     public static IEnumerable<object[]> Presets()
     {
-        yield return new object[] { InputName.Close, nameof(InputSeries.Close) };
-        yield return new object[] { InputName.AdjustedClose, nameof(InputSeries.AdjustedClose) };
-        yield return new object[] { InputName.Open, nameof(InputSeries.Open) };
-        yield return new object[] { InputName.High, nameof(InputSeries.High) };
-        yield return new object[] { InputName.Low, nameof(InputSeries.Low) };
-        yield return new object[] { InputName.Volume, nameof(InputSeries.Volume) };
-        yield return new object[] { InputName.MedianPrice, nameof(InputSeries.MedianPrice) };
-        yield return new object[] { InputName.TypicalPrice, nameof(InputSeries.TypicalPrice) };
-        yield return new object[] { InputName.FullTypicalPrice, nameof(InputSeries.FullTypicalPrice) };
-        yield return new object[] { InputName.WeightedClose, nameof(InputSeries.WeightedClose) };
-        yield return new object[] { InputName.AveragePrice, nameof(InputSeries.AveragePrice) };
+        yield return new object[] { nameof(InputName.Close), nameof(InputSeries.Close) };
+        yield return new object[] { nameof(InputName.AdjustedClose), nameof(InputSeries.AdjustedClose) };
+        yield return new object[] { nameof(InputName.Open), nameof(InputSeries.Open) };
+        yield return new object[] { nameof(InputName.High), nameof(InputSeries.High) };
+        yield return new object[] { nameof(InputName.Low), nameof(InputSeries.Low) };
+        yield return new object[] { nameof(InputName.Volume), nameof(InputSeries.Volume) };
+        yield return new object[] { nameof(InputName.MedianPrice), nameof(InputSeries.MedianPrice) };
+        yield return new object[] { nameof(InputName.TypicalPrice), nameof(InputSeries.TypicalPrice) };
+        yield return new object[] { nameof(InputName.FullTypicalPrice), nameof(InputSeries.FullTypicalPrice) };
+        yield return new object[] { nameof(InputName.WeightedClose), nameof(InputSeries.WeightedClose) };
+        yield return new object[] { nameof(InputName.AveragePrice), nameof(InputSeries.AveragePrice) };
     }
 
     /// <summary>
@@ -37,8 +37,11 @@ public sealed class InputSeriesTests : GlobalTestData
     /// </summary>
     [Theory]
     [MemberData(nameof(Presets))]
-    public void EachPresetIsExactlyTheInputNameItReplaces(InputName name, string preset)
+    public void EachPresetIsExactlyTheInputNameItReplaces(string inputName, string preset)
     {
+        // The row carries the name as a string: InputName is internal now, and a public test method
+        // cannot expose an internal type in its signature.
+        var name = Enum.Parse<InputName>(inputName);
         var series = (IInputSeries)typeof(InputSeries).GetProperty(preset)!.GetValue(null)!;
 
         foreach (var ticker in Tickers())

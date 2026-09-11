@@ -189,6 +189,43 @@ A custom series changes more than the close: when its value lies outside the bar
 indicator's high and low come from the series itself (the max and min of its previous and current
 value). Batch applies the same rule to a chained series, so the two engines give the same numbers.
 
+### InputName is removed
+
+Callers pass values, not a name for them. `InputName` is gone from every indicator constructor, every
+`Calculate*` method, `StockData`, and the streaming options. An indicator built with no input named reads
+exactly what it read by default before; to compute it on something else, pass the series.
+
+```csharp
+// Streaming - default input: just drop the argument
+var cci = new CommodityChannelIndexState(InputName.TypicalPrice, MovingAvgType.SimpleMovingAverage, 20); // before
+var cci = new CommodityChannelIndexState(MovingAvgType.SimpleMovingAverage, 20);                         // after
+
+// Streaming - a different input: wrap the state
+var cci = new CustomInputState(new CommodityChannelIndexState(), InputSeries.MedianPrice);
+
+// Batch - default input: just drop the argument
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice); // before
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage);                         // after
+
+// Batch - a different input: chain it
+var ao = data.UseInput(InputSeries.TypicalPrice).CalculateAwesomeOscillator();
+```
+
+| Removed | Replacement |
+|---|---|
+| `InputName` parameter on a streaming state | drop it for the default; `new CustomInputState(state, InputSeries.X)` otherwise |
+| `inputName` parameter on a `Calculate*` method | drop it for the default; `data.UseInput(InputSeries.X).CalculateY()` otherwise |
+| `new StockData(tickers, InputName.X)` and `StockData.InputName` | `new StockData(tickers).UseInput(InputSeries.X)` |
+| `StreamingOptions.InputName`, `IndicatorSubscriptionOptions.InputName` | a `CustomInputState` per indicator |
+| `VolumeFlowIndicatorSpecOptions(inputName, ...)` | nothing - it was never read |
+| the `InputName` enum, `StreamingInputSelector`, `GetInputValuesList(InputName, StockData)` | now internal; name a series with `InputSeries` |
+
+**This can change results, in the direction of correctness.** `StockData`'s input name was stored and then
+ignored by about 650 indicators: `new StockData(tickers, InputName.MedianPrice).CalculateRsi()` computed an
+RSI of the close (#182). `new StockData(tickers).UseInput(InputSeries.MedianPrice).CalculateRsi()` really
+computes it on the median price. The same holds for the two streaming options, which fed that same ignored
+value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation ever read.
+
 ### Removed
 
 - None - all v1.x methods are still available (will be deprecated in v3.0)

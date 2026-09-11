@@ -1643,7 +1643,7 @@ public static class CalculationsHelper
     /// <param name="inputName">Name of the input.</param>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
-    public static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> closeList,
+    internal static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> closeList,
         List<double> volumeList) GetInputValuesList(InputName inputName, StockData stockData)
     {
         List<double> highList;
@@ -1653,8 +1653,8 @@ public static class CalculationsHelper
         List<double> volumeList;
 
         // A chained series wins, exactly as it does for the single-argument overload. This overload
-        // used to go straight to the named price field, so the 17 indicators that take their own
-        // inputName - AlligatorIndex, AwesomeOscillator, CommodityChannelIndex, MoneyFlowIndex,
+        // used to go straight to the named price field, so the 28 indicators whose default input is a
+        // named price - AlligatorIndex, AwesomeOscillator, CommodityChannelIndex, MoneyFlowIndex,
         // VolumeWeightedAveragePrice and the rest - silently ignored anything chained in front of
         // them, as did every indicator built on one of them (GatorOscillator on AlligatorIndex,
         // AcceleratorOscillator on AwesomeOscillator). Callers pass values; the name only decides what

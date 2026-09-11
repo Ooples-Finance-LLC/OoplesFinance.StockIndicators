@@ -595,7 +595,6 @@ public sealed class StockIndicatorBuilder
             ProcessingMode = source.ProcessingMode,
             BackpressurePolicy = source.BackpressurePolicy,
             MaxPendingMessages = source.MaxPendingMessages,
-            InputName = source.InputName,
             IncludeOutputValues = source.IncludeOutputValues,
             IndicatorOptions = source.IndicatorOptions,
             Indicators = source.Indicators
