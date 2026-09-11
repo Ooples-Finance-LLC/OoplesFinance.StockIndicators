@@ -142,7 +142,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var mavList = GetMovingAverageList(stockData, maType, length, volumeList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -329,7 +329,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(interList);
-        var vinterList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        var vinterList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var vinter = vinterList[i];

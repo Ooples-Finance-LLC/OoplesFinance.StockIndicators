@@ -1557,7 +1557,7 @@ public static partial class Calculations
         var options = stockData.Options;
         if (options == null || options.IncludeCustomValues != false)
         {
-            return calculator(stockData).CustomValuesList;
+            return calculator(stockData).ChainedValues;
         }
 
         var prevIncludeCustom = options.IncludeCustomValues;
@@ -1572,7 +1572,7 @@ public static partial class Calculations
         try
         {
             var result = calculator(stockData);
-            list = new List<double>(result.CustomValuesList);
+            list = new List<double>(result.ChainedValues);
         }
         finally
         {
@@ -1582,7 +1582,8 @@ public static partial class Calculations
 
             if (prevIncludeCustom == false)
             {
-                stockData.CustomValuesList = new List<double>();
+                // Hidden from the caller, as the option asks, but still the next calculation's input.
+                stockData.HideCustomValues();
             }
 
             if (prevIncludeOutput == false)
@@ -1633,7 +1634,8 @@ public static partial class Calculations
 
             if (prevIncludeCustom == false)
             {
-                stockData.CustomValuesList = new List<double>();
+                // Hidden from the caller, as the option asks, but still the next calculation's input.
+                stockData.HideCustomValues();
             }
 
             if (prevIncludeOutput == false)

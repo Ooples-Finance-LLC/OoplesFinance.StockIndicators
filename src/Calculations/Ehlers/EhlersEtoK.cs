@@ -335,9 +335,9 @@ public static partial class Calculations
         List<double> quotientList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var hpList = CalculateEhlersHighPassFilterV1(stockData, length2, 1).CustomValuesList;
+        var hpList = CalculateEhlersHighPassFilterV1(stockData, length2, 1).ChainedValues;
         stockData.SetCustomValues(hpList);
-        var superSmoothList = CalculateEhlersSuperSmootherFilter(stockData, length1).CustomValuesList;
+        var superSmoothList = CalculateEhlersSuperSmootherFilter(stockData, length1).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -658,7 +658,7 @@ public static partial class Calculations
         List<double> qPeakList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -725,7 +725,7 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1337,7 +1337,7 @@ public static partial class Calculations
         List<double> inverseFisherTransformList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

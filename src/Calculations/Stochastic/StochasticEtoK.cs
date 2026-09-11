@@ -111,12 +111,12 @@ public static partial class Calculations
         List<double> fsstList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var fskList = CalculateFastandSlowKurtosisOscillator(stockData, maType, length1).CustomValuesList;
+        var fskList = CalculateFastandSlowKurtosisOscillator(stockData, maType, length1).ChainedValues;
         var v4List = GetMovingAverageList(stockData, maType, length2, fskList);
         // Reset CustomValuesList and SignalsList so stochastic uses original close prices, not v4List
         // Use SetCustomValues to create a new empty list (don't clear, which would affect v4List reference)
         stockData.RestoreInputSeries(callerSeries);
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length3).CustomValuesList;
+        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length3).ChainedValues;
         var slowKList = GetMovingAverageList(stockData, maType, length3, fastKList);
 
         for (var i = 0; i < stockData.Count; i++)

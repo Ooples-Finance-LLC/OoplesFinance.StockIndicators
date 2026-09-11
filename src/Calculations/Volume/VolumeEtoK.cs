@@ -344,10 +344,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        var medianPriceList = CalculateMedianPrice(stockData).CustomValuesList;
+        var medianPriceList = CalculateMedianPrice(stockData).ChainedValues;
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var typicalPriceList = CalculateTypicalPrice(stockData).CustomValuesList;
+        var typicalPriceList = CalculateTypicalPrice(stockData).ChainedValues;
         var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -412,7 +412,7 @@ public static partial class Calculations
         RollingSum vBymSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var relVolList = CalculateRelativeVolumeIndicator(stockData, maType, length).CustomValuesList;
+        var relVolList = CalculateRelativeVolumeIndicator(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -443,7 +443,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(vBymList);
-        var sdfList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var sdfList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

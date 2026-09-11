@@ -240,8 +240,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var wmaList = CalculateWeightedMovingAverage(stockData, length).CustomValuesList;
-        var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -425,8 +425,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var wmaList = CalculateWeightedMovingAverage(stockData, length).CustomValuesList;
-        var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -480,9 +480,9 @@ public static partial class Calculations
 
         var sma1List = GetMovingAverageList(stockData, maType, length, inputList);
         var sma2List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1257,7 +1257,7 @@ public static partial class Calculations
         RollingSum diffSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevSrcList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevSrcList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var smaSrcList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1267,7 +1267,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1658,7 +1658,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(absOsList);
-        var pList = CalculateLinearRegression(stockData, smoothLength).CustomValuesList;
+        var pList = CalculateLinearRegression(stockData, smoothLength).ChainedValues;
         var (highestList, _) = GetMaxAndMinValuesList(pList, length);
         for (var i = 0; i < stockData.Count; i++)
         {

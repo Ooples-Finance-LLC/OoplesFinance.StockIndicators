@@ -114,7 +114,7 @@ public static partial class Calculations
     public static StockData CalculateAcceleratorOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 5, int slowLength = 34, int smoothLength = 5)
     {
-        var awesomeOscList = CalculateAwesomeOscillator(stockData, maType, fastLength, slowLength).CustomValuesList;
+        var awesomeOscList = CalculateAwesomeOscillator(stockData, maType, fastLength, slowLength).ChainedValues;
         var count = awesomeOscList.Count;
         var acList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
@@ -292,7 +292,7 @@ public static partial class Calculations
         List<double> chaikinOscillatorList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var adlList = CalculateAccumulationDistributionLine(stockData, maType, fastLength).CustomValuesList;
+        var adlList = CalculateAccumulationDistributionLine(stockData, maType, fastLength).ChainedValues;
         var adl3EmaList = GetMovingAverageList(stockData, maType, fastLength, adlList);
         var adl10EmaList = GetMovingAverageList(stockData, maType, slowLength, adlList);
 

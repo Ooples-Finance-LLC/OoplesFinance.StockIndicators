@@ -224,7 +224,7 @@ public static partial class Calculations
 
         var zlhaTemaList = GetMovingAverageList(stockData, maType, smoothLength, zlhaList);
         stockData.SetCustomValues(zlhaTemaList);
-        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
+        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -237,7 +237,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(percbList);
-        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = percbList[i];

@@ -158,7 +158,7 @@ public static partial class Calculations
         var mep = (double)2 / (smoothLength + 1);
         double ce = (stochLength + smoothLength) * 2;
 
-        var stochList = CalculateStochasticOscillator(stockData, maType, length: stochLength).CustomValuesList;
+        var stochList = CalculateStochasticOscillator(stockData, maType, length: stochLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -609,7 +609,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         var fList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1107,8 +1107,8 @@ public static partial class Calculations
         List<double> rocTotalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roc11List = CalculateRateOfChange(stockData, fastLength).CustomValuesList;
-        var roc14List = CalculateRateOfChange(stockData, slowLength).CustomValuesList;
+        var roc11List = CalculateRateOfChange(stockData, fastLength).ChainedValues;
+        var roc14List = CalculateRateOfChange(stockData, slowLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1160,8 +1160,8 @@ public static partial class Calculations
         List<double> bearSlopeList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).CustomValuesList;
-        var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).CustomValuesList;
+        var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).ChainedValues;
+        var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).ChainedValues;
         var rsiSmaList = GetMovingAverageList(stockData, maType, smoothLength, rsi2List);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1228,11 +1228,11 @@ public static partial class Calculations
 
         var k = 100 * (pointValue / Sqrt(margin) / (150 + commission));
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         // Clear state to prevent pollution of CalculateAverageDirectionalIndex inputs
         stockData.RestoreInputSeries(callerSeries);
         stockData.SetSignals(null);
-        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).CustomValuesList;
+        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1443,7 +1443,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var s1SumWindow = new RollingSum();
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
         var rsiEma1List = GetMovingAverageList(stockData, maType, length3, rsiList);
         var rsiEma2List = GetMovingAverageList(stockData, maType, length4, rsiEma1List);
 

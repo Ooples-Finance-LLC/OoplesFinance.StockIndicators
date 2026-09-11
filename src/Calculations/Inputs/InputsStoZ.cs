@@ -14,7 +14,7 @@ public static partial class Calculations
         // Chained: the same per-bar high and low every other indicator reads for a custom series
         // (GetCustomRangeLists). Unchained: the cached derived series, exactly as before.
         List<double> tpList;
-        if (stockData.CustomValuesList is { Count: > 0 })
+        if (stockData.ChainedValues is { Count: > 0 })
         {
             var (seriesList, seriesHighList, seriesLowList, seriesOpenList, _) = GetInputValuesList(stockData);
             tpList = new List<double>(seriesList.Count);
@@ -62,7 +62,7 @@ public static partial class Calculations
         // Chained: the same per-bar high and low every other indicator reads for a custom series
         // (GetCustomRangeLists). Unchained: the cached derived series, exactly as before.
         List<double> weightedCloseList;
-        if (stockData.CustomValuesList is { Count: > 0 })
+        if (stockData.ChainedValues is { Count: > 0 })
         {
             var (seriesList, seriesHighList, seriesLowList, seriesOpenList, _) = GetInputValuesList(stockData);
             weightedCloseList = new List<double>(seriesList.Count);

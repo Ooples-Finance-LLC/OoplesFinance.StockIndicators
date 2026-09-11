@@ -237,7 +237,7 @@ public static partial class Calculations
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length1).CustomValuesList;
+        var obvList = CalculateOnBalanceVolume(stockData, maType, length1).ChainedValues;
         var obvmList = GetMovingAverageList(stockData, maType, length1, obvList);
         var sigList = GetMovingAverageList(stockData, maType, length2, obvmList);
 
@@ -335,14 +335,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length).CustomValuesList;
+        var obvList = CalculateOnBalanceVolume(stockData, maType, length).ChainedValues;
         var obvSmaList = GetMovingAverageList(stockData, maType, length, obvList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(obvList);
-        var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -411,14 +411,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).CustomValuesList;
+        var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).ChainedValues;
         var nviSmaList = GetMovingAverageList(stockData, maType, length, nviList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(nviList);
-        var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -485,7 +485,7 @@ public static partial class Calculations
 
         var smaVolumeList = GetMovingAverageList(stockData, maType, length, volumeList);
         stockData.SetCustomValues(volumeList);
-        var stdDevVolumeList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevVolumeList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -14,6 +14,7 @@ namespace OoplesFinance.StockIndicators.Models;
 public class StockData : IStockData
 {
     private List<double>? _inputValues;
+    private List<double> _customValues = new List<double>();
     private List<double>? _openPrices;
     private List<double>? _highPrices;
     private List<double>? _lowPrices;
@@ -138,7 +139,37 @@ public class StockData : IStockData
         }
     }
 
-    public List<double> CustomValuesList { get; set; }
+    public List<double> CustomValuesList
+    {
+        get => _customValues;
+        set
+        {
+            _customValues = value ?? new List<double>();
+            ChainedValues = _customValues;
+        }
+    }
+
+    /// <summary>
+    /// The series the next calculation on this data reads: the last one published, or the caller's input.
+    /// </summary>
+    /// <remarks>
+    /// The same list as <see cref="CustomValuesList"/> unless IncludeCustomValues is off. That option hides a
+    /// result from the caller; it must not hide it from the composite that asked a component for it, or from
+    /// the next indicator in a chain. Hiding the one list both read made 176 indicators throw and three
+    /// compute on the close instead of their own components.
+    /// </remarks>
+    internal List<double> ChainedValues { get; private set; } = new List<double>();
+
+    /// <summary>Stops publishing the current series without taking it from the next calculation.</summary>
+    internal void HideCustomValues() => _customValues = new List<double>();
+
+    /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
+    internal void RestoreSeries(List<double> published, List<double> chained)
+    {
+        _customValues = published;
+        ChainedValues = chained;
+    }
+
     public Dictionary<string, List<double>> OutputValues { get; set; }
     public List<Signal> SignalsList { get; set; }
     public IndicatorOptions? Options { get; set; }

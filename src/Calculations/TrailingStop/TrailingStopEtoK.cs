@@ -24,7 +24,7 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).ChainedValues;
         var highMaList = GetMovingAverageList(stockData, maType, length, highList);
         var lowMaList = GetMovingAverageList(stockData, maType, length, lowList);
 
@@ -160,7 +160,7 @@ public static partial class Calculations
         var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
         var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         stockData.SetCustomValues(dtrList);
-        var dtrStdList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var dtrStdList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var maFast = smaFastList[i];
@@ -258,7 +258,7 @@ public static partial class Calculations
 
         var rangeAvgList = GetMovingAverageList(stockData, maType, length, rrangeList);
         stockData.SetCustomValues(rrangeList);
-        var rangeStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var rangeStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var price = priceList[i];

@@ -36,13 +36,13 @@ public static partial class Calculations
         var decSumList = moVar.OutputValues["DecSum"];
         var moList = moVar.OutputValues["Mo"];
         stockData.RestoreInputSeries(callerSeries);
-        var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).CustomValuesList;
+        var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi1List = CalculateMoneyFlowIndex(stockData, length2).CustomValuesList;
+        var mfi1List = CalculateMoneyFlowIndex(stockData, length2).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi2List = CalculateMoneyFlowIndex(stockData, length3).CustomValuesList;
+        var mfi2List = CalculateMoneyFlowIndex(stockData, length3).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi3List = CalculateMoneyFlowIndex(stockData, length4).CustomValuesList;
+        var mfi3List = CalculateMoneyFlowIndex(stockData, length4).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -60,7 +60,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(utmList);
-        var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).CustomValuesList;
+        var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).ChainedValues;
         var utmiList = GetMovingAverageList(stockData, maType, length1, utmRsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -116,7 +116,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(cumoSumList);
-        var rocList = CalculateRateOfChange(stockData, smoothLength).CustomValuesList;
+        var rocList = CalculateRateOfChange(stockData, smoothLength).ChainedValues;
         var tlmoList = GetMovingAverageList(stockData, maType, smoothLength, rocList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -170,7 +170,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(diffList);
-        var linregList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var predictedToday = linregList[i];

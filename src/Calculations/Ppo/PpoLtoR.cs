@@ -80,7 +80,7 @@ public static partial class Calculations
         // replaces it - the same precedence every indicator follows, and what the streaming state's
         // selector already does. It used to read raw volumes whatever was chained in front of it.
         var (inputList, _, _, _, volumes) = GetInputValuesList(stockData);
-        var volumeList = stockData.CustomValuesList is { Count: > 0 } ? inputList : volumes;
+        var volumeList = stockData.ChainedValues is { Count: > 0 } ? inputList : volumes;
 
         var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, volumeList);
         var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, volumeList);

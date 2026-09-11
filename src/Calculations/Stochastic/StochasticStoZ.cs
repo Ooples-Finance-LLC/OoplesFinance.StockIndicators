@@ -74,12 +74,12 @@ public static partial class Calculations
 
         var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
 
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).CustomValuesList;
+        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).ChainedValues;
         var fastDList = GetMovingAverageList(stockData, maType, length1, fastKList);
         stockData.SetCustomValues(fastKList);
-        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).CustomValuesList;
+        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
         stockData.SetCustomValues(fastDList);
-        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).CustomValuesList;
+        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -123,13 +123,13 @@ public static partial class Calculations
 
         var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
 
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).CustomValuesList;
+        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length1).ChainedValues;
         var slowKList = GetMovingAverageList(stockData, maType, length1, fastKList);
         var slowDList = GetMovingAverageList(stockData, maType, length1, slowKList);
         stockData.SetCustomValues(slowKList);
-        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).CustomValuesList;
+        var tsfKList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
         stockData.SetCustomValues(slowDList);
-        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).CustomValuesList;
+        var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
 
         for (var i = 0; i < tssDList.Count; i++)
         {
@@ -352,7 +352,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var stoList = CalculateStochasticOscillator(stockData, maType, length1, length2, length2);
-        var fastKList = stoList.CustomValuesList;
+        var fastKList = stoList.ChainedValues;
         var skList = stoList.OutputValues["FastD"];
 
         for (var i = 0; i < stockData.Count; i++)
