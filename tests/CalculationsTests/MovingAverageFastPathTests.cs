@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.Helpers;
+using static OoplesFinance.StockIndicators.Tests.Unit.StreamingTests.IndicatorRunner;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.CalculationsTests;
 
@@ -45,14 +46,8 @@ public sealed class MovingAverageFastPathTests : GlobalTestData
         fast.Should().HaveCount(reference.Count);
         for (var i = 0; i < reference.Count; i++)
         {
-            if (double.IsNaN(fast[i]) && double.IsNaN(reference[i]))
-            {
-                continue;
-            }
-
-            var scale = Math.Max(1.0, Math.Max(Math.Abs(fast[i]), Math.Abs(reference[i])));
-            Math.Abs(fast[i] - reference[i]).Should().BeLessThanOrEqualTo(1e-9 * scale,
-                $"{type} at bar {i}: fast path {fast[i]}, indicator {reference[i]}");
+            // The rule the engine parity tests use: 1e-9 of the larger magnitude plus a 1e-12 floor.
+            IsClose(reference[i], fast[i]).Should().BeTrue($"{type} at bar {i}: fast path {fast[i]}, indicator {reference[i]}");
         }
     }
 }
