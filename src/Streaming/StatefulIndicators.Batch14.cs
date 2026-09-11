@@ -6,7 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
-public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _jawOffset;
     private readonly int _teethOffset;
@@ -17,7 +17,7 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
     private readonly PooledRingBuffer<double> _jawWindow;
     private readonly PooledRingBuffer<double> _teethWindow;
     private readonly PooledRingBuffer<double> _lipsWindow;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public GatorOscillatorState(InputName inputName = InputName.MedianPrice,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13,
@@ -56,6 +56,9 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.GatorOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1361,10 +1364,10 @@ public sealed class HampelFilterState : IStreamingIndicatorState, IDisposable
     }
 }
 
-public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState
+public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState, ICustomInputConsumer
 {
     private readonly double _divisor;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevHigh;
     private double _prevLow;
     private double _prevMidpoint;
@@ -1389,6 +1392,9 @@ public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.HawkeyeVolumeIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1538,10 +1544,10 @@ public sealed class HendersonWeightedMovingAverageState : IStreamingIndicatorSta
     }
 }
 
-public sealed class HerrickPayoffIndexState : IStreamingIndicatorState
+public sealed class HerrickPayoffIndexState : IStreamingIndicatorState, ICustomInputConsumer
 {
     private readonly double _pointValue;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevValue;
     private double _prevOpen;
     private double _prevClose;
@@ -1566,6 +1572,9 @@ public sealed class HerrickPayoffIndexState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.HerrickPayoffIndex;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -2420,7 +2429,7 @@ public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
     }
 }
 
-public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
+public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _signalLength;
     private readonly EmaState _ema1;
@@ -2428,7 +2437,7 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
     private readonly RollingWindowSum _signalSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public ImpulseMovingAverageConvergenceDivergenceState(InputName inputName = InputName.TypicalPrice,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
@@ -2462,6 +2471,9 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
     }
 
     public IndicatorName Name => IndicatorName.ImpulseMovingAverageConvergenceDivergence;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

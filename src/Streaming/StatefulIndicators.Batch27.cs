@@ -5,7 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
-public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length1;
     private readonly int _length2;
@@ -16,7 +16,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     private readonly IMovingAverageSmoother _volumeMa;
     private readonly IMovingAverageSmoother _vfiMa;
     private readonly IMovingAverageSmoother _signalMa;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _inter;
     private double _prevValue;
     private double _prevVave;
@@ -59,6 +59,9 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     }
 
     public IndicatorName Name => IndicatorName.VolumeFlowIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -124,7 +127,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     }
 }
 
-public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
     private readonly IMovingAverageSmoother _volumeMa;
@@ -132,7 +135,7 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
     private readonly IMovingAverageSmoother _vpnSmooth;
     private readonly RollingWindowSum _vmpSum;
     private readonly RollingWindowSum _vmnSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevValue;
     private double _prevClose;
     private bool _hasPrev;
@@ -167,6 +170,9 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
     }
 
     public IndicatorName Name => IndicatorName.VolumePositiveNegativeIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -355,9 +361,9 @@ public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorS
     }
 }
 
-public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState
+public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _cumVolume;
     private double _cumVolumePrice;
 
@@ -377,6 +383,9 @@ public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.VolumeWeightedAveragePrice;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -922,13 +931,13 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
-public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _esaMa;
     private readonly IMovingAverageSmoother _dMa;
     private readonly IMovingAverageSmoother _tciMa;
     private readonly IMovingAverageSmoother _wt2Ma;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public WaveTrendOscillatorState(InputName inputName = InputName.FullTypicalPrice,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21,
@@ -957,6 +966,9 @@ public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDispos
     }
 
     public IndicatorName Name => IndicatorName.WaveTrendOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1704,12 +1716,12 @@ public sealed class WoodiePivotPointsState : IStreamingIndicatorState
     }
 }
 
-public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposable
+public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother? _meanMa;
     private readonly RollingVolumeWeightedMean _vwapMean;
     private readonly RollingZScore _zScore;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public ZDistanceFromVwapState(MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice, int length = 20,
         InputName inputName = InputName.Close)
@@ -1734,6 +1746,9 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     }
 
     public IndicatorName Name => IndicatorName.ZDistanceFromVwap;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

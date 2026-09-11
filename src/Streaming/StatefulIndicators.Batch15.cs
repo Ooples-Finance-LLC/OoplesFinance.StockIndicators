@@ -6,7 +6,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
-public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _signalLength;
     private readonly EmaState _ema1;
@@ -14,7 +14,7 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
     private readonly RollingWindowSum _signalSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public ImpulsePercentagePriceOscillatorState(InputName inputName = InputName.TypicalPrice,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
@@ -48,6 +48,9 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
     }
 
     public IndicatorName Name => IndicatorName.ImpulsePercentagePriceOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1428,7 +1431,7 @@ public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, I
     }
 }
 
-public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable
+public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
@@ -1436,7 +1439,7 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable
     private readonly StandardDeviationVolatilityState _dtrStd;
     private readonly PooledRingBuffer<double> _lowValues;
     private readonly PooledRingBuffer<double> _closeValues;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly double _stdDev1;
     private readonly double _stdDev2;
     private readonly double _stdDev3;
@@ -1488,6 +1491,9 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.KaseDevStopV1;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

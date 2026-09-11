@@ -69,7 +69,7 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     }
 }
 
-public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
     private readonly int _stl;
@@ -82,7 +82,7 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
     private readonly int _sLength;
     private readonly int _iLength;
     private readonly int _lLength;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly IMovingAverageSmoother _hAvg;
     private readonly IMovingAverageSmoother _sAvg;
     private readonly IMovingAverageSmoother _iAvg;
@@ -192,6 +192,9 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
     }
 
     public IndicatorName Name => IndicatorName.ConfluenceIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1238,11 +1241,11 @@ public sealed class DynamicPivotPointsState : IStreamingIndicatorState
     }
 }
 
-public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorState, IDisposable
+public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly PooledRingBuffer<double> _inputValues;
     private readonly PooledRingBuffer<double> _lowValues;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevClose;
     private bool _hasPrev;
 
@@ -1266,6 +1269,9 @@ public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorSta
     }
 
     public IndicatorName Name => IndicatorName.EarningSupportResistanceLevels;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

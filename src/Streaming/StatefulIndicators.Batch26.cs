@@ -178,7 +178,7 @@ public sealed class UpsidePotentialRatioState : IStreamingIndicatorState, IDispo
     }
 }
 
-public sealed class ValueChartIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class ValueChartIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
     private readonly int _varp;
@@ -188,7 +188,7 @@ public sealed class ValueChartIndicatorState : IStreamingIndicatorState, IDispos
     private readonly PooledRingBuffer<double> _highestValues;
     private readonly PooledRingBuffer<double> _lowestValues;
     private readonly PooledRingBuffer<double> _closeValues;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public ValueChartIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         InputName inputName = InputName.MedianPrice, int length = 5)
@@ -224,6 +224,9 @@ public sealed class ValueChartIndicatorState : IStreamingIndicatorState, IDispos
     }
 
     public IndicatorName Name => IndicatorName.ValueChartIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -960,13 +963,13 @@ public sealed class VerticalHorizontalMovingAverageState : IStreamingIndicatorSt
     }
 }
 
-public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _haMa1;
     private readonly IMovingAverageSmoother _haMa2;
     private readonly IMovingAverageSmoother _medianMa1;
     private readonly IMovingAverageSmoother _medianMa2;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevInput;
     private double _prevHao;
     private double _prevHac;
@@ -1010,6 +1013,9 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
     }
 
     public IndicatorName Name => IndicatorName.VervoortHeikenAshiCandlestickOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1112,13 +1118,13 @@ public sealed class VervoortHeikenAshiCandlestickOscillatorState : IStreamingInd
     }
 }
 
-public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _tacMa1;
     private readonly IMovingAverageSmoother _tacMa2;
     private readonly IMovingAverageSmoother _thlMa1;
     private readonly IMovingAverageSmoother _thlMa2;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly double _factor;
     private double _prevInput;
     private double _prevHao;
@@ -1165,6 +1171,9 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
     }
 
     public IndicatorName Name => IndicatorName.VervoortHeikenAshiLongTermCandlestickOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1264,7 +1273,7 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
     }
 }
 
-public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _hacMa1;
     private readonly IMovingAverageSmoother _hacMa2;
@@ -1272,7 +1281,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     private readonly IMovingAverageSmoother _wma;
     private readonly StandardDeviationVolatilityState _zlhaStdDev;
     private readonly StandardDeviationVolatilityState _percbStdDev;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly double _stdDevMult;
     private double _prevInput;
     private double _prevHao;
@@ -1313,6 +1322,9 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     }
 
     public IndicatorName Name => IndicatorName.VervoortModifiedBollingerBandIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -1385,7 +1397,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     }
 }
 
-public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _r1Sma;
@@ -1407,7 +1419,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly RollingWindowMin _lowWindow;
     private readonly RollingWindowMin _rbcMinWindow;
     private readonly RollingWindowSum _fastKSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _tzValue;
 
     public VervoortSmoothedOscillatorState(InputName inputName = InputName.TypicalPrice, int length1 = 18,
@@ -1476,6 +1488,9 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     }
 
     public IndicatorName Name => IndicatorName.VervoortSmoothedOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

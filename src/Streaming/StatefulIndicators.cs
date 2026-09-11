@@ -354,9 +354,9 @@ public sealed class HullMovingAverageState : IStreamingIndicatorState, IDisposab
 }
 
 
-public sealed class AveragePriceState : IStreamingIndicatorState
+public sealed class AveragePriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public AveragePriceState()
     {
@@ -374,6 +374,9 @@ public sealed class AveragePriceState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.AveragePrice;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -395,9 +398,9 @@ public sealed class AveragePriceState : IStreamingIndicatorState
     }
 }
 
-public sealed class FullTypicalPriceState : IStreamingIndicatorState
+public sealed class FullTypicalPriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public FullTypicalPriceState()
     {
@@ -415,6 +418,9 @@ public sealed class FullTypicalPriceState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.FullTypicalPrice;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -436,9 +442,9 @@ public sealed class FullTypicalPriceState : IStreamingIndicatorState
     }
 }
 
-public sealed class MedianPriceState : IStreamingIndicatorState
+public sealed class MedianPriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public MedianPriceState()
     {
@@ -456,6 +462,9 @@ public sealed class MedianPriceState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.MedianPrice;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -477,9 +486,9 @@ public sealed class MedianPriceState : IStreamingIndicatorState
     }
 }
 
-public sealed class TypicalPriceState : IStreamingIndicatorState
+public sealed class TypicalPriceState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public TypicalPriceState()
     {
@@ -497,6 +506,9 @@ public sealed class TypicalPriceState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.TypicalPrice;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -518,9 +530,9 @@ public sealed class TypicalPriceState : IStreamingIndicatorState
     }
 }
 
-public sealed class WeightedCloseState : IStreamingIndicatorState
+public sealed class WeightedCloseState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public WeightedCloseState()
     {
@@ -538,6 +550,9 @@ public sealed class WeightedCloseState : IStreamingIndicatorState
     }
 
     public IndicatorName Name => IndicatorName.WeightedClose;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -4707,11 +4722,11 @@ public sealed class WilliamsRState : IStreamingIndicatorState, IDisposable
     }
 }
 
-public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisposable
+public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _priceSmoother;
     private readonly IMovingAverageSmoother _meanDevSmoother;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly double _constant;
 
     public CommodityChannelIndexState(InputName inputName = InputName.TypicalPrice,
@@ -4738,6 +4753,9 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
     }
 
     public IndicatorName Name => IndicatorName.CommodityChannelIndex;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -5362,12 +5380,12 @@ public sealed class PercentagePriceOscillatorState : IStreamingIndicatorState, I
     }
 }
 
-public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _fast;
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public PercentageVolumeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9)
@@ -5393,6 +5411,9 @@ public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, 
     }
 
     public IndicatorName Name => IndicatorName.PercentageVolumeOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -6931,11 +6952,11 @@ public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposabl
     }
 }
 
-public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable
+public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly RollingWindowSum _posSum;
     private readonly RollingWindowSum _negSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevTypical;
     private bool _hasPrev;
 
@@ -6961,6 +6982,9 @@ public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.MoneyFlowIndex;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -7546,11 +7570,11 @@ public sealed class BelkhayateTimingState : IStreamingIndicatorState
     }
 }
 
-public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _inputSmoother;
     private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly double _lengthSqrt;
     private double _prevClose;
     private bool _hasPrev;
@@ -7581,6 +7605,9 @@ public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDi
     }
 
     public IndicatorName Name => IndicatorName.ChartmillValueIndicator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -8226,12 +8253,12 @@ public sealed class ContractHighLowState : IStreamingIndicatorState
     }
 }
 
-public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable
+public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly RollingWindowMax _highWindow;
     private readonly RollingWindowMin _lowWindow;
     private readonly IMovingAverageSmoother _ema;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevEma;
     private bool _hasPrevEma;
 
@@ -8260,6 +8287,9 @@ public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.ChopZone;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -9573,13 +9603,13 @@ public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
-public sealed class AwesomeOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class AwesomeOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _fastLength;
     private readonly int _slowLength;
     private readonly RollingWindowSum _fastSum;
     private readonly RollingWindowSum _slowSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public AwesomeOscillatorState(int fastLength = 5, int slowLength = 34, InputName inputName = InputName.MedianPrice)
     {
@@ -9605,6 +9635,9 @@ public sealed class AwesomeOscillatorState : IStreamingIndicatorState, IDisposab
     }
 
     public IndicatorName Name => IndicatorName.AwesomeOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -9642,7 +9675,7 @@ public sealed class AwesomeOscillatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
-public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _fastLength;
     private readonly int _slowLength;
@@ -9650,7 +9683,7 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
     private readonly RollingWindowSum _fastSum;
     private readonly RollingWindowSum _slowSum;
     private readonly RollingWindowSum _smoothSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public AcceleratorOscillatorState(int fastLength = 5, int slowLength = 34, int smoothLength = 5,
         InputName inputName = InputName.MedianPrice)
@@ -9682,6 +9715,9 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
     }
 
     public IndicatorName Name => IndicatorName.AcceleratorOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -11225,7 +11261,7 @@ public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, I
     }
 }
 
-public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable
+public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _jawOffset;
     private readonly int _teethOffset;
@@ -11236,7 +11272,7 @@ public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable
     private readonly PooledRingBuffer<double> _jawWindow;
     private readonly PooledRingBuffer<double> _teethWindow;
     private readonly PooledRingBuffer<double> _lipsWindow;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
 
     public AlligatorIndexState(InputName inputName = InputName.MedianPrice, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13,
         int jawOffset = 8, int teethLength = 8, int teethOffset = 5, int lipsLength = 5, int lipsOffset = 3)
@@ -11274,6 +11310,9 @@ public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable
     }
 
     public IndicatorName Name => IndicatorName.AlligatorIndex;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -13085,13 +13124,13 @@ public sealed class BollingerBandsWithAtrPctState : IStreamingIndicatorState, ID
     }
 }
 
-public sealed class BreakoutRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
+public sealed class BreakoutRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
     private readonly RollingWindowSum _volumeSum;
     private readonly RollingWindowSum _posPowerSum;
     private readonly RollingWindowSum _negPowerSum;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private double _prevBoPower;
 
     public BreakoutRelativeStrengthIndexState(InputName inputName = InputName.FullTypicalPrice, int length = 14,
@@ -13120,6 +13159,9 @@ public sealed class BreakoutRelativeStrengthIndexState : IStreamingIndicatorStat
     }
 
     public IndicatorName Name => IndicatorName.BreakoutRelativeStrengthIndex;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

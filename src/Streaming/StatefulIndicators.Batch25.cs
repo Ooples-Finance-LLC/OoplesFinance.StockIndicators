@@ -1780,7 +1780,7 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
     }
 }
 
-public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly McClellanOscillatorState _mo;
     private readonly BollingerBandsPercentBState _bbPct;
@@ -1823,6 +1823,15 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
     }
 
     public IndicatorName Name => IndicatorName.UltimateMomentumIndicator;
+
+    // No resolver of its own: the input was handed to these inner states, so they are the
+    // ones that must switch to reading the close.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_mfi1).ReadCloseAsInput();
+        ((ICustomInputConsumer)_mfi2).ReadCloseAsInput();
+        ((ICustomInputConsumer)_mfi3).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

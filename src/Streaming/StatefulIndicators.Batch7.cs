@@ -918,11 +918,11 @@ public sealed class EhlersAdaptiveStochasticIndicatorV1State : IStreamingIndicat
     }
 }
 
-public sealed class EhlersAdaptiveCommodityChannelIndexV1State : IStreamingIndicatorState, IDisposable
+public sealed class EhlersAdaptiveCommodityChannelIndexV1State : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly double _cycPart;
     private readonly double _constant;
-    private readonly StreamingInputResolver _input;
+    private StreamingInputResolver _input;
     private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
     private readonly PooledRingBuffer<double> _values;
     private double _prevAcciEma1;
@@ -953,6 +953,9 @@ public sealed class EhlersAdaptiveCommodityChannelIndexV1State : IStreamingIndic
     }
 
     public IndicatorName Name => IndicatorName.EhlersAdaptiveCommodityChannelIndexV1;
+
+    void ICustomInputConsumer.ReadCloseAsInput() =>
+        _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {

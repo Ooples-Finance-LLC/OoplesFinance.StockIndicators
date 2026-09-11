@@ -1357,7 +1357,7 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
     }
 }
 
-public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable
+public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _cciState;
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -1383,6 +1383,13 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
     }
 
     public IndicatorName Name => IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform;
+
+    // No resolver of its own: the input was handed to these inner states, so they are the
+    // ones that must switch to reading the close.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_cciState).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

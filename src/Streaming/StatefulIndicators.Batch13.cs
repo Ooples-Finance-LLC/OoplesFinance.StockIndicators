@@ -1782,7 +1782,7 @@ public sealed class FunctionToCandlesState : IStreamingIndicatorState, IDisposab
     }
 }
 
-public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _cciState;
     private readonly double _c1;
@@ -1835,6 +1835,13 @@ public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposab
     }
 
     public IndicatorName Name => IndicatorName.FXSniperIndicator;
+
+    // No resolver of its own: the input was handed to these inner states, so they are the
+    // ones that must switch to reading the close.
+    void ICustomInputConsumer.ReadCloseAsInput()
+    {
+        ((ICustomInputConsumer)_cciState).ReadCloseAsInput();
+    }
 
     public void Reset()
     {

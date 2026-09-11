@@ -20,14 +20,15 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
 /// <para>
 /// Both engines let a caller compute an indicator on something other than the close. In batch that
 /// is chaining - <c>data.CalculateMedianPrice().CalculateRsi()</c> - and a chained series always wins.
-/// In streaming it is the <c>Func&lt;OhlcvBar, double&gt;</c> constructor overload. Callers pass
-/// values, not a name for them, so nothing here goes through InputName.
+/// In streaming it is <see cref="CustomInputState"/>, which wraps any state with a
+/// <c>Func&lt;OhlcvBar, double&gt;</c>. Callers pass values, not a name for them, so nothing here goes
+/// through InputName.
 /// </para>
 /// <para>
-/// <b>Two rules.</b> First, every state must HAVE a selector constructor: one without it cannot take
-/// custom values at all, and it is a named failure here rather than a skip. Skipping it is how 87
-/// states went unexamined by the first version of this test, which only compared states that had
-/// both an InputName and a selector overload. Second, a state must respond to a custom series if,
+/// <b>Two rules.</b> First, every state must be reachable by custom input at all. The first version of
+/// this test only compared states that had both an InputName and a selector overload, and 82 states
+/// had no selector overload, so they went unexamined; a state that cannot be built for the wrapper is
+/// now a named failure rather than a skip. Second, a state must respond to a custom series if,
 /// and only if, its batch twin does. That rule is an equivalence rather than "must respond" because
 /// some indicators legitimately read specific bar fields - a median-price series lies inside the
 /// bar's range, so an Ichimoku line built on true highs and lows does not move - and an equivalence
@@ -76,6 +77,9 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         var stateType = typeof(IStreamingIndicatorState);
         var types = stateType.Assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && stateType.IsAssignableFrom(t))
+            // The wrapper under test, not an indicator: it has no defaults to build it with and no
+            // batch twin, and it is what every other type here is driven through.
+            .Where(t => t != typeof(CustomInputState))
             .OrderBy(t => t.Name, StringComparer.Ordinal)
             .ToList();
 
@@ -87,14 +91,12 @@ public sealed class StreamingCustomInputTests : GlobalTestData
 
         foreach (var type in types)
         {
-            var selector = FindSelectorConstructor(type);
-            if (selector is null)
+            var build = FindDefaultConstruction(type);
+            if (build is null)
             {
                 cannotTakeInput.Add(type.Name);
                 continue;
             }
-
-            if (selector.Value.Args is null) { unpaired++; continue; }
 
             var batch = FindBatchMethod(type.Name);
             if (batch is null) { unpaired++; continue; }
@@ -105,8 +107,8 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             {
                 var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, custom: null));
                 var batchOnCustom = Flatten((StockData)InvokeBatch(batch, bars, series));
-                var streamOnClose = Run(Build(selector.Value.Ctor, selector.Value.Args, (Func<OhlcvBar, double>)Close), bars);
-                var streamOnCustom = Run(Build(selector.Value.Ctor, selector.Value.Args, Selector(series)), bars);
+                var streamOnClose = Run(new CustomInputState(Build(build.Value), Close), bars);
+                var streamOnCustom = Run(new CustomInputState(Build(build.Value), Selector(series)), bars);
 
                 // An indicator whose window never fills over this fixture - the catalogue has
                 // defaults as long as 550 against 251 bars - emits nothing but zeros, and "no
@@ -143,8 +145,9 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         using var scope = new AssertionScope();
 
         cannotTakeInput.Should().BeEmpty(
-            $"every indicator must take custom values; {cannotTakeInput.Count} states have no " +
-            $"Func<OhlcvBar, double> constructor: {string.Join(", ", cannotTakeInput)}");
+            $"every indicator must take custom values through CustomInputState, which needs a way to " +
+            $"build the state with its defaults; {cannotTakeInput.Count} cannot be built: " +
+            $"{string.Join(", ", cannotTakeInput)}");
 
         disagreements.Should().BeEmpty(
             $"streaming and batch must agree about what the {series} input series controls. " +
@@ -196,56 +199,34 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         return batch.Invoke(null, args)!;
     }
 
-    private static IStreamingIndicatorState Build(ConstructorInfo ctor, object?[] args, object last) =>
-        (IStreamingIndicatorState)ctor.Invoke(args.Append<object?>(last).ToArray())!;
+    private static IStreamingIndicatorState Build((ConstructorInfo Ctor, object?[] Args) build) =>
+        (IStreamingIndicatorState)build.Ctor.Invoke(build.Args)!;
 
     /// <summary>Whether a run produced nothing to compare.</summary>
     private static bool Silent(Dictionary<string, List<double>> series) =>
         series.Values.All(s => s.All(v => v == 0 || double.IsNaN(v)));
 
     /// <summary>
-    /// The state's selector constructor, plus leading argument values to build it with.
+    /// How to build the state as a caller would with no arguments: a constructor whose parameters all
+    /// have defaults, preferring the one with the fewest parameters.
     /// </summary>
-    /// <returns>
-    /// Null when the state has no <c>Func&lt;OhlcvBar, double&gt;</c> constructor at all - it cannot
-    /// take custom values. <c>Args</c> is null when it has one but no overload declares defaults to
-    /// build it from, which is a harness limit rather than a verdict.
-    /// </returns>
+    /// <returns>Null when no constructor can be called without arguments.</returns>
     /// <remarks>
-    /// The leading values come from the selector constructor's own defaults when it has them, else
-    /// from a sibling overload with the same leading parameter types whose parameters all have
-    /// defaults (ignoring a trailing InputName, while that parameter still exists).
+    /// Custom input no longer comes from a per-state selector overload - <see cref="CustomInputState"/>
+    /// wraps any state - so what matters is only that the state can be built. Both runs build it the
+    /// same way and differ only in the selector, which rules out the old trap of two overloads being
+    /// filled with different argument values.
     /// </remarks>
-    private static (ConstructorInfo Ctor, object?[]? Args)? FindSelectorConstructor(Type type)
+    private static (ConstructorInfo Ctor, object?[] Args)? FindDefaultConstruction(Type type)
     {
-        var ctors = type.GetConstructors();
+        var ctor = type.GetConstructors()
+            .Where(c => c.GetParameters().All(p => p.HasDefaultValue))
+            .OrderBy(c => c.GetParameters().Length)
+            .FirstOrDefault();
 
-        var bySelector = ctors.FirstOrDefault(c =>
-        {
-            var ps = c.GetParameters();
-            return ps.Length > 0 && ps[^1].ParameterType == typeof(Func<OhlcvBar, double>);
-        });
-        if (bySelector is null) { return null; }
-
-        var lead = bySelector.GetParameters()[..^1];
-        if (lead.All(p => p.HasDefaultValue))
-        {
-            return (bySelector, lead.Select(p => p.DefaultValue).ToArray());
-        }
-
-        foreach (var sibling in ctors)
-        {
-            var ps = sibling.GetParameters();
-            var leading = ps.Length > 0 && ps[^1].ParameterType == typeof(InputName) ? ps[..^1] : ps;
-            if (leading.Length == lead.Length
-                && leading.Select(p => p.ParameterType).SequenceEqual(lead.Select(p => p.ParameterType))
-                && leading.All(p => p.HasDefaultValue))
-            {
-                return (bySelector, leading.Select(p => p.DefaultValue).ToArray());
-            }
-        }
-
-        return (bySelector, null);
+        return ctor is null
+            ? null
+            : (ctor, ctor.GetParameters().Select(p => p.DefaultValue).ToArray());
     }
 
     /// <summary>The batch twin, by the catalogue's naming convention: XyzState -&gt; CalculateXyz.</summary>
