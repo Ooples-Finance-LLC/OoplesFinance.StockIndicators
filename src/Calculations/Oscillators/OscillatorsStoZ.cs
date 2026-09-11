@@ -3365,10 +3365,18 @@ public static partial class Calculations
 
         if (stockData.Count == marketData.Count)
         {
+            // Each rate of change is of the price, as SectorRotationModelState takes them; the second of each pair
+            // used to be a rate of change of the first.
+            var stockSeries = stockData.CaptureInputSeries();
+            var marketSeries = marketData.CaptureInputSeries();
             var bull1List = CalculateRateOfChange(stockData, length1).ChainedValues;
+            stockData.RestoreInputSeries(stockSeries);
             var bull2List = CalculateRateOfChange(stockData, length2).ChainedValues;
+            stockData.RestoreInputSeries(stockSeries);
             var bear1List = CalculateRateOfChange(marketData, length1).ChainedValues;
+            marketData.RestoreInputSeries(marketSeries);
             var bear2List = CalculateRateOfChange(marketData, length2).ChainedValues;
+            marketData.RestoreInputSeries(marketSeries);
 
             for (var i = 0; i < stockData.Count; i++)
             {

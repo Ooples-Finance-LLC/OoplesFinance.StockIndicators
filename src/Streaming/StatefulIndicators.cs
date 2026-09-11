@@ -4003,11 +4003,9 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
 
 public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _rocLength;
     private readonly RsiState _rsi;
     private readonly RsiState _streakRsi;
     private readonly RollingPercentRank _rocRank;
-    private readonly PooledRingBuffer<double> _rocWindow;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _streak;
@@ -4016,11 +4014,9 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
     public ConnorsRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 2, int length2 = 3, int length3 = 100)
     {
-        _rocLength = Math.Max(1, length3);
         _rsi = new RsiState(maType, Math.Max(1, length2));
         _streakRsi = new RsiState(maType, Math.Max(1, length1));
-        _rocRank = new RollingPercentRank(_rocLength);
-        _rocWindow = new PooledRingBuffer<double>(_rocLength);
+        _rocRank = new RollingPercentRank(Math.Max(1, length3));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -4031,7 +4027,6 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
         _rsi.Reset();
         _streakRsi.Reset();
         _rocRank.Reset();
-        _rocWindow.Clear();
         _prevValue = 0;
         _streak = 0;
         _hasPrev = false;
@@ -4041,11 +4036,13 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
     {
         var currentValue = _input.GetValue(bar);
         var rsi = _rsi.Next(currentValue, isFinal);
-        var rocPrev = _rocWindow.Count >= _rocLength ? _rocWindow[0] : 0;
-        var roc = rocPrev != 0 ? (rsi - rocPrev) / rocPrev * 100 : 0;
+        var prevValue = _hasPrev ? _prevValue : 0;
+
+        // Connors ranks the one-bar rate of change of the price; this used to rank a length3-bar rate of change
+        // of the RSI, copying the batch.
+        var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
         var pctRank = isFinal ? _rocRank.Add(roc) : _rocRank.Preview(roc);
 
-        var prevValue = _hasPrev ? _prevValue : 0;
         var prevStreak = _streak;
         var streak = currentValue > prevValue
             ? prevStreak >= 0 ? prevStreak + 1 : 1
@@ -4061,7 +4058,6 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
             _prevValue = currentValue;
             _streak = streak;
             _hasPrev = true;
-            _rocWindow.TryAdd(rsi, out _);
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -4084,7 +4080,6 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
         _rsi.Dispose();
         _streakRsi.Dispose();
         _rocRank.Dispose();
-        _rocWindow.Dispose();
     }
 }
 
@@ -11478,12 +11473,14 @@ public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorStat
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        // Five RSIs of the source, one per length. Each used to take the previous one's output, copying a batch
+        // that read its own last result back as the input: the 21-bar RSI was an RSI of an RSI four deep.
         var value = _input.GetValue(bar);
         var rsi5 = _rsi5.Next(value, isFinal);
-        var rsi8 = _rsi8.Next(rsi5, isFinal);
-        var rsi13 = _rsi13.Next(rsi8, isFinal);
-        var rsi14 = _rsi14.Next(rsi13, isFinal);
-        var rsi21 = _rsi21.Next(rsi14, isFinal);
+        var rsi8 = _rsi8.Next(value, isFinal);
+        var rsi13 = _rsi13.Next(value, isFinal);
+        var rsi14 = _rsi14.Next(value, isFinal);
+        var rsi21 = _rsi21.Next(value, isFinal);
 
         var rsi21Len2Min = isFinal ? _rsi21Len2Min.Add(rsi21, out _) : _rsi21Len2Min.Preview(rsi21, out _);
         var rsi21Len2Max = isFinal ? _rsi21Len2Max.Add(rsi21, out _) : _rsi21Len2Max.Preview(rsi21, out _);
@@ -14138,7 +14135,7 @@ internal sealed class RollingPercentRank : IDisposable
     public double Preview(double value)
     {
         var count = CountLessThanOrEqual(value);
-        if (_window.Count == _length && _window[0] <= value)
+        if (_window.Count == _length && _window[0].CompareTo(value) <= 0)
         {
             count--;
         }
@@ -14174,7 +14171,7 @@ internal sealed class RollingPercentRank : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] <= value)
+                if (_window[i].CompareTo(value) <= 0)
                 {
                     count++;
                 }
@@ -14199,7 +14196,7 @@ internal sealed class RollingPercentRank : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] <= value)
+                if (_window[i].CompareTo(value) <= 0)
                 {
                     count++;
                 }

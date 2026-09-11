@@ -49,15 +49,16 @@ public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreaming
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
 
-        // Compute FSK on RSI values (matching batch chaining behavior where FSK sees RSI via CustomValuesList)
+        // The fast-and-slow kurtosis of the source, beside the RSI of the source. It used to be taken of the RSI,
+        // copying a batch that read the RSI it had just published back as the kurtosis input.
         var hasMomentum = _fskValues.Count >= _fskLength;
-        var prevRsi = hasMomentum ? EhlersStreamingWindow.GetOffsetValue(_fskValues, rsi, _fskLength) : 0;
-        var momentum = hasMomentum ? rsi - prevRsi : 0;
+        var prevValue = hasMomentum ? EhlersStreamingWindow.GetOffsetValue(_fskValues, value, _fskLength) : 0;
+        var momentum = hasMomentum ? value - prevValue : 0;
         var fsk = (FskRatio * (momentum - _fskPrevMomentum)) + ((1 - FskRatio) * _fskPrevFsk);
 
         if (isFinal)
         {
-            _fskValues.TryAdd(rsi, out _);
+            _fskValues.TryAdd(value, out _);
             _fskPrevMomentum = momentum;
             _fskPrevFsk = fsk;
         }

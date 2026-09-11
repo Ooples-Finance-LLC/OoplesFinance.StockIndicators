@@ -1379,7 +1379,10 @@ public static partial class Calculations
         List<double> fsrsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Both components read the caller's series; the kurtosis used to read the RSI just published.
+        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length3).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var fskList = CalculateFastandSlowKurtosisOscillator(stockData, maType, length: length1).ChainedValues;
         var v4List = GetMovingAverageList(stockData, maType, length2, fskList);
 
