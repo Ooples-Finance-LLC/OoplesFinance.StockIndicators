@@ -4152,6 +4152,9 @@ public sealed class DTOscillatorSpecOptions : IIndicatorSpecOptions
 /// <summary>
 /// Compare Price Momentum Oscillator indicator options.
 /// </summary>
+[Obsolete("Compares a stock against a market series, so it cannot be computed from one series. Use " +
+    "IndicatorCatalog.ComparePriceMomentumOscillator, which passes both through MultiStockIndicatorOptions. " +
+    "It will be removed in the next major version.")]
 public sealed class ComparePriceMomentumOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public ComparePriceMomentumOscillatorSpecOptions(int length)

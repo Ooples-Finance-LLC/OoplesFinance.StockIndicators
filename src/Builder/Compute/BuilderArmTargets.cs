@@ -1,6 +1,10 @@
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 
+// The table still names specs that are obsolete, so that a caller holding one keeps computing until the spec
+// itself is removed.
+#pragma warning disable CS0618
+
 namespace OoplesFinance.StockIndicators.Builder.Compute;
 
 /// <summary>
