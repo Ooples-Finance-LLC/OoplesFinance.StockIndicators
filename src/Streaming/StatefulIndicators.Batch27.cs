@@ -22,8 +22,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     private double _prevVave;
     private bool _hasPrev;
 
-    public VolumeFlowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        InputName inputName = InputName.TypicalPrice, int length1 = 130, int length2 = 30,
+    public VolumeFlowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 130, int length2 = 30,
         int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5)
     {
         _length1 = Math.Max(1, length1);
@@ -35,7 +34,7 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
         _volumeMa = MovingAverageSmootherFactory.Create(maType, _length1);
         _vfiMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _signalMa = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeFlowIndicator;
@@ -120,8 +119,7 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
     private double _prevClose;
     private bool _hasPrev;
 
-    public VolumePositiveNegativeIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        InputName inputName = InputName.TypicalPrice, int length = 30, int smoothLength = 3)
+    public VolumePositiveNegativeIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 30, int smoothLength = 3)
     {
         _length = Math.Max(1, length);
         _volumeMa = MovingAverageSmootherFactory.Create(maType, _length);
@@ -129,7 +127,7 @@ public sealed class VolumePositiveNegativeIndicatorState : IStreamingIndicatorSt
         _vpnSmooth = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _vmpSum = new RollingWindowSum(_length);
         _vmnSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumePositiveNegativeIndicator;
@@ -215,7 +213,7 @@ public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorS
     private readonly StreamingInputResolver _input;
 
     public VolumePriceConfirmationIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5,
-        int slowLength = 20, int length = 8, InputName inputName = InputName.Close)
+        int slowLength = 20, int length = 8)
     {
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
@@ -229,7 +227,7 @@ public sealed class VolumePriceConfirmationIndicatorState : IStreamingIndicatorS
         _smaFast = MovingAverageSmootherFactory.Create(maType, resolvedFast);
         _smaSlow = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
         _vpciMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumePriceConfirmationIndicator;
@@ -307,9 +305,9 @@ public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState, 
     private double _cumVolume;
     private double _cumVolumePrice;
 
-    public VolumeWeightedAveragePriceState(InputName inputName = InputName.TypicalPrice)
+    public VolumeWeightedAveragePriceState()
     {
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeWeightedAveragePrice;
@@ -356,13 +354,12 @@ public sealed class VolumeWeightedMovingAverageState : IStreamingIndicatorState,
     private readonly IMovingAverageSmoother _volumeMa;
     private readonly StreamingInputResolver _input;
 
-    public VolumeWeightedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        InputName inputName = InputName.Close)
+    public VolumeWeightedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         var resolved = Math.Max(1, length);
         _volumePriceSum = new RollingWindowSum(resolved);
         _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeWeightedMovingAverage;
@@ -412,13 +409,13 @@ public sealed class VolumeWeightedRelativeStrengthIndexState : IStreamingIndicat
     private bool _hasPrev;
 
     public VolumeWeightedRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10,
-        int smoothLength = 3, InputName inputName = InputName.Close)
+        int smoothLength = 3)
     {
         var resolved = Math.Max(1, length);
         _upMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _downMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _smoothMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeWeightedRelativeStrengthIndex;
@@ -479,13 +476,12 @@ public sealed class VortexBandsState : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _diffMa;
     private readonly StreamingInputResolver _input;
 
-    public VortexBandsState(MovingAvgType maType = MovingAvgType.McNichollMovingAverage, int length = 20,
-        InputName inputName = InputName.Close)
+    public VortexBandsState(MovingAvgType maType = MovingAvgType.McNichollMovingAverage, int length = 20)
     {
         var resolved = Math.Max(1, length);
         _basisMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _diffMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.VortexBands;
@@ -539,14 +535,14 @@ public sealed class VostroIndicatorState : IStreamingIndicatorState, IDisposable
     private double _prevIBuff112;
 
     public VostroIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 5,
-        int length2 = 100, double level = 8, InputName inputName = InputName.Close)
+        int length2 = 100, double level = 8)
     {
         _length1 = Math.Max(1, length1);
         _level = level;
         _tempSum = new RollingWindowSum(_length1);
         _rangeSum = new RollingWindowSum(_length1);
         _wma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.VostroIndicator;
@@ -621,8 +617,7 @@ public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDispo
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _values;
 
-    public WaddahAttarExplosionState(int fastLength = 20, int slowLength = 40, double sensitivity = 150,
-        InputName inputName = InputName.Close)
+    public WaddahAttarExplosionState(int fastLength = 20, int slowLength = 40, double sensitivity = 150)
     {
         _bbLength = Math.Max(1, fastLength);
         var resolvedFast = Math.Max(1, fastLength);
@@ -633,7 +628,7 @@ public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDispo
         _macd3 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
         _macd4 = new MacdEngine(MovingAvgType.ExponentialMovingAverage, resolvedFast, resolvedSlow, 9);
         _bbWindow = new RollingWindowStats(_bbLength);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(3);
     }
 
@@ -716,12 +711,12 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
     private bool _hasPrev;
 
     public WamiOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 13,
-        int length2 = 4, InputName inputName = InputName.Close)
+        int length2 = 4)
     {
         _diffWma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length2));
         _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WamiOscillator;
@@ -779,15 +774,14 @@ public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDispos
     private readonly IMovingAverageSmoother _wt2Ma;
     private StreamingInputResolver _input;
 
-    public WaveTrendOscillatorState(InputName inputName = InputName.FullTypicalPrice,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21,
+    public WaveTrendOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21,
         int smoothLength = 4)
     {
         _esaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _dMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _tciMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _wt2Ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
     }
 
     public IndicatorName Name => IndicatorName.WaveTrendOscillator;
@@ -841,10 +835,10 @@ public sealed class WellesWilderSummationState : IStreamingIndicatorState
     private readonly StreamingInputResolver _input;
     private double _prevSum;
 
-    public WellesWilderSummationState(int length = 14, InputName inputName = InputName.Close)
+    public WellesWilderSummationState(int length = 14)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WellesWilderSummation;
@@ -889,7 +883,7 @@ public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState
     private bool _hasPrev;
 
     public WellesWilderVolatilitySystemState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63,
-        int length2 = 21, double factor = 3, InputName inputName = InputName.Close)
+        int length2 = 21, double factor = 3)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -898,7 +892,7 @@ public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState
         _ema = MovingAverageSmootherFactory.Create(maType, resolved1);
         _maxWindow = new RollingWindowMax(resolved2);
         _minWindow = new RollingWindowMin(resolved2);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WellesWilderVolatilitySystem;
@@ -966,11 +960,11 @@ public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
     private double _prevYEma;
     private bool _hasPrev;
 
-    public WellRoundedMovingAverageState(int length = 14, InputName inputName = InputName.Close)
+    public WellRoundedMovingAverageState(int length = 14)
     {
         _length = Math.Max(1, length);
         _alpha = 2d / (_length + 1);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WellRoundedMovingAverage;
@@ -1175,7 +1169,7 @@ public sealed class WilsonRelativePriceChannelState : IStreamingIndicatorState, 
 
     public WilsonRelativePriceChannelState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 34,
         int smoothLength = 1, double overbought = 70, double oversold = 30, double upperNeutralZone = 55,
-        double lowerNeutralZone = 45, InputName inputName = InputName.Close)
+        double lowerNeutralZone = 45)
     {
         var resolved = Math.Max(1, length);
         var smooth = Math.Max(1, smoothLength);
@@ -1188,7 +1182,7 @@ public sealed class WilsonRelativePriceChannelState : IStreamingIndicatorState, 
         _osSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
         _nzuSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
         _nzlSmooth = MovingAverageSmootherFactory.Create(maType, smooth);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WilsonRelativePriceChannel;
@@ -1253,7 +1247,7 @@ public sealed class WindowedVolumeWeightedMovingAverageState : IStreamingIndicat
     private readonly StreamingInputResolver _input;
     private int _index;
 
-    public WindowedVolumeWeightedMovingAverageState(int length = 100, InputName inputName = InputName.Close)
+    public WindowedVolumeWeightedMovingAverageState(int length = 100)
     {
         _length = Math.Max(1, length);
         _bartlettWSum = new RollingWindowSum(_length);
@@ -1262,7 +1256,7 @@ public sealed class WindowedVolumeWeightedMovingAverageState : IStreamingIndicat
         _blackmanVWSum = new RollingWindowSum(_length);
         _hanningWSum = new RollingWindowSum(_length);
         _hanningVWSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.WindowedVolumeWeightedMovingAverage;
@@ -1339,8 +1333,8 @@ public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState,
     public WoodieCommodityChannelIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 6, int slowLength = 14)
     {
-        _slowCci = new CommodityChannelIndexState(InputName.TypicalPrice, maType, Math.Max(1, slowLength), 0.015);
-        _fastCci = new CommodityChannelIndexState(InputName.TypicalPrice, maType, Math.Max(1, fastLength), 0.015);
+        _slowCci = new CommodityChannelIndexState(maType, Math.Max(1, slowLength), 0.015);
+        _fastCci = new CommodityChannelIndexState(maType, Math.Max(1, fastLength), 0.015);
     }
 
     public IndicatorName Name => IndicatorName.WoodieCommodityChannelIndex;
@@ -1456,9 +1450,8 @@ public sealed class ZDistanceFromVwapState : IStreamingIndicatorState, IDisposab
     private readonly RollingZScore _zScore;
     private StreamingInputResolver _input;
 
-    public ZDistanceFromVwapState(MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice, int length = 20,
-        InputName inputName = InputName.Close)
-        : this(maType, length, new StreamingInputResolver(inputName, null))
+    public ZDistanceFromVwapState(MovingAvgType maType = MovingAvgType.VolumeWeightedAveragePrice, int length = 20)
+        : this(maType, length, new StreamingInputResolver(InputName.Close, null))
     {
     }
 
@@ -1516,8 +1509,7 @@ public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorSt
     private readonly IMovingAverageSmoother _ema2;
     private readonly StreamingInputResolver _input;
 
-    public ZeroLagExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
-        InputName inputName = InputName.Close)
+    public ZeroLagExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
         var resolvedType = maType == MovingAvgType.ZeroLagExponentialMovingAverage
             ? MovingAvgType.ExponentialMovingAverage
@@ -1525,7 +1517,7 @@ public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorSt
         var resolved = Math.Max(1, length);
         _ema1 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
         _ema2 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZeroLagExponentialMovingAverage;
@@ -1581,11 +1573,11 @@ public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDispo
     private double _lx2Value;
     private double _ax3Value;
 
-    public ZeroLagSmoothedCycleState(int length = 100, InputName inputName = InputName.Close)
+    public ZeroLagSmoothedCycleState(int length = 100)
     {
         _length = Math.Max(1, length);
         _length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2));
-        _linreg = new LinearRegressionState(_length, inputName);
+        _linreg = new LinearRegressionState(_length);
         _linregAx1 = new LinearRegressionState(_length, _ => _ax1Value);
         _linregLx1 = new LinearRegressionState(_length, _ => _lx1Value);
         _linregAx2 = new LinearRegressionState(_length, _ => _ax2Value);
@@ -1593,7 +1585,7 @@ public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDispo
         _linregAx3 = new LinearRegressionState(_length, _ => _ax3Value);
         _lcoSum = new RollingWindowSum(_length1);
         _lcoSmaSum = new RollingWindowSum(_length1);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZeroLagSmoothedCycle;
@@ -1668,8 +1660,7 @@ public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndic
     private readonly IMovingAverageSmoother _tma2;
     private readonly StreamingInputResolver _input;
 
-    public ZeroLagTripleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14,
-        InputName inputName = InputName.Close)
+    public ZeroLagTripleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14)
     {
         var resolvedType = maType == MovingAvgType.ZeroLagTripleExponentialMovingAverage
             ? MovingAvgType.TripleExponentialMovingAverage
@@ -1677,7 +1668,7 @@ public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndic
         var resolved = Math.Max(1, length);
         _tma1 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
         _tma2 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZeroLagTripleExponentialMovingAverage;
@@ -1725,14 +1716,14 @@ public sealed class ZeroLowLagMovingAverageState : IStreamingIndicatorState, IDi
     private int _index;
     private double _prevA;
 
-    public ZeroLowLagMovingAverageState(int length = 50, double lag = 1.4, InputName inputName = InputName.Close)
+    public ZeroLowLagMovingAverageState(int length = 50, double lag = 1.4)
     {
         _length = Math.Max(1, length);
         _lbLength = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2));
         _lag = lag;
         _aValues = new PooledRingBuffer<double>(_length + 1);
         _bValues = new PooledRingBuffer<double>(_lbLength + 1);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZeroLowLagMovingAverage;

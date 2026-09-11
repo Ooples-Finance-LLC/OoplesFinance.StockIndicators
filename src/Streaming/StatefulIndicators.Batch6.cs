@@ -106,8 +106,7 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
     private double _prevMom;
     private double _prevValue70;
 
-    public ConfluenceIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        InputName inputName = InputName.FullTypicalPrice, int length = 10)
+    public ConfluenceIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
         _length = Math.Max(1, length);
         _stl = (int)Math.Ceiling((_length * 2) - 1 - 0.5m);
@@ -130,7 +129,7 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         _i2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _iLength));
         _l2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _lLength));
         _ftpAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _lLength));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
 
         var maxOffset = Math.Max(Math.Max(_hoff, _soff), _ioff);
         var capacity = Math.Max(1, maxOffset);
@@ -366,7 +365,7 @@ public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
 
-    public DampedSineWaveWeightedFilterState(int length = 50, InputName inputName = InputName.Close)
+    public DampedSineWaveWeightedFilterState(int length = 50)
     {
         _length = Math.Max(1, length);
         _weights = new double[_length];
@@ -380,7 +379,7 @@ public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState
 
         _weightSum = sum;
         _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.DampedSineWaveWeightedFilter;
@@ -449,13 +448,13 @@ public sealed class DecisionPointBreadthSwenlinTradingOscillatorState : IStreami
     private bool _hasPrev;
 
     public DecisionPointBreadthSwenlinTradingOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 5, InputName inputName = InputName.Close)
+        int length = 5)
     {
         var resolved = Math.Max(1, length);
         _firstSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _secondSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.DecisionPointBreadthSwenlinTradingOscillator;
@@ -517,10 +516,10 @@ public sealed class DominantCycleTunedRelativeStrengthIndexState : IStreamingInd
     private double _prevB;
     private bool _hasPrev;
 
-    public DominantCycleTunedRelativeStrengthIndexState(int length = 5, InputName inputName = InputName.Close)
+    public DominantCycleTunedRelativeStrengthIndexState(int length = 5)
     {
         _periodState = new AdaptiveCyberCyclePeriodState(length, 0.07);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.DominantCycleTunedRelativeStrengthIndex;
@@ -591,14 +590,14 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
     private double _prevAtrDn;
     private bool _hasPrev;
 
-    public DrunkardWalkState(int length1 = 80, int length2 = 14, InputName inputName = InputName.Close)
+    public DrunkardWalkState(int length1 = 80, int length2 = 14)
     {
         var resolved = Math.Max(1, length1);
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
         _highs = new PooledRingBuffer<double>(resolved);
         _lows = new PooledRingBuffer<double>(resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _length2 = length2;
     }
 
@@ -686,12 +685,12 @@ public sealed class DynamicallyAdjustableFilterState : IStreamingIndicatorState,
     private double _prevK;
     private bool _hasPrev;
 
-    public DynamicallyAdjustableFilterState(int length = 14, InputName inputName = InputName.Close)
+    public DynamicallyAdjustableFilterState(int length = 14)
     {
         _length = Math.Max(1, length);
         _srcWindow = new RollingWindowSum(_length);
         _srcDevWindow = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.DynamicallyAdjustableFilter;
@@ -760,14 +759,13 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
     private double _tempSum;
     private double _fastStdDevValue;
 
-    public DynamicallyAdjustableMovingAverageState(int fastLength = 6, int slowLength = 200,
-        InputName inputName = InputName.Close)
+    public DynamicallyAdjustableMovingAverageState(int fastLength = 6, int slowLength = 200)
     {
         _fastLength = Math.Max(1, fastLength);
         _slowLength = Math.Max(1, slowLength);
-        _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _fastLength, inputName);
+        _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _fastLength);
         _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, _ => _fastStdDevValue);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _kValues = new PooledRingBuffer<double>(_slowLength);
     }
 
@@ -841,15 +839,15 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
     private bool _hasPrev;
 
     public DynamicMomentumIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5,
-        int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5, InputName inputName = InputName.Close)
+        int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5)
     {
         _length3 = Math.Max(1, length3);
         _upLimit = Math.Max(1, upLimit);
         _dnLimit = Math.Max(1, dnLimit);
         var capacity = Math.Max(1, Math.Max(_upLimit, _dnLimit));
-        _stdDevState = new StandardDeviationVolatilityState(maType, Math.Max(1, length1), inputName);
+        _stdDevState = new StandardDeviationVolatilityState(maType, Math.Max(1, length1));
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _gains = new PooledRingBuffer<double>(capacity);
         _losses = new PooledRingBuffer<double>(capacity);
         _dmiValues = new PooledRingBuffer<double>(capacity);
@@ -949,14 +947,14 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
     private bool _hasStoch;
 
     public DynamicMomentumOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 10,
-        int length2 = 20, InputName inputName = InputName.Close)
+        int length2 = 20)
     {
         var resolved = Math.Max(1, length1);
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.DynamicMomentumOscillator;
@@ -1077,11 +1075,11 @@ public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorSta
     private double _prevClose;
     private bool _hasPrev;
 
-    public EarningSupportResistanceLevelsState(InputName inputName = InputName.MedianPrice)
+    public EarningSupportResistanceLevelsState()
     {
         _inputValues = new PooledRingBuffer<double>(2);
         _lowValues = new PooledRingBuffer<double>(2);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.MedianPrice, null);
     }
 
     public IndicatorName Name => IndicatorName.EarningSupportResistanceLevels;
@@ -1147,12 +1145,12 @@ public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDispo
     private bool _hasPrev;
 
     public EdgePreservingFilterState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200,
-        int smoothLength = 50, InputName inputName = InputName.Close)
+        int smoothLength = 50)
     {
         _sma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _regression = new LinearRegressionState(Math.Max(1, smoothLength), _ => _regressionInput);
         _maxWindow = new RollingWindowMax(Math.Max(2, length));
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EdgePreservingFilter;
@@ -1229,13 +1227,12 @@ public sealed class EfficientAutoLineState : IStreamingIndicatorState, IDisposab
     private bool _hasPrev;
     private int _index;
 
-    public EfficientAutoLineState(int length = 19, double fastAlpha = 0.0001, double slowAlpha = 0.005,
-        InputName inputName = InputName.Close)
+    public EfficientAutoLineState(int length = 19, double fastAlpha = 0.0001, double slowAlpha = 0.005)
     {
         _er = new EfficiencyRatioState(Math.Max(1, length));
         _fastAlpha = fastAlpha;
         _slowAlpha = slowAlpha;
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EfficientAutoLine;
@@ -1291,12 +1288,12 @@ public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
     private double _chgErSum;
     private int _index;
 
-    public EfficientPriceState(int length = 50, InputName inputName = InputName.Close)
+    public EfficientPriceState(int length = 50)
     {
         _length = Math.Max(1, length);
         _er = new EfficiencyRatioState(_length);
         _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EfficientPrice;
@@ -1353,15 +1350,14 @@ public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, I
     private double _prevA;
     private bool _hasPrev;
 
-    public EfficientTrendStepChannelState(int length = 100, int fastLength = 50, int slowLength = 200,
-        InputName inputName = InputName.Close)
+    public EfficientTrendStepChannelState(int length = 100, int fastLength = 50, int slowLength = 200)
     {
         _er = new EfficiencyRatioState(Math.Max(1, length));
         _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage,
             Math.Max(1, fastLength), _ => _stdDevInput);
         _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage,
             Math.Max(1, slowLength), _ => _stdDevInput);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EfficientTrendStepChannel;
@@ -1427,7 +1423,7 @@ public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorSta
     private double _prevFilter2;
     private bool _hasPrev;
 
-    public Ehlers2PoleButterworthFilterV1State(int length = 10, InputName inputName = InputName.Close)
+    public Ehlers2PoleButterworthFilterV1State(int length = 10)
     {
         var resolved = Math.Max(1, length);
         var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
@@ -1435,7 +1431,7 @@ public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorSta
         _c2 = b;
         _c3 = -a * a;
         _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.Ehlers2PoleButterworthFilterV1;
@@ -1485,7 +1481,7 @@ public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorSta
     private double _prevFilter2;
     private int _index;
 
-    public Ehlers2PoleButterworthFilterV2State(int length = 15, InputName inputName = InputName.Close)
+    public Ehlers2PoleButterworthFilterV2State(int length = 15)
     {
         var resolved = Math.Max(1, length);
         var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
@@ -1493,7 +1489,7 @@ public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorSta
         _c2 = b;
         _c3 = -a * a;
         _c1 = (1 - b + (a * a)) / 4;
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(3);
     }
 
@@ -1555,7 +1551,7 @@ public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorS
     private double _prevFilter2;
     private int _index;
 
-    public Ehlers2PoleSuperSmootherFilterV1State(int length = 15, InputName inputName = InputName.Close)
+    public Ehlers2PoleSuperSmootherFilterV1State(int length = 15)
     {
         var resolved = Math.Max(1, length);
         var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
@@ -1563,7 +1559,7 @@ public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorS
         _coef2 = b1;
         _coef3 = -a1 * a1;
         _coef1 = 1 - _coef2 - _coef3;
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.Ehlers2PoleSuperSmootherFilterV1;
@@ -1614,7 +1610,7 @@ public sealed class Ehlers2PoleSuperSmootherFilterV2State : IStreamingIndicatorS
     private double _prevValue;
     private bool _hasPrev;
 
-    public Ehlers2PoleSuperSmootherFilterV2State(int length = 10, InputName inputName = InputName.Close)
+    public Ehlers2PoleSuperSmootherFilterV2State(int length = 10)
     {
         var resolved = Math.Max(1, length);
         var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
@@ -1622,7 +1618,7 @@ public sealed class Ehlers2PoleSuperSmootherFilterV2State : IStreamingIndicatorS
         _c2 = b;
         _c3 = -a * a;
         _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.Ehlers2PoleSuperSmootherFilterV2;

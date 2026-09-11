@@ -11,13 +11,12 @@ public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
     private readonly StreamingInputResolver _input;
     private double _inputValue;
 
-    public ZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        InputName inputName = InputName.Close)
+    public ZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         var resolved = Math.Max(1, length);
         _meanMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _inputValue);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZScore;
@@ -66,13 +65,13 @@ public sealed class ZweigMarketBreadthIndicatorState : IStreamingIndicatorState,
     private bool _hasPrev;
 
     public ZweigMarketBreadthIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 10, InputName inputName = InputName.Close)
+        int length = 10)
     {
         var resolved = Math.Max(1, length);
         _advances = new RollingWindowSum(resolved);
         _declines = new RollingWindowSum(resolved);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ZweigMarketBreadthIndicator;

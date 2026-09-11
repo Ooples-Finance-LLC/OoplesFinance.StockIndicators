@@ -27,10 +27,9 @@ public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDispos
     private bool _hasPrev;
 
     public SchaffTrendCycleShkState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int fastLength = 23, int slowLength = 50, int cycleLength = 10, int d1Length = 3, int d2Length = 3,
-        InputName inputName = InputName.Close)
+        int fastLength = 23, int slowLength = 50, int cycleLength = 10, int d1Length = 3, int d2Length = 3)
         : this(maType, fastLength, slowLength, cycleLength, d1Length, d2Length,
-            new StreamingInputResolver(inputName, null))
+            new StreamingInputResolver(InputName.Close, null))
     {
     }
 
@@ -144,8 +143,8 @@ public sealed class UtBotAlertsState : IStreamingIndicatorState, IDisposable
     private bool _hasPrev;
 
     public UtBotAlertsState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10,
-        double keyValue = 1, InputName inputName = InputName.Close)
-        : this(maType, length, keyValue, new StreamingInputResolver(inputName, null))
+        double keyValue = 1)
+        : this(maType, length, keyValue, new StreamingInputResolver(InputName.Close, null))
     {
     }
 
