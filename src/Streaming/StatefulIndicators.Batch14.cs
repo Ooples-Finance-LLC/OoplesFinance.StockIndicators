@@ -56,6 +56,12 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
         var teeth = _teethSmoother.Next(value, isFinal);
         var lips = _lipsSmoother.Next(value, isFinal);
 
+        // Read an offset of bars back, counting this bar, before this bar is committed, as AlligatorIndexState
+        // does; reading after the commit made a preview a bar late once the window was full.
+        var displacedJaw = EhlersStreamingWindow.GetOffsetValue(_jawWindow, jaw, _jawOffset);
+        var displacedTeeth = EhlersStreamingWindow.GetOffsetValue(_teethWindow, teeth, _teethOffset);
+        var displacedLips = EhlersStreamingWindow.GetOffsetValue(_lipsWindow, lips, _lipsOffset);
+
         if (isFinal)
         {
             _jawWindow.TryAdd(jaw, out _);
@@ -63,9 +69,6 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
             _lipsWindow.TryAdd(lips, out _);
         }
 
-        var displacedJaw = _jawOffset == 0 ? jaw : _jawWindow.Count > _jawOffset ? _jawWindow[0] : 0;
-        var displacedTeeth = _teethOffset == 0 ? teeth : _teethWindow.Count > _teethOffset ? _teethWindow[0] : 0;
-        var displacedLips = _lipsOffset == 0 ? lips : _lipsWindow.Count > _lipsOffset ? _lipsWindow[0] : 0;
         var top = Math.Abs(displacedJaw - displacedTeeth);
         var bottom = -Math.Abs(displacedTeeth - displacedLips);
 

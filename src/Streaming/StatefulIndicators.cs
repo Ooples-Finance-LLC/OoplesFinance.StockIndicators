@@ -9455,12 +9455,18 @@ public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, I
             _window.TryAdd(value, out _);
         }
 
-        var count = _window.Count;
+        // A forming bar is the newest value of the window it would make, so a preview weights it too; the
+        // window without it made a preview of the first bar 0.
+        var pending = isFinal ? 0 : 1;
+        var count = Math.Min(_window.Count + pending, _length);
+        var committed = count - pending;
+        var first = _window.Count - committed;
         var missing = _length - count;
         double sum = 0;
-        for (var j = 0; j < _length; j++)
+        for (var j = missing; j < _length; j++)
         {
-            var val = j < missing ? 0 : _window[j - missing];
+            var index = j - missing;
+            var val = index < committed ? _window[first + index] : value;
             sum += val * _weights[j];
         }
 
@@ -9534,16 +9540,18 @@ public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable,
         var teeth = _teethSmoother.Next(value, isFinal);
         var lips = _lipsSmoother.Next(value, isFinal);
 
+        // Each line is its own value an offset of bars back, counting this bar, so it is read before this bar
+        // is committed; reading it after made a preview a bar late once the window was full.
+        var displacedJaw = EhlersStreamingWindow.GetOffsetValue(_jawWindow, jaw, _jawOffset);
+        var displacedTeeth = EhlersStreamingWindow.GetOffsetValue(_teethWindow, teeth, _teethOffset);
+        var displacedLips = EhlersStreamingWindow.GetOffsetValue(_lipsWindow, lips, _lipsOffset);
+
         if (isFinal)
         {
             _jawWindow.TryAdd(jaw, out _);
             _teethWindow.TryAdd(teeth, out _);
             _lipsWindow.TryAdd(lips, out _);
         }
-
-        var displacedJaw = _jawOffset == 0 ? jaw : _jawWindow.Count > _jawOffset ? _jawWindow[0] : 0;
-        var displacedTeeth = _teethOffset == 0 ? teeth : _teethWindow.Count > _teethOffset ? _teethWindow[0] : 0;
-        var displacedLips = _lipsOffset == 0 ? lips : _lipsWindow.Count > _lipsOffset ? _lipsWindow[0] : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -14105,7 +14113,7 @@ internal sealed class RollingPercentRank : IDisposable
     private readonly int _length;
     private readonly bool _useLinear;
     private readonly PooledRingBuffer<double> _window;
-    private OrderStatisticTree? _tree;
+    private OrderStatisticTree _tree = new();
     private bool _disposed;
 
     public RollingPercentRank(int length)
@@ -14113,10 +14121,6 @@ internal sealed class RollingPercentRank : IDisposable
         _length = Math.Max(1, length);
         _useLinear = _length <= RollingWindowSettings.SmallWindowThreshold;
         _window = new PooledRingBuffer<double>(_length);
-        if (!_useLinear)
-        {
-            _tree = new OrderStatisticTree();
-        }
     }
 
     public double Add(double value)
@@ -14125,9 +14129,20 @@ internal sealed class RollingPercentRank : IDisposable
         return MathHelper.MinOrMax((double)count / _length * 100, 100, 0);
     }
 
+    /// <summary>The rank <see cref="Add"/> would return for the value, without adding it.</summary>
+    /// <remarks>
+    /// Add ranks the value against the window it leaves behind, which no longer holds the oldest value once
+    /// the window is full. Counting the oldest here made a preview disagree with its own commit whenever
+    /// the value about to leave was at or below the new one.
+    /// </remarks>
     public double Preview(double value)
     {
         var count = CountLessThanOrEqual(value);
+        if (_window.Count == _length && _window[0] <= value)
+        {
+            count--;
+        }
+
         return MathHelper.MinOrMax((double)count / _length * 100, 100, 0);
     }
 
@@ -14170,10 +14185,10 @@ internal sealed class RollingPercentRank : IDisposable
 
         if (_window.TryAdd(value, out var removed))
         {
-            _tree!.Remove(removed);
+            _tree.Remove(removed);
         }
 
-        _tree!.Insert(value);
+        _tree.Insert(value);
         return Math.Max(0, _tree.CountLessThanOrEqual(value) - 1);
     }
 
@@ -14193,7 +14208,7 @@ internal sealed class RollingPercentRank : IDisposable
             return count;
         }
 
-        return _tree!.CountLessThanOrEqual(value);
+        return _tree.CountLessThanOrEqual(value);
     }
 }
 

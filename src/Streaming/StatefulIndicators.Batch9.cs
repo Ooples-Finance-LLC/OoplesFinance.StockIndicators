@@ -1417,18 +1417,17 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
         var highestHigh2 = isFinal ? _highWindow2.Add(bar.High, out _) : _highWindow2.Preview(bar.High, out _);
         var lowestLow2 = isFinal ? _lowWindow2.Add(bar.Low, out _) : _lowWindow2.Preview(bar.Low, out _);
 
-        // Add current values to lag buffers FIRST (batch computes all values first, then accesses lagged)
+        // The value halfP bars back, counting this bar (batch: lagIndex = Math.Max(i - halfP, 0)), read before
+        // this bar is committed so a preview and its commit read the same bar. Until halfP bars have passed
+        // the lag stays on the first bar, which is still the oldest in the buffer then.
+        var highestHigh3 = LaggedOrFirst(_laggedHighest2, highestHigh2);
+        var lowestLow3 = LaggedOrFirst(_laggedLowest2, lowestLow2);
+
         if (isFinal)
         {
             _laggedHighest2.TryAdd(highestHigh2, out _);
             _laggedLowest2.TryAdd(lowestLow2, out _);
         }
-
-        // Use lagged values from halfP bars ago (batch: lagIndex = Math.Max(i - halfP, 0))
-        // For first halfP bars, lagIndex stays at 0 (uses first bar's value)
-        // After that, the oldest value in the ring buffer is from halfP bars ago
-        var highestHigh3 = _laggedHighest2.Count > 0 ? _laggedHighest2[0] : highestHigh2;
-        var lowestLow3 = _laggedLowest2.Count > 0 ? _laggedLowest2[0] : lowestLow2;
 
         var n3 = (highestHigh1 - lowestLow1) / _length;
         var n1 = (highestHigh2 - lowestLow2) / _halfP;
@@ -1456,6 +1455,12 @@ public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicato
 
         return new StreamingIndicatorStateResult(filter, outputs);
     }
+
+    /// <summary>The value halfP bars back counting the pending one, or the first value until there is one.</summary>
+    private double LaggedOrFirst(PooledRingBuffer<double> lagged, double pending) =>
+        lagged.Count >= _halfP
+            ? EhlersStreamingWindow.GetOffsetValue(lagged, pending, _halfP)
+            : lagged.Count > 0 ? lagged[0] : pending;
 
     public void Dispose()
     {

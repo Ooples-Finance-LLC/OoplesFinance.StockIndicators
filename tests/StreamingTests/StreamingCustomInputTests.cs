@@ -226,7 +226,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             ?? throw new InvalidOperationException($"{batch.Name} returned null instead of its StockData");
     }
 
-    private static IStreamingIndicatorState Build((ConstructorInfo Ctor, object?[] Args) build) =>
+    internal static IStreamingIndicatorState Build((ConstructorInfo Ctor, object?[] Args) build) =>
         (IStreamingIndicatorState)build.Ctor.Invoke(build.Args);
 
     /// <summary>
@@ -234,7 +234,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     /// have defaults, preferring the one with the fewest parameters.
     /// </summary>
     /// <returns>Null when no constructor can be called without arguments.</returns>
-    private static (ConstructorInfo Ctor, object?[] Args)? FindDefaultConstruction(Type type)
+    internal static (ConstructorInfo Ctor, object?[] Args)? FindDefaultConstruction(Type type)
     {
         var ctor = type.GetConstructors()
             .Where(c => c.GetParameters().All(p => p.HasDefaultValue))

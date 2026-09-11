@@ -564,8 +564,8 @@ internal sealed class RollingOrderStatistic : IDisposable
     private readonly int _length;
     private readonly bool _useLinear;
     private readonly PooledRingBuffer<double> _window;
-    private readonly OrderStatisticTree? _tree;
-    private readonly double[]? _scratch;
+    private readonly OrderStatisticTree _tree = new();
+    private readonly double[] _scratch;
     private bool _disposed;
 
     public RollingOrderStatistic(int length)
@@ -573,15 +573,7 @@ internal sealed class RollingOrderStatistic : IDisposable
         _length = Math.Max(1, length);
         _useLinear = _length <= RollingWindowSettings.SmallWindowThreshold;
         _window = new PooledRingBuffer<double>(_length);
-
-        if (_useLinear)
-        {
-            _scratch = ArrayPool<double>.Shared.Rent(_length);
-        }
-        else
-        {
-            _tree = new OrderStatisticTree();
-        }
+        _scratch = _useLinear ? ArrayPool<double>.Shared.Rent(_length) : Array.Empty<double>();
     }
 
     public int Count => _window.Count;
@@ -596,10 +588,10 @@ internal sealed class RollingOrderStatistic : IDisposable
 
         if (_window.TryAdd(value, out var removed))
         {
-            _tree!.Remove(removed);
+            _tree.Remove(removed);
         }
 
-        _tree!.Insert(value);
+        _tree.Insert(value);
     }
 
     public int CountLessThan(double value)
@@ -618,7 +610,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             return count;
         }
 
-        return _tree!.CountLessThan(value);
+        return _tree.CountLessThan(value);
     }
 
     public int CountLessThanOrEqual(double value)
@@ -637,7 +629,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             return count;
         }
 
-        return _tree!.CountLessThanOrEqual(value);
+        return _tree.CountLessThanOrEqual(value);
     }
 
     public double PercentileNearestRank(double percentile)
@@ -650,19 +642,63 @@ internal sealed class RollingOrderStatistic : IDisposable
 
         if (_useLinear)
         {
-            var scratch = _scratch!;
-            _window.CopyTo(scratch);
-            Array.Sort(scratch, 0, count);
-            var rank = (int)Math.Ceiling(percentile / 100 * count);
-            rank = Math.Max(rank, 1);
-            rank = Math.Min(rank, count);
-            return scratch[rank - 1];
+            _window.CopyTo(_scratch);
+            Array.Sort(_scratch, 0, count);
+            return _scratch[NearestRank(percentile, count) - 1];
         }
 
-        var treeCount = _tree!.Count;
-        var treeRank = treeCount > 0 ? (int)Math.Ceiling(percentile / 100 * treeCount) : 0;
-        return _tree.SelectByRank(Math.Max(treeRank, 1));
+        return _tree.SelectByRank(NearestRank(percentile, _tree.Count));
     }
+
+    /// <summary>
+    /// The percentile the window would have with <paramref name="pending"/> added, leaving the window as it is.
+    /// </summary>
+    /// <remarks>
+    /// A streaming preview answers for a bar it does not commit. Without this it could only read the window
+    /// before the bar, so a preview of the first bar was 0 and every later one was a bar late.
+    /// </remarks>
+    public double PercentileNearestRank(double percentile, double pending)
+    {
+        var evicts = _window.Count == _length;
+        var start = evicts ? 1 : 0;
+        var count = _window.Count - start + 1;
+
+        if (_useLinear)
+        {
+            for (var i = 0; i < count - 1; i++)
+            {
+                _scratch[i] = _window[start + i];
+            }
+
+            _scratch[count - 1] = pending;
+            Array.Sort(_scratch, 0, count);
+            return _scratch[NearestRank(percentile, count) - 1];
+        }
+
+        var evicted = evicts ? _window[0] : 0;
+        _tree.Insert(pending);
+        if (evicts)
+        {
+            _tree.Remove(evicted);
+        }
+
+        try
+        {
+            return _tree.SelectByRank(NearestRank(percentile, _tree.Count));
+        }
+        finally
+        {
+            if (evicts)
+            {
+                _tree.Insert(evicted);
+            }
+
+            _tree.Remove(pending);
+        }
+    }
+
+    private static int NearestRank(double percentile, int count) =>
+        Math.Min(Math.Max((int)Math.Ceiling(percentile / 100 * count), 1), count);
 
     public void Dispose()
     {
@@ -672,7 +708,7 @@ internal sealed class RollingOrderStatistic : IDisposable
         }
 
         _window.Dispose();
-        if (_scratch != null)
+        if (_useLinear)
         {
             ArrayPool<double>.Shared.Return(_scratch, clearArray: true);
         }

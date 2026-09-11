@@ -680,9 +680,9 @@ public sealed class TrimeanState : IStreamingIndicatorState, IDisposable
             _order.Add(value);
         }
 
-        var q1 = _order.PercentileNearestRank(25);
-        var median = _order.PercentileNearestRank(50);
-        var q3 = _order.PercentileNearestRank(75);
+        var q1 = isFinal ? _order.PercentileNearestRank(25) : _order.PercentileNearestRank(25, value);
+        var median = isFinal ? _order.PercentileNearestRank(50) : _order.PercentileNearestRank(50, value);
+        var q3 = isFinal ? _order.PercentileNearestRank(75) : _order.PercentileNearestRank(75, value);
         var trimean = (q1 + (2 * median) + q3) / 4;
 
         IReadOnlyDictionary<string, double>? outputs = null;

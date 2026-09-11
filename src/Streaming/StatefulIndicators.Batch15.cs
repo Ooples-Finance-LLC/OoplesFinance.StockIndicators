@@ -455,8 +455,8 @@ public sealed class InterquartileRangeBandsState : IStreamingIndicatorState, IDi
             _order.Add(value);
         }
 
-        var q1 = _order.PercentileNearestRank(25);
-        var q3 = _order.PercentileNearestRank(75);
+        var q1 = isFinal ? _order.PercentileNearestRank(25) : _order.PercentileNearestRank(25, value);
+        var q3 = isFinal ? _order.PercentileNearestRank(75) : _order.PercentileNearestRank(75, value);
         var iqr = q3 - q1;
         var upper = q3 + (_mult * iqr);
         var lower = q1 - (_mult * iqr);
