@@ -1966,52 +1966,49 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
 
 public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _gamma;
-    // Track three cumulative VWAPs due to batch contamination pattern in stdDev(VWAP)
-    private double _volSum;
-    private double _volPriceSum1;       // VWAP1: typicalPrice = (H+L+C)/3
-    private double _volPriceSum1Prime;  // VWAP1': typicalPrice = (H+L+VWAP1)/3
-    private double _volPriceSum2;       // VWAP2: typicalPrice = (H+L+deviationSquared)/3 where devSq = (VWAP1-VWAP1')²
+    private readonly int _zLength;
+    private readonly PooledRingBuffer<double> _volumePrices;
+    private readonly PooledRingBuffer<double> _volumes;
+    private readonly PooledRingBuffer<double> _devSquares;
     private double _l0;
     private double _l1;
     private double _l2;
     private double _l3;
     private bool _hasPrev;
-    private int _barCount;
 
     public MacZVwapIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 12,
         int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02,
         InputName inputName = InputName.Close)
+        : this(maType, fastLength, slowLength, signalLength, length1, length2, gamma, new StreamingInputResolver(inputName, null))
     {
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), inputName);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-        _gamma = gamma;
-        _ = length1; // Not used - batch VWAP is cumulative, not windowed
     }
 
     public MacZVwapIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length1,
         int length2, double gamma, Func<OhlcvBar, double> selector)
+        : this(maType, fastLength, slowLength, signalLength, length1, length2, gamma,
+            new StreamingInputResolver(InputName.Close, selector ?? throw new ArgumentNullException(nameof(selector))))
     {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
+    }
 
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), selector);
+    private MacZVwapIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length1,
+        int length2, double gamma, StreamingInputResolver input)
+    {
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length2));
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = input;
         _gamma = gamma;
-        _ = length1; // Not used - batch VWAP is cumulative, not windowed
+        _zLength = Math.Max(1, length1);
+        _volumePrices = new PooledRingBuffer<double>(_zLength);
+        _volumes = new PooledRingBuffer<double>(_zLength);
+        _devSquares = new PooledRingBuffer<double>(_zLength);
     }
 
     public IndicatorName Name => IndicatorName.MacZVwapIndicator;
@@ -2022,59 +2019,30 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _fastSmoother.Reset();
         _slowSmoother.Reset();
         _signalSmoother.Reset();
-        _volSum = 0;
-        _volPriceSum1 = 0;
-        _volPriceSum1Prime = 0;
-        _volPriceSum2 = 0;
+        _volumePrices.Clear();
+        _volumes.Clear();
+        _devSquares.Clear();
         _l0 = 0;
         _l1 = 0;
         _l2 = 0;
         _l3 = 0;
         _hasPrev = false;
-        _barCount = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdev = _stdDev.Next(value, isFinal);
         var fastMa = _fastSmoother.Next(value, isFinal);
         var slowMa = _slowSmoother.Next(value, isFinal);
 
-        // Batch ZDistanceFromVwap + stdDev(VWAP) contamination pattern:
-        // ZDistanceFromVwap computes VWAP1, sets CustomValuesList = VWAP1
-        // stdDev(VWAP) then uses CustomValuesList (VWAP1) as inputList:
-        //   1. Call 1: GetMovingAverageList(VWAP, VWAP1) sets CustomValuesList = VWAP1
-        //      -> VWAP uses TypicalPrice = (H+L+VWAP1)/3, produces VWAP1'
-        //   2. deviation = VWAP1 - VWAP1' (NOT close - VWAP1!)
-        //   3. Call 2: GetMovingAverageList(VWAP, deviationSquared) sets CustomValuesList = devSq
-        //      -> VWAP uses TypicalPrice = (H+L+deviationSquared)/3, produces VWAP2 (variance)
-        //   4. stdDev = sqrt(VWAP2)
-        // zscore = (close - VWAP1) / stdDev
-
-        // VWAP1: typicalPrice1 = (H+L+C)/3
-        var typicalPrice1 = (bar.High + bar.Low + bar.Close) / 3;
-        var volSum = _volSum + bar.Volume;
-        var volPriceSum1 = _volPriceSum1 + (typicalPrice1 * bar.Volume);
-        var vwap1 = volSum != 0 ? volPriceSum1 / volSum : 0;
-
-        // VWAP1': typicalPrice1' = (H+L+VWAP1)/3 - contaminated by VWAP1 as "close"
-        var typicalPrice1Prime = (bar.High + bar.Low + vwap1) / 3;
-        var volPriceSum1Prime = _volPriceSum1Prime + (typicalPrice1Prime * bar.Volume);
-        var vwap1Prime = volSum != 0 ? volPriceSum1Prime / volSum : 0;
-
-        // deviation = VWAP1 - VWAP1' (batch uses inputList[i] - smaList[i] where inputList = VWAP1)
-        var deviation = vwap1 - vwap1Prime;
-        var deviationSquared = deviation * deviation;
-
-        // VWAP2: typicalPrice2 = (H+L+deviationSquared)/3 - batch passes deviationSquared as CustomValuesList
-        var typicalPrice2 = (bar.High + bar.Low + deviationSquared) / 3;
-        var volPriceSum2 = _volPriceSum2 + (typicalPrice2 * bar.Volume);
-        var vwap2Variance = volSum != 0 ? volPriceSum2 / volSum : 0;
-
-        // stdDev = sqrt(VWAP2 "variance")
-        var vwapSd = MathHelper.Sqrt(vwap2Variance);
-        var zscore = vwapSd != 0 ? (value - vwap1) / vwapSd : 0;
+        // LazyBear's calc_zvwap: the distance of the price from its rolling volume-weighted mean, in units of
+        // sqrt(sma((price - mean)^2, length1)). Summed over the window oldest first, as the batch does.
+        var mean = SafeRatio(WindowSum(_volumePrices, bar.Volume * value, isFinal), WindowSum(_volumes, bar.Volume, isFinal));
+        var devSquared = (value - mean) * (value - mean);
+        var variance = WindowAverage(_devSquares, devSquared, isFinal);
+        var vwapSd = Math.Sqrt(variance);
+        var zscore = vwapSd != 0 ? (value - mean) / vwapSd : 0;
 
         var macd = fastMa - slowMa;
         var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
@@ -2092,35 +2060,13 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         var signal = _signalSmoother.Next(macz, isFinal);
         var histogram = macz - signal;
 
-        // At index 0, batch returns 0 because SMA-based stdDev = 0
-        // Our VWAP contamination pattern produces non-zero values at first bar
-        // Return 0 for first bar to match batch behavior
-        var isFirstBar = _barCount == 0;
-
         if (isFinal)
         {
-            _volSum = volSum;
-            _volPriceSum1 = volPriceSum1;
-            _volPriceSum1Prime = volPriceSum1Prime;
-            _volPriceSum2 = volPriceSum2;
             _l0 = l0;
             _l1 = l1;
             _l2 = l2;
             _l3 = l3;
             _hasPrev = true;
-            _barCount++;
-        }
-
-        if (isFirstBar)
-        {
-            return new StreamingIndicatorStateResult(0, includeOutputs
-                ? new Dictionary<string, double>(3)
-                {
-                    { "Macz", 0 },
-                    { "Signal", 0 },
-                    { "Histogram", 0 }
-                }
-                : null);
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -2139,10 +2085,58 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
-        _stdDev.Dispose();
         _fastSmoother.Dispose();
         _slowSmoother.Dispose();
         _signalSmoother.Dispose();
+        _stdDev.Dispose();
+        _volumePrices.Dispose();
+        _volumes.Dispose();
+        _devSquares.Dispose();
+    }
+
+    private static double SafeRatio(double numerator, double denominator) => denominator != 0 ? numerator / denominator : 0;
+
+    /// <summary>The sum of the last window values including <paramref name="value"/>; the window may be partial.</summary>
+    private double WindowSum(PooledRingBuffer<double> window, double value, bool isFinal)
+    {
+        var start = window.Count >= _zLength ? 1 : 0;
+        double sum = 0;
+        for (var i = start; i < window.Count; i++)
+        {
+            sum += window[i];
+        }
+
+        sum += value;
+        if (isFinal)
+        {
+            window.TryAdd(value, out _);
+        }
+
+        return sum;
+    }
+
+    /// <summary>The average of a full window including <paramref name="value"/>; 0 until the window is full.</summary>
+    private double WindowAverage(PooledRingBuffer<double> window, double value, bool isFinal)
+    {
+        var kept = Math.Min(window.Count, _zLength - 1);
+        double average = 0;
+        if (kept + 1 >= _zLength)
+        {
+            double sum = 0;
+            for (var i = window.Count - kept; i < window.Count; i++)
+            {
+                sum += window[i];
+            }
+
+            average = (sum + value) / _zLength;
+        }
+
+        if (isFinal)
+        {
+            window.TryAdd(value, out _);
+        }
+
+        return average;
     }
 }
 

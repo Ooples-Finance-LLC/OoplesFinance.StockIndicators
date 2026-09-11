@@ -156,13 +156,38 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        // LazyBear's MAC-Z VWAP. The MACD term is divided by stdev(src, length2), the prices' own standard
+        // deviation. The z-score is his calc_zvwap: the distance of the price from its rolling volume-weighted
+        // mean over length1, in units of sqrt(sma((price - mean)^2, length1)). It used to come from the Z distance
+        // indicator, which measured a cumulative VWAP against a deviation of the VWAP series itself.
+        var stdDevList = GetStandardDeviationList(inputList, length2);
         var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        // Reset CustomValuesList to ensure ZDistanceFromVwap uses close prices, not slowSmaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var zScoreList = CalculateZDistanceFromVwapIndicator(stockData, length: length1).CustomValuesList;
+        var volumeList = stockData.Volumes;
+        var zLength = Math.Max(1, length1);
+        var vwapMeanList = new List<double>(stockData.Count);
+        var vwapDevSquaredList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            double volumePriceSum = 0, volumeSum = 0;
+            for (var j = Math.Max(0, i - zLength + 1); j <= i; j++)
+            {
+                volumePriceSum += volumeList[j] * inputList[j];
+                volumeSum += volumeList[j];
+            }
+
+            var mean = volumeSum != 0 ? volumePriceSum / volumeSum : 0;
+            vwapMeanList.Add(mean);
+            vwapDevSquaredList.Add((inputList[i] - mean) * (inputList[i] - mean));
+        }
+
+        var vwapVarianceList = GetExactWindowAverageList(vwapDevSquaredList, zLength);
+        var zScoreList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var vwapSd = Sqrt(vwapVarianceList[i]);
+            zScoreList.Add(vwapSd != 0 ? (inputList[i] - vwapMeanList[i]) / vwapSd : 0);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
