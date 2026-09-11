@@ -112,21 +112,21 @@ public static class CalculationsHelper
         return true;
     }
 
+    /// <summary>
+    /// Publishes an indicator's named series, and keeps them, unrounded, for whatever is calculated next.
+    /// </summary>
+    /// <remarks>
+    /// IncludeOutputValues and RoundingDigits decide only the published copy. Composites read their components'
+    /// named series back, so emptying the one dictionary both read made 56 indicators throw, and rounding it
+    /// fed rounded inputs to the rest; it was also cleared in place, emptying a dictionary a caller held.
+    /// </remarks>
     public static void SetOutputValues(this StockData stockData, Func<Dictionary<string, List<double>>> outputFactory)
     {
-        if (!ShouldIncludeOutputValues(stockData))
-        {
-            stockData.OutputValues?.Clear();
-            return;
-        }
-
         var outputs = outputFactory();
-        if (TryGetRoundingDigits(stockData, out var roundingDigits))
-        {
-            outputs = RoundOutputValues(outputs, roundingDigits);
-        }
-
-        stockData.OutputValues = outputs;
+        var published = !ShouldIncludeOutputValues(stockData)
+            ? new Dictionary<string, List<double>>()
+            : TryGetRoundingDigits(stockData, out var roundingDigits) ? RoundOutputValues(outputs, roundingDigits) : outputs;
+        stockData.SetOutputs(outputs, published);
     }
 
     public static List<Signal>? CreateSignalsList(StockData stockData, int capacity = 0)
@@ -196,20 +196,17 @@ public static class CalculationsHelper
     /// Publishes an indicator's single series, and hands it to whatever is calculated next.
     /// </summary>
     /// <remarks>
-    /// IncludeCustomValues decides only the first. Off, the series is still the next calculation's input, the
-    /// same values it would read with the option on; it used to be cleared in place, which emptied the list a
-    /// composite had just asked a component for.
+    /// IncludeCustomValues and RoundingDigits decide only the first. Off, the series is still the next
+    /// calculation's input, the same values it would read with the option on; it used to be cleared in place,
+    /// which emptied the list a composite had just asked a component for. Rounded, it is still passed on
+    /// unrounded: the rounded copy used to be the input, so 187 indicators rounded a value they computed on.
     /// </remarks>
     public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
     {
-        stockData.CustomValuesList = TryGetRoundingDigits(stockData, out var roundingDigits)
-            ? RoundValuesList(customValuesList, roundingDigits)
-            : customValuesList;
-
-        if (!ShouldIncludeCustomValues(stockData))
-        {
-            stockData.HideCustomValues();
-        }
+        var published = !ShouldIncludeCustomValues(stockData)
+            ? new List<double>()
+            : TryGetRoundingDigits(stockData, out var roundingDigits) ? RoundValuesList(customValuesList, roundingDigits) : customValuesList;
+        stockData.RestoreSeries(published, customValuesList);
     }
 
     private static bool ShouldIncludeOutputValues(StockData stockData)
@@ -1354,7 +1351,7 @@ public static class CalculationsHelper
                 movingAvgList = stockData.CalculateFisherLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.FollowingAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().OutputValues["Fama"];
+                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().ChainedOutputs["Fama"];
                 break;
             case MovingAvgType.GeneralFilterEstimator:
                 movingAvgList = stockData.CalculateGeneralFilterEstimator(length: length).ChainedValues;

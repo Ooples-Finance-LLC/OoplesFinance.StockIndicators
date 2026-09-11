@@ -92,8 +92,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -138,9 +138,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
-        var middleBandList = bbList.OutputValues["MiddleBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
+        var middleBandList = bbList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

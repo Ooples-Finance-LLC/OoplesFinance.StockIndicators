@@ -317,8 +317,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var mtaList = CalculateMotionToAttractionChannels(stockData, length);
-        var aList = mtaList.OutputValues["UpperBand"];
-        var bList = mtaList.OutputValues["LowerBand"];
+        var aList = mtaList.ChainedOutputs["UpperBand"];
+        var bList = mtaList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

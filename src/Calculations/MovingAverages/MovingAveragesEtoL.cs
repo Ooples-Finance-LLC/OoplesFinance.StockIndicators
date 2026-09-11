@@ -1327,9 +1327,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var kamaList = CalculateKaufmanAdaptiveCorrelationOscillator(stockData, maType, length);
-        var indexStList = kamaList.OutputValues["IndexSt"];
-        var srcStList = kamaList.OutputValues["SrcSt"];
-        var rList = kamaList.OutputValues["Kaco"];
+        var indexStList = kamaList.ChainedOutputs["IndexSt"];
+        var srcStList = kamaList.ChainedOutputs["SrcSt"];
+        var rList = kamaList.ChainedOutputs["Kaco"];
         var srcMaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)

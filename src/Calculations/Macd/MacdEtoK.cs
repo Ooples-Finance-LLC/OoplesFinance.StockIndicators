@@ -76,7 +76,7 @@ public static partial class Calculations
         List<double> kcdList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var pkList = CalculateKasePeakOscillatorV1(stockData, length1, length2).OutputValues["Pk"];
+        var pkList = CalculateKasePeakOscillatorV1(stockData, length1, length2).ChainedOutputs["Pk"];
         var pkSignalList = GetMovingAverageList(stockData, maType, length3, pkList);
 
         for (var i = 0; i < stockData.Count; i++)

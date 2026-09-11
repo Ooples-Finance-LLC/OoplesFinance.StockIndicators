@@ -220,9 +220,9 @@ public static partial class Calculations
         int length = 14, double stdDevMult = 3)
     {
         var narrowChannelList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = narrowChannelList.OutputValues["UpperBand"];
-        var middleBandList = narrowChannelList.OutputValues["MiddleBand"];
-        var lowerBandList = narrowChannelList.OutputValues["LowerBand"];
+        var upperBandList = narrowChannelList.ChainedOutputs["UpperBand"];
+        var middleBandList = narrowChannelList.ChainedOutputs["MiddleBand"];
+        var lowerBandList = narrowChannelList.ChainedOutputs["LowerBand"];
         var signalsList = narrowChannelList.SignalsList;
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -802,9 +802,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(lowList);
-        var lowSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var lowSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
         stockData.SetCustomValues(highList);
-        var highSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var highSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

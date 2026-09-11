@@ -460,7 +460,7 @@ public static partial class Calculations
         List<double> bottomList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var alligatorList = CalculateAlligatorIndex(stockData, maType, jawLength, jawOffset, teethLength, teethOffset, lipsLength, lipsOffset).OutputValues;
+        var alligatorList = CalculateAlligatorIndex(stockData, maType, jawLength, jawOffset, teethLength, teethOffset, lipsLength, lipsOffset).ChainedOutputs;
         var jawList = alligatorList["Jaws"];
         var teethList = alligatorList["Teeth"];
         var lipsList = alligatorList["Lips"];

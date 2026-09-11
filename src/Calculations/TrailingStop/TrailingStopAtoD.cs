@@ -22,7 +22,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var perList = CalculatePoweredKaufmanAdaptiveMovingAverage(stockData, length, factor).OutputValues["Per"];
+        var perList = CalculatePoweredKaufmanAdaptiveMovingAverage(stockData, length, factor).ChainedOutputs["Per"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -88,7 +88,7 @@ public static partial class Calculations
 
         var aamaList = CalculateAdaptiveAutonomousRecursiveMovingAverage(stockData, length, gamma);
         var ma2List = aamaList.ChainedValues;
-        var dList = aamaList.OutputValues["D"];
+        var dList = aamaList.ChainedOutputs["D"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

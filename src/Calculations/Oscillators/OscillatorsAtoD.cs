@@ -324,8 +324,8 @@ public static partial class Calculations
         var probBbBasisDownSumWindow = new RollingSum();
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBbList = bbList.OutputValues["UpperBand"];
-        var basisList = bbList.OutputValues["MiddleBand"];
+        var upperBbList = bbList.ChainedOutputs["UpperBand"];
+        var basisList = bbList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -50,9 +50,9 @@ public static partial class Calculations
 
         stockData.SetCustomValues(ranaList);
         var moList = CalculateMovingAverageConvergenceDivergence(stockData, maType, fastLength, slowLength, signalLength);
-        var mcclellanOscillatorList = moList.OutputValues["Macd"];
-        var mcclellanSignalLineList = moList.OutputValues["Signal"];
-        var mcclellanHistogramList = moList.OutputValues["Histogram"];
+        var mcclellanOscillatorList = moList.ChainedOutputs["Macd"];
+        var mcclellanSignalLineList = moList.ChainedOutputs["Signal"];
+        var mcclellanHistogramList = moList.ChainedOutputs["Histogram"];
         for (var i = 0; i < stockData.Count; i++)
         {
             var mcclellanHistogram = mcclellanHistogramList[i];
@@ -100,7 +100,7 @@ public static partial class Calculations
         var wildersLength = (length * 2) - 1;
 
         var rsiValueList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength);
-        var rsiEmaList = rsiValueList.OutputValues["Signal"];
+        var rsiEmaList = rsiValueList.ChainedOutputs["Signal"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

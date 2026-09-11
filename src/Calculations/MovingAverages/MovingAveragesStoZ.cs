@@ -317,7 +317,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var callerSeries = stockData.CaptureInputSeries();
-        var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).OutputValues["Length"];
+        var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).ChainedOutputs["Length"];
         // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
         // and the typical price used to take it for the close.
         stockData.RestoreInputSeries(callerSeries);
@@ -1373,7 +1373,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var callerSeries = stockData.CaptureInputSeries();
-        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
         // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;

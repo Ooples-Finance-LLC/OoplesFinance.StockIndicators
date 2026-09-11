@@ -32,9 +32,9 @@ public static partial class Calculations
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
         var moVar = CalculateMcClellanOscillator(stockData, maType, fastLength: length2, slowLength: length4);
-        var advSumList = moVar.OutputValues["AdvSum"];
-        var decSumList = moVar.OutputValues["DecSum"];
-        var moList = moVar.OutputValues["Mo"];
+        var advSumList = moVar.ChainedOutputs["AdvSum"];
+        var decSumList = moVar.ChainedOutputs["DecSum"];
+        var moList = moVar.ChainedOutputs["Mo"];
         stockData.RestoreInputSeries(callerSeries);
         var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);

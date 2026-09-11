@@ -243,8 +243,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var fastKList = CalculateStochasticOscillator(stockData, maType, length, smoothLength1, smoothLength2);
-        var pkList = fastKList.OutputValues["FastD"];
-        var pdList = fastKList.OutputValues["SlowD"];
+        var pkList = fastKList.ChainedOutputs["FastD"];
+        var pdList = fastKList.ChainedOutputs["SlowD"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -353,7 +353,7 @@ public static partial class Calculations
 
         var stoList = CalculateStochasticOscillator(stockData, maType, length1, length2, length2);
         var fastKList = stoList.ChainedValues;
-        var skList = stoList.OutputValues["FastD"];
+        var skList = stoList.ChainedOutputs["FastD"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -510,8 +510,8 @@ public static partial class Calculations
         var rocList = CalculateRateOfChange(stockData, length: rocLength).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
         var stochasticList = CalculateStochasticOscillator(stockData, length: stochLength, smoothLength1: stochKLength, smoothLength2: stochDLength);
-        var stochKList = stochasticList.OutputValues["FastD"];
-        var stochDList = stochasticList.OutputValues["SlowD"];
+        var stochKList = stochasticList.ChainedOutputs["FastD"];
+        var stochDList = stochasticList.ChainedOutputs["SlowD"];
         stockData.RestoreInputSeries(callerSeries);
         var emvList = CalculateEaseOfMovement(stockData, length: emoLength, divisor: divisor).ChainedValues;
 
@@ -1520,8 +1520,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var fractalChaosBandsList = CalculateFractalChaosBands(stockData);
-        var upperBandList = fractalChaosBandsList.OutputValues["UpperBand"];
-        var lowerBandList = fractalChaosBandsList.OutputValues["LowerBand"];
+        var upperBandList = fractalChaosBandsList.ChainedOutputs["UpperBand"];
+        var lowerBandList = fractalChaosBandsList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2216,7 +2216,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -3423,7 +3423,7 @@ public static partial class Calculations
         double chgErSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -3470,7 +3470,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

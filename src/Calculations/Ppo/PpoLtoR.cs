@@ -139,8 +139,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var macdLeaderList = CalculateMovingAverageConvergenceDivergenceLeader(stockData, maType, fastLength, slowLength, signalLength);
-        var i1List = macdLeaderList.OutputValues["I1"];
-        var i2List = macdLeaderList.OutputValues["I2"];
+        var i1List = macdLeaderList.ChainedOutputs["I1"];
+        var i2List = macdLeaderList.ChainedOutputs["I2"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

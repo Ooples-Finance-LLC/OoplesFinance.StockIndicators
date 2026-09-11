@@ -209,7 +209,7 @@ public static partial class Calculations
         double absDiffSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -835,7 +835,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

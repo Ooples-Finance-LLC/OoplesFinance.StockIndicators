@@ -301,8 +301,8 @@ public static partial class Calculations
         var callerSeries = stockData.CaptureInputSeries();
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bollingerBands.OutputValues["UpperBand"];
-        var lowerBandList = bollingerBands.OutputValues["LowerBand"];
+        var upperBandList = bollingerBands.ChainedOutputs["UpperBand"];
+        var lowerBandList = bollingerBands.ChainedOutputs["LowerBand"];
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
         // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
         // caller's series, which is what its true range is a range of.

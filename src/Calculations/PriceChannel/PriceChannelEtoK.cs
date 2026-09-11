@@ -78,8 +78,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var trimeanList = CalculateTrimean(stockData, length);
-        var q1List = trimeanList.OutputValues["Q1"];
-        var q3List = trimeanList.OutputValues["Q3"];
+        var q1List = trimeanList.ChainedOutputs["Q1"];
+        var q3List = trimeanList.ChainedOutputs["Q3"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -697,7 +697,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -875,7 +875,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

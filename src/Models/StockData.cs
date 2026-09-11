@@ -15,6 +15,7 @@ public class StockData : IStockData
 {
     private List<double>? _inputValues;
     private List<double> _customValues = new List<double>();
+    private Dictionary<string, List<double>> _outputValues = new Dictionary<string, List<double>>();
     private List<double>? _openPrices;
     private List<double>? _highPrices;
     private List<double>? _lowPrices;
@@ -160,9 +161,6 @@ public class StockData : IStockData
     /// </remarks>
     internal List<double> ChainedValues { get; private set; } = new List<double>();
 
-    /// <summary>Stops publishing the current series without taking it from the next calculation.</summary>
-    internal void HideCustomValues() => _customValues = new List<double>();
-
     /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
     internal void RestoreSeries(List<double> published, List<double> chained)
     {
@@ -170,7 +168,32 @@ public class StockData : IStockData
         ChainedValues = chained;
     }
 
-    public Dictionary<string, List<double>> OutputValues { get; set; }
+    public Dictionary<string, List<double>> OutputValues
+    {
+        get => _outputValues;
+        set
+        {
+            _outputValues = value ?? new Dictionary<string, List<double>>();
+            ChainedOutputs = _outputValues;
+        }
+    }
+
+    /// <summary>
+    /// Every named series of the last calculation, unrounded, for the calculation that reads them next.
+    /// </summary>
+    /// <remarks>
+    /// The same dictionary as <see cref="OutputValues"/> unless IncludeOutputValues or RoundingDigits says to
+    /// publish less. A composite reads its components' named series from here: from the published copy, turning
+    /// output values off made 56 indicators throw and rounding fed rounded inputs to the rest.
+    /// </remarks>
+    internal Dictionary<string, List<double>> ChainedOutputs { get; private set; } = new Dictionary<string, List<double>>();
+
+    /// <summary>Sets the named series a calculation keeps for the next one, and the copy it publishes.</summary>
+    internal void SetOutputs(Dictionary<string, List<double>> chained, Dictionary<string, List<double>> published)
+    {
+        ChainedOutputs = chained;
+        _outputValues = published;
+    }
     public List<Signal> SignalsList { get; set; }
     public IndicatorOptions? Options { get; set; }
     public int Count { get; set; }

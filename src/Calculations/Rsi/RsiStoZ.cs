@@ -145,8 +145,8 @@ public static partial class Calculations
         var connorsRsiList = CalculateConnorsRelativeStrengthIndex(stockData, maType, length1, length2, length3).ChainedValues;
         stockData.SetCustomValues(connorsRsiList);
         var stochasticList = CalculateStochasticOscillator(stockData, maType, length2, smoothLength1, smoothLength2);
-        var fastDList = stochasticList.OutputValues["FastD"];
-        var slowDList = stochasticList.OutputValues["SlowD"];
+        var fastDList = stochasticList.ChainedOutputs["FastD"];
+        var slowDList = stochasticList.ChainedOutputs["SlowD"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -189,8 +189,8 @@ public static partial class Calculations
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
         stockData.SetCustomValues(rsiList);
         var stoRsiList = CalculateStochasticOscillator(stockData, maType, length, smoothLength1, smoothLength2);
-        var stochRsiList = stoRsiList.OutputValues["FastD"];
-        var stochRsiSignalList = stoRsiList.OutputValues["SlowD"];
+        var stochRsiList = stoRsiList.ChainedOutputs["FastD"];
+        var stochRsiSignalList = stoRsiList.ChainedOutputs["SlowD"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

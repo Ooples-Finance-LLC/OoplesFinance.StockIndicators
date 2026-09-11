@@ -365,7 +365,7 @@ internal sealed class SeriesEvaluator
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
         var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
-        if (key is not null && result.OutputValues.TryGetValue(key, out var list))
+        if (key is not null && result.ChainedOutputs.TryGetValue(key, out var list))
         {
             return list.ToArray();
         }
