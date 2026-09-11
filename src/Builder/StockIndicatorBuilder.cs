@@ -12,6 +12,7 @@ public sealed class StockIndicatorBuilder
 {
     private readonly IndicatorDataSource _source;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
+    private readonly Dictionary<IndicatorNodeKey, SeriesHandle> _indicatorNodes;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
     private readonly Dictionary<SeriesKey, SeriesHandle> _baseSeries;
     private readonly Dictionary<string, IndicatorDataSource> _namedSources;
@@ -40,6 +41,7 @@ public sealed class StockIndicatorBuilder
     {
         _source = source ?? throw new ArgumentNullException(nameof(source));
         _nodes = new Dictionary<SeriesHandle, SeriesNode>();
+        _indicatorNodes = new Dictionary<IndicatorNodeKey, SeriesHandle>();
         _keys = new Dictionary<IndicatorKey, SeriesHandle>();
         _baseSeries = new Dictionary<SeriesKey, SeriesHandle>();
         _namedSources = new Dictionary<string, IndicatorDataSource>(StringComparer.OrdinalIgnoreCase);
@@ -264,13 +266,57 @@ public sealed class StockIndicatorBuilder
         return engine.Run();
     }
 
+    /// <summary>
+    /// Whether identical indicator computations share one node. On by default.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// With this on, asking twice for the same indicator with the same parameters on the same input
+    /// returns the same handle and the work happens once. Results are unchanged either way - the graph
+    /// is a description of what to compute, and computing it twice produces the same numbers.
+    /// </para>
+    /// <para>
+    /// Turn it off to confirm that a difference in output is not coming from node sharing. It should
+    /// never be necessary, and if it ever is, that is a defect worth reporting rather than a setting
+    /// worth leaving off.
+    /// </para>
+    /// </remarks>
+    public bool EnableCommonSubexpressionElimination { get; set; } = true;
+
     internal SeriesHandle AddIndicator(IndicatorSpec spec, SeriesHandle input, SeriesKey seriesKey, IndicatorKey? key)
     {
+        // Two requests for the same computation on the same input share one node. The builder already
+        // does this for price series in GetOrCreateBaseSeries; without it here, asking for an SMA(20)
+        // on the close twice built two nodes and computed it twice. Sharing is safe because a node is
+        // a description of a computation rather than a result: evaluation is deterministic, and
+        // subscribing to the same handle twice is a no-op (IndicatorRuntime.ActivateSeries is a set).
+        //
+        // A specification that cannot be compared by value yields no key, and then this behaves as it
+        // did before. See IndicatorNodeKey for why that direction is the safe one.
+        var nodeKey = EnableCommonSubexpressionElimination
+            ? IndicatorNodeKey.TryCreate(seriesKey, input, spec)
+            : null;
+
+        if (nodeKey is not null && _indicatorNodes.TryGetValue(nodeKey, out var existing))
+        {
+            if (key.HasValue)
+            {
+                _keys[key.Value] = existing;
+            }
+
+            return existing;
+        }
+
         var handle = NewHandle();
         _nodes[handle] = SeriesNode.Indicator(seriesKey, input, spec);
         if (key.HasValue)
         {
             _keys[key.Value] = handle;
+        }
+
+        if (nodeKey is not null)
+        {
+            _indicatorNodes[nodeKey] = handle;
         }
 
         return handle;
