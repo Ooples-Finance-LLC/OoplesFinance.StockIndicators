@@ -200,12 +200,11 @@ public static partial class Calculations
     /// Calculates the Hawkeye Volume Indicator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <param name="divisor"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateHawkeyeVolumeIndicator(this StockData stockData, InputName inputName = InputName.MedianPrice, int length = 200,
+    public static StockData CalculateHawkeyeVolumeIndicator(this StockData stockData, int length = 200,
         double divisor = 3.6)
     {
         List<double> tempRangeList = new(stockData.Count);
@@ -215,7 +214,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum volumeSum = new();
         RollingSum rangeSum = new();
-        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -279,16 +278,15 @@ public static partial class Calculations
     /// Calculates the Herrick Payoff Index
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="pointValue"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateHerrickPayoffIndex(this StockData stockData, InputName inputName = InputName.MedianPrice, double pointValue = 100)
+    public static StockData CalculateHerrickPayoffIndex(this StockData stockData, double pointValue = 100)
     {
         List<double> kList = new(stockData.Count);
         List<double> hpicList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, openList, closeList, volumeList) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -339,16 +337,17 @@ public static partial class Calculations
     public static StockData CalculateFiniteVolumeElements(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 22, double factor = 0.3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> fveList = new(stockData.Count);
         List<double> bullList = new(stockData.Count);
         List<double> bearList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
-        var medianPriceList = CalculateMedianPrice(stockData).CustomValuesList;
-        // Reset CustomValuesList so TypicalPrice uses actual close prices, not medianPriceList
-        stockData.SetCustomValues(new List<double>());
-        var typicalPriceList = CalculateTypicalPrice(stockData).CustomValuesList;
+        var medianPriceList = CalculateMedianPrice(stockData).ChainedValues;
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
+        var typicalPriceList = CalculateTypicalPrice(stockData).ChainedValues;
         var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -413,7 +412,7 @@ public static partial class Calculations
         RollingSum vBymSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var relVolList = CalculateRelativeVolumeIndicator(stockData, maType, length).CustomValuesList;
+        var relVolList = CalculateRelativeVolumeIndicator(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -444,7 +443,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(vBymList);
-        var sdfList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var sdfList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

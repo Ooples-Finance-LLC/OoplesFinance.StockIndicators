@@ -273,7 +273,7 @@ internal sealed class SeriesEvaluator
             });
         }
 
-        return new StockData(tickerList, InputName.Close);
+        return new StockData(tickerList);
     }
 
     /// <summary>
@@ -349,12 +349,12 @@ internal sealed class SeriesEvaluator
                 return _cachedDefaultInput;
             }
 
-            var defaultInput = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+            var defaultInput = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
             _cachedDefaultInput = defaultInput.ToArray();
             return _cachedDefaultInput;
         }
 
-        var input = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         return input.ToArray();
     }
 
@@ -365,12 +365,12 @@ internal sealed class SeriesEvaluator
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
         var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
-        if (key is not null && result.OutputValues.TryGetValue(key, out var list))
+        if (key is not null && result.ChainedOutputs.TryGetValue(key, out var list))
         {
             return list.ToArray();
         }
 
-        return result.CustomValuesList.ToArray();
+        return result.ChainedValues.ToArray();
     }
 }
 

@@ -22,7 +22,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var perList = CalculatePoweredKaufmanAdaptiveMovingAverage(stockData, length, factor).OutputValues["Per"];
+        var perList = CalculatePoweredKaufmanAdaptiveMovingAverage(stockData, length, factor).ChainedOutputs["Per"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -87,8 +87,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var aamaList = CalculateAdaptiveAutonomousRecursiveMovingAverage(stockData, length, gamma);
-        var ma2List = aamaList.CustomValuesList;
-        var dList = aamaList.OutputValues["D"];
+        var ma2List = aamaList.ChainedValues;
+        var dList = aamaList.ChainedOutputs["D"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -146,7 +146,7 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -197,7 +197,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
         for (var i = 0; i < stockData.Count; i++)

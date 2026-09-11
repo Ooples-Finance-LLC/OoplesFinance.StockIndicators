@@ -14,24 +14,11 @@ public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndica
     private bool _hasPrev;
 
     public ElasticVolumeWeightedMovingAverageV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 40, double mult = 20, InputName inputName = InputName.Close)
+        int length = 40, double mult = 20)
     {
         _mult = mult;
         _volumeSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ElasticVolumeWeightedMovingAverageV1State(MovingAvgType maType, int length, double mult,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _mult = mult;
-        _volumeSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ElasticVolumeWeightedMovingAverageV1;
@@ -82,21 +69,10 @@ public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndica
     private double _prevEvwma;
     private bool _hasPrev;
 
-    public ElasticVolumeWeightedMovingAverageV2State(int length = 14, InputName inputName = InputName.Close)
+    public ElasticVolumeWeightedMovingAverageV2State(int length = 14)
     {
         _volumeSum = new RollingWindowSum(Math.Max(1, length));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ElasticVolumeWeightedMovingAverageV2State(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _volumeSum = new RollingWindowSum(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ElasticVolumeWeightedMovingAverageV2;
@@ -217,7 +193,7 @@ public sealed class ElderSafeZoneStopsState : IStreamingIndicatorState, IDisposa
     private bool _hasPrev;
 
     public ElderSafeZoneStopsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63,
-        int length2 = 22, int length3 = 3, double factor = 2.5, InputName inputName = InputName.Close)
+        int length2 = 22, int length3 = 3, double factor = 2.5)
     {
         _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _dmMinusSum = new RollingWindowSum(Math.Max(1, length2));
@@ -226,26 +202,7 @@ public sealed class ElderSafeZoneStopsState : IStreamingIndicatorState, IDisposa
         _dmPlusCountSum = new RollingWindowSum(Math.Max(1, length2));
         _safeZMinusMax = new RollingWindowMax(Math.Max(1, length3));
         _safeZPlusMin = new RollingWindowMin(Math.Max(1, length3));
-        _input = new StreamingInputResolver(inputName, null);
-        _factor = factor;
-    }
-
-    public ElderSafeZoneStopsState(MovingAvgType maType, int length1, int length2, int length3, double factor,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _dmMinusSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmMinusCountSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmPlusSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmPlusCountSum = new RollingWindowSum(Math.Max(1, length2));
-        _safeZMinusMax = new RollingWindowMax(Math.Max(1, length3));
-        _safeZPlusMin = new RollingWindowMin(Math.Max(1, length3));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _factor = factor;
     }
 
@@ -331,26 +288,12 @@ public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisp
     private readonly StreamingInputResolver _input;
 
     public ElliottWaveOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5,
-        int slowLength = 34, InputName inputName = InputName.Close)
+        int slowLength = 34)
     {
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ElliottWaveOscillatorState(MovingAvgType maType, int fastLength, int slowLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ElliottWaveOscillator;
@@ -403,8 +346,7 @@ public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposabl
     private readonly IMovingAverageSmoother _wcSmoother;
     private readonly StreamingInputResolver _input;
 
-    public EmaWaveIndicatorState(int length1 = 5, int length2 = 25, int length3 = 50, int smoothLength = 4,
-        InputName inputName = InputName.Close)
+    public EmaWaveIndicatorState(int length1 = 5, int length2 = 25, int length3 = 50, int smoothLength = 4)
     {
         _emaA = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length1));
         _emaB = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length2));
@@ -413,25 +355,7 @@ public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposabl
         _waSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
         _wbSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
         _wcSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EmaWaveIndicatorState(int length1, int length2, int length3, int smoothLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _emaA = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length1));
-        _emaB = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length2));
-        _emaC = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length3));
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _waSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wbSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _wcSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedSmooth);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EmaWaveIndicator;
@@ -491,7 +415,7 @@ public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisp
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
 
-    public EndPointMovingAverageState(int length = 11, int offset = 4, InputName inputName = InputName.Close)
+    public EndPointMovingAverageState(int length = 11, int offset = 4)
     {
         var resolved = Math.Max(1, length);
         _weights = new double[resolved];
@@ -505,29 +429,7 @@ public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisp
 
         _weightSum = weightSum;
         _values = new PooledRingBuffer<double>(resolved);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EndPointMovingAverageState(int length, int offset, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _weights = new double[resolved];
-        double weightSum = 0;
-        for (var j = 0; j < resolved; j++)
-        {
-            var weight = resolved - j - offset;
-            _weights[j] = weight;
-            weightSum += weight;
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EndPointMovingAverage;
@@ -581,7 +483,7 @@ public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
     private readonly StreamingInputResolver _input;
 
     public EnhancedIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        int signalLength = 8, InputName inputName = InputName.Close)
+        int signalLength = 8)
     {
         var resolved = Math.Max(1, length);
         var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
@@ -589,23 +491,7 @@ public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
         _lowWindow = new RollingWindowMin(resolved);
         _smaSmoother = MovingAverageSmootherFactory.Create(maType, smaLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EnhancedIndexState(MovingAvgType maType, int length, int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EnhancedIndex;
@@ -665,7 +551,7 @@ public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposab
     private bool _hasPrev;
 
     public EnhancedWilliamsRState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        int signalLength = 5, InputName inputName = InputName.Close)
+        int signalLength = 5)
     {
         var resolved = Math.Max(2, length);
         _srcMax = new RollingWindowMax(resolved);
@@ -677,28 +563,7 @@ public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposab
         _srcSma = MovingAverageSmootherFactory.Create(maType, smaLength);
         _volSma = MovingAverageSmootherFactory.Create(maType, smaLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EnhancedWilliamsRState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(2, length);
-        _srcMax = new RollingWindowMax(resolved);
-        _srcMin = new RollingWindowMin(resolved);
-        _volMax = new RollingWindowMax(resolved);
-        _volMin = new RollingWindowMin(resolved);
-        _af = length < 10 ? 0.25 : ((double)length / 32) - 0.0625;
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _srcSma = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _volSma = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EnhancedWilliamsR;
@@ -781,26 +646,12 @@ public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDispos
     private double _chgXCumSum;
     private bool _hasPrev;
 
-    public EquityMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        InputName inputName = InputName.Close)
+    public EquityMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         var resolved = Math.Max(1, length);
         _chgXSum = new RollingWindowSum(resolved);
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EquityMovingAverageState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _chgXSum = new RollingWindowSum(resolved);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EquityMovingAverage;
@@ -871,30 +722,14 @@ public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState
     private readonly StreamingInputResolver _input;
 
     public ErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 32, int length2 = 12, InputName inputName = InputName.Close)
+        int length1 = 32, int length2 = 12)
     {
         _xcoEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _xcoEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _xhlEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _xhlEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicCandlestickOscillatorState(MovingAvgType maType, int length1, int length2,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _xcoEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _xcoEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _xhlEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _xhlEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicCandlestickOscillator;
@@ -960,7 +795,7 @@ public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorSta
     private bool _hasPrev;
 
     public ErgodicCommoditySelectionIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
-        int length = 32, int smoothLength = 5, double pointValue = 1, InputName inputName = InputName.Close)
+        int length = 32, int smoothLength = 5, double pointValue = 1)
     {
         _length = Math.Max(1, length);
         _k = 100 * (pointValue / MathHelper.Sqrt(_length) / (150 + smoothLength));
@@ -969,25 +804,7 @@ public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorSta
         _tr = MovingAverageSmootherFactory.Create(maType, _length);
         _adx = MovingAverageSmootherFactory.Create(maType, _length);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicCommoditySelectionIndexState(MovingAvgType maType, int length, int smoothLength, double pointValue,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _k = 100 * (pointValue / MathHelper.Sqrt(_length) / (150 + smoothLength));
-        _dmPlus = MovingAverageSmootherFactory.Create(maType, _length);
-        _dmMinus = MovingAverageSmootherFactory.Create(maType, _length);
-        _tr = MovingAverageSmootherFactory.Create(maType, _length);
-        _adx = MovingAverageSmootherFactory.Create(maType, _length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicCommoditySelectionIndex;
@@ -1078,29 +895,13 @@ public sealed class ErgodicMeanDeviationIndicatorState : IStreamingIndicatorStat
     private readonly StreamingInputResolver _input;
 
     public ErgodicMeanDeviationIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5,
-        InputName inputName = InputName.Close)
+        int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5)
     {
         _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _ma1Ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _emdi = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicMeanDeviationIndicatorState(MovingAvgType maType, int length1, int length2, int length3,
-        int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _ma1Ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _emdi = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicMeanDeviationIndicator;
@@ -1153,26 +954,12 @@ public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingI
 
     public ErgodicMovingAverageConvergenceDivergenceState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 5,
-        int length3 = 5, InputName inputName = InputName.Close)
+        int length3 = 5)
     {
         _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicMovingAverageConvergenceDivergenceState(MovingAvgType maType, int length1, int length2, int length3,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicMovingAverageConvergenceDivergence;
@@ -1224,26 +1011,12 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
 
     public ErgodicPercentagePriceOscillatorState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 5,
-        int length3 = 5, InputName inputName = InputName.Close)
+        int length3 = 5)
     {
         _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicPercentagePriceOscillatorState(MovingAvgType maType, int length1, int length2, int length3,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicPercentagePriceOscillator;
@@ -1301,8 +1074,7 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
     private bool _hasPrev;
 
     public ErgodicTrueStrengthIndexV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3,
-        InputName inputName = InputName.Close)
+        int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3)
     {
         _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
@@ -1311,25 +1083,7 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
         _diffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _absDiffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicTrueStrengthIndexV1State(MovingAvgType maType, int length1, int length2, int length3,
-        int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _diffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _absDiffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _diffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _absDiffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicTrueStrengthIndexV1;
@@ -1415,7 +1169,7 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
 
     public ErgodicTrueStrengthIndexV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 21, int length2 = 9, int length3 = 9, int length4 = 17, int length5 = 6,
-        int length6 = 2, int signalLength = 2, InputName inputName = InputName.Close)
+        int length6 = 2, int signalLength = 2)
     {
         _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
@@ -1430,31 +1184,7 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
         _diffEma6 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
         _absDiffEma6 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ErgodicTrueStrengthIndexV2State(MovingAvgType maType, int length1, int length2, int length3, int length4,
-        int length5, int length6, int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _diffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _absDiffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _diffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _absDiffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _diffEma4 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _absDiffEma4 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _diffEma5 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
-        _absDiffEma5 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
-        _diffEma6 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
-        _absDiffEma6 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.ErgodicTrueStrengthIndexV2;
@@ -1550,27 +1280,13 @@ public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDispos
     private double _prevError;
     private bool _hasPrev;
 
-    public FallingRisingFilterState(int length = 14, InputName inputName = InputName.Close)
+    public FallingRisingFilterState(int length = 14)
     {
         var resolved = Math.Max(1, length);
         _alpha = (double)2 / (resolved + 1);
         _tempMax = new RollingWindowMax(resolved);
         _tempMin = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public FallingRisingFilterState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _alpha = (double)2 / (resolved + 1);
-        _tempMax = new RollingWindowMax(resolved);
-        _tempMin = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.FallingRisingFilter;
@@ -1631,7 +1347,7 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
 
-    public FareySequenceWeightedMovingAverageState(int length = 5, InputName inputName = InputName.Close)
+    public FareySequenceWeightedMovingAverageState(int length = 5)
     {
         var resolved = Math.Max(1, length);
         var array = new double[4] { 0, 1, 1, resolved };
@@ -1663,47 +1379,7 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
 
         _weightSum = weightSum;
         _values = new PooledRingBuffer<double>(_weights.Length);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public FareySequenceWeightedMovingAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        var array = new double[4] { 0, 1, 1, resolved };
-        List<double> resList = new();
-
-        while (array[2] <= resolved)
-        {
-            var a = array[0];
-            var b = array[1];
-            var c = array[2];
-            var d = array[3];
-            var k = Math.Floor((resolved + b) / array[3]);
-
-            array[0] = c;
-            array[1] = d;
-            array[2] = (k * c) - a;
-            array[3] = (k * d) - b;
-
-            var res = array[1] != 0 ? Math.Round(array[0] / array[1], 3) : 0;
-            resList.Insert(0, res);
-        }
-
-        _weights = resList.ToArray();
-        double weightSum = 0;
-        for (var i = 0; i < _weights.Length; i++)
-        {
-            weightSum += _weights[i];
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(_weights.Length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.FareySequenceWeightedMovingAverage;
@@ -1759,28 +1435,13 @@ public sealed class FastandSlowKurtosisOscillatorState : IStreamingIndicatorStat
     private double _prevFsk;
 
     public FastandSlowKurtosisOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length = 3, double ratio = 0.03, InputName inputName = InputName.Close)
+        int length = 3, double ratio = 0.03)
     {
         _length = Math.Max(1, length);
         _ratio = ratio;
         _values = new PooledRingBuffer<double>(_length);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public FastandSlowKurtosisOscillatorState(MovingAvgType maType, int length, double ratio,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _ratio = ratio;
-        _values = new PooledRingBuffer<double>(_length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.FastandSlowKurtosisOscillator;

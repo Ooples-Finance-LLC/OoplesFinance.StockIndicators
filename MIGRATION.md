@@ -150,6 +150,82 @@ var handle = indicators.Calculate(
 
 ## Breaking Changes
 
+### Custom input: one mechanism for every streaming indicator
+
+Every streaming state used to take custom input through its own selector constructor -
+`new RsiState(14, bar => ...)` - and 82 of them had none, so some indicators could not take custom
+values at all. Those per-state selector constructors are removed. `CustomInputState` wraps any state
+instead, and ready-made `InputSeries` presets are named after the input names they replace.
+
+```csharp
+// Before
+var rsi = new RelativeStrengthIndexState(14, 3, bar => (bar.High + bar.Low) / 2);
+
+// After - a preset
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.MedianPrice);
+
+// After - any function of the bar
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), bar => (bar.High + bar.Low) / 2);
+
+// After - another indicator's output (streaming chaining)
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.Of(new MidpointState(14)));
+```
+
+The same presets work in batch, where `UseInput` chains a series:
+
+```csharp
+var rsi = stockData.UseInput(InputSeries.MedianPrice).CalculateRelativeStrengthIndex(length: 14);
+```
+
+| Input | Preset |
+|---|---|
+| close, adjusted close, open, high, low, volume | `InputSeries.Close`, `.AdjustedClose`, `.Open`, `.High`, `.Low`, `.Volume` |
+| median, typical, full typical, weighted close, average price | `InputSeries.MedianPrice`, `.TypicalPrice`, `.FullTypicalPrice`, `.WeightedClose`, `.AveragePrice` |
+| midpoint, midprice over *n* bars | `InputSeries.Midpoint(n)`, `InputSeries.Midprice(n)` |
+| any function of the bar | `InputSeries.Of(bar => ...)` |
+| another indicator's output | `InputSeries.Of(state)` |
+
+A custom series changes more than the close: when its value lies outside the bar's range, the
+indicator's high and low come from the series itself (the max and min of its previous and current
+value). Batch applies the same rule to a chained series, so the two engines give the same numbers.
+
+### InputName is removed
+
+Callers pass values, not a name for them. `InputName` is gone from every indicator constructor, every
+`Calculate*` method, `StockData`, and the streaming options. An indicator built with no input named reads
+exactly what it read by default before; to compute it on something else, pass the series.
+
+```csharp
+// Streaming - default input: just drop the argument
+var cci = new CommodityChannelIndexState(InputName.TypicalPrice, MovingAvgType.SimpleMovingAverage, 20); // before
+var cci = new CommodityChannelIndexState(MovingAvgType.SimpleMovingAverage, 20);                         // after
+
+// Streaming - a different input: wrap the state
+var cci = new CustomInputState(new CommodityChannelIndexState(), InputSeries.MedianPrice);
+
+// Batch - default input: just drop the argument
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice); // before
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage);                         // after
+
+// Batch - a different input: chain it
+var ao = data.UseInput(InputSeries.TypicalPrice).CalculateAwesomeOscillator();
+```
+
+| Removed | Replacement |
+|---|---|
+| `InputName` parameter on a streaming state | drop it for the default; `new CustomInputState(state, InputSeries.X)` otherwise |
+| `inputName` parameter on a `Calculate*` method | drop it for the default; `data.UseInput(InputSeries.X).CalculateY()` otherwise |
+| `new StockData(tickers, InputName.X)` and `StockData.InputName` | `new StockData(tickers).UseInput(InputSeries.X)` |
+| `StreamingOptions.InputName`, `IndicatorSubscriptionOptions.InputName` | a `CustomInputState` per indicator |
+| `VolumeFlowIndicatorSpecOptions(inputName, ...)` | nothing - it was never read |
+| the `InputName` enum, `StreamingInputSelector`, `GetInputValuesList(InputName, StockData)` | now internal; name a series with `InputSeries` |
+
+**This can change results, in the direction of correctness.** `StockData`'s input name was stored and then
+ignored by about 650 indicators: `new StockData(tickers, InputName.MedianPrice).CalculateRsi()` computed an
+RSI of the close (#182). `new StockData(tickers).UseInput(InputSeries.MedianPrice).CalculateRsi()` really
+computes it on the median price. The same holds for the two streaming options, which fed that same ignored
+value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation ever read.
+
 ### Removed
 
 - None - all v1.x methods are still available (will be deprecated in v3.0)
@@ -198,12 +274,45 @@ the indicator's published definition, so **some batch values change**:
   origin; Chande Forecast, the standard deviation channel, Inertia and Projection Bands follow. Correlation is taken from each value's distance to the window mean, so a
   window with one side constant correlates at 0 rather than a rounding residue of either sign; the
   Periodic Channel sums that sign. Otherwise values change only in their last digits.
+- **`IncludeCustomValues = false` hides a result without changing any.** It used to empty the one list
+  that both the caller and the next calculation read, so a chain ran on the close, 176 indicators threw
+  and the Accelerator, Derivative and McClellan oscillators computed other values
+  (`IncludeCustomValuesTests`). Every indicator now computes with the option off exactly what it computes
+  with it on, and only `CustomValuesList` is empty. `Clear()` gives the data a new, empty series rather
+  than emptying the list in place, so a list you kept from an earlier result survives it; setting
+  `CustomValuesList` to null now reads back as an empty list.
+- **`IncludeOutputValues = false` and `RoundingDigits` change only what is published**, the same way
+  (`IncludeOutputValuesTests`, `RoundingDigitsTests`). With output values off, 56 indicators threw reading a
+  component's named series from the emptied dictionary; it is now replaced rather than cleared in place.
+  With rounding on, 187 indicators computed on rounded values - a component's result, or an intermediate
+  series handed on as input - so their final digits were the rounding of a different computation. Every
+  indicator now computes on unrounded values and rounds only what it publishes.
+- **Four indicators take each component of the price, as they are defined.** Each component call publishes
+  its result for the next one, and these called the next component without handing back the caller's series;
+  their streaming states copied the chain. CCT StochRSI took every RSI after the first of the RSI before it,
+  the Fast and Slow RSI Oscillator took its kurtosis term of the RSI, and the Sector Rotation Model took its
+  second rate of change of the first. Connors RSI ranked a 100-bar rate of change of the RSI; it ranks the
+  one-bar rate of change of the price over 100 bars, as Connors defines it, and the Stochastic Connors RSI and
+  Quasi White Noise built on it follow.
+- **Adaptive Ehlers windows take a cycle within float noise of an integer as that integer** before
+  rounding up to whole bars. A dominant cycle of exactly 29 in exact arithmetic could arrive as
+  29.000000000000004 and average over 30 bars, and which side it fell depended on summation order. Values
+  move only on bars where the cycle sat within a relative 1e-9 of an integer.
 
 Streaming-only corrections (batch unchanged): the first bar's true range in the ATR channels, Stoller
 channels, dynamic support/resistance, Bollinger Fibonacci ratios, Hurst cycle channel, trend trader bands,
 VMA bands, Trender and the volume positive/negative indicator; the Time Price Indicator's band offset; the
 defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
-50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations.
+50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations. The
+first bar's true range in the Grover Llorens Cycle Oscillator and the Ultimate Trader Oscillator is also
+High - Low now, not the whole high.
+
+A preview (`isFinal: false`) of a bar now publishes what that bar publishes once final
+(`StreamingPreviewTests`, every state). Nine did not: ALMA, Interquartile Range Bands and Trimean left the
+forming bar out of their window; Alligator, Gator and the Ehlers Fractal Adaptive Moving Average read their
+displaced value a bar late; and Connors RSI, with the Stochastic Connors RSI and Quasi White Noise built on
+it, ranked the forming value against a value the commit evicts. The autocorrelation periodogram behind the
+adaptive Ehlers indicators divided the previous bar's powers by the forming bar's maximum.
 
 `BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
 the batch twin of the streaming state of the same name.

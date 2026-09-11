@@ -50,9 +50,9 @@ public static partial class Calculations
 
         stockData.SetCustomValues(ranaList);
         var moList = CalculateMovingAverageConvergenceDivergence(stockData, maType, fastLength, slowLength, signalLength);
-        var mcclellanOscillatorList = moList.OutputValues["Macd"];
-        var mcclellanSignalLineList = moList.OutputValues["Signal"];
-        var mcclellanHistogramList = moList.OutputValues["Histogram"];
+        var mcclellanOscillatorList = moList.ChainedOutputs["Macd"];
+        var mcclellanSignalLineList = moList.ChainedOutputs["Signal"];
+        var mcclellanHistogramList = moList.ChainedOutputs["Histogram"];
         for (var i = 0; i < stockData.Count; i++)
         {
             var mcclellanHistogram = mcclellanHistogramList[i];
@@ -100,7 +100,7 @@ public static partial class Calculations
         var wildersLength = (length * 2) - 1;
 
         var rsiValueList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength);
-        var rsiEmaList = rsiValueList.OutputValues["Signal"];
+        var rsiEmaList = rsiValueList.ChainedOutputs["Signal"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -160,7 +160,7 @@ public static partial class Calculations
         List<double> whiteNoiseVarianceList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var connorsRsiList = CalculateConnorsRelativeStrengthIndex(stockData, maType, noiseLength, noiseLength, length).CustomValuesList;
+        var connorsRsiList = CalculateConnorsRelativeStrengthIndex(stockData, maType, noiseLength, noiseLength, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var connorsRsi = connorsRsiList[i];
@@ -176,7 +176,7 @@ public static partial class Calculations
 
         var whiteNoiseSmaList = GetMovingAverageList(stockData, maType, noiseLength, whiteNoiseList);
         stockData.SetCustomValues(whiteNoiseList);
-        var whiteNoiseStdDevList = CalculateStandardDeviationVolatility(stockData, maType, noiseLength).CustomValuesList;
+        var whiteNoiseStdDevList = CalculateStandardDeviationVolatility(stockData, maType, noiseLength).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var whiteNoiseStdDev = whiteNoiseStdDevList[i];
@@ -219,7 +219,7 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, lbLength);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -274,8 +274,8 @@ public static partial class Calculations
         List<double> histList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var linregList = CalculateLinearRegression(stockData, length).CustomValuesList;
-        var yList = CalculateQuadraticRegression(stockData, maType, length).CustomValuesList;
+        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
+        var yList = CalculateQuadraticRegression(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -451,7 +451,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -511,9 +511,9 @@ public static partial class Calculations
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(highList);
-        var rviHighList = CalculateRelativeVolatilityIndexV1(stockData, maType, length, smoothLength).CustomValuesList;
+        var rviHighList = CalculateRelativeVolatilityIndexV1(stockData, maType, length, smoothLength).ChainedValues;
         stockData.SetCustomValues(lowList);
-        var rviLowList = CalculateRelativeVolatilityIndexV1(stockData, maType, length, smoothLength).CustomValuesList;
+        var rviLowList = CalculateRelativeVolatilityIndexV1(stockData, maType, length, smoothLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -730,14 +730,14 @@ public static partial class Calculations
     public static StockData CalculateNaturalDirectionalCombo(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 40, int smoothLength = 20)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nxcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var ndxList = CalculateNaturalDirectionalIndex(stockData, maType, length, smoothLength).CustomValuesList;
-        // Reset CustomValuesList to prevent contamination of NST calculation
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var nstList = CalculateNaturalStochasticIndicator(stockData, maType, length, smoothLength).CustomValuesList;
+        var ndxList = CalculateNaturalDirectionalIndex(stockData, maType, length, smoothLength).ChainedValues;
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
+        var nstList = CalculateNaturalStochasticIndicator(stockData, maType, length, smoothLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -952,14 +952,14 @@ public static partial class Calculations
     public static StockData CalculateNaturalMarketCombo(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 40, int smoothLength = 20)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nmcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var nmrList = CalculateNaturalMarketRiver(stockData, maType, length).CustomValuesList;
-        // Reset CustomValuesList to prevent contamination of NMM calculation
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var nmmList = CalculateNaturalMarketMirror(stockData, maType, length).CustomValuesList;
+        var nmrList = CalculateNaturalMarketRiver(stockData, maType, length).ChainedValues;
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
+        var nmmList = CalculateNaturalMarketMirror(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1016,7 +1016,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(lnList);
-        var linRegList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var linReg = linRegList[i];
@@ -1225,7 +1225,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2).ChainedValues;
         var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1423,29 +1423,29 @@ public static partial class Calculations
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
         var callerSeries = stockData.CaptureInputSeries();
-        var rocList = CalculateRateOfChange(stockData, length1).CustomValuesList;
+        var rocList = CalculateRateOfChange(stockData, length1).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc15List = CalculateRateOfChange(stockData, length2).CustomValuesList;
+        var roc15List = CalculateRateOfChange(stockData, length2).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc20List = CalculateRateOfChange(stockData, length3).CustomValuesList;
+        var roc20List = CalculateRateOfChange(stockData, length3).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc30List = CalculateRateOfChange(stockData, length4).CustomValuesList;
+        var roc30List = CalculateRateOfChange(stockData, length4).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc40List = CalculateRateOfChange(stockData, length5).CustomValuesList;
+        var roc40List = CalculateRateOfChange(stockData, length5).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc65List = CalculateRateOfChange(stockData, length7).CustomValuesList;
+        var roc65List = CalculateRateOfChange(stockData, length7).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc75List = CalculateRateOfChange(stockData, length8).CustomValuesList;
+        var roc75List = CalculateRateOfChange(stockData, length8).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc100List = CalculateRateOfChange(stockData, length9).CustomValuesList;
+        var roc100List = CalculateRateOfChange(stockData, length9).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc195List = CalculateRateOfChange(stockData, length11).CustomValuesList;
+        var roc195List = CalculateRateOfChange(stockData, length11).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc265List = CalculateRateOfChange(stockData, length12).CustomValuesList;
+        var roc265List = CalculateRateOfChange(stockData, length12).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc390List = CalculateRateOfChange(stockData, length13).CustomValuesList;
+        var roc390List = CalculateRateOfChange(stockData, length13).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var roc530List = CalculateRateOfChange(stockData, length14).CustomValuesList;
+        var roc530List = CalculateRateOfChange(stockData, length14).ChainedValues;
         var roc10SmaList = GetMovingAverageList(stockData, maType, length1, rocList);
         var roc15SmaList = GetMovingAverageList(stockData, maType, length1, roc15List);
         var roc20SmaList = GetMovingAverageList(stockData, maType, length1, roc20List);
@@ -1664,7 +1664,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1707,7 +1707,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, lowList, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1840,7 +1840,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(absOsList);
-        var pList = CalculateLinearRegression(stockData, smoothLength).CustomValuesList;
+        var pList = CalculateLinearRegression(stockData, smoothLength).ChainedValues;
         var (highestList, _) = GetMaxAndMinValuesList(pList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2095,7 +2095,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         var sqrt = Sqrt(length);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -2246,7 +2246,7 @@ public static partial class Calculations
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
         stockData.SetCustomValues(emaList);
-        var rsiList = CalculateRelativeStrengthIndex(stockData, length: length).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2290,7 +2290,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linRegList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2399,7 +2399,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(spreadList);
-        var rsList = CalculateRelativeStrengthIndex(stockData, length: length).CustomValuesList;
+        var rsList = CalculateRelativeStrengthIndex(stockData, length: length).ChainedValues;
         var rssList = GetMovingAverageList(stockData, maType, smoothLength, rsList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2800,9 +2800,9 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -2869,7 +2869,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(rangeList);
-        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentVolume = volumeList[i];

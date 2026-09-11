@@ -14008,16 +14008,15 @@ public sealed class VariableIndexDynamicAverageSpecOptions : IIndicatorSpecOptio
 
 public sealed class VolumeFlowIndicatorSpecOptions : IIndicatorSpecOptions
 {
-    public VolumeFlowIndicatorSpecOptions(InputName inputName = InputName.TypicalPrice, int length1 = 130, int length2 = 30,
+    public VolumeFlowIndicatorSpecOptions(int length1 = 130, int length2 = 30,
         int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5)
-        : this(inputName, length1, length2, signalLength, smoothLength, coef, vcoef, MovingAvgType.SimpleMovingAverage)
+        : this(length1, length2, signalLength, smoothLength, coef, vcoef, MovingAvgType.SimpleMovingAverage)
     {
     }
 
-    public VolumeFlowIndicatorSpecOptions(InputName inputName, int length1, int length2, int signalLength, int smoothLength,
+    public VolumeFlowIndicatorSpecOptions(int length1, int length2, int signalLength, int smoothLength,
         double coef, double vcoef, MovingAvgType maType)
     {
-        InputName = inputName;
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
         SignalLength = Math.Max(1, signalLength);
@@ -14027,7 +14026,6 @@ public sealed class VolumeFlowIndicatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
-    public InputName InputName { get; }
     public int Length1 { get; }
     public int Length2 { get; }
     public int SignalLength { get; }

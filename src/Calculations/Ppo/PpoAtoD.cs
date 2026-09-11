@@ -135,8 +135,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var dinapoliMacdList = CalculateDiNapoliMovingAverageConvergenceDivergence(stockData, lc, sc, sp);
-        var ssList = dinapoliMacdList.OutputValues["SlowS"];
-        var rList = dinapoliMacdList.OutputValues["Macd"];
+        var ssList = dinapoliMacdList.ChainedOutputs["SlowS"];
+        var rList = dinapoliMacdList.ChainedOutputs["Macd"];
 
         var spAlpha = 2 / (1 + sp);
 

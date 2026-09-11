@@ -17,8 +17,8 @@ public static partial class Calculations
         List<double> stcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var srcList = CalculateLinearRegression(stockData, Math.Abs(slowLength - fastLength)).CustomValuesList;
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var srcList = CalculateLinearRegression(stockData, Math.Abs(slowLength - fastLength)).ChainedValues;
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
         var (highest1List, lowest1List) = GetMaxAndMinValuesList(srcList, fastLength);
         var (highest2List, lowest2List) = GetMaxAndMinValuesList(srcList, slowLength);
 
@@ -261,7 +261,7 @@ public static partial class Calculations
         List<double> doubleKList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var stochasticList = CalculateStochasticOscillator(stockData, maType, length: length).CustomValuesList;
+        var stochasticList = CalculateStochasticOscillator(stockData, maType, length: length).ChainedValues;
         var (highestList, lowestList) = GetMaxAndMinValuesList(stochasticList, length);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -318,8 +318,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var adxList = CalculateAverageDirectionalIndex(stockData, maType, length1);
-        var diPlusList = adxList.OutputValues["DiPlus"];
-        var diMinusList = adxList.OutputValues["DiMinus"];
+        var diPlusList = adxList.ChainedOutputs["DiPlus"];
+        var diMinusList = adxList.ChainedOutputs["DiMinus"];
 
         for (var i = 0; i < stockData.Count; i++)
         {

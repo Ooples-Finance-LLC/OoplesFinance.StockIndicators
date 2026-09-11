@@ -12,7 +12,6 @@ namespace OoplesFinance.StockIndicators.Interfaces;
 
 public interface IStockData
 {
-    InputName InputName { get; }
     IndicatorName IndicatorName { get; }
     List<double> InputValues { get; }
     List<double> OpenPrices { get; }

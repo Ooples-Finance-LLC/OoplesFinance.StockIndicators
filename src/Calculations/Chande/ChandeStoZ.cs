@@ -47,7 +47,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var stdDevEmaList = GetMovingAverageList(stockData, maType, length, stdDevList);
 
         for (var i = 0; i < stockData.Count; i++)

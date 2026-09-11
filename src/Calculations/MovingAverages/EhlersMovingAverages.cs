@@ -1325,7 +1325,7 @@ public static partial class Calculations
 
         var ssf2PoleList = GetMovingAverageList(stockData, maType, fastLength, avgZerosList);
         stockData.SetCustomValues(ssf2PoleList);
-        var ssf2PoleStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        var ssf2PoleStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

@@ -209,7 +209,7 @@ public static partial class Calculations
         double absDiffSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -564,7 +564,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -585,7 +585,7 @@ public static partial class Calculations
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
         stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = devList[i];
@@ -631,7 +631,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var devList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var devList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -671,7 +671,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -835,7 +835,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1289,8 +1289,8 @@ public static partial class Calculations
         double tempSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var shortStdDevList = CalculateStandardDeviationVolatility(stockData, length: fastLength).CustomValuesList;
-        var longStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        var shortStdDevList = CalculateStandardDeviationVolatility(stockData, length: fastLength).ChainedValues;
+        var longStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

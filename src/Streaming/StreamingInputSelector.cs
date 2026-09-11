@@ -3,7 +3,7 @@ using OoplesFinance.StockIndicators.Enums;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
-public static class StreamingInputSelector
+internal static class StreamingInputSelector
 {
     public static double GetValue(OhlcvBar bar, InputName inputName)
     {

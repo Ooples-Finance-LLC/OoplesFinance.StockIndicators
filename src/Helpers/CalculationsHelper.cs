@@ -112,21 +112,21 @@ public static class CalculationsHelper
         return true;
     }
 
+    /// <summary>
+    /// Publishes an indicator's named series, and keeps them, unrounded, for whatever is calculated next.
+    /// </summary>
+    /// <remarks>
+    /// IncludeOutputValues and RoundingDigits decide only the published copy. Composites read their components'
+    /// named series back, so emptying the one dictionary both read made 56 indicators throw, and rounding it
+    /// fed rounded inputs to the rest; it was also cleared in place, emptying a dictionary a caller held.
+    /// </remarks>
     public static void SetOutputValues(this StockData stockData, Func<Dictionary<string, List<double>>> outputFactory)
     {
-        if (!ShouldIncludeOutputValues(stockData))
-        {
-            stockData.OutputValues?.Clear();
-            return;
-        }
-
         var outputs = outputFactory();
-        if (TryGetRoundingDigits(stockData, out var roundingDigits))
-        {
-            outputs = RoundOutputValues(outputs, roundingDigits);
-        }
-
-        stockData.OutputValues = outputs;
+        var published = !ShouldIncludeOutputValues(stockData)
+            ? new Dictionary<string, List<double>>()
+            : TryGetRoundingDigits(stockData, out var roundingDigits) ? RoundOutputValues(outputs, roundingDigits) : outputs;
+        stockData.SetOutputs(outputs, published);
     }
 
     public static List<Signal>? CreateSignalsList(StockData stockData, int capacity = 0)
@@ -161,8 +161,8 @@ public static class CalculationsHelper
     /// <remarks>
     /// Not SetCustomValues. That publishes an indicator's OUTPUT, and honours IncludeCustomValues (which can
     /// drop it) and RoundingDigits (which rounds it). A caller's input series is neither: with
-    /// IncludeCustomValues off SetCustomValues clears it in place, and with RoundingDigits set the next
-    /// calculation would compute on rounded input.
+    /// IncludeCustomValues off, SetCustomValues cleared it and UseInput silently did nothing, and with
+    /// RoundingDigits set the next indicator computed on rounded input.
     /// </remarks>
     internal static void SetInputSeries(this StockData stockData, List<double> series) =>
         stockData.CustomValuesList = series;
@@ -171,12 +171,11 @@ public static class CalculationsHelper
     /// A copy of the caller's input series, taken before a composite's components publish their own outputs.
     /// </summary>
     /// <remarks>
-    /// Empty when the caller chained nothing. <see cref="StockData.CustomValuesList"/> has a public setter and can
-    /// be null; a null series reads as the bars' own input, as <c>GetInputValuesList</c> treats it, instead of
-    /// throwing from the copy.
+    /// Empty when the caller chained nothing. It is the chained series, not the published list, so a caller
+    /// with IncludeCustomValues off still hands its input to every component.
     /// </remarks>
     internal static List<double> CaptureInputSeries(this StockData stockData) =>
-        stockData.CustomValuesList is { } series ? new List<double>(series) : new List<double>();
+        new List<double>(stockData.ChainedValues);
 
     /// <summary>
     /// Hands the next component of a composite indicator the caller's input again, after an earlier
@@ -193,21 +192,21 @@ public static class CalculationsHelper
         stockData.SignalsList = new List<Signal>();
     }
 
+    /// <summary>
+    /// Publishes an indicator's single series, and hands it to whatever is calculated next.
+    /// </summary>
+    /// <remarks>
+    /// IncludeCustomValues and RoundingDigits decide only the first. Off, the series is still the next
+    /// calculation's input, the same values it would read with the option on; it used to be cleared in place,
+    /// which emptied the list a composite had just asked a component for. Rounded, it is still passed on
+    /// unrounded: the rounded copy used to be the input, so 187 indicators rounded a value they computed on.
+    /// </remarks>
     public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
     {
-        if (!ShouldIncludeCustomValues(stockData))
-        {
-            stockData.CustomValuesList?.Clear();
-            return;
-        }
-
-        if (TryGetRoundingDigits(stockData, out var roundingDigits))
-        {
-            stockData.CustomValuesList = RoundValuesList(customValuesList, roundingDigits);
-            return;
-        }
-
-        stockData.CustomValuesList = customValuesList;
+        var published = !ShouldIncludeCustomValues(stockData)
+            ? new List<double>()
+            : TryGetRoundingDigits(stockData, out var roundingDigits) ? RoundValuesList(customValuesList, roundingDigits) : customValuesList;
+        stockData.RestoreSeries(published, customValuesList);
     }
 
     private static bool ShouldIncludeOutputValues(StockData stockData)
@@ -375,14 +374,14 @@ public static class CalculationsHelper
             return false;
         }
 
-        return stockData.CustomValuesList == null || stockData.CustomValuesList.Count == 0;
+        return stockData.ChainedValues.Count == 0;
     }
 
     private static IReadOnlyList<double> GetDerivedCloseList(StockData stockData)
     {
-        if (stockData.CustomValuesList != null && stockData.CustomValuesList.Count > 0)
+        if (stockData.ChainedValues.Count > 0)
         {
-            return stockData.CustomValuesList;
+            return stockData.ChainedValues;
         }
 
         return stockData.ClosePrices;
@@ -397,10 +396,18 @@ public static class CalculationsHelper
             return list;
         }
 
-        var highs = stockData.HighPrices;
-        var lows = stockData.LowPrices;
         var opens = stockData.OpenPrices;
         var closes = GetDerivedCloseList(stockData);
+        IReadOnlyList<double> highs = stockData.HighPrices;
+        IReadOnlyList<double> lows = stockData.LowPrices;
+        if (!ReferenceEquals(closes, stockData.ClosePrices) && !SequenceEqualValues(closes, stockData.ClosePrices))
+        {
+            // A chained series stands in for the close, and each bar's range follows the per-bar rule, as
+            // GetInputValuesList and the streaming CustomInputState apply it. Built from the real high and low
+            // around a custom close, a true range measured the gap between two different series: a log-close
+            // of about 5 against highs near 180 gave ATR bands of +-400.
+            (highs, lows) = GetCustomRangeLists(closes, stockData.HighPrices, stockData.LowPrices);
+        }
 
         switch (kind)
         {
@@ -489,14 +496,14 @@ public static class CalculationsHelper
     /// <remarks>
     /// Leaves the caller's series exactly as it found it. It used to publish the average onto
     /// <see cref="StockData.CustomValuesList"/>, so whatever an indicator calculated NEXT ran on the average
-    /// rather than the price: Bollinger Bands measured the standard deviation of its own middle band. It works
-    /// on a copy because the calculations it delegates to clear the current series in place when
-    /// IncludeCustomValues is off, and that series can be the very list the caller is holding.
+    /// rather than the price: Bollinger Bands measured the standard deviation of its own middle band. Both the
+    /// published list and the chained series are put back, since with IncludeCustomValues off they differ.
     /// </remarks>
     public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,
         int? fastLength = null, int? slowLength = null)
     {
-        var callerSeries = stockData.CustomValuesList;
+        var callerPublished = stockData.CustomValuesList;
+        var callerChained = stockData.ChainedValues;
         stockData.SetInputSeries(customValuesList is not null ? new List<double>(customValuesList) : stockData.CaptureInputSeries());
         try
         {
@@ -504,7 +511,7 @@ public static class CalculationsHelper
         }
         finally
         {
-            stockData.SetInputSeries(callerSeries);
+            stockData.RestoreSeries(callerPublished, callerChained);
         }
     }
 
@@ -1144,490 +1151,490 @@ public static class CalculationsHelper
         switch (movingAvgType)
         {
             case MovingAvgType._1LCLeastSquaresMovingAverage:
-                movingAvgList = stockData.Calculate1LCLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.Calculate1LCLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType._3HMA:
-                movingAvgList = stockData.Calculate3HMA(length: length).CustomValuesList;
+                movingAvgList = stockData.Calculate3HMA(length: length).ChainedValues;
                 break;
             case MovingAvgType.AdaptiveAutonomousRecursiveMovingAverage:
-                movingAvgList = stockData.CalculateAdaptiveAutonomousRecursiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAdaptiveAutonomousRecursiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.AdaptiveExponentialMovingAverage:
-                movingAvgList = stockData.CalculateAdaptiveExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAdaptiveExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.AdaptiveLeastSquares:
-                movingAvgList = stockData.CalculateAdaptiveLeastSquares(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAdaptiveLeastSquares(length: length).ChainedValues;
                 break;
             case MovingAvgType.AdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateAdaptiveMovingAverage(fastLength ?? default, slowLength ?? length, length).CustomValuesList;
+                movingAvgList = stockData.CalculateAdaptiveMovingAverage(fastLength ?? default, slowLength ?? length, length).ChainedValues;
                 break;
             case MovingAvgType.AhrensMovingAverage:
-                movingAvgList = stockData.CalculateAhrensMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateAhrensMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.AlphaDecreasingExponentialMovingAverage:
-                movingAvgList = stockData.CalculateAlphaDecreasingExponentialMovingAverage().CustomValuesList;
+                movingAvgList = stockData.CalculateAlphaDecreasingExponentialMovingAverage().ChainedValues;
                 break;
             case MovingAvgType.ArnaudLegouxMovingAverage:
-                movingAvgList = stockData.CalculateArnaudLegouxMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateArnaudLegouxMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.AtrFilteredExponentialMovingAverage:
-                movingAvgList = stockData.CalculateAtrFilteredExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAtrFilteredExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.AutoFilter:
-                movingAvgList = stockData.CalculateAutoFilter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAutoFilter(length: length).ChainedValues;
                 break;
             case MovingAvgType.AutonomousRecursiveMovingAverage:
-                movingAvgList = stockData.CalculateAutonomousRecursiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateAutonomousRecursiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.BryantAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateBryantAdaptiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateBryantAdaptiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.CompoundRatioMovingAverage:
-                movingAvgList = stockData.CalculateCompoundRatioMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateCompoundRatioMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.CorrectedMovingAverage:
-                movingAvgList = stockData.CalculateCorrectedMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateCorrectedMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.CubedWeightedMovingAverage:
-                movingAvgList = stockData.CalculateCubedWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateCubedWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.DampedSineWaveWeightedFilter:
-                movingAvgList = stockData.CalculateDampedSineWaveWeightedFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateDampedSineWaveWeightedFilter(length).ChainedValues;
                 break;
             case MovingAvgType.DistanceWeightedMovingAverage:
-                movingAvgList = stockData.CalculateDistanceWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateDistanceWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.DoubleExponentialMovingAverage:
-                movingAvgList = stockData.CalculateDoubleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateDoubleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.DoubleExponentialSmoothing:
-                movingAvgList = stockData.CalculateDoubleExponentialSmoothing().CustomValuesList;
+                movingAvgList = stockData.CalculateDoubleExponentialSmoothing().ChainedValues;
                 break;
             case MovingAvgType.DynamicallyAdjustableFilter:
-                movingAvgList = stockData.CalculateDynamicallyAdjustableFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateDynamicallyAdjustableFilter(length).ChainedValues;
                 break;
             case MovingAvgType.DynamicallyAdjustableMovingAverage:
-                movingAvgList = stockData.CalculateDynamicallyAdjustableMovingAverage(fastLength ?? default, slowLength ?? length).CustomValuesList;
+                movingAvgList = stockData.CalculateDynamicallyAdjustableMovingAverage(fastLength ?? default, slowLength ?? length).ChainedValues;
                 break;
             case MovingAvgType.EdgePreservingFilter:
-                movingAvgList = stockData.CalculateEdgePreservingFilter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEdgePreservingFilter(length: length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers2PoleButterworthFilterV1:
-                movingAvgList = stockData.CalculateEhlers2PoleButterworthFilterV1(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers2PoleButterworthFilterV1(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers2PoleButterworthFilterV2:
-                movingAvgList = stockData.CalculateEhlers2PoleButterworthFilterV2(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers2PoleButterworthFilterV2(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers2PoleSuperSmootherFilterV1:
-                movingAvgList = stockData.CalculateEhlers2PoleSuperSmootherFilterV1(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers2PoleSuperSmootherFilterV1(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers2PoleSuperSmootherFilterV2:
-                movingAvgList = stockData.CalculateEhlers2PoleSuperSmootherFilterV2(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers2PoleSuperSmootherFilterV2(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers3PoleButterworthFilterV1:
-                movingAvgList = stockData.CalculateEhlers3PoleButterworthFilterV1(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers3PoleButterworthFilterV1(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers3PoleButterworthFilterV2:
-                movingAvgList = stockData.CalculateEhlers3PoleButterworthFilterV2(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers3PoleButterworthFilterV2(length).ChainedValues;
                 break;
             case MovingAvgType.Ehlers3PoleSuperSmootherFilter:
-                movingAvgList = stockData.CalculateEhlers3PoleSuperSmootherFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlers3PoleSuperSmootherFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersAdaptiveLaguerreFilter:
-                movingAvgList = stockData.CalculateEhlersAdaptiveLaguerreFilter(slowLength ?? length, fastLength ?? default).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersAdaptiveLaguerreFilter(slowLength ?? length, fastLength ?? default).ChainedValues;
                 break;
             case MovingAvgType.EhlersAllPassPhaseShifter:
-                movingAvgList = stockData.CalculateEhlersAllPassPhaseShifter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersAllPassPhaseShifter(length: length).ChainedValues;
                 break;
             case MovingAvgType.EhlersAverageErrorFilter:
-                movingAvgList = stockData.CalculateEhlersAverageErrorFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersAverageErrorFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersBetterExponentialMovingAverage:
-                movingAvgList = stockData.CalculateEhlersBetterExponentialMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersBetterExponentialMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersChebyshevLowPassFilter:
-                movingAvgList = stockData.CalculateEhlersChebyshevLowPassFilter().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersChebyshevLowPassFilter().ChainedValues;
                 break;
             case MovingAvgType.EhlersDeviationScaledMovingAverage:
                 movingAvgList = stockData.CalculateEhlersDeviationScaledMovingAverage(
-                    fastLength: fastLength ?? length, slowLength: slowLength ?? length * 2).CustomValuesList;
+                    fastLength: fastLength ?? length, slowLength: slowLength ?? length * 2).ChainedValues;
                 break;
             case MovingAvgType.EhlersDeviationScaledSuperSmoother:
-                movingAvgList = stockData.CalculateEhlersDeviationScaledSuperSmoother(length1: fastLength ?? length, length2: slowLength ?? default).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersDeviationScaledSuperSmoother(length1: fastLength ?? length, length2: slowLength ?? default).ChainedValues;
                 break;
             case MovingAvgType.EhlersDistanceCoefficientFilter:
-                movingAvgList = stockData.CalculateEhlersDistanceCoefficientFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersDistanceCoefficientFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersFilter:
-                movingAvgList = stockData.CalculateEhlersFilter(slowLength ?? length, fastLength ?? default).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersFilter(slowLength ?? length, fastLength ?? default).ChainedValues;
                 break;
             case MovingAvgType.EhlersFiniteImpulseResponseFilter:
-                movingAvgList = stockData.CalculateEhlersFiniteImpulseResponseFilter().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersFiniteImpulseResponseFilter().ChainedValues;
                 break;
             case MovingAvgType.EhlersFractalAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateEhlersFractalAdaptiveMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersFractalAdaptiveMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersGaussianFilter:
-                movingAvgList = stockData.CalculateEhlersGaussianFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersGaussianFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersHammingMovingAverage:
-                movingAvgList = stockData.CalculateEhlersHammingMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersHammingMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.EhlersHannMovingAverage:
-                movingAvgList = stockData.CalculateEhlersHannMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersHannMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersInfiniteImpulseResponseFilter:
-                movingAvgList = stockData.CalculateEhlersInfiniteImpulseResponseFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersInfiniteImpulseResponseFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersKaufmanAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateEhlersKaufmanAdaptiveMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersKaufmanAdaptiveMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersLaguerreFilter:
-                movingAvgList = stockData.CalculateEhlersLaguerreFilter().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersLaguerreFilter().ChainedValues;
                 break;
             case MovingAvgType.EhlersLeadingIndicator:
-                movingAvgList = stockData.CalculateEhlersLeadingIndicator().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersLeadingIndicator().ChainedValues;
                 break;
             case MovingAvgType.EhlersMedianAverageAdaptiveFilter:
-                movingAvgList = stockData.CalculateEhlersMedianAverageAdaptiveFilter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersMedianAverageAdaptiveFilter(length: length).ChainedValues;
                 break;
             case MovingAvgType.EhlersMesaAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().ChainedValues;
                 break;
             case MovingAvgType.EhlersModifiedOptimumEllipticFilter:
-                movingAvgList = stockData.CalculateEhlersModifiedOptimumEllipticFilter().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersModifiedOptimumEllipticFilter().ChainedValues;
                 break;
             case MovingAvgType.EhlersOptimumEllipticFilter:
-                movingAvgList = stockData.CalculateEhlersOptimumEllipticFilter().CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersOptimumEllipticFilter().ChainedValues;
                 break;
             case MovingAvgType.EhlersRecursiveMedianFilter:
-                movingAvgList = stockData.CalculateEhlersRecursiveMedianFilter(fastLength ?? default, slowLength ?? length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersRecursiveMedianFilter(fastLength ?? default, slowLength ?? length).ChainedValues;
                 break;
             case MovingAvgType.EhlersSuperSmootherFilter:
-                movingAvgList = stockData.CalculateEhlersSuperSmootherFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersSuperSmootherFilter(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersTriangleMovingAverage:
-                movingAvgList = stockData.CalculateEhlersTriangleMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersTriangleMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersVariableIndexDynamicAverage:
                 movingAvgList = stockData.CalculateEhlersVariableIndexDynamicAverage(fastLength: fastLength ?? default, slowLength: slowLength ?? length)
-                    .CustomValuesList;
+                    .ChainedValues;
                 break;
             case MovingAvgType.EhlersZeroLagExponentialMovingAverage:
-                movingAvgList = stockData.CalculateEhlersZeroLagExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersZeroLagExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ElasticVolumeWeightedMovingAverageV1:
-                movingAvgList = stockData.CalculateElasticVolumeWeightedMovingAverageV1(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateElasticVolumeWeightedMovingAverageV1(length: length).ChainedValues;
                 break;
             case MovingAvgType.ElasticVolumeWeightedMovingAverageV2:
-                movingAvgList = stockData.CalculateElasticVolumeWeightedMovingAverageV2(length).CustomValuesList;
+                movingAvgList = stockData.CalculateElasticVolumeWeightedMovingAverageV2(length).ChainedValues;
                 break;
             case MovingAvgType.EndPointWeightedMovingAverage:
-                movingAvgList = stockData.CalculateEndPointMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEndPointMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.EquityMovingAverage:
-                movingAvgList = stockData.CalculateEquityMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateEquityMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ExponentialMovingAverage:
-                movingAvgList = stockData.CalculateExponentialMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateExponentialMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.FallingRisingFilter:
-                movingAvgList = stockData.CalculateFallingRisingFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateFallingRisingFilter(length).ChainedValues;
                 break;
             case MovingAvgType.FareySequenceWeightedMovingAverage:
-                movingAvgList = stockData.CalculateFareySequenceWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateFareySequenceWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.FibonacciWeightedMovingAverage:
-                movingAvgList = stockData.CalculateFibonacciWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateFibonacciWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.FisherLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateFisherLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateFisherLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.FollowingAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().OutputValues["Fama"];
+                movingAvgList = stockData.CalculateEhlersMotherOfAdaptiveMovingAverages().ChainedOutputs["Fama"];
                 break;
             case MovingAvgType.GeneralFilterEstimator:
-                movingAvgList = stockData.CalculateGeneralFilterEstimator(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateGeneralFilterEstimator(length: length).ChainedValues;
                 break;
             case MovingAvgType.GeneralizedDoubleExponentialMovingAverage:
-                movingAvgList = stockData.CalculateGeneralizedDoubleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateGeneralizedDoubleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.HampelFilter:
-                movingAvgList = stockData.CalculateHampelFilter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateHampelFilter(length: length).ChainedValues;
                 break;
             case MovingAvgType.HendersonWeightedMovingAverage:
-                movingAvgList = stockData.CalculateHendersonWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateHendersonWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.HoltExponentialMovingAverage:
-                movingAvgList = stockData.CalculateHoltExponentialMovingAverage(length, length).CustomValuesList;
+                movingAvgList = stockData.CalculateHoltExponentialMovingAverage(length, length).ChainedValues;
                 break;
             case MovingAvgType.HullEstimate:
-                movingAvgList = stockData.CalculateHullEstimate(length).CustomValuesList;
+                movingAvgList = stockData.CalculateHullEstimate(length).ChainedValues;
                 break;
             case MovingAvgType.HullMovingAverage:
-                movingAvgList = stockData.CalculateHullMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateHullMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.HybridConvolutionFilter:
-                movingAvgList = stockData.CalculateHybridConvolutionFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateHybridConvolutionFilter(length).ChainedValues;
                 break;
             case MovingAvgType.IIRLeastSquaresEstimate:
-                movingAvgList = stockData.CalculateIIRLeastSquaresEstimate(length).CustomValuesList;
+                movingAvgList = stockData.CalculateIIRLeastSquaresEstimate(length).ChainedValues;
                 break;
             case MovingAvgType.InverseDistanceWeightedMovingAverage:
-                movingAvgList = stockData.CalculateInverseDistanceWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateInverseDistanceWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.JsaMovingAverage:
-                movingAvgList = stockData.CalculateJsaMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateJsaMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.JurikMovingAverage:
-                movingAvgList = stockData.CalculateJurikMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateJurikMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.KalmanSmoother:
-                movingAvgList = stockData.CalculateKalmanSmoother(length).CustomValuesList;
+                movingAvgList = stockData.CalculateKalmanSmoother(length).ChainedValues;
                 break;
             case MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateKaufmanAdaptiveLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateKaufmanAdaptiveLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.KaufmanAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateKaufmanAdaptiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateKaufmanAdaptiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.LeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateLeastSquaresMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateLeastSquaresMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.LeoMovingAverage:
-                movingAvgList = stockData.CalculateLeoMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateLeoMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.LightLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateLightLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateLightLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.LinearExtrapolation:
-                movingAvgList = stockData.CalculateLinearExtrapolation(length).CustomValuesList;
+                movingAvgList = stockData.CalculateLinearExtrapolation(length).ChainedValues;
                 break;
             case MovingAvgType.LinearRegression:
-                movingAvgList = stockData.CalculateLinearRegression(length).CustomValuesList;
+                movingAvgList = stockData.CalculateLinearRegression(length).ChainedValues;
                 break;
             case MovingAvgType.LinearRegressionLine:
-                movingAvgList = stockData.CalculateLinearRegressionLine(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateLinearRegressionLine(length: length).ChainedValues;
                 break;
             case MovingAvgType.LinearWeightedMovingAverage:
-                movingAvgList = stockData.CalculateLinearWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateLinearWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.McGinleyDynamicIndicator:
-                movingAvgList = stockData.CalculateMcGinleyDynamicIndicator(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateMcGinleyDynamicIndicator(length: length).ChainedValues;
                 break;
             case MovingAvgType.McNichollMovingAverage:
-                movingAvgList = stockData.CalculateMcNichollMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateMcNichollMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.MiddleHighLowMovingAverage:
-                movingAvgList = stockData.CalculateMiddleHighLowMovingAverage(length1: slowLength ?? length, length2: fastLength ?? default).CustomValuesList;
+                movingAvgList = stockData.CalculateMiddleHighLowMovingAverage(length1: slowLength ?? length, length2: fastLength ?? default).ChainedValues;
                 break;
             case MovingAvgType.ModularFilter:
-                movingAvgList = stockData.CalculateModularFilter(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateModularFilter(length: length).ChainedValues;
                 break;
             case MovingAvgType.MovingAverageAdaptiveQ:
-                movingAvgList = stockData.CalculateMovingAverageAdaptiveQ(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateMovingAverageAdaptiveQ(length: length).ChainedValues;
                 break;
             case MovingAvgType.MovingAverageV3:
-                movingAvgList = stockData.CalculateMovingAverageV3(length1: length).CustomValuesList;
+                movingAvgList = stockData.CalculateMovingAverageV3(length1: length).ChainedValues;
                 break;
             case MovingAvgType.MultiDepthZeroLagExponentialMovingAverage:
-                movingAvgList = stockData.CalculateMultiDepthZeroLagExponentialMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateMultiDepthZeroLagExponentialMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.NaturalMovingAverage:
-                movingAvgList = stockData.CalculateNaturalMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateNaturalMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.OptimalWeightedMovingAverage:
-                movingAvgList = stockData.CalculateOptimalWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateOptimalWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.OvershootReductionMovingAverage:
-                movingAvgList = stockData.CalculateOvershootReductionMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateOvershootReductionMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ParabolicWeightedMovingAverage:
-                movingAvgList = stockData.CalculateParabolicWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateParabolicWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.ParametricCorrectiveLinearMovingAverage:
-                movingAvgList = stockData.CalculateParametricCorrectiveLinearMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateParametricCorrectiveLinearMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ParametricKalmanFilter:
-                movingAvgList = stockData.CalculateParametricKalmanFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateParametricKalmanFilter(length).ChainedValues;
                 break;
             case MovingAvgType.PentupleExponentialMovingAverage:
-                movingAvgList = stockData.CalculatePentupleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculatePentupleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.PolynomialLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculatePolynomialLeastSquaresMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculatePolynomialLeastSquaresMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.PoweredKaufmanAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculatePoweredKaufmanAdaptiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculatePoweredKaufmanAdaptiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.QuadraticLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateQuadraticLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateQuadraticLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.QuadraticMovingAverage:
-                movingAvgList = stockData.CalculateQuadraticMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateQuadraticMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.QuadraticRegression:
-                movingAvgList = stockData.CalculateQuadraticRegression(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateQuadraticRegression(length: length).ChainedValues;
                 break;
             case MovingAvgType.QuadrupleExponentialMovingAverage:
-                movingAvgList = stockData.CalculateQuadrupleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateQuadrupleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.QuickMovingAverage:
-                movingAvgList = stockData.CalculateQuickMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateQuickMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.R2AdaptiveRegression:
-                movingAvgList = stockData.CalculateR2AdaptiveRegression(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateR2AdaptiveRegression(length: length).ChainedValues;
                 break;
             case MovingAvgType.RatioOCHLAverager:
-                movingAvgList = stockData.CalculateRatioOCHLAverager().CustomValuesList;
+                movingAvgList = stockData.CalculateRatioOCHLAverager().ChainedValues;
                 break;
             case MovingAvgType.RecursiveMovingTrendAverage:
-                movingAvgList = stockData.CalculateRecursiveMovingTrendAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateRecursiveMovingTrendAverage(length).ChainedValues;
                 break;
             case MovingAvgType.RegularizedExponentialMovingAverage:
-                movingAvgList = stockData.CalculateRegularizedExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateRegularizedExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.RepulsionMovingAverage:
-                movingAvgList = stockData.CalculateRepulsionMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateRepulsionMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.RetentionAccelerationFilter:
-                movingAvgList = stockData.CalculateRetentionAccelerationFilter(length).CustomValuesList;
+                movingAvgList = stockData.CalculateRetentionAccelerationFilter(length).ChainedValues;
                 break;
             case MovingAvgType.ReverseEngineeringRelativeStrengthIndex:
-                movingAvgList = stockData.CalculateReverseEngineeringRelativeStrengthIndex(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateReverseEngineeringRelativeStrengthIndex(length: length).ChainedValues;
                 break;
             case MovingAvgType.ReverseMovingAverageConvergenceDivergence:
                 movingAvgList = stockData.CalculateReverseMovingAverageConvergenceDivergence(fastLength: fastLength ?? default, slowLength: slowLength ?? length)
-                    .CustomValuesList;
+                    .ChainedValues;
                 break;
             case MovingAvgType.RightSidedRickerMovingAverage:
-                movingAvgList = stockData.CalculateRightSidedRickerMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateRightSidedRickerMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.SelfWeightedMovingAverage:
-                movingAvgList = stockData.CalculateSelfWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSelfWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SequentiallyFilteredMovingAverage:
-                movingAvgList = stockData.CalculateSequentiallyFilteredMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateSequentiallyFilteredMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.SettingLessTrendStepFiltering:
-                movingAvgList = stockData.CalculateSettingLessTrendStepFiltering().CustomValuesList;
+                movingAvgList = stockData.CalculateSettingLessTrendStepFiltering().ChainedValues;
                 break;
             case MovingAvgType.ShapeshiftingMovingAverage:
-                movingAvgList = stockData.CalculateShapeshiftingMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateShapeshiftingMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SharpModifiedMovingAverage:
-                movingAvgList = stockData.CalculateSharpModifiedMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateSharpModifiedMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.SimpleMovingAverage:
-                movingAvgList = stockData.CalculateSimpleMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSimpleMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SimplifiedLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateSimplifiedLeastSquaresMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSimplifiedLeastSquaresMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SimplifiedWeightedMovingAverage:
-                movingAvgList = stockData.CalculateSimplifiedWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSimplifiedWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SineWeightedMovingAverage:
-                movingAvgList = stockData.CalculateSineWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSineWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.SlowSmoothedMovingAverage:
-                movingAvgList = stockData.CalculateSlowSmoothedMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateSlowSmoothedMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.Spencer15PointMovingAverage:
-                movingAvgList = stockData.CalculateSpencer15PointMovingAverage().CustomValuesList;
+                movingAvgList = stockData.CalculateSpencer15PointMovingAverage().ChainedValues;
                 break;
             case MovingAvgType.Spencer21PointMovingAverage:
-                movingAvgList = stockData.CalculateSpencer21PointMovingAverage().CustomValuesList;
+                movingAvgList = stockData.CalculateSpencer21PointMovingAverage().ChainedValues;
                 break;
             case MovingAvgType.SquareRootWeightedMovingAverage:
-                movingAvgList = stockData.CalculateSquareRootWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSquareRootWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.Svama:
-                movingAvgList = stockData.CalculateSvama(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSvama(length).ChainedValues;
                 break;
             case MovingAvgType.SymmetricallyWeightedMovingAverage:
-                movingAvgList = stockData.CalculateSymmetricallyWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateSymmetricallyWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.TStepLeastSquaresMovingAverage:
-                movingAvgList = stockData.CalculateTStepLeastSquaresMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateTStepLeastSquaresMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.TillsonIE2:
-                movingAvgList = stockData.CalculateTillsonIE2(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateTillsonIE2(length: length).ChainedValues;
                 break;
             case MovingAvgType.TillsonT3MovingAverage:
-                movingAvgList = stockData.CalculateTillsonT3MovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateTillsonT3MovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.TriangularMovingAverage:
-                movingAvgList = stockData.CalculateTriangularMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateTriangularMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.Trimean:
-                movingAvgList = stockData.CalculateTrimean(length).CustomValuesList;
+                movingAvgList = stockData.CalculateTrimean(length).ChainedValues;
                 break;
             case MovingAvgType.TripleExponentialMovingAverage:
-                movingAvgList = stockData.CalculateTripleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateTripleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.UltimateMovingAverage:
-                movingAvgList = stockData.CalculateUltimateMovingAverage(minLength: fastLength ?? default, maxLength: slowLength ?? length).CustomValuesList;
+                movingAvgList = stockData.CalculateUltimateMovingAverage(minLength: fastLength ?? default, maxLength: slowLength ?? length).ChainedValues;
                 break;
             case MovingAvgType.VariableAdaptiveMovingAverage:
-                movingAvgList = stockData.CalculateVariableAdaptiveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVariableAdaptiveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.VariableIndexDynamicAverage:
-                movingAvgList = stockData.CalculateVariableIndexDynamicAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVariableIndexDynamicAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.VariableLengthMovingAverage:
-                movingAvgList = stockData.CalculateVariableLengthMovingAverage(minLength: fastLength ?? default, maxLength: slowLength ?? length).CustomValuesList;
+                movingAvgList = stockData.CalculateVariableLengthMovingAverage(minLength: fastLength ?? default, maxLength: slowLength ?? length).ChainedValues;
                 break;
             case MovingAvgType.VariableMovingAverage:
-                movingAvgList = stockData.CalculateVariableMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateVariableMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.VerticalHorizontalMovingAverage:
-                movingAvgList = stockData.CalculateVerticalHorizontalMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateVerticalHorizontalMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.VolatilityMovingAverage:
-                movingAvgList = stockData.CalculateVolatilityMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVolatilityMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.VolatilityWaveMovingAverage:
-                movingAvgList = stockData.CalculateVolatilityWaveMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVolatilityWaveMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.VolumeAdjustedMovingAverage:
-                movingAvgList = stockData.CalculateVolumeAdjustedMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVolumeAdjustedMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.VolumeWeightedAveragePrice:
-                movingAvgList = stockData.CalculateVolumeWeightedAveragePrice().CustomValuesList;
+                movingAvgList = stockData.CalculateVolumeWeightedAveragePrice().ChainedValues;
                 break;
             case MovingAvgType.VolumeWeightedMovingAverage:
-                movingAvgList = stockData.CalculateVolumeWeightedMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateVolumeWeightedMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.WeightedMovingAverage:
-                movingAvgList = stockData.CalculateWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.WellRoundedMovingAverage:
-                movingAvgList = stockData.CalculateWellRoundedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateWellRoundedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.WildersSmoothingMethod:
-                movingAvgList = stockData.CalculateWellesWilderMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateWellesWilderMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.WildersSummationMethod:
-                movingAvgList = stockData.CalculateWellesWilderSummation(length).CustomValuesList;
+                movingAvgList = stockData.CalculateWellesWilderSummation(length).ChainedValues;
                 break;
             case MovingAvgType.WindowedVolumeWeightedMovingAverage:
-                movingAvgList = stockData.CalculateWindowedVolumeWeightedMovingAverage(length).CustomValuesList;
+                movingAvgList = stockData.CalculateWindowedVolumeWeightedMovingAverage(length).ChainedValues;
                 break;
             case MovingAvgType.ZeroLagExponentialMovingAverage:
-                movingAvgList = stockData.CalculateZeroLagExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateZeroLagExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ZeroLagTripleExponentialMovingAverage:
-                movingAvgList = stockData.CalculateZeroLagTripleExponentialMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateZeroLagTripleExponentialMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.ZeroLowLagMovingAverage:
-                movingAvgList = stockData.CalculateZeroLowLagMovingAverage(length: length).CustomValuesList;
+                movingAvgList = stockData.CalculateZeroLowLagMovingAverage(length: length).ChainedValues;
                 break;
             case MovingAvgType.EhlersNoiseEliminationTechnology:
-                movingAvgList = stockData.CalculateEhlersNoiseEliminationTechnology(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersNoiseEliminationTechnology(length).ChainedValues;
                 break;
             case MovingAvgType.EhlersSimpleDecycler:
-                movingAvgList = stockData.CalculateEhlersSimpleDecycler(length).CustomValuesList;
+                movingAvgList = stockData.CalculateEhlersSimpleDecycler(length).ChainedValues;
                 break;
             default:
                 Console.WriteLine($"Moving Avg Name: {movingAvgType} not supported!");
@@ -1643,7 +1650,7 @@ public static class CalculationsHelper
     /// <param name="inputName">Name of the input.</param>
     /// <param name="stockData">The stock data.</param>
     /// <returns></returns>
-    public static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> closeList,
+    internal static (List<double> inputList, List<double> highList, List<double> lowList, List<double> openList, List<double> closeList,
         List<double> volumeList) GetInputValuesList(InputName inputName, StockData stockData)
     {
         List<double> highList;
@@ -1651,7 +1658,27 @@ public static class CalculationsHelper
         List<double> openList;
         List<double> closeList;
         List<double> volumeList;
-        var inputList = inputName switch
+
+        // A chained series wins, exactly as it does for the single-argument overload. This overload
+        // used to go straight to the named price field, so the 28 indicators whose default input is a
+        // named price - AlligatorIndex, AwesomeOscillator, CommodityChannelIndex, MoneyFlowIndex,
+        // VolumeWeightedAveragePrice and the rest - silently ignored anything chained in front of
+        // them, as did every indicator built on one of them (GatorOscillator on AlligatorIndex,
+        // AcceleratorOscillator on AwesomeOscillator). Callers pass values; the name only decides what
+        // is read when nothing was passed.
+        //
+        // What is on CustomValuesList must therefore be the caller's chain. Each of the 24 methods reads
+        // it on entry, before its own calculation writes anything there. But a COMPOSITE that calls one
+        // of them after another component has published its output would hand it that output as if it
+        // were a chain (the #145 pattern). Four composites make such a call - InsyncIndex,
+        // TechnicalRatings, UltimateMomentumIndicator and WoodieCommodityChannelIndex - and each now
+        // restores the caller's series first. Without that, three of them changed their UNCHAINED output
+        // (a three-arm control against master: TechnicalRatings, UltimateMomentumIndicator and
+        // WoodieCommodityChannelIndex differed; InsyncIndex happened not to). Found by auditing every
+        // call site of these methods, not just their bodies.
+        var inputList = stockData.ChainedValues is { Count: > 0 } chained
+            ? chained
+            : inputName switch
         {
             InputName.Close => stockData.ClosePrices,
             InputName.Low => stockData.LowPrices,
@@ -1663,38 +1690,16 @@ public static class CalculationsHelper
             InputName.WeightedClose => GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose),
             InputName.Open => stockData.OpenPrices,
             InputName.AdjustedClose => stockData.ClosePrices,
-            InputName.Midpoint => stockData.CalculateMidpoint().CustomValuesList,
-            InputName.Midprice => stockData.CalculateMidprice().CustomValuesList,
+            InputName.Midpoint => stockData.CalculateMidpoint().ChainedValues,
+            InputName.Midprice => stockData.CalculateMidprice().ChainedValues,
             InputName.AveragePrice => GetDerivedSeriesList(stockData, DerivedSeriesKind.AveragePrice),
             _ => stockData.ClosePrices,
         };
 
-        if (inputList.Count > 0)
+        if (inputList.Count > 0 && !SequenceEqualValues(inputList, stockData.ClosePrices))
         {
-            var sum = SumValues(inputList);
-            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
-            if (isVolumeInput)
-            {
-                var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                highList = minMaxList.Item1;
-                lowList = minMaxList.Item2;
-            }
-            else
-            {
-                var lowSum = SumValues(stockData.LowPrices);
-                var highSum = SumValues(stockData.HighPrices);
-                if (sum < lowSum || sum > highSum)
-                {
-                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                    highList = minMaxList.Item1;
-                    lowList = minMaxList.Item2;
-                }
-                else
-                {
-                    highList = stockData.HighPrices;
-                    lowList = stockData.LowPrices;
-                }
-            }
+            // A series other than the close: the per-bar rule. See GetCustomRangeLists.
+            (highList, lowList) = GetCustomRangeLists(inputList, stockData.HighPrices, stockData.LowPrices);
         }
         else
         {
@@ -1703,7 +1708,9 @@ public static class CalculationsHelper
         }
 
         openList = stockData.OpenPrices;
-        closeList = stockData.ClosePrices;
+        // A chained series stands in for the close, as it does in the bar CustomInputState hands a streaming
+        // state; the named input only decides what is read when nothing was chained.
+        closeList = stockData.ChainedValues is { Count: > 0 } ? inputList : stockData.ClosePrices;
         volumeList = stockData.Volumes;
 
         return (inputList, highList, lowList, openList, closeList, volumeList);
@@ -1725,12 +1732,11 @@ public static class CalculationsHelper
         List<double> openList;
         List<double> volumeList;
 
-        if (stockData.CustomValuesList != null && stockData.CustomValuesList.Count > 0)
+        if (stockData.ChainedValues.Count > 0)
         {
-            inputList = stockData.CustomValuesList;
+            inputList = stockData.ChainedValues;
         }
-        else if ((stockData.CustomValuesList == null || (stockData.CustomValuesList != null && stockData.CustomValuesList.Count == 0)) &&
-            stockData.SignalsList != null && stockData.SignalsList.Count > 0)
+        else if (stockData.SignalsList != null && stockData.SignalsList.Count > 0)
         {
             throw new CalculationException($"Calculations based off of {stockData.IndicatorName} can't be completed because this indicator doesn't have a single output.");
         }
@@ -1739,32 +1745,10 @@ public static class CalculationsHelper
             inputList = stockData.InputValues;
         }
 
-        if (inputList.Count > 0)
+        if (inputList.Count > 0 && !SequenceEqualValues(inputList, stockData.ClosePrices))
         {
-            var sum = SumValues(inputList);
-            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
-            if (isVolumeInput)
-            {
-                var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                highList = minMaxList.Item1;
-                lowList = minMaxList.Item2;
-            }
-            else
-            {
-                var lowSum = SumValues(stockData.LowPrices);
-                var highSum = SumValues(stockData.HighPrices);
-                if (sum < lowSum || sum > highSum)
-                {
-                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                    highList = minMaxList.Item1;
-                    lowList = minMaxList.Item2;
-                }
-                else
-                {
-                    highList = stockData.HighPrices;
-                    lowList = stockData.LowPrices;
-                }
-            }
+            // A series other than the close: the per-bar rule. See GetCustomRangeLists.
+            (highList, lowList) = GetCustomRangeLists(inputList, stockData.HighPrices, stockData.LowPrices);
         }
         else
         {
@@ -1883,6 +1867,29 @@ public static class CalculationsHelper
         var parentOrder = new List<DateTime>();
         var tickerDataList = stockData.TickerDataList;
 
+        // A chained series is the close of every bar, and each bar's high and low follow the per-bar
+        // rule (GetCustomRangeLists); the periods are then built from those adjusted bars exactly as
+        // they are built from the real ones - open first, high the max, low the min, close last. This
+        // used to rebuild from TickerDataList whatever was chained in front, so every pivot point
+        // silently ignored a custom series.
+        var chained = stockData.ChainedValues is { Count: > 0 } custom && custom.Count == tickerDataList.Count
+            ? custom
+            : null;
+        List<double>? customHighs = null;
+        List<double>? customLows = null;
+        if (chained != null)
+        {
+            var highs = new List<double>(tickerDataList.Count);
+            var lows = new List<double>(tickerDataList.Count);
+            for (var k = 0; k < tickerDataList.Count; k++)
+            {
+                highs.Add(tickerDataList[k].High);
+                lows.Add(tickerDataList[k].Low);
+            }
+
+            (customHighs, customLows) = GetCustomRangeLists(chained, highs, lows);
+        }
+
         for (var i = 0; i < tickerDataList.Count; i++)
         {
             var ticker = tickerDataList[i];
@@ -1913,7 +1920,14 @@ public static class CalculationsHelper
                 parentGroup.ChildOrder.Add(childKey);
             }
 
-            childGroup.Add(ticker);
+            if (chained != null && customHighs != null && customLows != null)
+            {
+                childGroup.Add(ticker.Open, customHighs[i], customLows[i], chained[i], ticker.Volume);
+            }
+            else
+            {
+                childGroup.Add(ticker);
+            }
         }
 
         for (var i = 0; i < parentOrder.Count; i++)
@@ -1954,31 +1968,34 @@ public static class CalculationsHelper
         public double Close { get; private set; }
         public double Volume { get; private set; }
 
-        public void Add(TickerData ticker)
+        public void Add(TickerData ticker) =>
+            Add(ticker.Open, ticker.High, ticker.Low, ticker.Close, ticker.Volume);
+
+        public void Add(double open, double high, double low, double close, double volume)
         {
             if (!HasValue)
             {
-                Open = ticker.Open;
-                High = ticker.High;
-                Low = ticker.Low;
-                Close = ticker.Close;
-                Volume = ticker.Volume;
+                Open = open;
+                High = high;
+                Low = low;
+                Close = close;
+                Volume = volume;
                 HasValue = true;
                 return;
             }
 
-            if (ticker.High > High)
+            if (high > High)
             {
-                High = ticker.High;
+                High = high;
             }
 
-            if (ticker.Low < Low)
+            if (low < Low)
             {
-                Low = ticker.Low;
+                Low = low;
             }
 
-            Volume += ticker.Volume;
-            Close = ticker.Close;
+            Volume += volume;
+            Close = close;
         }
     }
 
@@ -2018,6 +2035,54 @@ public static class CalculationsHelper
     public static double CalculatePercentChange(double currentValue, double previousValue)
     {
         return previousValue != 0 ? (currentValue - previousValue) / Math.Abs(previousValue) * 100 : 0;
+    }
+
+    /// <summary>
+    /// The high and low an indicator should read when its input is a series other than the close.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Decided bar by bar. A value inside that bar's range is price-like - a median or typical price,
+    /// a chained moving average - so the bar's true high and low still apply. A value outside it -
+    /// an oscillator, a volume, a rescaled series - is its own scale, and its high and low are the
+    /// max and min of the previous and current value.
+    /// </para>
+    /// <para>
+    /// This replaces a whole-series rule that summed the input and compared the sum against the sums
+    /// of the lows and highs. For a series entirely inside or entirely outside the bars' range the
+    /// two agree exactly - the out-of-range branch was GetMaxAndMinValuesList(series, 0), whose window
+    /// clamps to 2. What the per-bar rule adds is causality: it needs nothing after the current bar,
+    /// so a streaming state can apply the same rule and the two engines agree bar by bar. The
+    /// whole-series sum could not be computed by a streaming state at all.
+    /// </para>
+    /// </remarks>
+    internal static (List<double> HighList, List<double> LowList) GetCustomRangeLists(IReadOnlyList<double> values,
+        IReadOnlyList<double> highs, IReadOnlyList<double> lows)
+    {
+        var count = values.Count;
+        var highList = new List<double>(count);
+        var lowList = new List<double>(count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var value = values[i];
+            var high = i < highs.Count ? highs[i] : value;
+            var low = i < lows.Count ? lows[i] : value;
+
+            if (value >= low && value <= high)
+            {
+                highList.Add(high);
+                lowList.Add(low);
+            }
+            else
+            {
+                var prev = i > 0 ? values[i - 1] : value;
+                highList.Add(Math.Max(prev, value));
+                lowList.Add(Math.Min(prev, value));
+            }
+        }
+
+        return (highList, lowList);
     }
 
     /// <summary>
@@ -2198,10 +2263,14 @@ public static class CalculationsHelper
     /// This needs to be called after you calculate an indicator if you are re-using the same input data to calculate a second indicator on a separate line
     /// </summary>
     /// <param name="stockData"></param>
+    /// <remarks>
+    /// The series is replaced, not emptied in place: a caller holding an earlier result's list keeps it, and
+    /// the chained series goes too, so the next indicator reads the bars.
+    /// </remarks>
     public static void Clear(this StockData stockData)
     {
         stockData.SignalsList?.Clear();
-        stockData.CustomValuesList?.Clear();
+        stockData.CustomValuesList = new List<double>();
     }
 
     /// <summary>

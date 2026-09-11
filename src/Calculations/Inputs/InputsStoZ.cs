@@ -11,7 +11,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTypicalPrice(this StockData stockData)
     {
-        var tpList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hlc3);
+        // Chained: the same per-bar high and low every other indicator reads for a custom series
+        // (GetCustomRangeLists). Unchained: the cached derived series, exactly as before.
+        List<double> tpList;
+        if (stockData.ChainedValues is { Count: > 0 })
+        {
+            var (seriesList, seriesHighList, seriesLowList, seriesOpenList, _) = GetInputValuesList(stockData);
+            tpList = new List<double>(seriesList.Count);
+            for (var i = 0; i < seriesList.Count; i++)
+            {
+                tpList.Add((seriesHighList[i] + seriesLowList[i] + seriesList[i]) / 3);
+            }
+        }
+        else
+        {
+            tpList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hlc3);
+        }
         var count = tpList.Count;
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
@@ -44,7 +59,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWeightedClose(this StockData stockData)    
     {
-        var weightedCloseList = GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose);
+        // Chained: the same per-bar high and low every other indicator reads for a custom series
+        // (GetCustomRangeLists). Unchained: the cached derived series, exactly as before.
+        List<double> weightedCloseList;
+        if (stockData.ChainedValues is { Count: > 0 })
+        {
+            var (seriesList, seriesHighList, seriesLowList, seriesOpenList, _) = GetInputValuesList(stockData);
+            weightedCloseList = new List<double>(seriesList.Count);
+            for (var i = 0; i < seriesList.Count; i++)
+            {
+                weightedCloseList.Add((seriesHighList[i] + seriesLowList[i] + (seriesList[i] * 2)) / 4);
+            }
+        }
+        else
+        {
+            weightedCloseList = GetDerivedSeriesList(stockData, DerivedSeriesKind.WeightedClose);
+        }
         var count = weightedCloseList.Count;
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);

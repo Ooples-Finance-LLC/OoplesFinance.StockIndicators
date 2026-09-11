@@ -1831,6 +1831,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSineWaveIndicatorV2(this StockData stockData, int length = 5, double alpha = 0.07)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length = Math.Max(length, 1);
         List<double> sineList = new(stockData.Count);
         List<double> leadSineList = new(stockData.Count);
@@ -1839,16 +1840,15 @@ public static partial class Calculations
 
         var periodList = GetOutputValuesInternal(stockData,
             data => CalculateEhlersAdaptiveCyberCycle(data, length, alpha))["Period"];
-        // Reset to use close prices for CyberCycle (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var cycleList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersCyberCycle(data));
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var period = periodList[i];
-            var dcPeriod = (int)Math.Ceiling(period);
+            var dcPeriod = MathHelper.CeilingCycle(period);
 
             double realPart = 0, imagPart = 0;
             for (var j = 0; j <= dcPeriod - 1; j++)

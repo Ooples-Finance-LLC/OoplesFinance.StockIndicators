@@ -127,7 +127,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -352,7 +352,7 @@ public static partial class Calculations
         var slowMaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var fastMaList = GetMovingAverageList(stockData, maType, length2, inputList);
         stockData.SetCustomValues(slowMaList);
-        var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
         var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -400,9 +400,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(atrList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -803,7 +803,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1072,20 +1072,19 @@ public static partial class Calculations
     /// Calculates the Wave Trend Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="smoothLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateWaveTrendOscillator(this StockData stockData, InputName inputName = InputName.FullTypicalPrice,
+    public static StockData CalculateWaveTrendOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21, int smoothLength = 4)
     {
         List<double> absApEsaList = new(stockData.Count);
         List<double> ciList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 

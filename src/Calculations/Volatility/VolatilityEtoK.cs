@@ -35,7 +35,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(tempLogList);
-        var stdDevLogList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevLogList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var stdDevLog = stdDevLogList[i];
@@ -281,11 +281,11 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         stockData.SetCustomValues(smaList);
-        var smaLinregList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var smaLinregList = CalculateLinearRegression(stockData, length).ChainedValues;
         stockData.SetCustomValues(smaList);
-        var linreg2List = CalculateLinearRegression(stockData, length2).CustomValuesList;
+        var linreg2List = CalculateLinearRegression(stockData, length2).ChainedValues;
         stockData.SetCustomValues(smaList);
-        var smaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var smaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

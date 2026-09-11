@@ -26,15 +26,16 @@ public static partial class Calculations
         using var rocOrder = new RollingOrderStatistic(length3);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2, length2).CustomValuesList;
-        var rocList = CalculateRateOfChange(stockData, length3).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var roc = rocList[i];
+            // Connors ranks the one-bar rate of change of the price over length3 bars. This used to rank a
+            // length3-bar rate of change of the RSI, read back from the RSI just published.
+            var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
             tempList.Add(roc);
             rocOrder.Add(roc);
 
@@ -48,8 +49,8 @@ public static partial class Calculations
             streakList.Add(streak);
         }
 
-        stockData.SetCustomValues(streakList);
-        var rsiStreakList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).CustomValuesList;
+        stockData.SetInputSeries(streakList);
+        var rsiStreakList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentRsi = rsiList[i];
@@ -158,7 +159,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, length).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -307,12 +308,11 @@ public static partial class Calculations
     /// Calculates the Breakout Relative Strength Index
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <param name="lbLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateBreakoutRelativeStrengthIndex(this StockData stockData, InputName inputName = InputName.FullTypicalPrice,
+    public static StockData CalculateBreakoutRelativeStrengthIndex(this StockData stockData,
         int length = 14, int lbLength = 2)
     {
         List<double> brsiList = new(stockData.Count);
@@ -324,7 +324,7 @@ public static partial class Calculations
         RollingSum volumeSumWindow = new();
         RollingSum posPowerSumWindow = new();
         RollingSum negPowerSumWindow = new();
-        var (inputList, highList, lowList, openList, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, volumeList) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -463,7 +463,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var v1List = CalculateEhlersAdaptiveCyberCycle(stockData, length).OutputValues["Period"];
+        var v1List = CalculateEhlersAdaptiveCyberCycle(stockData, length).ChainedOutputs["Period"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -543,11 +543,18 @@ public static partial class Calculations
         RollingMinMax rsi13Len3Window = new(length3);
         RollingMinMax rsi8Len2Window = new(length2);
 
-        var rsi5List = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
-        var rsi8List = CalculateRelativeStrengthIndex(stockData, maType, length: length2).CustomValuesList;
-        var rsi13List = CalculateRelativeStrengthIndex(stockData, maType, length: length3).CustomValuesList;
-        var rsi14List = CalculateRelativeStrengthIndex(stockData, maType, length: length4).CustomValuesList;
-        var rsi21List = CalculateRelativeStrengthIndex(stockData, maType, length: length5).CustomValuesList;
+        // Five RSIs of the caller's series. Each call publishes its RSI for the next calculation, so without the
+        // restores every RSI after the first was an RSI of the one before it.
+        var callerSeries = stockData.CaptureInputSeries();
+        var rsi5List = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
+        var rsi8List = CalculateRelativeStrengthIndex(stockData, maType, length: length2).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
+        var rsi13List = CalculateRelativeStrengthIndex(stockData, maType, length: length3).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
+        var rsi14List = CalculateRelativeStrengthIndex(stockData, maType, length: length4).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
+        var rsi21List = CalculateRelativeStrengthIndex(stockData, maType, length: length5).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

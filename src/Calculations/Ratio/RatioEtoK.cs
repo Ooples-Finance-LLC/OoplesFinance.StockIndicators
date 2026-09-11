@@ -33,7 +33,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(retList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
         for (var i = 0; i < stockData.Count; i++)
         {

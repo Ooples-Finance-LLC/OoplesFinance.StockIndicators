@@ -71,7 +71,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linRegList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

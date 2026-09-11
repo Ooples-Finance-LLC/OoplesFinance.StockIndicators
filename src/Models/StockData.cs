@@ -14,6 +14,8 @@ namespace OoplesFinance.StockIndicators.Models;
 public class StockData : IStockData
 {
     private List<double>? _inputValues;
+    private List<double> _customValues = new List<double>();
+    private Dictionary<string, List<double>> _outputValues = new Dictionary<string, List<double>>();
     private List<double>? _openPrices;
     private List<double>? _highPrices;
     private List<double>? _lowPrices;
@@ -24,7 +26,6 @@ public class StockData : IStockData
     private bool _columnsInitialized;
     private bool _rowsInitialized;
 
-    public InputName InputName { get; set; }
     public IndicatorName IndicatorName { get; set; }
 
     public List<double> InputValues
@@ -139,8 +140,60 @@ public class StockData : IStockData
         }
     }
 
-    public List<double> CustomValuesList { get; set; }
-    public Dictionary<string, List<double>> OutputValues { get; set; }
+    public List<double> CustomValuesList
+    {
+        get => _customValues;
+        set
+        {
+            _customValues = value ?? new List<double>();
+            ChainedValues = _customValues;
+        }
+    }
+
+    /// <summary>
+    /// The series the next calculation on this data reads: the last one published, or the caller's input.
+    /// </summary>
+    /// <remarks>
+    /// The same list as <see cref="CustomValuesList"/> unless IncludeCustomValues is off. That option hides a
+    /// result from the caller; it must not hide it from the composite that asked a component for it, or from
+    /// the next indicator in a chain. Hiding the one list both read made 176 indicators throw and three
+    /// compute on the close instead of their own components.
+    /// </remarks>
+    internal List<double> ChainedValues { get; private set; } = new List<double>();
+
+    /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
+    internal void RestoreSeries(List<double> published, List<double> chained)
+    {
+        _customValues = published;
+        ChainedValues = chained;
+    }
+
+    public Dictionary<string, List<double>> OutputValues
+    {
+        get => _outputValues;
+        set
+        {
+            _outputValues = value ?? new Dictionary<string, List<double>>();
+            ChainedOutputs = _outputValues;
+        }
+    }
+
+    /// <summary>
+    /// Every named series of the last calculation, unrounded, for the calculation that reads them next.
+    /// </summary>
+    /// <remarks>
+    /// The same dictionary as <see cref="OutputValues"/> unless IncludeOutputValues or RoundingDigits says to
+    /// publish less. A composite reads its components' named series from here: from the published copy, turning
+    /// output values off made 56 indicators throw and rounding fed rounded inputs to the rest.
+    /// </remarks>
+    internal Dictionary<string, List<double>> ChainedOutputs { get; private set; } = new Dictionary<string, List<double>>();
+
+    /// <summary>Sets the named series a calculation keeps for the next one, and the copy it publishes.</summary>
+    internal void SetOutputs(Dictionary<string, List<double>> chained, Dictionary<string, List<double>> published)
+    {
+        ChainedOutputs = chained;
+        _outputValues = published;
+    }
     public List<Signal> SignalsList { get; set; }
     public IndicatorOptions? Options { get; set; }
     public int Count { get; set; }
@@ -155,7 +208,7 @@ public class StockData : IStockData
     /// <param name="volumes"></param>
     /// <param name="dates"></param>
     public StockData(IEnumerable<double> openPrices, IEnumerable<double> highPrices, IEnumerable<double> lowPrices, IEnumerable<double> closePrices,
-        IEnumerable<double> volumes, IEnumerable<DateTime> dates, InputName inputName = InputName.Close)
+        IEnumerable<double> volumes, IEnumerable<DateTime> dates)
     {
         _openPrices = new List<double>(openPrices);
         _highPrices = new List<double>(highPrices);
@@ -169,7 +222,6 @@ public class StockData : IStockData
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
-        InputName = inputName;
         IndicatorName = IndicatorName.None;
         Options = new IndicatorOptions();
         Count = CalculateCount(_openPrices, _highPrices, _lowPrices, _closePrices, _volumes, _dates);
@@ -179,7 +231,7 @@ public class StockData : IStockData
     /// Initializes the StockData Class using classic list of ticker information
     /// </summary>
     /// <param name="tickerDataList"></param>
-    public StockData(IEnumerable<TickerData> tickerDataList, InputName inputName = InputName.Close)
+    public StockData(IEnumerable<TickerData> tickerDataList)
     {
         _tickerDataList = new List<TickerData>();
         foreach (var ticker in tickerDataList)
@@ -198,7 +250,6 @@ public class StockData : IStockData
         CustomValuesList = new List<double>();
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
-        InputName = inputName;
         Options = new IndicatorOptions();
         Count = _tickerDataList.Count;
     }

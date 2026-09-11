@@ -11,18 +11,17 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="length">The length.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="constant">The constant.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateCommodityChannelIndex(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateCommodityChannelIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double constant = 0.015)
     {
         List<double> cciList = new(stockData.Count);
         List<double> tpDevDiffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
         var tpSmaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -65,15 +64,13 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="fastLength">Length of the fast.</param>
     /// <param name="slowLength">Length of the slow.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateAwesomeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        InputName inputName = InputName.MedianPrice, int fastLength = 5, int slowLength = 34)
+    public static StockData CalculateAwesomeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 34)
     {
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.MedianPrice, stockData);
         var count = inputList.Count;
         var aoList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
@@ -109,16 +106,15 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="fastLength">Length of the fast.</param>
     /// <param name="slowLength">Length of the slow.</param>
     /// <param name="smoothLength">Length of the smooth.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateAcceleratorOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, InputName inputName = InputName.MedianPrice,
+    public static StockData CalculateAcceleratorOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 5, int slowLength = 34, int smoothLength = 5)
     {
-        var awesomeOscList = CalculateAwesomeOscillator(stockData, maType, inputName, fastLength, slowLength).CustomValuesList;
+        var awesomeOscList = CalculateAwesomeOscillator(stockData, maType, fastLength, slowLength).ChainedValues;
         var count = awesomeOscList.Count;
         var acList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
@@ -296,7 +292,7 @@ public static partial class Calculations
         List<double> chaikinOscillatorList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var adlList = CalculateAccumulationDistributionLine(stockData, maType, fastLength).CustomValuesList;
+        var adlList = CalculateAccumulationDistributionLine(stockData, maType, fastLength).ChainedValues;
         var adl3EmaList = GetMovingAverageList(stockData, maType, fastLength, adlList);
         var adl10EmaList = GetMovingAverageList(stockData, maType, slowLength, adlList);
 
@@ -389,7 +385,6 @@ public static partial class Calculations
     /// Calculates the index of the alligator.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="iawLength">Length of the iaw.</param>
     /// <param name="iawOffset">The iaw offset.</param>
@@ -399,7 +394,7 @@ public static partial class Calculations
     /// <param name="lipsOffset">The lips offset.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateAlligatorIndex(this StockData stockData, InputName inputName = InputName.MedianPrice, 
+    public static StockData CalculateAlligatorIndex(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13, int jawOffset = 8, int teethLength = 8, int teethOffset = 5, 
         int lipsLength = 5, int lipsOffset = 3)
     {
@@ -407,7 +402,7 @@ public static partial class Calculations
         List<double> displacedTeethList = new(stockData.Count);
         List<double> displacedLipsList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
         var jawList = GetMovingAverageList(stockData, maType, jawLength, inputList);
         var teethList = GetMovingAverageList(stockData, maType, teethLength, inputList);
@@ -448,7 +443,6 @@ public static partial class Calculations
     /// Calculates the gator oscillator.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="jawLength">Length of the jaw.</param>
     /// <param name="jawOffset">The jaw offset.</param>
@@ -458,7 +452,7 @@ public static partial class Calculations
     /// <param name="lipsOffset">The lips offset.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateGatorOscillator(this StockData stockData, InputName inputName = InputName.MedianPrice, 
+    public static StockData CalculateGatorOscillator(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13, int jawOffset = 8, int teethLength = 8, int teethOffset = 5, 
         int lipsLength = 5, int lipsOffset = 3)
     {
@@ -466,7 +460,7 @@ public static partial class Calculations
         List<double> bottomList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var alligatorList = CalculateAlligatorIndex(stockData, inputName, maType, jawLength, jawOffset, teethLength, teethOffset, lipsLength, lipsOffset).OutputValues;
+        var alligatorList = CalculateAlligatorIndex(stockData, maType, jawLength, jawOffset, teethLength, teethOffset, lipsLength, lipsOffset).ChainedOutputs;
         var jawList = alligatorList["Jaws"];
         var teethList = alligatorList["Teeth"];
         var lipsList = alligatorList["Lips"];

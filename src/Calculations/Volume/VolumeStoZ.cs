@@ -125,13 +125,12 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <param name="smoothLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumePositiveNegativeIndicator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, InputName inputName = InputName.TypicalPrice, int length = 30,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 30,
         int smoothLength = 3)
     {
         List<double> vmpList = new(stockData.Count);
@@ -140,10 +139,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum vmpSum = new();
         RollingSum vmnSum = new();
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var mavList = GetMovingAverageList(stockData, maType, length, volumeList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -298,7 +297,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="signalLength"></param>
@@ -307,8 +305,7 @@ public static partial class Calculations
     /// <param name="vcoef"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateVolumeFlowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        InputName inputName = InputName.TypicalPrice, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3,
+    public static StockData CalculateVolumeFlowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3,
         double coef = 0.2, double vcoef = 2.5)
     {
         List<double> interList = new(stockData.Count);
@@ -318,7 +315,7 @@ public static partial class Calculations
         List<double> dList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum vcpSumWindow = new();
-        var (inputList, _, _, _, closeList, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, closeList, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var smaVolumeList = GetMovingAverageList(stockData, maType, length1, volumeList);
 
@@ -332,7 +329,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(interList);
-        var vinterList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        var vinterList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var vinter = vinterList[i];

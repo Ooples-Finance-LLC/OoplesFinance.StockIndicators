@@ -23,9 +23,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var mabList = CalculateMovingAverageBands(stockData, maType, fastLength, slowLength, mult);
-        var ubList = mabList.OutputValues["UpperBand"];
-        var lbList = mabList.OutputValues["LowerBand"];
-        var maList = mabList.OutputValues["MiddleBand"];
+        var ubList = mabList.ChainedOutputs["UpperBand"];
+        var lbList = mabList.ChainedOutputs["LowerBand"];
+        var maList = mabList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -75,7 +75,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
         var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -93,7 +93,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(amaDiffList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var stdDev = stdDevList[i];
@@ -143,8 +143,8 @@ public static partial class Calculations
         if (stockData.Count == marketData.Count)
         {
             var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-            var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
-            var spStdDevList = CalculateStandardDeviationVolatility(marketData, maType, length).CustomValuesList;
+            var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+            var spStdDevList = CalculateStandardDeviationVolatility(marketData, maType, length).ChainedValues;
 
             for (var i = 0; i < stockData.Count; i++)
             {
@@ -320,7 +320,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
         var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -333,7 +333,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(chgList);
-        var aChgStdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var aChgStdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -446,11 +446,11 @@ public static partial class Calculations
 
         // All three averages are of the prices; each Calculate call leaves its own output on CustomValuesList.
         var callerSeries = stockData.CaptureInputSeries();
-        var qmaList = CalculateQuadraticMovingAverage(stockData, length).CustomValuesList;
+        var qmaList = CalculateQuadraticMovingAverage(stockData, length).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var emaList = CalculateExponentialMovingAverage(stockData, length).CustomValuesList;
+        var emaList = CalculateExponentialMovingAverage(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -497,8 +497,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var projectionBandsList = CalculateProjectionBands(stockData, length);
-        var puList = projectionBandsList.OutputValues["UpperBand"];
-        var plList = projectionBandsList.OutputValues["LowerBand"];
+        var puList = projectionBandsList.ChainedOutputs["UpperBand"];
+        var plList = projectionBandsList.ChainedOutputs["LowerBand"];
         var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -553,8 +553,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var projectionBandsList = CalculateProjectionBands(stockData, length);
-        var puList = projectionBandsList.OutputValues["UpperBand"];
-        var plList = projectionBandsList.OutputValues["LowerBand"];
+        var puList = projectionBandsList.ChainedOutputs["UpperBand"];
+        var plList = projectionBandsList.ChainedOutputs["LowerBand"];
         var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)

@@ -1551,103 +1551,13 @@ public static partial class Calculations
         return stockData;
     }
 
-    // Ensure internal calculations can access outputs even when options disable them.
-    private static List<double> GetCustomValuesListInternal(StockData stockData, Func<StockData, StockData> calculator)
-    {
-        var options = stockData.Options;
-        if (options == null || options.IncludeCustomValues != false)
-        {
-            return calculator(stockData).CustomValuesList;
-        }
+    // A component's single series and named series, unrounded and whatever the publication options say: the
+    // chained copies are kept for exactly this. These used to switch every option on around the call and hide
+    // the results again afterwards. The copies keep a later calculation on the same data from changing them.
+    private static List<double> GetCustomValuesListInternal(StockData stockData, Func<StockData, StockData> calculator) =>
+        new List<double>(calculator(stockData).ChainedValues);
 
-        var prevIncludeCustom = options.IncludeCustomValues;
-        var prevIncludeOutput = options.IncludeOutputValues;
-        var prevIncludeSignals = options.IncludeSignals;
-
-        options.IncludeCustomValues = true;
-        options.IncludeOutputValues = true;
-        options.IncludeSignals = true;
-
-        List<double> list;
-        try
-        {
-            var result = calculator(stockData);
-            list = new List<double>(result.CustomValuesList);
-        }
-        finally
-        {
-            options.IncludeCustomValues = prevIncludeCustom;
-            options.IncludeOutputValues = prevIncludeOutput;
-            options.IncludeSignals = prevIncludeSignals;
-
-            if (prevIncludeCustom == false)
-            {
-                stockData.CustomValuesList = new List<double>();
-            }
-
-            if (prevIncludeOutput == false)
-            {
-                stockData.OutputValues = new Dictionary<string, List<double>>();
-            }
-
-            if (prevIncludeSignals == false)
-            {
-                stockData.SignalsList = new List<Signal>();
-            }
-        }
-
-        return list;
-    }
-
-    private static Dictionary<string, List<double>> GetOutputValuesInternal(StockData stockData, Func<StockData, StockData> calculator)
-    {
-        var options = stockData.Options;
-        if (options == null || options.IncludeOutputValues != false)
-        {
-            return calculator(stockData).OutputValues;
-        }
-
-        var prevIncludeCustom = options.IncludeCustomValues;
-        var prevIncludeOutput = options.IncludeOutputValues;
-        var prevIncludeSignals = options.IncludeSignals;
-
-        options.IncludeCustomValues = true;
-        options.IncludeOutputValues = true;
-        options.IncludeSignals = true;
-
-        Dictionary<string, List<double>> outputValues;
-        try
-        {
-            var result = calculator(stockData);
-            outputValues = new Dictionary<string, List<double>>(result.OutputValues.Count);
-            foreach (var kvp in result.OutputValues)
-            {
-                outputValues[kvp.Key] = new List<double>(kvp.Value);
-            }
-        }
-        finally
-        {
-            options.IncludeCustomValues = prevIncludeCustom;
-            options.IncludeOutputValues = prevIncludeOutput;
-            options.IncludeSignals = prevIncludeSignals;
-
-            if (prevIncludeCustom == false)
-            {
-                stockData.CustomValuesList = new List<double>();
-            }
-
-            if (prevIncludeOutput == false)
-            {
-                stockData.OutputValues = new Dictionary<string, List<double>>();
-            }
-
-            if (prevIncludeSignals == false)
-            {
-                stockData.SignalsList = new List<Signal>();
-            }
-        }
-
-        return outputValues;
-    }
+    private static Dictionary<string, List<double>> GetOutputValuesInternal(StockData stockData, Func<StockData, StockData> calculator) =>
+        calculator(stockData).ChainedOutputs.ToDictionary(kvp => kvp.Key, kvp => new List<double>(kvp.Value));
 }
 

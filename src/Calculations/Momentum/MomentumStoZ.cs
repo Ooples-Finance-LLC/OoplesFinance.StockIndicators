@@ -7,7 +7,6 @@ public static partial class Calculations
     /// Calculates the Ultimate Momentum Indicator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
@@ -18,27 +17,32 @@ public static partial class Calculations
     /// <param name="stdDevMult"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateUltimateMomentumIndicator(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateUltimateMomentumIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19, int length3 = 21, int length4 = 39,
         int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
+        // The components that read their own default input - a typical or median price - read the
+        // CALLER's series instead whenever one is chained, and by the time this calculation calls them
+        // an earlier component has already published its output onto CustomValuesList, which they would
+        // otherwise take for the caller's chain. Unchained this is empty, and they read their own
+        // default input exactly as before.
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = stockData.CaptureInputSeries();
         var moVar = CalculateMcClellanOscillator(stockData, maType, fastLength: length2, slowLength: length4);
-        var advSumList = moVar.OutputValues["AdvSum"];
-        var decSumList = moVar.OutputValues["DecSum"];
-        var moList = moVar.OutputValues["Mo"];
+        var advSumList = moVar.ChainedOutputs["AdvSum"];
+        var decSumList = moVar.ChainedOutputs["DecSum"];
+        var moList = moVar.ChainedOutputs["Mo"];
         stockData.RestoreInputSeries(callerSeries);
-        var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).CustomValuesList;
+        var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi1List = CalculateMoneyFlowIndex(stockData, inputName, length2).CustomValuesList;
+        var mfi1List = CalculateMoneyFlowIndex(stockData, length2).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi2List = CalculateMoneyFlowIndex(stockData, inputName, length3).CustomValuesList;
+        var mfi2List = CalculateMoneyFlowIndex(stockData, length3).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var mfi3List = CalculateMoneyFlowIndex(stockData, inputName, length4).CustomValuesList;
+        var mfi3List = CalculateMoneyFlowIndex(stockData, length4).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -56,7 +60,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(utmList);
-        var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).CustomValuesList;
+        var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).ChainedValues;
         var utmiList = GetMovingAverageList(stockData, maType, length1, utmRsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -112,7 +116,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(cumoSumList);
-        var rocList = CalculateRateOfChange(stockData, smoothLength).CustomValuesList;
+        var rocList = CalculateRateOfChange(stockData, smoothLength).ChainedValues;
         var tlmoList = GetMovingAverageList(stockData, maType, smoothLength, rocList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -166,7 +170,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(diffList);
-        var linregList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var predictedToday = linregList[i];

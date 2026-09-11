@@ -535,7 +535,7 @@ public sealed class StreamingIndicatorEngine : IStreamObserver
                 UpdateLast(bar);
             }
 
-            var stockData = new StockData(_bars, _options.InputName)
+            var stockData = new StockData(_bars)
             {
                 Options = _options.Options
             };
@@ -739,7 +739,6 @@ public sealed class IndicatorSubscriptionOptions
     public bool IncludeUpdates { get; set; } = true;
     public bool IncludeOutputValues { get; set; } = true;
     public SeriesAlignmentPolicy SeriesAlignmentPolicy { get; set; } = SeriesAlignmentPolicy.LastKnown;
-    public InputName InputName { get; set; } = InputName.Close;
     public IndicatorOptions? Options { get; set; }
 }
 

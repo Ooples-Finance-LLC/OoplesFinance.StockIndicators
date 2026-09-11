@@ -24,7 +24,7 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).ChainedValues;
         var highMaList = GetMovingAverageList(stockData, maType, length, highList);
         var lowMaList = GetMovingAverageList(stockData, maType, length, lowList);
 
@@ -123,7 +123,6 @@ public static partial class Calculations
     /// Calculates the Kase Dev Stop V1
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
@@ -134,7 +133,7 @@ public static partial class Calculations
     /// <param name="stdDev4"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateKaseDevStopV1(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateKaseDevStopV1(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20, double stdDev1 = 0,
         double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
     {
@@ -144,7 +143,7 @@ public static partial class Calculations
         List<double> dev3List = new(stockData.Count);
         List<double> dtrList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -161,7 +160,7 @@ public static partial class Calculations
         var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
         var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         stockData.SetCustomValues(dtrList);
-        var dtrStdList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var dtrStdList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var maFast = smaFastList[i];
@@ -259,7 +258,7 @@ public static partial class Calculations
 
         var rangeAvgList = GetMovingAverageList(stockData, maType, length, rrangeList);
         stockData.SetCustomValues(rrangeList);
-        var rangeStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var rangeStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var price = priceList[i];

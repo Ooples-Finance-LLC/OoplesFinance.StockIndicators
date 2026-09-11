@@ -18,8 +18,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
-        var regressionList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        var regressionList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -72,7 +72,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -126,10 +126,10 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var callerSeries = stockData.CaptureInputSeries();
-        var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).CustomValuesList;
+        var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).ChainedValues;
         // The band width is the deviation of the prices, not of the UMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);
-        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, minLength).CustomValuesList;
+        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, minLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -246,7 +246,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsi = rsiList[i];
@@ -452,7 +452,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -595,7 +595,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -840,7 +840,7 @@ public static partial class Calculations
         double absDiffSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var tsList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var tsList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1073,7 +1073,7 @@ public static partial class Calculations
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var smaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1124,7 +1124,7 @@ public static partial class Calculations
 
         var atrPeriod = (length1 * 2) - 1;
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrPeriod).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, atrPeriod).ChainedValues;
         var maList = GetMovingAverageList(stockData, maType, length1, inputList);
         var middleBandList = GetMovingAverageList(stockData, maType, length2, inputList);
 

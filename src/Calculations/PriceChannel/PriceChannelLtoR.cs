@@ -220,9 +220,9 @@ public static partial class Calculations
         int length = 14, double stdDevMult = 3)
     {
         var narrowChannelList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = narrowChannelList.OutputValues["UpperBand"];
-        var middleBandList = narrowChannelList.OutputValues["MiddleBand"];
-        var lowerBandList = narrowChannelList.OutputValues["LowerBand"];
+        var upperBandList = narrowChannelList.ChainedOutputs["UpperBand"];
+        var middleBandList = narrowChannelList.ChainedOutputs["MiddleBand"];
+        var lowerBandList = narrowChannelList.ChainedOutputs["LowerBand"];
         var signalsList = narrowChannelList.SignalsList;
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -456,9 +456,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(highList);
-        var pnoUpBandList = CalculatePrimeNumberOscillator(stockData, length).CustomValuesList;
+        var pnoUpBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
         stockData.SetCustomValues(lowList);
-        var pnoDnBandList = CalculatePrimeNumberOscillator(stockData, length).CustomValuesList;
+        var pnoDnBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
         var (upperBandList, _) = GetMaxAndMinValuesList(pnoUpBandList, length);
         var (_, lowerBandList) = GetMaxAndMinValuesList(pnoDnBandList, length);
 
@@ -661,7 +661,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -732,7 +732,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -802,9 +802,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(lowList);
-        var lowSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var lowSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
         stockData.SetCustomValues(highList);
-        var highSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var highSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -976,7 +976,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum rocSquaredSum = new();
 
-        var rocList = CalculateRateOfChange(stockData, length).CustomValuesList;
+        var rocList = CalculateRateOfChange(stockData, length).ChainedValues;
         var middleBandList = GetMovingAverageList(stockData, maType, smoothLength, rocList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1344,7 +1344,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

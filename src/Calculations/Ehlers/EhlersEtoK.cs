@@ -265,8 +265,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var eteList = CalculateEhlersTrendExtraction(stockData, maType, length1, delta);
-        var trendList = eteList.OutputValues["Trend"];
-        var bpList = eteList.OutputValues["Bp"];
+        var trendList = eteList.ChainedOutputs["Trend"];
+        var bpList = eteList.ChainedOutputs["Bp"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -335,9 +335,9 @@ public static partial class Calculations
         List<double> quotientList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var hpList = CalculateEhlersHighPassFilterV1(stockData, length2, 1).CustomValuesList;
+        var hpList = CalculateEhlersHighPassFilterV1(stockData, length2, 1).ChainedValues;
         stockData.SetCustomValues(hpList);
-        var superSmoothList = CalculateEhlersSuperSmootherFilter(stockData, length1).CustomValuesList;
+        var superSmoothList = CalculateEhlersSuperSmootherFilter(stockData, length1).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -591,8 +591,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var ehtList = CalculateEhlersHilbertTransformIndicator(stockData, length: length1);
-        var ipList = ehtList.OutputValues["Inphase"];
-        var quList = ehtList.OutputValues["Quad"];
+        var ipList = ehtList.ChainedOutputs["Inphase"];
+        var quList = ehtList.ChainedOutputs["Quad"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -658,7 +658,7 @@ public static partial class Calculations
         List<double> qPeakList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -725,7 +725,7 @@ public static partial class Calculations
         var c3 = -a1 * a1;
         var c1 = 1 - c2 - c3;
 
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).CustomValuesList;
+        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -794,8 +794,8 @@ public static partial class Calculations
         var c1 = 1 - c2 - c3;
 
         var hilbertList = CalculateEhlersHilbertTransformer(stockData, length1, length2);
-        var realList = hilbertList.OutputValues["Real"];
-        var imagList = hilbertList.OutputValues["Imag"];
+        var realList = hilbertList.ChainedOutputs["Real"];
+        var imagList = hilbertList.ChainedOutputs["Imag"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -955,8 +955,8 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         var ehlersMamaList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData);
-        var smoothList = ehlersMamaList.OutputValues["Smooth"];
-        var smoothPeriodList = ehlersMamaList.OutputValues["SmoothPeriod"];
+        var smoothList = ehlersMamaList.ChainedOutputs["Smooth"];
+        var smoothPeriodList = ehlersMamaList.ChainedOutputs["SmoothPeriod"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1024,9 +1024,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var snrv2List = CalculateEhlersEnhancedSignalToNoiseRatio(stockData, length);
-        var smoothPeriodList = snrv2List.OutputValues["SmoothPeriod"];
-        var q3List = snrv2List.OutputValues["Q3"];
-        var i3List = snrv2List.OutputValues["I3"];
+        var smoothPeriodList = snrv2List.ChainedOutputs["SmoothPeriod"];
+        var q3List = snrv2List.ChainedOutputs["Q3"];
+        var i3List = snrv2List.ChainedOutputs["I3"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1337,7 +1337,7 @@ public static partial class Calculations
         List<double> inverseFisherTransformList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1432,7 +1432,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).OutputValues["SmoothPeriod"];
+        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).ChainedOutputs["SmoothPeriod"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
