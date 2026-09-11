@@ -234,6 +234,27 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
 
 - `IndicatorBuffer<T>` is now the primary container for indicator values (replaces raw lists)
 - Results are accessed via `runtime.GetSeries(handle)` instead of `OutputValues*` properties
+- **A typed Builder spec computes its batch indicator.** Each spec ran a fast arm written apart from the
+  indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
+  serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
+  indicator, so a spec's values are the indicator's values.
+- **A spec's options reach that indicator.** 155 options reached no parameter at all. 94 now set the parameter
+  they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
+  widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - and 66 that their indicator has no
+  parameter for are marked `[Obsolete]` as having no effect. `EhlersRoofingFilterSpecOptions` defaults to
+  Ehlers' 48-bar high pass and 10-bar smoother, and `DoubleSmoothedMomentaSpecOptions` to the batch
+  indicator's 2, 5 and 25, instead of settings that described another formula.
+- **Three indicators gained a parameter their spec sets**, each part of the published definition and each
+  defaulting to today's behaviour: the stochastic RSI's own stochastic lookback, Inertia's RVI smoothing
+  length, and the Gaussian filter's pole count.
+- **A typed spec streams what it computes.** The Builder built streaming states from a second table that had
+  never been compared with the batch path: 30 specs streamed another indicator, another parameter, or ignored
+  the moving-average type the batch honoured. `BuilderStreamingArmTests` now holds all 168 to their batch
+  indicator. `AverageTrueRangeState`, `AverageDirectionalIndexState`, `RelativeStrengthIndexState`,
+  `TrixState`, `AwesomeOscillatorState` and `AcceleratorOscillatorState` take a `maType`, defaulting to the
+  average each hard-coded, so no existing value changes.
+- **`ComparePriceMomentumOscillatorSpecOptions` is obsolete.** It compares a stock with a market series, which
+  one series cannot supply; use `IndicatorCatalog.ComparePriceMomentumOscillator`, which passes both.
 
 ### Corrected values
 
