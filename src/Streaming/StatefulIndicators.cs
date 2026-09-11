@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Attributes;
@@ -3936,14 +3936,16 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
     private readonly StreamingInputResolver _input;
 
     public StochasticRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14,
-        int smoothLength1 = 3, int smoothLength2 = 3)
+        int smoothLength1 = 3, int smoothLength2 = 3, int? stochLength = null)
     {
         _length = Math.Max(1, length);
+        // The stochastic's own lookback over the RSI, as the batch method's stochLength: the RSI's length unless set.
+        var stochWindow = Math.Max(1, stochLength ?? length);
         _rsi = new RsiState(maType, _length);
         _inputHighWindow = new RollingWindowMax(2);
         _inputLowWindow = new RollingWindowMin(2);
-        _maxWindow = new RollingWindowMax(_length);
-        _minWindow = new RollingWindowMin(_length);
+        _maxWindow = new RollingWindowMax(stochWindow);
+        _minWindow = new RollingWindowMin(stochWindow);
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength2));
         _input = new StreamingInputResolver(InputName.Close, null);

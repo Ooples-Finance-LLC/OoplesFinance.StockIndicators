@@ -579,10 +579,15 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="length"></param>
+    /// <param name="poles">
+    /// Which of Ehlers' one- to four-pole filters is the single series; all four are always published as Egf1 to
+    /// Egf4, and the four-pole filter stays the default.
+    /// </param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersGaussianFilter(this StockData stockData, int length = 14)
+    public static StockData CalculateEhlersGaussianFilter(this StockData stockData, int length = 14, int poles = 4)
     {
+        var resolvedPoles = Math.Min(Math.Max(poles, 1), 4);
         List<double> gf1List = new(stockData.Count);
         List<double> gf2List = new(stockData.Count);
         List<double> gf3List = new(stockData.Count);
@@ -629,7 +634,9 @@ public static partial class Calculations
                 (4 * Pow(1 - alpha4, 3) * prevGf4_3) - (Pow(1 - alpha4, 4) * prevGf4_4);
             gf4List.Add(gf4);
 
-            var signal = GetCompareSignal(currentValue - gf4, prevValue - prevGf4_1);
+            var gf = resolvedPoles switch { 1 => gf1, 2 => gf2, 3 => gf3, _ => gf4 };
+            var prevGf = resolvedPoles switch { 1 => prevGf1, 2 => prevGf2_1, 3 => prevGf3_1, _ => prevGf4_1 };
+            var signal = GetCompareSignal(currentValue - gf, prevValue - prevGf);
             signalsList?.Add(signal);
         }
 
@@ -640,7 +647,7 @@ public static partial class Calculations
             { "Egf4", gf4List }
         });
         stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gf4List);
+        stockData.SetCustomValues(resolvedPoles switch { 1 => gf1List, 2 => gf2List, 3 => gf3List, _ => gf4List });
         stockData.IndicatorName = IndicatorName.EhlersGaussianFilter;
 
         return stockData;

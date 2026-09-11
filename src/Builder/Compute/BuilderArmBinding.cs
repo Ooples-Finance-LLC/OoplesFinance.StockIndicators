@@ -60,10 +60,12 @@ internal static class BuilderArmBinding
         var method = IndicatorInvoker.GetMethod(target.Name)
             ?? throw new NotSupportedException($"{target.Name} has no batch calculation to compute {spec.Options.GetType().Name} with.");
 
-        var bars = new StockData(data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.Dates, data.InputName);
-        if (data.CustomValuesList.Count > 0)
+        // The caller's own series, which is the chained one: the published list is empty or rounded when the
+        // publication options say so, and the indicator must compute on what the caller chained.
+        var bars = new StockData(data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.Dates);
+        if (data.ChainedValues.Count > 0)
         {
-            bars.SetInputSeries(new List<double>(data.CustomValuesList));
+            bars.SetInputSeries(new List<double>(data.ChainedValues));
         }
 
         var parameters = method.GetParameters();

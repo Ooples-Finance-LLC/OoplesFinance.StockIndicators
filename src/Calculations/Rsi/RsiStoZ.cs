@@ -179,16 +179,20 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <param name="smoothLength1"></param>
     /// <param name="smoothLength2"></param>
+    /// <param name="stochLength">
+    /// The stochastic's lookback over the RSI. Chande and Kroll's StochRSI has one for the RSI and one for the
+    /// stochastic; when this is null the stochastic uses <paramref name="length"/>, as it always did here.
+    /// </param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateStochasticRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
-        int length = 14, int smoothLength1 = 3, int smoothLength2 = 3)
+    public static StockData CalculateStochasticRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
+        int length = 14, int smoothLength1 = 3, int smoothLength2 = 3, int? stochLength = null)
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
         stockData.SetCustomValues(rsiList);
-        var stoRsiList = CalculateStochasticOscillator(stockData, maType, length, smoothLength1, smoothLength2);
+        var stoRsiList = CalculateStochasticOscillator(stockData, maType, Math.Max(1, stochLength ?? length), smoothLength1, smoothLength2);
         var stochRsiList = stoRsiList.ChainedOutputs["FastD"];
         var stochRsiSignalList = stoRsiList.ChainedOutputs["SlowD"];
 

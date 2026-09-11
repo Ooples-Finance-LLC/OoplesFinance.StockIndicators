@@ -84,11 +84,12 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
     private readonly RelativeVolatilityIndexEngine _rviLow;
     private readonly IMovingAverageSmoother _smoother;
 
-    public InertiaIndicatorState(MovingAvgType maType = MovingAvgType.LinearRegression, int length = 20)
+    public InertiaIndicatorState(MovingAvgType maType = MovingAvgType.LinearRegression, int length = 20, int rviLength = 14)
     {
         var resolved = Math.Max(1, length);
-        _rviHigh = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, 14);
-        _rviLow = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, 14);
+        var resolvedRvi = Math.Max(1, rviLength);
+        _rviHigh = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, resolvedRvi);
+        _rviLow = new RelativeVolatilityIndexEngine(MovingAvgType.WildersSmoothingMethod, 10, resolvedRvi);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
     }
 
