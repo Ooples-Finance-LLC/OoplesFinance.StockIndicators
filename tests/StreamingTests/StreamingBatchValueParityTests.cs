@@ -1,7 +1,7 @@
-using System.Reflection;
 using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Streaming;
+using static OoplesFinance.StockIndicators.Tests.Unit.StreamingTests.IndicatorRunner;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
 
@@ -25,7 +25,6 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
 public sealed class StreamingBatchValueParityTests : GlobalTestData
 {
     private const int Bars = 251;
-    private const string Primary = "<primary>";
 
     [Fact]
     public void EveryStreamingStateComputesTheValuesItsBatchTwinComputes()
@@ -108,13 +107,7 @@ public sealed class StreamingBatchValueParityTests : GlobalTestData
 
                 for (var i = 0; i < expected.Count; i++)
                 {
-                    if (double.IsNaN(expected[i]) && double.IsNaN(actual[i]))
-                    {
-                        continue;
-                    }
-
-                    var scale = Math.Max(1.0, Math.Max(Math.Abs(expected[i]), Math.Abs(actual[i])));
-                    if (!(Math.Abs(expected[i] - actual[i]) <= 1e-9 * scale))
+                    if (!IsClose(expected[i], actual[i]))
                     {
                         disagreements.Add($"{type.Name}.{key} at bar {i}: batch {expected[i]}, streaming {actual[i]}");
                         break;
@@ -131,59 +124,5 @@ public sealed class StreamingBatchValueParityTests : GlobalTestData
         keyMismatches.Should().BeEmpty($"both engines name the same outputs: {string.Join(" | ", keyMismatches)}");
         disagreements.Should().BeEmpty($"{compared} states compared; streaming computes what batch computes: " +
             string.Join(" | ", disagreements));
-    }
-
-    private static Dictionary<string, List<double>> RunBatch(MethodInfo method, List<TickerData> tickers)
-    {
-        var parameters = method.GetParameters();
-        var args = new object?[parameters.Length];
-        args[0] = new StockData(tickers);
-        for (var i = 1; i < parameters.Length; i++)
-        {
-            args[i] = parameters[i].DefaultValue;
-        }
-
-        var result = method.Invoke(null, args) as StockData
-            ?? throw new InvalidOperationException($"{method.Name} did not return its StockData");
-
-        var series = new Dictionary<string, List<double>>(StringComparer.Ordinal);
-        if (result.CustomValuesList.Count > 0)
-        {
-            series[Primary] = result.CustomValuesList;
-        }
-
-        foreach (var output in result.OutputValues)
-        {
-            series[output.Key] = output.Value;
-        }
-
-        return series;
-    }
-
-    private static Dictionary<string, List<double>> RunStreaming(IStreamingIndicatorState state, List<TickerData> tickers)
-    {
-        var series = new Dictionary<string, List<double>>(StringComparer.Ordinal) { [Primary] = new() };
-        foreach (var t in tickers)
-        {
-            var bar = new OhlcvBar("TEST", BarTimeframe.Tick, t.Date, t.Date, t.Open, t.High, t.Low, t.Close, t.Volume, isFinal: true);
-            var result = state.Update(bar, isFinal: true, includeOutputs: true);
-            series[Primary].Add(result.Value);
-            if (result.Outputs is null)
-            {
-                continue;
-            }
-
-            foreach (var output in result.Outputs)
-            {
-                if (!series.TryGetValue(output.Key, out var list))
-                {
-                    series[output.Key] = list = new List<double>();
-                }
-
-                list.Add(output.Value);
-            }
-        }
-
-        return series;
     }
 }

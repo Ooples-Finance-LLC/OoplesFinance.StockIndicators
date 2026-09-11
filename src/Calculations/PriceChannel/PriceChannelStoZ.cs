@@ -125,7 +125,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).CustomValuesList;
         // The band width is the deviation of the prices, not of the UMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);

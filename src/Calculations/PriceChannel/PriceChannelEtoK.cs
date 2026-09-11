@@ -296,7 +296,7 @@ public static partial class Calculations
         var scl_2 = MinOrMax((int)Math.Ceiling((double)scl / 2));
         var mcl_2 = MinOrMax((int)Math.Ceiling((double)mcl / 2));
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).CustomValuesList;
         // Both channels are ATRs of the prices. The first ATR publishes itself onto CustomValuesList, and the
         // second used to take it for the close - a true range measured against an ATR.

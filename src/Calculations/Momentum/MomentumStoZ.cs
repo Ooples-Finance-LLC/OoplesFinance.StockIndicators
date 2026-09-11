@@ -26,7 +26,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var moVar = CalculateMcClellanOscillator(stockData, maType, fastLength: length2, slowLength: length4);
         var advSumList = moVar.OutputValues["AdvSum"];
         var decSumList = moVar.OutputValues["DecSum"];

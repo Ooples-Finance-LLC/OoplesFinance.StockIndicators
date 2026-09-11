@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 
+using OoplesFinance.StockIndicators.Helpers;
+
 namespace OoplesFinance.StockIndicators.Core;
 
 internal static class MovingAverageCore
@@ -22,6 +24,18 @@ internal static class MovingAverageCore
             }
 
             output[i] = i >= length - 1 ? sum / length : 0;
+
+            // Rebuilt from its window every length bars, once the bar's value is taken. A running sum otherwise
+            // keeps the rounding error of every value it has ever held: after prices near 100,000 it was still
+            // off by 1e-9 at prices near 10, which a deviation from the mean of a tenth turns into 1e-8.
+            if (length > 0 && (i + 1) % length == 0)
+            {
+                sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += input[j];
+                }
+            }
         }
     }
 
@@ -48,6 +62,21 @@ internal static class MovingAverageCore
             }
 
             output[i] = numerator / weightedSumDenominator;
+
+            // Rebuilt from the window every length bars, once the bar's value is taken, as SimpleMovingAverage
+            // rebuilds its sum: the running numerator otherwise carried a relative error of 1e-6 from prices near
+            // 100,000 into prices near 10.
+            if (length > 0 && (i + 1) % length == 0)
+            {
+                numerator = 0;
+                windowSum = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var windowValue = input[i - length + 1 + j];
+                    numerator += (j + 1) * windowValue;
+                    windowSum += windowValue;
+                }
+            }
         }
     }
 
@@ -291,44 +320,20 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Rolling sums for incremental computation
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-
+        // Fitted over the values the window holds, with x counted from its first bar: running sums over the bar
+        // index cancel catastrophically and drift, see WindowLeastSquares. A one-value window has no slope and
+        // returns the value itself.
         for (var i = 0; i < input.Length; i++)
         {
-            var currentY = input[i];
-            var currentX = (double)i;
-
-            // Add current values to sums
-            sumX += currentX;
-            sumY += currentY;
-            sumXY += currentX * currentY;
-            sumX2 += currentX * currentX;
-
-            // Remove old values if window is full
-            if (i >= length)
+            var fit = new WindowLeastSquares();
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
-                var oldX = (double)(i - length);
-                var oldY = input[i - length];
-                sumX -= oldX;
-                sumY -= oldY;
-                sumXY -= oldX * oldY;
-                sumX2 -= oldX * oldX;
+                fit.Add(input[j]);
             }
 
-            var n = Math.Min(i + 1, length);
-            var denominator = (n * sumX2) - (sumX * sumX);
-
-            if (denominator == 0)
-            {
-                output[i] = n > 0 ? sumY / n : 0;
-            }
-            else
-            {
-                var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
-                var intercept = (sumY - (slope * sumX)) / n;
-                output[i] = intercept + (slope * currentX);
-            }
+            var n = fit.Count;
+            var (slope, intercept) = fit.Solve(n);
+            output[i] = intercept + (slope * (n - 1));
         }
     }
 
@@ -592,53 +597,36 @@ internal static class MovingAverageCore
         // the first price - so MovingAvgType.VariableMovingAverage meant one thing here and another there.
         var resolved = Math.Max(1, length);
         var k = 1d / resolved;
-        var pool = ArrayPool<double>.Shared;
-        var isArray = pool.Rent(input.Length);
+        // The same rolling window as the indicator: the highest and lowest iS, O(1) amortised per bar.
+        var isWindow = new RollingMinMax(resolved);
+        double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0, vma = 0;
 
-        try
+        for (var i = 0; i < input.Length; i++)
         {
-            var isSeries = isArray.AsSpan(0, input.Length);
-            double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0, vma = 0;
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var pdm = i >= 1 ? Math.Max(currentValue - prevValue, 0) : 0;
+            var mdm = i >= 1 ? Math.Max(prevValue - currentValue, 0) : 0;
 
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevValue = i >= 1 ? input[i - 1] : 0;
-                var pdm = i >= 1 ? Math.Max(currentValue - prevValue, 0) : 0;
-                var mdm = i >= 1 ? Math.Max(prevValue - currentValue, 0) : 0;
+            pdmS = ((1 - k) * pdmS) + (k * pdm);
+            mdmS = ((1 - k) * mdmS) + (k * mdm);
+            var s = pdmS + mdmS;
+            var pdi = s != 0 ? pdmS / s : 0;
+            var mdi = s != 0 ? mdmS / s : 0;
 
-                pdmS = ((1 - k) * pdmS) + (k * pdm);
-                mdmS = ((1 - k) * mdmS) + (k * mdm);
-                var s = pdmS + mdmS;
-                var pdi = s != 0 ? pdmS / s : 0;
-                var mdi = s != 0 ? mdmS / s : 0;
+            pdiS = ((1 - k) * pdiS) + (k * pdi);
+            mdiS = ((1 - k) * mdiS) + (k * mdi);
+            var d = Math.Abs(pdiS - mdiS);
+            var s1 = pdiS + mdiS;
+            var dS1 = s1 != 0 ? d / s1 : 0;
 
-                pdiS = ((1 - k) * pdiS) + (k * pdi);
-                mdiS = ((1 - k) * mdiS) + (k * mdi);
-                var d = Math.Abs(pdiS - mdiS);
-                var s1 = pdiS + mdiS;
-                var dS1 = s1 != 0 ? d / s1 : 0;
+            iS = ((1 - k) * iS) + (k * dS1);
+            isWindow.Add(iS);
 
-                iS = ((1 - k) * iS) + (k * dS1);
-                isSeries[i] = iS;
-
-                var hhv = iS;
-                var llv = iS;
-                for (var j = Math.Max(0, i - resolved + 1); j < i; j++)
-                {
-                    hhv = Math.Max(hhv, isSeries[j]);
-                    llv = Math.Min(llv, isSeries[j]);
-                }
-
-                var d1 = hhv - llv;
-                var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-                vma = ((1 - (k * vI)) * vma) + (k * vI * currentValue);
-                output[i] = vma;
-            }
-        }
-        finally
-        {
-            pool.Return(isArray);
+            var d1 = isWindow.Max - isWindow.Min;
+            var vI = d1 != 0 ? (iS - isWindow.Min) / d1 : 0;
+            vma = ((1 - (k * vI)) * vma) + (k * vI * currentValue);
+            output[i] = vma;
         }
     }
 

@@ -317,7 +317,7 @@ public static partial class Calculations
         RollingSum negMoneyFlowSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).OutputValues["Length"];
         // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
         // and the typical price used to take it for the close.
@@ -1373,7 +1373,7 @@ public static partial class Calculations
         double chgSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
         // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);

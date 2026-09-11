@@ -1422,7 +1422,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var rocList = CalculateRateOfChange(stockData, length1).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var roc15List = CalculateRateOfChange(stockData, length2).CustomValuesList;

@@ -298,7 +298,7 @@ public static partial class Calculations
         List<double> atrDevList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
         var upperBandList = bollingerBands.OutputValues["UpperBand"];

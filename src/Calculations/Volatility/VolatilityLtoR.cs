@@ -445,7 +445,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         // All three averages are of the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var qmaList = CalculateQuadraticMovingAverage(stockData, length).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;

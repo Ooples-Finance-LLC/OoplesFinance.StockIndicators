@@ -3019,20 +3019,14 @@ public sealed class RangeIdentifierState : IStreamingIndicatorState
 public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _xSum;
-    private readonly RollingWindowSum _ySum;
-    private readonly RollingWindowSum _xySum;
-    private readonly RollingWindowSum _x2Sum;
+    private readonly PooledRingBuffer<double> _window;
     private readonly StreamingInputResolver _input;
     private int _index;
 
     public LinearRegressionState(int length = 14, InputName inputName = InputName.Close)
     {
         _length = Math.Max(1, length);
-        _xSum = new RollingWindowSum(_length);
-        _ySum = new RollingWindowSum(_length);
-        _xySum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
+        _window = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -3044,10 +3038,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
         }
 
         _length = Math.Max(1, length);
-        _xSum = new RollingWindowSum(_length);
-        _ySum = new RollingWindowSum(_length);
-        _xySum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
+        _window = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -3055,29 +3046,44 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 
     public void Reset()
     {
-        _xSum.Reset();
-        _ySum.Reset();
-        _xySum.Reset();
-        _x2Sum.Reset();
+        _window.Clear();
         _index = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var x = (double)_index;
 
-        var sumX = isFinal ? _xSum.Add(x, out _) : _xSum.Preview(x, out _);
-        var sumY = isFinal ? _ySum.Add(value, out _) : _ySum.Preview(value, out _);
-        var sumXY = isFinal ? _xySum.Add(x * value, out _) : _xySum.Preview(x * value, out _);
-        var sumX2 = isFinal ? _x2Sum.Add(x * x, out _) : _x2Sum.Preview(x * x, out _);
+        // The fit of batch CalculateLinearRegression over the same window, fed oldest first, and divided by the
+        // full length as batch divides: see WindowLeastSquares. A preview replaces the oldest value only if the
+        // window is already full.
+        var first = 0;
+        if (isFinal)
+        {
+            _window.TryAdd(value, out _);
+        }
+        else if (_window.Count == _length)
+        {
+            first = 1;
+        }
 
-        // Use full length to match batch CalculateLinearRegression behavior
-        var bottom = (_length * sumX2) - (sumX * sumX);
-        var slope = bottom != 0 ? ((_length * sumXY) - (sumX * sumY)) / bottom : 0;
-        var intercept = _length != 0 ? (sumY - (slope * sumX)) / _length : 0;
-        var predictedToday = intercept + (slope * x);
-        var predictedTomorrow = intercept + (slope * (x + 1));
+        var fit = new WindowLeastSquares();
+        for (var i = first; i < _window.Count; i++)
+        {
+            fit.Add(_window[i]);
+        }
+
+        if (!isFinal)
+        {
+            fit.Add(value);
+        }
+
+        var (slope, windowIntercept) = fit.Solve(_length);
+        var last = fit.Count - 1;
+        // The intercept is reported at the first bar of the stream, as batch reports it at bar 0.
+        var intercept = windowIntercept - (slope * (_index - last));
+        var predictedToday = windowIntercept + (slope * last);
+        var predictedTomorrow = windowIntercept + (slope * (last + 1));
 
         if (isFinal)
         {
@@ -3101,10 +3107,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 
     public void Dispose()
     {
-        _xSum.Dispose();
-        _ySum.Dispose();
-        _xySum.Dispose();
-        _x2Sum.Dispose();
+        _window.Dispose();
     }
 }
 
@@ -15420,6 +15423,7 @@ internal sealed class RollingWindowSum : IDisposable
 {
     private readonly PooledRingBuffer<double> _window;
     private double _sum;
+    private int _sinceRebuild;
 
     public RollingWindowSum(int length)
     {
@@ -15440,23 +15444,37 @@ internal sealed class RollingWindowSum : IDisposable
 
     public double Add(double value, out int countAfter)
     {
+        // Grouped as MovingAverageCore.SimpleMovingAverage groups it, and as Preview does.
+        _sum += value;
         if (_window.TryAdd(value, out var removed))
         {
-            _sum += value - removed;
-        }
-        else
-        {
-            _sum += value;
+            _sum -= removed;
         }
 
         countAfter = _window.Count;
-        return _sum;
+        var sum = _sum;
+
+        // Rebuilt from the window every Capacity values, on the bars MovingAverageCore.SimpleMovingAverage
+        // rebuilds on, and after the running sum is reported so a preview still equals its final bar. A running
+        // sum otherwise keeps the rounding error of every value it has ever held.
+        if (++_sinceRebuild == _window.Capacity)
+        {
+            _sinceRebuild = 0;
+            _sum = 0;
+            for (var i = 0; i < _window.Count; i++)
+            {
+                _sum += _window[i];
+            }
+        }
+
+        return sum;
     }
 
     public void Reset()
     {
         _window.Clear();
         _sum = 0;
+        _sinceRebuild = 0;
     }
 
     public void Dispose()
@@ -15506,72 +15524,62 @@ internal sealed class RollingCumulativeSum
 internal sealed class RollingWindowCorrelation : IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _xSum;
-    private readonly RollingWindowSum _ySum;
-    private readonly RollingWindowSum _x2Sum;
-    private readonly RollingWindowSum _y2Sum;
-    private readonly RollingWindowSum _xySum;
+    private readonly PooledRingBuffer<double> _x;
+    private readonly PooledRingBuffer<double> _y;
+    private readonly double[] _xWindow;
+    private readonly double[] _yWindow;
 
     public RollingWindowCorrelation(int length)
     {
         _length = Math.Max(1, length);
-        _xSum = new RollingWindowSum(_length);
-        _ySum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
-        _y2Sum = new RollingWindowSum(_length);
-        _xySum = new RollingWindowSum(_length);
+        _x = new PooledRingBuffer<double>(_length);
+        _y = new PooledRingBuffer<double>(_length);
+        _xWindow = new double[_length];
+        _yWindow = new double[_length];
     }
 
     public double Preview(double x, double y, out int countAfter)
     {
-        var sumX = _xSum.Preview(x, out countAfter);
-        var sumY = _ySum.Preview(y, out _);
-        var sumX2 = _x2Sum.Preview(x * x, out _);
-        var sumY2 = _y2Sum.Preview(y * y, out _);
-        var sumXY = _xySum.Preview(x * y, out _);
-        return Calculate(sumX, sumY, sumX2, sumY2, sumXY, countAfter);
+        // A preview replaces the oldest pair only if the window is already full.
+        var first = _x.Count == _length ? 1 : 0;
+        var n = 0;
+        for (var i = first; i < _x.Count; i++, n++)
+        {
+            _xWindow[n] = _x[i];
+            _yWindow[n] = _y[i];
+        }
+
+        _xWindow[n] = x;
+        _yWindow[n] = y;
+        countAfter = n + 1;
+        return WindowCorrelation.Pearson(new ReadOnlySpan<double>(_xWindow, 0, countAfter), new ReadOnlySpan<double>(_yWindow, 0, countAfter));
     }
 
     public double Add(double x, double y, out int countAfter)
     {
-        var sumX = _xSum.Add(x, out countAfter);
-        var sumY = _ySum.Add(y, out _);
-        var sumX2 = _x2Sum.Add(x * x, out _);
-        var sumY2 = _y2Sum.Add(y * y, out _);
-        var sumXY = _xySum.Add(x * y, out _);
-        return Calculate(sumX, sumY, sumX2, sumY2, sumXY, countAfter);
+        _x.TryAdd(x, out _);
+        _y.TryAdd(y, out _);
+        countAfter = _x.Count;
+        for (var i = 0; i < countAfter; i++)
+        {
+            _xWindow[i] = _x[i];
+            _yWindow[i] = _y[i];
+        }
+
+        // The routine and window order of batch RollingCorrelation, so the two engines agree to the last bit.
+        return WindowCorrelation.Pearson(new ReadOnlySpan<double>(_xWindow, 0, countAfter), new ReadOnlySpan<double>(_yWindow, 0, countAfter));
     }
 
     public void Reset()
     {
-        _xSum.Reset();
-        _ySum.Reset();
-        _x2Sum.Reset();
-        _y2Sum.Reset();
-        _xySum.Reset();
-    }
-
-    private double Calculate(double sumX, double sumY, double sumX2, double sumY2, double sumXY, int n)
-    {
-        if (_length <= 1 || n <= 1)
-        {
-            return 0;
-        }
-
-        var numerator = (n * sumXY) - (sumX * sumY);
-        var denomLeft = (n * sumX2) - (sumX * sumX);
-        var denomRight = (n * sumY2) - (sumY * sumY);
-        var denom = Math.Sqrt(denomLeft * denomRight);
-        return denom != 0 ? numerator / denom : 0;
+        _x.Clear();
+        _y.Clear();
     }
 
     public void Dispose()
     {
-        _xSum.Dispose();
-        _ySum.Dispose();
-        _x2Sum.Dispose();
-        _y2Sum.Dispose();
-        _xySum.Dispose();
+        _x.Dispose();
+        _y.Dispose();
     }
 }
 
@@ -15765,6 +15773,7 @@ internal sealed class WmaState : IDisposable
     private readonly PooledRingBuffer<double> _window;
     private double _sum;
     private double _numerator;
+    private int _sinceRebuild;
 
     public WmaState(int length)
     {
@@ -15775,17 +15784,32 @@ internal sealed class WmaState : IDisposable
 
     public double GetNext(double value, bool commit)
     {
-        var numerator = _numerator + (_length * value) - _sum;
+        // The arithmetic of MovingAverageCore.WeightedMovingAverage, grouped the same way, so the two engines
+        // round alike: grouping it as (numerator + L*value) - sum, and folding the removal into one step, left
+        // them trillionths apart on an ordinary price series.
+        var numerator = _numerator + ((_length * value) - _sum);
         if (commit)
         {
             _numerator = numerator;
+            _sum += value;
             if (_window.TryAdd(value, out var removed))
             {
-                _sum += value - removed;
+                _sum -= removed;
             }
-            else
+
+            // Rebuilt from the window every length bars, on the bars the batch core rebuilds on and after this
+            // bar's value is taken, so neither engine carries rounding from values that have left the window.
+            if (++_sinceRebuild == _length)
             {
-                _sum += value;
+                _sinceRebuild = 0;
+                _numerator = 0;
+                _sum = 0;
+                for (var j = 0; j < _window.Count; j++)
+                {
+                    var windowValue = _window[j];
+                    _numerator += (j + 1) * windowValue;
+                    _sum += windowValue;
+                }
             }
         }
 
@@ -15797,6 +15821,7 @@ internal sealed class WmaState : IDisposable
         _window.Clear();
         _sum = 0;
         _numerator = 0;
+        _sinceRebuild = 0;
     }
 
     public void Dispose()
@@ -16328,69 +16353,52 @@ internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverag
 internal sealed class LinearRegressionCoreSmoother : IMovingAverageSmoother
 {
     private readonly int _length;
-    private readonly RollingWindowSum _xSum;
-    private readonly RollingWindowSum _ySum;
-    private readonly RollingWindowSum _xySum;
-    private readonly RollingWindowSum _x2Sum;
-    private int _index;
+    private readonly PooledRingBuffer<double> _window;
 
     public LinearRegressionCoreSmoother(int length)
     {
         _length = Math.Max(1, length);
-        _xSum = new RollingWindowSum(_length);
-        _ySum = new RollingWindowSum(_length);
-        _xySum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
+        _window = new PooledRingBuffer<double>(_length);
     }
 
     public double Next(double value, bool isFinal)
     {
-        var x = (double)_index;
-
-        var sumX = isFinal ? _xSum.Add(x, out _) : _xSum.Preview(x, out _);
-        var sumY = isFinal ? _ySum.Add(value, out _) : _ySum.Preview(value, out _);
-        var sumXY = isFinal ? _xySum.Add(x * value, out _) : _xySum.Preview(x * value, out _);
-        var sumX2 = isFinal ? _x2Sum.Add(x * x, out _) : _x2Sum.Preview(x * x, out _);
-
-        // Use actual sample count to match MovingAverageCore.LinearRegression behavior
-        var n = Math.Min(_index + 1, _length);
-        var denominator = (n * sumX2) - (sumX * sumX);
-
-        double predictedToday;
-        if (denominator == 0)
-        {
-            predictedToday = n > 0 ? sumY / n : 0;
-        }
-        else
-        {
-            var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
-            var intercept = (sumY - (slope * sumX)) / n;
-            predictedToday = intercept + (slope * x);
-        }
-
+        // The fit of MovingAverageCore.LinearRegression over the same window, fed oldest first: see
+        // WindowLeastSquares. A preview replaces the oldest value only if the window is already full.
+        var first = 0;
         if (isFinal)
         {
-            _index++;
+            _window.TryAdd(value, out _);
+        }
+        else if (_window.Count == _length)
+        {
+            first = 1;
         }
 
-        return predictedToday;
+        var fit = new WindowLeastSquares();
+        for (var i = first; i < _window.Count; i++)
+        {
+            fit.Add(_window[i]);
+        }
+
+        if (!isFinal)
+        {
+            fit.Add(value);
+        }
+
+        var n = fit.Count;
+        var (slope, intercept) = fit.Solve(n);
+        return intercept + (slope * (n - 1));
     }
 
     public void Reset()
     {
-        _xSum.Reset();
-        _ySum.Reset();
-        _xySum.Reset();
-        _x2Sum.Reset();
-        _index = 0;
+        _window.Clear();
     }
 
     public void Dispose()
     {
-        _xSum.Dispose();
-        _ySum.Dispose();
-        _xySum.Dispose();
-        _x2Sum.Dispose();
+        _window.Dispose();
     }
 }
 

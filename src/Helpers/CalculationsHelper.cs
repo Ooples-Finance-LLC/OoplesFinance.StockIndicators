@@ -168,6 +168,17 @@ public static class CalculationsHelper
         stockData.CustomValuesList = series;
 
     /// <summary>
+    /// A copy of the caller's input series, taken before a composite's components publish their own outputs.
+    /// </summary>
+    /// <remarks>
+    /// Empty when the caller chained nothing. <see cref="StockData.CustomValuesList"/> has a public setter and can
+    /// be null; a null series reads as the bars' own input, as <c>GetInputValuesList</c> treats it, instead of
+    /// throwing from the copy.
+    /// </remarks>
+    internal static List<double> CaptureInputSeries(this StockData stockData) =>
+        stockData.CustomValuesList is { } series ? new List<double>(series) : new List<double>();
+
+    /// <summary>
     /// Hands the next component of a composite indicator the caller's input again, after an earlier
     /// component published its own output.
     /// </summary>
@@ -486,7 +497,7 @@ public static class CalculationsHelper
         int? fastLength = null, int? slowLength = null)
     {
         var callerSeries = stockData.CustomValuesList;
-        stockData.SetInputSeries(new List<double>(customValuesList ?? callerSeries));
+        stockData.SetInputSeries(customValuesList is not null ? new List<double>(customValuesList) : stockData.CaptureInputSeries());
         try
         {
             return GetMovingAverageListCore(stockData, movingAvgType, length, customValuesList, fastLength, slowLength);

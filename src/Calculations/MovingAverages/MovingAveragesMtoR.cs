@@ -1015,7 +1015,7 @@ public static partial class Calculations
         RollingSum x2PowSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var linregList = CalculateLinearRegression(stockData, length).CustomValuesList;
         // The deviation is of the prices, not of the regression line just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);

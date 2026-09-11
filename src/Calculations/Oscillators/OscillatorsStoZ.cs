@@ -427,7 +427,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var cciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: slowLength).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var turboCciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: fastLength).CustomValuesList;
@@ -636,7 +636,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var macd1List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).CustomValuesList;
         // The explosion line is the Bollinger width of the prices, not of the MACD just published.
         stockData.RestoreInputSeries(callerSeries);
@@ -1705,7 +1705,7 @@ public static partial class Calculations
         var ma1List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, inputList);
         var ma2List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length3, inputList);
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var ltRocList = CalculateRateOfChange(stockData, length2).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var mtRocList = CalculateRateOfChange(stockData, length4).CustomValuesList;
@@ -1827,7 +1827,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var stochastic1List = CalculateStochasticOscillator(stockData, maType, length: length2, smoothLength, smoothLength).OutputValues["FastD"];
@@ -2125,7 +2125,7 @@ public static partial class Calculations
 
         // Every component reads the prices (the AO and CCI their own median and typical price); each
         // Calculate call leaves its output on CustomValuesList for the next one to mistake for its input.
-        var callerSeries = new List<double>(stockData.CustomValuesList);
+        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: rsiLength).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var aoList = CalculateAwesomeOscillator(stockData, fastLength: aoLength1, slowLength: aoLength2).CustomValuesList;

@@ -1427,54 +1427,35 @@ public static partial class Calculations
         List<double> interceptList = new(stockData.Count);
         List<double> predictedTomorrowList = new(stockData.Count);
         List<double> predictedTodayList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> xyList = new(stockData.Count);
-        List<double> x2List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum xSumWindow = new();
-        RollingSum ySumWindow = new();
-        RollingSum xySumWindow = new();
-        RollingSum x2SumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = GetLastOrDefault(yList);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            yList.Add(currentValue);
-            ySumWindow.Add(currentValue);
 
-            double x = i;
-            xList.Add(x);
-            xSumWindow.Add(x);
+            // Fitted with x counted from the window's first bar, which is bar 0 until the window fills; see
+            // WindowLeastSquares for why the bar index itself is not used as x.
+            var start = Math.Max(0, i - length + 1);
+            var fit = new WindowLeastSquares();
+            for (var j = start; j <= i; j++)
+            {
+                fit.Add(inputList[j]);
+            }
 
-            var x2 = x * x;
-            x2List.Add(x2);
-            x2SumWindow.Add(x2);
-
-            var xy = x * currentValue;
-            xyList.Add(xy);
-            xySumWindow.Add(xy);
-
-            var sumX = xSumWindow.Sum(length);
-            var sumY = ySumWindow.Sum(length);
-            var sumXY = xySumWindow.Sum(length);
-            var sumX2 = x2SumWindow.Sum(length);
-            var top = (length * sumXY) - (sumX * sumY);
-            var bottom = (length * sumX2) - Pow(sumX, 2);
-
-            var b = bottom != 0 ? top / bottom : 0;
+            var (b, windowIntercept) = fit.Solve(length);
             slopeList.Add(b);
 
-            var a = length != 0 ? (sumY - (b * sumX)) / length : 0;
+            // The intercept is still reported at bar 0 of the series, as it always was.
+            var a = windowIntercept - (b * start);
             interceptList.Add(a);
 
-            var predictedToday = a + (b * x);
+            var predictedToday = windowIntercept + (b * (i - start));
             predictedTodayList.Add(predictedToday);
 
             var prevPredictedNextDay = GetLastOrDefault(predictedTomorrowList);
-            var predictedNextDay = a + (b * (x + 1));
+            var predictedNextDay = windowIntercept + (b * (i - start + 1));
             predictedTomorrowList.Add(predictedNextDay);
 
             var signal = GetCompareSignal(currentValue - predictedNextDay, prevValue - prevPredictedNextDay, true);
