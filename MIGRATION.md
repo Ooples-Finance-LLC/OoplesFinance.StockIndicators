@@ -330,6 +330,13 @@ the indicator's values. Routing also corrected the indicators it exposed:
 - Asking `GetMovingAverageList` for the dynamically adjustable, adaptive, Ehlers adaptive Laguerre or middle
   high-low average without a fast length now uses the indicator's own default instead of 0.
 
+**The Accumulative Swing Index is Wilder's.** Both engines ran his numerator backwards (the previous close
+less today's) and took K and R from signed moves where he takes their sizes; they now compute
+`50 * ((C - Cy) + 0.5 * (C - O) + 0.25 * (Cy - Oy)) / R * K / T` with his three-case R, and the first bar,
+which has no previous bar, contributes 0. `CalculateAccumulativeSwingIndex` and `AccumulativeSwingIndexState`
+take Wilder's limit move T as `limitMove`; the default of 0 keeps each bar's range in its place, as before.
+ASI values and its signal change.
+
 ### New Dependencies (net461 only)
 
 - `System.Net.Http` 4.3.4

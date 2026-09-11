@@ -76,9 +76,11 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
+    /// <param name="limitMove">The market's limit move, Wilder's T; 0 uses each bar's range instead.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateAccumulativeSwingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
+    public static StockData CalculateAccumulativeSwingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
+        double limitMove = 0)
     {
         List<double> accumulativeSwingIndexList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -86,26 +88,11 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentClose = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevOpen = i >= 1 ? openList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevHighCurrentClose = prevHigh - currentClose;
-            var prevLowCurrentClose = prevLow - currentClose;
-            var prevClosePrevOpen = prevClose - prevOpen;
-            var currentHighPrevClose = currentHigh - prevClose;
-            var currentLowPrevClose = currentLow - prevClose;
-            var t = currentHigh - currentLow;
-            var k = Math.Max(Math.Abs(prevHighCurrentClose), Math.Abs(prevLowCurrentClose));
-            var r = currentHighPrevClose > Math.Max(currentLowPrevClose, t) ? currentHighPrevClose - (0.5 * currentLowPrevClose) + (0.25 * prevClosePrevOpen) :
-                currentLowPrevClose > Math.Max(currentHighPrevClose, t) ? currentLowPrevClose - (0.5 * currentHighPrevClose) + (0.25 * prevClosePrevOpen) :
-                t > Math.Max(currentHighPrevClose, currentLowPrevClose) ? t + (0.25 * prevClosePrevOpen) : 0;
-            var swingIndex = r != 0 && t != 0 ? 50 * ((prevClose - currentClose + (0.5 * prevClosePrevOpen) +
-                                                       (0.25 * (currentClose - currentOpen))) / r) * (k / t) : 0;
+            // Wilder's swing index needs yesterday's bar; the first bar has none. The numerator ran backwards (the
+            // previous close less today's) and K and R took signed moves where Wilder takes their sizes.
+            var swingIndex = i >= 1
+                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1], inputList[i - 1], limitMove)
+                : 0;
 
             var prevSwingIndex = GetLastOrDefault(accumulativeSwingIndexList);
             var accumulativeSwingIndex = prevSwingIndex + swingIndex;

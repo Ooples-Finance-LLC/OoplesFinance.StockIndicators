@@ -6123,16 +6123,17 @@ public sealed class AbsoluteStrengthIndexState : IStreamingIndicatorState
 public sealed class AccumulativeSwingIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signal;
+    private readonly double _limitMove;
     private double _asi;
     private double _prevClose;
     private double _prevOpen;
-    private double _prevHigh;
-    private double _prevLow;
     private bool _hasPrev;
 
-    public AccumulativeSwingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
+    public AccumulativeSwingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
+        double limitMove = 0)
     {
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _limitMove = limitMove;
     }
 
     public IndicatorName Name => IndicatorName.AccumulativeSwingIndex;
@@ -6143,37 +6144,14 @@ public sealed class AccumulativeSwingIndexState : IStreamingIndicatorState, IDis
         _asi = 0;
         _prevClose = 0;
         _prevOpen = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
         _hasPrev = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var currentClose = bar.Close;
-        var currentHigh = bar.High;
-        var currentLow = bar.Low;
-        var currentOpen = bar.Open;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevOpen = _hasPrev ? _prevOpen : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevHighCurrentClose = prevHigh - currentClose;
-        var prevLowCurrentClose = prevLow - currentClose;
-        var prevClosePrevOpen = prevClose - prevOpen;
-        var currentHighPrevClose = currentHigh - prevClose;
-        var currentLowPrevClose = currentLow - prevClose;
-        var t = currentHigh - currentLow;
-        var k = Math.Max(Math.Abs(prevHighCurrentClose), Math.Abs(prevLowCurrentClose));
-        var r = currentHighPrevClose > Math.Max(currentLowPrevClose, t)
-            ? currentHighPrevClose - (0.5 * currentLowPrevClose) + (0.25 * prevClosePrevOpen)
-            : currentLowPrevClose > Math.Max(currentHighPrevClose, t)
-                ? currentLowPrevClose - (0.5 * currentHighPrevClose) + (0.25 * prevClosePrevOpen)
-                : t > Math.Max(currentHighPrevClose, currentLowPrevClose)
-                    ? t + (0.25 * prevClosePrevOpen)
-                    : 0;
-        var swingIndex = r != 0 && t != 0
-            ? 50 * ((prevClose - currentClose + (0.5 * prevClosePrevOpen) + (0.25 * (currentClose - currentOpen))) / r) * (k / t)
+        // Wilder's swing index needs yesterday's bar; the first bar has none.
+        var swingIndex = _hasPrev
+            ? WilderSwingIndex.Compute(bar.Open, bar.High, bar.Low, bar.Close, _prevOpen, _prevClose, _limitMove)
             : 0;
         var asi = _asi + swingIndex;
         var signal = _signal.Next(asi, isFinal);
@@ -6181,10 +6159,8 @@ public sealed class AccumulativeSwingIndexState : IStreamingIndicatorState, IDis
         if (isFinal)
         {
             _asi = asi;
-            _prevClose = currentClose;
-            _prevOpen = currentOpen;
-            _prevHigh = currentHigh;
-            _prevLow = currentLow;
+            _prevClose = bar.Close;
+            _prevOpen = bar.Open;
             _hasPrev = true;
         }
 
