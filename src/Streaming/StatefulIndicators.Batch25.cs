@@ -506,7 +506,9 @@ public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposabl
         var upper = retEma + _bandStep;
         var lower = retEma - _bandStep;
 
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevClose = _hasPrev ? _prevClose : close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _atrSmoother.Next(tr, isFinal);
 

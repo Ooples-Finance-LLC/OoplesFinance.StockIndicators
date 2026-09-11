@@ -167,6 +167,21 @@ public static class CalculationsHelper
     internal static void SetInputSeries(this StockData stockData, List<double> series) =>
         stockData.CustomValuesList = series;
 
+    /// <summary>
+    /// Hands the next component of a composite indicator the caller's input again, after an earlier
+    /// component published its own output.
+    /// </summary>
+    /// <remarks>
+    /// Every Calculate method leaves its result on CustomValuesList for chaining, so a second component
+    /// called straight after a first computes on the first one's output. The signals go too: a component
+    /// that publishes signals and no single series makes the next input read refuse to run.
+    /// </remarks>
+    internal static void RestoreInputSeries(this StockData stockData, List<double> callerSeries)
+    {
+        stockData.SetInputSeries(new List<double>(callerSeries));
+        stockData.SignalsList = new List<Signal>();
+    }
+
     public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
     {
         if (!ShouldIncludeCustomValues(stockData))

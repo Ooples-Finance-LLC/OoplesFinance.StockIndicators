@@ -2324,6 +2324,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
     private readonly StreamingInputResolver _input;
     private readonly double _atrMult;
     private double _prevValue;
+    private double _atrValue;
     private double _prevEma;
     private double _prevAdm;
     private double _prevTrndDn;
@@ -2342,7 +2343,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         var resolved = Math.Max(1, length);
         _ema = MovingAverageSmootherFactory.Create(maType, resolved);
         _atr = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, inputName);
+        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _atrValue);
         _adSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _atrMult = atrMult;
         _input = new StreamingInputResolver(inputName, null);
@@ -2358,7 +2359,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         var resolved = Math.Max(1, length);
         _ema = MovingAverageSmootherFactory.Create(maType, resolved);
         _atr = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, selector);
+        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _atrValue);
         _adSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _atrMult = atrMult;
         _input = new StreamingInputResolver(InputName.Close, selector);
@@ -2373,6 +2374,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         _stdDev.Reset();
         _adSmoother.Reset();
         _prevValue = 0;
+        _atrValue = 0;
         _prevEma = 0;
         _prevAdm = 0;
         _prevTrndDn = 0;
@@ -2391,8 +2393,13 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var ema = _ema.Next(value, isFinal);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, _hasPrev ? _prevValue : value);
         var atr = _atr.Next(tr, isFinal);
+        // The batch takes the band's standard deviation of the ATR, not of the price: it chains the ATR
+        // into StandardDeviationVolatility on purpose.
+        _atrValue = atr;
         var ad = value > prevValue ? ema + (atr / 2) : value < prevValue ? ema - (atr / 2) : ema;
         var adm = _adSmoother.Next(ad, isFinal);
         var prevAdm = _hasPrev ? _prevAdm : 0;

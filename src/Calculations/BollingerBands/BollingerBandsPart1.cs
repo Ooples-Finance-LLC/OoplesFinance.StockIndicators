@@ -306,8 +306,7 @@ public static partial class Calculations
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
         // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
         // caller's series, which is what its true range is a range of.
-        stockData.SetInputSeries(new List<double>(callerSeries));
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
 
         double prevAtrDev = 0;
