@@ -281,6 +281,19 @@ the indicator's published definition, so **some batch values change**:
   with it on, and only `CustomValuesList` is empty. `Clear()` gives the data a new, empty series rather
   than emptying the list in place, so a list you kept from an earlier result survives it; setting
   `CustomValuesList` to null now reads back as an empty list.
+- **`IncludeOutputValues = false` and `RoundingDigits` change only what is published**, the same way
+  (`IncludeOutputValuesTests`, `RoundingDigitsTests`). With output values off, 56 indicators threw reading a
+  component's named series from the emptied dictionary; it is now replaced rather than cleared in place.
+  With rounding on, 187 indicators computed on rounded values - a component's result, or an intermediate
+  series handed on as input - so their final digits were the rounding of a different computation. Every
+  indicator now computes on unrounded values and rounds only what it publishes.
+- **Four indicators take each component of the price, as they are defined.** Each component call publishes
+  its result for the next one, and these called the next component without handing back the caller's series;
+  their streaming states copied the chain. CCT StochRSI took every RSI after the first of the RSI before it,
+  the Fast and Slow RSI Oscillator took its kurtosis term of the RSI, and the Sector Rotation Model took its
+  second rate of change of the first. Connors RSI ranked a 100-bar rate of change of the RSI; it ranks the
+  one-bar rate of change of the price over 100 bars, as Connors defines it, and the Stochastic Connors RSI and
+  Quasi White Noise built on it follow.
 - **Adaptive Ehlers windows take a cycle within float noise of an integer as that integer** before
   rounding up to whole bars. A dominant cycle of exactly 29 in exact arithmetic could arrive as
   29.000000000000004 and average over 30 bars, and which side it fell depended on summation order. Values
