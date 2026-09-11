@@ -460,7 +460,9 @@ public sealed class GroverLlorensCycleOscillatorState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous close, so it stands in for itself (TR = High - Low), as the batch's
+        // true range and AverageTrueRangeState both do. A zero there made the first TR the whole high.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var prevTs = _hasPrev ? _prevTs : value;

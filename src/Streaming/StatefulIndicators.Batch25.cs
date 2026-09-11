@@ -1893,7 +1893,9 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var low = bar.Low;
         var open = bar.Open;
         var prevClose = _hasPrev ? _prevClose : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(high, low, prevClose);
+        // The first bar's true range uses the bar's own close, as the batch does, so it is High - Low rather
+        // than the whole high. The momentum term c below keeps the batch's zero.
+        var tr = CalculationsHelper.CalculateTrueRange(high, low, _hasPrev ? _prevClose : close);
         var trEnvelopeHigh = isFinal ? _trEnvelopeMax.Add(tr, out _) : _trEnvelopeMax.Preview(tr, out _);
         var trEnvelopeLow = isFinal ? _trEnvelopeMin.Add(tr, out _) : _trEnvelopeMin.Preview(tr, out _);
         var trHigh = isFinal ? _trMax.Add(trEnvelopeHigh, out _) : _trMax.Preview(trEnvelopeHigh, out _);
