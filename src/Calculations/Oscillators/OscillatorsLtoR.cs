@@ -1421,17 +1421,30 @@ public static partial class Calculations
         List<double> specialKList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var rocList = CalculateRateOfChange(stockData, length1).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc15List = CalculateRateOfChange(stockData, length2).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc20List = CalculateRateOfChange(stockData, length3).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc30List = CalculateRateOfChange(stockData, length4).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc40List = CalculateRateOfChange(stockData, length5).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc65List = CalculateRateOfChange(stockData, length7).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc75List = CalculateRateOfChange(stockData, length8).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc100List = CalculateRateOfChange(stockData, length9).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc195List = CalculateRateOfChange(stockData, length11).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc265List = CalculateRateOfChange(stockData, length12).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc390List = CalculateRateOfChange(stockData, length13).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var roc530List = CalculateRateOfChange(stockData, length14).CustomValuesList;
         var roc10SmaList = GetMovingAverageList(stockData, maType, length1, rocList);
         var roc15SmaList = GetMovingAverageList(stockData, maType, length1, roc15List);

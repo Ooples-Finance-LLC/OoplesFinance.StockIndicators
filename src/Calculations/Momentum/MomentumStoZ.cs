@@ -25,13 +25,19 @@ public static partial class Calculations
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var moVar = CalculateMcClellanOscillator(stockData, maType, fastLength: length2, slowLength: length4);
         var advSumList = moVar.OutputValues["AdvSum"];
         var decSumList = moVar.OutputValues["DecSum"];
         var moList = moVar.OutputValues["Mo"];
+        stockData.RestoreInputSeries(callerSeries);
         var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var mfi1List = CalculateMoneyFlowIndex(stockData, inputName, length2).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var mfi2List = CalculateMoneyFlowIndex(stockData, inputName, length3).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var mfi3List = CalculateMoneyFlowIndex(stockData, inputName, length4).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

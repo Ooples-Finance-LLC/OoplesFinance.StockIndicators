@@ -425,7 +425,10 @@ public static partial class Calculations
         List<double> histogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var cciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: slowLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var turboCciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: fastLength).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

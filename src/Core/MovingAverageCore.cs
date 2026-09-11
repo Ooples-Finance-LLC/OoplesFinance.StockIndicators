@@ -5847,22 +5847,30 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var alpha = 2.0 / (length + 1);
+        // Ehlers' noise elimination technology, the same as CalculateEhlersNoiseEliminationTechnology: a
+        // Kendall-style count of how the last `length` values are ordered, scaled to [-1, 1]. This fast path
+        // was an adaptive EMA of the input instead - a price-scale average where the indicator is an oscillator.
+        length = Math.Max(length, 1);
+        var denom = 0.5 * length * (length - 1);
+        var xArray = new double[length + 1];
 
         for (var i = 0; i < input.Length; i++)
         {
-            var currentValue = input[i];
-            var prevNet = i >= 1 ? output[i - 1] : currentValue;
+            for (var j = 1; j <= length; j++)
+            {
+                xArray[j] = i >= j - 1 ? input[i - (j - 1)] : 0;
+            }
 
-            // Noise elimination through adaptive smoothing
-            var change = Math.Abs(currentValue - prevNet);
-            var prevChange = i >= 1 ? Math.Abs(input[i - 1] - (i >= 2 ? output[i - 2] : input[i - 1])) : 0;
+            double num = 0;
+            for (var j = 2; j <= length; j++)
+            {
+                for (var k = 1; k <= j - 1; k++)
+                {
+                    num -= Math.Sign(xArray[j] - xArray[k]);
+                }
+            }
 
-            // Reduce alpha when changes are small (noise)
-            var noiseRatio = prevChange > 0 ? Math.Min(change / prevChange, 2) : 1;
-            var adaptiveAlpha = alpha * Math.Min(noiseRatio, 1);
-
-            output[i] = prevNet + (adaptiveAlpha * (currentValue - prevNet));
+            output[i] = denom != 0 ? num / denom : 0;
         }
     }
 
