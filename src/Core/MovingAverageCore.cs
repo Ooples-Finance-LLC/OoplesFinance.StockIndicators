@@ -580,34 +580,58 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // Chande's VMA as LazyBear writes it, the same algorithm as CalculateVariableMovingAverage. This fast
+        // path used to compute a different average altogether - an EMA weighted by sd / (sd + 0.001), seeded at
+        // the first price - so MovingAvgType.VariableMovingAverage meant one thing here and another there.
+        var resolved = Math.Max(1, length);
+        var k = 1d / resolved;
         var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
+        var isArray = pool.Rent(input.Length);
 
         try
         {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            VolatilityCore.StandardDeviation(input, stdDev, length);
-
-            double vma = 0;
+            var isSeries = isArray.AsSpan(0, input.Length);
+            double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0, vma = 0;
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i == 0)
+                var currentValue = input[i];
+                var prevValue = i >= 1 ? input[i - 1] : 0;
+                var pdm = i >= 1 ? Math.Max(currentValue - prevValue, 0) : 0;
+                var mdm = i >= 1 ? Math.Max(prevValue - currentValue, 0) : 0;
+
+                pdmS = ((1 - k) * pdmS) + (k * pdm);
+                mdmS = ((1 - k) * mdmS) + (k * mdm);
+                var s = pdmS + mdmS;
+                var pdi = s != 0 ? pdmS / s : 0;
+                var mdi = s != 0 ? mdmS / s : 0;
+
+                pdiS = ((1 - k) * pdiS) + (k * pdi);
+                mdiS = ((1 - k) * mdiS) + (k * mdi);
+                var d = Math.Abs(pdiS - mdiS);
+                var s1 = pdiS + mdiS;
+                var dS1 = s1 != 0 ? d / s1 : 0;
+
+                iS = ((1 - k) * iS) + (k * dS1);
+                isSeries[i] = iS;
+
+                var hhv = iS;
+                var llv = iS;
+                for (var j = Math.Max(0, i - resolved + 1); j < i; j++)
                 {
-                    vma = input[i];
-                    output[i] = vma;
+                    hhv = Math.Max(hhv, isSeries[j]);
+                    llv = Math.Min(llv, isSeries[j]);
                 }
-                else
-                {
-                    var k = stdDev[i] / (stdDev[i] + 0.001);
-                    vma = (k * input[i]) + ((1 - k) * vma);
-                    output[i] = vma;
-                }
+
+                var d1 = hhv - llv;
+                var vI = d1 != 0 ? (iS - llv) / d1 : 0;
+                vma = ((1 - (k * vI)) * vma) + (k * vI * currentValue);
+                output[i] = vma;
             }
         }
         finally
         {
-            pool.Return(stdDevArray);
+            pool.Return(isArray);
         }
     }
 

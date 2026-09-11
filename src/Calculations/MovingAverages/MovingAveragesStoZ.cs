@@ -1196,7 +1196,9 @@ public static partial class Calculations
             var vI = d1 != 0 ? (iS - llv) / d1 : 0;
 
             var prevVma = GetLastOrDefault(vmaList);
-            var vma = ((1 - k) * vI * prevVma) + (k * vI * currentValue);
+            // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. This was
+            // (1 - k) * vI * prevVma, which scaled the whole average by vI and pulled it towards zero.
+            var vma = ((1 - (k * vI)) * prevVma) + (k * vI * currentValue);
             vmaList.Add(vma);
 
             var signal = GetCompareSignal(currentValue - vma, prevValue - prevVma);

@@ -2489,7 +2489,8 @@ internal sealed class VariableMovingAverageEngine : IDisposable
         var llv = isFinal ? _minWindow.Add(iS, out _) : _minWindow.Preview(iS, out _);
         var d1 = hhv - llv;
         var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-        var vma = ((1 - _k) * vI * _prevVma) + (_k * vI * value);
+        // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI.
+        var vma = ((1 - (_k * vI)) * _prevVma) + (_k * vI * value);
 
         if (isFinal)
         {
