@@ -12,7 +12,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.CalculationsTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A typed spec (<c>RsiSpecOptions</c> and the 844 others) used to run a fast arm of its own, written apart
+/// A typed spec (<c>RsiSpecOptions</c> and the 843 others) used to run a fast arm of its own, written apart
 /// from the batch indicator and never compared with it. Of the arms that could be compared, over half
 /// disagreed: RSI, ATR, ADX and the stochastic among them, by a warmup convention, a different formula, or by
 /// computing another indicator altogether. The Builder now serves an arm only when it is in

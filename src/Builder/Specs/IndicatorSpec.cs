@@ -7728,7 +7728,7 @@ public sealed class EhlersRecursiveMedianFilterSpecOptions : IIndicatorSpecOptio
 public sealed class EhlersRoofingFilterSpecOptions : IIndicatorSpecOptions
 {
     // Ehlers' roofing filter: a 48-bar high-pass, then a 10-bar super smoother, as the batch indicator's defaults.
-    public EhlersRoofingFilterSpecOptions(int hpLength, int lpLength = 10) { HpLength = Math.Max(1, hpLength); LpLength = Math.Max(1, lpLength); }
+    public EhlersRoofingFilterSpecOptions(int hpLength = 48, int lpLength = 10) { HpLength = Math.Max(1, hpLength); LpLength = Math.Max(1, lpLength); }
     public int HpLength { get; }
     public int LpLength { get; }
 }

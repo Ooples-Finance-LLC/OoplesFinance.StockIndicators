@@ -238,9 +238,11 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
   indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
   serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
   indicator, so a spec's values are the indicator's values.
-- **A spec's options reach that indicator.** 155 options reached no parameter at all. 94 now set the parameter
+- **A spec's options reach that indicator.** 177 options reached no parameter at all. 111 now set the parameter
   they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
-  widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - and 66 that their indicator has no
+  widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - through 118 mappings, since seven
+  options set more than one parameter, as their own arms do: the decycler and osc oscillators' length sets both
+  a fast and a slow length, and the mass index's two set three. The remaining 66 that their indicator has no
   parameter for are marked `[Obsolete]` as having no effect. `EhlersRoofingFilterSpecOptions` defaults to
   Ehlers' 48-bar high pass and 10-bar smoother, and `DoubleSmoothedMomentaSpecOptions` to the batch
   indicator's 2, 5 and 25, instead of settings that described another formula.
