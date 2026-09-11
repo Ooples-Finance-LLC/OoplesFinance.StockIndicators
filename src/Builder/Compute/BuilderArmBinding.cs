@@ -88,9 +88,9 @@ internal static class BuilderArmBinding
             return result.CustomValuesList;
         }
 
-        return result.OutputValues.TryGetValue(key, out var series)
-            ? series
-            : throw new NotSupportedException($"{target.Name} publishes no {key} output for {spec.Options.GetType().Name}.");
+        // The registry answers UpperBand, MiddleBand, LowerBand, Signal and Histogram for any indicator, whether
+        // or not it publishes one. An indicator that does not is answered with the series it does publish.
+        return result.ChainedOutputs.TryGetValue(key, out var series) ? series : result.ChainedValues;
     }
 
     /// <summary>
