@@ -715,7 +715,9 @@ public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var middle = _middleSmoother.Next(value, isFinal);
@@ -2236,7 +2238,9 @@ public sealed class StollerAverageRangeChannelsState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
         var middle = _middleSmoother.Next(value, isFinal);
@@ -2396,7 +2400,9 @@ public sealed class DynamicSupportAndResistanceState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atrSmoother.Next(tr, isFinal);
 
@@ -3851,7 +3857,7 @@ public sealed class LinearChannelsState : IStreamingIndicatorState
 public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly IMovingAverageSmoother _varianceSmoother;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _stdDevMult;
 
@@ -3860,7 +3866,7 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
     {
         var resolved = Math.Max(1, length);
         _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _stdDevMult = stdDevMult;
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -3875,7 +3881,7 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
 
         var resolved = Math.Max(1, length);
         _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _stdDevMult = stdDevMult;
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
@@ -3885,16 +3891,15 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
     public void Reset()
     {
         _meanSmoother.Reset();
-        _varianceSmoother.Reset();
+        _stdDev.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var middle = _meanSmoother.Next(value, isFinal);
-        var deviation = value - middle;
-        var variance = _varianceSmoother.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
+        // Bollinger Bands, as the batch defines it: the population standard deviation of the prices.
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = middle + (stdDev * _stdDevMult);
         var lower = middle - (stdDev * _stdDevMult);
 
@@ -3915,7 +3920,7 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
     public void Dispose()
     {
         _meanSmoother.Dispose();
-        _varianceSmoother.Dispose();
+        _stdDev.Dispose();
     }
 }
 
@@ -12840,7 +12845,9 @@ public sealed class BollingerBandsFibonacciRatiosState : IStreamingIndicatorStat
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var atr = _atr.Next(tr, isFinal);
         var r3 = atr * _fibRatio3;
