@@ -150,6 +150,45 @@ var handle = indicators.Calculate(
 
 ## Breaking Changes
 
+### Custom input: one mechanism for every streaming indicator
+
+Every streaming state used to take custom input through its own selector constructor -
+`new RsiState(14, bar => ...)` - and 82 of them had none, so some indicators could not take custom
+values at all. Those per-state selector constructors are removed. `CustomInputState` wraps any state
+instead, and ready-made `InputSeries` presets are named after the input names they replace.
+
+```csharp
+// Before
+var rsi = new RelativeStrengthIndexState(14, 3, bar => (bar.High + bar.Low) / 2);
+
+// After - a preset
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.MedianPrice);
+
+// After - any function of the bar
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), bar => (bar.High + bar.Low) / 2);
+
+// After - another indicator's output (streaming chaining)
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.Of(new MidpointState(14)));
+```
+
+The same presets work in batch, where `UseInput` chains a series:
+
+```csharp
+var rsi = stockData.UseInput(InputSeries.MedianPrice).CalculateRelativeStrengthIndex(length: 14);
+```
+
+| Input | Preset |
+|---|---|
+| close, adjusted close, open, high, low, volume | `InputSeries.Close`, `.AdjustedClose`, `.Open`, `.High`, `.Low`, `.Volume` |
+| median, typical, full typical, weighted close, average price | `InputSeries.MedianPrice`, `.TypicalPrice`, `.FullTypicalPrice`, `.WeightedClose`, `.AveragePrice` |
+| midpoint, midprice over *n* bars | `InputSeries.Midpoint(n)`, `InputSeries.Midprice(n)` |
+| any function of the bar | `InputSeries.Of(bar => ...)` |
+| another indicator's output | `InputSeries.Of(state)` |
+
+A custom series changes more than the close: when its value lies outside the bar's range, the
+indicator's high and low come from the series itself (the max and min of its previous and current
+value). Batch applies the same rule to a chained series, so the two engines give the same numbers.
+
 ### Removed
 
 - None - all v1.x methods are still available (will be deprecated in v3.0)

@@ -23,20 +23,6 @@ public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, 
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RapidRelativeStrengthIndexState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _upSum = new RollingWindowSum(resolved);
-        _downSum = new RollingWindowSum(resolved);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RapidRelativeStrengthIndex;
 
     public void Reset()
@@ -100,16 +86,6 @@ public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RatioOCHLAveragerState(Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RatioOCHLAverager;
 
     public void Reset()
@@ -158,19 +134,6 @@ public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisp
         _ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ReallySimpleIndicatorState(MovingAvgType maType, int length, int smoothLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.ReallySimpleIndicator;
@@ -232,22 +195,6 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
         _avgGain = new WilderState(_length);
         _avgLoss = new WilderState(_length);
         _input = new StreamingInputResolver(inputName, null);
-        _bValues = new PooledRingBuffer<double>(_length);
-    }
-
-    public RecursiveDifferenciatorState(MovingAvgType maType, int length, double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _alpha = alpha;
-        _ema = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
         _bValues = new PooledRingBuffer<double>(_length);
     }
 
@@ -329,18 +276,6 @@ public sealed class RecursiveMovingTrendAverageState : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RecursiveMovingTrendAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _alpha = 2d / (resolved + 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RecursiveMovingTrendAverage;
 
     public void Reset()
@@ -403,26 +338,6 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
         _avgGain = new WilderState(_length);
         _avgLoss = new WilderState(_length);
         _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length);
-        _bValues = new PooledRingBuffer<double>(_length);
-        _avgValues = new PooledRingBuffer<double>(_length);
-        _gainValues = new PooledRingBuffer<double>(_length);
-        _lossValues = new PooledRingBuffer<double>(_length);
-        _avgRsiValues = new PooledRingBuffer<double>(_length);
-    }
-
-    public RecursiveRelativeStrengthIndexState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _srcMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
         _values = new PooledRingBuffer<double>(_length);
         _bValues = new PooledRingBuffer<double>(_length);
         _avgValues = new PooledRingBuffer<double>(_length);
@@ -558,22 +473,6 @@ public sealed class RecursiveStochasticState : IStreamingIndicatorState, IDispos
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RecursiveStochasticState(int length, double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _alpha = alpha;
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _maHighWindow = new RollingWindowMax(_length);
-        _maLowWindow = new RollingWindowMin(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RecursiveStochastic;
 
     public void Reset()
@@ -638,17 +537,6 @@ public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDispo
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RegressionOscillatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _linReg = new LinearRegressionState(length, selector);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RegressionOscillator;
 
     public void Reset()
@@ -694,19 +582,6 @@ public sealed class RegularizedExponentialMovingAverageState : IStreamingIndicat
         _alpha = 2d / (resolved + 1);
         _lambda = lambda;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RegularizedExponentialMovingAverageState(int length, double lambda, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _alpha = 2d / (resolved + 1);
-        _lambda = lambda;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RegularizedExponentialMovingAverage;
@@ -758,20 +633,6 @@ public sealed class RelativeDifferenceOfSquaresOscillatorState : IStreamingIndic
         _dSum = new RollingWindowSum(resolved);
         _nSum = new RollingWindowSum(resolved);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RelativeDifferenceOfSquaresOscillatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _aSum = new RollingWindowSum(resolved);
-        _dSum = new RollingWindowSum(resolved);
-        _nSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RelativeDifferenceOfSquaresOscillator;
@@ -843,21 +704,6 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _values = new PooledRingBuffer<double>(_length2);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RelativeMomentumIndexState(MovingAvgType maType, int length1, int length2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length2 = Math.Max(1, length2);
-        _avgGain = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _avgLoss = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _values = new PooledRingBuffer<double>(_length2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RelativeMomentumIndex;
@@ -1059,22 +905,6 @@ public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDis
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RelativeSpreadStrengthState(MovingAvgType maType, int fastLength, int slowLength, int length,
-        int smoothLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _avgGain = new WilderState(Math.Max(1, length));
-        _avgLoss = new WilderState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RelativeSpreadStrength;
 
     public void Reset()
@@ -1274,22 +1104,6 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RelativeVigorIndexState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _numeratorMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _denominatorMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _openValues = new PooledRingBuffer<double>(3);
-        _closeValues = new PooledRingBuffer<double>(3);
-        _highValues = new PooledRingBuffer<double>(3);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RelativeVigorIndex;
 
     public void Reset()
@@ -1385,20 +1199,6 @@ public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, I
         _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RelativeVolatilityIndexV1State(MovingAvgType maType, int length, int smoothLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length), selector);
-        _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RelativeVolatilityIndexV1;
@@ -1514,19 +1314,6 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RelativeVolumeIndicatorState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _volumeStdDev = new StandardDeviationVolatilityState(maType, resolved, InputName.Volume);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RelativeVolumeIndicator;
 
     public void Reset()
@@ -1598,22 +1385,6 @@ public sealed class RepulseState : IStreamingIndicatorState, IDisposable
         _bearMa = MovingAverageSmootherFactory.Create(maType, resolved * 5);
         _signal = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RepulseState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _bullMa = MovingAverageSmootherFactory.Create(maType, resolved * 5);
-        _bearMa = MovingAverageSmootherFactory.Create(maType, resolved * 5);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.Repulse;
@@ -1688,20 +1459,6 @@ public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDis
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public RepulsionMovingAverageState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _sma1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _sma2 = MovingAverageSmootherFactory.Create(maType, resolved * 2);
-        _sma3 = MovingAverageSmootherFactory.Create(maType, resolved * 3);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.RepulsionMovingAverage;
 
     public void Reset()
@@ -1758,21 +1515,6 @@ public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState,
         _highWindow2 = new RollingWindowMax(_length * 2);
         _lowWindow2 = new RollingWindowMin(_length * 2);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RetentionAccelerationFilterState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _highWindow1 = new RollingWindowMax(_length);
-        _lowWindow1 = new RollingWindowMin(_length);
-        _highWindow2 = new RollingWindowMax(_length * 2);
-        _lowWindow2 = new RollingWindowMin(_length * 2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RetentionAccelerationFilter;
@@ -1851,19 +1593,6 @@ public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorStat
         _absMax = new RollingWindowMax(resolved);
         _absMin = new RollingWindowMin(resolved);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RetrospectiveCandlestickChartState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _absMax = new RollingWindowMax(resolved);
-        _absMin = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.RetrospectiveCandlestickChart;
@@ -1946,21 +1675,6 @@ public sealed class ReversalPointsState : IStreamingIndicatorState, IDisposable
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public ReversalPointsState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2));
-        _aEma1 = MovingAverageSmootherFactory.Create(maType, length1);
-        _aEma2 = MovingAverageSmootherFactory.Create(maType, length1);
-        _bSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.ReversalPoints;
 
     public void Reset()
@@ -2033,22 +1747,6 @@ public sealed class ReverseEngineeringRelativeStrengthIndexState : IStreamingInd
         _prevAdc = 1;
     }
 
-    public ReverseEngineeringRelativeStrengthIndexState(int length, double rsiLevel, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _rsiLevel = rsiLevel;
-        var expPeriod = (2 * _length) - 1;
-        _k = 2d / (expPeriod + 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-        _prevAuc = 1;
-        _prevAdc = 1;
-    }
-
     public IndicatorName Name => IndicatorName.ReverseEngineeringRelativeStrengthIndex;
 
     public void Reset()
@@ -2115,24 +1813,6 @@ public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingI
         _slowMa = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
         _signalMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public ReverseMovingAverageConvergenceDivergenceState(MovingAvgType maType, int fastLength, int slowLength,
-        int signalLength, double macdLevel, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _fastAlpha = 2d / (1 + resolvedFast);
-        _slowAlpha = 2d / (1 + resolvedSlow);
-        _fastMa = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowMa = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.ReverseMovingAverageConvergenceDivergence;

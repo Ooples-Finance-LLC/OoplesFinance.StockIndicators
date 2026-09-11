@@ -21,19 +21,6 @@ public sealed class EhlersCorrelationTrendIndicatorState : IStreamingIndicatorSt
         _values = new PooledRingBuffer<double>(_length);
     }
 
-    public EhlersCorrelationTrendIndicatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        (_sy, _syy) = BuildYAxisSums(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersCorrelationTrendIndicator;
 
     public void Reset()
@@ -113,19 +100,6 @@ public sealed class EhlersCenterofGravityOscillatorState : IStreamingIndicatorSt
         _values = new PooledRingBuffer<double>(_length);
     }
 
-    public EhlersCenterofGravityOscillatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _halfLength = (_length + 1) / 2.0;
-        _input = new StreamingInputResolver(InputName.Close, selector);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersCenterofGravityOscillator;
 
     public void Reset()
@@ -193,23 +167,6 @@ public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EhlersDecyclerOscillatorV1State(int fastLength, int slowLength, double fastMult, double slowMult,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastMult = fastMult;
-        _slowMult = slowMult;
-        _fastHp = new HighPassFilterV1Engine(fastLength, 1);
-        _slowHp = new HighPassFilterV1Engine(slowLength, 1);
-        _fastDecHp = new HighPassFilterV1Engine(fastLength, 0.5);
-        _slowDecHp = new HighPassFilterV1Engine(slowLength, 0.5);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersDecyclerOscillatorV1;
 
     public void Reset()
@@ -261,19 +218,6 @@ public sealed class EhlersDecyclerOscillatorV2State : IStreamingIndicatorState, 
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EhlersDecyclerOscillatorV2State(MovingAvgType maType, int fastLength, int slowLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastHp = new HighPassFilterV2Engine(maType, fastLength);
-        _slowHp = new HighPassFilterV2Engine(maType, slowLength);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersDecyclerOscillatorV2;
 
     public void Reset()
@@ -323,20 +267,6 @@ public sealed class EhlersDecyclerState : IStreamingIndicatorState
         var alphaCos = Math.Cos(alphaArg);
         _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersDecyclerState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        var alphaArg = Math.Min(2 * Math.PI / resolved, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.EhlersDecycler;
@@ -394,21 +324,6 @@ public sealed class EhlersCorrelationCycleIndicatorState : IStreamingIndicatorSt
         _negSinValues = new double[_length];
         (_sy, _syy, _nsy, _nsyy) = BuildTrigonometricSums(_length, _cosValues, _negSinValues);
         _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public EhlersCorrelationCycleIndicatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _cosValues = new double[_length];
-        _negSinValues = new double[_length];
-        (_sy, _syy, _nsy, _nsyy) = BuildTrigonometricSums(_length, _cosValues, _negSinValues);
-        _input = new StreamingInputResolver(InputName.Close, selector);
         _values = new PooledRingBuffer<double>(_length);
     }
 
@@ -822,24 +737,6 @@ public sealed class EhlersBandPassFilterV1State : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EhlersBandPassFilterV1State(int length, double bw, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        var twoPiPrd1 = MathHelper.MinOrMax(0.25 * bw * 2 * Math.PI / resolved, 0.99, 0.01);
-        var twoPiPrd2 = MathHelper.MinOrMax(1.5 * bw * 2 * Math.PI / resolved, 0.99, 0.01);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(2 * Math.PI * bw / resolved, 0.99, 0.01));
-        _alpha1 = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
-        _alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
-        _alpha3 = (Math.Cos(twoPiPrd2) + Math.Sin(twoPiPrd2) - 1) / Math.Cos(twoPiPrd2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersBandPassFilterV1;
 
     public void Reset()
@@ -923,20 +820,6 @@ public sealed class EhlersBandPassFilterV2State : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EhlersBandPassFilterV2State(int length, double bw, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / resolved, 0.99, 0.01));
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / MathHelper.Pow(g1, 2)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersBandPassFilterV2;
 
     public void Reset()
@@ -998,20 +881,6 @@ public sealed class EhlersCycleBandPassFilterState : IStreamingIndicatorState
         var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolved, 0.99, 0.01));
         _alpha = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersCycleBandPassFilterState(int length, double delta, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolved, 0.99, 0.01));
-        _alpha = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.EhlersCycleBandPassFilter;
@@ -1146,17 +1015,6 @@ public sealed class EhlersCyberCycleState : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public EhlersCyberCycleState(double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.EhlersCyberCycle;
 
     public void Reset()
@@ -1242,25 +1100,6 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
         _input = new StreamingInputResolver(inputName, null);
-        _roofingValues = new List<double>(128);
-    }
-
-    public EhlersConvolutionIndicatorState(int length1, int length2, int length3, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length3 = Math.Max(1, length3);
-        var piPrd = MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1);
-        _alpha = (Math.Cos(piPrd) + Math.Sin(piPrd) - 1) / Math.Cos(piPrd);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, selector);
         _roofingValues = new List<double>(128);
     }
 
@@ -1370,18 +1209,6 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
-    public EhlersCommodityChannelIndexInverseFisherTransformState(InputName inputName, MovingAvgType maType,
-        int length, int signalLength, double constant, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _cciState = new CommodityChannelIndexState(inputName, maType, Math.Max(1, length), constant, selector);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-    }
-
     public IndicatorName Name => IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform;
 
     // No resolver of its own: the input was handed to these inner states, so they are the
@@ -1445,21 +1272,6 @@ public sealed class EhlersAverageErrorFilterState : IStreamingIndicatorState
         _c3 = -1 * a1 * a1;
         _c1 = 1 - _c2 - _c3;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersAverageErrorFilterState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length), -0.01, -0.999));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length), 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -1 * a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.EhlersAverageErrorFilter;
@@ -1558,16 +1370,6 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
     public EhlersChebyshevLowPassFilterState(InputName inputName = InputName.Close)
     {
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersChebyshevLowPassFilterState(Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.EhlersChebyshevLowPassFilter;
@@ -1753,18 +1555,6 @@ public sealed class EhlersBetterExponentialMovingAverageState : IStreamingIndica
         var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
         _alpha = val != 0 ? MathHelper.MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersBetterExponentialMovingAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
-        _alpha = val != 0 ? MathHelper.MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.EhlersBetterExponentialMovingAverage;

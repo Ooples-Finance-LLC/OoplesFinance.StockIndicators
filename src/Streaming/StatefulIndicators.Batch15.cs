@@ -29,24 +29,6 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public ImpulsePercentagePriceOscillatorState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _signalLength = Math.Max(1, signalLength);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSum = new RollingWindowSum(_signalLength);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.ImpulsePercentagePriceOscillator;
 
     void ICustomInputConsumer.ReadCloseAsInput() =>
@@ -167,21 +149,6 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
         _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _retValue);
         _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public InformationRatioState(MovingAvgType maType, int length, double bmk, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _bench = MathHelper.Pow(1 + bmk, _length / 360d) - 1;
-        _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _retValue);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.InformationRatio;
@@ -409,19 +376,6 @@ public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public InternalBarStrengthIndicatorState(int length, int smoothLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _smoothLength = Math.Max(1, smoothLength);
-        _ibsSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.InternalBarStrengthIndicator;
 
     public void Reset()
@@ -479,19 +433,6 @@ public sealed class InterquartileRangeBandsState : IStreamingIndicatorState, IDi
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public InterquartileRangeBandsState(int length, double mult, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _mult = mult;
-        _order = new RollingOrderStatistic(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.InterquartileRangeBands;
 
     public void Reset()
@@ -546,18 +487,6 @@ public sealed class InverseDistanceWeightedMovingAverageState : IStreamingIndica
         _length = Math.Max(1, length);
         _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public InverseDistanceWeightedMovingAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.InverseDistanceWeightedMovingAverage;
@@ -620,16 +549,6 @@ public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDi
         _fastZScore = new FastZScoreState(maType, length, inputName);
     }
 
-    public InverseFisherFastZScoreState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastZScore = new FastZScoreState(maType, length, selector);
-    }
-
     public IndicatorName Name => IndicatorName.InverseFisherFastZScore;
 
     public void Reset()
@@ -674,19 +593,6 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
         _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public InverseFisherZScoreState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.InverseFisherZScore;
@@ -752,24 +658,6 @@ public sealed class JapaneseCorrelationCoefficientState : IStreamingIndicatorSta
         _lowest = new RollingWindowMin(_length1);
         _closeValues = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public JapaneseCorrelationCoefficientState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _length1 = MathHelper.MinOrMax((int)Math.Ceiling(_length / 2d));
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _closeSmoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _highest = new RollingWindowMax(_length1);
-        _lowest = new RollingWindowMin(_length1);
-        _closeValues = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.JapaneseCorrelationCoefficient;
@@ -850,19 +738,6 @@ public sealed class JmaRsxCloneState : IStreamingIndicatorState
         _f18 = 3d / (_length + 2);
         _f20 = 1 - _f18;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public JmaRsxCloneState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _f18 = 3d / (_length + 2);
-        _f20 = 1 - _f18;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.JmaRsxClone;
@@ -994,31 +869,6 @@ public sealed class JrcFractalDimensionState : IStreamingIndicatorState, IDispos
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public JrcFractalDimensionState(MovingAvgType maType, int length1, int length2, int smoothLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _smoothLength = Math.Max(1, smoothLength);
-        _wind1 = MathHelper.MinOrMax((_length2 - 1) * _length1);
-        _wind2 = MathHelper.MinOrMax(_length2 * _length1);
-        _nLog = Math.Log(_length2);
-        _highest1 = new RollingWindowMax(_length1);
-        _lowest1 = new RollingWindowMin(_length1);
-        _highest2 = new RollingWindowMax(_wind2);
-        _lowest2 = new RollingWindowMin(_wind2);
-        var capacity = Math.Max(_wind2, _length1);
-        _values = new PooledRingBuffer<double>(capacity);
-        _smallRanges = new PooledRingBuffer<double>(_wind1);
-        _fdSmoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.JrcFractalDimension;
 
     public void Reset()
@@ -1107,18 +957,6 @@ public sealed class JsaMovingAverageState : IStreamingIndicatorState, IDisposabl
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public JsaMovingAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.JsaMovingAverage;
 
     public void Reset()
@@ -1175,21 +1013,6 @@ public sealed class JurikMovingAverageState : IStreamingIndicatorState
         _beta = ratio / (ratio + 2);
         _alpha = MathHelper.Pow(_beta, power);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public JurikMovingAverageState(int length, double phase, double power, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _phaseRatio = phase < -100 ? 0.5 : phase > 100 ? 2.5 : (phase / 100) + 1.5;
-        var ratio = 0.45 * (resolved - 1);
-        _beta = ratio / (ratio + 2);
-        _alpha = MathHelper.Pow(_beta, power);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.JurikMovingAverage;
@@ -1250,19 +1073,6 @@ public sealed class KalmanSmootherState : IStreamingIndicatorState
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public KalmanSmootherState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _smoothFactor = MathHelper.Sqrt((resolved / 10000d) * 2);
-        _veloFactor = resolved / 10000d;
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.KalmanSmoother;
 
     public void Reset()
@@ -1318,20 +1128,6 @@ public sealed class KarobeinOscillatorState : IStreamingIndicatorState, IDisposa
         _aSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _bSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public KarobeinOscillatorState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _aSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _bSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.KarobeinOscillator;
@@ -1466,30 +1262,6 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
         _stdDev4 = stdDev4;
     }
 
-    public KaseDevStopV1State(MovingAvgType maType, int fastLength, int slowLength, int length,
-        double stdDev1, double stdDev2, double stdDev3, double stdDev4, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolved = Math.Max(1, length);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _dtrAvg = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dtrStd = new StandardDeviationVolatilityState(maType, resolved, _ => _dtrValue);
-        _lowValues = new PooledRingBuffer<double>(2);
-        _closeValues = new PooledRingBuffer<double>(2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-        _stdDev1 = stdDev1;
-        _stdDev2 = stdDev2;
-        _stdDev3 = stdDev3;
-        _stdDev4 = stdDev4;
-    }
-
     public IndicatorName Name => IndicatorName.KaseDevStopV1;
 
     void ICustomInputConsumer.ReadCloseAsInput() =>
@@ -1594,31 +1366,6 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
         _lowValues = new PooledRingBuffer<double>(2);
         _inputValues = new PooledRingBuffer<double>(2);
         _input = new StreamingInputResolver(inputName, null);
-        _stdDev1 = stdDev1;
-        _stdDev2 = stdDev2;
-        _stdDev3 = stdDev3;
-        _stdDev4 = stdDev4;
-    }
-
-    public KaseDevStopV2State(MovingAvgType maType, int fastLength, int slowLength, int length, double stdDev1,
-        double stdDev2, double stdDev3, double stdDev4, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolved = Math.Max(1, length);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _rangeAvg = MovingAverageSmootherFactory.Create(maType, resolved);
-        _rangeStd = new StandardDeviationVolatilityState(maType, resolved, _ => _rangeValue);
-        _highValues = new PooledRingBuffer<double>(2);
-        _lowValues = new PooledRingBuffer<double>(2);
-        _inputValues = new PooledRingBuffer<double>(2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
         _stdDev1 = stdDev1;
         _stdDev2 = stdDev2;
         _stdDev3 = stdDev3;
@@ -1860,29 +1607,6 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public KasePeakOscillatorV2State(MovingAvgType maType, int fastLength, int slowLength, int length1, int length2, int length3,
-        int smoothLength, double devFactor, double sensitivity, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _fastLength = Math.Max(1, fastLength);
-        _slowLength = Math.Max(1, slowLength);
-        _sensitivity = sensitivity;
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _ccDev = new StandardDeviationVolatilityState(maType, resolvedLength1, _ => _ccLogValue);
-        _ccDevAvg = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
-        _x1Sum = new RollingWindowSum(resolvedSmooth);
-        _x2Sum = new RollingWindowSum(resolvedSmooth);
-        _highValues = new PooledRingBuffer<double>(_slowLength);
-        _lowValues = new PooledRingBuffer<double>(_slowLength);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.KasePeakOscillatorV2;
 
     public void Reset()
@@ -1981,20 +1705,6 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public KaseSerialDependencyIndexState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length, _ => _tempLog);
-        _highValues = new PooledRingBuffer<double>(_length);
-        _lowValues = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
     public IndicatorName Name => IndicatorName.KaseSerialDependencyIndex;
 
     public void Reset()
@@ -2066,18 +1776,6 @@ public sealed class KaufmanAdaptiveBandsState : IStreamingIndicatorState, IDispo
         _er = new EfficiencyRatioState(Math.Max(1, length));
         _stdDevFactor = stdDevFactor;
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public KaufmanAdaptiveBandsState(int length, double stdDevFactor, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        _stdDevFactor = stdDevFactor;
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.KaufmanAdaptiveBands;
@@ -2159,34 +1857,6 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
         }
 
         _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public KaufmanAdaptiveCorrelationOscillatorState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage)
-        {
-            _srcMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _indexMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _indexSrcMa = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _index2Ma = new KaufmanAdaptiveMovingAverageEngine(resolved);
-            _src2Ma = new KaufmanAdaptiveMovingAverageEngine(resolved);
-        }
-        else
-        {
-            _srcMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _indexMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _indexSrcMa = MovingAverageSmootherFactory.Create(maType, resolved);
-            _index2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
-            _src2Ma = MovingAverageSmootherFactory.Create(maType, resolved);
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.KaufmanAdaptiveCorrelationOscillator;

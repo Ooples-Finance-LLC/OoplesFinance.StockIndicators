@@ -34,14 +34,6 @@ public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDispos
     {
     }
 
-    public SchaffTrendCycleShkState(MovingAvgType maType, int fastLength, int slowLength, int cycleLength,
-        int d1Length, int d2Length, Func<OhlcvBar, double> selector)
-        : this(maType, fastLength, slowLength, cycleLength, d1Length, d2Length,
-            new StreamingInputResolver(InputName.Close,
-                selector ?? throw new ArgumentNullException(nameof(selector))))
-    {
-    }
-
     private SchaffTrendCycleShkState(MovingAvgType maType, int fastLength, int slowLength, int cycleLength,
         int d1Length, int d2Length, StreamingInputResolver input)
     {
@@ -154,14 +146,6 @@ public sealed class UtBotAlertsState : IStreamingIndicatorState, IDisposable
     public UtBotAlertsState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10,
         double keyValue = 1, InputName inputName = InputName.Close)
         : this(maType, length, keyValue, new StreamingInputResolver(inputName, null))
-    {
-    }
-
-    public UtBotAlertsState(MovingAvgType maType, int length, double keyValue,
-        Func<OhlcvBar, double> selector)
-        : this(maType, length, keyValue,
-            new StreamingInputResolver(InputName.Close,
-                selector ?? throw new ArgumentNullException(nameof(selector))))
     {
     }
 
