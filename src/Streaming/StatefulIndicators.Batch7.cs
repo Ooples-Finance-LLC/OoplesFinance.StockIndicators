@@ -316,7 +316,7 @@ public sealed class EhlersAdaptiveCenterOfGravityOscillatorState : IStreamingInd
     {
         var value = _input.GetValue(bar);
         var period = _periodState.Next(value, isFinal);
-        var intPeriod = (int)Math.Ceiling(period / 2);
+        var intPeriod = MathHelper.CeilingCycle(period / 2);
         double num = 0;
         double denom = 0;
         for (var j = 0; j < intPeriod; j++)
@@ -1308,6 +1308,7 @@ public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorS
     private readonly EhlersAutoCorrelationIndicatorState _corrState;
     private readonly PooledRingBuffer<double> _corrValues;
     private readonly double[] _rArray;
+    private readonly double[] _rNext;
 
     public EhlersAutoCorrelationPeriodogramState(int length1 = 48, int length2 = 10, int length3 = 3)
     {
@@ -1317,6 +1318,7 @@ public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorS
         _corrState = new EhlersAutoCorrelationIndicatorState(_length1, _length2);
         _corrValues = new PooledRingBuffer<double>(_length1);
         _rArray = new double[_length1 + 1];
+        _rNext = new double[_length1 + 1];
     }
 
     public IndicatorName Name => IndicatorName.EhlersAutoCorrelationPeriodogram;
@@ -1345,20 +1347,18 @@ public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorS
             }
 
             var sqSum = MathHelper.Pow(cosPart, 2) + MathHelper.Pow(sinPart, 2);
-            var prevR = _rArray[j];
-            var r = (0.2 * MathHelper.Pow(sqSum, 2)) + (0.8 * prevR);
-            if (isFinal)
-            {
-                _rArray[j] = r;
-            }
+            var r = (0.2 * MathHelper.Pow(sqSum, 2)) + (0.8 * _rArray[j]);
+            _rNext[j] = r;
             maxPwr = Math.Max(r, maxPwr);
         }
 
+        // The powers are normalised by this bar's maximum, so they must be this bar's powers too. Reading
+        // _rArray here made a preview divide the previous bar's powers by the current bar's maximum.
         double spx = 0;
         double sp = 0;
         for (var j = _length2; j <= _length1; j++)
         {
-            var pwr = maxPwr != 0 ? _rArray[j] / maxPwr : 0;
+            var pwr = maxPwr != 0 ? _rNext[j] / maxPwr : 0;
             if (pwr >= 0.5)
             {
                 spx += j * pwr;
@@ -1371,6 +1371,7 @@ public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorS
         if (isFinal)
         {
             _corrValues.TryAdd(corr, out _);
+            Array.Copy(_rNext, _rArray, _rArray.Length);
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1445,7 +1446,7 @@ public sealed class EhlersAdaptiveRelativeStrengthIndexV2State : IStreamingIndic
         domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
 
-        var length = (int)Math.Ceiling(domCyc / 2);
+        var length = MathHelper.CeilingCycle(domCyc / 2);
         double upChg = 0;
         double dnChg = 0;
         for (var j = 0; j < length; j++)
@@ -1602,7 +1603,7 @@ public sealed class EhlersAdaptiveStochasticIndicatorV2State : IStreamingIndicat
         domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
 
-        var length = (int)Math.Ceiling(domCyc);
+        var length = MathHelper.CeilingCycle(domCyc);
         var highest = roofingFilter;
         var lowest = roofingFilter;
         // Match batch: only look back at values that exist (j <= count of stored values)
@@ -1758,7 +1759,7 @@ public sealed class EhlersAdaptiveCommodityChannelIndexV2State : IStreamingIndic
         var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
         domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var cycLength = (int)Math.Ceiling(domCyc);
+        var cycLength = MathHelper.CeilingCycle(domCyc);
 
         var tempSum = isFinal ? _tempSum.Add(roofingFilter, cycLength) : _tempSum.Preview(roofingFilter, cycLength);
         var count = cycLength > 0 ? Math.Min(cycLength, _index + 1) : 0;

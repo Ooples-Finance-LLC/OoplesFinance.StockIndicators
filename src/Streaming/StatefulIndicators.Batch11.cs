@@ -2705,7 +2705,7 @@ public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, I
         var value = _input.GetValue(bar);
         var period = _periodState.Next(value, isFinal);
         var cycle = _cycleState.Update(bar, isFinal, includeOutputs: false).Value;
-        var dcPeriod = Math.Max(1, (int)Math.Ceiling(period));
+        var dcPeriod = Math.Max(1, MathHelper.CeilingCycle(period));
 
         double realPart = 0;
         double imagPart = 0;

@@ -1848,7 +1848,7 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var period = periodList[i];
-            var dcPeriod = (int)Math.Ceiling(period);
+            var dcPeriod = MathHelper.CeilingCycle(period);
 
             double realPart = 0, imagPart = 0;
             for (var j = 0; j <= dcPeriod - 1; j++)

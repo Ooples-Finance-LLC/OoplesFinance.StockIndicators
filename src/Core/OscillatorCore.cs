@@ -13547,7 +13547,7 @@ internal static class OscillatorCore
             for (int i = 0; i < close.Length; i++)
             {
                 double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
-                int cycLength = (int)Math.Ceiling(cycle);
+                int cycLength = MathHelper.CeilingCycle(cycle);
 
                 // Compute average and RMS over cycLength
                 double sum = 0;
@@ -13620,7 +13620,7 @@ internal static class OscillatorCore
             for (int i = 0; i < close.Length; i++)
             {
                 double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
-                int halfCycle = (int)Math.Ceiling(cycle / 2);
+                int halfCycle = MathHelper.CeilingCycle(cycle / 2);
 
                 double upChg = 0, dnChg = 0;
                 for (int j = 0; j < halfCycle && (i - j - 1) >= 0; j++)

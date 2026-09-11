@@ -877,7 +877,7 @@ public static partial class Calculations
 
             var prevUpChg = GetLastOrDefault(upChgList);
             double upChg = 0, dnChg = 0;
-            for (var j = 0; j < (int)Math.Ceiling(domCyc / 2); j++)
+            for (var j = 0; j < MathHelper.CeilingCycle(domCyc / 2); j++)
             {
                 var filt = i >= j ? roofingFilterList[i - j] : 0;
                 var prevFilt = i >= j + 1 ? roofingFilterList[i - (j + 1)] : 0;
@@ -1007,7 +1007,7 @@ public static partial class Calculations
             var prevAstoc1 = i >= 1 ? astocList[i - 1] : 0;
             var prevAstoc2 = i >= 2 ? astocList[i - 2] : 0;
 
-            var window = (int)Math.Ceiling(domCyc);
+            var window = MathHelper.CeilingCycle(domCyc);
             var highest = roofingFilter;
             var lowest = roofingFilter;
             for (var j = 1; j < window && i >= j; j++)
@@ -1151,7 +1151,7 @@ public static partial class Calculations
             var domCyc = MinOrMax(domCycList[i], length1, length2);
             var prevAcci1 = i >= 1 ? acciList[i - 1] : 0;
             var prevAcci2 = i >= 2 ? acciList[i - 2] : 0;
-            var cycLength = (int)Math.Ceiling(domCyc);
+            var cycLength = MathHelper.CeilingCycle(domCyc);
 
             var roofingFilter = roofingFilterList[i];
             tempList.Add(roofingFilter);
