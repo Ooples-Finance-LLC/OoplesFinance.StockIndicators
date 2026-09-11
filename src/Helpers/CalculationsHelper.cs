@@ -272,6 +272,39 @@ public static class CalculationsHelper
         return buffer.ToList();
     }
 
+    /// <summary>
+    /// The average of each bar's trailing window of <paramref name="input"/>, summed afresh every bar: 0
+    /// until the window is full.
+    /// </summary>
+    /// <remarks>
+    /// A simple moving average by value, without the running sum. A running sum of values that are all 0
+    /// leaves a residue near 1e-19 rather than 0, and a ratio that divides by its root turns that into
+    /// nonsense. Streaming sums the same window in the same order.
+    /// </remarks>
+    internal static List<double> GetExactWindowAverageList(List<double> input, int length)
+    {
+        length = Math.Max(1, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            if (i < length - 1)
+            {
+                output.Add(0);
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+
+            output.Add(sum / length);
+        }
+
+        return output;
+    }
+
     internal static List<double> GetTrueRangeList(StockData stockData)
     {
         return GetDerivedSeriesList(stockData, DerivedSeriesKind.TrueRange);

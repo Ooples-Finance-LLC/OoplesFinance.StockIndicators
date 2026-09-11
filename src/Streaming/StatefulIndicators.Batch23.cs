@@ -251,6 +251,8 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _retSmoother;
     private readonly IMovingAverageSmoother _devSmoother;
     private readonly PooledRingBuffer<double> _values;
+    private readonly PooledRingBuffer<double> _devWindow;
+    private readonly bool _exactWindow;
     private readonly StreamingInputResolver _input;
 
     public SortinoRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = 0.02,
@@ -264,6 +266,8 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
         _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _devSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _values = new PooledRingBuffer<double>(_length + 1);
+        _devWindow = new PooledRingBuffer<double>(_length);
+        _exactWindow = maType == MovingAvgType.SimpleMovingAverage;
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -282,16 +286,53 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
         _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _devSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _values = new PooledRingBuffer<double>(_length + 1);
+        _devWindow = new PooledRingBuffer<double>(_length);
+        _exactWindow = maType == MovingAvgType.SimpleMovingAverage;
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
     public IndicatorName Name => IndicatorName.SortinoRatio;
+
+    private double ExactWindowAverage(double value, bool isFinal)
+    {
+        if (isFinal)
+        {
+            _devWindow.TryAdd(value, out _);
+            if (_devWindow.Count < _length)
+            {
+                return 0;
+            }
+
+            double total = 0;
+            for (var i = 0; i < _devWindow.Count; i++)
+            {
+                total += _devWindow[i];
+            }
+
+            return total / _length;
+        }
+
+        var kept = Math.Min(_devWindow.Count, _length - 1);
+        if (kept + 1 < _length)
+        {
+            return 0;
+        }
+
+        double sum = 0;
+        for (var i = _devWindow.Count - kept; i < _devWindow.Count; i++)
+        {
+            sum += _devWindow[i];
+        }
+
+        return (sum + value) / _length;
+    }
 
     public void Reset()
     {
         _retSmoother.Reset();
         _devSmoother.Reset();
         _values.Clear();
+        _devWindow.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -302,7 +343,8 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
         var retSma = _retSmoother.Next(ret, isFinal);
         var deviation = Math.Min(ret - retSma, 0);
         var deviationSquared = deviation * deviation;
-        var divisionOfSum = _devSmoother.Next(deviationSquared, isFinal);
+        // Summed afresh over the window, as the batch does, so a window with no downside is exactly 0.
+        var divisionOfSum = _exactWindow ? ExactWindowAverage(deviationSquared, isFinal) : _devSmoother.Next(deviationSquared, isFinal);
         var stdDeviation = MathHelper.Sqrt(divisionOfSum);
         var sortino = stdDeviation != 0 ? retSma / stdDeviation : 0;
 
@@ -327,6 +369,7 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
     {
         _retSmoother.Dispose();
         _devSmoother.Dispose();
+        _devWindow.Dispose();
         _values.Dispose();
     }
 }

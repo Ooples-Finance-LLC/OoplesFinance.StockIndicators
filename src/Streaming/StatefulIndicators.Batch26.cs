@@ -1408,6 +1408,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly RollingWindowMin _rbcMinWindow;
     private readonly RollingWindowSum _fastKSum;
     private readonly StreamingInputResolver _input;
+    private double _tzValue;
 
     public VervoortSmoothedOscillatorState(InputName inputName = InputName.TypicalPrice, int length1 = 18,
         int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
@@ -1430,7 +1431,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
+        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1465,7 +1466,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
+        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1519,6 +1520,8 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var ema2 = _ema2.Next(ema1, isFinal);
         var zlrb = (2 * ema1) - ema2;
         var tz = _tema.Next(zlrb, isFinal);
+        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close.
+        _tzValue = tz;
         var hwidth = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var wmatz = _wma.Next(tz, isFinal);
         var zlrbpercb = hwidth != 0

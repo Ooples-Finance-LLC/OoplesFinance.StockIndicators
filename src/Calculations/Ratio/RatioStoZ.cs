@@ -202,7 +202,11 @@ public static partial class Calculations
             deviationSquaredList.Add(deviationSquared);
         }
 
-        var divisionOfSumList = GetMovingAverageList(stockData, maType, length, deviationSquaredList);
+        // The downside deviation is exactly 0 when no return in the window falls below the mean. A running
+        // SMA left a residue near 1e-19 there, and the ratio divided by its root came out near 1e7.
+        var divisionOfSumList = maType == MovingAvgType.SimpleMovingAverage
+            ? GetExactWindowAverageList(deviationSquaredList, length)
+            : GetMovingAverageList(stockData, maType, length, deviationSquaredList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var divisionOfSum = divisionOfSumList[i];

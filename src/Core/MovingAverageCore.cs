@@ -3754,27 +3754,27 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // First compute TEMA
-        var temaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        // The same as CalculateZeroLagTripleExponentialMovingAverage: 2 * TEMA - TEMA(TEMA). This fast path
+        // took the second average as an EMA of the TEMA, a different line from the indicator of the same name.
+        var tema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var tema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            var tema = temaBuffer.AsSpan(0, input.Length);
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+            var tema1 = tema1Buffer.AsSpan(0, input.Length);
+            var tema2 = tema2Buffer.AsSpan(0, input.Length);
 
-            TripleExponentialMovingAverage(input, tema, length);
-            ExponentialMovingAverage(tema, ema1, length);
+            TripleExponentialMovingAverage(input, tema1, length);
+            TripleExponentialMovingAverage(tema1, tema2, length);
 
-            // Zero lag = 2*TEMA - EMA(TEMA)
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * tema[i]) - ema1[i];
+                output[i] = tema1[i] + (tema1[i] - tema2[i]);
             }
         }
         finally
         {
-            ArrayPool<double>.Shared.Return(temaBuffer);
-            ArrayPool<double>.Shared.Return(ema1Buffer);
+            ArrayPool<double>.Shared.Return(tema1Buffer);
+            ArrayPool<double>.Shared.Return(tema2Buffer);
         }
     }
 

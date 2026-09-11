@@ -1373,7 +1373,10 @@ public static partial class Calculations
         double chgSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
+        stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
