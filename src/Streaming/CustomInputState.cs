@@ -46,7 +46,7 @@ internal interface ICustomInputConsumer
 public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
 {
     private readonly IStreamingIndicatorState _inner;
-    private readonly Func<OhlcvBar, double> _selector;
+    private readonly IInputSeries _series;
     private double _prevValue;
     private bool _hasPrev;
 
@@ -60,9 +60,25 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
     /// <param name="selector">The caller's series, one value per bar.</param>
     /// <exception cref="ArgumentNullException">Either argument is null.</exception>
     public CustomInputState(IStreamingIndicatorState inner, Func<OhlcvBar, double> selector)
+        : this(inner, InputSeries.Of(selector ?? throw new ArgumentNullException(nameof(selector))))
+    {
+    }
+
+    /// <summary>
+    /// Wraps <paramref name="inner"/> so that it computes on <paramref name="series"/>: a preset such as
+    /// <see cref="InputSeries.MedianPrice"/>, a windowed series such as <see cref="InputSeries.Midpoint"/>,
+    /// or another indicator's output via <see cref="InputSeries.Of(IStreamingIndicatorState)"/>.
+    /// </summary>
+    /// <param name="inner">
+    /// A freshly built state. It is told to read the close if its own default is another series, so
+    /// do not also update it directly.
+    /// </param>
+    /// <param name="series">The input series. One with history must not be shared with another wrapper.</param>
+    /// <exception cref="ArgumentNullException">Either argument is null.</exception>
+    public CustomInputState(IStreamingIndicatorState inner, IInputSeries series)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+        _series = series ?? throw new ArgumentNullException(nameof(series));
 
         if (inner is ICustomInputConsumer consumer)
         {
@@ -77,6 +93,7 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
     public void Reset()
     {
         _inner.Reset();
+        _series.Reset();
         _prevValue = 0;
         _hasPrev = false;
     }
@@ -89,7 +106,7 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
             throw new ArgumentNullException(nameof(bar));
         }
 
-        var value = _selector(bar);
+        var value = _series.Next(bar, isFinal);
 
         double high;
         double low;
@@ -123,6 +140,11 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
         if (_inner is IDisposable disposable)
         {
             disposable.Dispose();
+        }
+
+        if (_series is IDisposable series)
+        {
+            series.Dispose();
         }
     }
 }
