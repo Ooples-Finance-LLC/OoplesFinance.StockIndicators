@@ -96,6 +96,11 @@ public sealed class StreamingPreviewTests : GlobalTestData
             return expected.Outputs is null == actual.Outputs is null ? null : $"outputs missing at bar {bar}";
         }
 
+        if (!new HashSet<string>(expected.Outputs.Keys, StringComparer.Ordinal).SetEquals(actual.Outputs.Keys))
+        {
+            return $"output keys differ at bar {bar}: [{string.Join(",", actual.Outputs.Keys)}] vs [{string.Join(",", expected.Outputs.Keys)}]";
+        }
+
         foreach (var kv in expected.Outputs)
         {
             if (!actual.Outputs.TryGetValue(kv.Key, out var value))

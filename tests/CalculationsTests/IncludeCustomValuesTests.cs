@@ -62,6 +62,14 @@ public sealed class IncludeCustomValuesTests : GlobalTestData
             }
 
             compared++;
+            var onKeys = new HashSet<string>(on.OutputValues.Keys, StringComparer.Ordinal);
+            if (!onKeys.SetEquals(off.OutputValues.Keys))
+            {
+                differs.Add($"{name}: on [{string.Join(",", onKeys.OrderBy(k => k, StringComparer.Ordinal))}], " +
+                    $"off [{string.Join(",", off.OutputValues.Keys.OrderBy(k => k, StringComparer.Ordinal))}]");
+                continue;
+            }
+
             foreach (var kv in on.OutputValues)
             {
                 if (!off.OutputValues.TryGetValue(kv.Key, out var offSeries) || offSeries.Count != kv.Value.Count)
