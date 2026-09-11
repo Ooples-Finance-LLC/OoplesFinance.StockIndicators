@@ -77,19 +77,20 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var vwapList = GetMovingAverageList(stockData, maType, length, inputList);
-        stockData.SetCustomValues(vwapList);
-        var vwapSdList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // LazyBear's calc_zvwap. The mean is a rolling volume-weighted mean over `length` (the chosen moving
+        // average, for any other type) and the width is sqrt(sma((price - mean)^2, length)). This used the VWAP
+        // fast path's cumulative average as the mean and the deviation of that mean series as the width.
+        var meanList = maType == MovingAvgType.VolumeWeightedAveragePrice
+            ? GetRollingVolumeWeightedMeanList(inputList, stockData.Volumes, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
+        var zscoreValues = GetZScoreList(inputList, meanList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
             var prevZScore1 = i >= 1 ? zscoreList[i - 1] : 0;
             var prevZScore2 = i >= 2 ? zscoreList[i - 2] : 0;
-            var mean = vwapList[i];
-            var vwapsd = vwapSdList[i];
 
-            var zscore = vwapsd != 0 ? (currentValue - mean) / vwapsd : 0;
+            var zscore = zscoreValues[i];
             zscoreList.Add(zscore);
 
             var signal = GetRsiSignal(zscore - prevZScore1, prevZScore1 - prevZScore2, zscore, prevZScore1, 2, -2);
@@ -425,7 +426,10 @@ public static partial class Calculations
         List<double> histogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = stockData.CaptureInputSeries();
         var cciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: slowLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var turboCciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: fastLength).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -632,7 +636,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = stockData.CaptureInputSeries();
         var macd1List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).CustomValuesList;
+        // The explosion line is the Bollinger width of the prices, not of the MACD just published.
+        stockData.RestoreInputSeries(callerSeries);
         var bbList = CalculateBollingerBands(stockData, length: fastLength);
         var upperBollingerBandList = bbList.OutputValues["UpperBand"];
         var lowerBollingerBandList = bbList.OutputValues["LowerBand"];
@@ -1697,9 +1704,14 @@ public static partial class Calculations
 
         var ma1List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length1, inputList);
         var ma2List = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length3, inputList);
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = stockData.CaptureInputSeries();
         var ltRocList = CalculateRateOfChange(stockData, length2).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var mtRocList = CalculateRateOfChange(stockData, length4).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: length9).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var ppoHistList = CalculatePercentagePriceOscillator(stockData, MovingAvgType.ExponentialMovingAverage, length5, length6, length7).
             OutputValues["Histogram"];
 
@@ -1814,8 +1826,12 @@ public static partial class Calculations
         List<double> bufHistNoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var stochastic1List = CalculateStochasticOscillator(stockData, maType, length: length2, smoothLength, smoothLength).OutputValues["FastD"];
+        stockData.RestoreInputSeries(callerSeries);
         var stochastic2List = CalculateStochasticOscillator(stockData, maType, length: length1, smoothLength, smoothLength).OutputValues["FastD"];
 
         for (var i = 0; i < stockData.Count; i++)
@@ -2107,31 +2123,43 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // Every component reads the prices (the AO and CCI their own median and typical price); each
+        // Calculate call leaves its output on CustomValuesList for the next one to mistake for its input.
+        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: rsiLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var aoList = CalculateAwesomeOscillator(stockData, fastLength: aoLength1, slowLength: aoLength2).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var macdItemsList = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: macdLength1, slowLength: macdLength2, 
             signalLength: macdLength3);
         var macdList = macdItemsList.CustomValuesList;
         var macdSignalList = macdItemsList.OutputValues["Signal"];
+        stockData.RestoreInputSeries(callerSeries);
         var uoList = CalculateUltimateOscillator(stockData, ultOscLength1, ultOscLength2, ultOscLength3).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var ichiMokuList = CalculateIchimokuCloud(stockData, tenkanLength: ichiLength1, kijunLength: ichiLength2, senkouLength: ichiLength3);
         var tenkanList = ichiMokuList.OutputValues["TenkanSen"];
         var kijunList = ichiMokuList.OutputValues["KijunSen"];
         var senkouAList = ichiMokuList.OutputValues["SenkouSpanA"];
         var senkouBList = ichiMokuList.OutputValues["SenkouSpanB"];
-        stockData.Clear();
+        stockData.RestoreInputSeries(callerSeries);
         var adxItemsList = CalculateAverageDirectionalIndex(stockData, length: adxLength);
         var adxList = adxItemsList.CustomValuesList;
         var adxPlusList = adxItemsList.OutputValues["DiPlus"];
         var adxMinusList = adxItemsList.OutputValues["DiMinus"];
+        stockData.RestoreInputSeries(callerSeries);
         var cciList = CalculateCommodityChannelIndex(stockData, length: cciLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var bullBearPowerList = CalculateElderRayIndex(stockData, length: bullBearLength);
         var bullPowerList = bullBearPowerList.OutputValues["BullPower"];
         var bearPowerList = bullBearPowerList.OutputValues["BearPower"];
-        stockData.Clear();
+        stockData.RestoreInputSeries(callerSeries);
         var hullMaList = CalculateHullMovingAverage(stockData, length: hullMaLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var williamsPctList = CalculateWilliamsR(stockData, length: williamRLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var vwmaList = CalculateVolumeWeightedMovingAverage(stockData, length: vwmaLength).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var stoList = CalculateStochasticOscillator(stockData, length: stochLength1, smoothLength1: stochLength2, smoothLength2: stochLength3);
         var stoKList = stoList.CustomValuesList;
         var stoDList = stoList.OutputValues["FastD"];
@@ -2141,11 +2169,18 @@ public static partial class Calculations
         var ma50List = GetMovingAverageList(stockData, maType, maLength4, inputList);
         var ma100List = GetMovingAverageList(stockData, maType, maLength5, inputList);
         var ma200List = GetMovingAverageList(stockData, maType, maLength6, inputList);
+        stockData.RestoreInputSeries(callerSeries);
         var momentumList = CalculateMomentumOscillator(stockData, length: momLength).CustomValuesList;
-        stockData.SetCustomValues(rsiList);
-        var stoRsiList = CalculateStochasticOscillator(stockData, length: stochLength1, smoothLength1: stochLength2, smoothLength2: stochLength3);
-        var stoRsiKList = stoRsiList.CustomValuesList;
-        var stoRsiDList = stoRsiList.OutputValues["FastD"];
+        // Stochastic RSI: the RSI's stochastic over the RSI's own range. Chained into the stochastic
+        // indicator, the RSI was measured against the bars' highs and lows instead.
+        var (rsiHighestList, rsiLowestList) = GetMaxAndMinValuesList(rsiList, stochLength1);
+        var stoRsiKList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var rsiRange = rsiHighestList[i] - rsiLowestList[i];
+            stoRsiKList.Add(rsiRange != 0 ? MinOrMax((rsiList[i] - rsiLowestList[i]) / rsiRange * 100, 100, 0) : 0);
+        }
+        var stoRsiDList = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, stochLength2, stoRsiKList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2697,11 +2732,13 @@ public static partial class Calculations
         }
 
         var bList = GetMovingAverageList(stockData, maType, length1, aaSeList);
-        stockData.SetCustomValues(bList);
-        var stoList = CalculateStochasticOscillator(stockData, maType, length: length1).CustomValuesList;
+        // The stochastic of b over b's own range. Chained into the stochastic indicator, b was measured against
+        // the bars' highs and lows - a ratio set against a price range.
+        var (bHighestList, bLowestList) = GetMaxAndMinValuesList(bList, length1);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var bSto = stoList[i];
+            var bRange = bHighestList[i] - bLowestList[i];
+            var bSto = bRange != 0 ? MinOrMax((bList[i] - bLowestList[i]) / bRange * 100, 100, 0) : 0;
 
             var sSe = (bSto * 2) - 100;
             sSeList.Add(sSe);

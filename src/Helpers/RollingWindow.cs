@@ -19,56 +19,54 @@ internal static class RollingWindowSettings
 
 internal sealed class RollingSum
 {
-    private readonly List<double> _cumulative = new();
+    // Prefix sums as high + low pairs: see CompensatedSum for why a plain prefix drifts over a long series.
+    private readonly List<double> _high = new();
+    private readonly List<double> _low = new();
 
-    public int Count => _cumulative.Count;
+    public int Count => _high.Count;
 
     public void Add(double value)
     {
-        var sum = value + (_cumulative.Count > 0 ? _cumulative[_cumulative.Count - 1] : 0);
-        _cumulative.Add(sum);
+        var last = _high.Count - 1;
+        var (high, low) = CompensatedSum.Add(last >= 0 ? _high[last] : 0, last >= 0 ? _low[last] : 0, value);
+        _high.Add(high);
+        _low.Add(low);
     }
 
     public double Sum(int length)
     {
-        if (_cumulative.Count == 0 || length <= 0)
+        if (_high.Count == 0 || length <= 0)
         {
             return 0;
         }
 
-        var end = _cumulative[_cumulative.Count - 1];
-        var startIndex = _cumulative.Count - length - 1;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(_high.Count - 1, _high.Count - length - 1);
     }
 
     public double SumAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || length <= 0 || endIndex < 0)
+        if (_high.Count == 0 || length <= 0 || endIndex < 0)
         {
             return 0;
         }
 
-        var end = _cumulative[endIndex];
-        var startIndex = endIndex - length;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(endIndex, endIndex - length);
     }
 
     public double Average(int length)
     {
-        if (_cumulative.Count == 0)
+        if (_high.Count == 0)
         {
             return 0;
         }
 
-        var count = Math.Min(length, _cumulative.Count);
+        var count = Math.Min(length, _high.Count);
         return count > 0 ? Sum(length) / count : 0;
     }
 
     public double AverageAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || endIndex < 0)
+        if (_high.Count == 0 || endIndex < 0)
         {
             return 0;
         }
@@ -76,6 +74,10 @@ internal sealed class RollingSum
         var count = Math.Min(length, endIndex + 1);
         return count > 0 ? SumAt(length, endIndex) / count : 0;
     }
+
+    private double Between(int end, int start) => start >= 0
+        ? CompensatedSum.Difference(_high[end], _low[end], _high[start], _low[start])
+        : _high[end] + _low[end];
 }
 
 internal sealed class RollingMinMax
@@ -209,47 +211,47 @@ internal sealed class RollingMinMax
 
 internal sealed class RollingCorrelation
 {
-    private readonly RollingSum _xSum = new();
-    private readonly RollingSum _ySum = new();
-    private readonly RollingSum _x2Sum = new();
-    private readonly RollingSum _y2Sum = new();
-    private readonly RollingSum _xySum = new();
+    private readonly List<double> _x = new();
+    private readonly List<double> _y = new();
+    private double[] _xWindow = Array.Empty<double>();
+    private double[] _yWindow = Array.Empty<double>();
 
-    public int Count => _xSum.Count;
+    public int Count => _x.Count;
 
     public void Add(double x, double y)
     {
-        _xSum.Add(x);
-        _ySum.Add(y);
-        _x2Sum.Add(x * x);
-        _y2Sum.Add(y * y);
-        _xySum.Add(x * y);
+        _x.Add(x);
+        _y.Add(y);
     }
 
+    /// <summary>The correlation of the last <paramref name="length"/> pairs; see <see cref="WindowCorrelation"/>.</summary>
     public double R(int length)
     {
-        if (length <= 1 || _xSum.Count == 0)
+        if (length <= 1 || _x.Count == 0)
         {
             return 0;
         }
 
-        var n = Math.Min(length, _xSum.Count);
+        var n = Math.Min(length, _x.Count);
         if (n <= 1)
         {
             return 0;
         }
 
-        var sumX = _xSum.Sum(length);
-        var sumY = _ySum.Sum(length);
-        var sumX2 = _x2Sum.Sum(length);
-        var sumY2 = _y2Sum.Sum(length);
-        var sumXY = _xySum.Sum(length);
+        if (_xWindow.Length < n)
+        {
+            _xWindow = new double[n];
+            _yWindow = new double[n];
+        }
 
-        var numerator = (n * sumXY) - (sumX * sumY);
-        var denomLeft = (n * sumX2) - (sumX * sumX);
-        var denomRight = (n * sumY2) - (sumY * sumY);
-        var denom = Math.Sqrt(denomLeft * denomRight);
-        return denom != 0 ? numerator / denom : 0;
+        var start = _x.Count - n;
+        for (var i = 0; i < n; i++)
+        {
+            _xWindow[i] = _x[start + i];
+            _yWindow[i] = _y[start + i];
+        }
+
+        return WindowCorrelation.Pearson(new ReadOnlySpan<double>(_xWindow, 0, n), new ReadOnlySpan<double>(_yWindow, 0, n));
     }
 
     public double RSquared(int length)

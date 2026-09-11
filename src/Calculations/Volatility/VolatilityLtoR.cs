@@ -444,8 +444,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // All three averages are of the prices; each Calculate call leaves its own output on CustomValuesList.
+        var callerSeries = stockData.CaptureInputSeries();
         var qmaList = CalculateQuadraticMovingAverage(stockData, length).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        stockData.RestoreInputSeries(callerSeries);
         var emaList = CalculateExponentialMovingAverage(stockData, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

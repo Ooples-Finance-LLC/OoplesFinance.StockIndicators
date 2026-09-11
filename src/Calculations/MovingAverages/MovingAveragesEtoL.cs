@@ -580,7 +580,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var myList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index themselves.
+        var myList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -597,8 +598,7 @@ public static partial class Calculations
         }
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
-        stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList; ;
+        var mxList = GetStandardDeviationList(xList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = myList[i];
@@ -1427,54 +1427,30 @@ public static partial class Calculations
         List<double> interceptList = new(stockData.Count);
         List<double> predictedTomorrowList = new(stockData.Count);
         List<double> predictedTodayList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> xyList = new(stockData.Count);
-        List<double> x2List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum xSumWindow = new();
-        RollingSum ySumWindow = new();
-        RollingSum xySumWindow = new();
-        RollingSum x2SumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // The line through the trailing window, x counted from its first bar and fitted through the bars there
+        // are until it fills; see RollingLeastSquares.
+        using var regression = new RollingLeastSquares(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = GetLastOrDefault(yList);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            yList.Add(currentValue);
-            ySumWindow.Add(currentValue);
 
-            double x = i;
-            xList.Add(x);
-            xSumWindow.Add(x);
-
-            var x2 = x * x;
-            x2List.Add(x2);
-            x2SumWindow.Add(x2);
-
-            var xy = x * currentValue;
-            xyList.Add(xy);
-            xySumWindow.Add(xy);
-
-            var sumX = xSumWindow.Sum(length);
-            var sumY = ySumWindow.Sum(length);
-            var sumXY = xySumWindow.Sum(length);
-            var sumX2 = x2SumWindow.Sum(length);
-            var top = (length * sumXY) - (sumX * sumY);
-            var bottom = (length * sumX2) - Pow(sumX, 2);
-
-            var b = bottom != 0 ? top / bottom : 0;
+            var fit = regression.Next(currentValue, isFinal: true);
+            var b = fit.Slope;
             slopeList.Add(b);
 
-            var a = length != 0 ? (sumY - (b * sumX)) / length : 0;
+            // The intercept is still reported at bar 0 of the series, as it always was.
+            var a = fit.Intercept - (b * (i - fit.Count + 1));
             interceptList.Add(a);
 
-            var predictedToday = a + (b * x);
+            var predictedToday = fit.Last;
             predictedTodayList.Add(predictedToday);
 
             var prevPredictedNextDay = GetLastOrDefault(predictedTomorrowList);
-            var predictedNextDay = a + (b * (x + 1));
+            var predictedNextDay = fit.Next;
             predictedTomorrowList.Add(predictedNextDay);
 
             var signal = GetCompareSignal(currentValue - predictedNextDay, prevValue - prevPredictedNextDay, true);

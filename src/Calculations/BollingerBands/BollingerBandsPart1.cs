@@ -21,7 +21,10 @@ public static partial class Calculations
         var lowerBandList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // Bollinger's definition: the population standard deviation of the last `length` prices around their
+        // own mean. This used to be StandardDeviationVolatility - a different measure - and, through the
+        // moving average left on CustomValuesList, of the middle band rather than the prices.
+        var stdDeviationList = GetStandardDeviationList(inputList, length);
 
         double prevUpperBand = 0;
         double prevLowerBand = 0;
@@ -295,11 +298,15 @@ public static partial class Calculations
         List<double> atrDevList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var callerSeries = stockData.CaptureInputSeries();
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
         var upperBandList = bollingerBands.OutputValues["UpperBand"];
         var lowerBandList = bollingerBands.OutputValues["LowerBand"];
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
+        // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
+        // caller's series, which is what its true range is a range of.
+        stockData.RestoreInputSeries(callerSeries);
         var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).CustomValuesList;
 
         double prevAtrDev = 0;

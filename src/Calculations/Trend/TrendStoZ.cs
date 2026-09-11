@@ -874,8 +874,16 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        stockData.SetCustomValues(macdList);
-        var stcList = CalculateStochasticOscillator(stockData, maType, length: cycleLength).CustomValuesList;
+        // The stochastic of the MACD over the MACD's own range. Chained into the stochastic indicator, the MACD
+        // was measured against the bars' highs and lows - an oscillator set against a price range.
+        var (macdHighestList, macdLowestList) = GetMaxAndMinValuesList(macdList, cycleLength);
+        var stcList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var macdRange = macdHighestList[i] - macdLowestList[i];
+            stcList.Add(macdRange != 0 ? MinOrMax((macdList[i] - macdLowestList[i]) / macdRange * 100, 100, 0) : 0);
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var stc = stcList[i];

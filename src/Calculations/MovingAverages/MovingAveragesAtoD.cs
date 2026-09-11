@@ -721,7 +721,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // stdev(src, length) in the original: the prices' own standard deviation.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -985,7 +986,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var v1List = CalculateStandardDeviationVolatility(stockData, maType, length).OutputValues["Variance"];
+        // Uhl's v1 is the variance of the source over the window: a plain population variance of the prices.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var tolerance = Pow(10, -5);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -994,7 +996,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var sma = smaList[i];
             var prevCma = i >= 1 ? cmaList[i - 1] : sma;
-            var v1 = v1List[i];
+            var v1 = stdDevList[i] * stdDevList[i];
             var v2 = Pow(prevCma - sma, 2);
             var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
 
@@ -1008,7 +1010,8 @@ public static partial class Calculations
                 kPrev = k;
             }
 
-            var cma = prevCma + (k * (sma - prevCma));
+            // Seeded at the average until the window is full, as the original's na(cma[1]) ? sma.
+            var cma = i < length ? sma : prevCma + (k * (sma - prevCma));
             cmaList.Add(cma);
 
             var signal = GetCompareSignal(currentValue - cma, prevValue - prevCma);

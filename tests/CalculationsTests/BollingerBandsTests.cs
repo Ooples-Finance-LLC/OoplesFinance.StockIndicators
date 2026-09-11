@@ -20,19 +20,36 @@ public sealed class BollingerBandsTests : GlobalTestData
         RoundList(results.OutputValues["LowerBand"]).Should().BeEquivalentTo(RoundList(expected.LowerBand));
     }
 
+    /// <summary>
+    /// Bollinger's definition, written out: the middle band is the SMA of the last <paramref name="length"/>
+    /// prices, and the band width is the population standard deviation of those same prices around that
+    /// same mean.
+    /// </summary>
+    /// <remarks>
+    /// This reference used to take the standard deviation of the MIDDLE BAND around an average of the middle
+    /// band. That is not Bollinger Bands; it is what the batch computed while GetMovingAverageList left the
+    /// middle band on CustomValuesList for the standard deviation to read, and a reference copied from the
+    /// implementation can only ever agree with it. At bar 200 of this fixture it made the bands 55% too wide.
+    /// </remarks>
     private static (List<double> UpperBand, List<double> MiddleBand, List<double> LowerBand) CalculateBollingerBandsNaive(
         IReadOnlyList<double> input,
         int length,
         double stdDevMult)
     {
         var middleBand = CalculateSimpleMovingAverageNaive(input, length);
-        var stdDevMean = CalculateSimpleMovingAverageNaive(middleBand, length);
-        var variance = CalculateSimpleMovingAverageNaive(CalculateDeviationSquared(middleBand, stdDevMean), length);
-        var stdDev = new List<double>(variance.Count);
+        var stdDev = new List<double>(input.Count);
 
-        for (var i = 0; i < variance.Count; i++)
+        for (var i = 0; i < input.Count; i++)
         {
-            stdDev.Add(Math.Sqrt(variance[i]));
+            if (i < length - 1)
+            {
+                stdDev.Add(0d);
+                continue;
+            }
+
+            var window = input.Skip(i - length + 1).Take(length).ToList();
+            var mean = window.Average();
+            stdDev.Add(Math.Sqrt(window.Sum(value => (value - mean) * (value - mean)) / length));
         }
 
         var upperBand = new List<double>(input.Count);

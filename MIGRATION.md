@@ -159,6 +159,55 @@ var handle = indicators.Calculate(
 - `IndicatorBuffer<T>` is now the primary container for indicator values (replaces raw lists)
 - Results are accessed via `runtime.GetSeries(handle)` instead of `OutputValues*` properties
 
+### Corrected values
+
+Every streaming state is now held to computing, on every bar, every value its batch twin computes
+(`StreamingBatchValueParityTests`, all 769 states). The hand-written parity specs had covered a subset,
+often only a band indicator's middle band, and 50 indicators disagreed between engines. Each was fixed to
+the indicator's published definition, so **some batch values change**:
+
+- **Moving averages no longer leak into the next calculation.** `GetMovingAverageList` left its result on
+  `CustomValuesList`, so whatever an indicator calculated next ran on the average rather than the price.
+- **Bollinger Bands** use the population standard deviation of the prices, as Bollinger defines them. The
+  batch bands were about 55% too wide at steady state and far wider during warmup. %B, Width, the Bayesian
+  Oscillator, BB-ATR, the Narrow Sideways Channel and Waddah Attar Explosion's bands follow.
+- **Composite indicators read the prices in every component** instead of the previous component's output:
+  Pring Special K, Technical Ratings, Technical Rank, Trading Made More Simpler Oscillator, Waddah Attar
+  Explosion, Woodie CCI, Ultimate Momentum Indicator, Ultimate Moving Average and its bands, QMA-SMA
+  Difference, Hurst Cycle Channel, R2 Adaptive Regression and T-Step LSMA.
+- **A stochastic of a derived series is taken over that series' own range**, not the bars' highs and lows:
+  Schaff Trend Cycle, Strength of Movement, and Technical Ratings' Stochastic RSI.
+- **Corrected Moving Average, 1LC LSMA and the Linear Regression Line** use the true variance and standard
+  deviation of the source.
+- **`MovingAvgType` fast paths compute the indicator of the same name** for the Variable Moving Average
+  (now LazyBear's formula, which also corrects the VMA indicator itself), VIDYA, McNicholl, Ehlers' Noise
+  Elimination Technology and the Zero-Lag TEMA.
+- **Z Distance from VWAP and MAC-Z VWAP** compute LazyBear's `calc_zvwap`.
+- **Sortino Ratio** sums its downside window exactly, so a window with no downside is 0 instead of a
+  rounding residue that inflated the ratio to around 1e7.
+- **Gopalakrishnan Range Index** publishes its `Signal` series, which was always empty.
+- **Window calculations no longer drift over a long series** (`StreamingLongRunStabilityTests`). After
+  100,000 bars near 100,000 and 100,000 near 10, the weighted moving average was 1e-6 off and the standard
+  deviation channel 3e-4 off in both engines, carrying rounding from values long out of the window. The
+  simple and weighted moving averages now rebuild their running sums from the window every `length` bars,
+  and window sums taken as the difference of two prefix sums (about 120 batch indicators, among them CMO,
+  MFI and Vortex) keep each prefix as a compensated pair.
+  The linear regression counts x from the window's first bar instead of the series' (its `Intercept` is
+  still reported at bar 0), slides in O(1) with the same periodic rebuild, and fits the bars there are
+  while its window fills, rather than dividing by the full length as though the missing points sat at the
+  origin; Chande Forecast, the standard deviation channel, Inertia and Projection Bands follow. Correlation is taken from each value's distance to the window mean, so a
+  window with one side constant correlates at 0 rather than a rounding residue of either sign; the
+  Periodic Channel sums that sign. Otherwise values change only in their last digits.
+
+Streaming-only corrections (batch unchanged): the first bar's true range in the ATR channels, Stoller
+channels, dynamic support/resistance, Bollinger Fibonacci ratios, Hurst cycle channel, trend trader bands,
+VMA bands, Trender and the volume positive/negative indicator; the Time Price Indicator's band offset; the
+defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
+50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations.
+
+`BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
+the batch twin of the streaming state of the same name.
+
 ### New Dependencies (net461 only)
 
 - `System.Net.Http` 4.3.4

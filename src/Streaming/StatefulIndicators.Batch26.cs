@@ -583,7 +583,8 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
         var value = _input.GetValue(bar);
         var cmo = _cmo.Update(bar, isFinal, includeOutputs: false).Value;
         var currentCmo = Math.Abs(cmo / 100);
-        var prevVidya = _hasPrev ? _prevVidya : value;
+        // Seeded at 0, as the batch and the original's nz(vidya[1]) are: VIDYA grows into the price.
+        var prevVidya = _hasPrev ? _prevVidya : 0;
         var vidya = (value * _alpha * currentCmo) + (prevVidya * (1 - (_alpha * currentCmo)));
 
         if (isFinal)
@@ -830,7 +831,9 @@ public sealed class VariableMovingAverageBandsState : IStreamingIndicatorState, 
             ? _vmaEngine!.Next(value, isFinal)
             : _ma!.Next(value, isFinal);
 
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevClose = _hasPrev ? _prevClose : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var atr = _useVariable
             ? _atrEngine!.Next(tr, isFinal)
@@ -1405,6 +1408,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly RollingWindowMin _rbcMinWindow;
     private readonly RollingWindowSum _fastKSum;
     private readonly StreamingInputResolver _input;
+    private double _tzValue;
 
     public VervoortSmoothedOscillatorState(InputName inputName = InputName.TypicalPrice, int length1 = 18,
         int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
@@ -1427,7 +1431,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
+        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1462,7 +1466,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1);
+        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1516,6 +1520,8 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var ema2 = _ema2.Next(ema1, isFinal);
         var zlrb = (2 * ema1) - ema2;
         var tz = _tema.Next(zlrb, isFinal);
+        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close.
+        _tzValue = tz;
         var hwidth = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var wmatz = _wma.Next(tz, isFinal);
         var zlrbpercb = hwidth != 0
@@ -2487,7 +2493,8 @@ internal sealed class VariableMovingAverageEngine : IDisposable
         var llv = isFinal ? _minWindow.Add(iS, out _) : _minWindow.Preview(iS, out _);
         var d1 = hhv - llv;
         var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-        var vma = ((1 - _k) * vI * _prevVma) + (_k * vI * value);
+        // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI.
+        var vma = ((1 - (_k * vI)) * _prevVma) + (_k * vI * value);
 
         if (isFinal)
         {

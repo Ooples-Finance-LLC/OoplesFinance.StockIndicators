@@ -2126,7 +2126,9 @@ public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
+        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
         var sclAtr = _sclAtrSmoother.Next(tr, isFinal);
         var mclAtr = _mclAtrSmoother.Next(tr, isFinal);

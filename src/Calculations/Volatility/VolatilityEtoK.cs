@@ -139,7 +139,6 @@ public static partial class Calculations
         int length = 5)
     {
         List<double> gapoList = new(stockData.Count);
-        List<double> gapoEmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
@@ -173,7 +172,7 @@ public static partial class Calculations
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Gapo", gapoList },
-            { "Signal", gapoEmaList }
+            { "Signal", gapoWmaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(gapoList);

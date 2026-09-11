@@ -156,13 +156,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        // LazyBear's MAC-Z VWAP. The MACD term is divided by stdev(src, length2), the prices' own standard
+        // deviation. The z-score is his calc_zvwap: the distance of the price from its rolling volume-weighted
+        // mean over length1, in units of sqrt(sma((price - mean)^2, length1)). It used to come from the Z distance
+        // indicator, which measured a cumulative VWAP against a deviation of the VWAP series itself.
+        var stdDevList = GetStandardDeviationList(inputList, length2);
         var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
         var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        // Reset CustomValuesList to ensure ZDistanceFromVwap uses close prices, not slowSmaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var zScoreList = CalculateZDistanceFromVwapIndicator(stockData, length: length1).CustomValuesList;
+        var zScoreList = GetZScoreList(inputList,
+            GetRollingVolumeWeightedMeanList(inputList, stockData.Volumes, length1), Math.Max(1, length1));
 
         for (var i = 0; i < stockData.Count; i++)
         {

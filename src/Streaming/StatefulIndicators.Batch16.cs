@@ -1503,11 +1503,9 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
     private readonly RollingWindowCorrelation _correlation;
     private readonly IMovingAverageSmoother _yMa;
     private readonly IMovingAverageSmoother _xMa;
-    private readonly StandardDeviationVolatilityState _yStdDev;
-    private readonly StandardDeviationVolatilityState _xStdDev;
+    private readonly RollingStandardDeviation _yStdDev;
+    private readonly RollingStandardDeviation _xStdDev;
     private readonly StreamingInputResolver _input;
-    private double _indexValue;
-    private double _yMaValue;
     private int _index;
 
     public LinearRegressionLineState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
@@ -1517,10 +1515,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        // Batch contamination: GetMovingAverageList sets CustomValuesList = yMaList, then
-        // CalculateStandardDeviationVolatility uses yMaList (not original close prices)
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
-        _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _yStdDev = new RollingStandardDeviation(_length);
+        _xStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -1535,9 +1531,8 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _correlation = new RollingWindowCorrelation(_length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
         _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        // Batch contamination: stdDev uses yMa values, not original input values
-        _yStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _yMaValue);
-        _xStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _yStdDev = new RollingStandardDeviation(_length);
+        _xStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -1550,8 +1545,6 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         _xMa.Reset();
         _yStdDev.Reset();
         _xStdDev.Reset();
-        _indexValue = 0;
-        _yMaValue = 0;
         _index = 0;
     }
 
@@ -1559,7 +1552,6 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
     {
         var value = _input.GetValue(bar);
         var x = (double)_index;
-        _indexValue = x;
 
         var corr = isFinal
             ? _correlation.Add(value, x, out _)
@@ -1567,10 +1559,10 @@ public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDispo
         corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
         var yMa = _yMa.Next(value, isFinal);
         var xMa = _xMa.Next(x, isFinal);
-        // Must set _yMaValue before _yStdDev.Update() since stdDev uses selector that returns _yMaValue
-        _yMaValue = yMa;
-        var my = _yStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var mx = _xStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index
+        // themselves - so the line is the least-squares fit of the window, evaluated at this bar.
+        var my = _yStdDev.Next(value, isFinal);
+        var mx = _xStdDev.Next(x, isFinal);
         var slope = mx != 0 ? corr * (my / mx) : 0;
         var inter = yMa - (slope * xMa);
         var reg = (x * slope) + inter;
@@ -1974,52 +1966,45 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
 
 public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _gamma;
-    // Track three cumulative VWAPs due to batch contamination pattern in stdDev(VWAP)
-    private double _volSum;
-    private double _volPriceSum1;       // VWAP1: typicalPrice = (H+L+C)/3
-    private double _volPriceSum1Prime;  // VWAP1': typicalPrice = (H+L+VWAP1)/3
-    private double _volPriceSum2;       // VWAP2: typicalPrice = (H+L+deviationSquared)/3 where devSq = (VWAP1-VWAP1')²
+    private readonly RollingVolumeWeightedMean _vwapMean;
+    private readonly RollingZScore _zScore;
     private double _l0;
     private double _l1;
     private double _l2;
     private double _l3;
     private bool _hasPrev;
-    private int _barCount;
 
     public MacZVwapIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 12,
         int slowLength = 25, int signalLength = 9, int length1 = 20, int length2 = 25, double gamma = 0.02,
         InputName inputName = InputName.Close)
+        : this(maType, fastLength, slowLength, signalLength, length1, length2, gamma, new StreamingInputResolver(inputName, null))
     {
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), inputName);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-        _gamma = gamma;
-        _ = length1; // Not used - batch VWAP is cumulative, not windowed
     }
 
     public MacZVwapIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length1,
         int length2, double gamma, Func<OhlcvBar, double> selector)
+        : this(maType, fastLength, slowLength, signalLength, length1, length2, gamma,
+            new StreamingInputResolver(InputName.Close, selector ?? throw new ArgumentNullException(nameof(selector))))
     {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
+    }
 
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), selector);
+    private MacZVwapIndicatorState(MovingAvgType maType, int fastLength, int slowLength, int signalLength, int length1,
+        int length2, double gamma, StreamingInputResolver input)
+    {
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length2));
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = input;
         _gamma = gamma;
-        _ = length1; // Not used - batch VWAP is cumulative, not windowed
+        _vwapMean = new RollingVolumeWeightedMean(Math.Max(1, length1));
+        _zScore = new RollingZScore(Math.Max(1, length1));
     }
 
     public IndicatorName Name => IndicatorName.MacZVwapIndicator;
@@ -2030,59 +2015,26 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         _fastSmoother.Reset();
         _slowSmoother.Reset();
         _signalSmoother.Reset();
-        _volSum = 0;
-        _volPriceSum1 = 0;
-        _volPriceSum1Prime = 0;
-        _volPriceSum2 = 0;
+        _vwapMean.Reset();
+        _zScore.Reset();
         _l0 = 0;
         _l1 = 0;
         _l2 = 0;
         _l3 = 0;
         _hasPrev = false;
-        _barCount = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdev = _stdDev.Next(value, isFinal);
         var fastMa = _fastSmoother.Next(value, isFinal);
         var slowMa = _slowSmoother.Next(value, isFinal);
 
-        // Batch ZDistanceFromVwap + stdDev(VWAP) contamination pattern:
-        // ZDistanceFromVwap computes VWAP1, sets CustomValuesList = VWAP1
-        // stdDev(VWAP) then uses CustomValuesList (VWAP1) as inputList:
-        //   1. Call 1: GetMovingAverageList(VWAP, VWAP1) sets CustomValuesList = VWAP1
-        //      -> VWAP uses TypicalPrice = (H+L+VWAP1)/3, produces VWAP1'
-        //   2. deviation = VWAP1 - VWAP1' (NOT close - VWAP1!)
-        //   3. Call 2: GetMovingAverageList(VWAP, deviationSquared) sets CustomValuesList = devSq
-        //      -> VWAP uses TypicalPrice = (H+L+deviationSquared)/3, produces VWAP2 (variance)
-        //   4. stdDev = sqrt(VWAP2)
-        // zscore = (close - VWAP1) / stdDev
-
-        // VWAP1: typicalPrice1 = (H+L+C)/3
-        var typicalPrice1 = (bar.High + bar.Low + bar.Close) / 3;
-        var volSum = _volSum + bar.Volume;
-        var volPriceSum1 = _volPriceSum1 + (typicalPrice1 * bar.Volume);
-        var vwap1 = volSum != 0 ? volPriceSum1 / volSum : 0;
-
-        // VWAP1': typicalPrice1' = (H+L+VWAP1)/3 - contaminated by VWAP1 as "close"
-        var typicalPrice1Prime = (bar.High + bar.Low + vwap1) / 3;
-        var volPriceSum1Prime = _volPriceSum1Prime + (typicalPrice1Prime * bar.Volume);
-        var vwap1Prime = volSum != 0 ? volPriceSum1Prime / volSum : 0;
-
-        // deviation = VWAP1 - VWAP1' (batch uses inputList[i] - smaList[i] where inputList = VWAP1)
-        var deviation = vwap1 - vwap1Prime;
-        var deviationSquared = deviation * deviation;
-
-        // VWAP2: typicalPrice2 = (H+L+deviationSquared)/3 - batch passes deviationSquared as CustomValuesList
-        var typicalPrice2 = (bar.High + bar.Low + deviationSquared) / 3;
-        var volPriceSum2 = _volPriceSum2 + (typicalPrice2 * bar.Volume);
-        var vwap2Variance = volSum != 0 ? volPriceSum2 / volSum : 0;
-
-        // stdDev = sqrt(VWAP2 "variance")
-        var vwapSd = MathHelper.Sqrt(vwap2Variance);
-        var zscore = vwapSd != 0 ? (value - vwap1) / vwapSd : 0;
+        // LazyBear's calc_zvwap: the distance of the price from its rolling volume-weighted mean, in units of
+        // sqrt(sma((price - mean)^2, length1)). Summed over the window oldest first, as the batch does.
+        var mean = _vwapMean.Next(value, bar.Volume, isFinal);
+        var zscore = _zScore.Next(value, mean, isFinal);
 
         var macd = fastMa - slowMa;
         var maczt = stdev != 0 ? zscore + (macd / stdev) : zscore;
@@ -2100,35 +2052,13 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
         var signal = _signalSmoother.Next(macz, isFinal);
         var histogram = macz - signal;
 
-        // At index 0, batch returns 0 because SMA-based stdDev = 0
-        // Our VWAP contamination pattern produces non-zero values at first bar
-        // Return 0 for first bar to match batch behavior
-        var isFirstBar = _barCount == 0;
-
         if (isFinal)
         {
-            _volSum = volSum;
-            _volPriceSum1 = volPriceSum1;
-            _volPriceSum1Prime = volPriceSum1Prime;
-            _volPriceSum2 = volPriceSum2;
             _l0 = l0;
             _l1 = l1;
             _l2 = l2;
             _l3 = l3;
             _hasPrev = true;
-            _barCount++;
-        }
-
-        if (isFirstBar)
-        {
-            return new StreamingIndicatorStateResult(0, includeOutputs
-                ? new Dictionary<string, double>(3)
-                {
-                    { "Macz", 0 },
-                    { "Signal", 0 },
-                    { "Histogram", 0 }
-                }
-                : null);
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -2147,11 +2077,14 @@ public sealed class MacZVwapIndicatorState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
-        _stdDev.Dispose();
         _fastSmoother.Dispose();
         _slowSmoother.Dispose();
         _signalSmoother.Dispose();
+        _stdDev.Dispose();
+        _vwapMean.Dispose();
+        _zScore.Dispose();
     }
+
 }
 
 public sealed class MarketDirectionIndicatorState : IStreamingIndicatorState

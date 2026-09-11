@@ -317,7 +317,11 @@ public static partial class Calculations
         RollingSum negMoneyFlowSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = stockData.CaptureInputSeries();
         var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).OutputValues["Length"];
+        // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
+        // and the typical price used to take it for the close.
+        stockData.RestoreInputSeries(callerSeries);
         var tpList = CalculateTypicalPrice(stockData).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1196,7 +1200,9 @@ public static partial class Calculations
             var vI = d1 != 0 ? (iS - llv) / d1 : 0;
 
             var prevVma = GetLastOrDefault(vmaList);
-            var vma = ((1 - k) * vI * prevVma) + (k * vI * currentValue);
+            // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. This was
+            // (1 - k) * vI * prevVma, which scaled the whole average by vI and pulled it towards zero.
+            var vma = ((1 - (k * vI)) * prevVma) + (k * vI * currentValue);
             vmaList.Add(vma);
 
             var signal = GetCompareSignal(currentValue - vma, prevValue - prevVma);
@@ -1367,7 +1373,10 @@ public static partial class Calculations
         double chgSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = stockData.CaptureInputSeries();
         var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
+        stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 

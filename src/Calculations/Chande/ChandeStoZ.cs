@@ -14,7 +14,33 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChandeVolatilityIndexDynamicAverageIndicator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, double alpha1 = 0.2, double alpha2 = 0.04)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, double alpha1 = 0.2, double alpha2 = 0.04) =>
+        CalculateVolatilityIndexDynamicAverage(stockData, maType, length, alpha1, alpha2,
+            IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator, "Cvida1", "Cvida2");
+
+    /// <summary>
+    /// Calculates the Volatility Index Dynamic Average Indicator
+    /// </summary>
+    /// <remarks>
+    /// The same indicator as <see cref="CalculateChandeVolatilityIndexDynamicAverageIndicator"/>, under its own
+    /// name and output keys. Streaming has offered this name all along; without a batch method of the same name
+    /// the two engines could not be held to the same numbers.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="maType"></param>
+    /// <param name="length"></param>
+    /// <param name="alpha1"></param>
+    /// <param name="alpha2"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVolatilityIndexDynamicAverageIndicator(this StockData stockData,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, double alpha1 = 0.2, double alpha2 = 0.04) =>
+        CalculateVolatilityIndexDynamicAverage(stockData, maType, length, alpha1, alpha2,
+            IndicatorName.VolatilityIndexDynamicAverageIndicator, "Vida1", "Vida2");
+
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    private static StockData CalculateVolatilityIndexDynamicAverage(StockData stockData, MovingAvgType maType, int length,
+        double alpha1, double alpha2, IndicatorName indicatorName, string vidya1Key, string vidya2Key)
     {
         List<double> vidya1List = new(stockData.Count);
         List<double> vidya2List = new(stockData.Count);
@@ -46,12 +72,12 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cvida1", vidya1List },
-            { "Cvida2", vidya2List }
+            { vidya1Key, vidya1List },
+            { vidya2Key, vidya2List }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator;
+        stockData.IndicatorName = indicatorName;
 
         return stockData;
     }

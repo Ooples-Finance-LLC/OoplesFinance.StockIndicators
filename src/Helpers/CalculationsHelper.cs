@@ -155,6 +155,44 @@ public static class CalculationsHelper
         stockData.SignalsList = signalsList;
     }
 
+    /// <summary>
+    /// Hands the next calculation its input series, unaltered.
+    /// </summary>
+    /// <remarks>
+    /// Not SetCustomValues. That publishes an indicator's OUTPUT, and honours IncludeCustomValues (which can
+    /// drop it) and RoundingDigits (which rounds it). A caller's input series is neither: with
+    /// IncludeCustomValues off SetCustomValues clears it in place, and with RoundingDigits set the next
+    /// calculation would compute on rounded input.
+    /// </remarks>
+    internal static void SetInputSeries(this StockData stockData, List<double> series) =>
+        stockData.CustomValuesList = series;
+
+    /// <summary>
+    /// A copy of the caller's input series, taken before a composite's components publish their own outputs.
+    /// </summary>
+    /// <remarks>
+    /// Empty when the caller chained nothing. <see cref="StockData.CustomValuesList"/> has a public setter and can
+    /// be null; a null series reads as the bars' own input, as <c>GetInputValuesList</c> treats it, instead of
+    /// throwing from the copy.
+    /// </remarks>
+    internal static List<double> CaptureInputSeries(this StockData stockData) =>
+        stockData.CustomValuesList is { } series ? new List<double>(series) : new List<double>();
+
+    /// <summary>
+    /// Hands the next component of a composite indicator the caller's input again, after an earlier
+    /// component published its own output.
+    /// </summary>
+    /// <remarks>
+    /// Every Calculate method leaves its result on CustomValuesList for chaining, so a second component
+    /// called straight after a first computes on the first one's output. The signals go too: a component
+    /// that publishes signals and no single series makes the next input read refuse to run.
+    /// </remarks>
+    internal static void RestoreInputSeries(this StockData stockData, List<double> callerSeries)
+    {
+        stockData.SetInputSeries(new List<double>(callerSeries));
+        stockData.SignalsList = new List<Signal>();
+    }
+
     public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
     {
         if (!ShouldIncludeCustomValues(stockData))
@@ -225,6 +263,104 @@ public static class CalculationsHelper
         var series = BuildDerivedSeriesList(stockData, kind);
         cache[kind] = series;
         return series;
+    }
+
+    /// <summary>
+    /// The population standard deviation of each bar's trailing window of <paramref name="input"/>: 0 until
+    /// the window is full.
+    /// </summary>
+    /// <remarks>
+    /// The standard deviation an indicator's source formula means by <c>stdev(src, length)</c>: every value in
+    /// the window measured from that window's own mean. Not <c>CalculateStandardDeviationVolatility</c>, which
+    /// measures each value from the moving average at its own bar and so is a different quantity - 55% wider
+    /// than this on a typical price series. Streaming computes the same thing in RollingStandardDeviation.
+    /// </remarks>
+    internal static List<double> GetStandardDeviationList(List<double> input, int length)
+    {
+        var buffer = SpanCompat.CreateOutputBuffer(input.Count);
+        VolatilityCore.StandardDeviation(SpanCompat.AsReadOnlySpan(input), buffer.Span, Math.Max(1, length));
+
+        return buffer.ToList();
+    }
+
+    /// <summary>
+    /// The average of each bar's trailing window of <paramref name="input"/>, summed afresh every bar: 0
+    /// until the window is full.
+    /// </summary>
+    /// <remarks>
+    /// A simple moving average by value, without the running sum. A running sum of values that are all 0
+    /// leaves a residue near 1e-19 rather than 0, and a ratio that divides by its root turns that into
+    /// nonsense. Streaming sums the same window in the same order.
+    /// </remarks>
+    internal static List<double> GetExactWindowAverageList(List<double> input, int length)
+    {
+        length = Math.Max(1, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            if (i < length - 1)
+            {
+                output.Add(0);
+                continue;
+            }
+
+            double sum = 0;
+            for (var j = i - length + 1; j <= i; j++)
+            {
+                sum += input[j];
+            }
+
+            output.Add(sum / length);
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// The volume-weighted mean of each bar's trailing window of <paramref name="input"/>, partial at the start.
+    /// </summary>
+    /// <remarks>sum(volume * value, length) / sum(volume, length), as LazyBear's calc_zvwap takes its mean.</remarks>
+    internal static List<double> GetRollingVolumeWeightedMeanList(List<double> input, List<double> volumes, int length)
+    {
+        length = Math.Max(1, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            double volumePriceSum = 0, volumeSum = 0;
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
+            {
+                volumePriceSum += volumes[j] * input[j];
+                volumeSum += volumes[j];
+            }
+
+            output.Add(volumeSum != 0 ? volumePriceSum / volumeSum : 0);
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Each value's distance from its mean in units of sqrt(sma((value - mean)^2, length)): LazyBear's
+    /// calc_zvwap, with the squared distances averaged exactly over the window.
+    /// </summary>
+    internal static List<double> GetZScoreList(List<double> input, List<double> means, int length)
+    {
+        var devSquared = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var deviation = input[i] - means[i];
+            devSquared.Add(deviation * deviation);
+        }
+
+        var variance = GetExactWindowAverageList(devSquared, length);
+        var output = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var deviationSd = Math.Sqrt(variance[i]);
+            output.Add(deviationSd != 0 ? (input[i] - means[i]) / deviationSd : 0);
+        }
+
+        return output;
     }
 
     internal static List<double> GetTrueRangeList(StockData stockData)
@@ -347,15 +483,35 @@ public static class CalculationsHelper
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
-    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,        
+    /// <summary>
+    /// A moving average of <paramref name="customValuesList"/>, or of the input series when none is given.
+    /// </summary>
+    /// <remarks>
+    /// Leaves the caller's series exactly as it found it. It used to publish the average onto
+    /// <see cref="StockData.CustomValuesList"/>, so whatever an indicator calculated NEXT ran on the average
+    /// rather than the price: Bollinger Bands measured the standard deviation of its own middle band. It works
+    /// on a copy because the calculations it delegates to clear the current series in place when
+    /// IncludeCustomValues is off, and that series can be the very list the caller is holding.
+    /// </remarks>
+    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,
         int? fastLength = null, int? slowLength = null)
     {
-        List<double> movingAvgList = new();
-
-        if (customValuesList != null)
+        var callerSeries = stockData.CustomValuesList;
+        stockData.SetInputSeries(customValuesList is not null ? new List<double>(customValuesList) : stockData.CaptureInputSeries());
+        try
         {
-            stockData.SetCustomValues(customValuesList);
+            return GetMovingAverageListCore(stockData, movingAvgType, length, customValuesList, fastLength, slowLength);
         }
+        finally
+        {
+            stockData.SetInputSeries(callerSeries);
+        }
+    }
+
+    private static List<double> GetMovingAverageListCore(StockData stockData, MovingAvgType movingAvgType, int length,
+        List<double>? customValuesList, int? fastLength, int? slowLength)
+    {
+        List<double> movingAvgList = new();
 
         // Fast path for moving averages with simple (input, output, length) Core signatures
         // Note: All Core methods have been verified to match Calculate methods
@@ -907,7 +1063,6 @@ public static class CalculationsHelper
             }
 
             movingAvgList = outputBuffer.ToList();
-            stockData.SetCustomValues(movingAvgList);
             return movingAvgList;
         }
 
@@ -967,9 +1122,24 @@ public static class CalculationsHelper
             }
 
             movingAvgList = outputBuffer.ToList();
-            stockData.SetCustomValues(movingAvgList);
             return movingAvgList;
         }
+
+        return GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+    }
+
+    /// <summary>
+    /// The moving average computed by the indicator of the same name, never by a fast path.
+    /// </summary>
+    /// <remarks>
+    /// What every fast path above must equal: MovingAvgType.X is the indicator CalculateX, whichever route
+    /// computes it. The fast paths for the variable, VIDYA and McNicholl averages had each drifted to a
+    /// different formula; MovingAverageFastPathTests holds every fast path to this.
+    /// </remarks>
+    internal static List<double> GetMovingAverageListByCalculation(StockData stockData, MovingAvgType movingAvgType, int length,
+        int? fastLength = null, int? slowLength = null)
+    {
+        List<double> movingAvgList = new();
 
         switch (movingAvgType)
         {
@@ -1452,6 +1622,12 @@ public static class CalculationsHelper
                 break;
             case MovingAvgType.ZeroLowLagMovingAverage:
                 movingAvgList = stockData.CalculateZeroLowLagMovingAverage(length: length).CustomValuesList;
+                break;
+            case MovingAvgType.EhlersNoiseEliminationTechnology:
+                movingAvgList = stockData.CalculateEhlersNoiseEliminationTechnology(length).CustomValuesList;
+                break;
+            case MovingAvgType.EhlersSimpleDecycler:
+                movingAvgList = stockData.CalculateEhlersSimpleDecycler(length).CustomValuesList;
                 break;
             default:
                 Console.WriteLine($"Moving Avg Name: {movingAvgType} not supported!");
