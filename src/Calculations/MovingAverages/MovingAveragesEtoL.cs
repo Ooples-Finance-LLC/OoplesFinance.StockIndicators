@@ -1429,33 +1429,28 @@ public static partial class Calculations
         List<double> predictedTodayList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // The line through the trailing window, x counted from its first bar and fitted through the bars there
+        // are until it fills; see RollingLeastSquares.
+        using var regression = new RollingLeastSquares(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
 
-            // Fitted with x counted from the window's first bar, which is bar 0 until the window fills; see
-            // WindowLeastSquares for why the bar index itself is not used as x.
-            var start = Math.Max(0, i - length + 1);
-            var fit = new WindowLeastSquares();
-            for (var j = start; j <= i; j++)
-            {
-                fit.Add(inputList[j]);
-            }
-
-            var (b, windowIntercept) = fit.Solve(length);
+            var fit = regression.Next(currentValue, isFinal: true);
+            var b = fit.Slope;
             slopeList.Add(b);
 
             // The intercept is still reported at bar 0 of the series, as it always was.
-            var a = windowIntercept - (b * start);
+            var a = fit.Intercept - (b * (i - fit.Count + 1));
             interceptList.Add(a);
 
-            var predictedToday = windowIntercept + (b * (i - start));
+            var predictedToday = fit.Last;
             predictedTodayList.Add(predictedToday);
 
             var prevPredictedNextDay = GetLastOrDefault(predictedTomorrowList);
-            var predictedNextDay = windowIntercept + (b * (i - start + 1));
+            var predictedNextDay = fit.Next;
             predictedTomorrowList.Add(predictedNextDay);
 
             var signal = GetCompareSignal(currentValue - predictedNextDay, prevValue - prevPredictedNextDay, true);

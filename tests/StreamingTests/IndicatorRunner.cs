@@ -29,6 +29,13 @@ internal static class IndicatorRunner
             return true;
         }
 
+        if (double.IsInfinity(expected) || double.IsInfinity(actual))
+        {
+            // Equal infinities returned above. Any other pairing with one scales the tolerance to infinity too,
+            // and infinity <= infinity would pass a finite value against it.
+            return false;
+        }
+
         var scale = Math.Max(Math.Abs(expected), Math.Abs(actual));
         return Math.Abs(expected - actual) <= (1e-9 * scale) + 1e-12;
     }

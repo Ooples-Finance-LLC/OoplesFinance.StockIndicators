@@ -193,7 +193,9 @@ the indicator's published definition, so **some batch values change**:
   and window sums taken as the difference of two prefix sums (about 120 batch indicators, among them CMO,
   MFI and Vortex) keep each prefix as a compensated pair.
   The linear regression counts x from the window's first bar instead of the series' (its `Intercept` is
-  still reported at bar 0). Correlation is taken from each value's distance to the window mean, so a
+  still reported at bar 0), slides in O(1) with the same periodic rebuild, and fits the bars there are
+  while its window fills, rather than dividing by the full length as though the missing points sat at the
+  origin; Chande Forecast, the standard deviation channel, Inertia and Projection Bands follow. Correlation is taken from each value's distance to the window mean, so a
   window with one side constant correlates at 0 rather than a rounding residue of either sign; the
   Periodic Channel sums that sign. Otherwise values change only in their last digits.
 

@@ -3018,15 +3018,13 @@ public sealed class RangeIdentifierState : IStreamingIndicatorState
 
 public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly RollingLeastSquares _regression;
     private readonly StreamingInputResolver _input;
     private int _index;
 
     public LinearRegressionState(int length = 14, InputName inputName = InputName.Close)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _regression = new RollingLeastSquares(length);
         _input = new StreamingInputResolver(inputName, null);
     }
 
@@ -3037,8 +3035,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _regression = new RollingLeastSquares(length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -3046,7 +3043,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 
     public void Reset()
     {
-        _window.Clear();
+        _regression.Reset();
         _index = 0;
     }
 
@@ -3054,36 +3051,13 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
     {
         var value = _input.GetValue(bar);
 
-        // The fit of batch CalculateLinearRegression over the same window, fed oldest first, and divided by the
-        // full length as batch divides: see WindowLeastSquares. A preview replaces the oldest value only if the
-        // window is already full.
-        var first = 0;
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-        else if (_window.Count == _length)
-        {
-            first = 1;
-        }
-
-        var fit = new WindowLeastSquares();
-        for (var i = first; i < _window.Count; i++)
-        {
-            fit.Add(_window[i]);
-        }
-
-        if (!isFinal)
-        {
-            fit.Add(value);
-        }
-
-        var (slope, windowIntercept) = fit.Solve(_length);
-        var last = fit.Count - 1;
+        // The fit of batch CalculateLinearRegression: the same class, fed the same values.
+        var fit = _regression.Next(value, isFinal);
+        var slope = fit.Slope;
         // The intercept is reported at the first bar of the stream, as batch reports it at bar 0.
-        var intercept = windowIntercept - (slope * (_index - last));
-        var predictedToday = windowIntercept + (slope * last);
-        var predictedTomorrow = windowIntercept + (slope * (last + 1));
+        var intercept = fit.Intercept - (slope * (_index - fit.Count + 1));
+        var predictedToday = fit.Last;
+        var predictedTomorrow = fit.Next;
 
         if (isFinal)
         {
@@ -3107,7 +3081,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 
     public void Dispose()
     {
-        _window.Dispose();
+        _regression.Dispose();
     }
 }
 
@@ -15265,12 +15239,10 @@ internal readonly struct ProjectionBandsSnapshot
 internal sealed class ProjectionBandsCalculator : IDisposable
 {
     private readonly int _length;
-    private RollingSum _xSum;
-    private RollingSum _x2Sum;
-    private RollingSum _highSum;
-    private RollingSum _highXYSum;
-    private RollingSum _lowSum;
-    private RollingSum _lowXYSum;
+    // The slopes batch CalculateProjectionBands takes from CalculateLinearRegression: the same class, fed the
+    // same highs and lows.
+    private readonly RollingLeastSquares _highFit;
+    private readonly RollingLeastSquares _lowFit;
     private readonly PooledRingBuffer<double> _highs;
     private readonly PooledRingBuffer<double> _lows;
     private readonly PooledRingBuffer<double> _highSlopes;
@@ -15280,12 +15252,8 @@ internal sealed class ProjectionBandsCalculator : IDisposable
     public ProjectionBandsCalculator(int length)
     {
         _length = Math.Max(1, length);
-        _xSum = new RollingSum();
-        _x2Sum = new RollingSum();
-        _highSum = new RollingSum();
-        _highXYSum = new RollingSum();
-        _lowSum = new RollingSum();
-        _lowXYSum = new RollingSum();
+        _highFit = new RollingLeastSquares(_length);
+        _lowFit = new RollingLeastSquares(_length);
         _highs = new PooledRingBuffer<double>(_length);
         _lows = new PooledRingBuffer<double>(_length);
         _highSlopes = new PooledRingBuffer<double>(_length);
@@ -15361,22 +15329,8 @@ internal sealed class ProjectionBandsCalculator : IDisposable
 
         if (isFinal)
         {
-            var x = (double)currentIndex;
-            _xSum.Add(x);
-            _x2Sum.Add(x * x);
-            _highSum.Add(high);
-            _highXYSum.Add(x * high);
-            _lowSum.Add(low);
-            _lowXYSum.Add(x * low);
-
-            var sumX = _xSum.Sum(_length);
-            var sumX2 = _x2Sum.Sum(_length);
-            var sumHigh = _highSum.Sum(_length);
-            var sumHighXY = _highXYSum.Sum(_length);
-            var sumLow = _lowSum.Sum(_length);
-            var sumLowXY = _lowXYSum.Sum(_length);
-            var highSlope = CalculateSlope(sumX, sumHigh, sumHighXY, sumX2);
-            var lowSlope = CalculateSlope(sumX, sumLow, sumLowXY, sumX2);
+            var highSlope = _highFit.Next(high, isFinal: true).Slope;
+            var lowSlope = _lowFit.Next(low, isFinal: true).Slope;
 
             _highSlopes.TryAdd(highSlope, out _);
             _lowSlopes.TryAdd(lowSlope, out _);
@@ -15390,12 +15344,8 @@ internal sealed class ProjectionBandsCalculator : IDisposable
 
     public void Reset()
     {
-        _xSum = new RollingSum();
-        _x2Sum = new RollingSum();
-        _highSum = new RollingSum();
-        _highXYSum = new RollingSum();
-        _lowSum = new RollingSum();
-        _lowXYSum = new RollingSum();
+        _highFit.Reset();
+        _lowFit.Reset();
         _highs.Clear();
         _lows.Clear();
         _highSlopes.Clear();
@@ -15405,17 +15355,12 @@ internal sealed class ProjectionBandsCalculator : IDisposable
 
     public void Dispose()
     {
+        _highFit.Dispose();
+        _lowFit.Dispose();
         _highs.Dispose();
         _lows.Dispose();
         _highSlopes.Dispose();
         _lowSlopes.Dispose();
-    }
-
-    private double CalculateSlope(double sumX, double sumY, double sumXY, double sumX2)
-    {
-        var top = (_length * sumXY) - (sumX * sumY);
-        var bottom = (_length * sumX2) - (sumX * sumX);
-        return bottom != 0 ? top / bottom : 0;
     }
 }
 
@@ -16362,54 +16307,19 @@ internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverag
 /// </summary>
 internal sealed class LinearRegressionCoreSmoother : IMovingAverageSmoother
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly RollingLeastSquares _regression;
 
     public LinearRegressionCoreSmoother(int length)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _regression = new RollingLeastSquares(length);
     }
 
-    public double Next(double value, bool isFinal)
-    {
-        // The fit of MovingAverageCore.LinearRegression over the same window, fed oldest first: see
-        // WindowLeastSquares. A preview replaces the oldest value only if the window is already full.
-        var first = 0;
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-        else if (_window.Count == _length)
-        {
-            first = 1;
-        }
+    // The fit of MovingAverageCore.LinearRegression: the same class, fed the same values.
+    public double Next(double value, bool isFinal) => _regression.Next(value, isFinal).Last;
 
-        var fit = new WindowLeastSquares();
-        for (var i = first; i < _window.Count; i++)
-        {
-            fit.Add(_window[i]);
-        }
+    public void Reset() => _regression.Reset();
 
-        if (!isFinal)
-        {
-            fit.Add(value);
-        }
-
-        var n = fit.Count;
-        var (slope, intercept) = fit.Solve(n);
-        return intercept + (slope * (n - 1));
-    }
-
-    public void Reset()
-    {
-        _window.Clear();
-    }
-
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _regression.Dispose();
 }
 
 internal static class MovingAverageSmootherFactory

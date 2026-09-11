@@ -320,20 +320,12 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Fitted over the values the window holds, with x counted from its first bar: running sums over the bar
-        // index cancel catastrophically and drift, see WindowLeastSquares. A one-value window has no slope and
-        // returns the value itself.
+        // The line through the trailing window, x counted from its first value: running sums over the bar index
+        // cancel catastrophically and drift, see RollingLeastSquares. A one-value window returns the value.
+        using var regression = new RollingLeastSquares(length);
         for (var i = 0; i < input.Length; i++)
         {
-            var fit = new WindowLeastSquares();
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                fit.Add(input[j]);
-            }
-
-            var n = fit.Count;
-            var (slope, intercept) = fit.Solve(n);
-            output[i] = intercept + (slope * (n - 1));
+            output[i] = regression.Next(input[i], isFinal: true).Last;
         }
     }
 
