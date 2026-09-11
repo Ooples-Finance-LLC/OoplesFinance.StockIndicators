@@ -1683,32 +1683,10 @@ public static class CalculationsHelper
             _ => stockData.ClosePrices,
         };
 
-        if (inputList.Count > 0)
+        if (inputList.Count > 0 && !SequenceEqualValues(inputList, stockData.ClosePrices))
         {
-            var sum = SumValues(inputList);
-            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
-            if (isVolumeInput)
-            {
-                var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                highList = minMaxList.Item1;
-                lowList = minMaxList.Item2;
-            }
-            else
-            {
-                var lowSum = SumValues(stockData.LowPrices);
-                var highSum = SumValues(stockData.HighPrices);
-                if (sum < lowSum || sum > highSum)
-                {
-                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                    highList = minMaxList.Item1;
-                    lowList = minMaxList.Item2;
-                }
-                else
-                {
-                    highList = stockData.HighPrices;
-                    lowList = stockData.LowPrices;
-                }
-            }
+            // A series other than the close: the per-bar rule. See GetCustomRangeLists.
+            (highList, lowList) = GetCustomRangeLists(inputList, stockData.HighPrices, stockData.LowPrices);
         }
         else
         {
@@ -1753,32 +1731,10 @@ public static class CalculationsHelper
             inputList = stockData.InputValues;
         }
 
-        if (inputList.Count > 0)
+        if (inputList.Count > 0 && !SequenceEqualValues(inputList, stockData.ClosePrices))
         {
-            var sum = SumValues(inputList);
-            var isVolumeInput = SequenceEqualValues(inputList, stockData.Volumes);
-            if (isVolumeInput)
-            {
-                var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                highList = minMaxList.Item1;
-                lowList = minMaxList.Item2;
-            }
-            else
-            {
-                var lowSum = SumValues(stockData.LowPrices);
-                var highSum = SumValues(stockData.HighPrices);
-                if (sum < lowSum || sum > highSum)
-                {
-                    var minMaxList = GetMaxAndMinValuesList(inputList, 0);
-                    highList = minMaxList.Item1;
-                    lowList = minMaxList.Item2;
-                }
-                else
-                {
-                    highList = stockData.HighPrices;
-                    lowList = stockData.LowPrices;
-                }
-            }
+            // A series other than the close: the per-bar rule. See GetCustomRangeLists.
+            (highList, lowList) = GetCustomRangeLists(inputList, stockData.HighPrices, stockData.LowPrices);
         }
         else
         {
@@ -2040,6 +1996,54 @@ public static class CalculationsHelper
     /// <param name="inputs">The inputs.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
+    /// <summary>
+    /// The high and low an indicator should read when its input is a series other than the close.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Decided bar by bar. A value inside that bar's range is price-like - a median or typical price,
+    /// a chained moving average - so the bar's true high and low still apply. A value outside it -
+    /// an oscillator, a volume, a rescaled series - is its own scale, and its high and low are the
+    /// max and min of the previous and current value.
+    /// </para>
+    /// <para>
+    /// This replaces a whole-series rule that summed the input and compared the sum against the sums
+    /// of the lows and highs. For a series entirely inside or entirely outside the bars' range the
+    /// two agree exactly - the out-of-range branch was GetMaxAndMinValuesList(series, 0), whose window
+    /// clamps to 2. What the per-bar rule adds is causality: it needs nothing after the current bar,
+    /// so a streaming state can apply the same rule and the two engines agree bar by bar. The
+    /// whole-series sum could not be computed by a streaming state at all.
+    /// </para>
+    /// </remarks>
+    internal static (List<double> HighList, List<double> LowList) GetCustomRangeLists(IReadOnlyList<double> values,
+        IReadOnlyList<double> highs, IReadOnlyList<double> lows)
+    {
+        var count = values.Count;
+        var highList = new List<double>(count);
+        var lowList = new List<double>(count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var value = values[i];
+            var high = i < highs.Count ? highs[i] : value;
+            var low = i < lows.Count ? lows[i] : value;
+
+            if (value >= low && value <= high)
+            {
+                highList.Add(high);
+                lowList.Add(low);
+            }
+            else
+            {
+                var prev = i > 0 ? values[i - 1] : value;
+                highList.Add(Math.Max(prev, value));
+                lowList.Add(Math.Min(prev, value));
+            }
+        }
+
+        return (highList, lowList);
+    }
+
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> inputs, int length)
     {
         var count = inputs.Count;

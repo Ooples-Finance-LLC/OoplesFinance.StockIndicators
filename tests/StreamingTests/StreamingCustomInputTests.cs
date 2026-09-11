@@ -48,8 +48,27 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     /// <summary>The whole fixture, so long-window indicators get as much warmup as exists.</summary>
     private const int Bars = 251;
 
-    [Fact]
-    public void StreamingRespondsToACustomInputExactlyWhenTheBatchDoes()
+    /// <summary>A custom series the test feeds both engines.</summary>
+    public enum CustomSeries
+    {
+        /// <summary>
+        /// Median price: inside every bar's range, so an indicator that reads true highs and lows
+        /// legitimately does not move.
+        /// </summary>
+        InRange,
+
+        /// <summary>
+        /// The close divided by 100: outside every bar's range, so high and low come from the series
+        /// itself under the per-bar rule. Only this series exercises that half of the rule; on the
+        /// median series alone it went untested and 43 indicators disagreed on it.
+        /// </summary>
+        OutOfRange,
+    }
+
+    [Theory]
+    [InlineData(CustomSeries.InRange)]
+    [InlineData(CustomSeries.OutOfRange)]
+    public void StreamingRespondsToACustomInputExactlyWhenTheBatchDoes(CustomSeries series)
     {
         var bars = StockTestData.Take(Bars).ToList();
         bars.Should().NotBeEmpty();
@@ -84,10 +103,10 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             bool streamMoved;
             try
             {
-                var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, chainMedian: false));
-                var batchOnMedian = Flatten((StockData)InvokeBatch(batch, bars, chainMedian: true));
+                var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, custom: null));
+                var batchOnCustom = Flatten((StockData)InvokeBatch(batch, bars, series));
                 var streamOnClose = Run(Build(selector.Value.Ctor, selector.Value.Args, (Func<OhlcvBar, double>)Close), bars);
-                var streamOnMedian = Run(Build(selector.Value.Ctor, selector.Value.Args, (Func<OhlcvBar, double>)Median), bars);
+                var streamOnCustom = Run(Build(selector.Value.Ctor, selector.Value.Args, Selector(series)), bars);
 
                 // An indicator whose window never fills over this fixture - the catalogue has
                 // defaults as long as 550 against 251 bars - emits nothing but zeros, and "no
@@ -96,8 +115,8 @@ public sealed class StreamingCustomInputTests : GlobalTestData
                 // against QuadraticLeastSquaresMovingAverage.
                 if (Silent(streamOnClose) || Silent(batchOnClose)) { unpaired++; continue; }
 
-                batchMoved = Differs(batchOnClose, batchOnMedian);
-                streamMoved = Differs(streamOnClose, streamOnMedian);
+                batchMoved = Differs(batchOnClose, batchOnCustom);
+                streamMoved = Differs(streamOnClose, streamOnCustom);
             }
             catch (Exception ex)
             {
@@ -128,7 +147,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             $"Func<OhlcvBar, double> constructor: {string.Join(", ", cannotTakeInput)}");
 
         disagreements.Should().BeEmpty(
-            $"streaming and batch must agree about what the input series controls. " +
+            $"streaming and batch must agree about what the {series} input series controls. " +
             $"{compared} indicators compared, {unpaired} without a comparable run " +
             $"(could not run: {string.Join(", ", couldNotRun)}). " +
             $"Disagreements ({disagreements.Count}): {string.Join(" | ", disagreements)}");
@@ -137,6 +156,11 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     private static double Close(OhlcvBar bar) => bar.Close;
 
     private static double Median(OhlcvBar bar) => (bar.High + bar.Low) / 2;
+
+    private static double ScaledClose(OhlcvBar bar) => bar.Close / 100;
+
+    private static Func<OhlcvBar, double> Selector(CustomSeries series) =>
+        series == CustomSeries.InRange ? Median : ScaledClose;
 
     /// <summary>
     /// Runs a batch indicator on a close series or a median-price series chained in front of it.
@@ -148,25 +172,24 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     /// AwesomeOscillator defaults it to MedianPrice. An earlier version of this test drove those
     /// through the parameter instead, which hid exactly that defect: they ignore the chain.
     /// </remarks>
-    private static object InvokeBatch(MethodInfo batch, List<TickerData> bars, bool chainMedian)
+    private static object InvokeBatch(MethodInfo batch, List<TickerData> bars, CustomSeries? custom)
     {
         var ps = batch.GetParameters();
         var args = new object?[ps.Length];
         for (var i = 1; i < ps.Length; i++) { args[i] = ps[i].DefaultValue; }
 
-        // BOTH runs chain a series, mirroring the streaming side's close and median selectors. An
-        // unchained baseline is not "close" for every method: AwesomeOscillator, AcceleratorOscillator,
-        // AlligatorIndex and GatorOscillator default to MedianPrice, so chaining a median series in
-        // front of them changed nothing and read as "batch ignores its input" when it does not.
+        // BOTH runs chain a series, mirroring the streaming side's selectors. An unchained baseline
+        // is not "close" for every method: AwesomeOscillator, AcceleratorOscillator, AlligatorIndex
+        // and GatorOscillator default to MedianPrice, so chaining a median series in front of them
+        // changed nothing and read as "batch ignores its input" when it does not.
         var data = new StockData(bars);
-        if (chainMedian)
+        var values = custom switch
         {
-            data = data.CalculateMedianPrice();
-        }
-        else
-        {
-            data.SetCustomValues(new List<double>(data.ClosePrices));
-        }
+            CustomSeries.InRange => data.HighPrices.Zip(data.LowPrices, (h, l) => (h + l) / 2).ToList(),
+            CustomSeries.OutOfRange => data.ClosePrices.Select(c => c / 100).ToList(),
+            _ => new List<double>(data.ClosePrices),
+        };
+        data.SetCustomValues(values);
 
         args[0] = data;
 
