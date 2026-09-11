@@ -6386,29 +6386,33 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState
 
 public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
     private readonly double _stdDevMult;
-    private readonly RollingWindowStats _window;
+    private readonly IMovingAverageSmoother _middle;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
 
-    public BollingerBandsState(int length = 20, double stdDevMult = 2, InputName inputName = InputName.Close)
+    public BollingerBandsState(int length = 20, double stdDevMult = 2,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, InputName inputName = InputName.Close)
     {
-        _length = Math.Max(1, length);
+        var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
-        _window = new RollingWindowStats(_length);
+        _middle = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(inputName, null);
     }
 
-    public BollingerBandsState(int length, double stdDevMult, Func<OhlcvBar, double> selector)
+    public BollingerBandsState(int length, double stdDevMult, Func<OhlcvBar, double> selector,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _length = Math.Max(1, length);
+        var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
-        _window = new RollingWindowStats(_length);
+        _middle = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -6416,16 +6420,15 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _window.Reset();
+        _middle.Reset();
+        _stdDev.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var snapshot = isFinal ? _window.Add(value) : _window.Preview(value);
-        var middle = snapshot.Count >= _length ? snapshot.Sum / _length : 0;
-        var variance = snapshot.Count >= _length ? (snapshot.SumSquares / _length) - (middle * middle) : 0;
-        var stdDev = MathHelper.Sqrt(variance);
+        var middle = _middle.Next(value, isFinal);
+        var stdDev = _stdDev.Next(value, isFinal);
         var upper = middle + (stdDev * _stdDevMult);
         var lower = middle - (stdDev * _stdDevMult);
 
@@ -6445,7 +6448,8 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
-        _window.Dispose();
+        _middle.Dispose();
+        _stdDev.Dispose();
     }
 }
 

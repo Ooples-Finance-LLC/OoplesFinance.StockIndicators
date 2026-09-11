@@ -155,6 +155,18 @@ public static class CalculationsHelper
         stockData.SignalsList = signalsList;
     }
 
+    /// <summary>
+    /// Hands the next calculation its input series, unaltered.
+    /// </summary>
+    /// <remarks>
+    /// Not SetCustomValues. That publishes an indicator's OUTPUT, and honours IncludeCustomValues (which can
+    /// drop it) and RoundingDigits (which rounds it). A caller's input series is neither: with
+    /// IncludeCustomValues off SetCustomValues clears it in place, and with RoundingDigits set the next
+    /// calculation would compute on rounded input.
+    /// </remarks>
+    internal static void SetInputSeries(this StockData stockData, List<double> series) =>
+        stockData.CustomValuesList = series;
+
     public static void SetCustomValues(this StockData stockData, List<double> customValuesList)
     {
         if (!ShouldIncludeCustomValues(stockData))
@@ -225,6 +237,24 @@ public static class CalculationsHelper
         var series = BuildDerivedSeriesList(stockData, kind);
         cache[kind] = series;
         return series;
+    }
+
+    /// <summary>
+    /// The population standard deviation of each bar's trailing window of <paramref name="input"/>: 0 until
+    /// the window is full.
+    /// </summary>
+    /// <remarks>
+    /// The standard deviation an indicator's source formula means by <c>stdev(src, length)</c>: every value in
+    /// the window measured from that window's own mean. Not <c>CalculateStandardDeviationVolatility</c>, which
+    /// measures each value from the moving average at its own bar and so is a different quantity - 55% wider
+    /// than this on a typical price series. Streaming computes the same thing in RollingStandardDeviation.
+    /// </remarks>
+    internal static List<double> GetStandardDeviationList(List<double> input, int length)
+    {
+        var buffer = SpanCompat.CreateOutputBuffer(input.Count);
+        VolatilityCore.StandardDeviation(SpanCompat.AsReadOnlySpan(input), buffer.Span, Math.Max(1, length));
+
+        return buffer.ToList();
     }
 
     internal static List<double> GetTrueRangeList(StockData stockData)
@@ -347,15 +377,35 @@ public static class CalculationsHelper
     /// <param name="fastLength"></param>
     /// <param name="slowLength"></param>
     /// <returns></returns>
-    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,        
+    /// <summary>
+    /// A moving average of <paramref name="customValuesList"/>, or of the input series when none is given.
+    /// </summary>
+    /// <remarks>
+    /// Leaves the caller's series exactly as it found it. It used to publish the average onto
+    /// <see cref="StockData.CustomValuesList"/>, so whatever an indicator calculated NEXT ran on the average
+    /// rather than the price: Bollinger Bands measured the standard deviation of its own middle band. It works
+    /// on a copy because the calculations it delegates to clear the current series in place when
+    /// IncludeCustomValues is off, and that series can be the very list the caller is holding.
+    /// </remarks>
+    public static List<double> GetMovingAverageList(StockData stockData, MovingAvgType movingAvgType, int length, List<double>? customValuesList = null,
         int? fastLength = null, int? slowLength = null)
     {
-        List<double> movingAvgList = new();
-
-        if (customValuesList != null)
+        var callerSeries = stockData.CustomValuesList;
+        stockData.SetInputSeries(new List<double>(customValuesList ?? callerSeries));
+        try
         {
-            stockData.SetCustomValues(customValuesList);
+            return GetMovingAverageListCore(stockData, movingAvgType, length, customValuesList, fastLength, slowLength);
         }
+        finally
+        {
+            stockData.SetInputSeries(callerSeries);
+        }
+    }
+
+    private static List<double> GetMovingAverageListCore(StockData stockData, MovingAvgType movingAvgType, int length,
+        List<double>? customValuesList, int? fastLength, int? slowLength)
+    {
+        List<double> movingAvgList = new();
 
         // Fast path for moving averages with simple (input, output, length) Core signatures
         // Note: All Core methods have been verified to match Calculate methods
@@ -907,7 +957,6 @@ public static class CalculationsHelper
             }
 
             movingAvgList = outputBuffer.ToList();
-            stockData.SetCustomValues(movingAvgList);
             return movingAvgList;
         }
 
@@ -967,7 +1016,6 @@ public static class CalculationsHelper
             }
 
             movingAvgList = outputBuffer.ToList();
-            stockData.SetCustomValues(movingAvgList);
             return movingAvgList;
         }
 
