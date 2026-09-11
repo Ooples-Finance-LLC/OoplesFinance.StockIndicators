@@ -1034,6 +1034,22 @@ public static class CalculationsHelper
             return movingAvgList;
         }
 
+        return GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+    }
+
+    /// <summary>
+    /// The moving average computed by the indicator of the same name, never by a fast path.
+    /// </summary>
+    /// <remarks>
+    /// What every fast path above must equal: MovingAvgType.X is the indicator CalculateX, whichever route
+    /// computes it. The fast paths for the variable, VIDYA and McNicholl averages had each drifted to a
+    /// different formula; MovingAverageFastPathTests holds every fast path to this.
+    /// </remarks>
+    internal static List<double> GetMovingAverageListByCalculation(StockData stockData, MovingAvgType movingAvgType, int length,
+        int? fastLength = null, int? slowLength = null)
+    {
+        List<double> movingAvgList = new();
+
         switch (movingAvgType)
         {
             case MovingAvgType._1LCLeastSquaresMovingAverage:
@@ -1515,6 +1531,12 @@ public static class CalculationsHelper
                 break;
             case MovingAvgType.ZeroLowLagMovingAverage:
                 movingAvgList = stockData.CalculateZeroLowLagMovingAverage(length: length).CustomValuesList;
+                break;
+            case MovingAvgType.EhlersNoiseEliminationTechnology:
+                movingAvgList = stockData.CalculateEhlersNoiseEliminationTechnology(length).CustomValuesList;
+                break;
+            case MovingAvgType.EhlersSimpleDecycler:
+                movingAvgList = stockData.CalculateEhlersSimpleDecycler(length).CustomValuesList;
                 break;
             default:
                 Console.WriteLine($"Moving Avg Name: {movingAvgType} not supported!");

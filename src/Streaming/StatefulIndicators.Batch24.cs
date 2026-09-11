@@ -1960,6 +1960,7 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
     private readonly StandardDeviationVolatilityState _stdDev;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private double _slowValue;
 
     public TrendAnalysisIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 21, int length2 = 4, InputName inputName = InputName.Close)
@@ -1968,7 +1969,7 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
         var resolved2 = Math.Max(1, length2);
         _slowMa = MovingAverageSmootherFactory.Create(maType, resolved1);
         _fastMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved2, inputName);
+        _stdDev = new StandardDeviationVolatilityState(maType, resolved2, _ => _slowValue);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
         _input = new StreamingInputResolver(inputName, null);
     }
@@ -1985,7 +1986,7 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
         var resolved2 = Math.Max(1, length2);
         _slowMa = MovingAverageSmootherFactory.Create(maType, resolved1);
         _fastMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved2, selector);
+        _stdDev = new StandardDeviationVolatilityState(maType, resolved2, _ => _slowValue);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
@@ -1998,12 +1999,15 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
         _fastMa.Reset();
         _stdDev.Reset();
         _signalSmoother.Reset();
+        _slowValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        _ = _slowMa.Next(value, isFinal);
+        // The index is the deviation of the slow average, as the batch computes it: it chains the slow MA
+        // into the deviation on purpose.
+        _slowValue = _slowMa.Next(value, isFinal);
         _ = _fastMa.Next(value, isFinal);
         var tai = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var signal = _signalSmoother.Next(tai, isFinal);

@@ -2709,11 +2709,13 @@ public static partial class Calculations
         }
 
         var bList = GetMovingAverageList(stockData, maType, length1, aaSeList);
-        stockData.SetCustomValues(bList);
-        var stoList = CalculateStochasticOscillator(stockData, maType, length: length1).CustomValuesList;
+        // The stochastic of b over b's own range. Chained into the stochastic indicator, b was measured against
+        // the bars' highs and lows - a ratio set against a price range.
+        var (bHighestList, bLowestList) = GetMaxAndMinValuesList(bList, length1);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var bSto = stoList[i];
+            var bRange = bHighestList[i] - bLowestList[i];
+            var bSto = bRange != 0 ? MinOrMax((bList[i] - bLowestList[i]) / bRange * 100, 100, 0) : 0;
 
             var sSe = (bSto * 2) - 100;
             sSeList.Add(sSe);
