@@ -95,6 +95,27 @@ public sealed class UseInputTests : GlobalTestData
             "the control: if the input were dropped this is what the indicator would compute");
     }
 
+    /// <summary>
+    /// A chain computes the same with its series unpublished. Each calculation returns the same StockData, so the
+    /// next one reads what the last left behind; with IncludeCustomValues off that used to be an emptied list,
+    /// and the RSI ran on the close instead of the average.
+    /// </summary>
+    [Fact]
+    public void AChainComputesTheSameWhenCustomValuesAreNotPublished()
+    {
+        var tickers = Tickers();
+
+        var published = new StockData(tickers).CalculateSimpleMovingAverage(20).CalculateRelativeStrengthIndex();
+        var unpublished = new StockData(tickers) { Options = new IndicatorOptions { IncludeCustomValues = false } }
+            .CalculateSimpleMovingAverage(20).CalculateRelativeStrengthIndex();
+        var onClose = new StockData(tickers).CalculateRelativeStrengthIndex();
+
+        unpublished.OutputValues.Should().BeEquivalentTo(published.OutputValues);
+        unpublished.OutputValues.Should().NotBeEquivalentTo(onClose.OutputValues,
+            "the control: if the average were dropped this is what the RSI would compute");
+        unpublished.CustomValuesList.Should().BeEmpty("the option still hides the series from the caller");
+    }
+
     /// <summary>RoundingDigits rounds what an indicator publishes, never what it computes on.</summary>
     [Fact]
     public void TheInputIsNotRoundedByTheOutputRounding()
