@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
 using OoplesFinance.StockIndicators.Streaming;
@@ -11,35 +12,34 @@ using Xunit;
 namespace OoplesFinance.StockIndicators.Tests.Unit.StreamingTests;
 
 /// <summary>
-/// Streaming responds to a caller-supplied input series if, and only if, the batch does.
+/// Every indicator takes a caller-supplied input series, and streaming responds to one exactly when
+/// the batch does.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Both engines let a caller compute an indicator on something other than the close. In batch that
-/// is chaining - <c>data.CalculateMedianPrice().CalculateRsi()</c>. In streaming it is the
-/// <c>Func&lt;OhlcvBar, double&gt;</c> constructor overload. A state can build a
-/// <c>StreamingInputResolver</c> and never read it, in which case the selector is accepted and
-/// discarded: no exception, no warning, and results that silently disagree with the batch the moment
-/// a caller supplies custom values.
+/// is chaining - <c>data.CalculateMedianPrice().CalculateRsi()</c> - and a chained series always wins.
+/// In streaming it is the <c>Func&lt;OhlcvBar, double&gt;</c> constructor overload. Callers pass
+/// values, not a name for them, so nothing here goes through InputName.
 /// </para>
 /// <para>
-/// <b>Why the rule is an equivalence rather than "streaming must respond".</b> Some indicators are
-/// defined on specific bar fields - Ichimoku on highs and lows, Fibonacci retracements on the range -
-/// and for those there is no series to substitute, so neither engine should move. An
-/// "always respond" rule would need a list of exceptions, and a list of exceptions is a trapdoor:
-/// any genuine defect can be silenced by adding a name and a plausible sentence. Comparing the two
-/// engines instead needs no list. The input-independent indicators pass because their batch does not
-/// move either, which is the same evidence a human would have used to justify exempting them.
+/// <b>Two rules.</b> First, every state must HAVE a selector constructor: one without it cannot take
+/// custom values at all, and it is a named failure here rather than a skip. Skipping it is how 87
+/// states went unexamined by the first version of this test, which only compared states that had
+/// both an InputName and a selector overload. Second, a state must respond to a custom series if,
+/// and only if, its batch twin does. That rule is an equivalence rather than "must respond" because
+/// some indicators legitimately read specific bar fields - a median-price series lies inside the
+/// bar's range, so an Ichimoku line built on true highs and lows does not move - and an equivalence
+/// needs no list of exceptions. A list of exceptions is a trapdoor: any genuine defect can be
+/// silenced with a name and a plausible sentence.
 /// </para>
 /// <para>
 /// <b>Two traps in the harness itself.</b> The selector constructor usually declares no defaults, so
-/// filling its leading parameters with <c>default</c> builds a state with <c>length: 0</c> - the two
-/// states then differ because of the length rather than the input, which reads as a pass. Both are
-/// therefore constructed from the SAME argument values, taken from the InputName overload's
-/// defaults. And <c>Result.Value</c> is only one member of a state's output set, the rest arriving
-/// through <c>Outputs</c>; comparing <c>Value</c> alone misses a state whose selected series moves
-/// only a secondary series, which is exactly how DrunkardWalk escaped an earlier sweep. Every key is
-/// compared, on both sides.
+/// filling its leading parameters with <c>default</c> builds a state with <c>length: 0</c>. Both runs
+/// therefore use the SAME constructor and the SAME leading arguments, taken from a sibling overload's
+/// defaults, and differ only in the selector. And <c>Result.Value</c> is only one member of a state's
+/// output set; comparing it alone misses a state whose input moves only a secondary series, which is
+/// how DrunkardWalk escaped an earlier sweep. Every key is compared, on both sides.
 /// </para>
 /// </remarks>
 public sealed class StreamingCustomInputTests : GlobalTestData
@@ -59,14 +59,22 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             .OrderBy(t => t.Name, StringComparer.Ordinal)
             .ToList();
 
+        var cannotTakeInput = new List<string>();
         var disagreements = new List<string>();
+        var couldNotRun = new List<string>();
         var compared = 0;
         var unpaired = 0;
 
         foreach (var type in types)
         {
-            var pair = FindComparablePair(type);
-            if (pair is null) { unpaired++; continue; }
+            var selector = FindSelectorConstructor(type);
+            if (selector is null)
+            {
+                cannotTakeInput.Add(type.Name);
+                continue;
+            }
+
+            if (selector.Value.Args is null) { unpaired++; continue; }
 
             var batch = FindBatchMethod(type.Name);
             if (batch is null) { unpaired++; continue; }
@@ -75,10 +83,10 @@ public sealed class StreamingCustomInputTests : GlobalTestData
             bool streamMoved;
             try
             {
-                var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, InputName.Close));
-                var batchOnMedian = Flatten((StockData)InvokeBatch(batch, bars, InputName.MedianPrice));
-                var streamOnClose = Run(Build(pair.Value.ByName, pair.Value.Args, InputName.Close), bars);
-                var streamOnMedian = Run(Build(pair.Value.BySelector, pair.Value.Args, (Func<OhlcvBar, double>)Median), bars);
+                var batchOnClose = Flatten((StockData)InvokeBatch(batch, bars, chainMedian: false));
+                var batchOnMedian = Flatten((StockData)InvokeBatch(batch, bars, chainMedian: true));
+                var streamOnClose = Run(Build(selector.Value.Ctor, selector.Value.Args, (Func<OhlcvBar, double>)Close), bars);
+                var streamOnMedian = Run(Build(selector.Value.Ctor, selector.Value.Args, (Func<OhlcvBar, double>)Median), bars);
 
                 // An indicator whose window never fills over this fixture - the catalogue has
                 // defaults as long as 550 against 251 bars - emits nothing but zeros, and "no
@@ -90,8 +98,10 @@ public sealed class StreamingCustomInputTests : GlobalTestData
                 batchMoved = Differs(batchOnClose, batchOnMedian);
                 streamMoved = Differs(streamOnClose, streamOnMedian);
             }
-            catch
+            catch (Exception ex)
             {
+                // Named, not swallowed: a state that throws on a plain run is worth knowing about.
+                couldNotRun.Add($"{type.Name} ({(ex.InnerException ?? ex).GetType().Name})");
                 unpaired++;
                 continue;
             }
@@ -108,46 +118,42 @@ public sealed class StreamingCustomInputTests : GlobalTestData
 
         compared.Should().BeGreaterThan(150, "the harness must exercise a broad set of indicators");
 
+        // Both lists in one run: they are independent defects, and a first assertion that throws
+        // would hide the second list behind it.
+        using var scope = new AssertionScope();
+
+        cannotTakeInput.Should().BeEmpty(
+            $"every indicator must take custom values; {cannotTakeInput.Count} states have no " +
+            $"Func<OhlcvBar, double> constructor: {string.Join(", ", cannotTakeInput)}");
+
         disagreements.Should().BeEmpty(
             $"streaming and batch must agree about what the input series controls. " +
-            $"{compared} indicators compared, {unpaired} without a comparable pair. " +
-            $"Disagreements: {string.Join(" | ", disagreements)}");
+            $"{compared} indicators compared, {unpaired} without a comparable run " +
+            $"(could not run: {string.Join(", ", couldNotRun)}). " +
+            $"Disagreements ({disagreements.Count}): {string.Join(" | ", disagreements)}");
     }
+
+    private static double Close(OhlcvBar bar) => bar.Close;
 
     private static double Median(OhlcvBar bar) => (bar.High + bar.Low) / 2;
 
     /// <summary>
-    /// Runs a batch indicator on a given input series, using whichever lever that indicator exposes.
+    /// Runs a batch indicator on the close, or on a median-price series chained in front of it.
     /// </summary>
     /// <remarks>
-    /// The catalogue has two ways of accepting an input series and they are not interchangeable.
-    /// Most indicators read it from the StockData - CustomValuesList if chained, else InputValues -
-    /// so chaining is how a caller changes it. A minority declare an <c>InputName</c> parameter and
-    /// resolve through the two-argument <c>GetInputValuesList(inputName, stockData)</c>, which never
-    /// looks at the chained series at all; AwesomeOscillator is one, and it defaults to
-    /// <c>MedianPrice</c> rather than close.
-    ///
-    /// Testing only the chaining lever reported those as ignoring their input, which they do not -
-    /// they ignore that particular lever. Each is driven the way it actually accepts input.
+    /// Chaining is the one lever: a chained series always wins. Some methods still take their own
+    /// <c>inputName</c> parameter and resolve it through the two-argument
+    /// <c>GetInputValuesList(inputName, stockData)</c>, which never looks at the chained series -
+    /// AwesomeOscillator defaults it to MedianPrice. An earlier version of this test drove those
+    /// through the parameter instead, which hid exactly that defect: they ignore the chain.
     /// </remarks>
-    private static object InvokeBatch(MethodInfo batch, List<TickerData> bars, InputName input)
+    private static object InvokeBatch(MethodInfo batch, List<TickerData> bars, bool chainMedian)
     {
         var ps = batch.GetParameters();
         var args = new object?[ps.Length];
         for (var i = 1; i < ps.Length; i++) { args[i] = ps[i].DefaultValue; }
 
-        var byParameter = Array.FindIndex(ps, p => p.ParameterType == typeof(InputName));
-        if (byParameter > 0)
-        {
-            args[0] = new StockData(bars);
-            args[byParameter] = input;
-        }
-        else
-        {
-            args[0] = input == InputName.MedianPrice
-                ? new StockData(bars).CalculateMedianPrice()
-                : new StockData(bars);
-        }
+        args[0] = chainMedian ? new StockData(bars).CalculateMedianPrice() : new StockData(bars);
 
         return batch.Invoke(null, args)!;
     }
@@ -160,34 +166,48 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         series.Values.All(s => s.All(v => v == 0 || double.IsNaN(v)));
 
     /// <summary>
-    /// An (InputName, selector) constructor pair differing only in the final parameter, plus the
-    /// shared argument values, so the only difference between the two states is the input.
+    /// The state's selector constructor, plus leading argument values to build it with.
     /// </summary>
-    private static (ConstructorInfo ByName, ConstructorInfo BySelector, object?[] Args)? FindComparablePair(Type type)
+    /// <returns>
+    /// Null when the state has no <c>Func&lt;OhlcvBar, double&gt;</c> constructor at all - it cannot
+    /// take custom values. <c>Args</c> is null when it has one but no overload declares defaults to
+    /// build it from, which is a harness limit rather than a verdict.
+    /// </returns>
+    /// <remarks>
+    /// The leading values come from the selector constructor's own defaults when it has them, else
+    /// from a sibling overload with the same leading parameter types whose parameters all have
+    /// defaults (ignoring a trailing InputName, while that parameter still exists).
+    /// </remarks>
+    private static (ConstructorInfo Ctor, object?[]? Args)? FindSelectorConstructor(Type type)
     {
         var ctors = type.GetConstructors();
-
-        var byName = ctors.FirstOrDefault(c =>
-        {
-            var ps = c.GetParameters();
-            return ps.Length > 0
-                && ps[^1].ParameterType == typeof(InputName)
-                && ps.Take(ps.Length - 1).All(p => p.HasDefaultValue);
-        });
-        if (byName is null) { return null; }
-
-        var lead = byName.GetParameters()[..^1];
 
         var bySelector = ctors.FirstOrDefault(c =>
         {
             var ps = c.GetParameters();
-            return ps.Length == lead.Length + 1
-                && ps[^1].ParameterType == typeof(Func<OhlcvBar, double>)
-                && ps[..^1].Select(p => p.ParameterType).SequenceEqual(lead.Select(p => p.ParameterType));
+            return ps.Length > 0 && ps[^1].ParameterType == typeof(Func<OhlcvBar, double>);
         });
         if (bySelector is null) { return null; }
 
-        return (byName, bySelector, lead.Select(p => p.DefaultValue).ToArray());
+        var lead = bySelector.GetParameters()[..^1];
+        if (lead.All(p => p.HasDefaultValue))
+        {
+            return (bySelector, lead.Select(p => p.DefaultValue).ToArray());
+        }
+
+        foreach (var sibling in ctors)
+        {
+            var ps = sibling.GetParameters();
+            var leading = ps.Length > 0 && ps[^1].ParameterType == typeof(InputName) ? ps[..^1] : ps;
+            if (leading.Length == lead.Length
+                && leading.Select(p => p.ParameterType).SequenceEqual(lead.Select(p => p.ParameterType))
+                && leading.All(p => p.HasDefaultValue))
+            {
+                return (bySelector, leading.Select(p => p.DefaultValue).ToArray());
+            }
+        }
+
+        return (bySelector, null);
     }
 
     /// <summary>The batch twin, by the catalogue's naming convention: XyzState -&gt; CalculateXyz.</summary>
