@@ -337,6 +337,7 @@ public static partial class Calculations
     public static StockData CalculateFiniteVolumeElements(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 22, double factor = 0.3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> fveList = new(stockData.Count);
         List<double> bullList = new(stockData.Count);
         List<double> bearList = new(stockData.Count);
@@ -344,8 +345,8 @@ public static partial class Calculations
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
 
         var medianPriceList = CalculateMedianPrice(stockData).CustomValuesList;
-        // Reset CustomValuesList so TypicalPrice uses actual close prices, not medianPriceList
-        stockData.SetCustomValues(new List<double>());
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var typicalPriceList = CalculateTypicalPrice(stockData).CustomValuesList;
         var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
 

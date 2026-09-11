@@ -407,14 +407,14 @@ public static partial class Calculations
     public static StockData CalculateInverseFisherZScore(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> fList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Reset CustomValuesList to prevent contamination of stdDev calculation
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -2429,18 +2429,16 @@ public static partial class Calculations
         int length2 = 10, int length3 = 10, int length4 = 15, int rocLength1 = 10, int rocLength2 = 15, int rocLength3 = 20, int rocLength4 = 30,
         int signalLength = 9, double weight1 = 1, double weight2 = 2, double weight3 = 3, double weight4 = 4)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> kstList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var roc1List = CalculateRateOfChange(stockData, rocLength1).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var roc2List = CalculateRateOfChange(stockData, rocLength2).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var roc3List = CalculateRateOfChange(stockData, rocLength3).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var roc4List = CalculateRateOfChange(stockData, rocLength4).CustomValuesList;
         var roc1SmaList = GetMovingAverageList(stockData, maType, length1, roc1List);
         var roc2SmaList = GetMovingAverageList(stockData, maType, length2, roc2List);

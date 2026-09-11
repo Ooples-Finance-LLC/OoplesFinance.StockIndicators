@@ -329,6 +329,7 @@ public static partial class Calculations
     public static StockData CalculateOnBalanceVolumeDisparityIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> obvdiList = new(stockData.Count);
         List<double> bscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -337,9 +338,8 @@ public static partial class Calculations
         var obvList = CalculateOnBalanceVolume(stockData, maType, length).CustomValuesList;
         var obvSmaList = GetMovingAverageList(stockData, maType, length, obvList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         stockData.SetCustomValues(obvList);
         var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
@@ -405,6 +405,7 @@ public static partial class Calculations
     public static StockData CalculateNegativeVolumeDisparityIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nvdiList = new(stockData.Count);
         List<double> bscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -413,9 +414,8 @@ public static partial class Calculations
         var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).CustomValuesList;
         var nviSmaList = GetMovingAverageList(stockData, maType, length, nviList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
         stockData.SetCustomValues(nviList);
         var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;

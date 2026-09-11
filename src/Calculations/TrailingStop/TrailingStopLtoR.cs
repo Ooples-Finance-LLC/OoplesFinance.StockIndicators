@@ -378,6 +378,7 @@ public static partial class Calculations
     public static StockData CalculateUtBotAlerts(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10, double keyValue = 1)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> trailingStopList = new(stockData.Count);
         List<double> positionList = new(stockData.Count);
         List<double> buyList = new(stockData.Count);
@@ -388,7 +389,7 @@ public static partial class Calculations
         // Taken before any moving average runs against stockData: GetMovingAverageList writes into
         // CustomValuesList, which the true-range helper would then read as the close series.
         var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {

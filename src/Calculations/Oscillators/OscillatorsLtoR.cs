@@ -730,13 +730,13 @@ public static partial class Calculations
     public static StockData CalculateNaturalDirectionalCombo(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 40, int smoothLength = 20)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nxcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var ndxList = CalculateNaturalDirectionalIndex(stockData, maType, length, smoothLength).CustomValuesList;
-        // Reset CustomValuesList to prevent contamination of NST calculation
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var nstList = CalculateNaturalStochasticIndicator(stockData, maType, length, smoothLength).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -952,13 +952,13 @@ public static partial class Calculations
     public static StockData CalculateNaturalMarketCombo(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 40, int smoothLength = 20)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nmcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var nmrList = CalculateNaturalMarketRiver(stockData, maType, length).CustomValuesList;
-        // Reset CustomValuesList to prevent contamination of NMM calculation
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var nmmList = CalculateNaturalMarketMirror(stockData, maType, length).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)

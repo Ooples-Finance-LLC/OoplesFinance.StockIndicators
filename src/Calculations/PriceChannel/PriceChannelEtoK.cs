@@ -754,6 +754,7 @@ public static partial class Calculations
         int length1 = 20, int length2 = 10, double multFactor = 2,
         MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> upperChannelList = new(stockData.Count);
         List<double> lowerChannelList = new(stockData.Count);
         List<double> midChannelList = new(stockData.Count);
@@ -767,7 +768,7 @@ public static partial class Calculations
         // 9.7261 and pushed the upper band from 143.74 to 155.28. The ATR is computed here, before any
         // moving average touches stockData.
         var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
+        stockData.RestoreInputSeries(callerSeries);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 

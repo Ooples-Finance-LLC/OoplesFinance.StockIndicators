@@ -107,6 +107,7 @@ public static partial class Calculations
     public static StockData CalculateFastandSlowStochasticOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 9)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> fsstList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
@@ -114,8 +115,7 @@ public static partial class Calculations
         var v4List = GetMovingAverageList(stockData, maType, length2, fskList);
         // Reset CustomValuesList and SignalsList so stochastic uses original close prices, not v4List
         // Use SetCustomValues to create a new empty list (don't clear, which would affect v4List reference)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        stockData.RestoreInputSeries(callerSeries);
         var fastKList = CalculateStochasticOscillator(stockData, maType, length: length3).CustomValuesList;
         var slowKList = GetMovingAverageList(stockData, maType, length3, fastKList);
 

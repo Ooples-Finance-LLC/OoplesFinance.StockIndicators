@@ -1220,6 +1220,7 @@ public static partial class Calculations
     public static StockData CalculateCommoditySelectionIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14, double pointValue = 50, double margin = 3000, double commission = 10)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> csiList = new(stockData.Count);
         List<double> csiSmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -1229,7 +1230,7 @@ public static partial class Calculations
 
         var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
         // Clear state to prevent pollution of CalculateAverageDirectionalIndex inputs
-        stockData.SetCustomValues(new List<double>());
+        stockData.RestoreInputSeries(callerSeries);
         stockData.SetSignals(null);
         var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).CustomValuesList;
 
