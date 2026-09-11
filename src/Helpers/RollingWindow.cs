@@ -19,56 +19,54 @@ internal static class RollingWindowSettings
 
 internal sealed class RollingSum
 {
-    private readonly List<double> _cumulative = new();
+    // Prefix sums as high + low pairs: see CompensatedSum for why a plain prefix drifts over a long series.
+    private readonly List<double> _high = new();
+    private readonly List<double> _low = new();
 
-    public int Count => _cumulative.Count;
+    public int Count => _high.Count;
 
     public void Add(double value)
     {
-        var sum = value + (_cumulative.Count > 0 ? _cumulative[_cumulative.Count - 1] : 0);
-        _cumulative.Add(sum);
+        var last = _high.Count - 1;
+        var (high, low) = CompensatedSum.Add(last >= 0 ? _high[last] : 0, last >= 0 ? _low[last] : 0, value);
+        _high.Add(high);
+        _low.Add(low);
     }
 
     public double Sum(int length)
     {
-        if (_cumulative.Count == 0 || length <= 0)
+        if (_high.Count == 0 || length <= 0)
         {
             return 0;
         }
 
-        var end = _cumulative[_cumulative.Count - 1];
-        var startIndex = _cumulative.Count - length - 1;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(_high.Count - 1, _high.Count - length - 1);
     }
 
     public double SumAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || length <= 0 || endIndex < 0)
+        if (_high.Count == 0 || length <= 0 || endIndex < 0)
         {
             return 0;
         }
 
-        var end = _cumulative[endIndex];
-        var startIndex = endIndex - length;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(endIndex, endIndex - length);
     }
 
     public double Average(int length)
     {
-        if (_cumulative.Count == 0)
+        if (_high.Count == 0)
         {
             return 0;
         }
 
-        var count = Math.Min(length, _cumulative.Count);
+        var count = Math.Min(length, _high.Count);
         return count > 0 ? Sum(length) / count : 0;
     }
 
     public double AverageAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || endIndex < 0)
+        if (_high.Count == 0 || endIndex < 0)
         {
             return 0;
         }
@@ -76,6 +74,10 @@ internal sealed class RollingSum
         var count = Math.Min(length, endIndex + 1);
         return count > 0 ? SumAt(length, endIndex) / count : 0;
     }
+
+    private double Between(int end, int start) => start >= 0
+        ? CompensatedSum.Difference(_high[end], _low[end], _high[start], _low[start])
+        : _high[end] + _low[end];
 }
 
 internal sealed class RollingMinMax

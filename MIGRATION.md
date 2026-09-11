@@ -189,7 +189,9 @@ the indicator's published definition, so **some batch values change**:
 - **Window calculations no longer drift over a long series** (`StreamingLongRunStabilityTests`). After
   100,000 bars near 100,000 and 100,000 near 10, the weighted moving average was 1e-6 off and the standard
   deviation channel 3e-4 off in both engines, carrying rounding from values long out of the window. The
-  simple and weighted moving averages now rebuild their running sums from the window every `length` bars.
+  simple and weighted moving averages now rebuild their running sums from the window every `length` bars,
+  and window sums taken as the difference of two prefix sums (about 120 batch indicators, among them CMO,
+  MFI and Vortex) keep each prefix as a compensated pair.
   The linear regression counts x from the window's first bar instead of the series' (its `Intercept` is
   still reported at bar 0). Correlation is taken from each value's distance to the window mean, so a
   window with one side constant correlates at 0 rather than a rounding residue of either sign; the

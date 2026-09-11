@@ -15485,7 +15485,9 @@ internal sealed class RollingWindowSum : IDisposable
 
 internal sealed class RollingCumulativeSum
 {
-    private readonly List<double> _cumulative = new();
+    // Prefix sums as high + low pairs, as batch RollingSum keeps them: see CompensatedSum.
+    private readonly List<double> _high = new();
+    private readonly List<double> _low = new();
 
     public double Preview(double value, int length)
     {
@@ -15494,31 +15496,39 @@ internal sealed class RollingCumulativeSum
             return 0;
         }
 
-        var end = value + (_cumulative.Count > 0 ? _cumulative[_cumulative.Count - 1] : 0);
-        var startIndex = _cumulative.Count - length;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        var (endHigh, endLow) = Extend(value);
+        return Window(endHigh, endLow, _high.Count - length);
     }
 
     public double Add(double value, int length)
     {
-        var end = value + (_cumulative.Count > 0 ? _cumulative[_cumulative.Count - 1] : 0);
-        _cumulative.Add(end);
+        var (endHigh, endLow) = Extend(value);
+        _high.Add(endHigh);
+        _low.Add(endLow);
 
         if (length <= 0)
         {
             return 0;
         }
 
-        var startIndex = _cumulative.Count - length - 1;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Window(endHigh, endLow, _high.Count - length - 1);
     }
 
     public void Reset()
     {
-        _cumulative.Clear();
+        _high.Clear();
+        _low.Clear();
     }
+
+    private (double High, double Low) Extend(double value)
+    {
+        var last = _high.Count - 1;
+        return CompensatedSum.Add(last >= 0 ? _high[last] : 0, last >= 0 ? _low[last] : 0, value);
+    }
+
+    private double Window(double endHigh, double endLow, int startIndex) => startIndex >= 0
+        ? CompensatedSum.Difference(endHigh, endLow, _high[startIndex], _low[startIndex])
+        : endHigh + endLow;
 }
 
 internal sealed class RollingWindowCorrelation : IDisposable

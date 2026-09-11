@@ -34,6 +34,10 @@ public sealed class StreamingLongRunStabilityTests
         typeof(BollingerBandsState),
         typeof(StandardDeviationChannelState),
         typeof(EhlersMovingAverageDifferenceIndicatorState),
+        // Window sums of price the batch engine takes as differences of prefix sums.
+        typeof(ChandeMomentumOscillatorState),
+        typeof(MoneyFlowIndexState),
+        typeof(VortexIndicatorState),
     };
 
     [Theory]
