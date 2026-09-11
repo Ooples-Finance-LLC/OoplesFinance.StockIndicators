@@ -228,7 +228,30 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
 
 ### Removed
 
-- None - all v1.x methods are still available (will be deprecated in v3.0)
+- All v1.x `Calculate*` methods are still available (they will be deprecated in v3.0).
+- The Alpaca adapters have moved out of the `OoplesFinance.StockIndicators` package into a new
+  `OoplesFinance.StockIndicators.Trading` package.
+
+#### Moving to the Trading package
+
+`AlpacaBroker` and `AlpacaMarketDataProvider` are in a separate assembly now. Their namespaces are
+unchanged, so no `using` needs editing - but the types are no longer in the core package, so a
+project that uses them needs the new package reference:
+
+```xml
+<PackageReference Include="OoplesFinance.StockIndicators" Version="..." />
+<PackageReference Include="OoplesFinance.StockIndicators.Trading" Version="..." />
+```
+
+The two packages release together and carry the same version.
+
+Nothing else needs to change: same types, same members, same namespaces.
+
+**Why:** `Alpaca.Markets` is a broker SDK, and only those two adapters need it. Carrying it in the
+core package meant a project that only wanted to compute an RSI also restored a trading API client
+and its transitive dependencies. Type forwarding would have made this invisible, but the Trading
+assembly references the core one, so a forwarder in the core assembly would be a reference cycle.
+The move is therefore breaking, and is marked as such rather than hidden.
 
 ### Changed
 

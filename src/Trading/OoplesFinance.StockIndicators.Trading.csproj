@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;net461</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>OoplesFinance.StockIndicators</RootNamespace>
+    <AssemblyName>OoplesFinance.StockIndicators.Trading</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>OoplesFinance.StockIndicators.Trading</PackageId>
+    <Title>Ooples Finance Stock Indicators - Trading</Title>
+    <Description>
+      Broker and live market data adapters for OoplesFinance.StockIndicators. Kept out of the core
+      package so that computing an indicator does not require a broker SDK.
+    </Description>
+    <Authors>Franklin Moormann</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://ooples.github.io/OoplesFinance.StockIndicators/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators</RepositoryUrl>
+    <PackageTags>stock;indicators;trading;alpaca;broker;market-data</PackageTags>
+    <!-- x-release-please-version -->
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OoplesFinance.StockIndicators.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AlpacaBroker.RawAlpacaAccount is the wire shape of the account response and stays internal;
+         the mapping tests assert against it directly. The core project grants the same access, but
+         that attribute is per-assembly, so moving the broker here means bringing it along. -->
+    <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
+  </ItemGroup>
+
+  <!--
+    The reason this project exists. Alpaca.Markets is a broker SDK, and only these adapters need it -
+    everything else in the library computes indicators. Carrying it in the core package meant anyone
+    who wanted an RSI also pulled in a trading API client.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Alpaca.Markets" Version="7.2.0" />
+    <PackageReference Include="Alpaca.Markets.Extensions" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <!-- Same pairing as the core project: System.Memory and System.Text.Json both require
+         System.Buffers >= 4.6.1 on this target, and taking only one half is a fatal NU1605. -->
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Buffers" Version="4.6.1" />
+  </ItemGroup>
+
+</Project>

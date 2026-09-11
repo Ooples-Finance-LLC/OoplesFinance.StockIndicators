@@ -108,14 +108,18 @@ jobs:
           user: ${{ vars.NUGET_USER || 'ooples' }}
 
       - name: Restore and build
+        # Both packable projects. The Trading project is where the Alpaca adapters live; packing
+        # only the core one would publish a release that has removed them with nothing to move to.
         run: |
           dotnet restore src/OoplesFinance.StockIndicators.csproj
+          dotnet restore src/Trading/OoplesFinance.StockIndicators.Trading.csproj
           dotnet build src/OoplesFinance.StockIndicators.csproj -c Release --no-restore
+          dotnet build src/Trading/OoplesFinance.StockIndicators.Trading.csproj -c Release --no-restore
 
       - name: Pack NuGet
-        run: >
-          dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release -o out --no-build
-          /p:PackageVersion=${{ needs.release-please.outputs.version }}
+        run: |
+          dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release -o out --no-build /p:PackageVersion=${{ needs.release-please.outputs.version }}
+          dotnet pack src/Trading/OoplesFinance.StockIndicators.Trading.csproj -c Release -o out --no-build /p:PackageVersion=${{ needs.release-please.outputs.version }}
 
       - name: Verify the package ships every target framework
         shell: pwsh
@@ -123,21 +127,35 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-          # The expected list is read from the csproj rather than hardcoded. Hardcoding it couples
-          # this workflow to whatever TargetFrameworks happened to say when it was written, so a
-          # legitimate change to the target list would fail verification AFTER release-please had
-          # already created the tag and the GitHub release - leaving a release with no package.
-          [xml]$proj = Get-Content 'src/OoplesFinance.StockIndicators.csproj'
-          $raw = @($proj.Project.PropertyGroup.TargetFrameworks) +
-                 @($proj.Project.PropertyGroup.TargetFramework) |
-                 Where-Object { $_ -and $_.ToString().Trim() } | Select-Object -First 1
-          $tfms = @($raw -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-          if (-not $tfms) { Write-Error 'Could not read TargetFrameworks from the csproj'; exit 1 }
-          Write-Host "Project targets: $($tfms -join ', ')"
+          # Each project is checked against its OWN TargetFrameworks. Reading one project's list and
+          # applying it to every package only works while the projects happen to agree, and it would
+          # fail AFTER release-please had created the tag and the GitHub release - leaving a release
+          # with no package. The list is read from the csproj rather than hardcoded for the same
+          # reason: a legitimate change to the target list must not break verification.
+          $projects = @(
+            @{ Path = 'src/OoplesFinance.StockIndicators.csproj';                 PackageId = 'OoplesFinance.StockIndicators' },
+            @{ Path = 'src/Trading/OoplesFinance.StockIndicators.Trading.csproj'; PackageId = 'OoplesFinance.StockIndicators.Trading' }
+          )
 
-          $pkgs = Get-ChildItem out/*.nupkg
+          $pkgs = @(Get-ChildItem out/*.nupkg)
           if (-not $pkgs) { Write-Error 'No .nupkg produced in out/'; exit 1 }
-          foreach ($pkg in $pkgs) {
+
+          foreach ($project in $projects) {
+            [xml]$proj = Get-Content $project.Path
+            $raw = @($proj.Project.PropertyGroup.TargetFrameworks) +
+                   @($proj.Project.PropertyGroup.TargetFramework) |
+                   Where-Object { $_ -and $_.ToString().Trim() } | Select-Object -First 1
+            $tfms = @($raw -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+            if (-not $tfms) { Write-Error "Could not read TargetFrameworks from $($project.Path)"; exit 1 }
+            Write-Host "$($project.PackageId) targets: $($tfms -join ', ')"
+
+            # Anchored on the id so OoplesFinance.StockIndicators does not also match
+            # OoplesFinance.StockIndicators.Trading, which would verify one package twice and the
+            # other never.
+            $pkg = $pkgs | Where-Object { $_.Name -match "^$([regex]::Escape($project.PackageId))\.\d.*\.nupkg$" } |
+                   Select-Object -First 1
+            if (-not $pkg) { Write-Error "No .nupkg produced for $($project.PackageId)"; exit 1 }
+
             $zip = [System.IO.Compression.ZipFile]::OpenRead($pkg.FullName)
             try   { $entries = $zip.Entries.FullName }
             finally { $zip.Dispose() }
