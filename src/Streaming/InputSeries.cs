@@ -36,8 +36,9 @@ public interface IInputSeries
 /// Ready-made input series, named after the input names they replace, plus ways to build your own.
 /// </summary>
 /// <remarks>
-/// Migrating from an input name is a one-token change: <c>InputName.MedianPrice</c> becomes
-/// <c>InputSeries.MedianPrice</c>. Each preset gives exactly the value the input name selected.
+/// Code that used to pass an input name - <c>InputName.MedianPrice</c> - passes the preset of the same
+/// name instead: <c>InputSeries.MedianPrice</c>. Each preset gives exactly the value that input name
+/// selected.
 /// <code>
 /// var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.MedianPrice);
 /// var sma = new CustomInputState(new SimpleMovingAverageState(20), InputSeries.Of(new RelativeStrengthIndexState(14)));
