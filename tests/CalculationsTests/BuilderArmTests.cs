@@ -43,10 +43,18 @@ public sealed class BuilderArmTests : GlobalTestData
         var ignored = new List<string>();
         foreach (var type in OptionTypes)
         {
-            if (BuilderArmBinding.TryGetTarget(type, out var target) && BuilderArmBinding.UnmappedProperties(type, target.Name) is { Count: > 0 } unmapped)
+            if (!BuilderArmBinding.TryGetTarget(type, out var target))
+            {
+                continue;
+            }
+
+            if (BuilderArmBinding.UnmappedProperties(type, target) is { Count: > 0 } unmapped)
             {
                 ignored.Add($"{type.Name} -> {target.Name}: {string.Join(",", unmapped)}");
             }
+
+            // A declared argument that names nothing would silently pass nothing.
+            ignored.AddRange(BuilderArmBinding.InvalidArguments(type, target).Select(invalid => $"{type.Name} -> {target.Name}: {invalid}"));
         }
 
         ignored.Should().BeEmpty($"a spec option the batch indicator never sees is silently ignored: {string.Join(" | ", ignored)}");
