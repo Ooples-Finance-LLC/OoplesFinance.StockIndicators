@@ -531,42 +531,49 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Vidya (Variable Index Dynamic Average).
     /// </summary>
-    internal static void Vidya(ReadOnlySpan<double> input, Span<double> output, int length, int cmoLength = 9)
+    internal static void Vidya(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The same VIDYA as CalculateVariableIndexDynamicAverage: the CMO over `length` bars, and the average
+        // seeded at 0. This fast path used a fixed 9-bar CMO and seeded at the first price, so
+        // MovingAvgType.VariableIndexDynamicAverage meant a different average here than in the indicator.
+        var resolved = Math.Max(1, length);
+        var alpha = 2d / (resolved + 1);
         var pool = ArrayPool<double>.Shared;
-        var cmoArray = pool.Rent(input.Length);
+        var changesArray = pool.Rent(input.Length * 2);
 
         try
         {
-            var cmo = cmoArray.AsSpan(0, input.Length);
-            OscillatorCore.ChandeMomentumOscillator(input, cmo, cmoLength);
-
-            var sc = 2.0 / (length + 1);
-            double vidya = 0;
+            var pos = changesArray.AsSpan(0, input.Length);
+            var neg = changesArray.AsSpan(input.Length, input.Length);
+            double posSum = 0, negSum = 0, vidya = 0;
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i == 0)
+                var diff = i >= 1 ? input[i] - input[i - 1] : 0;
+                pos[i] = diff > 0 ? diff : 0;
+                neg[i] = diff < 0 ? Math.Abs(diff) : 0;
+                posSum += pos[i];
+                negSum += neg[i];
+                if (i >= resolved)
                 {
-                    vidya = input[i];
-                    output[i] = vidya;
+                    posSum -= pos[i - resolved];
+                    negSum -= neg[i - resolved];
                 }
-                else
-                {
-                    var absChmo = Math.Abs(cmo[i]) / 100;
-                    vidya = (sc * absChmo * input[i]) + ((1 - sc * absChmo) * vidya);
-                    output[i] = vidya;
-                }
+
+                var cmo = posSum + negSum != 0 ? Math.Min(Math.Max((posSum - negSum) / (posSum + negSum) * 100, -100), 100) : 0;
+                var currentCmo = Math.Abs(cmo / 100);
+                vidya = (input[i] * alpha * currentCmo) + (vidya * (1 - (alpha * currentCmo)));
+                output[i] = vidya;
             }
         }
         finally
         {
-            pool.Return(cmoArray);
+            pool.Return(changesArray);
         }
     }
 

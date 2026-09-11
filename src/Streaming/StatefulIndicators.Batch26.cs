@@ -583,7 +583,8 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
         var value = _input.GetValue(bar);
         var cmo = _cmo.Update(bar, isFinal, includeOutputs: false).Value;
         var currentCmo = Math.Abs(cmo / 100);
-        var prevVidya = _hasPrev ? _prevVidya : value;
+        // Seeded at 0, as the batch and the original's nz(vidya[1]) are: VIDYA grows into the price.
+        var prevVidya = _hasPrev ? _prevVidya : 0;
         var vidya = (value * _alpha * currentCmo) + (prevVidya * (1 - (_alpha * currentCmo)));
 
         if (isFinal)

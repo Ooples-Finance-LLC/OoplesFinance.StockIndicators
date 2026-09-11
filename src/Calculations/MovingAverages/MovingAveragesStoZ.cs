@@ -317,7 +317,11 @@ public static partial class Calculations
         RollingSum negMoneyFlowSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var callerSeries = new List<double>(stockData.CustomValuesList);
         var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).OutputValues["Length"];
+        // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
+        // and the typical price used to take it for the close.
+        stockData.RestoreInputSeries(callerSeries);
         var tpList = CalculateTypicalPrice(stockData).CustomValuesList;
 
         for (var i = 0; i < stockData.Count; i++)
