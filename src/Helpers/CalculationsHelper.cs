@@ -1651,7 +1651,21 @@ public static class CalculationsHelper
         List<double> openList;
         List<double> closeList;
         List<double> volumeList;
-        var inputList = inputName switch
+
+        // A chained series wins, exactly as it does for the single-argument overload. This overload
+        // used to go straight to the named price field, so the 17 indicators that take their own
+        // inputName - AlligatorIndex, AwesomeOscillator, CommodityChannelIndex, MoneyFlowIndex,
+        // VolumeWeightedAveragePrice and the rest - silently ignored anything chained in front of
+        // them, as did every indicator built on one of them (GatorOscillator on AlligatorIndex,
+        // AcceleratorOscillator on AwesomeOscillator). Callers pass values; the name only decides what
+        // is read when nothing was passed.
+        //
+        // Safe for every call site: each of the 24 reads its input on entry, before anything in that
+        // calculation writes to CustomValuesList, so what is found there is always the caller's chain
+        // and never an intermediate of the calculation itself (the #145 pattern).
+        var inputList = stockData.CustomValuesList is { Count: > 0 } chained
+            ? chained
+            : inputName switch
         {
             InputName.Close => stockData.ClosePrices,
             InputName.Low => stockData.LowPrices,

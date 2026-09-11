@@ -5,6 +5,7 @@ using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Enums;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Models;
 using OoplesFinance.StockIndicators.Streaming;
 using Xunit;
@@ -138,7 +139,7 @@ public sealed class StreamingCustomInputTests : GlobalTestData
     private static double Median(OhlcvBar bar) => (bar.High + bar.Low) / 2;
 
     /// <summary>
-    /// Runs a batch indicator on the close, or on a median-price series chained in front of it.
+    /// Runs a batch indicator on a close series or a median-price series chained in front of it.
     /// </summary>
     /// <remarks>
     /// Chaining is the one lever: a chained series always wins. Some methods still take their own
@@ -153,7 +154,21 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         var args = new object?[ps.Length];
         for (var i = 1; i < ps.Length; i++) { args[i] = ps[i].DefaultValue; }
 
-        args[0] = chainMedian ? new StockData(bars).CalculateMedianPrice() : new StockData(bars);
+        // BOTH runs chain a series, mirroring the streaming side's close and median selectors. An
+        // unchained baseline is not "close" for every method: AwesomeOscillator, AcceleratorOscillator,
+        // AlligatorIndex and GatorOscillator default to MedianPrice, so chaining a median series in
+        // front of them changed nothing and read as "batch ignores its input" when it does not.
+        var data = new StockData(bars);
+        if (chainMedian)
+        {
+            data = data.CalculateMedianPrice();
+        }
+        else
+        {
+            data.SetCustomValues(new List<double>(data.ClosePrices));
+        }
+
+        args[0] = data;
 
         return batch.Invoke(null, args)!;
     }
