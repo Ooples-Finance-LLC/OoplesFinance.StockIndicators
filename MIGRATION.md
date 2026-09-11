@@ -274,12 +274,32 @@ the indicator's published definition, so **some batch values change**:
   origin; Chande Forecast, the standard deviation channel, Inertia and Projection Bands follow. Correlation is taken from each value's distance to the window mean, so a
   window with one side constant correlates at 0 rather than a rounding residue of either sign; the
   Periodic Channel sums that sign. Otherwise values change only in their last digits.
+- **`IncludeCustomValues = false` hides a result without changing any.** It used to empty the one list
+  that both the caller and the next calculation read, so a chain ran on the close, 176 indicators threw
+  and the Accelerator, Derivative and McClellan oscillators computed other values
+  (`IncludeCustomValuesTests`). Every indicator now computes with the option off exactly what it computes
+  with it on, and only `CustomValuesList` is empty. `Clear()` gives the data a new, empty series rather
+  than emptying the list in place, so a list you kept from an earlier result survives it; setting
+  `CustomValuesList` to null now reads back as an empty list.
+- **Adaptive Ehlers windows take a cycle within float noise of an integer as that integer** before
+  rounding up to whole bars. A dominant cycle of exactly 29 in exact arithmetic could arrive as
+  29.000000000000004 and average over 30 bars, and which side it fell depended on summation order. Values
+  move only on bars where the cycle sat within a relative 1e-9 of an integer.
 
 Streaming-only corrections (batch unchanged): the first bar's true range in the ATR channels, Stoller
 channels, dynamic support/resistance, Bollinger Fibonacci ratios, Hurst cycle channel, trend trader bands,
 VMA bands, Trender and the volume positive/negative indicator; the Time Price Indicator's band offset; the
 defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
-50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations.
+50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations. The
+first bar's true range in the Grover Llorens Cycle Oscillator and the Ultimate Trader Oscillator is also
+High - Low now, not the whole high.
+
+A preview (`isFinal: false`) of a bar now publishes what that bar publishes once final
+(`StreamingPreviewTests`, every state). Nine did not: ALMA, Interquartile Range Bands and Trimean left the
+forming bar out of their window; Alligator, Gator and the Ehlers Fractal Adaptive Moving Average read their
+displaced value a bar late; and Connors RSI, with the Stochastic Connors RSI and Quasi White Noise built on
+it, ranked the forming value against a value the commit evicts. The autocorrelation periodogram behind the
+adaptive Ehlers indicators divided the previous bar's powers by the forming bar's maximum.
 
 `BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
 the batch twin of the streaming state of the same name.
