@@ -327,8 +327,6 @@ the indicator's values. Routing also corrected the indicators it exposed:
 - **Kaufman's Adaptive Moving Average** passes the price through until its efficiency window fills, then
   recurses from it, as TA-Lib and Pine seed it. It was seeded at 0 in both engines, crawled up from zero, and
   on a flat market was still converging thousands of bars later.
-- **Linear Regression** fits the bars there are during its warmup rather than the full length, as though
-  the missing points sat at the origin. Projection Bands, Bandwidth and Oscillator follow.
 - Asking `GetMovingAverageList` for the dynamically adjustable, adaptive, Ehlers adaptive Laguerre or middle
   high-low average without a fast length now uses the indicator's own default instead of 0.
 
