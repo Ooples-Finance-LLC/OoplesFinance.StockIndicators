@@ -679,8 +679,36 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
 
             var prevValue = GetLastOrDefault(valueList);
-            var value = currentLow >= prevHigh ? prevValue + increment : currentHigh <= prevLow ? prevValue - increment : prevValue;
-            valueList.Add(value);
+            valueList.Add(prevValue + GapStep(i >= 1, currentHigh, currentLow, prevHigh, prevLow, increment));
+        }
+
+        // Strict comparisons: a gap means this bar's low is above the previous high, not level with
+        // it. With >= and <=, a market that never moved counted a gap up on every bar - the low
+        // equals the previous high - and the accumulator simply returned the bar number.
+        // The first bar has no predecessor and therefore cannot gap. prevHigh and prevLow are the 0
+        // sentinel there, so currentLow > prevHigh is true for any positively priced instrument: bar
+        // 0 was counted as a gap up, and every later value carried that extra increment. The strict
+        // comparisons here were already corrected once for a market that never moves; the first-bar
+        // case is the same class of defect at the other end of the series.
+        static double GapStep(bool hasPrevious, double currentHigh, double currentLow, double prevHigh,
+            double prevLow, double increment)
+        {
+            if (!hasPrevious)
+            {
+                return 0;
+            }
+
+            if (currentLow > prevHigh)
+            {
+                return increment;
+            }
+
+            if (currentHigh < prevLow)
+            {
+                return -increment;
+            }
+
+            return 0;
         }
 
         var valueEmaList = GetMovingAverageList(stockData, maType, length, valueList);

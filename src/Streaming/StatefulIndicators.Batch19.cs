@@ -1553,7 +1553,8 @@ public sealed class PercentChangeOscillatorState : IStreamingIndicatorState, IDi
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var prevPcc = _hasPrev ? _prevPcc : 0;
-        var pcc = prevValue - 1 != 0 ? prevPcc + (value / (prevValue - 1)) : 0;
+        // (current / previous) - 1, not current / (previous - 1). See the batch side.
+        var pcc = prevValue != 0 ? prevPcc + ((value / prevValue) - 1) : 0;
         var signal = _signalSmoother.Next(pcc, isFinal);
 
         if (isFinal)

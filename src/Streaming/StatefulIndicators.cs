@@ -7677,9 +7677,11 @@ public sealed class ConditionalAccumulatorState : IStreamingIndicatorState, IDis
     {
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var value = bar.Low >= prevHigh ? _value + _increment
-            : bar.High <= prevLow ? _value - _increment
-            : _value;
+        // Strict, as on the batch side: a gap means this bar's low is above the previous high, not
+        // level with it. And the first bar cannot gap at all - there is no previous bar to gap from,
+        // and comparing against the 0 sentinel made bar.Low > prevHigh true for any positively
+        // priced instrument, counting a gap up on bar 0 and carrying that increment forward.
+        var value = _value + GapStep(bar, prevHigh, prevLow);
         var signal = _signal.Next(value, isFinal);
 
         if (isFinal)
@@ -7701,6 +7703,30 @@ public sealed class ConditionalAccumulatorState : IStreamingIndicatorState, IDis
         }
 
         return new StreamingIndicatorStateResult(value, outputs);
+    }
+
+    /// <summary>
+    /// How much this bar moves the accumulator: one increment up on a gap up, one down on a gap
+    /// down, nothing otherwise.
+    /// </summary>
+    private double GapStep(OhlcvBar bar, double prevHigh, double prevLow)
+    {
+        if (!_hasPrev)
+        {
+            return 0;
+        }
+
+        if (bar.Low > prevHigh)
+        {
+            return _increment;
+        }
+
+        if (bar.High < prevLow)
+        {
+            return -_increment;
+        }
+
+        return 0;
     }
 
     public void Dispose()
