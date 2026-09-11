@@ -423,11 +423,16 @@ public static partial class Calculations
     public static StockData CalculateWoodieCommodityChannelIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 6, int slowLength = 14)
     {
+        // Each component that takes its own inputName reads the CALLER's series. Those methods
+        // let a chained series win over their named input, and by the time this calculation calls
+        // them an earlier component has already published its output onto CustomValuesList - which
+        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
+        // their own named input exactly as before.
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> histogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = stockData.CaptureInputSeries();
         var cciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: slowLength).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var turboCciList = CalculateCommodityChannelIndex(stockData, maType: maType, length: fastLength).CustomValuesList;
@@ -2117,6 +2122,12 @@ public static partial class Calculations
         int macdLength3 = 9, int bullBearLength = 13, int williamRLength = 14, int maLength1 = 10, int maLength2 = 20, int maLength3 = 30, 
         int maLength4 = 50, int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9)
     {
+        // Each component that takes its own inputName reads the CALLER's series. Those methods
+        // let a chained series win over their named input, and by the time this calculation calls
+        // them an earlier component has already published its output onto CustomValuesList - which
+        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
+        // their own named input exactly as before.
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> maRatingList = new(stockData.Count);
         List<double> oscRatingList = new(stockData.Count);
         List<double> totalRatingList = new(stockData.Count);
@@ -2125,7 +2136,6 @@ public static partial class Calculations
 
         // Every component reads the prices (the AO and CCI their own median and typical price); each
         // Calculate call leaves its output on CustomValuesList for the next one to mistake for its input.
-        var callerSeries = stockData.CaptureInputSeries();
         var rsiList = CalculateRelativeStrengthIndex(stockData, length: rsiLength).CustomValuesList;
         stockData.RestoreInputSeries(callerSeries);
         var aoList = CalculateAwesomeOscillator(stockData, fastLength: aoLength1, slowLength: aoLength2).CustomValuesList;

@@ -1660,9 +1660,15 @@ public static class CalculationsHelper
         // AcceleratorOscillator on AwesomeOscillator). Callers pass values; the name only decides what
         // is read when nothing was passed.
         //
-        // Safe for every call site: each of the 24 reads its input on entry, before anything in that
-        // calculation writes to CustomValuesList, so what is found there is always the caller's chain
-        // and never an intermediate of the calculation itself (the #145 pattern).
+        // What is on CustomValuesList must therefore be the caller's chain. Each of the 24 methods reads
+        // it on entry, before its own calculation writes anything there. But a COMPOSITE that calls one
+        // of them after another component has published its output would hand it that output as if it
+        // were a chain (the #145 pattern). Four composites make such a call - InsyncIndex,
+        // TechnicalRatings, UltimateMomentumIndicator and WoodieCommodityChannelIndex - and each now
+        // restores the caller's series first. Without that, three of them changed their UNCHAINED output
+        // (a three-arm control against master: TechnicalRatings, UltimateMomentumIndicator and
+        // WoodieCommodityChannelIndex differed; InsyncIndex happened not to). Found by auditing every
+        // call site of these methods, not just their bodies.
         var inputList = stockData.CustomValuesList is { Count: > 0 } chained
             ? chained
             : inputName switch
@@ -2024,12 +2030,6 @@ public static class CalculationsHelper
     }
 
     /// <summary>
-    /// Gets the maximum and minimum values list.
-    /// </summary>
-    /// <param name="inputs">The inputs.</param>
-    /// <param name="length">The length.</param>
-    /// <returns></returns>
-    /// <summary>
     /// The high and low an indicator should read when its input is a series other than the close.
     /// </summary>
     /// <remarks>
@@ -2077,6 +2077,12 @@ public static class CalculationsHelper
         return (highList, lowList);
     }
 
+    /// <summary>
+    /// Gets the maximum and minimum values list.
+    /// </summary>
+    /// <param name="inputs">The inputs.</param>
+    /// <param name="length">The length.</param>
+    /// <returns></returns>
     public static (List<double>, List<double>) GetMaxAndMinValuesList(List<double> inputs, int length)
     {
         var count = inputs.Count;

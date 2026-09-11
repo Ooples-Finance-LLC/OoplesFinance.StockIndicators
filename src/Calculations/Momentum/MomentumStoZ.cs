@@ -22,11 +22,16 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19, int length3 = 21, int length4 = 39,
         int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
+        // Each component that takes its own inputName reads the CALLER's series. Those methods
+        // let a chained series win over their named input, and by the time this calculation calls
+        // them an earlier component has already published its output onto CustomValuesList - which
+        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
+        // their own named input exactly as before.
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
-        var callerSeries = stockData.CaptureInputSeries();
         var moVar = CalculateMcClellanOscillator(stockData, maType, fastLength: length2, slowLength: length4);
         var advSumList = moVar.OutputValues["AdvSum"];
         var decSumList = moVar.OutputValues["DecSum"];

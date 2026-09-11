@@ -473,6 +473,12 @@ public static partial class Calculations
         int cciLength = 14, int dpoLength = 18, int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1,
         int stochDLength = 3, int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
     {
+        // Each component that takes its own inputName reads the CALLER's series. Those methods
+        // let a chained series win over their named input, and by the time this calculation calls
+        // them an earlier component has already published its output onto CustomValuesList - which
+        // they would otherwise take for the caller's chain. Unchained this is empty, and they read
+        // their own named input exactly as before.
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> iidxList = new(stockData.Count);
         List<double> tempMacdList = new(stockData.Count);
         List<double> tempDpoList = new(stockData.Count);
@@ -491,9 +497,11 @@ public static partial class Calculations
         // Reset CustomValuesList to prevent contamination of derived series (TypicalPrice uses CustomValuesList as close)
         stockData.SetCustomValues(new List<double>());
         stockData.SignalsList = new List<Signal>();
+        stockData.SetCustomValues(new List<double>(callerSeries));
         var cciList = CalculateCommodityChannelIndex(stockData, length: cciLength).CustomValuesList;
         stockData.SetCustomValues(new List<double>());
         stockData.SignalsList = new List<Signal>();
+        stockData.SetCustomValues(new List<double>(callerSeries));
         var mfiList = CalculateMoneyFlowIndex(stockData, length: mfiLength).CustomValuesList;
         stockData.SetCustomValues(new List<double>());
         stockData.SignalsList = new List<Signal>();
