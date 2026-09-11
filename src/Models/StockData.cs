@@ -14,6 +14,8 @@ namespace OoplesFinance.StockIndicators.Models;
 public class StockData : IStockData
 {
     private List<double>? _inputValues;
+    private bool _inputValuesAssigned;
+    private InputName _inputName;
     private List<double>? _openPrices;
     private List<double>? _highPrices;
     private List<double>? _lowPrices;
@@ -24,7 +26,37 @@ public class StockData : IStockData
     private bool _columnsInitialized;
     private bool _rowsInitialized;
 
-    public InputName InputName { get; set; }
+    /// <summary>
+    /// The price series calculations read when nothing has been chained in.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Honoured through <see cref="InputValues"/>, which is what the single-argument
+    /// <c>GetInputValuesList(stockData)</c> reads - the path about 650 indicators take. It used to be
+    /// stored and never consulted there: <c>new StockData(tickers, InputName.MedianPrice)</c> gave
+    /// close-based results from every one of them, silently (#182).
+    /// </para>
+    /// <para>
+    /// A chained series still wins. <c>CustomValuesList</c> is checked before <c>InputValues</c>, so
+    /// this only decides what an indicator reads when it is the first in a chain.
+    /// </para>
+    /// </remarks>
+    public InputName InputName
+    {
+        get => _inputName;
+        set
+        {
+            if (_inputName != value && !_inputValuesAssigned)
+            {
+                // The cached series was built from the previous name. An explicitly assigned
+                // InputValues is the caller's own series and is left alone.
+                _inputValues = null;
+            }
+
+            _inputName = value;
+        }
+    }
+
     public IndicatorName IndicatorName { get; set; }
 
     public List<double> InputValues
@@ -33,12 +65,37 @@ public class StockData : IStockData
         {
             if (_inputValues == null)
             {
-                _inputValues = new List<double>(ClosePrices);
+                _inputValues = InputName == InputName.Close
+                    ? new List<double>(ClosePrices)
+                    : BuildInputValues(InputName);
             }
 
             return _inputValues;
         }
-        set => _inputValues = value ?? new List<double>();
+        set
+        {
+            _inputValues = value ?? new List<double>();
+            _inputValuesAssigned = true;
+        }
+    }
+
+    /// <summary>
+    /// Builds the series an <see cref="Enums.InputName"/> names, with the same mapping the indicators
+    /// that take their own <c>inputName</c> parameter already use.
+    /// </summary>
+    /// <remarks>
+    /// Built over a separate <see cref="StockData"/> on the same prices. Two of the names -
+    /// <see cref="InputName.Midpoint"/> and <see cref="InputName.Midprice"/> - are indicators
+    /// themselves, and running one here would publish its results onto this object from inside a
+    /// property getter. The copy starts on Close, so building it cannot come back here.
+    /// </remarks>
+    private List<double> BuildInputValues(InputName inputName)
+    {
+        var source = new StockData(OpenPrices, HighPrices, LowPrices, ClosePrices, Volumes, Dates);
+        var (inputList, _, _, _, _, _) =
+            OoplesFinance.StockIndicators.Helpers.CalculationsHelper.GetInputValuesList(inputName, source);
+
+        return new List<double>(inputList);
     }
 
     public List<double> OpenPrices
