@@ -93,6 +93,7 @@ internal static partial class StatefulIndicatorFactory
             AtrSpecOptions atr => new AverageTrueRangeState(length: atr.Length, maType: atr.MaType),
             AdxSpecOptions adx => new AverageDirectionalIndexState(length: adx.Length, maType: adx.MaType),
             StdDevSpecOptions std => new StandardDeviationState(length: std.Length),
+            VarianceSpecOptions variance => new VarianceState(length: variance.Length),
             HistoricalVolatilitySpecOptions hv => new HistoricalVolatilityState(maType: hv.MaType, length: hv.Length),
             ChaikinVolatilitySpecOptions cv => new ChaikinVolatilityState(maType: cv.MaType, length1: cv.Length),
             UlcerIndexSpecOptions ui => new UlcerIndexState(length: ui.Length),

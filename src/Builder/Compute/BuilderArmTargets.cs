@@ -741,6 +741,7 @@ internal static class BuilderArmTargets
         [typeof(VariableIndexDynamicAverageSpecOptions)] = new(IndicatorName.VariableIndexDynamicAverage),
         [typeof(VariableLengthMovingAverageSpecOptions)] = new(IndicatorName.VariableLengthMovingAverage, null, new BuilderArgument("Length", "minLength"), new BuilderArgument("Length", "maxLength", v => v is int n ? n * 2 : v)),
         [typeof(VariableMovingAverageBandsSpecOptions)] = new(IndicatorName.VariableMovingAverageBands, "UpperBand"),
+        [typeof(VarianceSpecOptions)] = new(IndicatorName.Variance),
         [typeof(VerticalHorizontalFilterSpecOptions)] = new(IndicatorName.VerticalHorizontalFilter),
         [typeof(VerticalHorizontalMovingAverageSpecOptions)] = new(IndicatorName.VerticalHorizontalMovingAverage),
         [typeof(VervoortHeikenAshiCandlestickOscillatorSpecOptions)] = new(IndicatorName.VervoortHeikenAshiCandlestickOscillator),

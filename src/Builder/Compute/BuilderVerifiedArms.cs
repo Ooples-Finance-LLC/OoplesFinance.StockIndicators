@@ -162,6 +162,7 @@ internal static class BuilderVerifiedArms
         (typeof(UniChannelSpecOptions), IndicatorOutput.Primary),
         (typeof(UpsideDownsideVolumeSpecOptions), IndicatorOutput.Primary),
         (typeof(VariableIndexDynamicAverageSpecOptions), IndicatorOutput.Primary),
+        (typeof(VarianceSpecOptions), IndicatorOutput.Primary),
         (typeof(VidyaSpecOptions), IndicatorOutput.Primary),
         (typeof(VixTradingSystemSpecOptions), IndicatorOutput.Primary),
         (typeof(VmaSpecOptions), IndicatorOutput.Primary),

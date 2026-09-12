@@ -107,6 +107,66 @@ public static partial class Calculations
 
 
     /// <summary>
+    /// Calculates the Variance of the input series over a rolling window.
+    /// </summary>
+    /// <remarks>
+    /// The population variance of the window: the mean of the squared deviations from the window's own mean,
+    /// divided by the window length. This is the square of <see cref="CalculateStandardDeviationVolatility"/>'s
+    /// standard deviation, which divides by the same length. A window shorter than <paramref name="length"/> has
+    /// no variance defined for it, and publishes zero until the window fills.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVariance(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> varianceList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double variance = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                variance /= length;
+            }
+
+            varianceList.Add(variance);
+
+            var prevVariance1 = i >= 1 ? varianceList[i - 1] : 0;
+            var prevVariance2 = i >= 2 ? varianceList[i - 2] : 0;
+            var signal = GetCompareSignal(variance - prevVariance1, prevVariance1 - prevVariance2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Variance", varianceList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(varianceList);
+        stockData.IndicatorName = IndicatorName.Variance;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Ultimate Volatility Indicator
     /// </summary>
     /// <param name="stockData"></param>

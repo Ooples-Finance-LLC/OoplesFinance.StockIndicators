@@ -1464,6 +1464,8 @@ public enum IndicatorName
     [Category(IndicatorType.Volatility)]
     VariableMovingAverageBands,
     [Category(IndicatorType.Volatility)]
+    Variance,
+    [Category(IndicatorType.Volatility)]
     VerticalHorizontalFilter,
     [Category(IndicatorType.Trend)]
     VerticalHorizontalMovingAverage,
