@@ -420,35 +420,30 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(input.Length);
+        // The scatter about the fitted line, measured at each position in the window. Taken against the
+        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
+        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
+        using var regression = new RollingLeastSquares(length);
 
-        try
+        for (var i = 0; i < input.Length; i++)
         {
-            var linReg = linRegArray.AsSpan(0, input.Length);
-            MovingAverageCore.LinearRegression(input, linReg, length);
-
-            for (var i = 0; i < input.Length; i++)
+            var fit = regression.Next(input[i], isFinal: true);
+            if (i < length - 1)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
-                double sumSqDiff = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = input[j] - linReg[i];
-                    sumSqDiff += diff * diff;
-                }
-
-                output[i] = Math.Sqrt(sumSqDiff / length);
+                output[i] = 0;
+                continue;
             }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
+
+            double sumSqDiff = 0;
+            var first = i - length + 1;
+            for (var j = first; j <= i; j++)
+            {
+                var fitted = fit.Intercept + (fit.Slope * (j - first));
+                var diff = input[j] - fitted;
+                sumSqDiff += diff * diff;
+            }
+
+            output[i] = Math.Sqrt(sumSqDiff / length);
         }
     }
 

@@ -2833,18 +2833,20 @@ internal static class MovingAverageCore
                 continue;
             }
 
-            var product = 1.0;
+            // Summed as logarithms rather than multiplied: the product of a long window overflows a
+            // double once length * log10(price) passes about 308, and published infinity instead.
+            double logSum = 0;
             var count = 0;
             for (var j = 0; j < length; j++)
             {
                 var val = input[i - j];
                 if (val > 0)
                 {
-                    product *= val;
+                    logSum += Math.Log(val);
                     count++;
                 }
             }
-            output[i] = count > 0 ? Math.Pow(product, 1.0 / count) : 0;
+            output[i] = count > 0 ? Math.Exp(logSum / count) : 0;
         }
     }
 

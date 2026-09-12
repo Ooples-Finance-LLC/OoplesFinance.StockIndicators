@@ -250,7 +250,7 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
   moved far enough past it, and recognising it rewrites the bars back to the previous turning point. A
   streaming engine has already published those bars. `CalculateZigZag` computes it, and the Builder serves
   it from there; there is no `ZigZagState`.
-- **Nine more spec options are `[Obsolete]`** as having no effect, for the same reason as the 66 before
+- **Eight more spec options are `[Obsolete]`** as having no effect, for the same reason as the 66 before
   them - their indicator has no parameter to set: the true range, the range, net volume, the cumulative
   volume index, the demand index and the Ichimoku lagging span read one bar or two and take no length; the
   Keltner channel width always averages exponentially; and the zig zag's option was being passed as a
@@ -381,6 +381,25 @@ less today's) and took K and R from signed moves where he takes their sizes; the
 which has no previous bar, contributes 0. `CalculateAccumulativeSwingIndex` and `AccumulativeSwingIndexState`
 take Wilder's limit move T as `limitMove`; the default of 0 keeps each bar's range in its place, as before.
 ASI values and its signal change.
+
+**Four Builder arms computed something other than the indicator they name.** Each served a typed spec
+directly, so its values reached callers even while the spec named no indicator of its own:
+
+- **Yang-Zhang volatility** weighed the open-to-close variance by `0.34 / (1 + (n + 1) / (n - 1))`. The
+  published weight has 1.34 in that denominator rather than 1, which at a length of 20 makes it 0.1390
+  instead of 0.1615 and moves the published volatility by about one per cent on every bar. A length of one
+  also divided by zero, and is clamped to two: both variances are taken about a mean drawn from the same
+  window, so a single bar has no reading.
+- **The simple price zone** took a change out of its running sums one bar early, subtracting a raw price
+  that had never been added to them. From bar `length` onwards both sums were wrong for good, and the zone
+  left the range it is defined on, reading as high as 120 where it cannot pass 100.
+- **The standard error** measured every residual against the fitted line's endpoint rather than against the
+  line at each position in the window, so a window lying exactly on a sloped line reported scatter where
+  there is none.
+- **The geometric mean moving average** multiplied its window rather than summing logarithms, so a long
+  window overflowed a double and published infinity: at a price of 1000 that happens by a length of 103.
+
+Their batch and streaming twins are new here and never published the wrong values; these are the arms only.
 
 ### New Dependencies (net461 only)
 

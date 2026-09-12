@@ -38,21 +38,25 @@ public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var linReg = _regression.Next(value, isFinal).Last;
+        var fit = _regression.Next(value, isFinal);
 
         double standardError = 0;
         if (_window.Count + 1 >= _length)
         {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
+            // Summed oldest first with this bar last, as the batch engine sums its window, and each
+            // residual taken against the line where that bar sits. Against the line's endpoint instead,
+            // a window lying exactly on a sloped line reports scatter where there is none.
             var start = _window.Count - (_length - 1);
             double sumSquaredDiff = 0;
             for (var i = start; i < _window.Count; i++)
             {
-                var diff = _window[i] - linReg;
+                var fitted = fit.Intercept + (fit.Slope * (i - start));
+                var diff = _window[i] - fitted;
                 sumSquaredDiff += diff * diff;
             }
 
-            var currentDiff = value - linReg;
+            var currentFitted = fit.Intercept + (fit.Slope * (_length - 1));
+            var currentDiff = value - currentFitted;
             sumSquaredDiff += currentDiff * currentDiff;
 
             standardError = Sqrt(sumSquaredDiff / _length);

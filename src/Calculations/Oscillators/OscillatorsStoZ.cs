@@ -37,9 +37,12 @@ public static partial class Calculations
                 sumUp += change > 0 ? change : 0;
                 sumDown += change < 0 ? -change : 0;
 
-                if (i >= length)
+                // A change enters the sums only from the second bar, so the one leaving is
+                // change[i - length], which exists only once i - length >= 1. Removing it at
+                // i == length subtracted a raw price that was never added.
+                if (i >= length + 1)
                 {
-                    var prevChange = inputList[i - length] - (i > length ? inputList[i - length - 1] : 0);
+                    var prevChange = inputList[i - length] - inputList[i - length - 1];
                     sumUp -= prevChange > 0 ? prevChange : 0;
                     sumDown -= prevChange < 0 ? -prevChange : 0;
                 }

@@ -9008,9 +9008,12 @@ internal static class OscillatorCore
             sumUp += up;
             sumDn += dn;
 
-            if (i >= length)
+            // A change enters the sums only from the second bar, so the one leaving is
+            // change[i - length], which exists only once i - length >= 1. Removing it at
+            // i == length subtracted a raw price that was never added.
+            if (i >= length + 1)
             {
-                var prevChange = close[i - length] - (i > length ? close[i - length - 1] : 0);
+                var prevChange = close[i - length] - close[i - length - 1];
                 var prevUp = prevChange > 0 ? prevChange : 0;
                 var prevDn = prevChange < 0 ? -prevChange : 0;
                 sumUp -= prevUp;

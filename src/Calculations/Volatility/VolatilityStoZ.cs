@@ -312,20 +312,23 @@ public static partial class Calculations
         List<double> standardErrorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var linRegBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.LinearRegression(inputSpan, linRegBuffer.Span, length);
+        // The scatter about the fitted line, measured at each position in the window. Taken against the
+        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
+        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
+        using var regression = new RollingLeastSquares(length);
 
         for (var i = 0; i < count; i++)
         {
+            var fit = regression.Next(inputList[i], isFinal: true);
             double standardError = 0;
             if (i >= length - 1)
             {
-                var linReg = linRegBuffer.Span[i];
                 double sumSquaredDiff = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                var first = i - length + 1;
+                for (var j = first; j <= i; j++)
                 {
-                    var diff = inputList[j] - linReg;
+                    var fitted = fit.Intercept + (fit.Slope * (j - first));
+                    var diff = inputList[j] - fitted;
                     sumSquaredDiff += diff * diff;
                 }
 
@@ -418,7 +421,7 @@ public static partial class Calculations
     /// <remarks>
     /// The Yang-Zhang estimator, which adds what the others leave out: the overnight jump from one close to
     /// the next open, the move from open to close, and the Rogers-Satchell reading of the bar's range. The
-    /// weight k = 0.34 / (1 + (n + 1) / (n - 1)) is the one that makes the variance of the whole as small as
+    /// weight k = 0.34 / (1.34 + (n + 1) / (n - 1)) is the one that makes the variance of the whole as small
     /// it can be. The first two terms are sample variances, over one less than the window, because each is
     /// measured about a mean taken from the same window. Annualised by the root of 252.
     /// </remarks>
@@ -428,13 +431,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateYangZhangVolatility(this StockData stockData, int length = 20)
     {
-        length = Math.Max(length, 1);
+        // Both variances divide by length - 1, and so does k: a one-bar window has no reading.
+        length = Math.Max(length, 2);
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
         var count = inputList.Count;
         List<double> volatilityList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         var annualisationFactor = Sqrt(252);
-        var k = 0.34 / (1 + ((double)(length + 1) / (length - 1)));
+        var k = 0.34 / (1.34 + ((double)(length + 1) / (length - 1)));
 
         for (var i = 0; i < count; i++)
         {

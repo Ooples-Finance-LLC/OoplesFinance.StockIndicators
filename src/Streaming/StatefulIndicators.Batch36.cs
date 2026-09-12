@@ -34,8 +34,9 @@ public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDispos
 
     public YangZhangVolatilityState(int length = 20)
     {
-        _length = Math.Max(1, length);
-        _k = 0.34 / (1 + ((double)(_length + 1) / (_length - 1)));
+        // Both variances divide by _length - 1, and so does _k: a one-bar window has no reading.
+        _length = Math.Max(2, length);
+        _k = 0.34 / (1.34 + ((double)(_length + 1) / (_length - 1)));
         _overnight = new PooledRingBuffer<double>(_length);
         _openToClose = new PooledRingBuffer<double>(_length);
         _rogersSatchell = new PooledRingBuffer<double>(_length);

@@ -109,12 +109,14 @@ public sealed class GeometricMeanMovingAverageState : IStreamingIndicatorState, 
         }
         else
         {
+            // Summed as logarithms rather than multiplied, as the batch engine and the arm now do: the
+            // product of a long window overflows a double once length * log10(price) passes about 308.
             var start = _window.Count - (_length - 1);
-            var product = 1.0;
+            double logSum = 0;
             var used = 0;
             if (value > 0)
             {
-                product *= value;
+                logSum += Math.Log(value);
                 used++;
             }
 
@@ -123,12 +125,12 @@ public sealed class GeometricMeanMovingAverageState : IStreamingIndicatorState, 
                 var windowValue = _window[i];
                 if (windowValue > 0)
                 {
-                    product *= windowValue;
+                    logSum += Math.Log(windowValue);
                     used++;
                 }
             }
 
-            gmma = used > 0 ? Math.Pow(product, 1.0 / used) : 0;
+            gmma = used > 0 ? Math.Exp(logSum / used) : 0;
         }
 
         if (isFinal)

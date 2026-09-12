@@ -179,13 +179,11 @@ public sealed class SimplePriceZoneState : IStreamingIndicatorState, IDisposable
             sumUp += change > 0 ? change : 0;
             sumDown += change < 0 ? -change : 0;
 
-            if (_barIndex >= _length)
+            // A change enters the sums only from the second bar, so the one leaving is the change into
+            // the bar _length back, which exists only once the window holds the bar before it too.
+            if (_barIndex >= _length + 1)
             {
-                // The change leaving the window: the value _length bars back against the one before it, which
-                // the batch engine takes as zero when there is no bar before it.
-                var leaving = _window.Count >= _length + 1 ? _window[1] : _window[0];
-                var beforeLeaving = _window.Count >= _length + 1 ? _window[0] : 0;
-                var prevChange = leaving - beforeLeaving;
+                var prevChange = _window[1] - _window[0];
                 sumUp -= prevChange > 0 ? prevChange : 0;
                 sumDown -= prevChange < 0 ? -prevChange : 0;
             }

@@ -88,19 +88,22 @@ public static partial class Calculations
             }
             else
             {
-                var product = 1.0;
+                // Summed as logarithms rather than multiplied: the product of a long window overflows
+                // a double once length * log10(price) passes about 308, and published infinity. Math.Log
+                // rather than the guarded Log, since the value is already known to be positive.
+                double logSum = 0;
                 var used = 0;
                 for (var j = 0; j < length; j++)
                 {
                     var value = inputList[i - j];
                     if (value > 0)
                     {
-                        product *= value;
+                        logSum += Math.Log(value);
                         used++;
                     }
                 }
 
-                gmma = used > 0 ? Math.Pow(product, 1.0 / used) : 0;
+                gmma = used > 0 ? Math.Exp(logSum / used) : 0;
             }
 
             gmmaList.Add(gmma);
