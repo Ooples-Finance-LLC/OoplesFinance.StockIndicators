@@ -160,7 +160,10 @@ public static partial class Calculations
                     }
                 }
 
-                rawWilliamsR = highestHigh != lowestLow
+                // Greater than, not unequal to: the window's highest high is never below its lowest low, so
+                // the two agree on every real window, and the comparison stays exact rather than approximate.
+                // It also keeps a window of nothing but NaN on the midpoint instead of dividing by -infinity.
+                rawWilliamsR = highestHigh > lowestLow
                     ? (highestHigh - inputList[i]) / (highestHigh - lowestLow) * -100
                     : -50;
             }

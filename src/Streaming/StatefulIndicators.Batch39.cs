@@ -332,7 +332,9 @@ public sealed class SmoothedWilliamsRState : IStreamingIndicatorState, IDisposab
                 lowestLow = bar.Low;
             }
 
-            rawWilliamsR = highestHigh != lowestLow
+            // Greater than, not unequal to, for the reason the batch gives: the highest high is never below
+            // the lowest low, so this is the same test made exact, and an all-NaN window keeps the midpoint.
+            rawWilliamsR = highestHigh > lowestLow
                 ? (highestHigh - value) / (highestHigh - lowestLow) * -100
                 : -50;
         }
