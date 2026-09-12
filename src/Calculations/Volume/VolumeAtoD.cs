@@ -4,6 +4,60 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Cumulative Volume Index
+    /// </summary>
+    /// <remarks>
+    /// A running total that adds the bar's volume when it closed up and subtracts it when it closed down,
+    /// leaving the total alone on a bar that closed unchanged. The first bar has nothing to compare with, so
+    /// it starts the total at zero. Because it accumulates a change rather than a level, it settles on a
+    /// market that stops moving instead of drifting on for ever.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCumulativeVolumeIndex(this StockData stockData)
+    {
+        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> cviList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double cvi = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (i >= 1)
+            {
+                var currentValue = inputList[i];
+                var prevValue = inputList[i - 1];
+                if (currentValue > prevValue)
+                {
+                    cvi += volumeList[i];
+                }
+                else if (currentValue < prevValue)
+                {
+                    cvi -= volumeList[i];
+                }
+            }
+
+            cviList.Add(cvi);
+
+            var prevCvi1 = i >= 1 ? cviList[i - 1] : 0;
+            var prevCvi2 = i >= 2 ? cviList[i - 2] : 0;
+            var signal = GetCompareSignal(cvi - prevCvi1, prevCvi1 - prevCvi2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Cvi", cviList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(cviList);
+        stockData.IndicatorName = IndicatorName.CumulativeVolumeIndex;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Chaikin Money Flow
     /// </summary>
     /// <param name="stockData">The stock data.</param>

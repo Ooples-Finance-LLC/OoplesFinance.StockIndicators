@@ -210,6 +210,128 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Standard Error of the input series about its own regression line.
+    /// </summary>
+    /// <remarks>
+    /// The root mean square distance from the window's values to the straight line fitted through them, which
+    /// is how far the series strays from its own trend. Distinct from
+    /// <see cref="CalculateStandardErrorOfTheMean"/>, which measures how precisely a mean is known rather than
+    /// how well a line fits. A window shorter than <paramref name="length"/> has no line to fit, and publishes
+    /// zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateStandardError(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> standardErrorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var linRegBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.LinearRegression(inputSpan, linRegBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            double standardError = 0;
+            if (i >= length - 1)
+            {
+                var linReg = linRegBuffer.Span[i];
+                double sumSquaredDiff = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - linReg;
+                    sumSquaredDiff += diff * diff;
+                }
+
+                standardError = Sqrt(sumSquaredDiff / length);
+            }
+
+            standardErrorList.Add(standardError);
+
+            var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;
+            var prevError2 = i >= 2 ? standardErrorList[i - 2] : 0;
+            var signal = GetCompareSignal(standardError - prevError1, prevError1 - prevError2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "StandardError", standardErrorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(standardErrorList);
+        stockData.IndicatorName = IndicatorName.StandardError;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Standard Error of the Mean of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The window's standard deviation divided by the root of its length: how precisely the window's mean is
+    /// known, which narrows as the window lengthens even when the spread does not. Distinct from
+    /// <see cref="CalculateStandardError"/>, which measures the scatter about a fitted line instead.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateStandardErrorOfTheMean(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> standardErrorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var sqrtLength = Sqrt(length);
+
+        for (var i = 0; i < count; i++)
+        {
+            double stdDev = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                stdDev = Sqrt(variance / length);
+            }
+
+            var standardError = stdDev / sqrtLength;
+            standardErrorList.Add(standardError);
+
+            var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;
+            var prevError2 = i >= 2 ? standardErrorList[i - 2] : 0;
+            var signal = GetCompareSignal(standardError - prevError1, prevError1 - prevError2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Sem", standardErrorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(standardErrorList);
+        stockData.IndicatorName = IndicatorName.StandardErrorOfTheMean;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Ultimate Volatility Indicator
     /// </summary>
     /// <param name="stockData"></param>

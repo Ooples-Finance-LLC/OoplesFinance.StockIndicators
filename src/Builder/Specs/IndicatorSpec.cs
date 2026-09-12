@@ -2473,6 +2473,7 @@ public sealed class NetVolumeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: NetVolume has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2920,6 +2921,7 @@ public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: CumulativeVolumeIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 

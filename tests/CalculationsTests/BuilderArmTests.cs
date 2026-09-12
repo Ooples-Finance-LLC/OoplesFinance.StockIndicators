@@ -45,7 +45,7 @@ public sealed class BuilderArmTests : GlobalTestData
     /// The typed specs whose indicator the library does not have yet, each to be written in both engines.
     /// </summary>
     /// <remarks>
-    /// These 39 arms compute something no batch indicator computes - the average day range, Yang-Zhang
+    /// These 31 arms compute something no batch indicator computes - the average day range, Yang-Zhang
     /// volatility, a zig zag - so there is nothing to bind them to and nothing to hold them to.
     /// Every one is promoted to a real indicator, batch and streaming, in the follow-up; the list is here so
     /// that it shrinks visibly and cannot grow unnoticed.
@@ -54,21 +54,21 @@ public sealed class BuilderArmTests : GlobalTestData
     {
         "AroonDownSpecOptions", "AroonUpSpecOptions", "AtrChannelWidthSpecOptions",
         "AtrPercentSpecOptions", "CloseToCloseVolatilitySpecOptions",
-        "CumulativeVolumeIndexSpecOptions",
+       
         "DemandIndexSpecOptions", "ElderImpulseSystemSpecOptions", "GeoMaSpecOptions",
         "GeometricMeanMovingAverageSpecOptions", "HarmonicMeanMovingAverageSpecOptions",
         "IchimokuChikouSpanSpecOptions", "KeltnerChannelWidthSpecOptions",
         "MedianMaSpecOptions", "NatrSpecOptions",
-        "NetVolumeSpecOptions", "NormalizedMacdSpecOptions", "NormalizedVolumeSpecOptions",
+        "NormalizedMacdSpecOptions",
         "ParkinsonVolatilitySpecOptions", "PpoMaSpecOptions", "PriceMomentumSpecOptions",
         "RelativeVolatilityIndexHighSpecOptions",
         "RelativeVolatilityIndexLowSpecOptions", "RogersSatchellVolatilitySpecOptions",
         "SimplePriceZoneSpecOptions",
-        "SmoothedWilliamsRSpecOptions", "StandardErrorCoreSpecOptions", "StandardErrorSpecOptions",
+        "SmoothedWilliamsRSpecOptions",
         "SwingIndexSpecOptions", "TrueRangeAdjustedExponentialMovingAverageSpecOptions",
         "TypicalPriceVolatilitySpecOptions", "VolatilityStopSpecOptions",
-        "VolumeMomentumOscillatorSpecOptions", "VolumeMomentumSpecOptions", "VolumeOscillatorSpecOptions",
-        "VolumeZoneOscillatorSpecOptions", "VrocSpecOptions", "YangZhangVolatilitySpecOptions", "ZigZagSpecOptions",
+        "VolumeMomentumOscillatorSpecOptions",
+        "VolumeZoneOscillatorSpecOptions", "YangZhangVolatilitySpecOptions", "ZigZagSpecOptions",
     };
 
     [Fact]

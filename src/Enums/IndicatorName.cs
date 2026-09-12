@@ -211,6 +211,8 @@ public enum IndicatorName
     CubedWeightedMovingAverage,
     [Category(IndicatorType.Trend)]
     CumulativeSum,
+    [Category(IndicatorType.Volume)]
+    CumulativeVolumeIndex,
     [Category(IndicatorType.Volatility)]
     DEnvelope,
     [Category(IndicatorType.Volatility)]
@@ -1005,10 +1007,14 @@ public enum IndicatorName
     NegativeVolumeDisparityIndicator,
     [Category(IndicatorType.Volume)]
     NegativeVolumeIndex,
+    [Category(IndicatorType.Volume)]
+    NetVolume,
     [Category(IndicatorType.Trend)]
     NickRypockTrailingReverse,
     [Category(IndicatorType.Momentum)]
     NormalizedRelativeVigorIndex,
+    [Category(IndicatorType.Volume)]
+    NormalizedVolume,
     [Category(IndicatorType.Momentum)]
     NthOrderDifferencingOscillator,
     [Category(IndicatorType.Momentum)]
@@ -1307,6 +1313,10 @@ public enum IndicatorName
     StandardDeviationChannel,
     [Category(IndicatorType.Volatility)]
     StandardDeviationVolatility,
+    [Category(IndicatorType.Volatility)]
+    StandardError,
+    [Category(IndicatorType.Volatility)]
+    StandardErrorOfTheMean,
     [Category(IndicatorType.SupportAndResistance)]
     StandardPivotPoints,
     [Category(IndicatorType.Trend)]
@@ -1538,9 +1548,15 @@ public enum IndicatorName
     [Category(IndicatorType.Volume)]
     VolumeFlowIndicator,
     [Category(IndicatorType.Volume)]
+    VolumeMomentum,
+    [Category(IndicatorType.Volume)]
+    VolumeOscillator,
+    [Category(IndicatorType.Volume)]
     VolumePositiveNegativeIndicator,
     [Category(IndicatorType.Volume)]
     VolumePriceConfirmationIndicator,
+    [Category(IndicatorType.Volume)]
+    VolumeRateOfChange,
     [Category(IndicatorType.Trend)]
     VolumeWeightedAveragePrice,
     [Category(IndicatorType.Trend)]

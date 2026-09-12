@@ -1,8 +1,103 @@
 ﻿
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
+
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
 {
+    /// <summary>
+    /// Calculates the Net Volume
+    /// </summary>
+    /// <remarks>
+    /// The bar's volume signed by its direction: positive when it closed up, negative when it closed down,
+    /// and zero when it closed unchanged. The first bar has nothing to compare with and is zero. This is the
+    /// per-bar quantity the cumulative volume index accumulates.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNetVolume(this StockData stockData)
+    {
+        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> netVolumeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double netVolume = 0;
+            if (i >= 1)
+            {
+                var currentValue = inputList[i];
+                var prevValue = inputList[i - 1];
+                netVolume = currentValue > prevValue ? volumeList[i] : currentValue < prevValue ? -volumeList[i] : 0;
+            }
+
+            netVolumeList.Add(netVolume);
+
+            var prevNetVolume1 = i >= 1 ? netVolumeList[i - 1] : 0;
+            var prevNetVolume2 = i >= 2 ? netVolumeList[i - 2] : 0;
+            var signal = GetCompareSignal(netVolume - prevNetVolume1, prevNetVolume1 - prevNetVolume2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "NetVolume", netVolumeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(netVolumeList);
+        stockData.IndicatorName = IndicatorName.NetVolume;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Normalized Volume
+    /// </summary>
+    /// <remarks>
+    /// The bar's volume as a multiple of the average volume of the last <paramref name="length"/> bars: one
+    /// when the bar is typical, two when it traded twice its recent average. A bar before the average has
+    /// filled, or one whose average is zero, has nothing to be a multiple of and publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNormalizedVolume(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = volumeList.Count;
+        List<double> normalizedVolumeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
+        var smaBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.SimpleMovingAverage(volumeSpan, smaBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var averageVolume = smaBuffer.Span[i];
+            var normalizedVolume = averageVolume != 0 ? volumeList[i] / averageVolume : 0;
+            normalizedVolumeList.Add(normalizedVolume);
+
+            var prevNormalized1 = i >= 1 ? normalizedVolumeList[i - 1] : 0;
+            var prevNormalized2 = i >= 2 ? normalizedVolumeList[i - 2] : 0;
+            var signal = GetCompareSignal(normalizedVolume - prevNormalized1, prevNormalized1 - prevNormalized2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "NormalizedVolume", normalizedVolumeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(normalizedVolumeList);
+        stockData.IndicatorName = IndicatorName.NormalizedVolume;
+
+        return stockData;
+    }
+
     /// <summary>
     /// Calculates the Money Flow Index
     /// </summary>
