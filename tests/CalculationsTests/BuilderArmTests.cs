@@ -45,30 +45,30 @@ public sealed class BuilderArmTests : GlobalTestData
     /// The typed specs whose indicator the library does not have yet, each to be written in both engines.
     /// </summary>
     /// <remarks>
-    /// These 57 arms compute something no batch indicator computes - the highest high, a rolling variance,
-    /// Yang-Zhang volatility, a zig zag - so there is nothing to bind them to and nothing to hold them to.
+    /// These 9 arms compute something no batch indicator computes - the average day range, Yang-Zhang
+    /// volatility, a zig zag - so there is nothing to bind them to and nothing to hold them to.
     /// Every one is promoted to a real indicator, batch and streaming, in the follow-up; the list is here so
     /// that it shrinks visibly and cannot grow unnoticed.
     /// </remarks>
     private static readonly HashSet<string> AwaitingPromotion = new(StringComparer.Ordinal)
     {
-        "AdrSpecOptions", "AroonDownSpecOptions", "AroonUpSpecOptions", "AtrChannelWidthSpecOptions",
-        "AtrPercentSpecOptions", "AverageDayRangeSpecOptions", "CloseToCloseVolatilitySpecOptions",
-        "CoefficientOfVariationSpecOptions", "CumulativeSumSpecOptions", "CumulativeVolumeIndexSpecOptions",
-        "DemandIndexSpecOptions", "DownsideDeviationSpecOptions", "ElderImpulseSystemSpecOptions", "GeoMaSpecOptions",
-        "GeometricMeanMovingAverageSpecOptions", "HarmonicMeanMovingAverageSpecOptions", "HighestHighSpecOptions",
-        "IchimokuChikouSpanSpecOptions", "KeltnerChannelWidthSpecOptions", "LogReturnsSpecOptions",
-        "LowestLowSpecOptions", "MedianMaSpecOptions", "MedianValueSpecOptions", "NatrSpecOptions",
-        "NetVolumeSpecOptions", "NormalizedMacdSpecOptions", "NormalizedVolumeSpecOptions",
-        "ParkinsonVolatilitySpecOptions", "PercentRankSpecOptions", "PpoMaSpecOptions", "PriceMomentumSpecOptions",
-        "RSquaredSpecOptions", "RangeSpecOptions", "RelativeVolatilityIndexHighSpecOptions",
-        "RelativeVolatilityIndexLowSpecOptions", "RogersSatchellVolatilitySpecOptions", "RollingMaxSpecOptions",
-        "RollingMinSpecOptions", "SimplePriceZoneSpecOptions", "SimpleReturnsSpecOptions", "SkewnessSpecOptions",
-        "SmoothedWilliamsRSpecOptions", "StandardErrorCoreSpecOptions", "StandardErrorSpecOptions",
-        "SwingIndexSpecOptions", "TrueRangeAdjustedExponentialMovingAverageSpecOptions", "TrueRangeSpecOptions",
-        "TypicalPriceVolatilitySpecOptions", "VarianceSpecOptions", "VolatilityStopSpecOptions",
-        "VolumeMomentumOscillatorSpecOptions", "VolumeMomentumSpecOptions", "VolumeOscillatorSpecOptions",
-        "VolumeZoneOscillatorSpecOptions", "VrocSpecOptions", "YangZhangVolatilitySpecOptions", "ZigZagSpecOptions",
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
     };
 
     [Fact]

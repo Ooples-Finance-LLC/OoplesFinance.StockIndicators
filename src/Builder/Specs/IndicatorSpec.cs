@@ -1215,6 +1215,7 @@ public sealed class TrueRangeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: TrueRange has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2472,6 +2473,7 @@ public sealed class NetVolumeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: NetVolume has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2726,6 +2728,7 @@ public sealed class ZigZagSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ZigZag takes a deviation percentage and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2753,6 +2756,7 @@ public sealed class RangeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: Range has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2812,6 +2816,7 @@ public sealed class DemandIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DemandIndex reads one bar at a time and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2918,6 +2923,7 @@ public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: CumulativeVolumeIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5702,6 +5708,7 @@ public sealed class IchimokuChikouSpanSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: IchimokuChikouSpan is the close itself and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6511,6 +6518,8 @@ public sealed class KeltnerChannelWidthSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+
+    [Obsolete("Has no effect: KeltnerChannelWidth averages exponentially and has no parameter this option could set. It will be removed in the next major version.")]
     public MovingAvgType MaType { get; }
 }
 

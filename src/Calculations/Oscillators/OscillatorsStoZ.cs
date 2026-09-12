@@ -6,6 +6,358 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Simple Price Zone.
+    /// </summary>
+    /// <remarks>
+    /// The balance of the last <paramref name="length"/> bars' rises against their falls, as a percentage
+    /// running from a hundred when every bar rose to minus a hundred when every bar fell. It is the relative
+    /// strength index's arithmetic without its smoothing: the rises and the falls are summed over a plain
+    /// window rather than averaged forward.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSimplePriceZone(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> zoneList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double sumUp = 0;
+        double sumDown = 0;
+        for (var i = 0; i < count; i++)
+        {
+            double zone = 0;
+            if (i >= 1)
+            {
+                var change = inputList[i] - inputList[i - 1];
+                sumUp += change > 0 ? change : 0;
+                sumDown += change < 0 ? -change : 0;
+
+                // A change enters the sums only from the second bar, so the one leaving is
+                // change[i - length], which exists only once i - length >= 1. Removing it at
+                // i == length subtracted a raw price that was never added.
+                if (i >= length + 1)
+                {
+                    var prevChange = inputList[i - length] - inputList[i - length - 1];
+                    sumUp -= prevChange > 0 ? prevChange : 0;
+                    sumDown -= prevChange < 0 ? -prevChange : 0;
+                }
+
+                var total = sumUp + sumDown;
+                zone = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
+            }
+
+            zoneList.Add(zone);
+
+            var prevZone1 = i >= 1 ? zoneList[i - 1] : 0;
+            var prevZone2 = i >= 2 ? zoneList[i - 2] : 0;
+            var signal = GetCompareSignal(zone - prevZone1, prevZone1 - prevZone2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Spz", zoneList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(zoneList);
+        stockData.IndicatorName = IndicatorName.SimplePriceZone;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Swing Index.
+    /// </summary>
+    /// <remarks>
+    /// Wilder's swing index of each bar against the bar before it, computed by the same
+    /// <c>WilderSwingIndex</c> both engines use, so the two agree to the last bit and so that the index and
+    /// the accumulative swing index that totals it cannot part company. Where the market has no limit move,
+    /// the bar's own range stands in for one. The first bar has no bar behind it and reads zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="limitMove"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSwingIndex(this StockData stockData, double limitMove = 0)
+    {
+        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> swingIndexList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var swingIndex = i >= 1
+                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1],
+                    inputList[i - 1], limitMove)
+                : 0;
+            swingIndexList.Add(swingIndex);
+
+            var prevSwing1 = i >= 1 ? swingIndexList[i - 1] : 0;
+            var prevSwing2 = i >= 2 ? swingIndexList[i - 2] : 0;
+            var signal = GetCompareSignal(swingIndex - prevSwing1, prevSwing1 - prevSwing2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Si", swingIndexList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(swingIndexList);
+        stockData.IndicatorName = IndicatorName.SwingIndex;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Smoothed Williams R.
+    /// </summary>
+    /// <remarks>
+    /// Williams %R, smoothed exponentially: where the close sits in the window's range, from zero at the top
+    /// to a hundred below it at the bottom, then run through an average of <paramref name="smoothLength"/> to
+    /// take the jitter out. A window with no range to speak of, and every bar before the window fills, reads
+    /// the midpoint of minus fifty rather than an edge of the range.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="smoothLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSmoothedWilliamsR(this StockData stockData, int length = 14, int smoothLength = 3)
+    {
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> smoothedList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var k = 2.0 / (smoothLength + 1);
+        double prevSmoothed = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            double rawWilliamsR;
+            if (i < length - 1)
+            {
+                rawWilliamsR = -50;
+            }
+            else
+            {
+                var highestHigh = double.MinValue;
+                var lowestLow = double.MaxValue;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (highList[j] > highestHigh)
+                    {
+                        highestHigh = highList[j];
+                    }
+
+                    if (lowList[j] < lowestLow)
+                    {
+                        lowestLow = lowList[j];
+                    }
+                }
+
+                // Greater than, not unequal to: the window's highest high is never below its lowest low, so
+                // the two agree on every real window, and the comparison stays exact rather than approximate.
+                // It also keeps a window of nothing but NaN on the midpoint instead of dividing by -infinity.
+                rawWilliamsR = highestHigh > lowestLow
+                    ? (highestHigh - inputList[i]) / (highestHigh - lowestLow) * -100
+                    : -50;
+            }
+
+            var smoothed = i == 0 ? rawWilliamsR : (rawWilliamsR * k) + (prevSmoothed * (1 - k));
+            prevSmoothed = smoothed;
+            smoothedList.Add(smoothed);
+
+            var prevSmoothed1 = i >= 1 ? smoothedList[i - 1] : 0;
+            var prevSmoothed2 = i >= 2 ? smoothedList[i - 2] : 0;
+            var signal = GetCompareSignal(smoothed - prevSmoothed1, prevSmoothed1 - prevSmoothed2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Swr", smoothedList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(smoothedList);
+        stockData.IndicatorName = IndicatorName.SmoothedWilliamsR;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Simple Returns of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The change over <paramref name="length"/> bars as a fraction of the earlier value. A bar with no value
+    /// that far back, or one whose earlier value is zero and so has no return to speak of, publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSimpleReturns(this StockData stockData, int length = 1)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> returnsList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= length ? inputList[i - length] : 0;
+            var returns = i >= length && prevValue != 0 ? (inputList[i] - prevValue) / prevValue : 0;
+            returnsList.Add(returns);
+
+            var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
+            var prevReturns2 = i >= 2 ? returnsList[i - 2] : 0;
+            var signal = GetCompareSignal(returns - prevReturns1, prevReturns1 - prevReturns2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Returns", returnsList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(returnsList);
+        stockData.IndicatorName = IndicatorName.SimpleReturns;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Skewness of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The third moment of the window about its own mean, divided by the cube of its standard deviation:
+    /// how lopsided the window is, and which way. Both the moment and the deviation are taken over the
+    /// window's own length, so this is the population skewness. A window with no spread at all has no shape
+    /// to describe and publishes zero, as does a window shorter than <paramref name="length"/>.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSkewness(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> skewnessList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double skewness = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double sumSquaredDev = 0;
+                double sumCubedDev = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var dev = inputList[j] - mean;
+                    sumSquaredDev += dev * dev;
+                    sumCubedDev += dev * dev * dev;
+                }
+
+                var stdDev = Sqrt(sumSquaredDev / length);
+                skewness = stdDev != 0 ? sumCubedDev / length / (stdDev * stdDev * stdDev) : 0;
+            }
+
+            skewnessList.Add(skewness);
+
+            var prevSkewness1 = i >= 1 ? skewnessList[i - 1] : 0;
+            var prevSkewness2 = i >= 2 ? skewnessList[i - 2] : 0;
+            var signal = GetCompareSignal(skewness - prevSkewness1, prevSkewness1 - prevSkewness2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Skewness", skewnessList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(skewnessList);
+        stockData.IndicatorName = IndicatorName.Skewness;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Typical Price Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The deviation of the typical price - the mean of the bar's high, low and close - about its own
+    /// average over the window. It is quoted in the price's own units rather than annualised, so it reads as
+    /// a distance rather than a rate. A window shorter than <paramref name="length"/> publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateTypicalPriceVolatility(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += (highList[j] + lowList[j] + inputList[j]) / 3;
+                }
+
+                var mean = sum / length;
+                double sumSquaredDev = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var typicalPrice = (highList[j] + lowList[j] + inputList[j]) / 3;
+                    var dev = typicalPrice - mean;
+                    sumSquaredDev += dev * dev;
+                }
+
+                volatility = Sqrt(sumSquaredDev / length);
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Tpv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.TypicalPriceVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Zweig Market Breadth Indicator
     /// </summary>
     /// <param name="stockData"></param>
@@ -294,7 +646,7 @@ public static partial class Calculations
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             trList.Add(tr);
         }
 
@@ -2408,7 +2760,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var v1 = i >= 1 && currentValue > prevValue ? tr / MinPastValues(i, 1, currentValue - prevValue) : tr;
             v1List.Add(v1);
@@ -2578,7 +2930,7 @@ public static partial class Calculations
             var currentClose = inputList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             var prevSro1 = i >= 1 ? sroList[i - 1] : 0;
             var prevSro2 = i >= 2 ? sroList[i - 2] : 0;
 

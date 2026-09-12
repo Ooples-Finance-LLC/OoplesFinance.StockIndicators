@@ -6,6 +6,326 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Normalized Macd.
+    /// </summary>
+    /// <remarks>
+    /// The gap between a fast and a slow exponential average as a percentage of the slow one, which is what
+    /// makes it comparable between instruments where the raw convergence and divergence is not. Both averages
+    /// start at the first bar's value rather than warming up, so the reading is meaningful at once, and the
+    /// first bar, which has no change behind it, publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="fastLength"></param>
+    /// <param name="slowLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNormalizedMacd(this StockData stockData, int fastLength = 12, int slowLength = 26)
+    {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> macdList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var fastK = 2.0 / (fastLength + 1);
+        var slowK = 2.0 / (slowLength + 1);
+        var fastEma = count > 0 ? inputList[0] : 0;
+        var slowEma = count > 0 ? inputList[0] : 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            double macd = 0;
+            if (i >= 1)
+            {
+                fastEma = (inputList[i] * fastK) + (fastEma * (1 - fastK));
+                slowEma = (inputList[i] * slowK) + (slowEma * (1 - slowK));
+                macd = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+            }
+
+            macdList.Add(macd);
+
+            var prevMacd1 = i >= 1 ? macdList[i - 1] : 0;
+            var prevMacd2 = i >= 2 ? macdList[i - 2] : 0;
+            var signal = GetCompareSignal(macd - prevMacd1, prevMacd1 - prevMacd2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "NormalizedMacd", macdList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(macdList);
+        stockData.IndicatorName = IndicatorName.NormalizedMacd;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Relative Volatility Index High.
+    /// </summary>
+    /// <remarks>
+    /// The relative volatility index read from each bar's high: the standard deviation is sorted into the
+    /// bars that rose and the bars that fell, and the reading is the share of it that belongs to the risers.
+    /// It is the relative strength index with deviation in place of price change, so it measures the
+    /// direction of volatility rather than the direction of price. The
+    /// <see cref="CalculateRelativeVolatilityIndexLow"/> reads the same measure from each bar's low, and the
+    /// two are averaged by the relative volatility index itself.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="stdDevLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRelativeVolatilityIndexHigh(this StockData stockData, int length = 14, int stdDevLength = 10)
+    {
+        var (_, highList, _, _, _) = GetInputValuesList(stockData);
+        return CalculateRelativeVolatilityIndexOn(stockData, highList, length, stdDevLength,
+            "RviHigh", IndicatorName.RelativeVolatilityIndexHigh);
+    }
+
+    /// <summary>
+    /// Calculates the Relative Volatility Index Low.
+    /// </summary>
+    /// <remarks>
+    /// The relative volatility index read from each bar's low, and the mirror of
+    /// <see cref="CalculateRelativeVolatilityIndexHigh"/>.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="stdDevLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRelativeVolatilityIndexLow(this StockData stockData, int length = 14, int stdDevLength = 10)
+    {
+        var (_, _, lowList, _, _) = GetInputValuesList(stockData);
+        return CalculateRelativeVolatilityIndexOn(stockData, lowList, length, stdDevLength,
+            "RviLow", IndicatorName.RelativeVolatilityIndexLow);
+    }
+
+    /// <summary>
+    /// The relative volatility index of one series, which the high and the low readings share.
+    /// </summary>
+    private static StockData CalculateRelativeVolatilityIndexOn(StockData stockData, List<double> series, int length,
+        int stdDevLength, string outputKey, IndicatorName name)
+    {
+        length = Math.Max(length, 1);
+        stdDevLength = Math.Max(stdDevLength, 1);
+        var count = series.Count;
+        List<double> rviList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var seriesSpan = SpanCompat.AsReadOnlySpan(series);
+        var stdDevBuffer = SpanCompat.CreateOutputBuffer(count);
+        VolatilityCore.StandardDeviation(seriesSpan, stdDevBuffer.Span, stdDevLength);
+
+        double upSum = 0, downSum = 0, upEma = 0, downEma = 0;
+        var k = 1.0 / length;
+        for (var i = 0; i < count; i++)
+        {
+            double rvi = 0;
+            if (i >= 1)
+            {
+                var change = series[i] - series[i - 1];
+                var upMove = change > 0 ? stdDevBuffer.Span[i] : 0;
+                var downMove = change < 0 ? stdDevBuffer.Span[i] : 0;
+
+                if (i < length)
+                {
+                    upSum += upMove;
+                    downSum += downMove;
+                }
+                else if (i == length)
+                {
+                    upSum += upMove;
+                    downSum += downMove;
+                    upEma = upSum / length;
+                    downEma = downSum / length;
+                    rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
+                }
+                else
+                {
+                    upEma = (upMove * k) + (upEma * (1 - k));
+                    downEma = (downMove * k) + (downEma * (1 - k));
+                    rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
+                }
+            }
+
+            rviList.Add(rvi);
+
+            var prevRvi1 = i >= 1 ? rviList[i - 1] : 0;
+            var prevRvi2 = i >= 2 ? rviList[i - 2] : 0;
+            var signal = GetCompareSignal(rvi - prevRvi1, prevRvi1 - prevRvi2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { outputKey, rviList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(rviList);
+        stockData.IndicatorName = name;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Log Returns of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The natural logarithm of the ratio of a value to the one <paramref name="length"/> bars before it. A bar
+    /// with no value that far back, or with a value of zero or less at either end, has no logarithm to take and
+    /// publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateLogReturns(this StockData stockData, int length = 1)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> returnsList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = inputList[i];
+            var prevValue = i >= length ? inputList[i - length] : 0;
+            var returns = i >= length && prevValue > 0 && currentValue > 0 ? Log(currentValue / prevValue) : 0;
+            returnsList.Add(returns);
+
+            var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
+            var prevReturns2 = i >= 2 ? returnsList[i - 2] : 0;
+            var signal = GetCompareSignal(returns - prevReturns1, prevReturns1 - prevReturns2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Returns", returnsList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(returnsList);
+        stockData.IndicatorName = IndicatorName.LogReturns;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Median Value of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The middle value of the window once sorted, averaging the middle pair when the length is even. Until
+    /// the window fills there is no median to take, and the bar publishes its own value rather than zero, so
+    /// the series starts on the scale it will keep.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateMedianValue(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> medianList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var window = new double[length];
+
+        for (var i = 0; i < count; i++)
+        {
+            double median;
+            if (i < length - 1)
+            {
+                median = inputList[i];
+            }
+            else
+            {
+                for (var j = 0; j < length; j++)
+                {
+                    window[j] = inputList[i - length + 1 + j];
+                }
+
+                Array.Sort(window);
+                median = length % 2 == 0 ? (window[(length / 2) - 1] + window[length / 2]) / 2 : window[length / 2];
+            }
+
+            medianList.Add(median);
+
+            var prevMedian1 = i >= 1 ? medianList[i - 1] : 0;
+            var prevMedian2 = i >= 2 ? medianList[i - 2] : 0;
+            var signal = GetCompareSignal(median - prevMedian1, prevMedian1 - prevMedian2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "MedianValue", medianList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(medianList);
+        stockData.IndicatorName = IndicatorName.MedianValue;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Percent Rank of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The share of the previous <paramref name="length"/> values that the current one stands above, as a
+    /// percentage. The current bar is ranked against the bars before it and is not counted among them, so a
+    /// value never ranks against itself, and a bar without that many predecessors publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePercentRank(this StockData stockData, int length = 100)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> percentRankList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double percentRank = 0;
+            if (i >= length)
+            {
+                var currentValue = inputList[i];
+                var below = 0;
+                for (var j = i - length; j < i; j++)
+                {
+                    if (inputList[j] < currentValue)
+                    {
+                        below++;
+                    }
+                }
+
+                percentRank = (double)below / length * 100;
+            }
+
+            percentRankList.Add(percentRank);
+
+            var prevRank1 = i >= 1 ? percentRankList[i - 1] : 0;
+            var prevRank2 = i >= 2 ? percentRankList[i - 2] : 0;
+            var signal = GetCompareSignal(percentRank - prevRank1, prevRank1 - prevRank2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "PercentRank", percentRankList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(percentRankList);
+        stockData.IndicatorName = IndicatorName.PercentRank;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the McClellan Oscillator
     /// </summary>
     /// <param name="stockData"></param>

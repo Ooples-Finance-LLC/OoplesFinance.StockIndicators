@@ -238,6 +238,23 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
   indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
   serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
   indicator, so a spec's values are the indicator's values.
+- **Every typed spec now names an indicator this library has.** 57 specs computed something no indicator
+  computed - the highest high, a rolling variance, Yang-Zhang volatility, a zig zag - and were pinned in
+  `BuilderArmTests.AwaitingPromotion` while they waited. All 57 are bound now and that list is empty. Most
+  became new indicators, written from their published definitions and held to their arms; a few turned out
+  to be indicators the library already had under another name, and bind to those instead: the median moving
+  average is the median value, the ATR percent is the normalized average true range, and both average day
+  range specs name the one indicator. Each new indicator has a streaming twin held to it bar by bar, with
+  one exception below.
+- **`ZigZag` has no streaming twin, and cannot have one.** A turning point is only known once the price has
+  moved far enough past it, and recognising it rewrites the bars back to the previous turning point. A
+  streaming engine has already published those bars. `CalculateZigZag` computes it, and the Builder serves
+  it from there; there is no `ZigZagState`.
+- **Eight more spec options are `[Obsolete]`** as having no effect, for the same reason as the 66 before
+  them - their indicator has no parameter to set: the true range, the range, net volume, the cumulative
+  volume index, the demand index and the Ichimoku lagging span read one bar or two and take no length; the
+  Keltner channel width always averages exponentially; and the zig zag's option was being passed as a
+  deviation percentage rather than a bar count.
 - **A spec's options reach that indicator.** 177 options reached no parameter at all. 111 now set the parameter
   they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
   widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - through 118 mappings, since seven
@@ -328,7 +345,12 @@ VMA bands, Trender and the volume positive/negative indicator; the Time Price In
 defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
 50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations. The
 first bar's true range in the Grover Llorens Cycle Oscillator and the Ultimate Trader Oscillator is also
-High - Low now, not the whole high.
+High - Low now, not the whole high. Half Trend, the Volatility Ratio and the ATR Filtered Exponential
+Moving Average measure it against the bar's own close too, as their batch twins do. Only the last of the
+three publishes different values: the other two discard that first range before it reaches a result - the
+Volatility Ratio because its window bounds are still zero and their difference gates the ratio, Half Trend
+because its average true range reaches only the arrow levels, which feed a signal and nothing either
+engine publishes - so those two had agreed with the batch by luck rather than by construction.
 
 A preview (`isFinal: false`) of a bar now publishes what that bar publishes once final
 (`StreamingPreviewTests`, every state). Nine did not: ALMA, Interquartile Range Bands and Trimean left the
@@ -359,6 +381,25 @@ less today's) and took K and R from signed moves where he takes their sizes; the
 which has no previous bar, contributes 0. `CalculateAccumulativeSwingIndex` and `AccumulativeSwingIndexState`
 take Wilder's limit move T as `limitMove`; the default of 0 keeps each bar's range in its place, as before.
 ASI values and its signal change.
+
+**Four Builder arms computed something other than the indicator they name.** Each served a typed spec
+directly, so its values reached callers even while the spec named no indicator of its own:
+
+- **Yang-Zhang volatility** weighed the open-to-close variance by `0.34 / (1 + (n + 1) / (n - 1))`. The
+  published weight has 1.34 in that denominator rather than 1, which at a length of 20 makes it 0.1390
+  instead of 0.1615 and moves the published volatility by about one per cent on every bar. A length of one
+  also divided by zero, and is clamped to two: both variances are taken about a mean drawn from the same
+  window, so a single bar has no reading.
+- **The simple price zone** took a change out of its running sums one bar early, subtracting a raw price
+  that had never been added to them. From bar `length` onwards both sums were wrong for good, and the zone
+  left the range it is defined on, reading as high as 120 where it cannot pass 100.
+- **The standard error** measured every residual against the fitted line's endpoint rather than against the
+  line at each position in the window, so a window lying exactly on a sloped line reported scatter where
+  there is none.
+- **The geometric mean moving average** multiplied its window rather than summing logarithms, so a long
+  window overflowed a double and published infinity: at a price of 1000 that happens by a length of 103.
+
+Their batch and streaming twins are new here and never published the wrong values; these are the arms only.
 
 ### New Dependencies (net461 only)
 

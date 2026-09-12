@@ -6,6 +6,87 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Volatility Stop.
+    /// </summary>
+    /// <remarks>
+    /// A stop that trails the price by a multiple of the average true range and never moves against the
+    /// trend: while the trend is up it only ever rises, and it flips to the other side of the price when the
+    /// close crosses it. The average is the one <see cref="CalculateAverageTrueRange"/> takes. The first bar
+    /// has no stop behind it and starts at its own price.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="multiplier"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVolatilityStop(this StockData stockData, int length = 14, double multiplier = 2)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> stopList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        var trendIsUp = true;
+        for (var i = 0; i < count; i++)
+        {
+            double stop;
+            if (i == 0)
+            {
+                stop = inputList[i];
+            }
+            else
+            {
+                var previousStop = stopList[i - 1];
+                var band = atrBuffer.Span[i] * multiplier;
+                if (trendIsUp)
+                {
+                    if (inputList[i] < previousStop)
+                    {
+                        trendIsUp = false;
+                        stop = inputList[i] + band;
+                    }
+                    else
+                    {
+                        stop = Math.Max(previousStop, inputList[i] - band);
+                    }
+                }
+                else
+                {
+                    if (inputList[i] > previousStop)
+                    {
+                        trendIsUp = true;
+                        stop = inputList[i] - band;
+                    }
+                    else
+                    {
+                        stop = Math.Min(previousStop, inputList[i] + band);
+                    }
+                }
+            }
+
+            stopList.Add(stop);
+
+            var signal = GetCompareSignal(inputList[i] - stop, i >= 1 ? inputList[i - 1] - stopList[i - 1] : 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Vs", stopList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(stopList);
+        stockData.IndicatorName = IndicatorName.VolatilityStop;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Standard Deviation Volatility
     /// </summary>
     /// <param name="stockData"></param>
@@ -105,6 +186,343 @@ public static partial class Calculations
         return stockData;
     }
 
+
+    /// <summary>
+    /// Calculates the Variance of the input series over a rolling window.
+    /// </summary>
+    /// <remarks>
+    /// The population variance of the window: the mean of the squared deviations from the window's own mean,
+    /// divided by the window length. This is the square of <see cref="CalculateStandardDeviationVolatility"/>'s
+    /// standard deviation, which divides by the same length. A window shorter than <paramref name="length"/> has
+    /// no variance defined for it, and publishes zero until the window fills.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVariance(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> varianceList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double variance = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                variance /= length;
+            }
+
+            varianceList.Add(variance);
+
+            var prevVariance1 = i >= 1 ? varianceList[i - 1] : 0;
+            var prevVariance2 = i >= 2 ? varianceList[i - 2] : 0;
+            var signal = GetCompareSignal(variance - prevVariance1, prevVariance1 - prevVariance2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Variance", varianceList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(varianceList);
+        stockData.IndicatorName = IndicatorName.Variance;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the True Range.
+    /// </summary>
+    /// <remarks>
+    /// Wilder's true range: the greatest of the bar's own range, the distance from its high to the previous
+    /// close, and the distance from its low to that close. The first bar has no previous close, so its true
+    /// range is its own range. When the caller supplies their own series, that series is the close.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateTrueRange(this StockData stockData)
+    {
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> trueRangeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var trueRange = i >= 1
+                ? CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, inputList[i - 1])
+                : currentHigh - currentLow;
+            trueRangeList.Add(trueRange);
+
+            var prevTrueRange1 = i >= 1 ? trueRangeList[i - 1] : 0;
+            var prevTrueRange2 = i >= 2 ? trueRangeList[i - 2] : 0;
+            var signal = GetCompareSignal(trueRange - prevTrueRange1, prevTrueRange1 - prevTrueRange2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "TrueRange", trueRangeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(trueRangeList);
+        stockData.IndicatorName = IndicatorName.TrueRange;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Standard Error of the input series about its own regression line.
+    /// </summary>
+    /// <remarks>
+    /// The root mean square distance from the window's values to the straight line fitted through them, which
+    /// is how far the series strays from its own trend. Distinct from
+    /// <see cref="CalculateStandardErrorOfTheMean"/>, which measures how precisely a mean is known rather than
+    /// how well a line fits. A window shorter than <paramref name="length"/> has no line to fit, and publishes
+    /// zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateStandardError(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> standardErrorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        // The scatter about the fitted line, measured at each position in the window. Taken against the
+        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
+        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
+        using var regression = new RollingLeastSquares(length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var fit = regression.Next(inputList[i], isFinal: true);
+            double standardError = 0;
+            if (i >= length - 1)
+            {
+                double sumSquaredDiff = 0;
+                var first = i - length + 1;
+                for (var j = first; j <= i; j++)
+                {
+                    var fitted = fit.Intercept + (fit.Slope * (j - first));
+                    var diff = inputList[j] - fitted;
+                    sumSquaredDiff += diff * diff;
+                }
+
+                standardError = Sqrt(sumSquaredDiff / length);
+            }
+
+            standardErrorList.Add(standardError);
+
+            var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;
+            var prevError2 = i >= 2 ? standardErrorList[i - 2] : 0;
+            var signal = GetCompareSignal(standardError - prevError1, prevError1 - prevError2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "StandardError", standardErrorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(standardErrorList);
+        stockData.IndicatorName = IndicatorName.StandardError;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Standard Error of the Mean of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The window's standard deviation divided by the root of its length: how precisely the window's mean is
+    /// known, which narrows as the window lengthens even when the spread does not. Distinct from
+    /// <see cref="CalculateStandardError"/>, which measures the scatter about a fitted line instead.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateStandardErrorOfTheMean(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> standardErrorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var sqrtLength = Sqrt(length);
+
+        for (var i = 0; i < count; i++)
+        {
+            double stdDev = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                stdDev = Sqrt(variance / length);
+            }
+
+            var standardError = stdDev / sqrtLength;
+            standardErrorList.Add(standardError);
+
+            var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;
+            var prevError2 = i >= 2 ? standardErrorList[i - 2] : 0;
+            var signal = GetCompareSignal(standardError - prevError1, prevError1 - prevError2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Sem", standardErrorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(standardErrorList);
+        stockData.IndicatorName = IndicatorName.StandardErrorOfTheMean;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Yang Zhang Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The Yang-Zhang estimator, which adds what the others leave out: the overnight jump from one close to
+    /// the next open, the move from open to close, and the Rogers-Satchell reading of the bar's range. The
+    /// weight k = 0.34 / (1.34 + (n + 1) / (n - 1)) is the one that makes the variance of the whole as small
+    /// it can be. The first two terms are sample variances, over one less than the window, because each is
+    /// measured about a mean taken from the same window. Annualised by the root of 252.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateYangZhangVolatility(this StockData stockData, int length = 20)
+    {
+        // Both variances divide by length - 1, and so does k: a one-bar window has no reading.
+        length = Math.Max(length, 2);
+        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var annualisationFactor = Sqrt(252);
+        var k = 0.34 / (1.34 + ((double)(length + 1) / (length - 1)));
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length)
+            {
+                double overnightMean = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (j > 0 && inputList[j - 1] != 0)
+                    {
+                        overnightMean += Log(openList[j] / inputList[j - 1]);
+                    }
+                }
+
+                overnightMean /= length;
+                double overnightSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (j > 0 && inputList[j - 1] != 0)
+                    {
+                        var logOc = Log(openList[j] / inputList[j - 1]);
+                        overnightSum += (logOc - overnightMean) * (logOc - overnightMean);
+                    }
+                }
+
+                var overnightVariance = overnightSum / (length - 1);
+
+                double openToCloseMean = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (openList[j] != 0)
+                    {
+                        openToCloseMean += Log(inputList[j] / openList[j]);
+                    }
+                }
+
+                openToCloseMean /= length;
+                double openToCloseSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (openList[j] != 0)
+                    {
+                        var logCo = Log(inputList[j] / openList[j]);
+                        openToCloseSum += (logCo - openToCloseMean) * (logCo - openToCloseMean);
+                    }
+                }
+
+                var openToCloseVariance = openToCloseSum / (length - 1);
+
+                double rogersSatchellSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var currentClose = inputList[j];
+                    var currentOpen = openList[j];
+                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
+                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
+                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
+                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    rogersSatchellSum += (logHc * logHo) + (logLc * logLo);
+                }
+
+                var rogersSatchellVariance = rogersSatchellSum / length;
+                var yangZhangVariance = overnightVariance + (k * openToCloseVariance) + ((1 - k) * rogersSatchellVariance);
+                volatility = Sqrt(yangZhangVariance) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Yzv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.YangZhangVolatility;
+
+        return stockData;
+    }
 
     /// <summary>
     /// Calculates the Ultimate Volatility Indicator
@@ -483,7 +901,7 @@ public static partial class Calculations
             var currentOpen = openList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var trueRange = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
 
             var prevVqiT = GetLastOrDefault(vqiTList);
             var vqiT = trueRange != 0 && currentHigh - currentLow != 0 ?

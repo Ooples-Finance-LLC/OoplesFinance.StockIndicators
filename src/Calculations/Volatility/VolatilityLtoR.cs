@@ -6,6 +6,169 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Parkinson Volatility.
+    /// </summary>
+    /// <remarks>
+    /// Parkinson's estimator, which reads volatility from the range each bar travelled rather than from
+    /// close to close: the mean squared logarithm of high over low, scaled by four times the logarithm of
+    /// two, and annualised by the root of 252. Because it uses the whole bar it is the more efficient
+    /// estimate of the two, though it cannot see a gap between one bar's close and the next bar's open.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateParkinsonVolatility(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var factor = 1 / (4 * length * Log(2));
+        var annualisationFactor = Sqrt(252);
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var logRatio = lowList[j] != 0 ? Log(highList[j] / lowList[j]) : 0;
+                    sum += logRatio * logRatio;
+                }
+
+                volatility = Sqrt(factor * sum) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Pv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.ParkinsonVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Rogers Satchell Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The Rogers-Satchell estimator, which reads each bar's high and low against both its open and its
+    /// close. Unlike Parkinson's, it stays unbiased when the price drifts, because the drift cancels between
+    /// the two products it sums. Annualised by the root of 252.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRogersSatchellVolatility(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var annualisationFactor = Sqrt(252);
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var currentClose = inputList[j];
+                    var currentOpen = openList[j];
+                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
+                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
+                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
+                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    sum += (logHc * logHo) + (logLc * logLo);
+                }
+
+                volatility = Sqrt(sum / length) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Rsv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.RogersSatchellVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Normalized Average True Range.
+    /// </summary>
+    /// <remarks>
+    /// The average true range as a percentage of the price, so that one instrument's volatility can be
+    /// compared with another's whatever they cost. The average is the one
+    /// <see cref="CalculateAverageTrueRange"/> takes, smoothed Wilder's way, so the two agree bar for bar;
+    /// a bar with no price to divide by publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNormalizedAverageTrueRange(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> natrList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = inputList[i];
+            var natr = currentValue != 0 ? atrBuffer.Span[i] / currentValue * 100 : 0;
+            natrList.Add(natr);
+
+            var prevNatr1 = i >= 1 ? natrList[i - 1] : 0;
+            var prevNatr2 = i >= 2 ? natrList[i - 2] : 0;
+            var signal = GetCompareSignal(natr - prevNatr1, prevNatr1 - prevNatr2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Natr", natrList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(natrList);
+        stockData.IndicatorName = IndicatorName.NormalizedAverageTrueRange;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Moving Average BandWidth
     /// </summary>
     /// <param name="stockData"></param>

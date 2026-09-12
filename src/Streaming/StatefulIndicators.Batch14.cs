@@ -966,7 +966,9 @@ public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        // The first bar has no previous close, so it stands in for itself and the true range is the bar's
+        // own high - low, as GetTrueRangeList measures it. A zero made the first range the whole high.
+        var prevClose = _hasPrev ? _prevClose : bar.Close;
 
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
