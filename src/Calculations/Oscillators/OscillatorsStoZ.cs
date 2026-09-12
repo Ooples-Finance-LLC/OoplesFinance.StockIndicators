@@ -6,6 +6,81 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Smoothed Williams R.
+    /// </summary>
+    /// <remarks>
+    /// Williams %R, smoothed exponentially: where the close sits in the window's range, from zero at the top
+    /// to a hundred below it at the bottom, then run through an average of <paramref name="smoothLength"/> to
+    /// take the jitter out. A window with no range to speak of, and every bar before the window fills, reads
+    /// the midpoint of minus fifty rather than an edge of the range.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="smoothLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSmoothedWilliamsR(this StockData stockData, int length = 14, int smoothLength = 3)
+    {
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> smoothedList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var k = 2.0 / (smoothLength + 1);
+        double prevSmoothed = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            double rawWilliamsR;
+            if (i < length - 1)
+            {
+                rawWilliamsR = -50;
+            }
+            else
+            {
+                var highestHigh = double.MinValue;
+                var lowestLow = double.MaxValue;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (highList[j] > highestHigh)
+                    {
+                        highestHigh = highList[j];
+                    }
+
+                    if (lowList[j] < lowestLow)
+                    {
+                        lowestLow = lowList[j];
+                    }
+                }
+
+                rawWilliamsR = highestHigh != lowestLow
+                    ? (highestHigh - inputList[i]) / (highestHigh - lowestLow) * -100
+                    : -50;
+            }
+
+            var smoothed = i == 0 ? rawWilliamsR : (rawWilliamsR * k) + (prevSmoothed * (1 - k));
+            prevSmoothed = smoothed;
+            smoothedList.Add(smoothed);
+
+            var prevSmoothed1 = i >= 1 ? smoothedList[i - 1] : 0;
+            var prevSmoothed2 = i >= 2 ? smoothedList[i - 2] : 0;
+            var signal = GetCompareSignal(smoothed - prevSmoothed1, prevSmoothed1 - prevSmoothed2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Swr", smoothedList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(smoothedList);
+        stockData.IndicatorName = IndicatorName.SmoothedWilliamsR;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Simple Returns of the input series.
     /// </summary>
     /// <remarks>

@@ -5706,6 +5706,7 @@ public sealed class IchimokuChikouSpanSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: IchimokuChikouSpan is the close itself and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 

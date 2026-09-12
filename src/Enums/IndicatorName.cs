@@ -793,6 +793,8 @@ public enum IndicatorName
     IchimokuCloud,
     [Category(IndicatorType.Trend)]
     IIRLeastSquaresEstimate,
+    [Category(IndicatorType.Trend)]
+    IchimokuChikouSpan,
     [Category(IndicatorType.Momentum)]
     ImpulseMovingAverageConvergenceDivergence,
     [Category(IndicatorType.Momentum)]
@@ -1030,6 +1032,8 @@ public enum IndicatorName
     [Category(IndicatorType.Volatility)]
     NormalizedAverageTrueRange,
     [Category(IndicatorType.Momentum)]
+    NormalizedMacd,
+    [Category(IndicatorType.Momentum)]
     NormalizedRelativeVigorIndex,
     [Category(IndicatorType.Volume)]
     NormalizedVolume,
@@ -1225,6 +1229,10 @@ public enum IndicatorName
     RelativeVolatilityIndexV1,
     [Category(IndicatorType.Volatility)]
     RelativeVolatilityIndexV2,
+    [Category(IndicatorType.Volatility)]
+    RelativeVolatilityIndexHigh,
+    [Category(IndicatorType.Volatility)]
+    RelativeVolatilityIndexLow,
     [Category(IndicatorType.Volume)]
     RelativeVolumeIndicator,
     [Category(IndicatorType.Momentum)]
@@ -1319,6 +1327,8 @@ public enum IndicatorName
     SmoothedRateOfChange,
     [Category(IndicatorType.Volatility)]
     SmoothedVolatilityBands,
+    [Category(IndicatorType.Momentum)]
+    SmoothedWilliamsR,
     [Category(IndicatorType.Momentum)]
     SmoothedWilliamsAccumulationDistribution,
     [Category(IndicatorType.Volatility)]

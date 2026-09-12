@@ -6,6 +6,47 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Ichimoku Chikou Span.
+    /// </summary>
+    /// <remarks>
+    /// The lagging span of the Ichimoku cloud: the close itself, which a chart then draws shifted back behind
+    /// the price so that the eye compares today's close with the price of some bars ago. The shift belongs to
+    /// the drawing rather than the series, as it does for the cloud's own spans, which
+    /// <see cref="CalculateIchimokuCloud"/> likewise publishes at the bar that computes them. So every bar
+    /// here carries its own close and none is left empty.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateIchimokuChikouSpan(this StockData stockData)
+    {
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> chikouSpanList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var chikouSpan = inputList[i];
+            chikouSpanList.Add(chikouSpan);
+
+            var prevChikou1 = i >= 1 ? chikouSpanList[i - 1] : 0;
+            var prevChikou2 = i >= 2 ? chikouSpanList[i - 2] : 0;
+            var signal = GetCompareSignal(chikouSpan - prevChikou1, prevChikou1 - prevChikou2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "ChikouSpan", chikouSpanList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(chikouSpanList);
+        stockData.IndicatorName = IndicatorName.IchimokuChikouSpan;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Japanese Correlation Coefficient
     /// </summary>
     /// <param name="stockData"></param>
