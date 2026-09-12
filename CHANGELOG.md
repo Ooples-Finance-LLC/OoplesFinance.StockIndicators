@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.0.0](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/compare/v1.1.0...v2.0.0) (2026-09-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* promote every typed builder spec to a real indicator ([#188](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/188))
+* compute and stream every typed builder spec with the indicator it names ([#187](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/187))
+* the public Func<OhlcvBar, double> constructor overload is removed from every streaming indicator state. Wrap the state instead: new CustomInputState(state, selector), or new CustomInputState(state, InputSeries.MedianPrice) for a preset.
+
+### Features
+
+* compute and stream every typed builder spec with the indicator it names ([#187](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/187)) ([427fd72](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/427fd72ee5f1dd633da556e20e0d8d00ee54188d))
+* let every indicator take custom values in both engines ([#181](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/181)) ([1bb55e4](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/1bb55e41816a2f15f3283dab5593f893a28c069c))
+* promote every typed builder spec to a real indicator ([#188](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/188)) ([1fd9ac5](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/1fd9ac55c3c3ce01d2241d71de435148d098019a))
+* report what the machine can actually do ([#175](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/175)) ([d2d6e2b](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/d2d6e2b528f406c8e1776b87cca06aafd7935987))
+
+
+### Bug Fixes
+
+* make every streaming state compute what its batch twin computes ([#186](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/186)) ([9976c14](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/9976c142b1b8307df77027a3b564d25f1c5a02c9))
+* match the batch lookback in ultimatetraderoscillator ([#176](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/176)) ([db911b6](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/db911b67df97b2146e71dca1e8f58db69c6205dc))
+* **sourcegen:** keep the generator's Roslyn floor, and catch the next one in CI ([#169](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/169)) ([1dca066](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/1dca0664a5d97faea603d58921878d35ea5cc333))
+
+
+### Performance
+
+* share identical indicator computations in the graph ([#174](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/issues/174)) ([67d45a3](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/commit/67d45a3b93f17042b98a63e328c721973b33e5ae))
+
 ## [1.1.0](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/compare/v1.0.53...v1.1.0) (2026-09-09)
 
 
