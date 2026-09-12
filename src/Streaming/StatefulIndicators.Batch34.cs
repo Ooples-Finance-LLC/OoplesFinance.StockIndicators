@@ -88,16 +88,15 @@ public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
 /// </remarks>
 public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
     private readonly double _sqrtLength;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
 
     public StandardErrorOfTheMeanState(int length = 20)
     {
-        _length = Math.Max(1, length);
-        _sqrtLength = Sqrt(_length);
-        _window = new PooledRingBuffer<double>(_length);
+        var resolved = Math.Max(1, length);
+        _sqrtLength = Sqrt(resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -105,45 +104,17 @@ public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDis
 
     public void Reset()
     {
-        _window.Clear();
+        _stdDev.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double stdDev = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _length;
-            double variance = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var diff = _window[i] - mean;
-                variance += diff * diff;
-            }
-
-            var currentDiff = value - mean;
-            variance += currentDiff * currentDiff;
-
-            stdDev = Sqrt(variance / _length);
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-
+        // The window's population standard deviation, taken from the primitive the other deviation-based
+        // states already share rather than summed again here: the same two passes over the window, oldest
+        // value first with this bar last, and the same zero until the window fills.
+        var stdDev = _stdDev.Next(value, isFinal);
         var standardError = stdDev / _sqrtLength;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -157,7 +128,7 @@ public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDis
 
     public void Dispose()
     {
-        _window.Dispose();
+        _stdDev.Dispose();
     }
 }
 
