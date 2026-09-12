@@ -1479,14 +1479,17 @@ public sealed class EhlersGaussianFilterState : IStreamingIndicatorState, IDispo
     private readonly double _alpha2;
     private readonly double _alpha3;
     private readonly double _alpha4;
+    private readonly int _poles;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _gf1Values;
     private readonly PooledRingBuffer<double> _gf2Values;
     private readonly PooledRingBuffer<double> _gf3Values;
     private readonly PooledRingBuffer<double> _gf4Values;
 
-    public EhlersGaussianFilterState(int length = 14)
+    public EhlersGaussianFilterState(int length = 14, int poles = 4)
     {
+        // Which pole count's filter is the value, as the batch method's poles; all four are always outputs.
+        _poles = Math.Min(Math.Max(poles, 1), 4);
         var resolved = Math.Max(1, length);
         var cosVal = MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01);
         var beta1 = (1 - Math.Cos(cosVal)) / (MathHelper.Pow(2, 1.0) - 1);
@@ -1557,7 +1560,7 @@ public sealed class EhlersGaussianFilterState : IStreamingIndicatorState, IDispo
             };
         }
 
-        return new StreamingIndicatorStateResult(gf4, outputs);
+        return new StreamingIndicatorStateResult(_poles switch { 1 => gf1, 2 => gf2, 3 => gf3, _ => gf4 }, outputs);
     }
 
     public void Dispose()

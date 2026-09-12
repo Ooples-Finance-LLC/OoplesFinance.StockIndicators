@@ -390,8 +390,12 @@ public static class IndicatorOutputRegistry
         { (IndicatorName.BollingerBands, IndicatorOutput.MiddleBand), "MiddleBand" },
         { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
 
-        // Stochastic outputs (K/D lines)
-        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "SignalFastK" },
+        // Stochastic outputs (K/D lines): the batch indicator publishes %D as FastD.
+        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "FastD" },
+
+        // Chandelier Exit outputs
+        { (IndicatorName.ChandelierExit, IndicatorOutput.UpperBand), "ExitLong" },
+        { (IndicatorName.ChandelierExit, IndicatorOutput.LowerBand), "ExitShort" },
 
         // ADX outputs (DI+, DI-, ADX)
         { (IndicatorName.AverageDirectionalIndex, IndicatorOutput.Signal), "Adx" },

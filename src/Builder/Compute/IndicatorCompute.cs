@@ -5,6 +5,11 @@ using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
 
+// The arms below still read typed options that are obsolete because their batch indicator has nothing they could
+// set. Those arms are not served unless verified, and BuilderArmTests fails any served arm whose result such an
+// option changes; the reads go when the options do.
+#pragma warning disable CS0618
+
 namespace OoplesFinance.StockIndicators.Builder.Compute;
 
 /// <summary>
@@ -26,6 +31,22 @@ internal static partial class IndicatorCompute
     /// <param name="context">The compute context for buffer management.</param>
     /// <returns>A ComputeBuffer containing the indicator result, or null if fast path unavailable.</returns>
     public static ComputeBuffer? TryComputeFast(StockData data, IndicatorSpec spec, ComputeContext context)
+    {
+        // A typed arm is served only once BuilderArmTests has shown it computes its batch indicator. Every other
+        // typed spec with a batch indicator is computed by that indicator; see BuilderArmBinding.
+        var optionsType = spec.Options.GetType();
+        if (BuilderArmTargets.Targets.ContainsKey(optionsType) && !BuilderVerifiedArms.Arms.Contains((optionsType, spec.Output)))
+        {
+            return BuilderArmBinding.TryCompute(data, spec, context);
+        }
+
+        return ComputeArm(data, spec, context);
+    }
+
+    /// <summary>
+    /// The typed spec's own fast arm, unchecked; <see cref="TryComputeFast"/> serves it only when verified.
+    /// </summary>
+    internal static ComputeBuffer? ComputeArm(StockData data, IndicatorSpec spec, ComputeContext context)
     {
         return spec.Options switch
         {

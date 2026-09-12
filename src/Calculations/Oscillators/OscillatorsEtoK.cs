@@ -264,14 +264,15 @@ public static partial class Calculations
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
     /// <param name="length"></param>
+    /// <param name="rviLength">The smoothing length of the Relative Volatility Index that Dorsey's Inertia regresses.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateInertiaIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.LinearRegression,
-        int length = 20)
+        int length = 20, int rviLength = 14)
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rviList = CalculateRelativeVolatilityIndexV2(stockData).ChainedValues;
+        var rviList = CalculateRelativeVolatilityIndexV2(stockData, smoothLength: Math.Max(1, rviLength)).ChainedValues;
         var inertiaList = GetMovingAverageList(stockData, maType, length, rviList);
 
         for (var i = 0; i < stockData.Count; i++)

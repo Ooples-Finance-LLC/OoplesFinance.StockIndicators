@@ -234,6 +234,29 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
 
 - `IndicatorBuffer<T>` is now the primary container for indicator values (replaces raw lists)
 - Results are accessed via `runtime.GetSeries(handle)` instead of `OutputValues*` properties
+- **A typed Builder spec computes its batch indicator.** Each spec ran a fast arm written apart from the
+  indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
+  serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
+  indicator, so a spec's values are the indicator's values.
+- **A spec's options reach that indicator.** 177 options reached no parameter at all. 111 now set the parameter
+  they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
+  widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - through 118 mappings, since seven
+  options set more than one parameter, as their own arms do: the decycler and osc oscillators' length sets both
+  a fast and a slow length, and the mass index's two set three. The remaining 66 that their indicator has no
+  parameter for are marked `[Obsolete]` as having no effect. `EhlersRoofingFilterSpecOptions` defaults to
+  Ehlers' 48-bar high pass and 10-bar smoother, and `DoubleSmoothedMomentaSpecOptions` to the batch
+  indicator's 2, 5 and 25, instead of settings that described another formula.
+- **Three indicators gained a parameter their spec sets**, each part of the published definition and each
+  defaulting to today's behaviour: the stochastic RSI's own stochastic lookback, Inertia's RVI smoothing
+  length, and the Gaussian filter's pole count.
+- **A typed spec streams what it computes.** The Builder built streaming states from a second table that had
+  never been compared with the batch path: 30 specs streamed another indicator, another parameter, or ignored
+  the moving-average type the batch honoured. `BuilderStreamingArmTests` now holds all 168 to their batch
+  indicator. `AverageTrueRangeState`, `AverageDirectionalIndexState`, `RelativeStrengthIndexState`,
+  `TrixState`, `AwesomeOscillatorState` and `AcceleratorOscillatorState` take a `maType`, defaulting to the
+  average each hard-coded, so no existing value changes.
+- **`ComparePriceMomentumOscillatorSpecOptions` is obsolete.** It compares a stock with a market series, which
+  one series cannot supply; use `IndicatorCatalog.ComparePriceMomentumOscillator`, which passes both.
 
 ### Corrected values
 
@@ -316,6 +339,26 @@ adaptive Ehlers indicators divided the previous bar's powers by the forming bar'
 
 `BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
 the batch twin of the streaming state of the same name.
+
+**`MovingAvgType` means the indicator of that name.** `GetMovingAverageList` smoothed through span fast
+paths meant to reproduce the indicator of the same name, and 120 of 162 did not (a different formula, a
+different warmup, or a numerical blow-up). Every type is now computed by its indicator unless its fast path
+is verified to match it (`MovingAverageFastPathTests` holds every type to its indicator). Batch indicators
+that smooth with one of the 118 unverified types, whether by default or through a `maType` you pass, give
+the indicator's values. Routing also corrected the indicators it exposed:
+
+- **Kaufman's Adaptive Moving Average** passes the price through until its efficiency window fills, then
+  recurses from it, as TA-Lib and Pine seed it. It was seeded at 0 in both engines, crawled up from zero, and
+  on a flat market was still converging thousands of bars later.
+- Asking `GetMovingAverageList` for the dynamically adjustable, adaptive, Ehlers adaptive Laguerre or middle
+  high-low average without a fast length now uses the indicator's own default instead of 0.
+
+**The Accumulative Swing Index is Wilder's.** Both engines ran his numerator backwards (the previous close
+less today's) and took K and R from signed moves where he takes their sizes; they now compute
+`50 * ((C - Cy) + 0.5 * (C - O) + 0.25 * (Cy - Oy)) / R * K / T` with his three-case R, and the first bar,
+which has no previous bar, contributes 0. `CalculateAccumulativeSwingIndex` and `AccumulativeSwingIndexState`
+take Wilder's limit move T as `limitMove`; the default of 0 keeps each bar's range in its place, as before.
+ASI values and its signal change.
 
 ### New Dependencies (net461 only)
 
