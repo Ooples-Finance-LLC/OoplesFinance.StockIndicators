@@ -243,7 +243,7 @@ public sealed class LogReturnsState : IStreamingIndicatorState, IDisposable
         if (_window.Count >= _length)
         {
             var prevValue = _window[0];
-            returns = prevValue > 0 && value > 0 ? Math.Log(value / prevValue) : 0;
+            returns = prevValue > 0 && value > 0 ? Log(value / prevValue) : 0;
         }
 
         if (isFinal)

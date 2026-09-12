@@ -180,6 +180,8 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     ChoppinessIndex,
     [Category(IndicatorType.Volatility)]
+    CloseToCloseVolatility,
+    [Category(IndicatorType.Volatility)]
     ClosedFormDistanceVolatility,
     [Category(IndicatorType.Volatility)]
     CoefficientOfVariation,
@@ -1011,6 +1013,8 @@ public enum IndicatorName
     NetVolume,
     [Category(IndicatorType.Trend)]
     NickRypockTrailingReverse,
+    [Category(IndicatorType.Volatility)]
+    NormalizedAverageTrueRange,
     [Category(IndicatorType.Momentum)]
     NormalizedRelativeVigorIndex,
     [Category(IndicatorType.Volume)]
@@ -1045,6 +1049,8 @@ public enum IndicatorName
     ParabolicSAR,
     [Category(IndicatorType.Trend)]
     ParabolicWeightedMovingAverage,
+    [Category(IndicatorType.Volatility)]
+    ParkinsonVolatility,
     [Category(IndicatorType.Trend)]
     ParametricCorrectiveLinearMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -1227,6 +1233,8 @@ public enum IndicatorName
     RollingMax,
     [Category(IndicatorType.SupportAndResistance)]
     RollingMin,
+    [Category(IndicatorType.Volatility)]
+    RogersSatchellVolatility,
     [Category(IndicatorType.Volatility)]
     RootMovingAverageSquaredErrorBands,
     [Category(IndicatorType.Momentum)]
@@ -1463,6 +1471,8 @@ public enum IndicatorName
     TwiggsMoneyFlow,
     [Category(IndicatorType.Trend)]
     TypicalPrice,
+    [Category(IndicatorType.Volatility)]
+    TypicalPriceVolatility,
     [Category(IndicatorType.Trend)]
     UberTrendIndicator,
     [Category(IndicatorType.Momentum)]
@@ -1601,6 +1611,8 @@ public enum IndicatorName
     WoodieCommodityChannelIndex,
     [Category(IndicatorType.SupportAndResistance)]
     WoodiePivotPoints,
+    [Category(IndicatorType.Volatility)]
+    YangZhangVolatility,
     [Category(IndicatorType.Volume)]
     ZDistanceFromVwap,
     [Category(IndicatorType.Momentum)]

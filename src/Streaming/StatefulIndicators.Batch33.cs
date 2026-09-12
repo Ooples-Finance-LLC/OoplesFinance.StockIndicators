@@ -38,23 +38,28 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
         double cv = 0;
         if (_window.Count + 1 >= _length)
         {
+            // Summed oldest first with this bar last, as the batch engine sums its window.
             var start = _window.Count - (_length - 1);
-            var sum = value;
+            double sum = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 sum += _window[i];
             }
 
+            sum += value;
+
             var mean = sum / _length;
-            var currentDiff = value - mean;
-            var variance = currentDiff * currentDiff;
+            double variance = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 var diff = _window[i] - mean;
                 variance += diff * diff;
             }
 
-            var stdDev = Math.Sqrt(variance / _length);
+            var currentDiff = value - mean;
+            variance += currentDiff * currentDiff;
+
+            var stdDev = Sqrt(variance / _length);
             cv = mean != 0 ? stdDev / mean * 100 : 0;
         }
 
@@ -129,7 +134,7 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
                 }
             }
 
-            downsideDeviation = shortfalls > 0 ? Math.Sqrt(sumSquaredDownside / shortfalls) : 0;
+            downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
         }
 
         if (isFinal)
@@ -186,17 +191,19 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
         double skewness = 0;
         if (_window.Count + 1 >= _length)
         {
+            // Summed oldest first with this bar last, as the batch engine sums its window.
             var start = _window.Count - (_length - 1);
-            var sum = value;
+            double sum = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 sum += _window[i];
             }
 
+            sum += value;
+
             var mean = sum / _length;
-            var currentDev = value - mean;
-            var sumSquaredDev = currentDev * currentDev;
-            var sumCubedDev = currentDev * currentDev * currentDev;
+            double sumSquaredDev = 0;
+            double sumCubedDev = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 var dev = _window[i] - mean;
@@ -204,7 +211,11 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
                 sumCubedDev += dev * dev * dev;
             }
 
-            var stdDev = Math.Sqrt(sumSquaredDev / _length);
+            var currentDev = value - mean;
+            sumSquaredDev += currentDev * currentDev;
+            sumCubedDev += currentDev * currentDev * currentDev;
+
+            var stdDev = Sqrt(sumSquaredDev / _length);
             skewness = stdDev != 0 ? sumCubedDev / _length / (stdDev * stdDev * stdDev) : 0;
         }
 
@@ -276,7 +287,7 @@ public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
             }
 
             var numerator = (_length * sumXy) - (sumX * sumY);
-            var denominator = Math.Sqrt(((_length * sumX2) - (sumX * sumX)) * ((_length * sumY2) - (sumY * sumY)));
+            var denominator = Sqrt(((_length * sumX2) - (sumX * sumX)) * ((_length * sumY2) - (sumY * sumY)));
             var r = denominator != 0 ? numerator / denominator : 0;
             rSquared = r * r;
         }

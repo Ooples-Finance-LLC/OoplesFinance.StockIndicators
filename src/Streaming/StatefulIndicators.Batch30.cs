@@ -41,22 +41,27 @@ public sealed class VarianceState : IStreamingIndicatorState, IDisposable
         {
             // The bar being measured is the newest of the window's values, so only the newest _length - 1 of
             // those already held take part in it.
+            // Summed oldest first with this bar last, as the batch engine sums its window: a different
+            // order gives a different last bit, which a window that all but cancels turns into a
+            // disagreement.
             var start = _window.Count - (_length - 1);
-            var sum = value;
+            double sum = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 sum += _window[i];
             }
 
+            sum += value;
+
             var mean = sum / _length;
-            var currentDiff = value - mean;
-            variance = currentDiff * currentDiff;
             for (var i = start; i < _window.Count; i++)
             {
                 var diff = _window[i] - mean;
                 variance += diff * diff;
             }
 
+            var currentDiff = value - mean;
+            variance += currentDiff * currentDiff;
             variance /= _length;
         }
 

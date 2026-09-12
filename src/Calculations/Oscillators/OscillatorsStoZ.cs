@@ -111,6 +111,67 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Typical Price Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The deviation of the typical price - the mean of the bar's high, low and close - about its own
+    /// average over the window. It is quoted in the price's own units rather than annualised, so it reads as
+    /// a distance rather than a rate. A window shorter than <paramref name="length"/> publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateTypicalPriceVolatility(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += (highList[j] + lowList[j] + inputList[j]) / 3;
+                }
+
+                var mean = sum / length;
+                double sumSquaredDev = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var typicalPrice = (highList[j] + lowList[j] + inputList[j]) / 3;
+                    var dev = typicalPrice - mean;
+                    sumSquaredDev += dev * dev;
+                }
+
+                volatility = Sqrt(sumSquaredDev / length);
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Tpv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.TypicalPriceVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Zweig Market Breadth Indicator
     /// </summary>
     /// <param name="stockData"></param>

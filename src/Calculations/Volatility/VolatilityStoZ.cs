@@ -332,6 +332,114 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Yang Zhang Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The Yang-Zhang estimator, which adds what the others leave out: the overnight jump from one close to
+    /// the next open, the move from open to close, and the Rogers-Satchell reading of the bar's range. The
+    /// weight k = 0.34 / (1 + (n + 1) / (n - 1)) is the one that makes the variance of the whole as small as
+    /// it can be. The first two terms are sample variances, over one less than the window, because each is
+    /// measured about a mean taken from the same window. Annualised by the root of 252.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateYangZhangVolatility(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var annualisationFactor = Sqrt(252);
+        var k = 0.34 / (1 + ((double)(length + 1) / (length - 1)));
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length)
+            {
+                double overnightMean = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (j > 0 && inputList[j - 1] != 0)
+                    {
+                        overnightMean += Log(openList[j] / inputList[j - 1]);
+                    }
+                }
+
+                overnightMean /= length;
+                double overnightSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (j > 0 && inputList[j - 1] != 0)
+                    {
+                        var logOc = Log(openList[j] / inputList[j - 1]);
+                        overnightSum += (logOc - overnightMean) * (logOc - overnightMean);
+                    }
+                }
+
+                var overnightVariance = overnightSum / (length - 1);
+
+                double openToCloseMean = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (openList[j] != 0)
+                    {
+                        openToCloseMean += Log(inputList[j] / openList[j]);
+                    }
+                }
+
+                openToCloseMean /= length;
+                double openToCloseSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    if (openList[j] != 0)
+                    {
+                        var logCo = Log(inputList[j] / openList[j]);
+                        openToCloseSum += (logCo - openToCloseMean) * (logCo - openToCloseMean);
+                    }
+                }
+
+                var openToCloseVariance = openToCloseSum / (length - 1);
+
+                double rogersSatchellSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var currentClose = inputList[j];
+                    var currentOpen = openList[j];
+                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
+                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
+                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
+                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    rogersSatchellSum += (logHc * logHo) + (logLc * logLo);
+                }
+
+                var rogersSatchellVariance = rogersSatchellSum / length;
+                var yangZhangVariance = overnightVariance + (k * openToCloseVariance) + ((1 - k) * rogersSatchellVariance);
+                volatility = Sqrt(yangZhangVariance) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Yzv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.YangZhangVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Ultimate Volatility Indicator
     /// </summary>
     /// <param name="stockData"></param>

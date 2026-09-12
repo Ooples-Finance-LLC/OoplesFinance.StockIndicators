@@ -176,6 +176,75 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Close to Close Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The annualised deviation of the series' logarithmic returns: the plainest volatility estimate there
+    /// is, using only the close of each bar and none of its range. Annualised by the root of 252, the usual
+    /// count of trading days in a year, so the reading is comparable with a quoted annual volatility. A
+    /// window shorter than <paramref name="length"/> publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCloseToCloseVolatility(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var annualisationFactor = Sqrt(252);
+
+        var returns = new double[count];
+        for (var i = 1; i < count; i++)
+        {
+            var prevValue = inputList[i - 1];
+            returns[i] = prevValue != 0 ? Log(inputList[i] / prevValue) : 0;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += returns[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = returns[j] - mean;
+                    variance += diff * diff;
+                }
+
+                volatility = Sqrt(variance / length) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Ctcv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.CloseToCloseVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the choppiness index.
     /// </summary>
     /// <param name="stockData">The stock data.</param>

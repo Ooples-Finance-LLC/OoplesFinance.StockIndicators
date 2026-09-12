@@ -43,16 +43,19 @@ public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
         double standardError = 0;
         if (_window.Count + 1 >= _length)
         {
+            // Summed oldest first with this bar last, as the batch engine sums its window.
             var start = _window.Count - (_length - 1);
-            var currentDiff = value - linReg;
-            var sumSquaredDiff = currentDiff * currentDiff;
+            double sumSquaredDiff = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 var diff = _window[i] - linReg;
                 sumSquaredDiff += diff * diff;
             }
 
-            standardError = Math.Sqrt(sumSquaredDiff / _length);
+            var currentDiff = value - linReg;
+            sumSquaredDiff += currentDiff * currentDiff;
+
+            standardError = Sqrt(sumSquaredDiff / _length);
         }
 
         if (isFinal)
@@ -93,7 +96,7 @@ public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDis
     public StandardErrorOfTheMeanState(int length = 20)
     {
         _length = Math.Max(1, length);
-        _sqrtLength = Math.Sqrt(_length);
+        _sqrtLength = Sqrt(_length);
         _window = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -112,23 +115,28 @@ public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDis
         double stdDev = 0;
         if (_window.Count + 1 >= _length)
         {
+            // Summed oldest first with this bar last, as the batch engine sums its window.
             var start = _window.Count - (_length - 1);
-            var sum = value;
+            double sum = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 sum += _window[i];
             }
 
+            sum += value;
+
             var mean = sum / _length;
-            var currentDiff = value - mean;
-            var variance = currentDiff * currentDiff;
+            double variance = 0;
             for (var i = start; i < _window.Count; i++)
             {
                 var diff = _window[i] - mean;
                 variance += diff * diff;
             }
 
-            stdDev = Math.Sqrt(variance / _length);
+            var currentDiff = value - mean;
+            variance += currentDiff * currentDiff;
+
+            stdDev = Sqrt(variance / _length);
         }
 
         if (isFinal)
