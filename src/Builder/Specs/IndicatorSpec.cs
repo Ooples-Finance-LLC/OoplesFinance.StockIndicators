@@ -6515,6 +6515,8 @@ public sealed class KeltnerChannelWidthSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+
+    [Obsolete("Has no effect: KeltnerChannelWidth averages exponentially and has no parameter this option could set. It will be removed in the next major version.")]
     public MovingAvgType MaType { get; }
 }
 

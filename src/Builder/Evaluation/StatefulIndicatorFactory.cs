@@ -153,6 +153,12 @@ internal static partial class StatefulIndicatorFactory
             YangZhangVolatilitySpecOptions yzv => new YangZhangVolatilityState(length: yzv.Length),
             TypicalPriceVolatilitySpecOptions tpv => new TypicalPriceVolatilityState(length: tpv.Length),
             NatrSpecOptions natr => new NormalizedAverageTrueRangeState(length: natr.Length),
+            // The ATR percent is the normalized average true range: the same range over the same price.
+            AtrPercentSpecOptions atrp => new NormalizedAverageTrueRangeState(length: atrp.Length),
+            AroonUpSpecOptions arup => new AroonUpState(length: arup.Length),
+            AroonDownSpecOptions ardn => new AroonDownState(length: ardn.Length),
+            AtrChannelWidthSpecOptions acw => new AtrChannelWidthState(length: acw.Length, multiplier: acw.Multiplier),
+            KeltnerChannelWidthSpecOptions kcw => new KeltnerChannelWidthState(length: kcw.Length),
             DonchianChannelSpecOptions dc => new DonchianChannelsState(length: dc.Length),
             ParabolicSarSpecOptions _ => new ParabolicSARState(),
             SuperTrendSpecOptions st => new SuperTrendState(maType: st.MaType, length: st.Length),

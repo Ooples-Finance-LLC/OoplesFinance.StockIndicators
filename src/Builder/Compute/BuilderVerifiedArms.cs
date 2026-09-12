@@ -17,6 +17,8 @@ internal static class BuilderVerifiedArms
         (typeof(AccumulationDistributionLineSpecOptions), IndicatorOutput.Primary),
         (typeof(AdlSpecOptions), IndicatorOutput.Primary),
         (typeof(ApoSpecOptions), IndicatorOutput.Primary),
+        (typeof(AroonDownSpecOptions), IndicatorOutput.Primary),
+        (typeof(AroonUpSpecOptions), IndicatorOutput.Primary),
         (typeof(AsymmetricalRelativeStrengthIndexSpecOptions), IndicatorOutput.Primary),
         (typeof(AdrSpecOptions), IndicatorOutput.Primary),
         (typeof(AverageAbsoluteErrorNormalizationSpecOptions), IndicatorOutput.Primary),

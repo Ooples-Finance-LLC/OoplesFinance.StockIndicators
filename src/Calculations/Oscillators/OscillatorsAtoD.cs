@@ -5,6 +5,119 @@ namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
 {
+    /// <summary>
+    /// Calculates the Aroon Up.
+    /// </summary>
+    /// <remarks>
+    /// How recently the window's highest high occurred, as a percentage: a hundred on the bar that sets a new
+    /// high, falling towards zero as that high recedes. The window looks back <paramref name="length"/> bars
+    /// from the current one, and where the high is equalled more than once the most recent occurrence counts,
+    /// since it is the freshness of the high the reading is about.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAroonUp(this StockData stockData, int length = 25)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, _, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> aroonUpList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double aroonUp = 0;
+            if (i >= length)
+            {
+                var highestIndex = i;
+                var highestValue = double.MinValue;
+                for (var j = i - length; j <= i; j++)
+                {
+                    if (highList[j] >= highestValue)
+                    {
+                        highestValue = highList[j];
+                        highestIndex = j;
+                    }
+                }
+
+                aroonUp = 100.0 * (length - (i - highestIndex)) / length;
+            }
+
+            aroonUpList.Add(aroonUp);
+
+            var prevAroonUp = i >= 1 ? aroonUpList[i - 1] : 0;
+            var signal = GetCompareSignal(aroonUp - prevAroonUp, 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "AroonUp", aroonUpList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(aroonUpList);
+        stockData.IndicatorName = IndicatorName.AroonUp;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Aroon Down.
+    /// </summary>
+    /// <remarks>
+    /// How recently the window's lowest low occurred, as a percentage, and the mirror of
+    /// <see cref="CalculateAroonUp"/>: a hundred on the bar that sets a new low, falling towards zero as that
+    /// low recedes. Where the low is equalled more than once the most recent occurrence counts.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAroonDown(this StockData stockData, int length = 25)
+    {
+        length = Math.Max(length, 1);
+        var (_, _, lowList, _, _) = GetInputValuesList(stockData);
+        var count = lowList.Count;
+        List<double> aroonDownList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double aroonDown = 0;
+            if (i >= length)
+            {
+                var lowestIndex = i;
+                var lowestValue = double.MaxValue;
+                for (var j = i - length; j <= i; j++)
+                {
+                    if (lowList[j] <= lowestValue)
+                    {
+                        lowestValue = lowList[j];
+                        lowestIndex = j;
+                    }
+                }
+
+                aroonDown = 100.0 * (length - (i - lowestIndex)) / length;
+            }
+
+            aroonDownList.Add(aroonDown);
+
+            var prevAroonDown = i >= 1 ? aroonDownList[i - 1] : 0;
+            var signal = GetCompareSignal(aroonDown - prevAroonDown, 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "AroonDown", aroonDownList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(aroonDownList);
+        stockData.IndicatorName = IndicatorName.AroonDown;
+
+        return stockData;
+    }
+
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAbsoluteStrengthIndex(this StockData stockData, int length = 10, int maLength = 21, int signalLength = 34)
     {

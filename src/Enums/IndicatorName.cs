@@ -68,7 +68,13 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     AroonOscillator,
     [Category(IndicatorType.Momentum)]
+    AroonDown,
+    [Category(IndicatorType.Momentum)]
+    AroonUp,
+    [Category(IndicatorType.Momentum)]
     AsymmetricalRelativeStrengthIndex,
+    [Category(IndicatorType.Volatility)]
+    AtrChannelWidth,
     [Category(IndicatorType.Trend)]
     AtrFilteredExponentialMovingAverage,
     [Category(IndicatorType.Volatility)]
@@ -847,6 +853,8 @@ public enum IndicatorName
     KaufmanBinaryWave,
     [Category(IndicatorType.Momentum)]
     KaufmanStressIndicator,
+    [Category(IndicatorType.Volatility)]
+    KeltnerChannelWidth,
     [Category(IndicatorType.Volatility)]
     KeltnerChannels,
     [Category(IndicatorType.Volatility)]

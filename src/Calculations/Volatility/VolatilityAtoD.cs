@@ -245,6 +245,54 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Atr Channel Width.
+    /// </summary>
+    /// <remarks>
+    /// How wide a channel drawn a multiple of the average true range either side of the price would be: twice
+    /// the multiple, times the range. It is the width alone, so it says how much room the channel gives
+    /// without saying where the channel sits. The average is the one
+    /// <see cref="CalculateAverageTrueRange"/> takes, so the two agree bar for bar.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="multiplier"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAtrChannelWidth(this StockData stockData, int length = 14, double multiplier = 2)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> widthList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var width = 2 * multiplier * atrBuffer.Span[i];
+            widthList.Add(width);
+
+            var prevWidth1 = i >= 1 ? widthList[i - 1] : 0;
+            var prevWidth2 = i >= 2 ? widthList[i - 2] : 0;
+            var signal = GetCompareSignal(width - prevWidth1, prevWidth1 - prevWidth2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Acw", widthList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(widthList);
+        stockData.IndicatorName = IndicatorName.AtrChannelWidth;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the choppiness index.
     /// </summary>
     /// <param name="stockData">The stock data.</param>

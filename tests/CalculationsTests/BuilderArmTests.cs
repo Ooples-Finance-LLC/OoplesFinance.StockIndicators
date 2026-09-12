@@ -45,19 +45,19 @@ public sealed class BuilderArmTests : GlobalTestData
     /// The typed specs whose indicator the library does not have yet, each to be written in both engines.
     /// </summary>
     /// <remarks>
-    /// These 19 arms compute something no batch indicator computes - the average day range, Yang-Zhang
+    /// These 14 arms compute something no batch indicator computes - the average day range, Yang-Zhang
     /// volatility, a zig zag - so there is nothing to bind them to and nothing to hold them to.
     /// Every one is promoted to a real indicator, batch and streaming, in the follow-up; the list is here so
     /// that it shrinks visibly and cannot grow unnoticed.
     /// </remarks>
     private static readonly HashSet<string> AwaitingPromotion = new(StringComparer.Ordinal)
     {
-        "AroonDownSpecOptions", "AroonUpSpecOptions", "AtrChannelWidthSpecOptions",
-        "AtrPercentSpecOptions",
+       
+       
        
         "DemandIndexSpecOptions", "ElderImpulseSystemSpecOptions",
        
-        "IchimokuChikouSpanSpecOptions", "KeltnerChannelWidthSpecOptions",
+        "IchimokuChikouSpanSpecOptions",
        
         "NormalizedMacdSpecOptions",
        
