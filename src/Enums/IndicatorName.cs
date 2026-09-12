@@ -727,6 +727,10 @@ public enum IndicatorName
     GeneralFilterEstimator,
     [Category(IndicatorType.Trend)]
     GeneralizedDoubleExponentialMovingAverage,
+    [Category(IndicatorType.Trend)]
+    GeometricMeanMovingAverage,
+    [Category(IndicatorType.Trend)]
+    GeometricMovingAverage,
     [Category(IndicatorType.Volatility)]
     GopalakrishnanRangeIndex,
     [Category(IndicatorType.Trend)]
@@ -747,6 +751,8 @@ public enum IndicatorName
     HampelFilter,
     [Category(IndicatorType.Volume)]
     HawkeyeVolumeIndicator,
+    [Category(IndicatorType.Trend)]
+    HarmonicMeanMovingAverage,
     [Category(IndicatorType.Trend)]
     HendersonWeightedMovingAverage,
     [Category(IndicatorType.Momentum)]
@@ -1092,6 +1098,8 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     PoweredKaufmanAdaptiveMovingAverage,
     [Category(IndicatorType.Momentum)]
+    PpoMovingAverage,
+    [Category(IndicatorType.Momentum)]
     PremierStochasticOscillator,
     [Category(IndicatorType.Momentum)]
     PrettyGoodOscillator,
@@ -1105,6 +1113,8 @@ public enum IndicatorName
     PriceHeadleyAccelerationBands,
     [Category(IndicatorType.Volatility)]
     PriceLineChannel,
+    [Category(IndicatorType.Momentum)]
+    PriceMomentum,
     [Category(IndicatorType.Momentum)]
     PriceMomentumOscillator,
     [Category(IndicatorType.Volume)]

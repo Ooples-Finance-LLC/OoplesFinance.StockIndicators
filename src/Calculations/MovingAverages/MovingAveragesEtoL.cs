@@ -6,6 +6,184 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Geometric Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The geometric mean of the window, taken through logarithms so that a long window of large prices
+    /// cannot overflow the product. A value at or below zero has no logarithm, so each is floored at a
+    /// millionth first, which keeps the mean finite on a series that crosses zero. Distinct from
+    /// <see cref="CalculateGeometricMeanMovingAverage"/>, which multiplies the values themselves and leaves
+    /// out the ones it cannot use.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateGeometricMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> gmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double gma = 0;
+            if (i >= length - 1)
+            {
+                double logSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    logSum += Math.Log(Math.Max(inputList[j], 0.000001));
+                }
+
+                gma = Math.Exp(logSum / length);
+            }
+
+            gmaList.Add(gma);
+
+            var prevGma1 = i >= 1 ? gmaList[i - 1] : 0;
+            var prevGma2 = i >= 2 ? gmaList[i - 2] : 0;
+            var signal = GetCompareSignal(gma - prevGma1, prevGma1 - prevGma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Gma", gmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(gmaList);
+        stockData.IndicatorName = IndicatorName.GeometricMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Geometric Mean Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The geometric mean of the window's positive values: their product raised to one over how many there
+    /// were. A value of zero or less has no place in a product of that kind and is left out, so the root
+    /// taken is the root of the count actually used. Until the window fills, the bar publishes its own value.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateGeometricMeanMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> gmmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double gmma;
+            if (i < length - 1)
+            {
+                gmma = inputList[i];
+            }
+            else
+            {
+                var product = 1.0;
+                var used = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var value = inputList[i - j];
+                    if (value > 0)
+                    {
+                        product *= value;
+                        used++;
+                    }
+                }
+
+                gmma = used > 0 ? Math.Pow(product, 1.0 / used) : 0;
+            }
+
+            gmmaList.Add(gmma);
+
+            var prevGmma1 = i >= 1 ? gmmaList[i - 1] : 0;
+            var prevGmma2 = i >= 2 ? gmmaList[i - 2] : 0;
+            var signal = GetCompareSignal(gmma - prevGmma1, prevGmma1 - prevGmma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Gmma", gmmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(gmmaList);
+        stockData.IndicatorName = IndicatorName.GeometricMeanMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Harmonic Mean Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The harmonic mean of the window: how many values there were, over the sum of their reciprocals. It
+    /// leans towards the smaller values of the window, which is what makes it the right mean for a rate. A
+    /// zero has no reciprocal and is left out. Until the window fills, the bar publishes its own value.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateHarmonicMeanMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> hmmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double hmma;
+            if (i < length - 1)
+            {
+                hmma = inputList[i];
+            }
+            else
+            {
+                var sum = 0.0;
+                var used = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var value = inputList[i - j];
+                    if (value != 0)
+                    {
+                        sum += 1.0 / value;
+                        used++;
+                    }
+                }
+
+                hmma = used > 0 && sum != 0 ? used / sum : 0;
+            }
+
+            hmmaList.Add(hmma);
+
+            var prevHmma1 = i >= 1 ? hmmaList[i - 1] : 0;
+            var prevHmma2 = i >= 2 ? hmmaList[i - 2] : 0;
+            var signal = GetCompareSignal(hmma - prevHmma1, prevHmma1 - prevHmma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Hmma", hmmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(hmmaList);
+        stockData.IndicatorName = IndicatorName.HarmonicMeanMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the exponential moving average.
     /// </summary>
     /// <param name="stockData">The stock data.</param>

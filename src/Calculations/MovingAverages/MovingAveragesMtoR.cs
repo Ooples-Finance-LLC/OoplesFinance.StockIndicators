@@ -6,6 +6,97 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Ppo Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The gap between a fast and a slow exponential average of the series, as a percentage of the slow one.
+    /// It is the percentage price oscillator without a signal line, and unlike
+    /// <see cref="CalculatePercentagePriceOscillator"/> it always averages exponentially rather than taking
+    /// the average a caller asks for. A bar whose slow average is zero has nothing to take a percentage of.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="fastLength"></param>
+    /// <param name="slowLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePpoMovingAverage(this StockData stockData, int fastLength = 12, int slowLength = 26)
+    {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> ppoMaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var fastBuffer = SpanCompat.CreateOutputBuffer(count);
+        var slowBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, fastBuffer.Span, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, slowBuffer.Span, slowLength);
+
+        for (var i = 0; i < count; i++)
+        {
+            var slowEma = slowBuffer.Span[i];
+            var ppoMa = slowEma != 0 ? (fastBuffer.Span[i] - slowEma) / slowEma * 100 : 0;
+            ppoMaList.Add(ppoMa);
+
+            var prevPpoMa1 = i >= 1 ? ppoMaList[i - 1] : 0;
+            var prevPpoMa2 = i >= 2 ? ppoMaList[i - 2] : 0;
+            var signal = GetCompareSignal(ppoMa - prevPpoMa1, prevPpoMa1 - prevPpoMa2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "PpoMa", ppoMaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(ppoMaList);
+        stockData.IndicatorName = IndicatorName.PpoMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Price Momentum.
+    /// </summary>
+    /// <remarks>
+    /// The change in the series over <paramref name="length"/> bars, in the price's own units rather than as
+    /// a proportion. A bar with no value that far back publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePriceMomentum(this StockData stockData, int length = 10)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> momentumList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var momentum = i >= length ? inputList[i] - inputList[i - length] : 0;
+            momentumList.Add(momentum);
+
+            var prevMomentum1 = i >= 1 ? momentumList[i - 1] : 0;
+            var prevMomentum2 = i >= 2 ? momentumList[i - 2] : 0;
+            var signal = GetCompareSignal(momentum - prevMomentum1, prevMomentum1 - prevMomentum2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Pm", momentumList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(momentumList);
+        stockData.IndicatorName = IndicatorName.PriceMomentum;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the powered kaufman adaptive moving average.
     /// </summary>
     /// <param name="stockData">The stock data.</param>

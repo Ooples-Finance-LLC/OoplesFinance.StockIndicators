@@ -132,6 +132,13 @@ internal static partial class StatefulIndicatorFactory
             RSquaredSpecOptions rsq => new RSquaredState(length: rsq.Length),
             PercentRankSpecOptions pr => new PercentRankState(length: pr.Length),
             MedianValueSpecOptions mv => new MedianValueState(length: mv.Length),
+            // The median moving average is the median value: same window, same sort, same middle.
+            MedianMaSpecOptions medma => new MedianValueState(length: medma.Length),
+            GeoMaSpecOptions gma => new GeometricMovingAverageState(length: gma.Length),
+            GeometricMeanMovingAverageSpecOptions gmma => new GeometricMeanMovingAverageState(length: gmma.Length),
+            HarmonicMeanMovingAverageSpecOptions hmma => new HarmonicMeanMovingAverageState(length: hmma.Length),
+            PpoMaSpecOptions ppoma => new PpoMovingAverageState(fastLength: ppoma.FastLength, slowLength: ppoma.SlowLength),
+            PriceMomentumSpecOptions pm => new PriceMomentumState(length: pm.Length),
             StandardErrorSpecOptions se => new StandardErrorState(length: se.Length),
             StandardErrorCoreSpecOptions sec => new StandardErrorOfTheMeanState(length: sec.Length),
             NetVolumeSpecOptions _ => new NetVolumeState(),
