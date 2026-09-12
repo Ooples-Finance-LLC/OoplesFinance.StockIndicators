@@ -205,6 +205,8 @@ public enum IndicatorName
     CorrectedMovingAverage,
     [Category(IndicatorType.Trend)]
     CubedWeightedMovingAverage,
+    [Category(IndicatorType.Trend)]
+    CumulativeSum,
     [Category(IndicatorType.Volatility)]
     DEnvelope,
     [Category(IndicatorType.Volatility)]
@@ -740,6 +742,8 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     HerrickPayoffIndex,
     [Category(IndicatorType.SupportAndResistance)]
+    HighestHigh,
+    [Category(IndicatorType.SupportAndResistance)]
     HighLowBands,
     [Category(IndicatorType.Momentum)]
     HighLowIndex,
@@ -869,6 +873,8 @@ public enum IndicatorName
     LiquidRelativeStrengthIndex,
     [Category(IndicatorType.Momentum)]
     LogisticCorrelation,
+    [Category(IndicatorType.SupportAndResistance)]
+    LowestLow,
     [Category(IndicatorType.Momentum)]
     MacZIndicator,
     [Category(IndicatorType.Volume)]
@@ -1195,6 +1201,10 @@ public enum IndicatorName
     RightSidedRickerMovingAverage,
     [Category(IndicatorType.Momentum)]
     RobustWeightingOscillator,
+    [Category(IndicatorType.SupportAndResistance)]
+    RollingMax,
+    [Category(IndicatorType.SupportAndResistance)]
+    RollingMin,
     [Category(IndicatorType.Volatility)]
     RootMovingAverageSquaredErrorBands,
     [Category(IndicatorType.Momentum)]

@@ -4,6 +4,56 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Highest High over a rolling window.
+    /// </summary>
+    /// <remarks>
+    /// The highest high of the last <paramref name="length"/> bars. The window expands rather than warming up:
+    /// before it is full, the highest high of the bars so far is still the highest high there is. When the
+    /// caller supplies their own series, the high is the one the batch engine derives for that bar.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateHighestHigh(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, _, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> highestHighList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var start = Math.Max(0, i - length + 1);
+            var highest = highList[start];
+            for (var j = start + 1; j <= i; j++)
+            {
+                if (highList[j] > highest)
+                {
+                    highest = highList[j];
+                }
+            }
+
+            highestHighList.Add(highest);
+
+            var prevHighest1 = i >= 1 ? highestHighList[i - 1] : 0;
+            var prevHighest2 = i >= 2 ? highestHighList[i - 2] : 0;
+            var signal = GetCompareSignal(highest - prevHighest1, prevHighest1 - prevHighest2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "HighestHigh", highestHighList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(highestHighList);
+        stockData.IndicatorName = IndicatorName.HighestHigh;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Gann Trend Oscillator
     /// </summary>
     /// <param name="stockData"></param>

@@ -4,6 +4,154 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Lowest Low over a rolling window.
+    /// </summary>
+    /// <remarks>
+    /// The lowest low of the last <paramref name="length"/> bars. The window expands rather than warming up:
+    /// before it is full, the lowest low of the bars so far is still the lowest low there is. When the caller
+    /// supplies their own series, the low is the one the batch engine derives for that bar.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateLowestLow(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (_, _, lowList, _, _) = GetInputValuesList(stockData);
+        var count = lowList.Count;
+        List<double> lowestLowList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var start = Math.Max(0, i - length + 1);
+            var lowest = lowList[start];
+            for (var j = start + 1; j <= i; j++)
+            {
+                if (lowList[j] < lowest)
+                {
+                    lowest = lowList[j];
+                }
+            }
+
+            lowestLowList.Add(lowest);
+
+            var prevLowest1 = i >= 1 ? lowestLowList[i - 1] : 0;
+            var prevLowest2 = i >= 2 ? lowestLowList[i - 2] : 0;
+            var signal = GetCompareSignal(lowest - prevLowest1, prevLowest1 - prevLowest2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "LowestLow", lowestLowList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(lowestLowList);
+        stockData.IndicatorName = IndicatorName.LowestLow;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Rolling Maximum of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The largest value of the last <paramref name="length"/> bars of the series being measured, which is the
+    /// caller's own series when they supply one. The window expands rather than warming up.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRollingMax(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> rollingMaxList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var start = Math.Max(0, i - length + 1);
+            var max = inputList[start];
+            for (var j = start + 1; j <= i; j++)
+            {
+                if (inputList[j] > max)
+                {
+                    max = inputList[j];
+                }
+            }
+
+            rollingMaxList.Add(max);
+
+            var prevMax1 = i >= 1 ? rollingMaxList[i - 1] : 0;
+            var prevMax2 = i >= 2 ? rollingMaxList[i - 2] : 0;
+            var signal = GetCompareSignal(max - prevMax1, prevMax1 - prevMax2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "RollingMax", rollingMaxList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(rollingMaxList);
+        stockData.IndicatorName = IndicatorName.RollingMax;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Rolling Minimum of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The smallest value of the last <paramref name="length"/> bars of the series being measured, which is the
+    /// caller's own series when they supply one. The window expands rather than warming up.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRollingMin(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> rollingMinList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var start = Math.Max(0, i - length + 1);
+            var min = inputList[start];
+            for (var j = start + 1; j <= i; j++)
+            {
+                if (inputList[j] < min)
+                {
+                    min = inputList[j];
+                }
+            }
+
+            rollingMinList.Add(min);
+
+            var prevMin1 = i >= 1 ? rollingMinList[i - 1] : 0;
+            var prevMin2 = i >= 2 ? rollingMinList[i - 2] : 0;
+            var signal = GetCompareSignal(min - prevMin1, prevMin1 - prevMin2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "RollingMin", rollingMinList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(rollingMinList);
+        stockData.IndicatorName = IndicatorName.RollingMin;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Optimized Trend Tracker
     /// </summary>
     /// <param name="stockData"></param>

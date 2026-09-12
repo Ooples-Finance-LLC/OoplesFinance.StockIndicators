@@ -4,6 +4,45 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Cumulative Sum of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The running total: each bar adds its own value to the total of every bar before it. It has no length,
+    /// so it never warms up - the first bar's total is its own value.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCumulativeSum(this StockData stockData)
+    {
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> cumulativeSumList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double sum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            sum += inputList[i];
+            cumulativeSumList.Add(sum);
+
+            var prevSum1 = i >= 1 ? cumulativeSumList[i - 1] : 0;
+            var prevSum2 = i >= 2 ? cumulativeSumList[i - 2] : 0;
+            var signal = GetCompareSignal(sum - prevSum1, prevSum1 - prevSum2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "CumulativeSum", cumulativeSumList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(cumulativeSumList);
+        stockData.IndicatorName = IndicatorName.CumulativeSum;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Coral Trend Indicator
     /// </summary>
     /// <param name="stockData"></param>

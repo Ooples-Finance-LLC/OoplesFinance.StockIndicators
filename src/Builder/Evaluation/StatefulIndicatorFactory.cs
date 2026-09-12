@@ -115,6 +115,11 @@ internal static partial class StatefulIndicatorFactory
 
             // Price/Trend - using named parameters to skip MovingAvgType defaults
             VhfSpecOptions vhf => new VerticalHorizontalFilterState(length: vhf.Length),
+            HighestHighSpecOptions hh => new HighestHighState(length: hh.Length),
+            LowestLowSpecOptions ll => new LowestLowState(length: ll.Length),
+            RollingMaxSpecOptions rmax => new RollingMaxState(length: rmax.Length),
+            RollingMinSpecOptions rmin => new RollingMinState(length: rmin.Length),
+            CumulativeSumSpecOptions _ => new CumulativeSumState(),
             DonchianChannelSpecOptions dc => new DonchianChannelsState(length: dc.Length),
             ParabolicSarSpecOptions _ => new ParabolicSARState(),
             SuperTrendSpecOptions st => new SuperTrendState(maType: st.MaType, length: st.Length),
