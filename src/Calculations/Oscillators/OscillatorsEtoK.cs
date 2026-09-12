@@ -1785,7 +1785,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var trUp = currentValue > prevValue ? tr : 0;
             trUpList.Add(trUp);
@@ -3202,7 +3202,7 @@ public static partial class Calculations
             var adxR = (adx + prevAdx) * 0.5;
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             var csi = length + tr > 0 ? k * adxR * tr / length : 0;
 
             var ergodicCsi = currentValue > 0 ? csi / currentValue : 0;

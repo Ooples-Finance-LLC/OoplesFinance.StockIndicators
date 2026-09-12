@@ -1851,7 +1851,7 @@ public static partial class Calculations
             var currentLow = lowList[i];
             tempLowList.Add(currentLow);
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             var maxIndex = tempHighList.LastIndexOf(highestHigh);
             var minIndex = tempLowList.LastIndexOf(lowestLow);
             var dnRun = i - maxIndex;

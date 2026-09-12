@@ -152,6 +152,43 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Range of each bar.
+    /// </summary>
+    /// <remarks>
+    /// The bar's high less its low. It looks at no other bar, so it has no length and never warms up.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRange(this StockData stockData)
+    {
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> rangeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var range = highList[i] - lowList[i];
+            rangeList.Add(range);
+
+            var prevRange1 = i >= 1 ? rangeList[i - 1] : 0;
+            var prevRange2 = i >= 2 ? rangeList[i - 2] : 0;
+            var signal = GetCompareSignal(range - prevRange1, prevRange1 - prevRange2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Range", rangeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(rangeList);
+        stockData.IndicatorName = IndicatorName.Range;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Optimized Trend Tracker
     /// </summary>
     /// <param name="stockData"></param>

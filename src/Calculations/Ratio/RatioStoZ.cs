@@ -90,7 +90,7 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             var max = priorValue != 0 ? Math.Max(prevHighest, priorValue) : prevHighest;
             var min = priorValue != 0 ? Math.Min(prevLowest, priorValue) : prevLowest;
 

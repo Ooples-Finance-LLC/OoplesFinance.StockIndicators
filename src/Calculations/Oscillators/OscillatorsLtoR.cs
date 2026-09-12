@@ -6,6 +6,49 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Log Returns of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The natural logarithm of the ratio of a value to the one <paramref name="length"/> bars before it. A bar
+    /// with no value that far back, or with a value of zero or less at either end, has no logarithm to take and
+    /// publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateLogReturns(this StockData stockData, int length = 1)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> returnsList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = inputList[i];
+            var prevValue = i >= length ? inputList[i - length] : 0;
+            var returns = i >= length && prevValue > 0 && currentValue > 0 ? Log(currentValue / prevValue) : 0;
+            returnsList.Add(returns);
+
+            var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
+            var prevReturns2 = i >= 2 ? returnsList[i - 2] : 0;
+            var signal = GetCompareSignal(returns - prevReturns1, prevReturns1 - prevReturns2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Returns", returnsList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(returnsList);
+        stockData.IndicatorName = IndicatorName.LogReturns;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the McClellan Oscillator
     /// </summary>
     /// <param name="stockData"></param>

@@ -83,6 +83,8 @@ public enum IndicatorName
     AutonomousRecursiveMovingAverage,
     [Category(IndicatorType.Momentum)]
     AverageAbsoluteErrorNormalization,
+    [Category(IndicatorType.Volatility)]
+    AverageDayRange,
     [Category(IndicatorType.Trend)]
     AverageDirectionalIndex,
     [Category(IndicatorType.Momentum)]
@@ -873,6 +875,8 @@ public enum IndicatorName
     LiquidRelativeStrengthIndex,
     [Category(IndicatorType.Momentum)]
     LogisticCorrelation,
+    [Category(IndicatorType.Momentum)]
+    LogReturns,
     [Category(IndicatorType.SupportAndResistance)]
     LowestLow,
     [Category(IndicatorType.Momentum)]
@@ -1133,6 +1137,8 @@ public enum IndicatorName
     RainbowOscillator,
     [Category(IndicatorType.Trend)]
     RandomWalkIndex,
+    [Category(IndicatorType.Volatility)]
+    Range,
     [Category(IndicatorType.Momentum)]
     RangeActionVerificationIndex,
     [Category(IndicatorType.Volatility)]
@@ -1249,6 +1255,8 @@ public enum IndicatorName
     SimpleLines,
     [Category(IndicatorType.Trend)]
     SimpleMovingAverage,
+    [Category(IndicatorType.Momentum)]
+    SimpleReturns,
     [Category(IndicatorType.Trend)]
     SimplifiedLeastSquaresMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -1415,6 +1423,8 @@ public enum IndicatorName
     TripleExponentialMovingAverage,
     [Category(IndicatorType.Momentum)]
     Trix,
+    [Category(IndicatorType.Volatility)]
+    TrueRange,
     [Category(IndicatorType.Momentum)]
     TrueStrengthIndex,
     [Category(IndicatorType.Trend)]

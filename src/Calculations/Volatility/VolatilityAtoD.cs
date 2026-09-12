@@ -6,6 +6,53 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Average Day Range.
+    /// </summary>
+    /// <remarks>
+    /// The simple average of the last <paramref name="length"/> daily ranges, each the bar's high less its low.
+    /// It publishes zero until the window fills, as the simple moving average it is built on does.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAverageDayRange(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> adrList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double sum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            sum += highList[i] - lowList[i];
+            if (i >= length)
+            {
+                sum -= highList[i - length] - lowList[i - length];
+            }
+
+            var adr = i >= length - 1 ? sum / length : 0;
+            adrList.Add(adr);
+
+            var prevAdr1 = i >= 1 ? adrList[i - 1] : 0;
+            var prevAdr2 = i >= 2 ? adrList[i - 2] : 0;
+            var signal = GetCompareSignal(adr - prevAdr1, prevAdr1 - prevAdr2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Adr", adrList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(adrList);
+        stockData.IndicatorName = IndicatorName.AverageDayRange;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the choppiness index.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -38,7 +85,7 @@ public static partial class Calculations
             var lowestLow = lowestLowList[i];
             var range = highestHigh - lowestLow;
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             trList.Add(tr);
             trSumWindow.Add(tr);
 

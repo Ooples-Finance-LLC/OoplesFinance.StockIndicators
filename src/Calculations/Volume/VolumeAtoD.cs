@@ -252,7 +252,7 @@ public static partial class Calculations
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
             var prevOpen = i >= 1 ? openList[i - 1] : 0;
-            var range = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var range = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
 
             var prevV1 = i >= 1 ? v1List[i - 1] : 0;
             var v1 = currentClose > currentOpen ? range / ((2 * range) + currentOpen - currentClose) * currentVolume :

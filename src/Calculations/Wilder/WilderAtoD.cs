@@ -108,7 +108,7 @@ public static partial class Calculations
             var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
             dmMinusList.Add(dmMinus);
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             trList.Add(tr);
         }
 

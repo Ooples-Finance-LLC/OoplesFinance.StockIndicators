@@ -587,7 +587,7 @@ public static partial class Calculations
             var vmMinus = Math.Abs(currentLow - prevHigh);
             vmMinusSumWindow.Add(vmMinus);
 
-            var trueRange = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             trueRangeSumWindow.Add(trueRange);
 
             var vmPlus14 = vmPlusSumWindow.Sum(length);

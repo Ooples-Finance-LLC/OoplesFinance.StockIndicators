@@ -6,6 +6,47 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Simple Returns of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The change over <paramref name="length"/> bars as a fraction of the earlier value. A bar with no value
+    /// that far back, or one whose earlier value is zero and so has no return to speak of, publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSimpleReturns(this StockData stockData, int length = 1)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> returnsList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= length ? inputList[i - length] : 0;
+            var returns = i >= length && prevValue != 0 ? (inputList[i] - prevValue) / prevValue : 0;
+            returnsList.Add(returns);
+
+            var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
+            var prevReturns2 = i >= 2 ? returnsList[i - 2] : 0;
+            var signal = GetCompareSignal(returns - prevReturns1, prevReturns1 - prevReturns2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Returns", returnsList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(returnsList);
+        stockData.IndicatorName = IndicatorName.SimpleReturns;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Zweig Market Breadth Indicator
     /// </summary>
     /// <param name="stockData"></param>
@@ -294,7 +335,7 @@ public static partial class Calculations
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             trList.Add(tr);
         }
 
@@ -2408,7 +2449,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var v1 = i >= 1 && currentValue > prevValue ? tr / MinPastValues(i, 1, currentValue - prevValue) : tr;
             v1List.Add(v1);
@@ -2578,7 +2619,7 @@ public static partial class Calculations
             var currentClose = inputList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
             var prevSro1 = i >= 1 ? sroList[i - 1] : 0;
             var prevSro2 = i >= 2 ? sroList[i - 2] : 0;
 

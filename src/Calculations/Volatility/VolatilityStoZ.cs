@@ -167,6 +167,49 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the True Range.
+    /// </summary>
+    /// <remarks>
+    /// Wilder's true range: the greatest of the bar's own range, the distance from its high to the previous
+    /// close, and the distance from its low to that close. The first bar has no previous close, so its true
+    /// range is its own range. When the caller supplies their own series, that series is the close.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateTrueRange(this StockData stockData)
+    {
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> trueRangeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
+            var trueRange = i >= 1
+                ? CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, inputList[i - 1])
+                : currentHigh - currentLow;
+            trueRangeList.Add(trueRange);
+
+            var prevTrueRange1 = i >= 1 ? trueRangeList[i - 1] : 0;
+            var prevTrueRange2 = i >= 2 ? trueRangeList[i - 2] : 0;
+            var signal = GetCompareSignal(trueRange - prevTrueRange1, prevTrueRange1 - prevTrueRange2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "TrueRange", trueRangeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(trueRangeList);
+        stockData.IndicatorName = IndicatorName.TrueRange;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Ultimate Volatility Indicator
     /// </summary>
     /// <param name="stockData"></param>
@@ -543,7 +586,7 @@ public static partial class Calculations
             var currentOpen = openList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var trueRange = CalculateTrueRange(currentHigh, currentLow, prevClose);
+            var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
 
             var prevVqiT = GetLastOrDefault(vqiTList);
             var vqiT = trueRange != 0 && currentHigh - currentLow != 0 ?

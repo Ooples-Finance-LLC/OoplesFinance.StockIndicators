@@ -342,7 +342,7 @@ public static partial class Calculations
             var currentLow = lowList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var trVal = currentValue != 0 ? tr / currentValue : tr;
             trValList.Add(trVal);
@@ -438,7 +438,7 @@ public static partial class Calculations
             var currentHigh = highList[i];
             var currentLow = lowList[i];
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             tempList.Add(tr);
             trWindow.Add(tr);
 
