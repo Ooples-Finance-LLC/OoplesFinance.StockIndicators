@@ -345,7 +345,12 @@ VMA bands, Trender and the volume positive/negative indicator; the Time Price In
 defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
 50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations. The
 first bar's true range in the Grover Llorens Cycle Oscillator and the Ultimate Trader Oscillator is also
-High - Low now, not the whole high.
+High - Low now, not the whole high. Half Trend, the Volatility Ratio and the ATR Filtered Exponential
+Moving Average measure it against the bar's own close too, as their batch twins do. Only the last of the
+three publishes different values: the other two discard that first range before it reaches a result - the
+Volatility Ratio because its window bounds are still zero and their difference gates the ratio, Half Trend
+because its average true range reaches only the arrow levels, which feed a signal and nothing either
+engine publishes - so those two had agreed with the batch by luck rather than by construction.
 
 A preview (`isFinal: false`) of a bar now publishes what that bar publishes once final
 (`StreamingPreviewTests`, every state). Nine did not: ALMA, Interquartile Range Bands and Trimean left the
