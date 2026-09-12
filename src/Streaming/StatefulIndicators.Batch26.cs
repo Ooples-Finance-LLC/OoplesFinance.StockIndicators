@@ -1690,7 +1690,8 @@ public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable
     {
         var value = _input.GetValue(bar);
         _ema.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous value, so it stands in for itself, as the batch does.
+        var prevValue = _hasPrev ? _prevValue : value;
         var prevHighest = _hasWindow ? _prevHighest : 0;
         var prevLowest = _hasWindow ? _prevLowest : 0;
         var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length + 1);

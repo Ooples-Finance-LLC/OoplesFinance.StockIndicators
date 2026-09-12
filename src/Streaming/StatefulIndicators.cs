@@ -9813,7 +9813,9 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
+        // The first bar has no previous value, so it stands in for itself, as the batch does to avoid an
+        // inflated first true range.
+        var prevValue = _hasPrev ? _prevValue : value;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
         var trVal = value != 0 ? tr / value : tr;
         var atrVal = _atrSmoother.Next(trVal, isFinal);
