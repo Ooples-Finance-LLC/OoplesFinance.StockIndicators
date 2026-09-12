@@ -2728,6 +2728,7 @@ public sealed class ZigZagSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ZigZag takes a deviation percentage and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2815,6 +2816,7 @@ public sealed class DemandIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DemandIndex reads one bar at a time and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 

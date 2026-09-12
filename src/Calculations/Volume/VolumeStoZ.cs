@@ -144,6 +144,116 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Volume Momentum Oscillator
+    /// </summary>
+    /// <remarks>
+    /// The gap between a short and a long exponential average of volume, as a percentage of the long one.
+    /// Distinct from <see cref="CalculateVolumeOscillator"/>, which measures the same gap between two simple
+    /// averages: this one weights recent volume more heavily. Both averages start at the first bar's volume
+    /// rather than warming up, and that first bar reads zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="shortLength"></param>
+    /// <param name="longLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVolumeMomentumOscillator(this StockData stockData, int shortLength = 5, int longLength = 20)
+    {
+        shortLength = Math.Max(shortLength, 1);
+        longLength = Math.Max(longLength, 1);
+        var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = volumeList.Count;
+        List<double> oscillatorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var shortK = 2.0 / (shortLength + 1);
+        var longK = 2.0 / (longLength + 1);
+        var shortEma = count > 0 ? volumeList[0] : 0;
+        var longEma = count > 0 ? volumeList[0] : 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            double oscillator = 0;
+            if (i >= 1)
+            {
+                shortEma = (volumeList[i] * shortK) + (shortEma * (1 - shortK));
+                longEma = (volumeList[i] * longK) + (longEma * (1 - longK));
+                oscillator = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+            }
+
+            oscillatorList.Add(oscillator);
+
+            var prevOscillator1 = i >= 1 ? oscillatorList[i - 1] : 0;
+            var prevOscillator2 = i >= 2 ? oscillatorList[i - 2] : 0;
+            var signal = GetCompareSignal(oscillator - prevOscillator1, prevOscillator1 - prevOscillator2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Vmo", oscillatorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(oscillatorList);
+        stockData.IndicatorName = IndicatorName.VolumeMomentumOscillator;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Volume Zone Oscillator
+    /// </summary>
+    /// <remarks>
+    /// The share of recent volume that belonged to rising bars, as a percentage: volume signed by the bar's
+    /// direction is averaged, and divided by the average of the volume itself. A hundred says every recent
+    /// bar rose, minus a hundred that every one fell, and zero that the two sides balance.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVolumeZoneOscillator(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> oscillatorList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var signedVolume = new double[count];
+        for (var i = 1; i < count; i++)
+        {
+            signedVolume[i] = inputList[i] > inputList[i - 1] ? volumeList[i] : -volumeList[i];
+        }
+
+        var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
+        var signedBuffer = SpanCompat.CreateOutputBuffer(count);
+        var totalBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.ExponentialMovingAverage(signedVolume, signedBuffer.Span, length);
+        MovingAverageCore.ExponentialMovingAverage(volumeSpan, totalBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var totalVolume = totalBuffer.Span[i];
+            var oscillator = totalVolume != 0 ? signedBuffer.Span[i] / totalVolume * 100 : 0;
+            oscillatorList.Add(oscillator);
+
+            var prevOscillator1 = i >= 1 ? oscillatorList[i - 1] : 0;
+            var prevOscillator2 = i >= 2 ? oscillatorList[i - 2] : 0;
+            var signal = GetCompareSignal(oscillator - prevOscillator1, prevOscillator1 - prevOscillator2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Vzo", oscillatorList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(oscillatorList);
+        stockData.IndicatorName = IndicatorName.VolumeZoneOscillator;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Upside Downside Volume
     /// </summary>
     /// <param name="stockData"></param>

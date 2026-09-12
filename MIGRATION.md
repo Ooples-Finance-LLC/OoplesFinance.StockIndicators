@@ -238,6 +238,23 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
   indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
   serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
   indicator, so a spec's values are the indicator's values.
+- **Every typed spec now names an indicator this library has.** 57 specs computed something no indicator
+  computed - the highest high, a rolling variance, Yang-Zhang volatility, a zig zag - and were pinned in
+  `BuilderArmTests.AwaitingPromotion` while they waited. All 57 are bound now and that list is empty. Most
+  became new indicators, written from their published definitions and held to their arms; a few turned out
+  to be indicators the library already had under another name, and bind to those instead: the median moving
+  average is the median value, the ATR percent is the normalized average true range, and both average day
+  range specs name the one indicator. Each new indicator has a streaming twin held to it bar by bar, with
+  one exception below.
+- **`ZigZag` has no streaming twin, and cannot have one.** A turning point is only known once the price has
+  moved far enough past it, and recognising it rewrites the bars back to the previous turning point. A
+  streaming engine has already published those bars. `CalculateZigZag` computes it, and the Builder serves
+  it from there; there is no `ZigZagState`.
+- **Nine more spec options are `[Obsolete]`** as having no effect, for the same reason as the 66 before
+  them - their indicator has no parameter to set: the true range, the range, net volume, the cumulative
+  volume index, the demand index and the Ichimoku lagging span read one bar or two and take no length; the
+  Keltner channel width always averages exponentially; and the zig zag's option was being passed as a
+  deviation percentage rather than a bar count.
 - **A spec's options reach that indicator.** 177 options reached no parameter at all. 111 now set the parameter
   they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
   widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - through 118 mappings, since seven

@@ -6,6 +6,87 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Volatility Stop.
+    /// </summary>
+    /// <remarks>
+    /// A stop that trails the price by a multiple of the average true range and never moves against the
+    /// trend: while the trend is up it only ever rises, and it flips to the other side of the price when the
+    /// close crosses it. The average is the one <see cref="CalculateAverageTrueRange"/> takes. The first bar
+    /// has no stop behind it and starts at its own price.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="multiplier"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateVolatilityStop(this StockData stockData, int length = 14, double multiplier = 2)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> stopList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        var trendIsUp = true;
+        for (var i = 0; i < count; i++)
+        {
+            double stop;
+            if (i == 0)
+            {
+                stop = inputList[i];
+            }
+            else
+            {
+                var previousStop = stopList[i - 1];
+                var band = atrBuffer.Span[i] * multiplier;
+                if (trendIsUp)
+                {
+                    if (inputList[i] < previousStop)
+                    {
+                        trendIsUp = false;
+                        stop = inputList[i] + band;
+                    }
+                    else
+                    {
+                        stop = Math.Max(previousStop, inputList[i] - band);
+                    }
+                }
+                else
+                {
+                    if (inputList[i] > previousStop)
+                    {
+                        trendIsUp = true;
+                        stop = inputList[i] - band;
+                    }
+                    else
+                    {
+                        stop = Math.Min(previousStop, inputList[i] + band);
+                    }
+                }
+            }
+
+            stopList.Add(stop);
+
+            var signal = GetCompareSignal(inputList[i] - stop, i >= 1 ? inputList[i - 1] - stopList[i - 1] : 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Vs", stopList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(stopList);
+        stockData.IndicatorName = IndicatorName.VolatilityStop;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Standard Deviation Volatility
     /// </summary>
     /// <param name="stockData"></param>

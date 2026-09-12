@@ -4,6 +4,58 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Demand Index
+    /// </summary>
+    /// <remarks>
+    /// How much of the bar's volume the buyers took against how much the sellers took, less one, so that a
+    /// bar split evenly reads zero. The split comes from where the close sits in the bar's range: a close at
+    /// the high gives the whole volume to the buyers, a close at the low gives it to the sellers. It looks at
+    /// one bar at a time and the first bar, having no predecessor, reads zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateDemandIndex(this StockData stockData)
+    {
+        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> demandIndexList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double demandIndex = 0;
+            if (i >= 1)
+            {
+                var range = highList[i] - lowList[i];
+                var buyingPressure = inputList[i] - lowList[i];
+                var sellingPressure = highList[i] - inputList[i];
+                var buyingPercent = range != 0 ? buyingPressure / range : 0;
+                var sellingPercent = range != 0 ? sellingPressure / range : 0;
+                var buyVolume = volumeList[i] * buyingPercent;
+                var sellVolume = volumeList[i] * sellingPercent;
+                demandIndex = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
+            }
+
+            demandIndexList.Add(demandIndex);
+
+            var prevDemand1 = i >= 1 ? demandIndexList[i - 1] : 0;
+            var prevDemand2 = i >= 2 ? demandIndexList[i - 2] : 0;
+            var signal = GetCompareSignal(demandIndex - prevDemand1, prevDemand1 - prevDemand2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Di", demandIndexList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(demandIndexList);
+        stockData.IndicatorName = IndicatorName.DemandIndex;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Cumulative Volume Index
     /// </summary>
     /// <remarks>

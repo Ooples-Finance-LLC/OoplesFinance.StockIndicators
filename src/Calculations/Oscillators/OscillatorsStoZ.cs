@@ -6,6 +6,111 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Simple Price Zone.
+    /// </summary>
+    /// <remarks>
+    /// The balance of the last <paramref name="length"/> bars' rises against their falls, as a percentage
+    /// running from a hundred when every bar rose to minus a hundred when every bar fell. It is the relative
+    /// strength index's arithmetic without its smoothing: the rises and the falls are summed over a plain
+    /// window rather than averaged forward.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSimplePriceZone(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> zoneList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double sumUp = 0;
+        double sumDown = 0;
+        for (var i = 0; i < count; i++)
+        {
+            double zone = 0;
+            if (i >= 1)
+            {
+                var change = inputList[i] - inputList[i - 1];
+                sumUp += change > 0 ? change : 0;
+                sumDown += change < 0 ? -change : 0;
+
+                if (i >= length)
+                {
+                    var prevChange = inputList[i - length] - (i > length ? inputList[i - length - 1] : 0);
+                    sumUp -= prevChange > 0 ? prevChange : 0;
+                    sumDown -= prevChange < 0 ? -prevChange : 0;
+                }
+
+                var total = sumUp + sumDown;
+                zone = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
+            }
+
+            zoneList.Add(zone);
+
+            var prevZone1 = i >= 1 ? zoneList[i - 1] : 0;
+            var prevZone2 = i >= 2 ? zoneList[i - 2] : 0;
+            var signal = GetCompareSignal(zone - prevZone1, prevZone1 - prevZone2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Spz", zoneList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(zoneList);
+        stockData.IndicatorName = IndicatorName.SimplePriceZone;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Swing Index.
+    /// </summary>
+    /// <remarks>
+    /// Wilder's swing index of each bar against the bar before it, computed by the same
+    /// <c>WilderSwingIndex</c> both engines use, so the two agree to the last bit and so that the index and
+    /// the accumulative swing index that totals it cannot part company. Where the market has no limit move,
+    /// the bar's own range stands in for one. The first bar has no bar behind it and reads zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="limitMove"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSwingIndex(this StockData stockData, double limitMove = 0)
+    {
+        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> swingIndexList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var swingIndex = i >= 1
+                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1],
+                    inputList[i - 1], limitMove)
+                : 0;
+            swingIndexList.Add(swingIndex);
+
+            var prevSwing1 = i >= 1 ? swingIndexList[i - 1] : 0;
+            var prevSwing2 = i >= 2 ? swingIndexList[i - 2] : 0;
+            var signal = GetCompareSignal(swingIndex - prevSwing1, prevSwing1 - prevSwing2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Si", swingIndexList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(swingIndexList);
+        stockData.IndicatorName = IndicatorName.SwingIndex;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Smoothed Williams R.
     /// </summary>
     /// <remarks>

@@ -55,7 +55,6 @@ public sealed class BuilderArmTests : GlobalTestData
        
        
        
-        "DemandIndexSpecOptions", "ElderImpulseSystemSpecOptions",
        
        
        
@@ -63,12 +62,13 @@ public sealed class BuilderArmTests : GlobalTestData
        
        
        
-        "SimplePriceZoneSpecOptions",
        
-        "SwingIndexSpecOptions", "TrueRangeAdjustedExponentialMovingAverageSpecOptions",
-        "VolatilityStopSpecOptions",
-        "VolumeMomentumOscillatorSpecOptions",
-        "VolumeZoneOscillatorSpecOptions", "ZigZagSpecOptions",
+       
+       
+       
+       
+       
+       
     };
 
     [Fact]
