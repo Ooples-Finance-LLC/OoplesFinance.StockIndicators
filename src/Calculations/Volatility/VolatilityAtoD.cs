@@ -53,6 +53,129 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Coefficient of Variation.
+    /// </summary>
+    /// <remarks>
+    /// The window's standard deviation as a percentage of its own mean, which is how a spread is compared
+    /// between series of different size. A window whose mean is zero has no such percentage, and publishes
+    /// zero, as does a window shorter than <paramref name="length"/>.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCoefficientOfVariation(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> cvList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double cv = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                var stdDev = Sqrt(variance / length);
+                cv = mean != 0 ? stdDev / mean * 100 : 0;
+            }
+
+            cvList.Add(cv);
+
+            var prevCv1 = i >= 1 ? cvList[i - 1] : 0;
+            var prevCv2 = i >= 2 ? cvList[i - 2] : 0;
+            var signal = GetCompareSignal(cv - prevCv1, prevCv1 - prevCv2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Cv", cvList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(cvList);
+        stockData.IndicatorName = IndicatorName.CoefficientOfVariation;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Downside Deviation.
+    /// </summary>
+    /// <remarks>
+    /// The deviation of only those returns that fell short of <paramref name="targetReturn"/>, which is what
+    /// a downside measure such as the Sortino ratio divides by: returns above the target are not risk. The
+    /// root mean square is taken over the shortfalls themselves, not over the whole window, so a window with
+    /// no shortfall in it publishes zero rather than a small number.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="targetReturn"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateDownsideDeviation(this StockData stockData, int length = 20, double targetReturn = 0)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> ddList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double downsideDeviation = 0;
+            if (i >= length)
+            {
+                double sumSquaredDownside = 0;
+                var shortfalls = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var prevValue = inputList[j - 1];
+                    var ret = prevValue > 0 ? (inputList[j] - prevValue) / prevValue : 0;
+                    if (ret < targetReturn)
+                    {
+                        var shortfall = ret - targetReturn;
+                        sumSquaredDownside += shortfall * shortfall;
+                        shortfalls++;
+                    }
+                }
+
+                downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
+            }
+
+            ddList.Add(downsideDeviation);
+
+            var prevDd1 = i >= 1 ? ddList[i - 1] : 0;
+            var prevDd2 = i >= 2 ? ddList[i - 2] : 0;
+            var signal = GetCompareSignal(downsideDeviation - prevDd1, prevDd1 - prevDd2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Dd", ddList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(ddList);
+        stockData.IndicatorName = IndicatorName.DownsideDeviation;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the choppiness index.
     /// </summary>
     /// <param name="stockData">The stock data.</param>

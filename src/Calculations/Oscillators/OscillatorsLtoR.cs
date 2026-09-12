@@ -49,6 +49,119 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Median Value of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The middle value of the window once sorted, averaging the middle pair when the length is even. Until
+    /// the window fills there is no median to take, and the bar publishes its own value rather than zero, so
+    /// the series starts on the scale it will keep.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateMedianValue(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> medianList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var window = new double[length];
+
+        for (var i = 0; i < count; i++)
+        {
+            double median;
+            if (i < length - 1)
+            {
+                median = inputList[i];
+            }
+            else
+            {
+                for (var j = 0; j < length; j++)
+                {
+                    window[j] = inputList[i - length + 1 + j];
+                }
+
+                Array.Sort(window);
+                median = length % 2 == 0 ? (window[(length / 2) - 1] + window[length / 2]) / 2 : window[length / 2];
+            }
+
+            medianList.Add(median);
+
+            var prevMedian1 = i >= 1 ? medianList[i - 1] : 0;
+            var prevMedian2 = i >= 2 ? medianList[i - 2] : 0;
+            var signal = GetCompareSignal(median - prevMedian1, prevMedian1 - prevMedian2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "MedianValue", medianList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(medianList);
+        stockData.IndicatorName = IndicatorName.MedianValue;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Percent Rank of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The share of the previous <paramref name="length"/> values that the current one stands above, as a
+    /// percentage. The current bar is ranked against the bars before it and is not counted among them, so a
+    /// value never ranks against itself, and a bar without that many predecessors publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePercentRank(this StockData stockData, int length = 100)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> percentRankList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double percentRank = 0;
+            if (i >= length)
+            {
+                var currentValue = inputList[i];
+                var below = 0;
+                for (var j = i - length; j < i; j++)
+                {
+                    if (inputList[j] < currentValue)
+                    {
+                        below++;
+                    }
+                }
+
+                percentRank = (double)below / length * 100;
+            }
+
+            percentRankList.Add(percentRank);
+
+            var prevRank1 = i >= 1 ? percentRankList[i - 1] : 0;
+            var prevRank2 = i >= 2 ? percentRankList[i - 2] : 0;
+            var signal = GetCompareSignal(percentRank - prevRank1, prevRank1 - prevRank2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "PercentRank", percentRankList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(percentRankList);
+        stockData.IndicatorName = IndicatorName.PercentRank;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the McClellan Oscillator
     /// </summary>
     /// <param name="stockData"></param>

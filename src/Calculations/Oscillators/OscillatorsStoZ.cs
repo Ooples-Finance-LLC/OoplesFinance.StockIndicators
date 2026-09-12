@@ -47,6 +47,70 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the Skewness of the input series.
+    /// </summary>
+    /// <remarks>
+    /// The third moment of the window about its own mean, divided by the cube of its standard deviation:
+    /// how lopsided the window is, and which way. Both the moment and the deviation are taken over the
+    /// window's own length, so this is the population skewness. A window with no spread at all has no shape
+    /// to describe and publishes zero, as does a window shorter than <paramref name="length"/>.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateSkewness(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> skewnessList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double skewness = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double sumSquaredDev = 0;
+                double sumCubedDev = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var dev = inputList[j] - mean;
+                    sumSquaredDev += dev * dev;
+                    sumCubedDev += dev * dev * dev;
+                }
+
+                var stdDev = Sqrt(sumSquaredDev / length);
+                skewness = stdDev != 0 ? sumCubedDev / length / (stdDev * stdDev * stdDev) : 0;
+            }
+
+            skewnessList.Add(skewness);
+
+            var prevSkewness1 = i >= 1 ? skewnessList[i - 1] : 0;
+            var prevSkewness2 = i >= 2 ? skewnessList[i - 2] : 0;
+            var signal = GetCompareSignal(skewness - prevSkewness1, prevSkewness1 - prevSkewness2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Skewness", skewnessList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(skewnessList);
+        stockData.IndicatorName = IndicatorName.Skewness;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Zweig Market Breadth Indicator
     /// </summary>
     /// <param name="stockData"></param>

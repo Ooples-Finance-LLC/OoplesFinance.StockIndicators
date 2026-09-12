@@ -181,6 +181,8 @@ public enum IndicatorName
     ChoppinessIndex,
     [Category(IndicatorType.Volatility)]
     ClosedFormDistanceVolatility,
+    [Category(IndicatorType.Volatility)]
+    CoefficientOfVariation,
     [Category(IndicatorType.Momentum)]
     CommodityChannelIndex,
     [Category(IndicatorType.Volatility)]
@@ -281,6 +283,8 @@ public enum IndicatorName
     DoubleSmoothedStochastic,
     [Category(IndicatorType.Momentum)]
     DoubleStochasticOscillator,
+    [Category(IndicatorType.Volatility)]
+    DownsideDeviation,
     [Category(IndicatorType.Volatility)]
     DrunkardWalk,
     [Category(IndicatorType.Momentum)]
@@ -912,6 +916,8 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     MedianPrice,
     [Category(IndicatorType.Trend)]
+    MedianValue,
+    [Category(IndicatorType.Trend)]
     MiddleHighLowMovingAverage,
     [Category(IndicatorType.Trend)]
     Midpoint,
@@ -1044,6 +1050,8 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     PercentChangeOscillator,
     [Category(IndicatorType.Momentum)]
+    PercentRank,
+    [Category(IndicatorType.Momentum)]
     PercentagePriceOscillator,
     [Category(IndicatorType.Momentum)]
     PercentageVolumeOscillator,
@@ -1131,6 +1139,8 @@ public enum IndicatorName
     QuickMovingAverage,
     [Category(IndicatorType.Trend)]
     R2AdaptiveRegression,
+    [Category(IndicatorType.Momentum)]
+    RSquared,
     [Category(IndicatorType.Momentum)]
     RahulMohindarOscillator,
     [Category(IndicatorType.Momentum)]
@@ -1265,6 +1275,8 @@ public enum IndicatorName
     SineWeightedMovingAverage,
     [Category(IndicatorType.Trend)]
     SlowSmoothedMovingAverage,
+    [Category(IndicatorType.Momentum)]
+    Skewness,
     [Category(IndicatorType.SupportAndResistance)]
     SmartEnvelope,
     [Category(IndicatorType.Momentum)]

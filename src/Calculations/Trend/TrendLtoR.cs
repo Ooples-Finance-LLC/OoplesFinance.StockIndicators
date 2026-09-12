@@ -189,6 +189,68 @@ public static partial class Calculations
     }
 
     /// <summary>
+    /// Calculates the R Squared of the input series against time.
+    /// </summary>
+    /// <remarks>
+    /// The square of the correlation between the window's values and the bar numbers they sit on: how much
+    /// of the window's movement a straight line accounts for. It is a measure of how trending the window is
+    /// and not of direction, so it runs from zero to one whichever way the line slopes. A window that does
+    /// not move at all has no line to fit and publishes zero, as does one shorter than the length.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateRSquared(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> rSquaredList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double rSquared = 0;
+            if (i >= length - 1)
+            {
+                double sumX = 0, sumY = 0, sumXy = 0, sumX2 = 0, sumY2 = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    double x = j;
+                    var y = inputList[i - length + 1 + j];
+                    sumX += x;
+                    sumY += y;
+                    sumXy += x * y;
+                    sumX2 += x * x;
+                    sumY2 += y * y;
+                }
+
+                var numerator = (length * sumXy) - (sumX * sumY);
+                var denominator = Sqrt(((length * sumX2) - (sumX * sumX)) * ((length * sumY2) - (sumY * sumY)));
+                var r = denominator != 0 ? numerator / denominator : 0;
+                rSquared = r * r;
+            }
+
+            rSquaredList.Add(rSquared);
+
+            var prevRSquared1 = i >= 1 ? rSquaredList[i - 1] : 0;
+            var prevRSquared2 = i >= 2 ? rSquaredList[i - 2] : 0;
+            var signal = GetCompareSignal(rSquared - prevRSquared1, prevRSquared1 - prevRSquared2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "RSquared", rSquaredList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(rSquaredList);
+        stockData.IndicatorName = IndicatorName.RSquared;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Optimized Trend Tracker
     /// </summary>
     /// <param name="stockData"></param>
