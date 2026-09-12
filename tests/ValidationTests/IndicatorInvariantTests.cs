@@ -99,6 +99,21 @@ public sealed class IndicatorInvariantTests
     };
 
     /// <summary>
+    /// Indicators that cannot settle on a flat market, because they grow without bound by definition.
+    /// </summary>
+    /// <remarks>
+    /// Not a defect, unlike <see cref="MovesOnAFlatMarket"/>: a running total of a constant price grows by
+    /// that price on every bar, for ever, and an indicator that settled instead would be the broken one.
+    /// This is not a licence for accumulators generally - the ones that accumulate a CHANGE rather than a
+    /// level, such as on balance volume, the accumulation distribution line and the cumulative volume
+    /// index, add nothing on a bar that did not move, so they settle and are held to the invariant.
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> UnboundedByDefinition = new()
+    {
+        IndicatorName.CumulativeSum
+    };
+
+    /// <summary>
     /// Indicators publishing an upper band below their middle, or a middle below their lower. Each is
     /// a defect; see issue #178.
     /// </summary>
@@ -264,7 +279,7 @@ public sealed class IndicatorInvariantTests
     [MemberData(nameof(AllIndicators))]
     public void SettlesToAConstantOnAFlatMarket(IndicatorName name)
     {
-        if (MovesOnAFlatMarket.Contains(name))
+        if (MovesOnAFlatMarket.Contains(name) || UnboundedByDefinition.Contains(name))
         {
             return;
         }
