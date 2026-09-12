@@ -20,6 +20,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// counts.
 /// </para>
 /// </remarks>
+[PrimaryOutput("Yzv")]
 public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -164,6 +165,7 @@ public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDispos
 /// <see cref="AverageTrueRangeState"/> rather than smoothing a true range of its own, so the range it
 /// divides is the one the batch engine averages.
 /// </remarks>
+[PrimaryOutput("Natr")]
 public sealed class NormalizedAverageTrueRangeState : IStreamingIndicatorState, IDisposable
 {
     private readonly AverageTrueRangeState _averageTrueRange;

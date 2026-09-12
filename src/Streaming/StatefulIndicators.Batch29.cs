@@ -9,6 +9,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// Streaming form of <c>CalculateSchaffTrendCycleShk</c>: the double-smoothed Schaff Trend Cycle from
 /// the "STC Indicator - A Better MACD [SHK]" script.
 /// </summary>
+[PrimaryOutput("Stc")]
 public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastEma;
@@ -132,6 +133,7 @@ public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDispos
 /// Streaming form of <c>CalculateUtBotAlerts</c>: an ATR trailing stop that ratchets in the direction
 /// of the trend and flips when price closes through it.
 /// </summary>
+[PrimaryOutput("TrailingStop")]
 public sealed class UtBotAlertsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _atrSmoother;

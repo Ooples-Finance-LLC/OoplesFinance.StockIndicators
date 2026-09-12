@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Rrsi")]
 public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _upSum;
@@ -75,6 +76,7 @@ public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Rochla")]
 public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -122,6 +124,7 @@ public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Rsi")]
 public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ma;
@@ -171,6 +174,7 @@ public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Rd")]
 public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -261,6 +265,7 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Rmta")]
 public sealed class RecursiveMovingTrendAverageState : IStreamingIndicatorState
 {
     private readonly double _alpha;
@@ -313,6 +318,7 @@ public sealed class RecursiveMovingTrendAverageState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Rrsi")]
 public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -450,6 +456,7 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Rsto")]
 public sealed class RecursiveStochasticState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -526,6 +533,7 @@ public sealed class RecursiveStochasticState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Rosc")]
 public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly LinearRegressionState _linReg;
@@ -568,6 +576,7 @@ public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Rema")]
 public sealed class RegularizedExponentialMovingAverageState : IStreamingIndicatorState
 {
     private readonly double _alpha;
@@ -617,6 +626,7 @@ public sealed class RegularizedExponentialMovingAverageState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Rdos")]
 public sealed class RelativeDifferenceOfSquaresOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _aSum;
@@ -686,6 +696,7 @@ public sealed class RelativeDifferenceOfSquaresOscillatorState : IStreamingIndic
     }
 }
 
+[PrimaryOutput("Rmi")]
 public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length2;
@@ -882,6 +893,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
     }
 }
 
+[PrimaryOutput("Rss")]
 public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastMa;
@@ -1079,6 +1091,7 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
     }
 }
 
+[PrimaryOutput("Rvi")]
 public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _numeratorMa;
@@ -1181,6 +1194,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Rvi")]
 public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly StandardDeviationVolatilityState _stdDev;
@@ -1259,6 +1273,7 @@ public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Rvi")]
 public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly RelativeVolatilityIndexV1State _rviHigh;
@@ -1304,6 +1319,7 @@ public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Rvi")]
 public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _volumeMa;
@@ -1373,6 +1389,7 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Repulse")]
 public sealed class RepulseState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1450,6 +1467,7 @@ public sealed class RepulseState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Rma")]
 public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma1;
@@ -1503,6 +1521,7 @@ public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Raf")]
 public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1584,6 +1603,7 @@ public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Rcc")]
 public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _absMax;
@@ -1661,6 +1681,7 @@ public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Rp")]
 public sealed class ReversalPointsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1731,6 +1752,7 @@ public sealed class ReversalPointsState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Rersi")]
 public sealed class ReverseEngineeringRelativeStrengthIndexState : IStreamingIndicatorState
 {
     private readonly int _length;
@@ -1795,6 +1817,7 @@ public sealed class ReverseEngineeringRelativeStrengthIndexState : IStreamingInd
     }
 }
 
+[PrimaryOutput("Rmacd")]
 public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _fastAlpha;

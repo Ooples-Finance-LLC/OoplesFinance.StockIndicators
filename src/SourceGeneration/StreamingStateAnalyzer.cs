@@ -64,9 +64,18 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    internal static readonly DiagnosticDescriptor MustDeclarePrimaryOutput = new(
+        id: "SI0005",
+        title: "A streaming state must declare its primary output",
+        messageFormat: "'{0}' does not declare [PrimaryOutput]; say which of its outputs its value is",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
-        MustBeBuildableWithoutArguments, NoInputParameters, NonCloseDefaultNeedsConsumer, ResolverNeverRead);
+        MustBeBuildableWithoutArguments, NoInputParameters, NonCloseDefaultNeedsConsumer, ResolverNeverRead,
+        MustDeclarePrimaryOutput);
 
     /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
@@ -83,6 +92,7 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
             var wrapper = compilation.GetTypeByMetadataName("OoplesFinance.StockIndicators.Streaming.CustomInputState");
             var inputName = compilation.GetTypeByMetadataName("OoplesFinance.StockIndicators.Enums.InputName");
             var bar = compilation.GetTypeByMetadataName("OoplesFinance.StockIndicators.Streaming.OhlcvBar");
+            var primary = compilation.GetTypeByMetadataName("OoplesFinance.StockIndicators.Streaming.PrimaryOutputAttribute");
 
             // Only the library itself defines these; in any other compilation there is nothing to check.
             if (state is null || consumer is null || resolver is null || inputName is null || bar is null)
@@ -90,7 +100,7 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
                 return;
             }
 
-            var types = new KnownTypes(state, consumer, resolver, wrapper, inputName, bar);
+            var types = new KnownTypes(state, consumer, resolver, wrapper, inputName, bar, primary);
             start.RegisterSyntaxNodeAction(ctx => AnalyzeClass(ctx, types), SyntaxKind.ClassDeclaration);
         });
     }
@@ -98,8 +108,9 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
     private sealed class KnownTypes
     {
         public KnownTypes(INamedTypeSymbol state, INamedTypeSymbol consumer, INamedTypeSymbol resolver,
-            INamedTypeSymbol? wrapper, INamedTypeSymbol inputName, INamedTypeSymbol bar)
+            INamedTypeSymbol? wrapper, INamedTypeSymbol inputName, INamedTypeSymbol bar, INamedTypeSymbol? primary)
         {
+            Primary = primary;
             State = state;
             Consumer = consumer;
             Resolver = resolver;
@@ -114,6 +125,7 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
         public INamedTypeSymbol? Wrapper { get; }
         public INamedTypeSymbol InputName { get; }
         public INamedTypeSymbol Bar { get; }
+        public INamedTypeSymbol? Primary { get; }
     }
 
     private static void AnalyzeClass(SyntaxNodeAnalysisContext context, KnownTypes types)
@@ -131,6 +143,13 @@ public sealed class StreamingStateAnalyzer : DiagnosticAnalyzer
         var name = symbol.Name;
         var at = declaration.Identifier.GetLocation();
         var publicCtors = symbol.InstanceConstructors.Where(c => c.DeclaredAccessibility == Accessibility.Public).ToList();
+
+        // SI0005: the state says which of its outputs its value is.
+        if (types.Primary is not null
+            && !symbol.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, types.Primary)))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(MustDeclarePrimaryOutput, at, name));
+        }
 
         // SI0001: buildable with no arguments.
         if (!publicCtors.Any(c => c.Parameters.All(p => p.HasExplicitDefaultValue || p.IsParams)))

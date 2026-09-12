@@ -69,6 +69,7 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     }
 }
 
+[PrimaryOutput("Ci")]
 public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly int _length;
@@ -357,6 +358,7 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Dswwf")]
 public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -438,6 +440,7 @@ public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Dpbsto")]
 public sealed class DecisionPointBreadthSwenlinTradingOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _firstSmoother;
@@ -507,6 +510,7 @@ public sealed class DecisionPointBreadthSwenlinTradingOscillatorState : IStreami
     }
 }
 
+[PrimaryOutput("DctRsi")]
 public sealed class DominantCycleTunedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly AdaptiveCyberCyclePeriodState _periodState;
@@ -577,6 +581,7 @@ public sealed class DominantCycleTunedRelativeStrengthIndexState : IStreamingInd
     }
 }
 
+[PrimaryOutput("UpWalk")]
 public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -675,6 +680,7 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Daf")]
 public sealed class DynamicallyAdjustableFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -748,6 +754,7 @@ public sealed class DynamicallyAdjustableFilterState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Dama")]
 public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _fastLength;
@@ -824,6 +831,7 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Dmi")]
 public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length3;
@@ -935,6 +943,7 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Dmo")]
 public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1017,6 +1026,7 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class DynamicPivotPointsState : IStreamingIndicatorState
 {
     private double _prevHigh;
@@ -1067,6 +1077,7 @@ public sealed class DynamicPivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Esr")]
 public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly PooledRingBuffer<double> _inputValues;
@@ -1132,6 +1143,7 @@ public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Epf")]
 public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
@@ -1217,6 +1229,7 @@ public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Eal")]
 public sealed class EfficientAutoLineState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
@@ -1279,6 +1292,7 @@ public sealed class EfficientAutoLineState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Ep")]
 public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1340,6 +1354,7 @@ public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
@@ -1413,6 +1428,7 @@ public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("E2bf")]
 public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorState
 {
     private readonly double _c1;
@@ -1470,6 +1486,7 @@ public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("E2bf")]
 public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly double _c1;
@@ -1541,6 +1558,7 @@ public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Essf")]
 public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorState
 {
     private readonly double _coef1;
@@ -1599,6 +1617,7 @@ public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("E2ssf")]
 public sealed class Ehlers2PoleSuperSmootherFilterV2State : IStreamingIndicatorState
 {
     private readonly double _c1;

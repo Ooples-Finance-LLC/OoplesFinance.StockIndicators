@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Pso")]
 public sealed class PremierStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ssSmoother;
@@ -58,6 +59,7 @@ public sealed class PremierStochasticOscillatorState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Pgo")]
 public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
@@ -106,6 +108,7 @@ public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Pco")]
 public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _diffSma;
@@ -155,6 +158,7 @@ public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Pmo")]
 public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -224,6 +228,7 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Po")]
 public sealed class PriceVolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -310,6 +315,7 @@ public sealed class PriceVolumeOscillatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Pvr")]
 public sealed class PriceVolumeRankState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -380,6 +386,7 @@ public sealed class PriceVolumeRankState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pvt")]
 public sealed class PriceVolumeTrendState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -439,6 +446,7 @@ public sealed class PriceVolumeTrendState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Pzo")]
 public sealed class PriceZoneOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _vmaSmoother;
@@ -500,6 +508,7 @@ public sealed class PriceZoneOscillatorState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("UpperBand")]
 public sealed class PrimeNumberBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -559,6 +568,7 @@ public sealed class PrimeNumberBandsState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Pno")]
 public sealed class PrimeNumberOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -683,6 +693,7 @@ public sealed class PrimeNumberOscillatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("PringSpecialK")]
 public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
 {
     private readonly RateOfChangeState _roc10;
@@ -862,6 +873,7 @@ public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pl")]
 public sealed class PsychologicalLineState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -918,6 +930,7 @@ public sealed class PsychologicalLineState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("QmaSmaDiff")]
 public sealed class QmaSmaDifferenceState : IStreamingIndicatorState, IDisposable
 {
     private readonly QuadraticMovingAverageState _qma;
@@ -965,6 +978,7 @@ public sealed class QmaSmaDifferenceState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Qlma")]
 public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1074,6 +1088,7 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Qma")]
 public sealed class QuadraticMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1120,6 +1135,7 @@ public sealed class QuadraticMovingAverageState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("QuadReg")]
 public sealed class QuadraticRegressionState : IStreamingIndicatorState, IDisposable
 {
     private readonly QuadraticRegressionEngine _engine;
@@ -1158,6 +1174,7 @@ public sealed class QuadraticRegressionState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Qema")]
 public sealed class QuadrupleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1221,6 +1238,7 @@ public sealed class QuadrupleExponentialMovingAverageState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("FastAtrRsi")]
 public sealed class QuantitativeQualitativeEstimationState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsi;
@@ -1300,6 +1318,7 @@ public sealed class QuantitativeQualitativeEstimationState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("WhiteNoise")]
 public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
 {
     private readonly ConnorsRelativeStrengthIndexState _connors;
@@ -1360,6 +1379,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Qma")]
 public sealed class QuickMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1419,6 +1439,7 @@ public sealed class QuickMovingAverageState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("R2ar")]
 public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1520,6 +1541,7 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Rmo")]
 public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _r1;
@@ -1640,6 +1662,7 @@ public sealed class RahulMohindarOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Ro")]
 public sealed class RainbowOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _r1;
@@ -1748,6 +1771,7 @@ public sealed class RainbowOscillatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("RwiHigh")]
 public sealed class RandomWalkIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1810,6 +1834,7 @@ public sealed class RandomWalkIndexState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Ravi")]
 public sealed class RangeActionVerificationIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;

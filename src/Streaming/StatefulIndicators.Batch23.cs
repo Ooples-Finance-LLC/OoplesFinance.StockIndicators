@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Sdro")]
 public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -75,6 +76,7 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Sroc")]
 public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -134,6 +136,7 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Swad")]
 public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -202,6 +205,7 @@ public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIn
     }
 }
 
+[PrimaryOutput("Sr")]
 public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -311,6 +315,7 @@ public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Si")]
 public sealed class SpearmanIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -444,6 +449,7 @@ public sealed class SpearmanIndicatorState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("S15ma")]
 public sealed class Spencer15PointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private static readonly double[] Weights =
@@ -515,6 +521,7 @@ public sealed class Spencer15PointMovingAverageState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("S21ma")]
 public sealed class Spencer21PointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private static readonly double[] Weights =
@@ -586,6 +593,7 @@ public sealed class Spencer21PointMovingAverageState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Srwma")]
 public sealed class SquareRootWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -653,6 +661,7 @@ public sealed class SquareRootWeightedMovingAverageState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Smi")]
 public sealed class SqueezeMomentumIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -716,6 +725,7 @@ public sealed class SqueezeMomentumIndicatorState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Pivot")]
 public sealed class StandardPivotPointsState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -801,6 +811,7 @@ public sealed class StandardPivotPointsState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Selo")]
 public sealed class StationaryExtrapolatedLevelsOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -875,6 +886,7 @@ public sealed class StationaryExtrapolatedLevelsOscillatorState : IStreamingIndi
     }
 }
 
+[PrimaryOutput("Si")]
 public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length2;
@@ -939,6 +951,7 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Sco")]
 public sealed class StochasticCustomOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1006,6 +1019,7 @@ public sealed class StochasticCustomOscillatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Sfo")]
 public sealed class StochasticFastOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1067,6 +1081,7 @@ public sealed class StochasticFastOscillatorState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Macd")]
 public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1138,6 +1153,7 @@ public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState 
     }
 }
 
+[PrimaryOutput("Sco")]
 public sealed class StochasticRegularState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1194,6 +1210,7 @@ public sealed class StochasticRegularState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Som")]
 public sealed class StrengthOfMovementState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1276,6 +1293,7 @@ public sealed class StrengthOfMovementState : IStreamingIndicatorState, IDisposa
     }
 }
 
+[PrimaryOutput("Trend")]
 public sealed class SuperTrendState : IStreamingIndicatorState, IDisposable
 {
     private readonly AverageTrueRangeSmoother _atrSmoother;
@@ -1354,6 +1372,7 @@ public sealed class SuperTrendState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Stf")]
 public sealed class SuperTrendFilterState : IStreamingIndicatorState
 {
     private readonly double _a;
@@ -1438,6 +1457,7 @@ public sealed class SuperTrendFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Sro")]
 public sealed class SupportAndResistanceOscillatorState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -1486,6 +1506,7 @@ public sealed class SupportAndResistanceOscillatorState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Sre")]
 public sealed class SurfaceRoughnessEstimatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowCorrelation _corrWindow;
@@ -1542,6 +1563,7 @@ public sealed class SurfaceRoughnessEstimatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Svama")]
 public sealed class SvamaState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -1610,6 +1632,7 @@ public sealed class SvamaState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Ss")]
 public sealed class SwamiStochasticsState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1684,6 +1707,7 @@ public sealed class SwamiStochasticsState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Swma")]
 public sealed class SymmetricallyWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1762,6 +1786,7 @@ public sealed class SymmetricallyWeightedMovingAverageState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Tr")]
 public sealed class TechnicalRankState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length8;

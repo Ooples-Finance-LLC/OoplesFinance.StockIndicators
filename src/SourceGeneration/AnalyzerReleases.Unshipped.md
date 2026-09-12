@@ -9,3 +9,4 @@ SI0001 | StreamingInput | Error | StreamingStateAnalyzer: a streaming state must
 SI0002 | StreamingInput | Error | StreamingStateAnalyzer: no public input-name or selector constructor parameters
 SI0003 | StreamingInput | Error | StreamingStateAnalyzer: a non-close default input needs ICustomInputConsumer
 SI0004 | StreamingInput | Error | StreamingStateAnalyzer: a resolved input must be read
+SI0005 | StreamingInput | Error | StreamingStateAnalyzer: a state must declare its primary output

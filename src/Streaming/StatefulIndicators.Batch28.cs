@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Zscore")]
 public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanMa;
@@ -55,6 +56,7 @@ public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Zmbti")]
 public sealed class ZweigMarketBreadthIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowSum _advances;

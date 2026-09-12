@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Ro")]
 public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _roSmoother;
@@ -54,6 +55,7 @@ public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Rsrma")]
 public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -142,6 +144,7 @@ public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Rwo")]
 public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -228,6 +231,7 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Rsing")]
 public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -396,6 +400,7 @@ public sealed class RSMKIndicatorState : IMultiSeriesIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Req")]
 public sealed class RunningEquityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -462,6 +467,7 @@ public sealed class RunningEquityState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Stc")]
 public sealed class SchaffTrendCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _cycleLength;
@@ -630,6 +636,7 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("SaRsi")]
 public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _mult;
@@ -694,6 +701,7 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
     }
 }
 
+[PrimaryOutput("Swma")]
 public sealed class SelfWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -752,6 +760,7 @@ public sealed class SelfWeightedMovingAverageState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Sgi")]
 public sealed class SellGravitationIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sgiSmoother;
@@ -800,6 +809,7 @@ public sealed class SellGravitationIndexState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Szo")]
 public sealed class SentimentZoneOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _fastLength;
@@ -872,6 +882,7 @@ public sealed class SentimentZoneOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Sfma")]
 public sealed class SequentiallyFilteredMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -939,6 +950,7 @@ public sealed class SequentiallyFilteredMovingAverageState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Sltsf")]
 public sealed class SettingLessTrendStepFilteringState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -1000,6 +1012,7 @@ public sealed class SettingLessTrendStepFilteringState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Sma")]
 public sealed class ShapeshiftingMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1090,6 +1103,7 @@ public sealed class ShapeshiftingMovingAverageState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Sr")]
 public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1158,6 +1172,7 @@ public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Smma")]
 public sealed class SharpModifiedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1227,6 +1242,7 @@ public sealed class SharpModifiedMovingAverageState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("ARatio")]
 public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1300,6 +1316,7 @@ public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Sc")]
 public sealed class SimpleCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1364,6 +1381,7 @@ public sealed class SimpleCycleState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Sl")]
 public sealed class SimpleLinesState : IStreamingIndicatorState
 {
     private readonly int _length;
@@ -1420,6 +1438,7 @@ public sealed class SimpleLinesState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Slsma")]
 public sealed class SimplifiedLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1491,6 +1510,7 @@ public sealed class SimplifiedLeastSquaresMovingAverageState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Swma")]
 public sealed class SimplifiedWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1555,6 +1575,7 @@ public sealed class SimplifiedWeightedMovingAverageState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Swma")]
 public sealed class SineWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1622,6 +1643,7 @@ public sealed class SineWeightedMovingAverageState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Ssma")]
 public sealed class SlowSmoothedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _l1;
@@ -1677,6 +1699,7 @@ public sealed class SlowSmoothedMovingAverageState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Smi")]
 public sealed class SMIErgodicIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _pcSmoothFast;
