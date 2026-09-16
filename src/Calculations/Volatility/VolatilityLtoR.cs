@@ -306,8 +306,8 @@ public static partial class Calculations
         if (stockData.Count == marketData.Count)
         {
             var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-            var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
-            var spStdDevList = CalculateStandardDeviationVolatility(marketData, maType, length).ChainedValues;
+            var stdDevList = GetStandardDeviationList(inputList, length);
+            var spStdDevList = GetStandardDeviationList(spInputList, length);
 
             for (var i = 0; i < stockData.Count; i++)
             {
@@ -483,7 +483,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -496,7 +496,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(chgList);
-        var aChgStdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        var aChgStdDevList = GetStandardDeviationList(chgList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

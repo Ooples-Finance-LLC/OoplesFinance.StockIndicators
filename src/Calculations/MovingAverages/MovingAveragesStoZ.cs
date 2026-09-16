@@ -1437,7 +1437,7 @@ public static partial class Calculations
         var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
         // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1464,7 +1464,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(bList);
-        var bStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var bStdDevList = GetStandardDeviationList(bList, length);
         var bSmaList = GetMovingAverageList(stockData, maType, length, bList);
         for (var i = 0; i < stockData.Count; i++)
         {

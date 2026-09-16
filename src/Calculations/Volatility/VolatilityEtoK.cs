@@ -341,7 +341,7 @@ public static partial class Calculations
         stockData.SetCustomValues(smaList);
         var linreg2List = CalculateLinearRegression(stockData, length2).ChainedValues;
         stockData.SetCustomValues(smaList);
-        var smaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var smaStdDevList = GetStandardDeviationList(smaList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {

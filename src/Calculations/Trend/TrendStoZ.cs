@@ -505,7 +505,7 @@ public static partial class Calculations
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
         var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(atrList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(atrList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
