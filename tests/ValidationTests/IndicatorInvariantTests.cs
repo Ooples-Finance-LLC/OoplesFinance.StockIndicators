@@ -210,8 +210,8 @@ public sealed class IndicatorInvariantTests
     };
 
     /// <summary>
-    /// Indicators publishing an upper band below their middle, or a middle below their lower. Each is
-    /// a defect; see issue #178.
+    /// Indicators publishing an upper band below their middle, or a middle below their lower. Each would
+    /// be a defect; see issue #178. The set is now empty.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -272,8 +272,25 @@ public sealed class IndicatorInvariantTests
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsOutOfOrder = new()
     {
-        // One left, and it is not a defect - see the remarks above. Bands built from the last fractal of
-        // each kind genuinely cross in a strong trend, because a recent low can form above an older high.
+        // Empty. Every indicator that was here has been fixed, or shown by measurement to belong in the
+        // set below - which is not a defect. The set is kept so that the next one found has somewhere to
+        // go and a count that stays visible.
+    };
+
+    /// <summary>
+    /// Indicators whose upper and lower bands genuinely cross, so that no series can lie between them.
+    /// </summary>
+    /// <remarks>
+    /// Not a defect, and measured rather than assumed. FractalChaosBands publishes the last up fractal
+    /// as its upper band and the last down fractal as its lower one. In a strong trend a recent low can
+    /// form above an older high, and the two are then crossed: on the fixture that happens first at bar
+    /// 60, where a down fractal at 172 sits above an up fractal at 163.41, and on 2 of the 251 bars in
+    /// all. Its middle band is the mean of the other two, so it lies between them whenever they are
+    /// ordered and cannot itself be at fault - this invariant is simply not a statement about an
+    /// indicator built this way.
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> BandsThatGenuinelyCross = new()
+    {
         IndicatorName.FractalChaosBands
     };
 
@@ -455,7 +472,7 @@ public sealed class IndicatorInvariantTests
     [MemberData(nameof(AllIndicators))]
     public void BandsAreOrderedUpperMiddleLower(IndicatorName name)
     {
-        if (BandsOutOfOrder.Contains(name))
+        if (BandsOutOfOrder.Contains(name) || BandsThatGenuinelyCross.Contains(name))
         {
             return;
         }
