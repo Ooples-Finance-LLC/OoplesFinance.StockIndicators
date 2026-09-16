@@ -73,12 +73,22 @@ public sealed class IndicatorInvariantTests
     /// family, already guarded its logarithm this way. It now settles to a spread of exactly 0 at a
     /// thousand bars, so this suite holds it to the invariant like any other indicator.
     /// </para>
+    /// <para>
+    /// FlaggingBands has gone the same way, and its band ordering is now guaranteed rather than lucky.
+    /// Each band was written against its own value two and three bars back, which split it into odd and
+    /// even subsequences that never interact, so a band that stopped moving held two different values
+    /// for ever: the spread was 6.88303 at a thousand bars and still exactly 6.88303 at five thousand
+    /// and at twenty thousand - a period-2 cycle, not convergence needing more bars. Each band now
+    /// carries forward from its own previous value, and its decay stops at price, so the upper cannot
+    /// drift down through price nor the lower up through it. Without that clamp both seed at the first
+    /// close and the first non-zero decay crossed them at bar 15. It settles to a spread of 0, and
+    /// a >= price >= b makes BandsAreOrderedUpperMiddleLower hold by construction.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
         // Spread at 900 -> 4900: unchanged, or larger.
         IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
-        IndicatorName.FlaggingBands,                      //  6.88303 ->  6.88303 (identical)
         IndicatorName.EhlersDeviationScaledSuperSmoother, //  1.27268 ->  1.27268 (identical)
         IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
 

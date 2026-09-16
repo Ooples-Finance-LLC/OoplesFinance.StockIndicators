@@ -573,14 +573,28 @@ public static partial class Calculations
             var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
             var prevA2 = i >= 2 ? aList[i - 2] : currentValue;
             var prevB2 = i >= 2 ? bList[i - 2] : currentValue;
-            var prevA3 = i >= 3 ? aList[i - 3] : currentValue;
-            var prevB3 = i >= 3 ? bList[i - 3] : currentValue;
             var l = stdDev != 0 ? (double)1 / length * stdDev : 0;
 
-            var a = currentValue > prevA1 ? prevA1 + (currentValue - prevA1) : prevA2 == prevA3 ? prevA2 - l : prevA2;
+            // Each band carries forward from its own previous value. Written against the value two and
+            // three bars back, the band was two interleaved series that never interact - the odd bars
+            // reading only odd bars and the even only even - so once it stopped moving it held two
+            // different values for ever rather than one. On a market that never moved the spread across
+            // the last hundred bars was 6.88303 at a thousand bars, and still exactly 6.88303 at five
+            // thousand and at twenty thousand: a period-2 cycle, not convergence that needed more bars.
+            // The band jumps to price when price passes it and otherwise decays by l once it has gone
+            // flat, which is the behaviour the indicator is named for.
+            //
+            // The decay stops at price. Each band is an envelope - price rising above the upper one pulls
+            // it up, price falling below the lower one pulls it down - so the upper must not drift down
+            // through price, nor the lower drift up through it. That keeps a >= price >= b, which makes
+            // the two ordered by construction rather than by luck. Without it both seed at the first
+            // close, stdDev is zero through the warmup so l is zero and neither moves, and the first
+            // non-zero l steps them toward each other from the same value and crosses them at once - at
+            // bar 15 of the AAPL fixture, publishing an upper band 0.418 below the middle.
+            var a = currentValue > prevA1 ? currentValue : prevA1 == prevA2 ? Math.Max(prevA1 - l, currentValue) : prevA1;
             aList.Add(a);
 
-            var b = currentValue < prevB1 ? prevB1 + (currentValue - prevB1) : prevB2 == prevB3 ? prevB2 + l : prevB2;
+            var b = currentValue < prevB1 ? currentValue : prevB1 == prevB2 ? Math.Min(prevB1 + l, currentValue) : prevB1;
             bList.Add(b);
 
             var prevTos = GetLastOrDefault(tosList);

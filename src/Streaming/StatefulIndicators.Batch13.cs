@@ -957,14 +957,16 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
         var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
         var prevA1 = _aValues.Count >= 1 ? _aValues[_aValues.Count - 1] : value;
         var prevA2 = _aValues.Count >= 2 ? _aValues[_aValues.Count - 2] : value;
-        var prevA3 = _aValues.Count >= 3 ? _aValues[_aValues.Count - 3] : value;
         var prevB1 = _bValues.Count >= 1 ? _bValues[_bValues.Count - 1] : value;
         var prevB2 = _bValues.Count >= 2 ? _bValues[_bValues.Count - 2] : value;
-        var prevB3 = _bValues.Count >= 3 ? _bValues[_bValues.Count - 3] : value;
         var l = stdDev != 0 ? (double)1 / _length * stdDev : 0;
 
-        var a = value > prevA1 ? prevA1 + (value - prevA1) : prevA2 == prevA3 ? prevA2 - l : prevA2;
-        var b = value < prevB1 ? prevB1 + (value - prevB1) : prevB2 == prevB3 ? prevB2 + l : prevB2;
+        // Each band carries forward from its own previous value, and its decay stops at price so the
+        // upper cannot drift down through price nor the lower up through it, keeping a >= price >= b;
+        // see the batch calculation. Written against the value two and three bars back it was two
+        // interleaved series that never interact.
+        var a = value > prevA1 ? value : prevA1 == prevA2 ? Math.Max(prevA1 - l, value) : prevA1;
+        var b = value < prevB1 ? value : prevB1 == prevB2 ? Math.Min(prevB1 + l, value) : prevB1;
         var prevTos = _hasPrevTos ? _prevTos : 0;
         var tos = value > prevA2 ? 1 : value < prevB2 ? 0 : prevTos;
 
