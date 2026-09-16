@@ -118,11 +118,9 @@ public sealed class IndicatorInvariantTests
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
-        // Spread at 900 -> 4900: unchanged, or larger.
-        IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
-
-        // Shrinks, but only 5.4x over a 5x longer run - slower than convergence and not yet settled.
-        IndicatorName.FastSlowDegreeOscillator            //  1.28917 ->  0.236896
+        // Empty. Every indicator that was here has been fixed, or shown by measurement to belong in one
+        // of the two sets below - which are not defects. The set is kept so that the next one found has
+        // somewhere to go and a count that stays visible.
     };
 
     /// <summary>
@@ -137,7 +135,8 @@ public sealed class IndicatorInvariantTests
     /// </para>
     /// <para>
     /// They stay excluded so the suite passes at 1000 bars, but they are separated from the defects
-    /// above so the outstanding count is six rather than twenty-five.
+    /// above so that the count of outstanding defects stays visible rather than being buried among the
+    /// indicators that are merely slow. That count is now zero.
     /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> SettlesAfterMoreBarsThanThisTestRuns = new()
@@ -153,6 +152,15 @@ public sealed class IndicatorInvariantTests
         IndicatorName.EhlersDeviationScaledMovingAverage,     //   0.00736 -> settles
         IndicatorName.AdaptiveMovingAverage,                  //   7.95e-6 -> settles
         IndicatorName.IIRLeastSquaresEstimate,                //   1.51e-6 -> settles
+
+        // Converges as 1/n, which is real but harmonic: measured across the last hundred bars of runs of
+        // 1000, 5000 and 20000 the spread is 1.11986, 0.20589 and 0.0507055, and multiplying each by its
+        // own bar count gives 1119.9, 1029.5 and 1014.1 - a constant. Its fast and slow halves use the
+        // same two polynomial terms, which cancel exactly, leaving rolling sums of sin(x)/(i+1) whose
+        // terms fall off as 1/i. So it does reach zero, but no run this suite could afford gets it to
+        // 1e-6; that needs of the order of a billion bars. Listed here rather than above because the
+        // limit is right and the rate is a property of the weighting, not a defect.
+        IndicatorName.FastSlowDegreeOscillator,               //   1.11986 -> 1/n
 
         IndicatorName.PseudoPolynomialChannel,                //  66.8218  -> 0.668654
         IndicatorName.GrandTrendForecasting,                  //  18.6118  -> 0.733483
@@ -177,6 +185,28 @@ public sealed class IndicatorInvariantTests
     private static readonly HashSet<IndicatorName> UnboundedByDefinition = new()
     {
         IndicatorName.CumulativeSum
+    };
+
+    /// <summary>
+    /// Indicators that oscillate on any market at all, because the oscillation is not read from the bars.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Not a defect, and distinct from <see cref="UnboundedByDefinition"/>: nothing here grows without
+    /// bound, it simply never stops moving. MorphedSineWave adds a sine wave to price to morph the two
+    /// together, and the sine's argument is the bar index alone - not any quantity taken from the bars -
+    /// so the same carrier rides on a flat market as on any other, and no market can settle it.
+    /// </para>
+    /// <para>
+    /// The amplitude is the arithmetic rather than an observation: the published value is
+    /// <c>price + sin(i / p) / power</c>, so a full swing is 2/power, which at the default power of 100
+    /// is 0.02. Measured across the last hundred bars it is 0.0194986 - a hundred samples of a sine not
+    /// quite reaching both extremes - and identical at 1000, 5000 and 20000 bars.
+    /// </para>
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> OscillatesByConstruction = new()
+    {
+        IndicatorName.MorphedSineWave
     };
 
     /// <summary>
@@ -371,7 +401,7 @@ public sealed class IndicatorInvariantTests
     public void SettlesToAConstantOnAFlatMarket(IndicatorName name)
     {
         if (MovesOnAFlatMarket.Contains(name) || SettlesAfterMoreBarsThanThisTestRuns.Contains(name)
-            || UnboundedByDefinition.Contains(name))
+            || UnboundedByDefinition.Contains(name) || OscillatesByConstruction.Contains(name))
         {
             return;
         }
