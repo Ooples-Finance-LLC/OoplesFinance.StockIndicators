@@ -4,6 +4,7 @@ using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
+using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
@@ -185,6 +186,74 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         {
             double.IsNaN(value).Should().BeFalse("a length of one is clamped rather than dividing by zero");
             double.IsInfinity(value).Should().BeFalse("a length of one is clamped rather than dividing by zero");
+        }
+    }
+
+    /// <summary>
+    /// A standard deviation does not depend on where the prices sit, only on how they are spread.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A window of <paramref name="length"/> points taken from a straight line of slope s has a population
+    /// deviation of exactly <c>s * sqrt((n^2 - 1) / 12)</c>, whatever the line's intercept. So the same
+    /// series shifted to a higher price must give the same answer, and the closed form pins it without
+    /// needing a second implementation to compare against.
+    /// </para>
+    /// <para>
+    /// The discriminating case is a price that is large next to its own spread. Computed as
+    /// <c>sqrt(E[x^2] - mean^2)</c> this subtracts two nearly-equal numbers, and the difference is lost to
+    /// rounding - it can even come out negative, which is why that form carried a clamp to zero. Measured
+    /// over 300 bars at length 14, the one-pass form agreed to 8.6e-13 on the AAPL fixture but at a price
+    /// of 1e6 with a spread of 0.001 it was wrong by a factor of 36 and returned exactly 0 on 186 bars
+    /// where the true deviation was positive.
+    /// </para>
+    /// <para>
+    /// The spread has to be small for that to bite, which is why the slope is a parameter here. At a base
+    /// of 1e6 a slope of 2.5 spreads a 14-bar window over about 35, and the one-pass error is then only
+    /// about 5e-7 - it would pass this tolerance and the test would prove nothing. A slope of 0.001 is the
+    /// regime the defect actually lives in.
+    /// </para>
+    /// <para>
+    /// Driven through the batch calculation and the streaming state rather than the Builder arm: the arm
+    /// already summed the squared deviations over the window, so it was the only one of the four
+    /// implementations that was right, and a test written against it would not move if this regressed.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(14, 100.0, 2.5)]
+    [InlineData(14, 1_000_000.0, 0.001)]
+    [InlineData(20, 1_000_000.0, 0.001)]
+    public void StandardDeviation_IsTheSameWhereverThePricesSit(int length, double start, double slope)
+    {
+        var bars = LinearSeries(length + 40, start, slope);
+        var expected = slope * Math.Sqrt(((double)(length * length) - 1) / 12);
+
+        // Far tighter than the defect, which replaced this value with zero, and loose enough that
+        // subtracting a mean near 1e6 from prices near 1e6 does not trip it.
+        const double tolerance = 1e-6;
+
+        var batch = new StockData(bars)
+            .CalculateStandardDevation(MovingAvgType.SimpleMovingAverage, length)
+            .CustomValuesList;
+
+        using var state = new StandardDeviationState(MovingAvgType.SimpleMovingAverage, length);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        for (var i = length - 1; i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected, tolerance,
+                $"a window of {length} points on a line of slope {slope} has a deviation of "
+                + $"{expected:F4} at any price level, including {start} (bar {i})");
+            streaming[i].Should().BeApproximately(expected, tolerance,
+                $"the streaming state computes what the batch computes, at any price level (bar {i})");
         }
     }
 
