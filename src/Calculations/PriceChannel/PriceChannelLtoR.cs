@@ -1374,7 +1374,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MeanAbsoluteErrorBands;
+        stockData.IndicatorName = IndicatorName.MeanAbsoluteDeviationBands;
 
         return stockData;
     }

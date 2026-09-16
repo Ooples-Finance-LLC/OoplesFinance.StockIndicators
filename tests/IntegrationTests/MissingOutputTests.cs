@@ -59,7 +59,32 @@ public sealed class MissingOutputTests : GlobalTestData
             .Should().BeGreaterThan(0, "the primary series must carry values, not only warm-up zeros");
     }
 
-    private static double[] Evaluate(IndicatorOutput output)
+    /// <summary>The mean absolute deviation bands resolve every band they publish.</summary>
+    /// <remarks>
+    /// The same failure from the other side. <c>CalculateMeanAbsoluteDeviationBands</c> ended by stamping
+    /// itself <c>IndicatorName.MeanAbsoluteErrorBands</c>, the different indicator defined sixty lines above
+    /// it, and that stamp is what the output map is read from. So the map held no entry for the deviation
+    /// bands at all and every one of them raised "Available outputs: none" - an indicator that computes
+    /// perfectly through the catalog, which keys off the method name instead and so never noticed, while
+    /// being unreachable through the Builder. Asking for all three bands is what pins the stamp.
+    /// </remarks>
+    [Theory]
+    [InlineData(IndicatorOutput.UpperBand)]
+    [InlineData(IndicatorOutput.MiddleBand)]
+    [InlineData(IndicatorOutput.LowerBand)]
+    public void TheMeanAbsoluteDeviationBandsResolveEveryBandTheyPublish(IndicatorOutput output)
+    {
+        var series = Evaluate(IndicatorName.MeanAbsoluteDeviationBands, new object[] { 20, 2.0 }, output);
+
+        series.Should().NotBeEmpty("the deviation bands publish an upper, a middle and a lower band");
+        series.Count(v => !double.IsNaN(v) && v != 0)
+            .Should().BeGreaterThan(0, "a resolved band must carry values, not only warm-up zeros");
+    }
+
+    private static double[] Evaluate(IndicatorOutput output) =>
+        Evaluate(SingleOutput, new object[] { 14 }, output);
+
+    private static double[] Evaluate(IndicatorName indicator, object[] parameters, IndicatorOutput output)
     {
         var stockData = new StockData(StockTestData.Take(200));
         var builder = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(stockData));
@@ -67,7 +92,7 @@ public sealed class MissingOutputTests : GlobalTestData
         SeriesHandle handle = default;
         builder.ConfigureIndicators(catalog =>
         {
-            var spec = IndicatorSpecs.Create(SingleOutput, new GenericIndicatorOptions(new object[] { 14 }), output);
+            var spec = IndicatorSpecs.Create(indicator, new GenericIndicatorOptions(parameters), output);
             var price = catalog.Price();
             handle = builder.AddIndicator(spec, price, builder.ResolveSeriesKey(price), key: null);
         });
