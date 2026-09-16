@@ -95,11 +95,30 @@ public sealed class IndicatorInvariantTests
     /// a magnitude of one when there is no deviation to scale by, which is the nominal period and gives
     /// exactly the coefficients CalculateEhlersSuperSmootherFilter uses.
     /// </para>
+    /// <para>
+    /// EhlersCombFilterSpectralEstimate carried the same defect as the spectrum derived filter bank, in
+    /// both of the places it kept state. Each period's two-sample recursion read a single shared list
+    /// holding one value per bar - whichever period the loop finished on, always the longest - and the
+    /// power sum that picks the dominant cycle read that same list at every lag, so the power was summed
+    /// over a mixture of periods rather than over the one being measured. A test on prevBp / j also
+    /// dropped every bar where the bandpass ran negative, half of them for a filter centred on zero,
+    /// from what is by definition a sum of squares. Each period now runs its own recursion over its own
+    /// history, and the spread falls from 25.2476 to 0 at a thousand bars, and is 0 at five and at
+    /// twenty thousand as well.
+    /// </para>
+    /// <para>
+    /// Its settled value still depends on how long it has run: 29 at a thousand bars, 30.5 at five
+    /// thousand, and 0 at twenty thousand, once the amplitudes have decayed far enough that every power
+    /// underflows and no period clears the half-power test. That is deliberately left alone rather than
+    /// clamped into the scanned band the way the bank's dominant cycle is. The bank needed that clamp
+    /// because EhlersRestoringPullIndicator divides into its output as 2*pi/domCyc, so a zero propagated
+    /// into everything downstream; nothing reads this one, and a market with no cycle in it reporting no
+    /// cycle is an honest answer rather than a defect to paper over.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
         // Spread at 900 -> 4900: unchanged, or larger.
-        IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
         IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
 
         // Shrinks, but only 5.4x over a 5x longer run - slower than convergence and not yet settled.

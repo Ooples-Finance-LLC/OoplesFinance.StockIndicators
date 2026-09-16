@@ -480,11 +480,18 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     private readonly int _length2;
     private readonly double _bw;
     private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _bpValues;
+
+    // One bandpass per period in the comb, each with its own two-sample recursion and its own history;
+    // see the batch calculation. A single shared buffer drove every period from another period's output
+    // and summed the deciding power over a mixture of periods.
+    private readonly double[] _bpPrev1;
+    private readonly double[] _bpPrev2;
+    private readonly double[,] _bpHistory;
+    private readonly double[] _bpCurrent;
+    private readonly int _ring;
     private double _prevRoofingFilter1;
     private double _prevRoofingFilter2;
-    private double _prevBp1;
-    private double _prevBp2;
+    private int _index;
 
     public EhlersCombFilterSpectralEstimateState(int length1 = 48, int length2 = 10, double bw = 0.3)
     {
@@ -492,7 +499,11 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
         _length2 = Math.Max(1, length2);
         _bw = bw;
         _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _bpValues = new PooledRingBuffer<double>(_length1);
+        _ring = _length1;
+        _bpPrev1 = new double[_length1 + 1];
+        _bpPrev2 = new double[_length1 + 1];
+        _bpHistory = new double[_length1 + 1, _ring];
+        _bpCurrent = new double[_length1 + 1];
     }
 
     public IndicatorName Name => IndicatorName.EhlersCombFilterSpectralEstimate;
@@ -500,40 +511,40 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     public void Reset()
     {
         _roofingFilter.Reset();
-        _bpValues.Clear();
+        Array.Clear(_bpPrev1, 0, _bpPrev1.Length);
+        Array.Clear(_bpPrev2, 0, _bpPrev2.Length);
+        Array.Clear(_bpHistory, 0, _bpHistory.Length);
+        Array.Clear(_bpCurrent, 0, _bpCurrent.Length);
         _prevRoofingFilter1 = 0;
         _prevRoofingFilter2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
+        _index = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var prevRoofingFilter2 = _prevRoofingFilter2;
-        var prevBp1 = _prevBp1;
-        var prevBp2 = _prevBp2;
 
-        double bp = 0;
         double maxPwr = 0;
         double spx = 0;
         double sp = 0;
+        var slot = _index % _ring;
         for (var j = _length2; j <= _length1; j++)
         {
             var beta = Math.Cos(2 * Math.PI / j);
             var gamma = 1 / Math.Cos(2 * Math.PI * _bw / j);
             var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-            bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) +
-                 (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
+            var bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) +
+                 (beta * (1 + alpha) * _bpPrev1[j]) - (alpha * _bpPrev2[j]);
+            _bpCurrent[j] = bp;
 
             double pwr = 0;
             for (var k = 1; k <= j; k++)
             {
-                var prevBp = EhlersStreamingWindow.GetOffsetValue(_bpValues, k);
-                if (prevBp >= 0)
-                {
-                    pwr += MathHelper.Pow(prevBp / j, 2);
-                }
+                // This period's own output k bars ago, and every one of them: a power is a sum of
+                // squares and cannot depend on the sign of what is squared.
+                var prevBp = _index >= k ? _bpHistory[j, ((slot - k) % _ring + _ring) % _ring] : 0;
+                pwr += MathHelper.Pow(prevBp / j, 2);
             }
 
             maxPwr = Math.Max(pwr, maxPwr);
@@ -551,9 +562,14 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
         {
             _prevRoofingFilter2 = _prevRoofingFilter1;
             _prevRoofingFilter1 = roofingFilter;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _bpValues.TryAdd(bp, out _);
+            for (var j = _length2; j <= _length1; j++)
+            {
+                _bpHistory[j, slot] = _bpCurrent[j];
+                _bpPrev2[j] = _bpPrev1[j];
+                _bpPrev1[j] = _bpCurrent[j];
+            }
+
+            _index++;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -571,7 +587,6 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     public void Dispose()
     {
         _roofingFilter.Dispose();
-        _bpValues.Dispose();
     }
 }
 
