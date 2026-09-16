@@ -2245,8 +2245,9 @@ public sealed class PriceLineChannelState : IStreamingIndicatorState, IDisposabl
         var sizeA = prevA1 - prevA2 > 0 ? atr : prevSizeA;
         var sizeB = prevB1 - prevB2 < 0 ? atr : prevSizeB;
         var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
-        var a = Math.Max(value, prevA1) - (sizeA / _length);
-        var b = Math.Min(value, prevB1) + (sizeB / _length);
+        // Each band is an envelope of price, so its drift stops at price; see the batch calculation.
+        var a = Math.Max(Math.Max(value, prevA1) - (sizeA / _length), value);
+        var b = Math.Min(Math.Min(value, prevB1) + (sizeB / _length), value);
         var middle = (a + b) / 2;
 
         if (isFinal)
@@ -2349,8 +2350,9 @@ public sealed class PriceCurveChannelState : IStreamingIndicatorState, IDisposab
         var barsSinceB = _count - lastBIndex;
         var lengthSquared = (double)_length * _length;
         var factor = lengthSquared != 0 ? size / lengthSquared : 0;
-        var a = Math.Max(value, prevA1) - (factor * (barsSinceA + 1));
-        var b = Math.Min(value, prevB1) + (factor * (barsSinceB + 1));
+        // Each band is an envelope of price, so its drift stops at price; see the batch calculation.
+        var a = Math.Max(Math.Max(value, prevA1) - (factor * (barsSinceA + 1)), value);
+        var b = Math.Min(Math.Min(value, prevB1) + (factor * (barsSinceB + 1)), value);
         var middle = (a + b) / 2;
 
         if (isFinal)

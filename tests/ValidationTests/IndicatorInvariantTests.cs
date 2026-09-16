@@ -234,6 +234,16 @@ public sealed class IndicatorInvariantTests
     /// path, so that third implementation moves with the other two.
     /// </para>
     /// <para>
+    /// PriceLineChannel and PriceCurveChannel are fixed and gone from this set as well, and they broke
+    /// for the reason FlaggingBands did. Both bands seed at the first close and then step away from it,
+    /// the upper decaying down and the lower rising up, so the upper ends bar 0 below the lower before
+    /// the channel has any width. At that bar the second previous values are still zero, which makes
+    /// prevA1 - prevA2 the whole price and positive: it sets the upper band's step to a full average
+    /// true range while the lower band's test for a negative difference fails. Each is an envelope of
+    /// price, so its drift now stops at price, which keeps a >= price >= b and puts their mean between
+    /// them by construction. Each showed exactly one violation of each kind, both at bar 0.
+    /// </para>
+    /// <para>
     /// Seven of those left publish a MiddleBand holding a different quantity from the one the upper and
     /// lower bands bracket. LBRPaintBars publishes an ATR width of about 5 as the middle of price bands
     /// near 180; MovingAverageBands centres its bands on the slow average but publishes the fast one;
@@ -254,8 +264,6 @@ public sealed class IndicatorInvariantTests
         IndicatorName.FractalChaosBands,
         IndicatorName.LBRPaintBars,
         IndicatorName.MovingAverageBands,
-        IndicatorName.PriceCurveChannel,
-        IndicatorName.PriceLineChannel,
         IndicatorName.RateOfChangeBands,
         IndicatorName.ScalpersChannel,
         IndicatorName.StationaryExtrapolatedLevels,

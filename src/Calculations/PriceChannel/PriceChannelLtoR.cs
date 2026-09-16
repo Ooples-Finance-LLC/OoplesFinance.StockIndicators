@@ -685,10 +685,16 @@ public static partial class Calculations
             var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
             sizeCList.Add(sizeC);
 
-            var a = Math.Max(currentValue, prevA1) - (sizeA / length);
+            // Each band is an envelope of price, so its drift stops at price: the upper cannot decay down
+            // through price, nor the lower rise up through it. Both seed at the first close, and at bar 0
+            // prevA2 and prevB2 are still zero, so prevA1 - prevA2 is the whole price and positive - which
+            // sets sizeA to the full average true range while failing the lower band's < 0 test. The two
+            // then step away from the same seed in opposite directions and the upper band ends the bar
+            // below the lower one, before the channel has any width at all.
+            var a = Math.Max(Math.Max(currentValue, prevA1) - (sizeA / length), currentValue);
             aList.Add(a);
 
-            var b = Math.Min(currentValue, prevB1) + (sizeB / length);
+            var b = Math.Min(Math.Min(currentValue, prevB1) + (sizeB / length), currentValue);
             bList.Add(b);
 
             var prevMid = GetLastOrDefault(midList);
@@ -759,10 +765,12 @@ public static partial class Calculations
             var barsSinceA = aChgList.Count - 1 - maxIndexA;
             var barsSinceB = bChgList.Count - 1 - maxIndexB;
 
-            var a = Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1));
+            // Each band is an envelope of price and its drift stops there; see CalculatePriceLineChannel,
+            // which inverts at bar 0 for the same reason and takes the same clamp.
+            var a = Math.Max(Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1)), currentValue);
             aList.Add(a);
 
-            var b = Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1));
+            var b = Math.Min(Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1)), currentValue);
             bList.Add(b);
 
             var prevMid = GetLastOrDefault(midList);
