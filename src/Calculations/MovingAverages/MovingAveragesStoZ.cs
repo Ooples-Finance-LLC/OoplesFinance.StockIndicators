@@ -1300,7 +1300,13 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, lbLength, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, lbLength).ChainedValues;
+
+        // The band below is sma +/- dev, and k then divides by its width, so dev has to be the deviation
+        // of the window about its own mean. CalculateStandardDeviationVolatility is a different quantity:
+        // the mean squared residual from the moving-average line, about 55% wider on a typical price
+        // series, which widened the band and shrank k by the same factor. See GetStandardDeviationList's
+        // remarks, and #190.
+        var stdDevList = GetStandardDeviationList(inputList, lbLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {

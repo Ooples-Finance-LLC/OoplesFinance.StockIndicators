@@ -1578,7 +1578,11 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
     private readonly int _length;
     private readonly int _lbLength;
     private readonly IMovingAverageSmoother _sma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, not the mean squared residual from the moving
+    // average line; see the batch calculation and #190. The band here is sma +/- dev and k divides by
+    // its width, so this has to be the one a band at k sigma is defined against.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _kSmoother;
     private readonly IMovingAverageSmoother _vmaSmoother;
     private readonly PooledRingBuffer<double> _values;
@@ -1591,7 +1595,7 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
         _lbLength = Math.Max(1, lbLength);
         var resolvedSmooth = Math.Max(1, smoothLength);
         _sma = MovingAverageSmootherFactory.Create(maType, _lbLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, _lbLength);
+        _stdDev = new RollingStandardDeviation(_lbLength);
         _kSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
         _vmaSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
         _values = new PooledRingBuffer<double>(_length);
@@ -1613,7 +1617,7 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var dev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var dev = _stdDev.Next(value, isFinal);
         var upper = sma + dev;
         var lower = sma - dev;
         var k = upper - lower != 0 ? (value - sma) / (upper - lower) * 100 * 2 : 0;
