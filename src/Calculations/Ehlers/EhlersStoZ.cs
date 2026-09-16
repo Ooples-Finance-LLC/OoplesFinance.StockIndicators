@@ -360,7 +360,16 @@ public static partial class Calculations
 
                 var ampl = (real * real) + (imag * imag);
                 maxAmpl = ampl > maxAmpl ? ampl : maxAmpl;
-                var db = maxAmpl != 0 && ampl / maxAmpl > 0 ? -length2 * Math.Log(0.01 / (1 - (0.99 * ampl / maxAmpl))) / Math.Log(length2) : 0;
+
+                // An amplitude cannot exceed the running maximum, so this attenuation is 0.01 at its
+                // smallest and db is bounded by [0, 20]. Left as the raw expression it still reaches zero:
+                // once the amplitudes decay into the denormal range there are too few mantissa bits left
+                // for 0.99 * ampl to differ from ampl, so the ratio rounds to exactly one, 0.01/0 makes db
+                // negative infinity, and -infinity passes the db <= 3 test - putting an infinity into both
+                // sums so that the dominant cycle comes out as infinity/infinity. Measured on a market that
+                // never moved at bar 3152, where ampl = maxAmpl = 1.1363509854348671E-322.
+                var ratio = maxAmpl != 0 ? ampl / maxAmpl : 0;
+                var db = ratio > 0 ? -length2 * Math.Log(0.01 / Math.Max(1 - (0.99 * ratio), 0.01)) / Math.Log(length2) : 0;
                 db = db > maxLength ? maxLength : db;
                 num += db <= 3 ? j * (maxLength - db) : 0;
                 denom += db <= 3 ? maxLength - db : 0;

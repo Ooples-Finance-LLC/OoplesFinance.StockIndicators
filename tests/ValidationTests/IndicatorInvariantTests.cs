@@ -56,18 +56,23 @@ public sealed class IndicatorInvariantTests
     /// previous smoothed value instead of the one it had just computed. IIRLeastSquaresEstimate is in
     /// the convergence set below, not here: the fix was real, and what remains settles by bar 4900.
     /// </para>
+    /// <para>
+    /// EhlersSpectrumDerivedFilterBank and EhlersRestoringPullIndicator have since moved to that same
+    /// convergence set. Every period in the bank now runs its own two-sample recursion rather than
+    /// reading one shared per-bar list, and the attenuation the bank takes a logarithm of is held at the
+    /// 0.01 floor it can never mathematically fall below - without which an amplitude decayed into the
+    /// denormal range made the ratio round to exactly one and put an infinity into both sums. Both
+    /// settle to a constant now, they simply need more than a thousand bars to get there. The pull
+    /// indicator was never independently broken: it is the bank multiplied by volume.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
-        // 275820 at bar 900 on a market priced at 100, still 194020 at 4900.
-        IndicatorName.EhlersRestoringPullIndicator,
-
         // Non-finite on a flat market at every length tried.
         IndicatorName.EhlersEnhancedSignalToNoiseRatio,
 
         // Spread at 900 -> 4900: unchanged, or larger.
         IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
-        IndicatorName.EhlersSpectrumDerivedFilterBank,    //  9.625   -> 11.1402  (grew)
         IndicatorName.FlaggingBands,                      //  6.88303 ->  6.88303 (identical)
         IndicatorName.EhlersDeviationScaledSuperSmoother, //  1.27268 ->  1.27268 (identical)
         IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
@@ -88,14 +93,16 @@ public sealed class IndicatorInvariantTests
     /// </para>
     /// <para>
     /// They stay excluded so the suite passes at 1000 bars, but they are separated from the defects
-    /// above so the outstanding count is eight rather than twenty-five.
+    /// above so the outstanding count is six rather than twenty-five.
     /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> SettlesAfterMoreBarsThanThisTestRuns = new()
     {
+        IndicatorName.EhlersRestoringPullIndicator,           // 3262.55   -> settles
         IndicatorName.StationaryExtrapolatedLevelsOscillator, // 100       -> settles
         IndicatorName.StationaryExtrapolatedLevels,           //  50       -> settles
         IndicatorName.LinearExtrapolation,                    //  24.7996  -> settles
+        IndicatorName.EhlersSpectrumDerivedFilterBank,        //   0.878421-> settles
         IndicatorName.SimpleCycle,                            //   0.0537  -> settles
         IndicatorName.DoubleExponentialSmoothing,             //   0.0183  -> settles
         IndicatorName.GChannels,                              //   0.00809 -> settles
