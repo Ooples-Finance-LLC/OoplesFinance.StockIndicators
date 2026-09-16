@@ -1011,6 +1011,7 @@ public static partial class Calculations
         List<double> extList = new(stockData.Count);
         List<double> yList = new(stockData.Count);
         List<double> xList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
@@ -1044,14 +1045,21 @@ public static partial class Calculations
             var prevY = i >= 1 ? yList[i - 1] : 0;
             var prevExt = i >= 1 ? extList[i - 1] : 0;
 
+            // The centre of the two bands published, both of which are extremes of the extrapolation.
+            middleBandList.Add((upperBandList[i] + lowerBandList[i]) / 2);
+
             var signal = GetCompareSignal(y - ext, prevY - prevExt);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the highest and lowest of the extrapolation; y is the deviation of price from
+            // its own average, a different quantity entirely, and it was above the upper band on 199 of
+            // the 251 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", upperBandList },
-            { "MiddleBand", yList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowerBandList },
+            { "Deviation", yList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1074,6 +1082,7 @@ public static partial class Calculations
         int length2 = 20)
     {
         List<double> scalperList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
@@ -1092,14 +1101,22 @@ public static partial class Calculations
             var scalper = Math.PI * currentAtr > 0 ? currentSma - Math.Log(Math.PI * currentAtr) : currentSma;
             scalperList.Add(scalper);
 
+            // The centre of the two bands published: a rolling high and a rolling low over the same
+            // window, so their midpoint lies between them on every bar by construction.
+            middleBandList.Add((highestList[i] + lowestList[i]) / 2);
+
             var signal = GetCompareSignal(currentValue - scalper, prevValue - prevScalper);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are a rolling high and a rolling low; the scalper line is sma - log(pi * atr),
+            // a third quantity with no reason to lie between them, and it sat below the rolling low on
+            // 19 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", highestList },
-            { "MiddleBand", scalperList },
-            { "LowerBand", lowestList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowestList },
+            { "Scalper", scalperList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

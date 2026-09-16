@@ -65,6 +65,7 @@ public static partial class Calculations
     {
         List<double> innerTopAtrChannelList = new(stockData.Count);
         List<double> innerBottomAtrChannelList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
@@ -87,15 +88,24 @@ public static partial class Calculations
             var bottomInner = Math.Round(currentValue - (atr * mult));
             innerBottomAtrChannelList.Add(bottomInner);
 
+            // The centre of the two bands actually published. Both are drawn around the current value,
+            // so their mean is that value carried through the same rounding, and it lies between them by
+            // construction.
+            middleBandList.Add((topInner + bottomInner) / 2);
+
             var signal = GetBollingerBandsSignal(currentValue - sma, prevValue - prevSma, currentValue, prevValue, topInner,
                 prevTopInner, bottomInner, prevBottomInner);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the current value plus and minus a multiple of the average true range. The
+            // moving average was published between them, and it is a different quantity with no reason
+            // to sit there: it was above the upper band on 9 bars and below the lower on 19.
             { "UpperBand", innerTopAtrChannelList },
-            { "MiddleBand", smaList },
-            { "LowerBand", innerBottomAtrChannelList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", innerBottomAtrChannelList },
+            { "Sma", smaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

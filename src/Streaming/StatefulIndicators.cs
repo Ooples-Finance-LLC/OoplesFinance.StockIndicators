@@ -543,7 +543,7 @@ public sealed class MidpriceState : IStreamingIndicatorState, IDisposable
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("Sma")]
 public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _atrSmoother;
@@ -594,11 +594,13 @@ public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDi
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // The moving average is not the centre of these bands; see the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
+                { "MiddleBand", (upper + lower) / 2 },
+                { "LowerBand", lower },
+                { "Sma", middle }
             };
         }
 
@@ -1068,7 +1070,7 @@ public sealed class RootMovingAverageSquaredErrorBandsState : IStreamingIndicato
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("FastMa")]
 public sealed class MovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -1115,11 +1117,14 @@ public sealed class MovingAverageBandsState : IStreamingIndicatorState, IDisposa
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // The bands are the slow average plus and minus dev, so the slow average is the centre; the
+            // fast one is a different quantity. See the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", upper },
-                { "MiddleBand", fast },
-                { "LowerBand", lower }
+                { "MiddleBand", slow },
+                { "LowerBand", lower },
+                { "FastMa", fast }
             };
         }
 
@@ -2843,7 +2848,7 @@ public sealed class SupportResistanceState : IStreamingIndicatorState, IDisposab
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("Deviation")]
 public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -2910,11 +2915,14 @@ public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // y is the deviation of price from its own average, not the centre of the extrapolation
+            // extremes these bands are; see the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", upper },
-                { "MiddleBand", y },
-                { "LowerBand", lower }
+                { "MiddleBand", (upper + lower) / 2 },
+                { "LowerBand", lower },
+                { "Deviation", y }
             };
         }
 
@@ -2932,7 +2940,7 @@ public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("Scalper")]
 public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _smaSmoother;
@@ -2989,11 +2997,13 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // The scalper line is a third quantity, not the centre; see the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", highest },
-                { "MiddleBand", scalper },
-                { "LowerBand", lowest }
+                { "MiddleBand", (highest + lowest) / 2 },
+                { "LowerBand", lowest },
+                { "Scalper", scalper }
             };
         }
 
@@ -3263,7 +3273,7 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("Roc")]
 public sealed class RateOfChangeBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -3304,11 +3314,14 @@ public sealed class RateOfChangeBandsState : IStreamingIndicatorState, IDisposab
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // Plus and minus the RMS is centred on zero; the rate of change travels between the bands
+            // rather than being their centre. See the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
+                { "MiddleBand", 0 },
+                { "LowerBand", lower },
+                { "Roc", middle }
             };
         }
 

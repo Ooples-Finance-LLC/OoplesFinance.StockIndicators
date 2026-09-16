@@ -845,7 +845,7 @@ public sealed class KwanIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("Aatr")]
 public sealed class LBRPaintBarsState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -896,11 +896,13 @@ public sealed class LBRPaintBarsState : IStreamingIndicatorState, IDisposable
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
+            // aatr is the width the bands are pulled in by, not a centre, and these bands cross on most
+            // bars so there is no centre to publish; see the batch calculation.
             outputs = new Dictionary<string, double>(3)
             {
                 { "UpperBand", upper },
                 { "LowerBand", lower },
-                { "MiddleBand", aatr }
+                { "Aatr", aatr }
             };
         }
 

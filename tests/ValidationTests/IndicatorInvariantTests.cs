@@ -244,12 +244,24 @@ public sealed class IndicatorInvariantTests
     /// them by construction. Each showed exactly one violation of each kind, both at bar 0.
     /// </para>
     /// <para>
-    /// Seven of those left publish a MiddleBand holding a different quantity from the one the upper and
-    /// lower bands bracket. LBRPaintBars publishes an ATR width of about 5 as the middle of price bands
-    /// near 180; MovingAverageBands centres its bands on the slow average but publishes the fast one;
-    /// RateOfChangeBands brackets zero with plus and minus the RMS of the rate of change but publishes
-    /// the rate of change itself; ScalpersChannel pairs a rolling high and low with
-    /// <c>sma - log(pi * atr)</c>, which has no reason to lie between them.
+    /// Seven more published a MiddleBand holding a different quantity from the one their upper and lower
+    /// bands bracket, and all seven are fixed. Each now publishes the centre its own bands are drawn
+    /// around, and the displaced series keeps its own name rather than being dropped:
+    /// AverageTrueRangeChannel moved its moving average to Sma; MovingAverageBands publishes the slow
+    /// average its bands are built from and moved the fast one to FastMa; RateOfChangeBands is centred on
+    /// zero, since its bands are plus and minus an RMS, and moved the rate of change to Roc;
+    /// ScalpersChannel publishes the midpoint of its rolling high and low and moved
+    /// <c>sma - log(pi * atr)</c> to Scalper; StationaryExtrapolatedLevels moved the deviation of price
+    /// from its average to Deviation; and VervoortModifiedBollingerBandIndicator publishes the mean of
+    /// its bands - which it already computed and never published - and moved %b to PercentB.
+    /// </para>
+    /// <para>
+    /// LBRPaintBars is the one of those seven with no centre to publish. Its bands are a squeeze, the
+    /// rolling high minus an ATR multiple against the rolling low plus one, and they genuinely cross:
+    /// measured on the fixture the upper band is below the lower on 171 of the 251 bars. Any series put
+    /// between them would be wrong on those bars, so its width moved to Aatr and it publishes no middle
+    /// band at all. This invariant reads the published names, so it no longer applies to that indicator -
+    /// which is the honest outcome rather than an exclusion.
     /// </para>
     /// <para>
     /// FractalChaosBands is not the zero seed it was first taken for. Its first violation is at bar 60,
@@ -260,14 +272,9 @@ public sealed class IndicatorInvariantTests
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsOutOfOrder = new()
     {
-        IndicatorName.AverageTrueRangeChannel,
-        IndicatorName.FractalChaosBands,
-        IndicatorName.LBRPaintBars,
-        IndicatorName.MovingAverageBands,
-        IndicatorName.RateOfChangeBands,
-        IndicatorName.ScalpersChannel,
-        IndicatorName.StationaryExtrapolatedLevels,
-        IndicatorName.VervoortModifiedBollingerBandIndicator
+        // One left, and it is not a defect - see the remarks above. Bands built from the last fractal of
+        // each kind genuinely cross in a strong trend, because a recent low can form above an older high.
+        IndicatorName.FractalChaosBands
     };
 
     public static TheoryData<IndicatorName> AllIndicators

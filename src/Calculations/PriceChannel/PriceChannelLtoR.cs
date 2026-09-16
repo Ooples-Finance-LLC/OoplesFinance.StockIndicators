@@ -981,6 +981,7 @@ public static partial class Calculations
         List<double> rocSquaredList = new(stockData.Count);
         List<double> upperBandList = new(stockData.Count);
         List<double> lowerBandList = new(stockData.Count);
+        List<double> centreList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum rocSquaredSum = new();
 
@@ -1007,15 +1008,24 @@ public static partial class Calculations
             var lowerBand = -upperBand;
             lowerBandList.Add(lowerBand);
 
+            // The bands are plus and minus the root mean square of the rate of change, so they are
+            // centred on zero. The rate of change itself travels between them, the way price travels
+            // between Bollinger bands; it is not the centre line.
+            centreList.Add(0);
+
             var signal = GetBollingerBandsSignal(middleBand - prevMiddleBand1, prevMiddleBand1 - prevMiddleBand2, middleBand, prevMiddleBand1, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The smoothed rate of change was published as the middle band, and it crossed the envelope
+            // it is measured against - above the upper on 40 bars and below the lower on 61. It keeps its
+            // own name; zero, which is what plus and minus the RMS is centred on, becomes the centre.
             { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", centreList },
+            { "LowerBand", lowerBandList },
+            { "Roc", middleBandList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1140,9 +1150,13 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the slow average plus and minus dev, so the slow average is what they are
+            // centred on. The fast one was published here instead, and being a different quantity it has
+            // no reason to lie between them - it left the upper band on 28 bars and the lower on 111.
             { "UpperBand", upperBandList },
-            { "MiddleBand", fastMaList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", slowMaList },
+            { "LowerBand", lowerBandList },
+            { "FastMa", fastMaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
