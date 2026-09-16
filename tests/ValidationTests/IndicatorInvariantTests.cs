@@ -41,61 +41,76 @@ public sealed class IndicatorInvariantTests
     };
 
     /// <summary>
-    /// Indicators that still move on a market that never moved. Each is a defect; see issue #178.
+    /// Indicators that still move on a market that never moved, and do not settle however long it runs.
+    /// Each is a defect; see issue #178.
     /// </summary>
     /// <remarks>
-    /// Three were found by this test and fixed rather than listed: PercentChangeOscillator divided by
-    /// <c>prevValue - 1</c> instead of subtracting one from the ratio, ConditionalAccumulator counted
+    /// <para>
+    /// Measured at 900 bars of 1000 and again at 4900 of 5000. These either hold their spread exactly,
+    /// grow, or shrink so slowly that no run settles them - so the movement is not convergence.
+    /// </para>
+    /// <para>
+    /// Three more were found by this test and fixed rather than listed: PercentChangeOscillator divided
+    /// by <c>prevValue - 1</c> instead of subtracting one from the ratio, ConditionalAccumulator counted
     /// a gap on every bar because it compared with <c>&gt;=</c>, and IIRLeastSquaresEstimate stored the
-    /// previous smoothed value instead of the one it had just computed.
+    /// previous smoothed value instead of the one it had just computed. IIRLeastSquaresEstimate is in
+    /// the convergence set below, not here: the fix was real, and what remains settles by bar 4900.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
+        // 275820 at bar 900 on a market priced at 100, still 194020 at 4900.
         IndicatorName.EhlersRestoringPullIndicator,
-        IndicatorName.StationaryExtrapolatedLevelsOscillator,
-        IndicatorName.EhlersCombFilterSpectralEstimate,
-        IndicatorName.LinearExtrapolation,
-        IndicatorName.EhlersSpectrumDerivedFilterBank,
-        IndicatorName.GrandTrendForecasting,
-        IndicatorName.EhlersDeviationScaledSuperSmoother,
-        IndicatorName.FastSlowDegreeOscillator,
-        IndicatorName.KaufmanAdaptiveMovingAverage,
-        IndicatorName.ReversalPoints,
-        IndicatorName.SimpleCycle,
-        IndicatorName.MorphedSineWave,
-        IndicatorName.DoubleExponentialSmoothing,
-        IndicatorName.EhlersDeviationScaledMovingAverage,
-        IndicatorName.TrendForceHistogram,
-        IndicatorName.AdaptiveMovingAverage,
-        IndicatorName.IIRLeastSquaresEstimate,
+
+        // Non-finite on a flat market at every length tried.
         IndicatorName.EhlersEnhancedSignalToNoiseRatio,
 
-        // Found only once this invariant looked at NAMED series as well as the primary one. Each of
-        // these leaves its primary series empty, so the check used to return before reading
-        // anything - 117 of the 775 indicators here are shaped that way. Measured spread over the
-        // last hundred of a thousand identical bars:
-        //
-        //   GChannels                            LowerBand  50
-        //   StationaryExtrapolatedLevels         UpperBand  34.8
-        //   PseudoPolynomialChannel              UpperBand  8.09
-        //   PeriodicChannel                      UpperBand  6.88
-        //   TimeSeriesForecast                   UpperBand  4.88
-        //   FlaggingBands                        UpperBand  1.93
-        //   VervoortModifiedBollingerBandIndicator      K   0.175
-        //   MeanAbsoluteErrorBands               UpperBand  0.143
-        //   QuasiWhiteNoise                   WhiteNoiseMa  0.0115
-        //
-        // A band that widens forever on a market that never moves is reading a signal that is not
-        // in the data, the same way the three fixed above were.
-        IndicatorName.FlaggingBands,
-        IndicatorName.GChannels,
-        IndicatorName.MeanAbsoluteErrorBands,
-        IndicatorName.PeriodicChannel,
-        IndicatorName.PseudoPolynomialChannel,
-        IndicatorName.QuasiWhiteNoise,
-        IndicatorName.StationaryExtrapolatedLevels,
-        IndicatorName.TimeSeriesForecast,
-        IndicatorName.VervoortModifiedBollingerBandIndicator
+        // Spread at 900 -> 4900: unchanged, or larger.
+        IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
+        IndicatorName.EhlersSpectrumDerivedFilterBank,    //  9.625   -> 11.1402  (grew)
+        IndicatorName.FlaggingBands,                      //  6.88303 ->  6.88303 (identical)
+        IndicatorName.EhlersDeviationScaledSuperSmoother, //  1.27268 ->  1.27268 (identical)
+        IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
+
+        // Shrinks, but only 5.4x over a 5x longer run - slower than convergence and not yet settled.
+        IndicatorName.FastSlowDegreeOscillator            //  1.28917 ->  0.236896
+    };
+
+    /// <summary>
+    /// Indicators that settle, but need more bars than this test runs.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Not defects. Each was measured again at 4900 bars of 5000: the ones marked "settles" fall below
+    /// 1e-9, and the rest are still shrinking by an order of magnitude or more. A filter converging
+    /// geometrically can sit well above the threshold at bar 900 and be perfectly correct - three of
+    /// these read 100, 50 and 24.8 there, and settle completely by 4900.
+    /// </para>
+    /// <para>
+    /// They stay excluded so the suite passes at 1000 bars, but they are separated from the defects
+    /// above so the outstanding count is eight rather than twenty-five.
+    /// </para>
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> SettlesAfterMoreBarsThanThisTestRuns = new()
+    {
+        IndicatorName.StationaryExtrapolatedLevelsOscillator, // 100       -> settles
+        IndicatorName.StationaryExtrapolatedLevels,           //  50       -> settles
+        IndicatorName.LinearExtrapolation,                    //  24.7996  -> settles
+        IndicatorName.SimpleCycle,                            //   0.0537  -> settles
+        IndicatorName.DoubleExponentialSmoothing,             //   0.0183  -> settles
+        IndicatorName.GChannels,                              //   0.00809 -> settles
+        IndicatorName.EhlersDeviationScaledMovingAverage,     //   0.00736 -> settles
+        IndicatorName.AdaptiveMovingAverage,                  //   7.95e-6 -> settles
+        IndicatorName.IIRLeastSquaresEstimate,                //   1.51e-6 -> settles
+
+        IndicatorName.PseudoPolynomialChannel,                //  66.8218  -> 0.668654
+        IndicatorName.GrandTrendForecasting,                  //  18.6118  -> 0.733483
+        IndicatorName.VervoortModifiedBollingerBandIndicator, //   4.61997 -> 1.24724e-07
+        IndicatorName.PeriodicChannel,                        //   2.10085 -> 0.113543
+        IndicatorName.ReversalPoints,                         //   0.272132-> 0.0102399
+        IndicatorName.MeanAbsoluteErrorBands,                 //   0.143143-> 0.00525411
+        IndicatorName.QuasiWhiteNoise,                        //   0.0115285->0.000268438
+        IndicatorName.TrendForceHistogram                     //   5.51e-5 -> 2.02e-6
     };
 
     /// <summary>
@@ -279,7 +294,8 @@ public sealed class IndicatorInvariantTests
     [MemberData(nameof(AllIndicators))]
     public void SettlesToAConstantOnAFlatMarket(IndicatorName name)
     {
-        if (MovesOnAFlatMarket.Contains(name) || UnboundedByDefinition.Contains(name))
+        if (MovesOnAFlatMarket.Contains(name) || SettlesAfterMoreBarsThanThisTestRuns.Contains(name)
+            || UnboundedByDefinition.Contains(name))
         {
             return;
         }

@@ -301,6 +301,44 @@ public sealed class IndicatorSourceTests : GlobalTestData
         }
     }
 
+    /// <summary>
+    /// The mechanism that closes #145: a moving average puts the caller's series back.
+    /// </summary>
+    /// <remarks>
+    /// The three tests above pin the consequences - a dispersion still measures price, call order stops
+    /// mattering. This pins the cause, so a future change that removes the restore is caught here rather
+    /// than by whichever indicator happens to notice. <c>GetMovingAverageList</c> saves both the published
+    /// series and the chained one, delegates, and restores them in a <c>finally</c>; before that the guard
+    /// was twenty-seven hand-written resets at the call sites, and the ones nobody remembered were the bug.
+    /// </remarks>
+    [Fact]
+    public void AMovingAveragePutsTheCallersSeriesBack()
+    {
+        // A negative control first. If publishing cannot be detected at all then "preserved" below is
+        // vacuous - it would read the same on a StockData that never records anything.
+        var control = CreateData();
+        var beforeControl = control.CustomValuesList;
+        control.CalculateRelativeStrengthIndex(length: 14);
+        control.CustomValuesList.Should().NotBeSameAs(beforeControl,
+            "an indicator publishes its result, so this test can tell a restored series from an absent one");
+
+        var data = CreateData();
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        data.SetCustomValues(new List<double>(input));
+
+        var published = data.CustomValuesList;
+        var chained = data.ChainedValues;
+        var count = published.Count;
+
+        CalculationsHelper.GetMovingAverageList(data, MovingAvgType.SimpleMovingAverage, 20, input);
+
+        data.CustomValuesList.Should().BeSameAs(published,
+            "the average must not redefine what the next helper on this data reads");
+        data.ChainedValues.Should().BeSameAs(chained,
+            "both channels are one list; restoring only the published one would leave the chain redirected");
+        data.CustomValuesList.Should().HaveCount(count);
+    }
+
     // ---------------------------------------------------------------------------------------------
     // SeriesView: continue from a named output. No chaining primitive on the input - the question of
     // which series to continue from belongs to the result, so it is answered there.
