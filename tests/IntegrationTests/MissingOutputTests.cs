@@ -81,6 +81,48 @@ public sealed class MissingOutputTests : GlobalTestData
             .Should().BeGreaterThan(0, "a resolved band must carry values, not only warm-up zeros");
     }
 
+    /// <summary>The trend trader bands resolve their own bands, not another indicator's keys.</summary>
+    /// <remarks>
+    /// The same stamp defect, except this one corrupted a second indicator as well.
+    /// <c>CalculateTimeAndMoneyChannel</c> stamped itself <c>IndicatorName.TrendTraderBands</c>, and it
+    /// publishes seven keys - Ch+1 through Ch-3, and Median - against the three the real trend trader bands
+    /// publish. The generator keeps the richest set per indicator, so the victim's map entry became the
+    /// impostor's seven: asking TrendTraderBands for its upper band resolved to the key "Ch-2", which its
+    /// own output dictionary does not contain.
+    /// </remarks>
+    [Theory]
+    [InlineData(IndicatorOutput.UpperBand)]
+    [InlineData(IndicatorOutput.MiddleBand)]
+    [InlineData(IndicatorOutput.LowerBand)]
+    public void TheTrendTraderBandsResolveTheirOwnBands(IndicatorOutput output)
+    {
+        var series = Evaluate(IndicatorName.TrendTraderBands, Array.Empty<object>(), output);
+
+        series.Count(v => !double.IsNaN(v) && v != 0)
+            .Should().BeGreaterThan(0, "the band must carry the trend trader bands' own values");
+    }
+
+    /// <summary>An indicator that stamped another's name was unreachable through the Builder entirely.</summary>
+    /// <remarks>
+    /// Neither of these appears in the output map while its calculation stamps a different indicator, so a
+    /// named slot raises "Available outputs: none" even though the calculation itself is correct.
+    /// <para>
+    /// The signal slot is the subject on purpose. Asking for Primary does not discriminate: the resolver
+    /// still falls back to the primary series for that one slot, as <see cref="ThePrimarySlotStillResolves"/>
+    /// records, so this test passed with the defect in place until it was pointed at a named slot.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(IndicatorName.TimeAndMoneyChannel)]
+    [InlineData(IndicatorName.EhlersSimpleWindowIndicator)]
+    public void AnIndicatorThatStampedAnothersNameIsReachable(IndicatorName indicator)
+    {
+        var series = Evaluate(indicator, Array.Empty<object>(), IndicatorOutput.Signal);
+
+        series.Count(v => !double.IsNaN(v) && v != 0)
+            .Should().BeGreaterThan(0, "the indicator publishes a signal series of its own");
+    }
+
     private static double[] Evaluate(IndicatorOutput output) =>
         Evaluate(SingleOutput, new object[] { 14 }, output);
 

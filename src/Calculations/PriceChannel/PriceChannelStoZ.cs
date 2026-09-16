@@ -743,7 +743,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.TrendTraderBands;
+        stockData.IndicatorName = IndicatorName.TimeAndMoneyChannel;
 
         return stockData;
     }

@@ -1204,7 +1204,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersTriangleWindowIndicator;
+        stockData.IndicatorName = IndicatorName.EhlersSimpleWindowIndicator;
 
         return stockData;
     }
