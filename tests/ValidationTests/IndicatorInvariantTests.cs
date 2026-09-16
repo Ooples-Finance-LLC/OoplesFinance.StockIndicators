@@ -155,6 +155,16 @@ public sealed class IndicatorInvariantTests
     /// reached by an entirely separate path.
     /// </para>
     /// <para>
+    /// VortexBands is fixed and gone from this set as well. It is a variation on that same Better
+    /// Bollinger Bands construction, and it measured its half-width as twice the mean of the signed
+    /// deviation from the basis. That mean sits near zero for a series oscillating about its own
+    /// average, and turns negative on every bar where price is below it, which inverted the two bands
+    /// on 135 of the 251 bars - its own signal line gave the game away by testing both orderings.
+    /// Measured as a distance instead, it agrees with DEnvelope to seven figures on all three bands at
+    /// bar 200, through code the two share none of. The Builder serves this one from a verified fast
+    /// path, so that third implementation moves with the other two.
+    /// </para>
+    /// <para>
     /// Seven of those left publish a MiddleBand holding a different quantity from the one the upper and
     /// lower bands bracket. LBRPaintBars publishes an ATR width of about 5 as the middle of price bands
     /// near 180; MovingAverageBands centres its bands on the slow average but publishes the fast one;
@@ -180,8 +190,7 @@ public sealed class IndicatorInvariantTests
         IndicatorName.RateOfChangeBands,
         IndicatorName.ScalpersChannel,
         IndicatorName.StationaryExtrapolatedLevels,
-        IndicatorName.VervoortModifiedBollingerBandIndicator,
-        IndicatorName.VortexBands
+        IndicatorName.VervoortModifiedBollingerBandIndicator
     };
 
     public static TheoryData<IndicatorName> AllIndicators
