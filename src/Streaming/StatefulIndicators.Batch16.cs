@@ -1020,8 +1020,8 @@ public sealed class LightLeastSquaresMovingAverageState : IStreamingIndicatorSta
     private readonly IMovingAverageSmoother _sma1;
     private readonly IMovingAverageSmoother _sma2;
     private readonly IMovingAverageSmoother _indexMa;
-    private readonly StandardDeviationVolatilityState _stdDev;
-    private readonly StandardDeviationVolatilityState _indexStdDev;
+    private readonly RollingStandardDeviation _stdDev;
+    private readonly RollingStandardDeviation _indexStdDev;
     private readonly StreamingInputResolver _input;
     private double _indexValue;
     private int _index;
@@ -1033,8 +1033,8 @@ public sealed class LightLeastSquaresMovingAverageState : IStreamingIndicatorSta
         _sma1 = MovingAverageSmootherFactory.Create(maType, _length);
         _sma2 = MovingAverageSmootherFactory.Create(maType, length1);
         _indexMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
-        _indexStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _stdDev = new RollingStandardDeviation(_length);
+        _indexStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1059,8 +1059,8 @@ public sealed class LightLeastSquaresMovingAverageState : IStreamingIndicatorSta
 
         var sma1 = _sma1.Next(value, isFinal);
         var sma2 = _sma2.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var indexStdDev = _indexStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
+        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
         var indexMa = _indexMa.Next(index, isFinal);
 
         var c = stdDev != 0 ? (sma2 - sma1) / stdDev : 0;
@@ -1598,7 +1598,7 @@ public sealed class LogisticCorrelationState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Macz")]
 public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -1610,7 +1610,7 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
         int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
+        _stdDev = new RollingStandardDeviation(resolved);
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
@@ -1634,7 +1634,7 @@ public sealed class MacZIndicatorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdev = _stdDev.Next(value, isFinal);
         var fastMa = _fastSmoother.Next(value, isFinal);
         var slowMa = _slowSmoother.Next(value, isFinal);
         var wima = _wilderSmoother.Next(value, isFinal);

@@ -564,7 +564,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -585,7 +585,7 @@ public static partial class Calculations
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
         stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var mxList = GetStandardDeviationList(xList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = devList[i];
@@ -1289,8 +1289,8 @@ public static partial class Calculations
         double tempSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var shortStdDevList = CalculateStandardDeviationVolatility(stockData, length: fastLength).ChainedValues;
-        var longStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).ChainedValues;
+        var shortStdDevList = GetStandardDeviationList(inputList, fastLength);
+        var longStdDevList = GetStandardDeviationList(inputList, slowLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {

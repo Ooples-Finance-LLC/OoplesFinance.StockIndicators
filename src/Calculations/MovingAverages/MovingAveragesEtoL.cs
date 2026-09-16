@@ -664,9 +664,9 @@ public static partial class Calculations
 
         var sma1List = GetMovingAverageList(stockData, maType, length, inputList);
         var sma2List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var indexStdDevList = GetStandardDeviationList(indexList, length);
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1441,7 +1441,7 @@ public static partial class Calculations
         RollingSum diffSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevSrcList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevSrcList = GetStandardDeviationList(inputList, length);
         var smaSrcList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1451,7 +1451,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var indexStdDevList = GetStandardDeviationList(indexList, length);
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {

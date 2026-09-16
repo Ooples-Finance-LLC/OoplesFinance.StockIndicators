@@ -759,8 +759,8 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
 {
     private readonly int _fastLength;
     private readonly int _slowLength;
-    private readonly StandardDeviationVolatilityState _fastStdDev;
-    private readonly StandardDeviationVolatilityState _slowStdDev;
+    private readonly RollingStandardDeviation _fastStdDev;
+    private readonly RollingStandardDeviation _slowStdDev;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _kValues;
     private double _tempSum;
@@ -770,8 +770,8 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
     {
         _fastLength = Math.Max(1, fastLength);
         _slowLength = Math.Max(1, slowLength);
-        _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _fastLength);
-        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _slowLength, _ => _fastStdDevValue);
+        _fastStdDev = new RollingStandardDeviation(_fastLength);
+        _slowStdDev = new RollingStandardDeviation(_slowLength);
         _input = new StreamingInputResolver(InputName.Close, null);
         _kValues = new PooledRingBuffer<double>(_slowLength);
     }
@@ -790,10 +790,10 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fastStdDev = _fastStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var fastStdDev = _fastStdDev.Next(value, isFinal);
         var prevFastStdDev = _fastStdDevValue;
         _fastStdDevValue = fastStdDev;
-        var slowStdDev = _slowStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var slowStdDev = _slowStdDev.Next(value, isFinal);
         if (!isFinal)
         {
             _fastStdDevValue = prevFastStdDev;

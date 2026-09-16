@@ -776,8 +776,8 @@ public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorSta
 {
     private readonly IMovingAverageSmoother _smaSmoother;
     private readonly IMovingAverageSmoother _bSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
-    private readonly StandardDeviationVolatilityState _bStdDev;
+    private readonly RollingStandardDeviation _stdDev;
+    private readonly RollingStandardDeviation _bStdDev;
     private readonly RollingWindowCorrelation _corrWindow;
     private readonly EfficiencyRatioState _er;
     private readonly StreamingInputResolver _input;
@@ -794,8 +794,8 @@ public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorSta
         _ = sc;
         _smaSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _bSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
-        _bStdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _bValue);
+        _stdDev = new RollingStandardDeviation(resolved);
+        _bStdDev = new RollingStandardDeviation(resolved);
         _corrWindow = new RollingWindowCorrelation(resolved);
         _er = new EfficiencyRatioState(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -836,8 +836,8 @@ public sealed class TStepLeastSquaresMovingAverageState : IStreamingIndicatorSta
         var sma = _smaSmoother.Next(value, isFinal);
         var bSma = _bSmoother.Next(b, isFinal);
         _bValue = b;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var bStdDev = _bStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
+        var bStdDev = _bStdDev.Next(_bValue, isFinal);
         var alpha = bStdDev != 0 ? corr * stdDev / bStdDev : 0;
         var beta = sma - (alpha * bSma);
         var ls = (alpha * b) + beta;

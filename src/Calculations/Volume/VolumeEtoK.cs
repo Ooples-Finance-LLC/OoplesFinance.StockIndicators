@@ -443,7 +443,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(vBymList);
-        var sdfList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var sdfList = GetStandardDeviationList(vBymList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

@@ -642,9 +642,9 @@ public static partial class Calculations
 
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var indexStdDevList = GetStandardDeviationList(indexList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

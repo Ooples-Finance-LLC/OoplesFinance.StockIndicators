@@ -405,7 +405,7 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         stockData.SetCustomValues(smaList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(smaList, length);
         stockData.SetCustomValues(smaList);
         var linreg1List = CalculateLinearRegression(stockData, length).ChainedValues;
         stockData.SetCustomValues(smaList);
@@ -457,7 +457,7 @@ public static partial class Calculations
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1623,7 +1623,7 @@ public static partial class Calculations
 
         var v3List = GetMovingAverageList(stockData, maType, length, v2List);
         stockData.SetCustomValues(v2List);
-        var v4List = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var v4List = GetStandardDeviationList(v2List, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var v2 = v2List[i];
@@ -2200,7 +2200,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(tempList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        var stdDevList = GetStandardDeviationList(tempList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentHigh = highList[i];

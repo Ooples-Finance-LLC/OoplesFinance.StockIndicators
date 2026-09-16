@@ -404,8 +404,8 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
     private readonly RollingWindowMax _bSmaMax;
     private readonly IMovingAverageSmoother _indexSmoother;
     private readonly IMovingAverageSmoother _sma;
-    private readonly StandardDeviationVolatilityState _stdDev;
-    private readonly StandardDeviationVolatilityState _indexStdDev;
+    private readonly RollingStandardDeviation _stdDev;
+    private readonly RollingStandardDeviation _indexStdDev;
     private readonly StreamingInputResolver _input;
     private double _indexValue;
     private double _prevValue;
@@ -422,8 +422,8 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
         _bSmaMax = new RollingWindowMax(_length);
         _indexSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
-        _indexStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _stdDev = new RollingStandardDeviation(_length);
+        _indexStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -456,8 +456,8 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
 
         var indexSma = _indexSmoother.Next(index, isFinal);
         var sma = _sma.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var indexStdDev = _indexStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
+        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
 
         var prevValue = _hasPrev ? _prevValue : 0;
         var prevD = _hasPrev ? (_prevD != 0 ? _prevD : prevValue) : prevValue;

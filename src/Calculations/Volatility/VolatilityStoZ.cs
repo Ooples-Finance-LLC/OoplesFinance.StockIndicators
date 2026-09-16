@@ -966,7 +966,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(retList);
-        var stdList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdList = GetStandardDeviationList(retList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevStd = i >= 1 ? stdList[i - 1] : 0;

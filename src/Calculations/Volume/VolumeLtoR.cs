@@ -580,7 +580,7 @@ public static partial class Calculations
 
         var smaVolumeList = GetMovingAverageList(stockData, maType, length, volumeList);
         stockData.SetCustomValues(volumeList);
-        var stdDevVolumeList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var stdDevVolumeList = GetStandardDeviationList(volumeList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
