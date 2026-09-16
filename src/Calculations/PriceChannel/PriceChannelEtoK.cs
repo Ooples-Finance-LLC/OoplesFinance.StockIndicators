@@ -591,10 +591,44 @@ public static partial class Calculations
             // close, stdDev is zero through the warmup so l is zero and neither moves, and the first
             // non-zero l steps them toward each other from the same value and crosses them at once - at
             // bar 15 of the AAPL fixture, publishing an upper band 0.418 below the middle.
-            var a = currentValue > prevA1 ? currentValue : prevA1 == prevA2 ? Math.Max(prevA1 - l, currentValue) : prevA1;
+            //
+            // The equality below is deliberate, and a tolerance would be wrong. It is not two
+            // computations that ought to agree to within rounding: it is one stored value against the one
+            // stored before it, asking whether the band carried forward untouched. Reading a real decay
+            // of l as "no change" would decay it a second time, and holding until price touches it is the
+            // behaviour this indicator is named for.
+#pragma warning disable S1244 // Floating point numbers should not be tested for equality
+            double a;
+            if (currentValue > prevA1)
+            {
+                a = currentValue;
+            }
+            else if (prevA1 == prevA2)
+            {
+                a = Math.Max(prevA1 - l, currentValue);
+            }
+            else
+            {
+                a = prevA1;
+            }
+
             aList.Add(a);
 
-            var b = currentValue < prevB1 ? currentValue : prevB1 == prevB2 ? Math.Min(prevB1 + l, currentValue) : prevB1;
+            double b;
+            if (currentValue < prevB1)
+            {
+                b = currentValue;
+            }
+            else if (prevB1 == prevB2)
+            {
+                b = Math.Min(prevB1 + l, currentValue);
+            }
+            else
+            {
+                b = prevB1;
+            }
+#pragma warning restore S1244
+
             bList.Add(b);
 
             var prevTos = GetLastOrDefault(tosList);

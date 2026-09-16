@@ -481,8 +481,8 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     private readonly double _bw;
     private readonly EhlersRoofingFilterV2State _roofingFilter;
 
-    // One bandpass per period in the comb, each with its own two-sample recursion and its own history;
-    // see the batch calculation. A single shared buffer drove every period from another period's output
+    // One bandpass per period in the comb, each with its own two-sample recursion and its own history.
+    // See the batch calculation. A single shared buffer drove every period from another period's output
     // and summed the deciding power over a mixture of periods.
     private readonly double[] _bpPrev1;
     private readonly double[] _bpPrev2;
