@@ -1847,9 +1847,14 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
     private readonly double _alpha1;
     private readonly PooledRingBuffer<double> _hpValues;
     private readonly PooledRingBuffer<double> _smoothHpValues;
-    private readonly PooledRingBuffer<double> _realValues;
-    private readonly PooledRingBuffer<double> _imagValues;
-    private readonly PooledRingBuffer<double> _q1Values;
+    // One bandpass per period in the bank, each with its own two-sample recursion. These were read
+    // from buffers holding one value per bar - the last period's - so every period was fed another
+    // period's output, and the bank never settled on a market that never moved.
+    private readonly double[] _realPrev1;
+    private readonly double[] _realPrev2;
+    private readonly double[] _imagPrev1;
+    private readonly double[] _imagPrev2;
+    private readonly double[] _q1Prev;
     private readonly PooledRingBuffer<double> _dcValues;
     private readonly double[] _medianScratch;
     private double _prevValue;
@@ -1865,9 +1870,11 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
         _alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
         _hpValues = new PooledRingBuffer<double>(5);
         _smoothHpValues = new PooledRingBuffer<double>(_maxLength);
-        _realValues = new PooledRingBuffer<double>(_maxLength * 2);
-        _imagValues = new PooledRingBuffer<double>(_maxLength * 2);
-        _q1Values = new PooledRingBuffer<double>(_maxLength * 2);
+        _realPrev1 = new double[_maxLength + 1];
+        _realPrev2 = new double[_maxLength + 1];
+        _imagPrev1 = new double[_maxLength + 1];
+        _imagPrev2 = new double[_maxLength + 1];
+        _q1Prev = new double[_maxLength + 1];
         _dcValues = new PooledRingBuffer<double>(_length2);
         _medianScratch = new double[_length2];
     }
@@ -1901,15 +1908,24 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
             var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / j, 0.99, 0.01));
             var alpha = gamma - MathHelper.Sqrt((gamma * gamma) - 1);
             var priorSmoothHp = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, j);
-            var prevReal = EhlersStreamingWindow.GetOffsetValue(_realValues, j);
-            var priorReal = EhlersStreamingWindow.GetOffsetValue(_realValues, j * 2);
-            var prevImag = EhlersStreamingWindow.GetOffsetValue(_imagValues, j);
-            var priorImag = EhlersStreamingWindow.GetOffsetValue(_imagValues, j * 2);
-            var prevQ1 = EhlersStreamingWindow.GetOffsetValue(_q1Values, j);
+            var prevReal = _realPrev1[j];
+            var priorReal = _realPrev2[j];
+            var prevImag = _imagPrev1[j];
+            var priorImag = _imagPrev2[j];
+            var prevQ1 = _q1Prev[j];
 
             q1 = j / Math.PI * 2 * (smoothHp - prevSmoothHp);
             real = (0.5 * (1 - alpha) * (smoothHp - priorSmoothHp)) + (beta * (1 + alpha) * prevReal) - (alpha * priorReal);
             imag = (0.5 * (1 - alpha) * (q1 - prevQ1)) + (beta * (1 + alpha) * prevImag) - (alpha * priorImag);
+            if (isFinal)
+            {
+                _realPrev2[j] = _realPrev1[j];
+                _realPrev1[j] = real;
+                _imagPrev2[j] = _imagPrev1[j];
+                _imagPrev1[j] = imag;
+                _q1Prev[j] = q1;
+            }
+
             var ampl = (real * real) + (imag * imag);
             maxAmpl = ampl > maxAmpl ? ampl : maxAmpl;
             var db = maxAmpl != 0 && ampl / maxAmpl > 0
@@ -1921,7 +1937,9 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
                 num += j * (_maxLength - db);
                 denom += _maxLength - db;
             }
-            dc = denom != 0 ? num / denom : 0;
+            // The dominant cycle is a period inside the band that was scanned. Anything else is not a
+            // cycle this bank can see, and a zero propagates as 2*pi/0 into everything downstream.
+            dc = denom != 0 ? MathHelper.MinOrMax(num / denom, _maxLength, _minLength) : _minLength;
         }
 
         var domCyc = EhlersStreamingWindow.GetMedian(_dcValues, dc, _medianScratch);
@@ -1930,9 +1948,7 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
         {
             _hpValues.TryAdd(hp, out _);
             _smoothHpValues.TryAdd(smoothHp, out _);
-            _q1Values.TryAdd(q1, out _);
-            _realValues.TryAdd(real, out _);
-            _imagValues.TryAdd(imag, out _);
+
             _dcValues.TryAdd(dc, out _);
             _prevValue = value;
             _index++;
@@ -1945,9 +1961,11 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
     {
         _hpValues.Clear();
         _smoothHpValues.Clear();
-        _realValues.Clear();
-        _imagValues.Clear();
-        _q1Values.Clear();
+        Array.Clear(_realPrev1, 0, _realPrev1.Length);
+        Array.Clear(_realPrev2, 0, _realPrev2.Length);
+        Array.Clear(_imagPrev1, 0, _imagPrev1.Length);
+        Array.Clear(_imagPrev2, 0, _imagPrev2.Length);
+        Array.Clear(_q1Prev, 0, _q1Prev.Length);
         _dcValues.Clear();
         _prevValue = 0;
         _index = 0;
@@ -1957,9 +1975,7 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
     {
         _hpValues.Dispose();
         _smoothHpValues.Dispose();
-        _realValues.Dispose();
-        _imagValues.Dispose();
-        _q1Values.Dispose();
+
         _dcValues.Dispose();
     }
 }
