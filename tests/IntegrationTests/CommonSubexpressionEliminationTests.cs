@@ -97,7 +97,7 @@ public sealed class CommonSubexpressionEliminationTests : GlobalTestData
             var alligator = catalog.AlligatorIndex();
             lips = alligator.Lips;
             teeth = alligator.Teeth;
-            jaws = alligator.Jaw;
+            jaws = alligator.Jaws;
         });
 
         lips.Should().NotBe(teeth);

@@ -75,8 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <!-- Upstream fix (to PR back to pr87): the Builder/Trading + Builder/MarketData
          Alpaca adapters use Alpaca.Markets but the reference was missing. -->
     <PackageReference Include="Alpaca.Markets" Version="7.2.0" />
@@ -102,6 +100,19 @@
   <!-- Source Generator: Reference the built analyzer DLL -->
   <ItemGroup>
     <Analyzer Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll" />
+  </ItemGroup>
+
+  <!--
+    Ship the generator inside the package as well, not only use it while building this project.
+    Without this the published nupkg holds three lib folders and nothing else, so a consumer gets no
+    generation at all - no series accessors, no output map, and no way for an indicator they write
+    themselves to take part in any of it. analyzers/dotnet/cs is where the SDK looks.
+  -->
+  <ItemGroup>
+    <None Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">

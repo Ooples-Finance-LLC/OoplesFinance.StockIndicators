@@ -18,17 +18,40 @@ internal static class BatchCompute
     /// <param name="data">The stock data to compute on.</param>
     /// <param name="state">The stateful indicator to use.</param>
     /// <returns>Array of indicator values for each bar.</returns>
-    public static double[] ComputeAll(StockData data, IStreamingIndicatorState state)
+    /// <param name="outputKey">
+    /// The named output to read, or null for the indicator's primary value. Passing null for an
+    /// indicator with several outputs is what made every band of a multi-output result come back as the
+    /// same series: the slot the caller asked for was simply not consulted.
+    /// </param>
+    public static double[] ComputeAll(StockData data, IStreamingIndicatorState state, string? outputKey = null)
     {
         var count = data.Count;
         var results = new double[count];
+        var wantsNamedOutput = outputKey is not null;
         state.Reset();
 
         for (var i = 0; i < count; i++)
         {
             var bar = CreateBar(data, i);
-            var result = state.Update(bar, isFinal: true, includeOutputs: false);
-            results[i] = result.Value;
+            var result = state.Update(bar, isFinal: true, includeOutputs: wantsNamedOutput);
+
+            if (!wantsNamedOutput)
+            {
+                results[i] = result.Value;
+                continue;
+            }
+
+            if (result.Outputs is null || !result.Outputs.TryGetValue(outputKey!, out var value))
+            {
+                var available = result.Outputs is null || result.Outputs.Count == 0
+                    ? "none"
+                    : string.Join(", ", result.Outputs.Keys);
+
+                throw new CalculationException(
+                    $"{state.Name} does not publish an output named '{outputKey}'. Available outputs: {available}.");
+            }
+
+            results[i] = value;
         }
 
         return results;
