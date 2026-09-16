@@ -3606,10 +3606,11 @@ public sealed class DEnvelopeState : IStreamingIndicatorState
         var oneMinus = 1 - _alpha;
         var mt = (_alpha * value) + (oneMinus * _mt);
         var ut = (_alpha * mt) + (oneMinus * _ut);
-        var dt = (2 - _alpha) * (mt - ut) / oneMinus;
+        // McNicholl's zero-lag form; see the batch calculation for why the grouping matters.
+        var dt = oneMinus != 0 ? (((2 - _alpha) * mt) - ut) / oneMinus : 0;
         var mt2 = (_alpha * Math.Abs(value - dt)) + (oneMinus * _mt2);
         var ut2 = (_alpha * mt2) + (oneMinus * _ut2);
-        var dt2 = (2 - _alpha) * (mt2 - ut2) / oneMinus;
+        var dt2 = oneMinus != 0 ? (((2 - _alpha) * mt2) - ut2) / oneMinus : 0;
         var upper = dt + (_devFactor * dt2);
         var lower = dt - (_devFactor * dt2);
 
@@ -6213,7 +6214,8 @@ public sealed class AbsoluteStrengthIndexState : IStreamingIndicatorState
         var abssio = abssi - abssiEma;
         var mt = (_alpha * abssio) + ((1 - _alpha) * _mt);
         var ut = (_alpha * mt) + ((1 - _alpha) * _ut);
-        var s = (2 - _alpha) * (mt - ut) / (1 - _alpha);
+        // McNicholl's zero-lag form; see the batch calculation for why the grouping matters.
+        var s = 1 - _alpha != 0 ? (((2 - _alpha) * mt) - ut) / (1 - _alpha) : 0;
         var asi = abssio - s;
 
         if (isFinal)

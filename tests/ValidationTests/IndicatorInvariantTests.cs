@@ -145,17 +145,33 @@ public sealed class IndicatorInvariantTests
     /// a defect; see issue #178.
     /// </summary>
     /// <remarks>
-    /// Two mechanisms account for most of them. FractalChaosBands computes its middle as the mean of
-    /// the other two, which is between them by construction - so the only way it can fail is for the
-    /// upper band to sit below the lower one, and both start at zero because GetLastOrDefault returns
-    /// zero until the first fractal forms. ScalpersChannel labels three unrelated quantities as bands:
-    /// a rolling high, a rolling low, and <c>sma - log(pi * atr)</c>, which has no reason to lie
-    /// between them.
+    /// <para>
+    /// Each mechanism below is measured on the AAPL fixture rather than assumed. DEnvelope is fixed and
+    /// gone from this set: its centre line used McNicholl's zero-lag form grouped as
+    /// <c>(2 - alpha) * (mt - ut)</c>, which cannot reproduce a constant - at a constant price mt and ut
+    /// are both that price and the centre came out 0. It published a middle band of -13.86 for a stock
+    /// trading at 145, and the same grouping drove the width negative on 112 of the 251 bars, inverting
+    /// both bands. Corrected, its centre line agrees to every digit with CalculateMcNichollMovingAverage
+    /// reached by an entirely separate path.
+    /// </para>
+    /// <para>
+    /// Seven of those left publish a MiddleBand holding a different quantity from the one the upper and
+    /// lower bands bracket. LBRPaintBars publishes an ATR width of about 5 as the middle of price bands
+    /// near 180; MovingAverageBands centres its bands on the slow average but publishes the fast one;
+    /// RateOfChangeBands brackets zero with plus and minus the RMS of the rate of change but publishes
+    /// the rate of change itself; ScalpersChannel pairs a rolling high and low with
+    /// <c>sma - log(pi * atr)</c>, which has no reason to lie between them.
+    /// </para>
+    /// <para>
+    /// FractalChaosBands is not the zero seed it was first taken for. Its first violation is at bar 60,
+    /// where a down fractal at 172 sits above an up fractal at 163.41 - not a band left at zero. Bands
+    /// built from the last fractal of each kind genuinely cross in a strong trend, because a recent low
+    /// can form above an older high.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsOutOfOrder = new()
     {
         IndicatorName.AverageTrueRangeChannel,
-        IndicatorName.DEnvelope,
         IndicatorName.FractalChaosBands,
         IndicatorName.LBRPaintBars,
         IndicatorName.MovingAverageBands,

@@ -291,7 +291,15 @@ public static partial class Calculations
             utList.Add(ut);
 
             var prevDt = GetLastOrDefault(dtList);
-            var dt = (2 - alp) * (mt - ut) / (1 - alp);
+
+            // McNicholl's zero-lag form, which everywhere else in this library is written
+            // ((2 - alpha) * ema1 - ema2) / (1 - alpha) - see CalculateMcNichollMovingAverage and
+            // MovingAverageCore.McNichollMovingAverage. Grouped instead as (2 - alp) * (mt - ut) it is a
+            // different quantity altogether: at a constant price mt and ut are both that price, so the
+            // centre line came out as 0 rather than the price. A de-lagged average has to reproduce a
+            // constant, and this one could not. On the AAPL fixture it published a middle band of -13.86
+            // for a stock trading at 145.
+            var dt = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 0;
             dtList.Add(dt);
 
             var prevMt2 = GetLastOrDefault(mt2List);
@@ -302,7 +310,11 @@ public static partial class Calculations
             var ut2 = (alp * mt2) + ((1 - alp) * prevUt2);
             ut2List.Add(ut2);
 
-            var dt2 = (2 - alp) * (mt2 - ut2) / (1 - alp);
+            // The same de-lagging, applied to the mean absolute deviation rather than to price. The old
+            // grouping drove this to zero as well, and it is what set the width of both bands - so the
+            // width went negative whenever the deviation was falling, inverting the bands on 112 of the
+            // 251 fixture bars.
+            var dt2 = 1 - alp != 0 ? (((2 - alp) * mt2) - ut2) / (1 - alp) : 0;
             var prevBut = GetLastOrDefault(butList);
             var but = dt + (devFactor * dt2);
             butList.Add(but);
