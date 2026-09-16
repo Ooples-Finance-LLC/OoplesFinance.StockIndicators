@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// millionth before its logarithm is taken, as the batch engine floors it, and the window is summed oldest
 /// first with this bar last so the two agree to the last bit.
 /// </remarks>
+[PrimaryOutput("Gma")]
 public sealed class GeometricMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -78,6 +79,7 @@ public sealed class GeometricMovingAverageState : IStreamingIndicatorState, IDis
 /// window from the newest value back, and this multiplies in that same order, because the product of
 /// floating point values depends on the order they are taken in.
 /// </remarks>
+[PrimaryOutput("Gmma")]
 public sealed class GeometricMeanMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -160,6 +162,7 @@ public sealed class GeometricMeanMovingAverageState : IStreamingIndicatorState, 
 /// The streaming twin of <c>Calculations.CalculateHarmonicMeanMovingAverage</c>, summing the reciprocals
 /// from the newest value back, as the batch engine sums them.
 /// </remarks>
+[PrimaryOutput("Hmma")]
 public sealed class HarmonicMeanMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -240,6 +243,7 @@ public sealed class HarmonicMeanMovingAverageState : IStreamingIndicatorState, I
 /// The streaming twin of <c>Calculations.CalculatePpoMovingAverage</c>. Both averages come from the same
 /// <c>EmaState</c> the batch path's exponential average is built on, seeding and all.
 /// </remarks>
+[PrimaryOutput("PpoMa")]
 public sealed class PpoMovingAverageState : IStreamingIndicatorState
 {
     private readonly EmaState _fast;
@@ -284,6 +288,7 @@ public sealed class PpoMovingAverageState : IStreamingIndicatorState
 /// <remarks>
 /// The streaming twin of <c>Calculations.CalculatePriceMomentum</c>.
 /// </remarks>
+[PrimaryOutput("Pm")]
 public sealed class PriceMomentumState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

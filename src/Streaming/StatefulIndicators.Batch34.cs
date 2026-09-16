@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// <c>RollingLeastSquares</c> the batch path fits it with, so the two agree rather than drifting apart as a
 /// second implementation of the same regression would.
 /// </remarks>
+[PrimaryOutput("StandardError")]
 public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -90,6 +91,7 @@ public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateStandardErrorOfTheMean</c>: the window's standard
 /// deviation over the root of its length.
 /// </remarks>
+[PrimaryOutput("Sem")]
 public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _sqrtLength;
@@ -143,6 +145,7 @@ public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDis
 /// The streaming twin of <c>Calculations.CalculateNetVolume</c>. The direction is taken from the series
 /// being streamed, so a caller's own values decide the sign as they do in the batch engine.
 /// </remarks>
+[PrimaryOutput("NetVolume")]
 public sealed class NetVolumeState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -194,6 +197,7 @@ public sealed class NetVolumeState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateCumulativeVolumeIndex</c>. It accumulates a change rather
 /// than a level, so a market that stops moving leaves the total where it stands.
 /// </remarks>
+[PrimaryOutput("Cvi")]
 public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -255,6 +259,7 @@ public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateNormalizedVolume</c>. Its window sums the way
 /// <c>MovingAverageCore.SimpleMovingAverage</c> sums, so the average the two engines divide by is the same.
 /// </remarks>
+[PrimaryOutput("NormalizedVolume")]
 public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -304,6 +309,7 @@ public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposabl
 /// <remarks>
 /// The streaming twin of <c>Calculations.CalculateVolumeOscillator</c>, as a percentage of the long average.
 /// </remarks>
+[PrimaryOutput("Vo")]
 public sealed class VolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _fastLength;
@@ -362,6 +368,7 @@ public sealed class VolumeOscillatorState : IStreamingIndicatorState, IDisposabl
 /// <remarks>
 /// The streaming twin of <c>Calculations.CalculateVolumeMomentum</c>.
 /// </remarks>
+[PrimaryOutput("VolumeMomentum")]
 public sealed class VolumeMomentumState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -415,6 +422,7 @@ public sealed class VolumeMomentumState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateVolumeRateOfChange</c>. A bar whose earlier volume was
 /// zero has no proportion to take and publishes zero.
 /// </remarks>
+[PrimaryOutput("Vroc")]
 public sealed class VolumeRateOfChangeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

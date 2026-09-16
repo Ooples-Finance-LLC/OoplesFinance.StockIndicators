@@ -12,6 +12,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// window's own mean, divided by the window length. The window holds the values already final, so a preview
 /// bar is measured against them without joining them, and publishes zero until the window fills.
 /// </remarks>
+[PrimaryOutput("Variance")]
 public sealed class VarianceState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;

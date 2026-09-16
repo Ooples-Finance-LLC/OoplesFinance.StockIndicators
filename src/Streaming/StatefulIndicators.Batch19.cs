@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Obvm")]
 public sealed class OnBalanceVolumeModifiedState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _obvSmoother;
@@ -71,6 +72,7 @@ public sealed class OnBalanceVolumeModifiedState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Obvr")]
 public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -136,6 +138,7 @@ public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Owma")]
 public sealed class OptimalWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -209,6 +212,7 @@ public sealed class OptimalWeightedMovingAverageState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Ott")]
 public sealed class OptimizedTrendTrackerState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ma;
@@ -280,6 +284,7 @@ public sealed class OptimizedTrendTrackerState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Oscar")]
 public sealed class OscarIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -341,6 +346,7 @@ public sealed class OscarIndicatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("OscOscillator")]
 public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -388,6 +394,7 @@ public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Orma")]
 public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -497,6 +504,7 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Sar")]
 public sealed class ParabolicSARState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _start;
@@ -640,6 +648,7 @@ public sealed class ParabolicSARState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pwma")]
 public sealed class ParabolicWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -707,6 +716,7 @@ public sealed class ParabolicWeightedMovingAverageState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Pclma")]
 public sealed class ParametricCorrectiveLinearMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -794,6 +804,7 @@ public sealed class ParametricCorrectiveLinearMovingAverageState : IStreamingInd
     }
 }
 
+[PrimaryOutput("Pkf")]
 public sealed class ParametricKalmanFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -865,6 +876,7 @@ public sealed class ParametricKalmanFilterState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Sign1")]
 public sealed class PeakValleyEstimationState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
@@ -945,6 +957,7 @@ public sealed class PeakValleyEstimationState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Pema")]
 public sealed class PentupleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema1;
@@ -1023,6 +1036,7 @@ public sealed class PentupleExponentialMovingAverageState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Ppo")]
 public sealed class PercentagePriceOscillatorLeaderState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -1096,6 +1110,7 @@ public sealed class PercentagePriceOscillatorLeaderState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("LongStop")]
 public sealed class PercentageTrailingStopsState : IStreamingIndicatorState, IDisposable
 {
     private readonly RollingWindowMax _highWindow;
@@ -1175,6 +1190,7 @@ public sealed class PercentageTrailingStopsState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Pti")]
 public sealed class PercentageTrendState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1264,6 +1280,7 @@ public sealed class PercentageTrendState : IStreamingIndicatorState, IDisposable
     }
 }
 
+[PrimaryOutput("Pcco")]
 public sealed class PercentChangeOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -1323,6 +1340,7 @@ public sealed class PercentChangeOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Math.PI")]
 public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1376,6 +1394,7 @@ public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Pci")]
 public sealed class PhaseChangeIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1448,6 +1467,7 @@ public sealed class PhaseChangeIndexState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Pdo")]
 public sealed class PivotDetectorOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsi;
@@ -1496,6 +1516,7 @@ public sealed class PivotDetectorOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
+[PrimaryOutput("Pivot1")]
 public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _pp1Smoother;
@@ -1575,6 +1596,7 @@ public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposab
     }
 }
 
+[PrimaryOutput("Pfe")]
 public sealed class PolarizedFractalEfficiencyState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1652,6 +1674,7 @@ public sealed class PolarizedFractalEfficiencyState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Plsma")]
 public sealed class PolynomialLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1755,6 +1778,7 @@ public sealed class PolynomialLeastSquaresMovingAverageState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Pvi")]
 public sealed class PositiveVolumeIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -1823,6 +1847,7 @@ public sealed class PositiveVolumeIndexState : IStreamingIndicatorState, IDispos
     }
 }
 
+[PrimaryOutput("Pkama")]
 public sealed class PoweredKaufmanAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;

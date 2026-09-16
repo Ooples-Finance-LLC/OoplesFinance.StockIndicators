@@ -11,6 +11,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// The streaming twin of <c>Calculations.CalculateDemandIndex</c>. It reads one bar at a time, so a preview
 /// bar costs it nothing beyond the count of bars it has seen.
 /// </remarks>
+[PrimaryOutput("Di")]
 public sealed class DemandIndexState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -68,6 +69,7 @@ public sealed class DemandIndexState : IStreamingIndicatorState
 /// make up the convergence and divergence histogram all come from the same <c>EmaState</c> the batch path's
 /// exponential average is built on, so the verdict cannot differ between the engines.
 /// </remarks>
+[PrimaryOutput("Eis")]
 public sealed class ElderImpulseSystemState : IStreamingIndicatorState
 {
     private readonly EmaState _trendEma;
@@ -140,6 +142,7 @@ public sealed class ElderImpulseSystemState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateSimplePriceZone</c>. The window keeps one value more than
 /// its length, because the change that leaves the window is measured against the value before it.
 /// </remarks>
+[PrimaryOutput("Spz")]
 public sealed class SimplePriceZoneState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -222,6 +225,7 @@ public sealed class SimplePriceZoneState : IStreamingIndicatorState, IDisposable
 /// The streaming twin of <c>Calculations.CalculateSwingIndex</c>, computing the index with the same
 /// <c>WilderSwingIndex</c> the batch engine uses.
 /// </remarks>
+[PrimaryOutput("Si")]
 public sealed class SwingIndexState : IStreamingIndicatorState
 {
     private readonly double _limitMove;
@@ -277,6 +281,7 @@ public sealed class SwingIndexState : IStreamingIndicatorState
 /// <see cref="AverageTrueRangeState"/> so the range it trails by is the one the batch engine averages, and
 /// it keeps the trend it is following between bars.
 /// </remarks>
+[PrimaryOutput("Vs")]
 public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _multiplier;
@@ -373,6 +378,7 @@ public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 /// first bar's volume and smooth from there, which is not how <c>EmaState</c> warms up, so the smoothing is
 /// kept here rather than borrowed.
 /// </remarks>
+[PrimaryOutput("Vmo")]
 public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
 {
     private readonly double _shortK;
@@ -435,6 +441,7 @@ public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
 /// The streaming twin of <c>Calculations.CalculateVolumeZoneOscillator</c>. The first bar has no bar before
 /// it to have risen against, so it contributes no signed volume, as the batch engine gives it none.
 /// </remarks>
+[PrimaryOutput("Vzo")]
 public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 {
     private readonly EmaState _signedVolume;
@@ -493,6 +500,7 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 /// of the true range comes from the same <c>EmaState</c> the batch path uses, and the first bar starts the
 /// average at its own price.
 /// </remarks>
+[PrimaryOutput("Trema")]
 public sealed class TrueRangeAdjustedExponentialMovingAverageState : IStreamingIndicatorState
 {
     private readonly double _baseAlpha;
