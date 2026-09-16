@@ -1461,8 +1461,22 @@ public static partial class Calculations
             var filtPowMa = filtPowSumWindow.Average(length2);
             var rms = filtPowMa > 0 ? Sqrt(filtPowMa) : 0;
             var scaledFilt = rms != 0 ? filt / rms : 0;
-            var a1 = Exp(-MathHelper.Sqrt2 * Math.PI * Math.Abs(scaledFilt) / length1);
-            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI * Math.Abs(scaledFilt) / length1);
+
+            // scaledFilt is the momentum in units of its own RMS, so its natural magnitude is one. Zero
+            // is the single value these coefficients cannot take: a1 becomes exp(0) = 1, so c2 = 2,
+            // c3 = -1 and c1 = 1 - c2 - c3 = 0. That is a double integrator with both poles at z = 1 - it
+            // stops reading its input altogether and carries whatever straight line it already held. On a
+            // market that never moved the output drifted linearly and for ever, by 0.01286 per bar:
+            // 112.65 at bar 1000, 164.07 at 5000 and 356.90 at 20000, the same slope across both spans.
+            // A flat market arrives at zero two ways - an all-zero window making rms zero, and a zero
+            // filt against a non-zero rms during warmup - so the floor belongs on the ratio rather than
+            // on rms. With no deviation to scale by there is no adaptive information to act on, and a
+            // magnitude of one is the neutral: it makes these coefficients exactly the ones
+            // CalculateEhlersSuperSmootherFilter uses at this length.
+            var scaledAbs = Math.Abs(scaledFilt);
+            scaledAbs = scaledAbs != 0 ? scaledAbs : 1;
+            var a1 = Exp(-MathHelper.Sqrt2 * Math.PI * scaledAbs / length1);
+            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI * scaledAbs / length1);
             var c2 = b1;
             var c3 = -a1 * a1;
             var c1 = 1 - c2 - c3;

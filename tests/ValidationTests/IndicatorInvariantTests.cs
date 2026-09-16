@@ -84,12 +84,22 @@ public sealed class IndicatorInvariantTests
     /// close and the first non-zero decay crossed them at bar 15. It settles to a spread of 0, and
     /// a >= price >= b makes BandsAreOrderedUpperMiddleLower hold by construction.
     /// </para>
+    /// <para>
+    /// EhlersDeviationScaledSuperSmoother was the clearest of them once measured over a long enough run.
+    /// Its momentum scaled by its own RMS is zero on a market that never moved, and zero is the single
+    /// value its coefficients cannot take: a1 becomes exp(0) = 1, so c2 = 2, c3 = -1 and c1 = 0, leaving
+    /// a double integrator with both poles at z = 1 that stops reading its input and carries whatever
+    /// straight line it already held. The output drifted linearly at 0.01286 per bar - 112.65 at bar
+    /// 1000, 164.07 at 5000, 356.90 at 20000 - which a hundred-bar window reads as a fixed spread of
+    /// 1.27268 at every length, so it looked frozen rather than divergent. The scaling now falls back to
+    /// a magnitude of one when there is no deviation to scale by, which is the nominal period and gives
+    /// exactly the coefficients CalculateEhlersSuperSmootherFilter uses.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
         // Spread at 900 -> 4900: unchanged, or larger.
         IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
-        IndicatorName.EhlersDeviationScaledSuperSmoother, //  1.27268 ->  1.27268 (identical)
         IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
 
         // Shrinks, but only 5.4x over a 5x longer run - slower than convergence and not yet settled.

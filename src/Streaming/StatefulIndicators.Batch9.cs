@@ -177,7 +177,12 @@ public sealed class EhlersDeviationScaledSuperSmootherState : IStreamingIndicato
         var filtPowMa = countAfter != 0 ? sum / countAfter : 0;
         var rms = filtPowMa > 0 ? MathHelper.Sqrt(filtPowMa) : 0;
         var scaledFilt = rms != 0 ? filt / rms : 0;
+
+        // A ratio of zero sets c1 to zero and leaves a double integrator that stops reading its input;
+        // see the batch calculation. With no deviation to scale by, the neutral magnitude of one gives
+        // the nominal period rather than an infinite one.
         var scaledAbs = Math.Abs(scaledFilt);
+        scaledAbs = scaledAbs != 0 ? scaledAbs : 1;
         var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI * scaledAbs / _length1);
         var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI * scaledAbs / _length1);
         var c2 = b1;
