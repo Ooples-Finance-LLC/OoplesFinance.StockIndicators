@@ -800,7 +800,13 @@ public sealed class EhlersEnhancedSignalToNoiseRatioState : IStreamingIndicatorS
         var diff = bar.High - bar.Low;
         var noise = (0.1 * diff * diff * 0.25) + (0.9 * _prevNoise);
         var temp = noise != 0 ? signalValue / noise : 0;
-        var snr = (0.33 * (10 * Math.Log(temp) / Math.Log(10))) + (0.67 * _prevSnr);
+
+        // A ratio in decibels is only defined for a positive ratio; see the batch calculation for the
+        // full reasoning. On a market with no range at all the noise estimate decays to zero and takes
+        // the signal with it, so temp is zero and the unguarded logarithm publishes negative infinity
+        // for every bar of the series.
+        var logTemp = temp > 0 ? 10 * Math.Log(temp) / Math.Log(10) : 0;
+        var snr = (0.33 * logTemp) + (0.67 * _prevSnr);
 
         if (isFinal)
         {

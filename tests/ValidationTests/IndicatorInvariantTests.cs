@@ -65,12 +65,17 @@ public sealed class IndicatorInvariantTests
     /// settle to a constant now, they simply need more than a thousand bars to get there. The pull
     /// indicator was never independently broken: it is the bank multiplied by volume.
     /// </para>
+    /// <para>
+    /// EhlersEnhancedSignalToNoiseRatio is gone from this set entirely rather than reclassified. A ratio
+    /// in decibels is only defined for a positive ratio, and on a market with no range the noise estimate
+    /// decays to zero and takes the signal with it, so the unguarded logarithm published negative infinity
+    /// for the whole series from bar 0. EhlersAlternateSignalToNoiseRatio, the same measurement in the same
+    /// family, already guarded its logarithm this way. It now settles to a spread of exactly 0 at a
+    /// thousand bars, so this suite holds it to the invariant like any other indicator.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
-        // Non-finite on a flat market at every length tried.
-        IndicatorName.EhlersEnhancedSignalToNoiseRatio,
-
         // Spread at 900 -> 4900: unchanged, or larger.
         IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
         IndicatorName.FlaggingBands,                      //  6.88303 ->  6.88303 (identical)
