@@ -250,6 +250,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV1(this StockData stockData, int fastLength = 100, int slowLength = 125, 
         double fastMult = 1.2, double slowMult = 1)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         fastLength = Math.Max(fastLength, 1);
         slowLength = Math.Max(slowLength, 1);
         List<double> decycler1OscillatorList = new(stockData.Count);
@@ -259,9 +260,8 @@ public static partial class Calculations
 
         var decycler1List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersSimpleDecycler(data, fastLength));
-        // Reset to use close prices for decycler2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var decycler2List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersSimpleDecycler(data, slowLength));
         stockData.SetCustomValues(decycler1List);
@@ -313,6 +313,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int fastLength = 10, int slowLength = 20)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         fastLength = Math.Max(fastLength, 1);
         slowLength = Math.Max(slowLength, 1);
         List<double> decList = new(stockData.Count);
@@ -320,9 +321,8 @@ public static partial class Calculations
 
         var hp1List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersHighPassFilterV2(data, maType, fastLength));
-        // Reset to use close prices for second HighPassFilterV2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var hp2List = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersHighPassFilterV2(data, maType, slowLength));
 
@@ -847,6 +847,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveRelativeStrengthIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
@@ -863,9 +864,8 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -877,7 +877,7 @@ public static partial class Calculations
 
             var prevUpChg = GetLastOrDefault(upChgList);
             double upChg = 0, dnChg = 0;
-            for (var j = 0; j < (int)Math.Ceiling(domCyc / 2); j++)
+            for (var j = 0; j < MathHelper.CeilingCycle(domCyc / 2); j++)
             {
                 var filt = i >= j ? roofingFilterList[i - j] : 0;
                 var prevFilt = i >= j + 1 ? roofingFilterList[i - (j + 1)] : 0;
@@ -979,6 +979,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveStochasticIndicatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
@@ -994,9 +995,8 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -1007,7 +1007,7 @@ public static partial class Calculations
             var prevAstoc1 = i >= 1 ? astocList[i - 1] : 0;
             var prevAstoc2 = i >= 2 ? astocList[i - 2] : 0;
 
-            var window = (int)Math.Ceiling(domCyc);
+            var window = MathHelper.CeilingCycle(domCyc);
             var highest = roofingFilter;
             var lowest = roofingFilter;
             for (var j = 1; j < window && i >= j; j++)
@@ -1121,6 +1121,7 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
@@ -1140,9 +1141,8 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -1151,7 +1151,7 @@ public static partial class Calculations
             var domCyc = MinOrMax(domCycList[i], length1, length2);
             var prevAcci1 = i >= 1 ? acciList[i - 1] : 0;
             var prevAcci2 = i >= 2 ? acciList[i - 2] : 0;
-            var cycLength = (int)Math.Ceiling(domCyc);
+            var cycLength = MathHelper.CeilingCycle(domCyc);
 
             var roofingFilter = roofingFilterList[i];
             tempList.Add(roofingFilter);
@@ -1977,6 +1977,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveBandPassFilter(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 3, double bw = 0.3)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         length3 = Math.Max(length3, 1);
@@ -1989,9 +1990,8 @@ public static partial class Calculations
 
         var domCycList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // Reset to use close prices for RoofingFilterV2 (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
 
@@ -2399,18 +2399,17 @@ public static partial class Calculations
     /// Calculates the Ehlers Adaptive Commodity Channel Index V1
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="cycPart"></param>
     /// <param name="constant"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV1(this StockData stockData, InputName inputName = InputName.TypicalPrice, double cycPart = 1,
+    public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV1(this StockData stockData, double cycPart = 1,
         double constant = 0.015)
     {
         List<double> acciList = new(stockData.Count);
         List<double> acciEmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var spList = GetOutputValuesInternal(stockData,
             data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
@@ -2465,14 +2464,13 @@ public static partial class Calculations
     /// Calculates the Ehlers Commodity Channel Index Inverse Fisher Transform
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <param name="signalLength"></param>
     /// <param name="constant"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersCommodityChannelIndexInverseFisherTransform(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateEhlersCommodityChannelIndexInverseFisherTransform(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20, int signalLength = 9, double constant = 0.015)
     {
         length = Math.Max(length, 1);
@@ -2482,7 +2480,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var cciList = GetCustomValuesListInternal(stockData,
-            data => CalculateCommodityChannelIndex(data, inputName, maType, length, constant));
+            data => CalculateCommodityChannelIndex(data, maType, length, constant));
 
         for (var i = 0; i < stockData.Count; i++)
         {

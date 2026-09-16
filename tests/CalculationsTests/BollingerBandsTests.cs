@@ -65,7 +65,7 @@ public sealed class BollingerBandsTests : GlobalTestData
         const double stdDevMult = 2;
 
         var results = stockData.CalculateBollingerBands(MovingAvgType.SimpleMovingAverage, length, stdDevMult);
-        var expected = CalculateBollingerBandsReference(stockData.ClosePrices, length, stdDevMult);
+        var expected = CalculateBollingerBandsNaive(stockData.ClosePrices, length, stdDevMult);
 
         RoundList(results.OutputValues["UpperBand"]).Should().BeEquivalentTo(RoundList(expected.UpperBand));
         RoundList(results.OutputValues["MiddleBand"]).Should().BeEquivalentTo(RoundList(expected.MiddleBand));
@@ -120,11 +120,17 @@ public sealed class BollingerBandsTests : GlobalTestData
         }
     }
 
-    /// <summary>
-    /// Bollinger Bands as defined: an N-period moving average of price, plus and minus K population
-    /// standard deviations of price measured about each window's own mean.
+    /// Bollinger's definition, written out: the middle band is the SMA of the last <paramref name="length"/>
+    /// prices, and the band width is the population standard deviation of those same prices around that
+    /// same mean.
     /// </summary>
-    private static (List<double> UpperBand, List<double> MiddleBand, List<double> LowerBand) CalculateBollingerBandsReference(
+    /// <remarks>
+    /// This reference used to take the standard deviation of the MIDDLE BAND around an average of the middle
+    /// band. That is not Bollinger Bands; it is what the batch computed while GetMovingAverageList left the
+    /// middle band on CustomValuesList for the standard deviation to read, and a reference copied from the
+    /// implementation can only ever agree with it. At bar 200 of this fixture it made the bands 55% too wide.
+    /// </remarks>
+    private static (List<double> UpperBand, List<double> MiddleBand, List<double> LowerBand) CalculateBollingerBandsNaive(
         IReadOnlyList<double> input,
         int length,
         double stdDevMult)

@@ -6,6 +6,187 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Geometric Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The geometric mean of the window, taken through logarithms so that a long window of large prices
+    /// cannot overflow the product. A value at or below zero has no logarithm, so each is floored at a
+    /// millionth first, which keeps the mean finite on a series that crosses zero. Distinct from
+    /// <see cref="CalculateGeometricMeanMovingAverage"/>, which multiplies the values themselves and leaves
+    /// out the ones it cannot use.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateGeometricMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> gmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double gma = 0;
+            if (i >= length - 1)
+            {
+                double logSum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    logSum += Math.Log(Math.Max(inputList[j], 0.000001));
+                }
+
+                gma = Math.Exp(logSum / length);
+            }
+
+            gmaList.Add(gma);
+
+            var prevGma1 = i >= 1 ? gmaList[i - 1] : 0;
+            var prevGma2 = i >= 2 ? gmaList[i - 2] : 0;
+            var signal = GetCompareSignal(gma - prevGma1, prevGma1 - prevGma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Gma", gmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(gmaList);
+        stockData.IndicatorName = IndicatorName.GeometricMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Geometric Mean Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The geometric mean of the window's positive values: their product raised to one over how many there
+    /// were. A value of zero or less has no place in a product of that kind and is left out, so the root
+    /// taken is the root of the count actually used. Until the window fills, the bar publishes its own value.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateGeometricMeanMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> gmmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double gmma;
+            if (i < length - 1)
+            {
+                gmma = inputList[i];
+            }
+            else
+            {
+                // Summed as logarithms rather than multiplied: the product of a long window overflows
+                // a double once length * log10(price) passes about 308, and published infinity. Math.Log
+                // rather than the guarded Log, since the value is already known to be positive.
+                double logSum = 0;
+                var used = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var value = inputList[i - j];
+                    if (value > 0)
+                    {
+                        logSum += Math.Log(value);
+                        used++;
+                    }
+                }
+
+                gmma = used > 0 ? Math.Exp(logSum / used) : 0;
+            }
+
+            gmmaList.Add(gmma);
+
+            var prevGmma1 = i >= 1 ? gmmaList[i - 1] : 0;
+            var prevGmma2 = i >= 2 ? gmmaList[i - 2] : 0;
+            var signal = GetCompareSignal(gmma - prevGmma1, prevGmma1 - prevGmma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Gmma", gmmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(gmmaList);
+        stockData.IndicatorName = IndicatorName.GeometricMeanMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Harmonic Mean Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The harmonic mean of the window: how many values there were, over the sum of their reciprocals. It
+    /// leans towards the smaller values of the window, which is what makes it the right mean for a rate. A
+    /// zero has no reciprocal and is left out. Until the window fills, the bar publishes its own value.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateHarmonicMeanMovingAverage(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> hmmaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double hmma;
+            if (i < length - 1)
+            {
+                hmma = inputList[i];
+            }
+            else
+            {
+                var sum = 0.0;
+                var used = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var value = inputList[i - j];
+                    if (value != 0)
+                    {
+                        sum += 1.0 / value;
+                        used++;
+                    }
+                }
+
+                hmma = used > 0 && sum != 0 ? used / sum : 0;
+            }
+
+            hmmaList.Add(hmma);
+
+            var prevHmma1 = i >= 1 ? hmmaList[i - 1] : 0;
+            var prevHmma2 = i >= 2 ? hmmaList[i - 2] : 0;
+            var signal = GetCompareSignal(hmma - prevHmma1, prevHmma1 - prevHmma2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Hmma", hmmaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(hmmaList);
+        stockData.IndicatorName = IndicatorName.HarmonicMeanMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the exponential moving average.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -160,7 +341,10 @@ public static partial class Calculations
 
             var sc = Pow((efficiencyRatio * (fastAlpha - slowAlpha)) + slowAlpha, 2);
             var prevKama = GetLastOrDefault(kamaList);
-            var currentKAMA = (sc * currentValue) + ((1 - sc) * prevKama);
+            // The price until the efficiency window is full, then Kaufman's recursion from it - as TA-Lib and
+            // Pine's nz(kama[1], src) seed it. Seeded at 0 it crawled up from zero, and on a flat market
+            // (efficiency 0, smoothing (2/31)^2) it was still converging thousands of bars later.
+            var currentKAMA = i < length ? currentValue : prevKama + (sc * (currentValue - prevKama));
             kamaList.Add(currentKAMA);
 
             var signal = GetCompareSignal(currentValue - currentKAMA, prevValue - prevKama);
@@ -240,8 +424,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var wmaList = CalculateWeightedMovingAverage(stockData, length).CustomValuesList;
-        var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -425,8 +609,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var wmaList = CalculateWeightedMovingAverage(stockData, length).CustomValuesList;
-        var smaList = CalculateSimpleMovingAverage(stockData, length).CustomValuesList;
+        var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -480,11 +664,9 @@ public static partial class Calculations
 
         var sma1List = GetMovingAverageList(stockData, maType, length, inputList);
         var sma2List = GetMovingAverageList(stockData, maType, length1, inputList);
-        // Measured on inputList, not on whatever the moving average above left behind. Taken from
-        // stockData this was the dispersion of that average rather than of the series itself - #145.
-        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -582,9 +764,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Measured on inputList, not on whatever the moving average above left behind. Taken from
-        // stockData this was the dispersion of that average rather than of the series itself - #145.
-        var myList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length).CustomValuesList;
+        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index themselves.
+        var myList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -601,8 +782,7 @@ public static partial class Calculations
         }
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
-        stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList; ;
+        var mxList = GetStandardDeviationList(xList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = myList[i];
@@ -660,7 +840,12 @@ public static partial class Calculations
             var prevS = i >= 1 ? sList[i - 1] : currentValue;
             var prevSEma = GetLastOrDefault(sEmaList);
             var sEma = CalculateEMA(prevS, prevSEma, halfLength);
-            sEmaList.Add(prevSEma);
+
+            // Record the value just computed, not the one it was computed from. Adding prevSEma left
+            // the list pinned at its initial zero, so every sEma was taken against zero rather than
+            // against a running average, and the estimate diverged - 2024 and climbing on a market
+            // priced at 100.
+            sEmaList.Add(sEma);
 
             var s = (a * currentValue) + prevS - (a * sEma);
             sList.Add(s);
@@ -1256,7 +1441,7 @@ public static partial class Calculations
         RollingSum diffSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevSrcList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevSrcList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var smaSrcList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1266,7 +1451,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1326,9 +1511,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var kamaList = CalculateKaufmanAdaptiveCorrelationOscillator(stockData, maType, length);
-        var indexStList = kamaList.OutputValues["IndexSt"];
-        var srcStList = kamaList.OutputValues["SrcSt"];
-        var rList = kamaList.OutputValues["Kaco"];
+        var indexStList = kamaList.ChainedOutputs["IndexSt"];
+        var srcStList = kamaList.ChainedOutputs["SrcSt"];
+        var rList = kamaList.ChainedOutputs["Kaco"];
         var srcMaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1426,54 +1611,30 @@ public static partial class Calculations
         List<double> interceptList = new(stockData.Count);
         List<double> predictedTomorrowList = new(stockData.Count);
         List<double> predictedTodayList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> xyList = new(stockData.Count);
-        List<double> x2List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum xSumWindow = new();
-        RollingSum ySumWindow = new();
-        RollingSum xySumWindow = new();
-        RollingSum x2SumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        // The line through the trailing window, x counted from its first bar and fitted through the bars there
+        // are until it fills; see RollingLeastSquares.
+        using var regression = new RollingLeastSquares(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = GetLastOrDefault(yList);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            yList.Add(currentValue);
-            ySumWindow.Add(currentValue);
 
-            double x = i;
-            xList.Add(x);
-            xSumWindow.Add(x);
-
-            var x2 = x * x;
-            x2List.Add(x2);
-            x2SumWindow.Add(x2);
-
-            var xy = x * currentValue;
-            xyList.Add(xy);
-            xySumWindow.Add(xy);
-
-            var sumX = xSumWindow.Sum(length);
-            var sumY = ySumWindow.Sum(length);
-            var sumXY = xySumWindow.Sum(length);
-            var sumX2 = x2SumWindow.Sum(length);
-            var top = (length * sumXY) - (sumX * sumY);
-            var bottom = (length * sumX2) - Pow(sumX, 2);
-
-            var b = bottom != 0 ? top / bottom : 0;
+            var fit = regression.Next(currentValue, isFinal: true);
+            var b = fit.Slope;
             slopeList.Add(b);
 
-            var a = length != 0 ? (sumY - (b * sumX)) / length : 0;
+            // The intercept is still reported at bar 0 of the series, as it always was.
+            var a = fit.Intercept - (b * (i - fit.Count + 1));
             interceptList.Add(a);
 
-            var predictedToday = a + (b * x);
+            var predictedToday = fit.Last;
             predictedTodayList.Add(predictedToday);
 
             var prevPredictedNextDay = GetLastOrDefault(predictedTomorrowList);
-            var predictedNextDay = a + (b * (x + 1));
+            var predictedNextDay = fit.Next;
             predictedTomorrowList.Add(predictedNextDay);
 
             var signal = GetCompareSignal(currentValue - predictedNextDay, prevValue - prevPredictedNextDay, true);
@@ -1681,7 +1842,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(absOsList);
-        var pList = CalculateLinearRegression(stockData, smoothLength).CustomValuesList;
+        var pList = CalculateLinearRegression(stockData, smoothLength).ChainedValues;
         var (highestList, _) = GetMaxAndMinValuesList(pList, length);
         for (var i = 0; i < stockData.Count; i++)
         {

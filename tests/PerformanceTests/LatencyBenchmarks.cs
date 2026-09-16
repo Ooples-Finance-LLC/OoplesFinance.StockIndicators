@@ -11,6 +11,7 @@ using Xunit.Abstractions;
 /// These tests verify that operations meet latency requirements.
 /// </summary>
 [Trait("Category", "Performance")]
+[Collection(PerformanceCollection.Name)]
 public class LatencyBenchmarks
 {
     private readonly ITestOutputHelper _output;
@@ -294,6 +295,7 @@ public class LatencyBenchmarks
 /// Throughput benchmarks for high-frequency operations.
 /// </summary>
 [Trait("Category", "Performance")]
+[Collection(PerformanceCollection.Name)]
 public class ThroughputBenchmarks
 {
     private readonly ITestOutputHelper _output;
@@ -385,6 +387,7 @@ public class ThroughputBenchmarks
 /// Memory allocation benchmarks.
 /// </summary>
 [Trait("Category", "Performance")]
+[Collection(PerformanceCollection.Name)]
 public class MemoryBenchmarks
 {
     private readonly ITestOutputHelper _output;

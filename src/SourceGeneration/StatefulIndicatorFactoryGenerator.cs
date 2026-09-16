@@ -91,7 +91,11 @@ public class StatefulIndicatorFactoryGenerator : IIncrementalGenerator
         foreach (var syntaxRef in nameProperty.DeclaringSyntaxReferences)
         {
             var propSyntax = syntaxRef.GetSyntax() as PropertyDeclarationSyntax;
-            if (propSyntax?.ExpressionBody?.Expression is MemberAccessExpressionSyntax memberAccess)
+            // Only a literal IndicatorName.X names a fixed indicator. Any other member access - a
+            // wrapper forwarding _inner.Name, for instance - is not an indicator of its own, and
+            // reading its member name as one generated a factory entry for IndicatorName.Name.
+            if (propSyntax?.ExpressionBody?.Expression is MemberAccessExpressionSyntax memberAccess
+                && memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "IndicatorName" })
             {
                 indicatorName = memberAccess.Name.Identifier.Text;
                 break;

@@ -40,7 +40,7 @@ public static partial class Calculations
 
         var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
         stockData.SetCustomValues(retList);
-        var ulcerIndexList = CalculateUlcerIndex(stockData, length).CustomValuesList;
+        var ulcerIndexList = CalculateUlcerIndex(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ulcerIndex = ulcerIndexList[i];

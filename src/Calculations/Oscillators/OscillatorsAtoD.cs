@@ -5,6 +5,119 @@ namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
 {
+    /// <summary>
+    /// Calculates the Aroon Up.
+    /// </summary>
+    /// <remarks>
+    /// How recently the window's highest high occurred, as a percentage: a hundred on the bar that sets a new
+    /// high, falling towards zero as that high recedes. The window looks back <paramref name="length"/> bars
+    /// from the current one, and where the high is equalled more than once the most recent occurrence counts,
+    /// since it is the freshness of the high the reading is about.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAroonUp(this StockData stockData, int length = 25)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, _, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> aroonUpList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double aroonUp = 0;
+            if (i >= length)
+            {
+                var highestIndex = i;
+                var highestValue = double.MinValue;
+                for (var j = i - length; j <= i; j++)
+                {
+                    if (highList[j] >= highestValue)
+                    {
+                        highestValue = highList[j];
+                        highestIndex = j;
+                    }
+                }
+
+                aroonUp = 100.0 * (length - (i - highestIndex)) / length;
+            }
+
+            aroonUpList.Add(aroonUp);
+
+            var prevAroonUp = i >= 1 ? aroonUpList[i - 1] : 0;
+            var signal = GetCompareSignal(aroonUp - prevAroonUp, 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "AroonUp", aroonUpList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(aroonUpList);
+        stockData.IndicatorName = IndicatorName.AroonUp;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Aroon Down.
+    /// </summary>
+    /// <remarks>
+    /// How recently the window's lowest low occurred, as a percentage, and the mirror of
+    /// <see cref="CalculateAroonUp"/>: a hundred on the bar that sets a new low, falling towards zero as that
+    /// low recedes. Where the low is equalled more than once the most recent occurrence counts.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAroonDown(this StockData stockData, int length = 25)
+    {
+        length = Math.Max(length, 1);
+        var (_, _, lowList, _, _) = GetInputValuesList(stockData);
+        var count = lowList.Count;
+        List<double> aroonDownList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double aroonDown = 0;
+            if (i >= length)
+            {
+                var lowestIndex = i;
+                var lowestValue = double.MaxValue;
+                for (var j = i - length; j <= i; j++)
+                {
+                    if (lowList[j] <= lowestValue)
+                    {
+                        lowestValue = lowList[j];
+                        lowestIndex = j;
+                    }
+                }
+
+                aroonDown = 100.0 * (length - (i - lowestIndex)) / length;
+            }
+
+            aroonDownList.Add(aroonDown);
+
+            var prevAroonDown = i >= 1 ? aroonDownList[i - 1] : 0;
+            var signal = GetCompareSignal(aroonDown - prevAroonDown, 0);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "AroonDown", aroonDownList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(aroonDownList);
+        stockData.IndicatorName = IndicatorName.AroonDown;
+
+        return stockData;
+    }
+
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAbsoluteStrengthIndex(this StockData stockData, int length = 10, int maLength = 21, int signalLength = 34)
     {
@@ -76,9 +189,11 @@ public static partial class Calculations
     /// <param name="stockData">The stock data.</param>
     /// <param name="maType">Type of the ma.</param>
     /// <param name="length">The length.</param>
+    /// <param name="limitMove">The market's limit move, Wilder's T; 0 uses each bar's range instead.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateAccumulativeSwingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
+    public static StockData CalculateAccumulativeSwingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
+        double limitMove = 0)
     {
         List<double> accumulativeSwingIndexList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -86,26 +201,11 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentClose = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevOpen = i >= 1 ? openList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevHighCurrentClose = prevHigh - currentClose;
-            var prevLowCurrentClose = prevLow - currentClose;
-            var prevClosePrevOpen = prevClose - prevOpen;
-            var currentHighPrevClose = currentHigh - prevClose;
-            var currentLowPrevClose = currentLow - prevClose;
-            var t = currentHigh - currentLow;
-            var k = Math.Max(Math.Abs(prevHighCurrentClose), Math.Abs(prevLowCurrentClose));
-            var r = currentHighPrevClose > Math.Max(currentLowPrevClose, t) ? currentHighPrevClose - (0.5 * currentLowPrevClose) + (0.25 * prevClosePrevOpen) :
-                currentLowPrevClose > Math.Max(currentHighPrevClose, t) ? currentLowPrevClose - (0.5 * currentHighPrevClose) + (0.25 * prevClosePrevOpen) :
-                t > Math.Max(currentHighPrevClose, currentLowPrevClose) ? t + (0.25 * prevClosePrevOpen) : 0;
-            var swingIndex = r != 0 && t != 0 ? 50 * ((prevClose - currentClose + (0.5 * prevClosePrevOpen) +
-                                                       (0.25 * (currentClose - currentOpen))) / r) * (k / t) : 0;
+            // Wilder's swing index needs yesterday's bar; the first bar has none. The numerator ran backwards (the
+            // previous close less today's) and K and R took signed moves where Wilder takes their sizes.
+            var swingIndex = i >= 1
+                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1], inputList[i - 1], limitMove)
+                : 0;
 
             var prevSwingIndex = GetLastOrDefault(accumulativeSwingIndexList);
             var accumulativeSwingIndex = prevSwingIndex + swingIndex;
@@ -158,7 +258,7 @@ public static partial class Calculations
         var mep = (double)2 / (smoothLength + 1);
         double ce = (stochLength + smoothLength) * 2;
 
-        var stochList = CalculateStochasticOscillator(stockData, maType, length: stochLength).CustomValuesList;
+        var stochList = CalculateStochasticOscillator(stockData, maType, length: stochLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -324,8 +424,8 @@ public static partial class Calculations
         var probBbBasisDownSumWindow = new RollingSum();
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBbList = bbList.OutputValues["UpperBand"];
-        var basisList = bbList.OutputValues["MiddleBand"];
+        var upperBbList = bbList.ChainedOutputs["UpperBand"];
+        var basisList = bbList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -597,21 +697,19 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateChartmillValueIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
-        InputName inputName = InputName.MedianPrice, int length = 5)
+    public static StockData CalculateChartmillValueIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
     {
         List<double> cmvCList = new(stockData.Count);
         List<double> cmvOList = new(stockData.Count);
         List<double> cmvHList = new(stockData.Count);
         List<double> cmvLList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         var fList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -679,8 +777,36 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
 
             var prevValue = GetLastOrDefault(valueList);
-            var value = currentLow >= prevHigh ? prevValue + increment : currentHigh <= prevLow ? prevValue - increment : prevValue;
-            valueList.Add(value);
+            valueList.Add(prevValue + GapStep(i >= 1, currentHigh, currentLow, prevHigh, prevLow, increment));
+        }
+
+        // Strict comparisons: a gap means this bar's low is above the previous high, not level with
+        // it. With >= and <=, a market that never moved counted a gap up on every bar - the low
+        // equals the previous high - and the accumulator simply returned the bar number.
+        // The first bar has no predecessor and therefore cannot gap. prevHigh and prevLow are the 0
+        // sentinel there, so currentLow > prevHigh is true for any positively priced instrument: bar
+        // 0 was counted as a gap up, and every later value carried that extra increment. The strict
+        // comparisons here were already corrected once for a market that never moves; the first-bar
+        // case is the same class of defect at the other end of the series.
+        static double GapStep(bool hasPrevious, double currentHigh, double currentLow, double prevHigh,
+            double prevLow, double increment)
+        {
+            if (!hasPrevious)
+            {
+                return 0;
+            }
+
+            if (currentLow > prevHigh)
+            {
+                return increment;
+            }
+
+            if (currentHigh < prevLow)
+            {
+                return -increment;
+            }
+
+            return 0;
         }
 
         var valueEmaList = GetMovingAverageList(stockData, maType, length, valueList);
@@ -754,17 +880,15 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateChopZone(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
-        InputName inputName = InputName.TypicalPrice, int length1 = 30, int length2 = 34)
+    public static StockData CalculateChopZone(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 34)
     {
         List<double> emaAngleList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var emaList = GetMovingAverageList(stockData, maType, length2, closeList);
@@ -897,12 +1021,10 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateConfluenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
-        InputName inputName = InputName.FullTypicalPrice, int length = 10)
+    public static StockData CalculateConfluenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
         List<double> value5List = new(stockData.Count);
         List<double> value6List = new(stockData.Count);
@@ -913,7 +1035,7 @@ public static partial class Calculations
         List<double> value70List = new(stockData.Count);
         List<double> confluenceList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, closeList, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, closeList, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
         var errSumWindow = new RollingSum();
         var value70SumWindow = new RollingSum();
 
@@ -1085,8 +1207,8 @@ public static partial class Calculations
         List<double> rocTotalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roc11List = CalculateRateOfChange(stockData, fastLength).CustomValuesList;
-        var roc14List = CalculateRateOfChange(stockData, slowLength).CustomValuesList;
+        var roc11List = CalculateRateOfChange(stockData, fastLength).ChainedValues;
+        var roc14List = CalculateRateOfChange(stockData, slowLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1138,8 +1260,8 @@ public static partial class Calculations
         List<double> bearSlopeList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).CustomValuesList;
-        var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).CustomValuesList;
+        var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).ChainedValues;
+        var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).ChainedValues;
         var rsiSmaList = GetMovingAverageList(stockData, maType, smoothLength, rsi2List);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1198,6 +1320,7 @@ public static partial class Calculations
     public static StockData CalculateCommoditySelectionIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14, double pointValue = 50, double margin = 3000, double commission = 10)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> csiList = new(stockData.Count);
         List<double> csiSmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -1205,11 +1328,11 @@ public static partial class Calculations
 
         var k = 100 * (pointValue / Sqrt(margin) / (150 + commission));
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         // Clear state to prevent pollution of CalculateAverageDirectionalIndex inputs
-        stockData.SetCustomValues(new List<double>());
+        stockData.RestoreInputSeries(callerSeries);
         stockData.SetSignals(null);
-        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).CustomValuesList;
+        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1420,7 +1543,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var s1SumWindow = new RollingSum();
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
         var rsiEma1List = GetMovingAverageList(stockData, maType, length3, rsiList);
         var rsiEma2List = GetMovingAverageList(stockData, maType, length4, rsiEma1List);
 
@@ -1841,7 +1964,7 @@ public static partial class Calculations
             var currentLow = lowList[i];
             tempLowList.Add(currentLow);
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             var maxIndex = tempHighList.LastIndexOf(highestHigh);
             var minIndex = tempLowList.LastIndexOf(lowestLow);
             var dnRun = i - maxIndex;

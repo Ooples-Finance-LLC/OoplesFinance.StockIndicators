@@ -6,6 +6,67 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the True Range Adjusted Exponential Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// An exponential average whose smoothing is loosened on the bars that moved and tightened on the bars
+    /// that did not: each bar's true range against its own average sets the weight, up to a cap of twice the
+    /// ordinary one, so the average follows a real move quickly and ignores a quiet bar. The first bar starts
+    /// at its own price.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="mult"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateTrueRangeAdjustedExponentialMovingAverage(this StockData stockData, int length = 14, double mult = 1.5)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> tremaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trueRange = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
+            var highLow = highList[i] - lowList[i];
+            var highClose = Math.Abs(highList[i] - prevValue);
+            var lowClose = Math.Abs(lowList[i] - prevValue);
+            trueRange[i] = Math.Max(highLow, Math.Max(highClose, lowClose));
+        }
+
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.ExponentialMovingAverage(trueRange, atrBuffer.Span, length);
+
+        var baseAlpha = 2.0 / (length + 1);
+        double trema = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var averageTrueRange = atrBuffer.Span[i];
+            var ratio = averageTrueRange != 0 ? trueRange[i] / averageTrueRange : 1;
+            var adjustedAlpha = baseAlpha * Math.Min(ratio * mult, 2);
+            trema = i == 0 ? inputList[i] : trema + (adjustedAlpha * (inputList[i] - trema));
+            tremaList.Add(trema);
+
+            var prevTrema1 = i >= 1 ? tremaList[i - 1] : 0;
+            var prevTrema2 = i >= 2 ? tremaList[i - 2] : 0;
+            var signal = GetCompareSignal(trema - prevTrema1, prevTrema1 - prevTrema2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Trema", tremaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(tremaList);
+        stockData.IndicatorName = IndicatorName.TrueRangeAdjustedExponentialMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the triangular moving average.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -197,10 +258,9 @@ public static partial class Calculations
     /// Calculates the volume weighted average price.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData, InputName inputName = InputName.TypicalPrice)
+    public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData)
     {
         List<double> vwapList = new(stockData.Count);
         List<double> tempVolList = new(stockData.Count);
@@ -208,7 +268,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         double tempVolSum = 0;
         double tempVolPriceSum = 0;
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -317,8 +377,12 @@ public static partial class Calculations
         RollingSum negMoneyFlowSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).OutputValues["Length"];
-        var tpList = CalculateTypicalPrice(stockData).CustomValuesList;
+        var callerSeries = stockData.CaptureInputSeries();
+        var lenList = CalculateVariableLengthMovingAverage(stockData, maType, minLength, maxLength).ChainedOutputs["Length"];
+        // The typical price of the bars. The variable-length average publishes itself onto CustomValuesList,
+        // and the typical price used to take it for the close.
+        stockData.RestoreInputSeries(callerSeries);
+        var tpList = CalculateTypicalPrice(stockData).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -392,9 +456,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, maxLength, inputList);
-        // Measured on inputList, not on whatever the moving average above left behind. Taken from
-        // stockData this was the dispersion of that average rather than of the series itself - #145.
-        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, maxLength).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, maxLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -838,7 +900,7 @@ public static partial class Calculations
 
         var alpha = (double)2 / (length + 1);
 
-        var cmoList = CalculateChandeMomentumOscillator(stockData, maType, length: length).CustomValuesList;
+        var cmoList = CalculateChandeMomentumOscillator(stockData, maType, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1028,7 +1090,7 @@ public static partial class Calculations
 
         var s = MinOrMax((int)Math.Ceiling(Sqrt(length)));
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1198,7 +1260,9 @@ public static partial class Calculations
             var vI = d1 != 0 ? (iS - llv) / d1 : 0;
 
             var prevVma = GetLastOrDefault(vmaList);
-            var vma = ((1 - k) * vI * prevVma) + (k * vI * currentValue);
+            // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. This was
+            // (1 - k) * vI * prevVma, which scaled the whole average by vI and pulled it towards zero.
+            var vma = ((1 - (k * vI)) * prevVma) + (k * vI * currentValue);
             vmaList.Add(vma);
 
             var signal = GetCompareSignal(currentValue - vma, prevValue - prevVma);
@@ -1236,9 +1300,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, lbLength, inputList);
-        // Measured on inputList, not on whatever the moving average above left behind. Taken from
-        // stockData this was the dispersion of that average rather than of the series itself - #145.
-        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, lbLength).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, lbLength).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1371,8 +1433,11 @@ public static partial class Calculations
         double chgSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var callerSeries = stockData.CaptureInputSeries();
+        var efRatioList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
+        // The first deviation is of the prices, not of the KAMA just published onto CustomValuesList.
+        stockData.RestoreInputSeries(callerSeries);
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1399,7 +1464,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(bList);
-        var bStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var bStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         var bSmaList = GetMovingAverageList(stockData, maType, length, bList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1450,7 +1515,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

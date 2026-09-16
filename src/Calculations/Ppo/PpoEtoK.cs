@@ -7,13 +7,12 @@ public static partial class Calculations
     /// Calculates the Impulse Percentage Price Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length"></param>
     /// <param name="signalLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateImpulsePercentagePriceOscillator(this StockData stockData, InputName inputName = InputName.TypicalPrice,
+    public static StockData CalculateImpulsePercentagePriceOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
     {
         List<double> ppoList = new(stockData.Count);
@@ -21,7 +20,7 @@ public static partial class Calculations
         List<double> ppoHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum ppoSum = new();
-        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         var typicalPriceZeroLagEmaList = GetMovingAverageList(stockData, MovingAvgType.ZeroLagExponentialMovingAverage, length, inputList);
         var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);

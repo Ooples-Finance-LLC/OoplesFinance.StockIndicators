@@ -51,7 +51,6 @@ public sealed class StreamingOptions
     public StreamingProcessingMode? ProcessingMode { get; set; }
     public StreamingBackpressurePolicy? BackpressurePolicy { get; set; }        
     public int? MaxPendingMessages { get; set; }
-    public InputName? InputName { get; set; }
     public bool? IncludeOutputValues { get; set; }
     public IndicatorOptions? IndicatorOptions { get; set; }
     public IReadOnlyList<StreamingIndicatorRegistration>? Indicators { get; set; }
@@ -86,7 +85,6 @@ public sealed class StreamingOptions
         {
             IncludeUpdates = policy == StreamingUpdatePolicy.IncludeUpdates,
             IncludeOutputValues = IncludeOutputValues ?? true,
-            InputName = InputName ?? global::OoplesFinance.StockIndicators.Enums.InputName.Close,
             Options = IndicatorOptions
         };
     }

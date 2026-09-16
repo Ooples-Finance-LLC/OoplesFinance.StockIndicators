@@ -95,6 +95,24 @@ public sealed class V2IndicatorEdgeCaseTests
     }
 
     /// <summary>
+    /// Indicators the streaming engine cannot have a state for, rather than merely lacking one.
+    /// </summary>
+    /// <remarks>
+    /// These sweeps build a streaming state for every indicator they enumerate, so an indicator that cannot
+    /// have one has to be named here. It is deliberately not the <see cref="ExcludedMethods"/> list, which
+    /// holds utility methods and multi-series indicators: an indicator named here is a real indicator that
+    /// the batch engine computes.
+    ///
+    /// The zig zag knows a turning point only once the price has moved far enough past it, and recognising
+    /// one rewrites every bar back to the turning point before it. A streaming engine has already published
+    /// those bars and cannot take them back, so there is no state to build and none is expected.
+    /// </remarks>
+    private static readonly HashSet<string> NoStreamingState = new(StringComparer.Ordinal)
+    {
+        "ZigZag"
+    };
+
+    /// <summary>
     /// Gets all indicator catalog methods using reflection.
     /// </summary>
     private static IEnumerable<MethodInfo> GetIndicatorMethods()
@@ -102,7 +120,8 @@ public sealed class V2IndicatorEdgeCaseTests
         return typeof(IndicatorCatalog)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
             .Where(m => m.ReturnType == typeof(SeriesHandle) &&
-                        !ExcludedMethods.Contains(m.Name));
+                        !ExcludedMethods.Contains(m.Name) &&
+                        !NoStreamingState.Contains(m.Name));
     }
 
     /// <summary>

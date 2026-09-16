@@ -21,8 +21,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var stochList = CalculateStochasticOscillator(stockData, maType, length: length1, smoothLength1: length1, smoothLength2: length2);
-        var stochSmaList = stochList.OutputValues["FastD"];
-        var smaValList = stochList.OutputValues["SlowD"];
+        var stochSmaList = stochList.ChainedOutputs["FastD"];
+        var smaValList = stochList.ChainedOutputs["SlowD"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -136,8 +136,8 @@ public static partial class Calculations
 
         if (stockData.Count == marketDataClass.InputValues.Count)
         {
-            var pmoList = CalculatePriceMomentumOscillator(stockData, maType, length1, length2, signalLength).CustomValuesList;
-            var spPmoList = CalculatePriceMomentumOscillator(marketDataClass, maType, length1, length2, signalLength).CustomValuesList;
+            var pmoList = CalculatePriceMomentumOscillator(stockData, maType, length1, length2, signalLength).ChainedValues;
+            var spPmoList = CalculatePriceMomentumOscillator(marketDataClass, maType, length1, length2, signalLength).ChainedValues;
 
             for (var i = 0; i < stockData.Count; i++)
             {
@@ -254,7 +254,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var standardDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
+        var standardDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
         var stdDeviationSmaList = GetMovingAverageList(stockData, maType, length2, standardDeviationList);
 
         for (var i = 0; i < stockData.Count; i++)

@@ -78,8 +78,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var trimeanList = CalculateTrimean(stockData, length);
-        var q1List = trimeanList.OutputValues["Q1"];
-        var q3List = trimeanList.OutputValues["Q3"];
+        var q1List = trimeanList.ChainedOutputs["Q1"];
+        var q3List = trimeanList.ChainedOutputs["Q3"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -296,13 +296,12 @@ public static partial class Calculations
         var scl_2 = MinOrMax((int)Math.Ceiling((double)scl / 2));
         var mcl_2 = MinOrMax((int)Math.Ceiling((double)mcl / 2));
 
-        // Both true ranges are of price. CalculateAverageTrueRange publishes its result onto
-        // stockData.CustomValuesList, so the second call measured the first one's ATR as its close
-        // series - which is why the fast bands agreed with the streaming state and the slow ones did
-        // not. Issue #145, and the first half of #167.
-        var atrSource = IndicatorSource.Resolve(stockData);
-        var sclAtrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, scl);
-        var mclAtrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, mcl);
+        var callerSeries = stockData.CaptureInputSeries();
+        var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).ChainedValues;
+        // Both channels are ATRs of the prices. The first ATR publishes itself onto CustomValuesList, and the
+        // second used to take it for the close - a true range measured against an ATR.
+        stockData.RestoreInputSeries(callerSeries);
+        var mclAtrList = CalculateAverageTrueRange(stockData, maType, mcl).ChainedValues;
         var sclRmaList = GetMovingAverageList(stockData, maType, scl, inputList);
         var mclRmaList = GetMovingAverageList(stockData, maType, mcl, inputList);
 
@@ -487,7 +486,7 @@ public static partial class Calculations
 
         var wmaList = GetMovingAverageList(stockData, maType, length, absD1List);
         stockData.SetCustomValues(d1List);
-        var s1List = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var s1List = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema = emaList[i];
@@ -500,7 +499,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(d2List);
-        var s2List = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var s2List = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema = emaList[i];
@@ -563,7 +562,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -636,7 +635,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length2).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -698,7 +697,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -755,6 +754,7 @@ public static partial class Calculations
         int length1 = 20, int length2 = 10, double multFactor = 2,
         MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> upperChannelList = new(stockData.Count);
         List<double> lowerChannelList = new(stockData.Count);
         List<double> midChannelList = new(stockData.Count);
@@ -767,8 +767,8 @@ public static partial class Calculations
         // MOVING AVERAGE rather than to the previous close - on AAPL that inflated ATR(10) from 3.9553 to
         // 9.7261 and pushed the upper band from 143.74 to 155.28. The ATR is computed here, before any
         // moving average touches stockData.
-        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
+        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
@@ -875,7 +875,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -886,9 +886,9 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(val2List);
-        var stdDevFastList = CalculateStandardDeviationVolatility(stockData, length: fastLength).CustomValuesList;
+        var stdDevFastList = CalculateStandardDeviationVolatility(stockData, length: fastLength).ChainedValues;
         stockData.SetCustomValues(val2List);
-        var stdDevSlowList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        var stdDevSlowList = CalculateStandardDeviationVolatility(stockData, length: slowLength).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

@@ -6,6 +6,293 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Average Day Range.
+    /// </summary>
+    /// <remarks>
+    /// The simple average of the last <paramref name="length"/> daily ranges, each the bar's high less its low.
+    /// It publishes zero until the window fills, as the simple moving average it is built on does.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAverageDayRange(this StockData stockData, int length = 14)
+    {
+        length = Math.Max(length, 1);
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> adrList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        double sum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            sum += highList[i] - lowList[i];
+            if (i >= length)
+            {
+                sum -= highList[i - length] - lowList[i - length];
+            }
+
+            var adr = i >= length - 1 ? sum / length : 0;
+            adrList.Add(adr);
+
+            var prevAdr1 = i >= 1 ? adrList[i - 1] : 0;
+            var prevAdr2 = i >= 2 ? adrList[i - 2] : 0;
+            var signal = GetCompareSignal(adr - prevAdr1, prevAdr1 - prevAdr2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Adr", adrList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(adrList);
+        stockData.IndicatorName = IndicatorName.AverageDayRange;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Coefficient of Variation.
+    /// </summary>
+    /// <remarks>
+    /// The window's standard deviation as a percentage of its own mean, which is how a spread is compared
+    /// between series of different size. A window whose mean is zero has no such percentage, and publishes
+    /// zero, as does a window shorter than <paramref name="length"/>.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCoefficientOfVariation(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> cvList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double cv = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += inputList[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = inputList[j] - mean;
+                    variance += diff * diff;
+                }
+
+                var stdDev = Sqrt(variance / length);
+                cv = mean != 0 ? stdDev / mean * 100 : 0;
+            }
+
+            cvList.Add(cv);
+
+            var prevCv1 = i >= 1 ? cvList[i - 1] : 0;
+            var prevCv2 = i >= 2 ? cvList[i - 2] : 0;
+            var signal = GetCompareSignal(cv - prevCv1, prevCv1 - prevCv2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Cv", cvList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(cvList);
+        stockData.IndicatorName = IndicatorName.CoefficientOfVariation;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Downside Deviation.
+    /// </summary>
+    /// <remarks>
+    /// The deviation of only those returns that fell short of <paramref name="targetReturn"/>, which is what
+    /// a downside measure such as the Sortino ratio divides by: returns above the target are not risk. The
+    /// root mean square is taken over the shortfalls themselves, not over the whole window, so a window with
+    /// no shortfall in it publishes zero rather than a small number.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="targetReturn"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateDownsideDeviation(this StockData stockData, int length = 20, double targetReturn = 0)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> ddList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double downsideDeviation = 0;
+            if (i >= length)
+            {
+                double sumSquaredDownside = 0;
+                var shortfalls = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var prevValue = inputList[j - 1];
+                    var ret = prevValue > 0 ? (inputList[j] - prevValue) / prevValue : 0;
+                    if (ret < targetReturn)
+                    {
+                        var shortfall = ret - targetReturn;
+                        sumSquaredDownside += shortfall * shortfall;
+                        shortfalls++;
+                    }
+                }
+
+                downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
+            }
+
+            ddList.Add(downsideDeviation);
+
+            var prevDd1 = i >= 1 ? ddList[i - 1] : 0;
+            var prevDd2 = i >= 2 ? ddList[i - 2] : 0;
+            var signal = GetCompareSignal(downsideDeviation - prevDd1, prevDd1 - prevDd2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Dd", ddList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(ddList);
+        stockData.IndicatorName = IndicatorName.DownsideDeviation;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Close to Close Volatility.
+    /// </summary>
+    /// <remarks>
+    /// The annualised deviation of the series' logarithmic returns: the plainest volatility estimate there
+    /// is, using only the close of each bar and none of its range. Annualised by the root of 252, the usual
+    /// count of trading days in a year, so the reading is comparable with a quoted annual volatility. A
+    /// window shorter than <paramref name="length"/> publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateCloseToCloseVolatility(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> volatilityList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+        var annualisationFactor = Sqrt(252);
+
+        var returns = new double[count];
+        for (var i = 1; i < count; i++)
+        {
+            var prevValue = inputList[i - 1];
+            returns[i] = prevValue != 0 ? Log(inputList[i] / prevValue) : 0;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            double volatility = 0;
+            if (i >= length - 1)
+            {
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += returns[j];
+                }
+
+                var mean = sum / length;
+                double variance = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    var diff = returns[j] - mean;
+                    variance += diff * diff;
+                }
+
+                volatility = Sqrt(variance / length) * annualisationFactor;
+            }
+
+            volatilityList.Add(volatility);
+
+            var prevVolatility1 = i >= 1 ? volatilityList[i - 1] : 0;
+            var prevVolatility2 = i >= 2 ? volatilityList[i - 2] : 0;
+            var signal = GetCompareSignal(volatility - prevVolatility1, prevVolatility1 - prevVolatility2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Ctcv", volatilityList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(volatilityList);
+        stockData.IndicatorName = IndicatorName.CloseToCloseVolatility;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Atr Channel Width.
+    /// </summary>
+    /// <remarks>
+    /// How wide a channel drawn a multiple of the average true range either side of the price would be: twice
+    /// the multiple, times the range. It is the width alone, so it says how much room the channel gives
+    /// without saying where the channel sits. The average is the one
+    /// <see cref="CalculateAverageTrueRange"/> takes, so the two agree bar for bar.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="multiplier"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateAtrChannelWidth(this StockData stockData, int length = 14, double multiplier = 2)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> widthList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var width = 2 * multiplier * atrBuffer.Span[i];
+            widthList.Add(width);
+
+            var prevWidth1 = i >= 1 ? widthList[i - 1] : 0;
+            var prevWidth2 = i >= 2 ? widthList[i - 2] : 0;
+            var signal = GetCompareSignal(width - prevWidth1, prevWidth1 - prevWidth2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Acw", widthList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(widthList);
+        stockData.IndicatorName = IndicatorName.AtrChannelWidth;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the choppiness index.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -38,7 +325,7 @@ public static partial class Calculations
             var lowestLow = lowestLowList[i];
             var range = highestHigh - lowestLow;
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             trList.Add(tr);
             trSumWindow.Add(tr);
 

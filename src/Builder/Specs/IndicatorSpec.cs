@@ -10,6 +10,9 @@ public interface IIndicatorSpecOptions { }
 /// <summary>
 /// Specification for an indicator computation.
 /// </summary>
+// Some options below are obsolete because their batch indicator has nothing they could set; their own
+// constructors still assign them until they are removed.
+#pragma warning disable CS0618
 public sealed class IndicatorSpec
 {
     /// <summary>
@@ -1212,6 +1215,7 @@ public sealed class TrueRangeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: TrueRange has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -1589,6 +1593,7 @@ public sealed class ParabolicSarSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ParabolicSAR has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -1818,6 +1823,7 @@ public sealed class SpecialKSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: PringSpecialK has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -1938,6 +1944,7 @@ public sealed class VwapSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: VolumeWeightedAveragePrice has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2054,6 +2061,7 @@ public sealed class TypicalPriceSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: TypicalPrice has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2067,6 +2075,7 @@ public sealed class MedianPriceSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: MedianPrice has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2080,6 +2089,7 @@ public sealed class WeightedCloseSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: WeightedClose has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2093,6 +2103,7 @@ public sealed class AveragePriceSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: AveragePrice has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2257,6 +2268,7 @@ public sealed class FractalChaosOscillatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: FractalChaosOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2296,6 +2308,7 @@ public sealed class DynamicMomentumIndexSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: DynamicMomentumIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -2460,6 +2473,7 @@ public sealed class NetVolumeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: NetVolume has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2652,6 +2666,7 @@ public sealed class TrendDetectionSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: TrendDetectionIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2713,6 +2728,7 @@ public sealed class ZigZagSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ZigZag takes a deviation percentage and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2726,6 +2742,7 @@ public sealed class PivotPointSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: FloorPivotPoints has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2739,6 +2756,7 @@ public sealed class RangeSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: Range has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2798,6 +2816,7 @@ public sealed class DemandIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DemandIndex reads one bar at a time and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2890,6 +2909,7 @@ public sealed class WilliamsADSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: WilliamsAccumulationDistribution has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2903,6 +2923,7 @@ public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: CumulativeVolumeIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -2969,7 +2990,9 @@ public sealed class ChandeCompositeMomentumIndexSpecOptions : IIndicatorSpecOpti
         LongLength = Math.Max(1, longLength);
     }
 
+    [Obsolete("Has no effect: ChandeCompositeMomentumIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int ShortLength { get; }
+    [Obsolete("Has no effect: ChandeCompositeMomentumIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int LongLength { get; }
 }
 
@@ -3091,6 +3114,7 @@ public sealed class AsymmetricalRsiSpecOptions : IIndicatorSpecOptions
     }
 
     public int UpLength { get; }
+    [Obsolete("Has no effect: AsymmetricalRelativeStrengthIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int DownLength { get; }
 }
 
@@ -3120,7 +3144,9 @@ public sealed class AdaptiveRsiSpecOptions : IIndicatorSpecOptions
         MaxLength = Math.Max(1, maxLength);
     }
 
+    [Obsolete("Has no effect: AdaptiveRelativeStrengthIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int MinLength { get; }
+    [Obsolete("Has no effect: AdaptiveRelativeStrengthIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int MaxLength { get; }
 }
 
@@ -3401,6 +3427,7 @@ public sealed class AlphaDecreasingEmaSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: AlphaDecreasingExponentialMovingAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -3565,6 +3592,7 @@ public sealed class RelativeVigorIndexSignalSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: RelativeVigorIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int SignalLength { get; }
 }
 
@@ -3655,6 +3683,7 @@ public sealed class StandardDeviationVolatilitySpecOptions : IIndicatorSpecOptio
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: StandardDeviationVolatility has no parameter this option could set. It will be removed in the next major version.")]
     public int AnnualizationFactor { get; }
     public MovingAvgType MaType { get; }
 }
@@ -3809,7 +3838,9 @@ public sealed class HlcAverageSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class DoubleSmoothedMomentaSpecOptions : IIndicatorSpecOptions
 {
-    public DoubleSmoothedMomentaSpecOptions(int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    // The batch Double Smoothed Momenta's own defaults: a lookback of 2, then EMAs of 5 and 25. The 1, 25 and 13
+    // these used to default to described a different formula, and as a lookback 1 leaves a zero range.
+    public DoubleSmoothedMomentaSpecOptions(int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)
         : this(momentumLength, firstSmooth, secondSmooth, MovingAvgType.ExponentialMovingAverage)
     {
     }
@@ -3858,6 +3889,7 @@ public sealed class MarketFacilitationIndexSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: MarketFacilitationIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4065,6 +4097,7 @@ public sealed class ChandeMomentumOscillatorAbsoluteAverageSpecOptions : IIndica
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ChandeMomentumOscillatorAbsoluteAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4078,6 +4111,7 @@ public sealed class ChandeMomentumOscillatorAverageSpecOptions : IIndicatorSpecO
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ChandeMomentumOscillatorAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4124,6 +4158,9 @@ public sealed class DTOscillatorSpecOptions : IIndicatorSpecOptions
 /// <summary>
 /// Compare Price Momentum Oscillator indicator options.
 /// </summary>
+[Obsolete("Compares a stock against a market series, so it cannot be computed from one series. Use " +
+    "IndicatorCatalog.ComparePriceMomentumOscillator, which passes both through MultiStockIndicatorOptions. " +
+    "It will be removed in the next major version.")]
 public sealed class ComparePriceMomentumOscillatorSpecOptions : IIndicatorSpecOptions
 {
     public ComparePriceMomentumOscillatorSpecOptions(int length)
@@ -4170,6 +4207,7 @@ public sealed class DemandOscillatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: DemandOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -4184,6 +4222,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexSpecOptions : IIndicatorS
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DoubleSmoothedRelativeStrengthIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4257,6 +4296,7 @@ public sealed class CCTStochRelativeStrengthIndexSpecOptions : IIndicatorSpecOpt
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: CCTStochRelativeStrengthIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4290,6 +4330,7 @@ public sealed class ChandeMomentumOscillatorAverageDisparityIndexSpecOptions : I
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: ChandeMomentumOscillatorAverageDisparityIndex has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4323,6 +4364,7 @@ public sealed class DiNapoliPercentagePriceOscillatorSpecOptions : IIndicatorSpe
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DiNapoliPercentagePriceOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4382,6 +4424,7 @@ public sealed class FastSlowRsiOscillatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: FastandSlowRelativeStrengthIndexOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4395,6 +4438,7 @@ public sealed class FastSlowStochasticOscillatorSpecOptions : IIndicatorSpecOpti
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: FastandSlowStochasticOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4626,6 +4670,7 @@ public sealed class PriceVolumeOscillatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: PriceVolumeOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -4963,6 +5008,7 @@ public sealed class PivotDetectorOscillatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: PivotDetectorOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -4997,6 +5043,7 @@ public sealed class SupportAndResistanceOscillatorSpecOptions : IIndicatorSpecOp
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: SupportAndResistanceOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5115,6 +5162,7 @@ public sealed class EhlersRecursiveMedianOscillatorSpecOptions : IIndicatorSpecO
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: EhlersRecursiveMedianOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5167,6 +5215,7 @@ public sealed class VervoortSmoothedOscillatorSpecOptions : IIndicatorSpecOption
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: VervoortSmoothedOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5271,6 +5320,7 @@ public sealed class McClellanOscillatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: McClellanOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -5343,6 +5393,7 @@ public sealed class TFSMboPercentagePriceOscillatorSpecOptions : IIndicatorSpecO
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: TFSMboPercentagePriceOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -5398,6 +5449,7 @@ public sealed class UltimateMovingAverageSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: UltimateMovingAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -5438,6 +5490,7 @@ public sealed class Spencer15PointMovingAverageSpecOptions : IIndicatorSpecOptio
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: Spencer15PointMovingAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5451,6 +5504,7 @@ public sealed class Spencer21PointMovingAverageSpecOptions : IIndicatorSpecOptio
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: Spencer21PointMovingAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -5654,6 +5708,7 @@ public sealed class IchimokuChikouSpanSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: IchimokuChikouSpan is the close itself and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6045,6 +6100,7 @@ public sealed class EhlersLeadingIndicatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: EhlersLeadingIndicator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6097,6 +6153,7 @@ public sealed class EhlersFirFilterSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: EhlersFiniteImpulseResponseFilter has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6151,6 +6208,7 @@ public sealed class DoubleExponentialSmoothingSpecOptions : IIndicatorSpecOption
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: DoubleExponentialSmoothing has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6177,6 +6235,7 @@ public sealed class BelkhayateTimingSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: BelkhayateTiming has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6229,6 +6288,7 @@ public sealed class MoveTrackerSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: MoveTracker has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6281,6 +6341,7 @@ public sealed class FullTypicalPriceSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: FullTypicalPrice has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6347,6 +6408,7 @@ public sealed class KurtosisIndicatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
+    [Obsolete("Has no effect: KurtosisIndicator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6456,6 +6518,8 @@ public sealed class KeltnerChannelWidthSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+
+    [Obsolete("Has no effect: KeltnerChannelWidth averages exponentially and has no parameter this option could set. It will be removed in the next major version.")]
     public MovingAvgType MaType { get; }
 }
 
@@ -6554,6 +6618,7 @@ public sealed class GeneralizedDoubleExponentialMovingAverageSpecOptions : IIndi
 public sealed class EhlersFiniteImpulseResponseFilterSpecOptions : IIndicatorSpecOptions
 {
     public EhlersFiniteImpulseResponseFilterSpecOptions(int length = 20) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: EhlersFiniteImpulseResponseFilter has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6722,6 +6787,7 @@ public sealed class EhlersKaufmanAdaptiveMovingAverageSpecOptions : IIndicatorSp
 public sealed class EhlersModifiedOptimumEllipticFilterSpecOptions : IIndicatorSpecOptions
 {
     public EhlersModifiedOptimumEllipticFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: EhlersModifiedOptimumEllipticFilter has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6740,6 +6806,7 @@ public sealed class EhlersNoiseEliminationTechnologySpecOptions : IIndicatorSpec
 public sealed class EhlersOptimumEllipticFilterSpecOptions : IIndicatorSpecOptions
 {
     public EhlersOptimumEllipticFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: EhlersOptimumEllipticFilter has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6759,6 +6826,7 @@ public sealed class EhlersVariableIndexDynamicAverageSpecOptions : IIndicatorSpe
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: EhlersVariableIndexDynamicAverage has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public MovingAvgType MaType { get; }
 }
@@ -6807,6 +6875,7 @@ public sealed class FisherLeastSquaresMovingAverageSpecOptions : IIndicatorSpecO
 public sealed class FollowingAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public FollowingAdaptiveMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: EhlersMotherOfAdaptiveMovingAverages has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -6870,6 +6939,7 @@ public sealed class InverseDistanceWeightedMovingAverageSpecOptions : IIndicator
 public sealed class InverseFisherTransformCoreSpecOptions : IIndicatorSpecOptions
 {
     public InverseFisherTransformCoreSpecOptions(int length) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: EhlersInverseFisherTransform has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -7299,6 +7369,7 @@ public sealed class SequentiallyFilteredMovingAverageSpecOptions : IIndicatorSpe
 public sealed class SettingLessTrendStepFilteringSpecOptions : IIndicatorSpecOptions
 {
     public SettingLessTrendStepFilteringSpecOptions(int length) { Length = Math.Max(1, length); }
+    [Obsolete("Has no effect: SettingLessTrendStepFiltering has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
 }
 
@@ -7611,7 +7682,9 @@ public sealed class KlingerSignalSpecOptions : IIndicatorSpecOptions
 public sealed class EhlersChebyshevLowPassFilterSpecOptions : IIndicatorSpecOptions
 {
     public EhlersChebyshevLowPassFilterSpecOptions(int length, double ripple = 0.5) { Length = Math.Max(1, length); Ripple = ripple; }
+    [Obsolete("Has no effect: EhlersChebyshevLowPassFilter has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
+    [Obsolete("Has no effect: EhlersChebyshevLowPassFilter has no parameter this option could set. It will be removed in the next major version.")]
     public double Ripple { get; }
 }
 
@@ -7641,6 +7714,7 @@ public sealed class EhlersMedianAverageAdaptiveFilterSpecOptions : IIndicatorSpe
 public sealed class EhlersMesaAdaptiveMovingAverageSpecOptions : IIndicatorSpecOptions
 {
     public EhlersMesaAdaptiveMovingAverageSpecOptions(int length, double fastLimit = 0.5, double slowLimit = 0.05) { Length = Math.Max(1, length); FastLimit = fastLimit; SlowLimit = slowLimit; }
+    [Obsolete("Has no effect: EhlersMotherOfAdaptiveMovingAverages has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
     public double FastLimit { get; }
     public double SlowLimit { get; }
@@ -7653,6 +7727,7 @@ public sealed class EhlersRecursiveMedianFilterSpecOptions : IIndicatorSpecOptio
 {
     public EhlersRecursiveMedianFilterSpecOptions(int length, double alpha = 0.5) { Length = Math.Max(1, length); Alpha = alpha; }
     public int Length { get; }
+    [Obsolete("Has no effect: EhlersRecursiveMedianFilter has no parameter this option could set. It will be removed in the next major version.")]
     public double Alpha { get; }
 }
 
@@ -7661,7 +7736,8 @@ public sealed class EhlersRecursiveMedianFilterSpecOptions : IIndicatorSpecOptio
 /// </summary>
 public sealed class EhlersRoofingFilterSpecOptions : IIndicatorSpecOptions
 {
-    public EhlersRoofingFilterSpecOptions(int hpLength, int lpLength = 48) { HpLength = Math.Max(1, hpLength); LpLength = Math.Max(1, lpLength); }
+    // Ehlers' roofing filter: a 48-bar high-pass, then a 10-bar super smoother, as the batch indicator's defaults.
+    public EhlersRoofingFilterSpecOptions(int hpLength = 48, int lpLength = 10) { HpLength = Math.Max(1, hpLength); LpLength = Math.Max(1, lpLength); }
     public int HpLength { get; }
     public int LpLength { get; }
 }
@@ -7686,6 +7762,7 @@ public sealed class EhlersDeviationScaledSuperSmootherSpecOptions : IIndicatorSp
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: EhlersDeviationScaledSuperSmoother has no parameter this option could set. It will be removed in the next major version.")]
     public int Poles { get; }
     public MovingAvgType MaType { get; }
 }
@@ -8264,6 +8341,7 @@ public sealed class TurboTriggerSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: TurboTrigger has no parameter this option could set. It will be removed in the next major version.")]
     public double PctMultiplier { get; }
     public MovingAvgType MaType { get; }
 }
@@ -8286,6 +8364,7 @@ public sealed class TurboScalerSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: TurboScaler has no parameter this option could set. It will be removed in the next major version.")]
     public double PctMultiplier { get; }
     public MovingAvgType MaType { get; }
 }
@@ -8338,6 +8417,7 @@ public sealed class ValueChartIndicatorSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: ValueChartIndicator has no parameter this option could set. It will be removed in the next major version.")]
     public int NumAtrs { get; }
     public MovingAvgType MaType { get; }
 }
@@ -12033,6 +12113,7 @@ public sealed class EhlersSignalToNoiseRatioV2SpecOptions : IIndicatorSpecOption
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: EhlersSignalToNoiseRatioV2 has no parameter this option could set. It will be removed in the next major version.")]
     public MovingAvgType MaType { get; }
 }
 
@@ -12995,6 +13076,7 @@ public sealed class ModifiedGannHiloActivatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
+    [Obsolete("Has no effect: ModifiedGannHiloActivator has no parameter this option could set. It will be removed in the next major version.")]
     public int LookbackLength { get; }
     public int Length { get; }
     public MovingAvgType MaType { get; }
@@ -13015,6 +13097,7 @@ public sealed class MomentumOscillatorSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: MomentumOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int SmoothLength { get; }
     public MovingAvgType MaType { get; }
 }
@@ -13108,6 +13191,7 @@ public sealed class NarrowSidewaysChannelSpecOptions : IIndicatorSpecOptions
     }
 
     public int Length { get; }
+    [Obsolete("Has no effect: NarrowSidewaysChannel has no parameter this option could set. It will be removed in the next major version.")]
     public double Pct { get; }
     public MovingAvgType MaType { get; }
 }
@@ -14008,16 +14092,15 @@ public sealed class VariableIndexDynamicAverageSpecOptions : IIndicatorSpecOptio
 
 public sealed class VolumeFlowIndicatorSpecOptions : IIndicatorSpecOptions
 {
-    public VolumeFlowIndicatorSpecOptions(InputName inputName = InputName.TypicalPrice, int length1 = 130, int length2 = 30,
+    public VolumeFlowIndicatorSpecOptions(int length1 = 130, int length2 = 30,
         int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5)
-        : this(inputName, length1, length2, signalLength, smoothLength, coef, vcoef, MovingAvgType.SimpleMovingAverage)
+        : this(length1, length2, signalLength, smoothLength, coef, vcoef, MovingAvgType.SimpleMovingAverage)
     {
     }
 
-    public VolumeFlowIndicatorSpecOptions(InputName inputName, int length1, int length2, int signalLength, int smoothLength,
+    public VolumeFlowIndicatorSpecOptions(int length1, int length2, int signalLength, int smoothLength,
         double coef, double vcoef, MovingAvgType maType)
     {
-        InputName = inputName;
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
         SignalLength = Math.Max(1, signalLength);
@@ -14027,7 +14110,6 @@ public sealed class VolumeFlowIndicatorSpecOptions : IIndicatorSpecOptions
         MaType = maType;
     }
 
-    public InputName InputName { get; }
     public int Length1 { get; }
     public int Length2 { get; }
     public int SignalLength { get; }

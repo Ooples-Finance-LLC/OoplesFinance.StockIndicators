@@ -61,8 +61,7 @@ internal static class BenchmarkDataFactory
             data.LowPrices,
             data.ClosePrices,
             data.Volumes,
-            data.Dates,
-            InputName.Close);
+            data.Dates);
     }
 
     public static void Reset(StockData stockData)
@@ -71,7 +70,6 @@ internal static class BenchmarkDataFactory
         stockData.OutputValues = new Dictionary<string, List<double>>();
         stockData.SignalsList = new List<Signal>();
         stockData.InputValues = stockData.ClosePrices;
-        stockData.InputName = InputName.Close;
         stockData.IndicatorName = IndicatorName.None;
     }
 

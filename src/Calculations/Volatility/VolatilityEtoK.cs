@@ -6,6 +6,62 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Keltner Channel Width.
+    /// </summary>
+    /// <remarks>
+    /// The distance between a Keltner channel's bands as a percentage of the exponential average they are
+    /// drawn about, which is how the room the channel gives is compared between instruments of different
+    /// price. The average is always exponential here, whatever average a caller may have in mind, and the
+    /// range is the one <see cref="CalculateAverageTrueRange"/> takes.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <param name="multiplier"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateKeltnerChannelWidth(this StockData stockData, int length = 20, double multiplier = 2)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> widthList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var emaBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, emaBuffer.Span, length);
+
+        var trList = GetTrueRangeList(stockData);
+        var trSpan = SpanCompat.AsReadOnlySpan(trList);
+        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var ema = emaBuffer.Span[i];
+            var atr = atrBuffer.Span[i];
+            var upper = ema + (multiplier * atr);
+            var lower = ema - (multiplier * atr);
+            var width = ema != 0 ? (upper - lower) / ema * 100 : 0;
+            widthList.Add(width);
+
+            var prevWidth1 = i >= 1 ? widthList[i - 1] : 0;
+            var prevWidth2 = i >= 2 ? widthList[i - 2] : 0;
+            var signal = GetCompareSignal(width - prevWidth1, prevWidth1 - prevWidth2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Kcw", widthList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(widthList);
+        stockData.IndicatorName = IndicatorName.KeltnerChannelWidth;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the historical volatility.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -35,7 +91,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(tempLogList);
-        var stdDevLogList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevLogList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var stdDevLog = stdDevLogList[i];
@@ -139,7 +195,6 @@ public static partial class Calculations
         int length = 5)
     {
         List<double> gapoList = new(stockData.Count);
-        List<double> gapoEmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
@@ -173,7 +228,7 @@ public static partial class Calculations
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Gapo", gapoList },
-            { "Signal", gapoEmaList }
+            { "Signal", gapoWmaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(gapoList);
@@ -282,11 +337,11 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         stockData.SetCustomValues(smaList);
-        var smaLinregList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var smaLinregList = CalculateLinearRegression(stockData, length).ChainedValues;
         stockData.SetCustomValues(smaList);
-        var linreg2List = CalculateLinearRegression(stockData, length2).CustomValuesList;
+        var linreg2List = CalculateLinearRegression(stockData, length2).ChainedValues;
         stockData.SetCustomValues(smaList);
-        var smaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var smaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -79,7 +79,7 @@ public static partial class Calculations
 
         var len = MinOrMax((int)Math.Ceiling(Sqrt(smoothLength)));
 
-        var stochasticRsiList = CalculateStochasticOscillator(stockData, maType, length).CustomValuesList;
+        var stochasticRsiList = CalculateStochasticOscillator(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

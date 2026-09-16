@@ -11,6 +11,20 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
     {
         get
         {
+            // Withheld from #166: this diverged from bar 15 because the batch stochastic sees a two-bar
+            // envelope of the true range as its high and low, which widens its lookback by one bar.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UltimateTraderOscillator.Uto",
+                    () => new UltimateTraderOscillatorState(),
+                    data => data.CalculateUltimateTraderOscillator().OutputValues["Uto"], "Uto")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("UltimateTraderOscillator.Signal",
+                    () => new UltimateTraderOscillatorState(),
+                    data => data.CalculateUltimateTraderOscillator().OutputValues["Signal"], "Signal")
+            };
             yield return new object[]
             {
                 new StatefulIndicatorSpec("UlcerIndex",
@@ -143,8 +157,8 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             yield return new object[]
             {
                 new StatefulIndicatorSpec("ChartmillValueIndicator.Cmvc",
-                    () => new ChartmillValueIndicatorState(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice, 5),
-                    data => data.CalculateChartmillValueIndicator(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice, 5)
+                    () => new ChartmillValueIndicatorState(MovingAvgType.SimpleMovingAverage, 5),
+                    data => data.CalculateChartmillValueIndicator(MovingAvgType.SimpleMovingAverage, 5)
                         .OutputValues["Cmvc"])
             };
             yield return new object[]
@@ -211,8 +225,8 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             yield return new object[]
             {
                 new StatefulIndicatorSpec("ChopZone",
-                    () => new ChopZoneState(MovingAvgType.ExponentialMovingAverage, InputName.TypicalPrice, 30, 34),
-                    data => data.CalculateChopZone(MovingAvgType.ExponentialMovingAverage, InputName.TypicalPrice, 30, 34)
+                    () => new ChopZoneState(MovingAvgType.ExponentialMovingAverage, 30, 34),
+                    data => data.CalculateChopZone(MovingAvgType.ExponentialMovingAverage, 30, 34)
                         .CustomValuesList)
             };
             yield return new object[]
@@ -715,6 +729,111 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
                 new StatefulIndicatorSpec("KeltnerChannels.LowerBand",
                     () => new KeltnerChannelsState(MovingAvgType.ExponentialMovingAverage, 20, 10, 2),
                     data => data.CalculateKeltnerChannels(MovingAvgType.ExponentialMovingAverage, 20, 10, 2)
+                        .OutputValues["LowerBand"], "LowerBand")
+            };
+            // These states feed an average true range into a band rather than into their own value. The
+            // sweep compared only Result.Value until an output key reached it, so those band series were
+            // never held against their batch twins - which is how a first-bar true range seeded from zero
+            // survived in them. That seed is fixed now, and these specs are what keep it fixed.
+            //
+            // Listed one by one rather than generated from the catalog, so a state that stops publishing
+            // one of these keys fails loudly instead of quietly dropping its own coverage.
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AverageTrueRangeChannel.UpperBand",
+                    () => new AverageTrueRangeChannelState(MovingAvgType.SimpleMovingAverage, 14, 2.5),
+                    data => data.CalculateAverageTrueRangeChannel(MovingAvgType.SimpleMovingAverage, 14, 2.5)
+                        .OutputValues["UpperBand"], "UpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("AverageTrueRangeChannel.LowerBand",
+                    () => new AverageTrueRangeChannelState(MovingAvgType.SimpleMovingAverage, 14, 2.5),
+                    data => data.CalculateAverageTrueRangeChannel(MovingAvgType.SimpleMovingAverage, 14, 2.5)
+                        .OutputValues["LowerBand"], "LowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("DynamicSupportAndResistance.Resistance",
+                    () => new DynamicSupportAndResistanceState(MovingAvgType.WildersSmoothingMethod, 25),
+                    data => data.CalculateDynamicSupportAndResistance(MovingAvgType.WildersSmoothingMethod, 25)
+                        .OutputValues["Resistance"], "Resistance")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("DynamicSupportAndResistance.Support",
+                    () => new DynamicSupportAndResistanceState(MovingAvgType.WildersSmoothingMethod, 25),
+                    data => data.CalculateDynamicSupportAndResistance(MovingAvgType.WildersSmoothingMethod, 25)
+                        .OutputValues["Support"], "Support")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ScalpersChannel.UpperBand",
+                    () => new ScalpersChannelState(MovingAvgType.SimpleMovingAverage, 15, 20),
+                    data => data.CalculateScalpersChannel(MovingAvgType.SimpleMovingAverage, 15, 20)
+                        .OutputValues["UpperBand"], "UpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("ScalpersChannel.LowerBand",
+                    () => new ScalpersChannelState(MovingAvgType.SimpleMovingAverage, 15, 20),
+                    data => data.CalculateScalpersChannel(MovingAvgType.SimpleMovingAverage, 15, 20)
+                        .OutputValues["LowerBand"], "LowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("BollingerBandsFibonacciRatios.UpperBand",
+                    () => new BollingerBandsFibonacciRatiosState(),
+                    data => data.CalculateBollingerBandsFibonacciRatios()
+                        .OutputValues["UpperBand"], "UpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("BollingerBandsFibonacciRatios.LowerBand",
+                    () => new BollingerBandsFibonacciRatiosState(),
+                    data => data.CalculateBollingerBandsFibonacciRatios()
+                        .OutputValues["LowerBand"], "LowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastUpperBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel()
+                        .OutputValues["FastUpperBand"], "FastUpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("HurstCycleChannel.FastLowerBand",
+                    () => new HurstCycleChannelState(),
+                    data => data.CalculateHurstCycleChannel()
+                        .OutputValues["FastLowerBand"], "FastLowerBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("DrunkardWalk.DnWalk",
+                    () => new DrunkardWalkState(),
+                    data => data.CalculateDrunkardWalk()
+                        .OutputValues["DnWalk"], "DnWalk")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendTraderBands.MiddleBand",
+                    () => new TrendTraderBandsState(),
+                    data => data.CalculateTrendTraderBands()
+                        .OutputValues["MiddleBand"], "MiddleBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendTraderBands.UpperBand",
+                    () => new TrendTraderBandsState(),
+                    data => data.CalculateTrendTraderBands()
+                        .OutputValues["UpperBand"], "UpperBand")
+            };
+            yield return new object[]
+            {
+                new StatefulIndicatorSpec("TrendTraderBands.LowerBand",
+                    () => new TrendTraderBandsState(),
+                    data => data.CalculateTrendTraderBands()
                         .OutputValues["LowerBand"], "LowerBand")
             };
             yield return new object[]

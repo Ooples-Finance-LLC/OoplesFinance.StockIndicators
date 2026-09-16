@@ -60,9 +60,6 @@ public sealed class IndicatorSourceTests : GlobalTestData
         source.Low.Should().Equal(expectedLow);
         source.High.Should().NotEqual(data.HighPrices, "these are not the bar highs");
 
-        // The true range deliberately keeps reading the bar highs - see IndicatorSource.BarHigh.
-        source.BarHigh.Should().BeSameAs(data.HighPrices);
-        source.BarLow.Should().BeSameAs(data.LowPrices);
     }
 
     [Fact]
@@ -302,29 +299,6 @@ public sealed class IndicatorSourceTests : GlobalTestData
             stdDevSecond[i].Should().BeApproximately(stdDevFirst[i], Tolerance,
                 $"call order is exactly what decides the result today, index {i}");
         }
-    }
-
-    /// <summary>
-    /// The defect this design removes, pinned so the difference is visible rather than asserted.
-    /// </summary>
-    [Fact]
-    public void TheExistingAmbientPathMeasuresDispersionAgainstItsOwnAverage()
-    {
-        var data = CreateData();
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-
-        // Precisely what CalculateBollingerBands does today.
-        CalculationsHelper.GetMovingAverageList(data, MovingAvgType.SimpleMovingAverage, 20, inputList);
-        var poisoned = data.CalculateStandardDeviationVolatility(MovingAvgType.SimpleMovingAverage, 20)
-            .CustomValuesList;
-
-        var clean = CreateData().CalculateStandardDeviationVolatility(MovingAvgType.SimpleMovingAverage, 20)
-            .CustomValuesList;
-
-        poisoned.Should().HaveCount(clean.Count);
-        poisoned.Should().NotEqual(clean,
-            "this is issue #145: the moving average redefined the series the standard deviation reads, "
-            + "so it measures the spread of the average instead of the spread of price");
     }
 
     // ---------------------------------------------------------------------------------------------

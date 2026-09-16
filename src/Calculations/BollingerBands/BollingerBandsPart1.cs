@@ -15,29 +15,16 @@ public static partial class Calculations
     public static StockData CalculateBollingerBands(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, double stdDevMult = 2)
     {
-        // Resolved once. Both series below are computed from it explicitly, so the moving average cannot
-        // redefine what the standard deviation reads - which is what happened here before, because
-        // GetMovingAverageList publishes onto stockData.CustomValuesList and
-        // CalculateStandardDeviationVolatility resolves its input from that same property. The bands
-        // were therefore drawn at the standard deviation of the average rather than of price.
-        //
-        // Bollinger's own definition - and TA-Lib, pandas-ta and TradingView with it - takes the
-        // standard deviation of price about the average. See issue #145.
-        //
-        // The dispersion term is RollingStandardDeviation rather than
-        // CalculateStandardDeviationVolatility, because the two are not the same statistic. The latter
-        // squares each bar's deviation from its own contemporaneous moving average and averages those,
-        // which is the mean squared residual from the moving-average line and runs larger whenever
-        // price is trending. Bollinger needs the population standard deviation about each window's own
-        // mean, which is also what TA-Lib's TA_STDDEV computes.
-        var source = IndicatorSource.Resolve(stockData);
-        var inputList = source.Values;
-        var count = source.Count;
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
         var upperBandList = new List<double>(count);
         var lowerBandList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var smaList = IndicatorMath.MovingAverage(stockData, source, maType, length);
-        var stdDeviationList = IndicatorMath.RollingStandardDeviation(inputList, length);
+        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        // Bollinger's definition: the population standard deviation of the last `length` prices around their
+        // own mean. This used to be StandardDeviationVolatility - a different measure - and, through the
+        // moving average left on CustomValuesList, of the middle band rather than the prices.
+        var stdDeviationList = GetStandardDeviationList(inputList, length);
 
         double prevUpperBand = 0;
         double prevLowerBand = 0;
@@ -250,7 +237,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -311,16 +298,16 @@ public static partial class Calculations
         List<double> atrDevList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        // Resolved before any moving average runs. CalculateAverageTrueRange takes its close series
-        // from stockData.CustomValuesList, which the moving average above overwrites, so the true
-        // range was being measured against that average rather than against price. See issue #145.
-        var atrSource = IndicatorSource.Resolve(stockData);
+        var callerSeries = stockData.CaptureInputSeries();
 
         var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bollingerBands.OutputValues["UpperBand"];
-        var lowerBandList = bollingerBands.OutputValues["LowerBand"];
+        var upperBandList = bollingerBands.ChainedOutputs["UpperBand"];
+        var lowerBandList = bollingerBands.ChainedOutputs["LowerBand"];
         var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
-        var atrList = IndicatorMath.AverageTrueRange(stockData, atrSource, maType, atrLength);
+        // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
+        // caller's series, which is what its true range is a range of.
+        stockData.RestoreInputSeries(callerSeries);
+        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).ChainedValues;
 
         double prevAtrDev = 0;
         for (var i = 0; i < stockData.Count; i++)

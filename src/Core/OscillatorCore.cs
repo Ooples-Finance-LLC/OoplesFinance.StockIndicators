@@ -9008,9 +9008,12 @@ internal static class OscillatorCore
             sumUp += up;
             sumDn += dn;
 
-            if (i >= length)
+            // A change enters the sums only from the second bar, so the one leaving is
+            // change[i - length], which exists only once i - length >= 1. Removing it at
+            // i == length subtracted a raw price that was never added.
+            if (i >= length + 1)
             {
-                var prevChange = close[i - length] - (i > length ? close[i - length - 1] : 0);
+                var prevChange = close[i - length] - close[i - length - 1];
                 var prevUp = prevChange > 0 ? prevChange : 0;
                 var prevDn = prevChange < 0 ? -prevChange : 0;
                 sumUp -= prevUp;
@@ -13547,7 +13550,7 @@ internal static class OscillatorCore
             for (int i = 0; i < close.Length; i++)
             {
                 double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
-                int cycLength = (int)Math.Ceiling(cycle);
+                int cycLength = MathHelper.CeilingCycle(cycle);
 
                 // Compute average and RMS over cycLength
                 double sum = 0;
@@ -13620,7 +13623,7 @@ internal static class OscillatorCore
             for (int i = 0; i < close.Length; i++)
             {
                 double cycle = Math.Max(length2, Math.Min(length1, domCyc[i]));
-                int halfCycle = (int)Math.Ceiling(cycle / 2);
+                int halfCycle = MathHelper.CeilingCycle(cycle / 2);
 
                 double upChg = 0, dnChg = 0;
                 for (int j = 0; j < halfCycle && (i - j - 1) >= 0; j++)

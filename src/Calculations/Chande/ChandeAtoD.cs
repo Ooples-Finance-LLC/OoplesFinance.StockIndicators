@@ -31,14 +31,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        // Each of these must measure the same series. CalculateStandardDeviationVolatility publishes its
-        // result onto stockData.CustomValuesList, so read from stockData the second call measured the
-        // first one's output and the third measured the second's - dispersion of dispersion of
-        // dispersion. The whole point of the indicator is comparing volatility over three horizons of
-        // the same data. Issue #145.
-        var stdDevList = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length1).CustomValuesList;
-        var stdDev10List = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length2).CustomValuesList;
-        var stdDev20List = stockData.WithValues(inputList).CalculateStandardDeviationVolatility(maType, length3).CustomValuesList;
+        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
+        var stdDev10List = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+        var stdDev20List = CalculateStandardDeviationVolatility(stockData, maType, length3).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -92,8 +92,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -138,9 +138,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
-        var middleBandList = bbList.OutputValues["MiddleBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
+        var middleBandList = bbList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -175,7 +175,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="smoothLength"></param>
@@ -183,7 +182,7 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVervoortModifiedBollingerBandIndicator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, InputName inputName = InputName.FullTypicalPrice, int length1 = 18,
+        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18,
         int length2 = 200, int smoothLength = 8, double stdDevMult = 1.6)
     {
         List<double> haOpenList = new(stockData.Count);
@@ -194,7 +193,7 @@ public static partial class Calculations
         List<double> lbList = new(stockData.Count);
         List<double> percbSignalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -225,7 +224,7 @@ public static partial class Calculations
 
         var zlhaTemaList = GetMovingAverageList(stockData, maType, smoothLength, zlhaList);
         stockData.SetCustomValues(zlhaTemaList);
-        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
+        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -238,7 +237,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(percbList);
-        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = percbList[i];

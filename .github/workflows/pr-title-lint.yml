@@ -20,8 +20,13 @@ on:
   pull_request_target:
     types: [opened, edited, reopened, synchronize]
 
+# Keyed on the pull request, not github.ref. Under pull_request_target github.ref is the BASE branch,
+# so every open PR shared one group and cancel-in-progress cancelled each other's runs: updating
+# four branches from master at once left three of them with a cancelled title check, which reads
+# as a failure. Superseding a run for the SAME PR - a second push, an edited title - is still the
+# intent, and the PR number gives exactly that.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:

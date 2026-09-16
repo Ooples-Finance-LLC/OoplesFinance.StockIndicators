@@ -19,56 +19,54 @@ internal static class RollingWindowSettings
 
 internal sealed class RollingSum
 {
-    private readonly List<double> _cumulative = new();
+    // Prefix sums as high + low pairs: see CompensatedSum for why a plain prefix drifts over a long series.
+    private readonly List<double> _high = new();
+    private readonly List<double> _low = new();
 
-    public int Count => _cumulative.Count;
+    public int Count => _high.Count;
 
     public void Add(double value)
     {
-        var sum = value + (_cumulative.Count > 0 ? _cumulative[_cumulative.Count - 1] : 0);
-        _cumulative.Add(sum);
+        var last = _high.Count - 1;
+        var (high, low) = CompensatedSum.Add(last >= 0 ? _high[last] : 0, last >= 0 ? _low[last] : 0, value);
+        _high.Add(high);
+        _low.Add(low);
     }
 
     public double Sum(int length)
     {
-        if (_cumulative.Count == 0 || length <= 0)
+        if (_high.Count == 0 || length <= 0)
         {
             return 0;
         }
 
-        var end = _cumulative[_cumulative.Count - 1];
-        var startIndex = _cumulative.Count - length - 1;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(_high.Count - 1, _high.Count - length - 1);
     }
 
     public double SumAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || length <= 0 || endIndex < 0)
+        if (_high.Count == 0 || length <= 0 || endIndex < 0)
         {
             return 0;
         }
 
-        var end = _cumulative[endIndex];
-        var startIndex = endIndex - length;
-        var start = startIndex >= 0 ? _cumulative[startIndex] : 0;
-        return end - start;
+        return Between(endIndex, endIndex - length);
     }
 
     public double Average(int length)
     {
-        if (_cumulative.Count == 0)
+        if (_high.Count == 0)
         {
             return 0;
         }
 
-        var count = Math.Min(length, _cumulative.Count);
+        var count = Math.Min(length, _high.Count);
         return count > 0 ? Sum(length) / count : 0;
     }
 
     public double AverageAt(int length, int endIndex)
     {
-        if (_cumulative.Count == 0 || endIndex < 0)
+        if (_high.Count == 0 || endIndex < 0)
         {
             return 0;
         }
@@ -76,6 +74,10 @@ internal sealed class RollingSum
         var count = Math.Min(length, endIndex + 1);
         return count > 0 ? SumAt(length, endIndex) / count : 0;
     }
+
+    private double Between(int end, int start) => start >= 0
+        ? CompensatedSum.Difference(_high[end], _low[end], _high[start], _low[start])
+        : _high[end] + _low[end];
 }
 
 internal sealed class RollingMinMax
@@ -209,47 +211,47 @@ internal sealed class RollingMinMax
 
 internal sealed class RollingCorrelation
 {
-    private readonly RollingSum _xSum = new();
-    private readonly RollingSum _ySum = new();
-    private readonly RollingSum _x2Sum = new();
-    private readonly RollingSum _y2Sum = new();
-    private readonly RollingSum _xySum = new();
+    private readonly List<double> _x = new();
+    private readonly List<double> _y = new();
+    private double[] _xWindow = Array.Empty<double>();
+    private double[] _yWindow = Array.Empty<double>();
 
-    public int Count => _xSum.Count;
+    public int Count => _x.Count;
 
     public void Add(double x, double y)
     {
-        _xSum.Add(x);
-        _ySum.Add(y);
-        _x2Sum.Add(x * x);
-        _y2Sum.Add(y * y);
-        _xySum.Add(x * y);
+        _x.Add(x);
+        _y.Add(y);
     }
 
+    /// <summary>The correlation of the last <paramref name="length"/> pairs; see <see cref="WindowCorrelation"/>.</summary>
     public double R(int length)
     {
-        if (length <= 1 || _xSum.Count == 0)
+        if (length <= 1 || _x.Count == 0)
         {
             return 0;
         }
 
-        var n = Math.Min(length, _xSum.Count);
+        var n = Math.Min(length, _x.Count);
         if (n <= 1)
         {
             return 0;
         }
 
-        var sumX = _xSum.Sum(length);
-        var sumY = _ySum.Sum(length);
-        var sumX2 = _x2Sum.Sum(length);
-        var sumY2 = _y2Sum.Sum(length);
-        var sumXY = _xySum.Sum(length);
+        if (_xWindow.Length < n)
+        {
+            _xWindow = new double[n];
+            _yWindow = new double[n];
+        }
 
-        var numerator = (n * sumXY) - (sumX * sumY);
-        var denomLeft = (n * sumX2) - (sumX * sumX);
-        var denomRight = (n * sumY2) - (sumY * sumY);
-        var denom = Math.Sqrt(denomLeft * denomRight);
-        return denom != 0 ? numerator / denom : 0;
+        var start = _x.Count - n;
+        for (var i = 0; i < n; i++)
+        {
+            _xWindow[i] = _x[start + i];
+            _yWindow[i] = _y[start + i];
+        }
+
+        return WindowCorrelation.Pearson(new ReadOnlySpan<double>(_xWindow, 0, n), new ReadOnlySpan<double>(_yWindow, 0, n));
     }
 
     public double RSquared(int length)
@@ -562,8 +564,8 @@ internal sealed class RollingOrderStatistic : IDisposable
     private readonly int _length;
     private readonly bool _useLinear;
     private readonly PooledRingBuffer<double> _window;
-    private readonly OrderStatisticTree? _tree;
-    private readonly double[]? _scratch;
+    private readonly OrderStatisticTree _tree = new();
+    private readonly double[] _scratch;
     private bool _disposed;
 
     public RollingOrderStatistic(int length)
@@ -571,15 +573,7 @@ internal sealed class RollingOrderStatistic : IDisposable
         _length = Math.Max(1, length);
         _useLinear = _length <= RollingWindowSettings.SmallWindowThreshold;
         _window = new PooledRingBuffer<double>(_length);
-
-        if (_useLinear)
-        {
-            _scratch = ArrayPool<double>.Shared.Rent(_length);
-        }
-        else
-        {
-            _tree = new OrderStatisticTree();
-        }
+        _scratch = _useLinear ? ArrayPool<double>.Shared.Rent(_length) : Array.Empty<double>();
     }
 
     public int Count => _window.Count;
@@ -594,10 +588,10 @@ internal sealed class RollingOrderStatistic : IDisposable
 
         if (_window.TryAdd(value, out var removed))
         {
-            _tree!.Remove(removed);
+            _tree.Remove(removed);
         }
 
-        _tree!.Insert(value);
+        _tree.Insert(value);
     }
 
     public int CountLessThan(double value)
@@ -607,7 +601,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] < value)
+                if (_window[i].CompareTo(value) < 0)
                 {
                     count++;
                 }
@@ -616,7 +610,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             return count;
         }
 
-        return _tree!.CountLessThan(value);
+        return _tree.CountLessThan(value);
     }
 
     public int CountLessThanOrEqual(double value)
@@ -626,7 +620,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             var count = 0;
             for (var i = 0; i < _window.Count; i++)
             {
-                if (_window[i] <= value)
+                if (_window[i].CompareTo(value) <= 0)
                 {
                     count++;
                 }
@@ -635,7 +629,7 @@ internal sealed class RollingOrderStatistic : IDisposable
             return count;
         }
 
-        return _tree!.CountLessThanOrEqual(value);
+        return _tree.CountLessThanOrEqual(value);
     }
 
     public double PercentileNearestRank(double percentile)
@@ -648,19 +642,63 @@ internal sealed class RollingOrderStatistic : IDisposable
 
         if (_useLinear)
         {
-            var scratch = _scratch!;
-            _window.CopyTo(scratch);
-            Array.Sort(scratch, 0, count);
-            var rank = (int)Math.Ceiling(percentile / 100 * count);
-            rank = Math.Max(rank, 1);
-            rank = Math.Min(rank, count);
-            return scratch[rank - 1];
+            _window.CopyTo(_scratch);
+            Array.Sort(_scratch, 0, count);
+            return _scratch[NearestRank(percentile, count) - 1];
         }
 
-        var treeCount = _tree!.Count;
-        var treeRank = treeCount > 0 ? (int)Math.Ceiling(percentile / 100 * treeCount) : 0;
-        return _tree.SelectByRank(Math.Max(treeRank, 1));
+        return _tree.SelectByRank(NearestRank(percentile, _tree.Count));
     }
+
+    /// <summary>
+    /// The percentile the window would have with <paramref name="pending"/> added, leaving the window as it is.
+    /// </summary>
+    /// <remarks>
+    /// A streaming preview answers for a bar it does not commit. Without this it could only read the window
+    /// before the bar, so a preview of the first bar was 0 and every later one was a bar late.
+    /// </remarks>
+    public double PercentileNearestRank(double percentile, double pending)
+    {
+        var evicts = _window.Count == _length;
+        var start = evicts ? 1 : 0;
+        var count = _window.Count - start + 1;
+
+        if (_useLinear)
+        {
+            for (var i = 0; i < count - 1; i++)
+            {
+                _scratch[i] = _window[start + i];
+            }
+
+            _scratch[count - 1] = pending;
+            Array.Sort(_scratch, 0, count);
+            return _scratch[NearestRank(percentile, count) - 1];
+        }
+
+        var evicted = evicts ? _window[0] : 0;
+        _tree.Insert(pending);
+        if (evicts)
+        {
+            _tree.Remove(evicted);
+        }
+
+        try
+        {
+            return _tree.SelectByRank(NearestRank(percentile, _tree.Count));
+        }
+        finally
+        {
+            if (evicts)
+            {
+                _tree.Insert(evicted);
+            }
+
+            _tree.Remove(pending);
+        }
+    }
+
+    private static int NearestRank(double percentile, int count) =>
+        Math.Min(Math.Max((int)Math.Ceiling(percentile / 100 * count), 1), count);
 
     public void Dispose()
     {
@@ -670,7 +708,7 @@ internal sealed class RollingOrderStatistic : IDisposable
         }
 
         _window.Dispose();
-        if (_scratch != null)
+        if (_useLinear)
         {
             ArrayPool<double>.Shared.Return(_scratch, clearArray: true);
         }
@@ -724,11 +762,15 @@ internal sealed class OrderStatisticTree
             return new Node(key, Random.Next());
         }
 
-        if (key == node.Key)
+        // One total order for every operation, double.CompareTo's, in which NaN equals itself and sorts
+        // first. With == and < a NaN went right on insert and was never found on removal, so a preview
+        // that inserted and removed it left a node behind.
+        var order = key.CompareTo(node.Key);
+        if (order == 0)
         {
             node.Count++;
         }
-        else if (key < node.Key)
+        else if (order < 0)
         {
             node.Left = Insert(node.Left, key);
             if (node.Left.Priority > node.Priority)
@@ -756,7 +798,8 @@ internal sealed class OrderStatisticTree
             return null;
         }
 
-        if (key == node.Key)
+        var order = key.CompareTo(node.Key);
+        if (order == 0)
         {
             if (node.Count > 1)
             {
@@ -784,7 +827,7 @@ internal sealed class OrderStatisticTree
                 }
             }
         }
-        else if (key < node.Key)
+        else if (order < 0)
         {
             node.Left = Remove(node.Left, key);
         }
@@ -804,7 +847,7 @@ internal sealed class OrderStatisticTree
             return 0;
         }
 
-        if (key <= node.Key)
+        if (key.CompareTo(node.Key) <= 0)
         {
             return CountLessThan(node.Left, key);
         }
@@ -819,7 +862,7 @@ internal sealed class OrderStatisticTree
             return 0;
         }
 
-        if (key < node.Key)
+        if (key.CompareTo(node.Key) < 0)
         {
             return CountLessThanOrEqual(node.Left, key);
         }

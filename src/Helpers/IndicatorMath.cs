@@ -76,11 +76,13 @@ internal static class IndicatorMath
     {
         var count = source.Count;
 
-        // BuildDerivedSeriesList reads stockData.HighPrices/LowPrices directly, never the substituted
-        // highs and lows that GetInputValuesList returns. Use the bar series here so this stays a
-        // faithful port; see IndicatorSource.BarHigh for why the two differ.
-        var highs = source.BarHigh;
-        var lows = source.BarLow;
+        // The substituted highs and lows, not the bar ones. BuildDerivedSeriesList applies the same rule:
+        // when the close series is a chained indicator rather than price, it derives each bar's range from
+        // that series through GetCustomRangeLists. Measuring an RSI close against an AAPL bar high is a gap
+        // between two unrelated series - the batch comment records a log-close near 5 against highs near 180
+        // producing ATR bands of +-400. Resolve has already done the substitution, so read what it returned.
+        var highs = source.High;
+        var lows = source.Low;
         var closes = source.Values;
         var list = new List<double>(count);
 

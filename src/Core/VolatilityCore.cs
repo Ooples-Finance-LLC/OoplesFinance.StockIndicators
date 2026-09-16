@@ -884,8 +884,10 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // Both variances divide by length - 1, and so does k: a one-bar window has no reading.
+        length = Math.Max(2, length);
         var sqrtFactor = Math.Sqrt(252);
-        var k = 0.34 / (1 + (double)(length + 1) / (length - 1));
+        var k = 0.34 / (1.34 + (double)(length + 1) / (length - 1));
 
         for (var i = 0; i < close.Length; i++)
         {
