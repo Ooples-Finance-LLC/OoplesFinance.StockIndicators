@@ -630,7 +630,7 @@ public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDispo
 public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _v3Smoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _v6Smoother;
     private readonly IMovingAverageSmoother _v7Smoother;
     private readonly IMovingAverageSmoother _wwSmoother;
@@ -644,7 +644,7 @@ public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposab
         var resolvedLength = Math.Max(1, length);
         var resolvedSmooth = Math.Max(1, smoothLength);
         _v3Smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolvedLength, _ => _v2Value);
+        _stdDev = new RollingStandardDeviation(resolvedLength);
         _v6Smoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
         _v7Smoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
         _wwSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
@@ -671,7 +671,7 @@ public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposab
         var v2 = (bar.High + bar.Low + (value * 2)) / 4;
         _v2Value = v2;
         var v3 = _v3Smoother.Next(v2, isFinal);
-        var v4 = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var v4 = _stdDev.Next(_v2Value, isFinal);
         var v5 = v4 == 0 ? (v2 - v3) * 100 : (v2 - v3) * 100 / v4;
         var v6 = _v6Smoother.Next(v5, isFinal);
         var v7 = _v7Smoother.Next(v6, isFinal);
@@ -709,8 +709,8 @@ public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorSt
     private readonly int _length;
     private readonly IMovingAverageSmoother _sma;
     private readonly IMovingAverageSmoother _indexSma;
-    private readonly StandardDeviationVolatilityState _stdDevSrc;
-    private readonly StandardDeviationVolatilityState _indexStdDev;
+    private readonly RollingStandardDeviation _stdDevSrc;
+    private readonly RollingStandardDeviation _indexStdDev;
     private readonly RollingWindowSum _diffSum;
     private readonly RollingWindowSum _absDiffSum;
     private readonly StreamingInputResolver _input;
@@ -725,8 +725,8 @@ public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorSt
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
         _indexSma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDevSrc = new StandardDeviationVolatilityState(maType, _length);
-        _indexStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _stdDevSrc = new RollingStandardDeviation(_length);
+        _indexStdDev = new RollingStandardDeviation(_length);
         _diffSum = new RollingWindowSum(_length);
         _absDiffSum = new RollingWindowSum(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -766,8 +766,8 @@ public sealed class FisherLeastSquaresMovingAverageState : IStreamingIndicatorSt
         _indexValue = _index;
         var sma = _sma.Next(value, isFinal);
         var indexSma = _indexSma.Next(_indexValue, isFinal);
-        var stdDevSrc = _stdDevSrc.Update(bar, isFinal, includeOutputs: false).Value;
-        var indexStdDev = _indexStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDevSrc = _stdDevSrc.Next(value, isFinal);
+        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
         var a = indexStdDev != 0 && r != 0 ? (_indexValue - indexSma) / indexStdDev * r : 0;
         var b = sma + (a * stdDevSrc);
 
@@ -1378,13 +1378,13 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
 {
     private readonly int _length;
     private readonly IMovingAverageSmoother _volumeSmoother;
-    private readonly StandardDeviationVolatilityState _volumeStdDev;
+    private readonly RollingStandardDeviation _volumeStdDev;
     private readonly RollingWindowMax _aMoveMax;
     private readonly RollingWindowMin _aMoveMin;
     private readonly RollingWindowMax _relVolMax;
     private readonly RollingWindowMin _relVolMin;
     private readonly RollingWindowSum _vBymSum;
-    private readonly StandardDeviationVolatilityState _vBymStdDev;
+    private readonly RollingStandardDeviation _vBymStdDev;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _prevDpl;
@@ -1397,13 +1397,13 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
     {
         _length = Math.Max(1, length);
         _volumeSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _volumeStdDev = new StandardDeviationVolatilityState(maType, _length, InputName.Volume);
+        _volumeStdDev = new RollingStandardDeviation(_length);
         _aMoveMax = new RollingWindowMax(_length);
         _aMoveMin = new RollingWindowMin(_length);
         _relVolMax = new RollingWindowMax(_length);
         _relVolMin = new RollingWindowMin(_length);
         _vBymSum = new RollingWindowSum(_length);
-        _vBymStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _vBymValue);
+        _vBymStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1431,7 +1431,7 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var avgVolume = _volumeSmoother.Next(bar.Volume, isFinal);
-        var sdVolume = _volumeStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var sdVolume = _volumeStdDev.Next(bar.Volume, isFinal);
         var relVol = sdVolume != 0 ? (bar.Volume - avgVolume) / sdVolume : 0;
 
         var priceChg = _hasPrev ? value - prevValue : 0;
@@ -1451,7 +1451,7 @@ public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposab
         var avf = countAfter > 0 ? vBymSum / countAfter : 0;
 
         _vBymValue = vBym;
-        var sdf = _vBymStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var sdf = _vBymStdDev.Next(_vBymValue, isFinal);
         var theFom = sdf != 0 ? (vBym - avf) / sdf : 0;
         var prevDpl = _hasPrevDpl ? _prevDpl : 0;
         var dpl = theFom >= 2 ? prevValue : _hasPrevDpl ? prevDpl : value;

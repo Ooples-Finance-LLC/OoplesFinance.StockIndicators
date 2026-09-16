@@ -152,8 +152,8 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
     private readonly IMovingAverageSmoother _sma;
     private readonly IMovingAverageSmoother _indexSma;
     private readonly IMovingAverageSmoother _lSma;
-    private readonly StandardDeviationVolatilityState _stdDev;
-    private readonly StandardDeviationVolatilityState _indexStdDev;
+    private readonly RollingStandardDeviation _stdDev;
+    private readonly RollingStandardDeviation _indexStdDev;
     private readonly StreamingInputResolver _input;
     private double _indexValue;
     private int _index;
@@ -165,8 +165,8 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
         _indexSma = MovingAverageSmootherFactory.Create(maType, _length);
         _lSma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
-        _indexStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _indexValue);
+        _stdDev = new RollingStandardDeviation(_length);
+        _indexStdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -195,8 +195,8 @@ public sealed class RobustWeightingOscillatorState : IStreamingIndicatorState, I
 
         var sma = _sma.Next(value, isFinal);
         var indexSma = _indexSma.Next(index, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var indexStdDev = _indexStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
+        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
 
         var a = indexStdDev != 0 ? corr * (stdDev / indexStdDev) : 0;
         var b = sma - (a * indexSma);
@@ -237,7 +237,7 @@ public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable
     private readonly int _length;
     private readonly IMovingAverageSmoother _volumeMa;
     private readonly IMovingAverageSmoother _signalMa;
-    private readonly StandardDeviationVolatilityState _rangeStdDev;
+    private readonly RollingStandardDeviation _rangeStdDev;
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
     private double _rangeValue;
@@ -248,7 +248,7 @@ public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable
         _length = Math.Max(1, length);
         _volumeMa = MovingAverageSmootherFactory.Create(maType, _length);
         _signalMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _rangeStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _rangeValue);
+        _rangeStdDev = new RollingStandardDeviation(_length);
         _values = new PooledRingBuffer<double>(_length + 1);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -272,7 +272,7 @@ public sealed class RSINGIndicatorState : IStreamingIndicatorState, IDisposable
         var ma = _volumeMa.Next(volume, isFinal);
         var range = bar.High - bar.Low;
         _rangeValue = range;
-        var stdev = _rangeStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdev = _rangeStdDev.Next(_rangeValue, isFinal);
 
         var count = _values.Count;
         var prevValue = count >= _length ? _values[count - _length] : 0;
@@ -1109,7 +1109,7 @@ public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
     private readonly int _length;
     private readonly double _bench;
     private readonly IMovingAverageSmoother _retSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
     private double _retValue;
@@ -1122,7 +1122,7 @@ public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
         var barsPerYr = minPerYr / barMin;
         _bench = MathHelper.Pow(1 + bmk, _length / barsPerYr) - 1;
         _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _retValue);
+        _stdDev = new RollingStandardDeviation(_length);
         _values = new PooledRingBuffer<double>(_length + 1);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1143,7 +1143,7 @@ public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
         var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, _length);
         var ret = prevValue != 0 ? (value / prevValue) - 1 - _bench : 0;
         _retValue = ret;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_retValue, isFinal);
         var retSma = _retSmoother.Next(ret, isFinal);
         var sharpe = stdDev != 0 ? retSma / stdDev : 0;
 

@@ -138,7 +138,7 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
     private readonly int _length;
     private readonly double _bench;
     private readonly IMovingAverageSmoother _retSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
     private double _retValue;
@@ -148,7 +148,7 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
         _length = Math.Max(1, length);
         _bench = MathHelper.Pow(1 + bmk, _length / 360d) - 1;
         _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length, _ => _retValue);
+        _stdDev = new RollingStandardDeviation(_length);
         _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -169,7 +169,7 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
         var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, _length);
         var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
         _retValue = ret;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_retValue, isFinal);
         var retSma = _retSmoother.Next(ret, isFinal);
         var info = stdDev != 0 ? (retSma - _bench) / stdDev : 0;
 
@@ -598,14 +598,14 @@ public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDi
 public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _sma;
-    private readonly IMovingAverageSmoother _varianceMa;
+    private readonly RollingStandardDeviation _stdDevCalc;
     private readonly StreamingInputResolver _input;
 
     public InverseFisherZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
     {
         var resolved = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceMa = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDevCalc = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -614,7 +614,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     public void Reset()
     {
         _sma.Reset();
-        _varianceMa.Reset();
+        _stdDevCalc.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -623,8 +623,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
         var sma = _sma.Next(value, isFinal);
         // Compute deviation using the same SMA that's used for z-score
         var deviation = value - sma;
-        var variance = _varianceMa.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
+        var stdDev = _stdDevCalc.Next(value, isFinal);
         var z = stdDev != 0 ? deviation / stdDev : 0;
         var expZ = MathHelper.Exp(2 * z);
         var f = expZ + 1 != 0 ? MathHelper.MinOrMax((((expZ - 1) / (expZ + 1)) + 1) * 50, 100, 0) : 0;
@@ -644,7 +643,7 @@ public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDispos
     public void Dispose()
     {
         _sma.Dispose();
-        _varianceMa.Dispose();
+        _stdDevCalc.Dispose();
     }
 }
 
@@ -1714,7 +1713,7 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
 public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _highValues;
     private readonly PooledRingBuffer<double> _lowValues;
     private readonly StreamingInputResolver _input;
@@ -1725,7 +1724,7 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
     public KaseSerialDependencyIndexState(int length = 14)
     {
         _length = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length, _ => _tempLog);
+        _stdDev = new RollingStandardDeviation(_length);
         _highValues = new PooledRingBuffer<double>(_length);
         _lowValues = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -1749,7 +1748,7 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
         var prevValue = _hasPrev ? _prevValue : 0;
         var temp = prevValue != 0 ? value / prevValue : 0;
         _tempLog = temp > 0 ? Math.Log(temp) : 0;
-        var volatility = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var volatility = _stdDev.Next(_tempLog, isFinal);
 
         var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, _length);
         var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);

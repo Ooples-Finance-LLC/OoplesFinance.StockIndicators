@@ -774,8 +774,8 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
 {
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
-    private readonly StandardDeviationVolatilityState _primaryStdDev;
-    private readonly StandardDeviationVolatilityState _marketStdDev;
+    private readonly RollingStandardDeviation _primaryStdDev;
+    private readonly RollingStandardDeviation _marketStdDev;
     private readonly IMovingAverageSmoother _primaryAbsSma;
     private readonly IMovingAverageSmoother _marketAbsSma;
     private double _prevValue;
@@ -791,8 +791,8 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         _primarySeries = primarySeries;
         _marketSeries = marketSeries;
         var resolved = Math.Max(1, length);
-        _primaryStdDev = new StandardDeviationVolatilityState(maType, resolved);
-        _marketStdDev = new StandardDeviationVolatilityState(maType, resolved);
+        _primaryStdDev = new RollingStandardDeviation(resolved);
+        _marketStdDev = new RollingStandardDeviation(resolved);
         _primaryAbsSma = MovingAverageSmootherFactory.Create(maType, resolved);
         _marketAbsSma = MovingAverageSmootherFactory.Create(maType, resolved);
     }
@@ -818,7 +818,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
     {
         if (series.Equals(_marketSeries))
         {
-            var stdDev = _marketStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+            var stdDev = _marketStdDev.Next(bar.Close, isFinal);
             var sp = _hasMarketPrev ? bar.Close - _prevMarketValue : 0;
             var zsp = stdDev != 0 ? sp / stdDev : 0;
             var absZsp = Math.Abs(zsp);
@@ -840,7 +840,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
-        var stdDevPrimary = _primaryStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDevPrimary = _primaryStdDev.Next(bar.Close, isFinal);
         var d = _hasPrev ? bar.Close - _prevValue : 0;
         var zsrc = stdDevPrimary != 0 ? d / stdDevPrimary : 0;
         var absZsrc = Math.Abs(zsrc);
@@ -853,7 +853,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         }
         else if (context.TryGetLatest(_marketSeries, out var marketBar))
         {
-            var marketStdDev = _marketStdDev.Update(marketBar, isFinal: false, includeOutputs: false).Value;
+            var marketStdDev = _marketStdDev.Next(marketBar.Close, isFinal: false);
             var sp = _hasMarketPrev ? marketBar.Close - _prevMarketValue : 0;
             var zsp = marketStdDev != 0 ? sp / marketStdDev : 0;
             var absZsp = Math.Abs(zsp);
@@ -1323,7 +1323,7 @@ public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, I
 public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _volumeMa;
-    private readonly StandardDeviationVolatilityState _volumeStdDev;
+    private readonly RollingStandardDeviation _volumeStdDev;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _prevDpl;
@@ -1335,7 +1335,7 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
     {
         var resolved = Math.Max(1, length);
         _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _volumeStdDev = new StandardDeviationVolatilityState(maType, resolved, InputName.Volume);
+        _volumeStdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1356,7 +1356,7 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var avgVolume = _volumeMa.Next(bar.Volume, isFinal);
-        var sdVolume = _volumeStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var sdVolume = _volumeStdDev.Next(bar.Volume, isFinal);
         var relVol = sdVolume != 0 ? (bar.Volume - avgVolume) / sdVolume : 0;
         var prevDpl = _hasPrevDpl ? _prevDpl : 0;
         var dpl = relVol >= 2 ? prevValue : _hasPrevDpl ? prevDpl : value;

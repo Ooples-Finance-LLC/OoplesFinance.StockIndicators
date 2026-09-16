@@ -1426,8 +1426,8 @@ public sealed class MorphedSineWaveState : IStreamingIndicatorState
 [PrimaryOutput("Msi")]
 public sealed class MotionSmoothnessIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
-    private readonly StandardDeviationVolatilityState _chgStdDev;
+    private readonly RollingStandardDeviation _stdDev;
+    private readonly RollingStandardDeviation _chgStdDev;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _chgValue;
@@ -1436,8 +1436,8 @@ public sealed class MotionSmoothnessIndexState : IStreamingIndicatorState, IDisp
     public MotionSmoothnessIndexState(int length = 50)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolved);
-        _chgStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolved, _ => _chgValue);
+        _stdDev = new RollingStandardDeviation(resolved);
+        _chgStdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1455,11 +1455,11 @@ public sealed class MotionSmoothnessIndexState : IStreamingIndicatorState, IDisp
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var prevValue = _hasPrev ? _prevValue : 0;
         var chg = _hasPrev ? value - prevValue : 0;
         _chgValue = chg;
-        var chgStdDev = _chgStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var chgStdDev = _chgStdDev.Next(_chgValue, isFinal);
         var msi = stdDev != 0 ? chgStdDev / stdDev : 0;
 
         if (isFinal)

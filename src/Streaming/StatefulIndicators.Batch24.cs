@@ -1975,7 +1975,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
     private readonly IMovingAverageSmoother _atr;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _adSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _atrMult;
@@ -1999,7 +1999,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         var resolved = Math.Max(1, length);
         _ema = MovingAverageSmootherFactory.Create(maType, resolved);
         _atr = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _atrValue);
+        _stdDev = new RollingStandardDeviation(resolved);
         _adSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _atrMult = atrMult;
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -2046,7 +2046,7 @@ public sealed class TrenderState : IStreamingIndicatorState, IDisposable
         var prevEma = _hasPrev ? _prevEma : 0;
         var prevHigh = _index >= 2 ? _prevHigh2 : 0;
         var prevLow = _index >= 2 ? _prevLow2 : 0;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_atrValue, isFinal);
 
         var prevTrndDn = _hasPrev ? _prevTrndDn : 0;
         var trndDn = adm < ema && prevAdm > prevEma ? prevHigh

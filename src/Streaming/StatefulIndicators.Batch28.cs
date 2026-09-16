@@ -8,7 +8,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanMa;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private double _inputValue;
 
@@ -16,7 +16,7 @@ public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
     {
         var resolved = Math.Max(1, length);
         _meanMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _inputValue);
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -34,7 +34,7 @@ public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         _inputValue = value;
         var mean = _meanMa.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_inputValue, isFinal);
         var zscore = stdDev != 0 ? (value - mean) / stdDev : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;

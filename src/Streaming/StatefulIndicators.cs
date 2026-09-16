@@ -1330,7 +1330,7 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
 public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly IMovingAverageSmoother _varianceSmoother;
+    private readonly RollingStandardDeviation _stdDevCalc;
     private readonly StreamingInputResolver _input;
     private readonly double _stdDevFactor;
 
@@ -1339,7 +1339,7 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     {
         var resolved = Math.Max(1, length);
         _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDevCalc = new RollingStandardDeviation(resolved);
         _stdDevFactor = stdDevFactor;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1349,16 +1349,14 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Reset()
     {
         _meanSmoother.Reset();
-        _varianceSmoother.Reset();
+        _stdDevCalc.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var middle = _meanSmoother.Next(value, isFinal);
-        var deviation = value - middle;
-        var variance = _varianceSmoother.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
+        var stdDev = _stdDevCalc.Next(value, isFinal);
         var upper = middle + (stdDev * _stdDevFactor);
         var lower = middle - (stdDev * _stdDevFactor);
 
@@ -1379,7 +1377,7 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Dispose()
     {
         _meanSmoother.Dispose();
-        _varianceSmoother.Dispose();
+        _stdDevCalc.Dispose();
     }
 }
 
@@ -1524,7 +1522,7 @@ public sealed class VerticalHorizontalFilterState : IStreamingIndicatorState, ID
 public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable    
 {
     private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly IMovingAverageSmoother _varianceSmoother;
+    private readonly RollingStandardDeviation _stdDevCalc;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
@@ -1536,7 +1534,7 @@ public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable
     {
         var resolved = Math.Max(1, length);
         _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDevCalc = new RollingStandardDeviation(resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1546,7 +1544,7 @@ public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable
     public void Reset()
     {
         _meanSmoother.Reset();
-        _varianceSmoother.Reset();
+        _stdDevCalc.Reset();
         _signalSmoother.Reset();
         _prevValue = 0;
         _hasPrev = false;
@@ -1561,9 +1559,7 @@ public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable
         var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
 
         var mean = _meanSmoother.Next(ret, isFinal);
-        var deviation = ret - mean;
-        var variance = _varianceSmoother.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
+        var stdDev = _stdDevCalc.Next(ret, isFinal);
 
         var sigma = _hasStd && _prevStd != 0 ? ret / _prevStd : 0;
         var signal = _signalSmoother.Next(sigma, isFinal);
@@ -1592,7 +1588,7 @@ public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable
     public void Dispose()
     {
         _meanSmoother.Dispose();
-        _varianceSmoother.Dispose();
+        _stdDevCalc.Dispose();
         _signalSmoother.Dispose();
     }
 }
@@ -2588,15 +2584,14 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("MiddleBand")]
 public sealed class StandardDeviationChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDevState;
+    private readonly RollingStandardDeviation _stdDevState;
     private readonly LinearRegressionState _regressionState;
     private readonly double _stdDevMult;
-    private double _regressionInput;
 
     public StandardDeviationChannelState(int length = 40, double stdDevMult = 2)
     {
-        _stdDevState = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, length);
-        _regressionState = new LinearRegressionState(length, _ => _regressionInput);
+        _stdDevState = new RollingStandardDeviation(length);
+        _regressionState = new LinearRegressionState(length);
         _stdDevMult = stdDevMult;
     }
 
@@ -2606,13 +2601,11 @@ public sealed class StandardDeviationChannelState : IStreamingIndicatorState, ID
     {
         _stdDevState.Reset();
         _regressionState.Reset();
-        _regressionInput = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var stdDev = _stdDevState.Update(bar, isFinal, includeOutputs: false).Value;
-        _regressionInput = stdDev;
+        var stdDev = _stdDevState.Next(bar.Close, isFinal);
         var middle = _regressionState.Update(bar, isFinal, includeOutputs: false).Value;
         var upper = middle + (stdDev * _stdDevMult);
         var lower = middle - (stdDev * _stdDevMult);
@@ -4996,7 +4989,7 @@ public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _smoother;
     private readonly LinearRegressionState _linregLong;
     private readonly LinearRegressionState _linregShort;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private double _maValue;
 
@@ -5007,7 +5000,7 @@ public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _linregLong = new LinearRegressionState(resolved, _ => _maValue);
         _linregShort = new LinearRegressionState(length2, _ => _maValue);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _maValue);
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -5030,7 +5023,7 @@ public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
 
         var linreg = _linregLong.Update(bar, isFinal, includeOutputs: false).Value;
         var linreg2 = _linregShort.Update(bar, isFinal, includeOutputs: false).Value;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_maValue, isFinal);
         var gs = stdDev != 0 ? (linreg2 - linreg) / stdDev / 2 : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -10118,8 +10111,8 @@ public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _yMa;
     private readonly IMovingAverageSmoother _xMa;
-    private readonly StandardDeviationVolatilityState _dev;
-    private readonly StandardDeviationVolatilityState _xDev;
+    private readonly RollingStandardDeviation _dev;
+    private readonly RollingStandardDeviation _xDev;
     private readonly RollingWindowCorrelation _correlation;
     private readonly StreamingInputResolver _input;
     private double _prevX;
@@ -10131,8 +10124,8 @@ public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
         var resolved = Math.Max(1, length);
         _yMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _xMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dev = new StandardDeviationVolatilityState(maType, resolved);
-        _xDev = new StandardDeviationVolatilityState(maType, resolved, _ => _xValue);
+        _dev = new RollingStandardDeviation(resolved);
+        _xDev = new RollingStandardDeviation(resolved);
         _correlation = new RollingWindowCorrelation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -10154,7 +10147,7 @@ public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var dev = _dev.Update(bar, isFinal, includeOutputs: false).Value;
+        var dev = _dev.Next(value, isFinal);
         var prevX = _hasPrev ? _prevX : value;
         var x = value > prevX + dev ? value : value < prevX - dev ? value : prevX;
         _xValue = x;
@@ -10162,7 +10155,7 @@ public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
         corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
         var yMa = _yMa.Next(value, isFinal);
         var xMa = _xMa.Next(x, isFinal);
-        var mx = _xDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var mx = _xDev.Next(_xValue, isFinal);
         var slope = mx != 0 ? corr * (dev / mx) : 0;
         var inter = yMa - (slope * xMa);
         var reg = (x * slope) + inter;
@@ -11754,9 +11747,9 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
     private readonly RollingWindowSum _diff2Sum2;
     private readonly RollingWindowSum _diff2Sum3;
     private readonly RollingWindowSum _dmiSum;
-    private readonly StandardDeviationVolatilityState _stdDev1;
-    private readonly StandardDeviationVolatilityState _stdDev2;
-    private readonly StandardDeviationVolatilityState _stdDev3;
+    private readonly RollingStandardDeviation _stdDev1;
+    private readonly RollingStandardDeviation _stdDev2;
+    private readonly RollingStandardDeviation _stdDev3;
     private readonly IMovingAverageSmoother _cmo5Smoother;
     private readonly IMovingAverageSmoother _cmo10Smoother;
     private readonly IMovingAverageSmoother _cmo20Smoother;
@@ -11781,9 +11774,9 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         _diff2Sum2 = new RollingWindowSum(resolved2);
         _diff2Sum3 = new RollingWindowSum(resolved3);
         _dmiSum = new RollingWindowSum(resolved1);
-        _stdDev1 = new StandardDeviationVolatilityState(maType, resolved1);
-        _stdDev2 = new StandardDeviationVolatilityState(maType, resolved2, _ => _stdDev1Value);
-        _stdDev3 = new StandardDeviationVolatilityState(maType, resolved3, _ => _stdDev2Value);
+        _stdDev1 = new RollingStandardDeviation(resolved1);
+        _stdDev2 = new RollingStandardDeviation(resolved2);
+        _stdDev3 = new RollingStandardDeviation(resolved3);
         _cmo5Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo10Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
         _cmo20Smoother = MovingAverageSmootherFactory.Create(maType, _smoothLength);
@@ -11842,11 +11835,11 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
         var cmo10 = _cmo10Smoother.Next(cmo10Ratio, isFinal);
         var cmo20 = _cmo20Smoother.Next(cmo20Ratio, isFinal);
 
-        var stdDev5 = _stdDev1.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev5 = _stdDev1.Next(value, isFinal);
         _stdDev1Value = stdDev5;
-        var stdDev10 = _stdDev2.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev10 = _stdDev2.Next(value, isFinal);
         _stdDev2Value = stdDev10;
-        var stdDev20 = _stdDev3.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev20 = _stdDev3.Next(value, isFinal);
         var stdDevSum = stdDev5 + stdDev10 + stdDev20;
         var dmi = stdDevSum != 0
             ? MathHelper.MinOrMax(((stdDev5 * cmo5) + (stdDev10 * cmo10) + (stdDev20 * cmo20)) / stdDevSum, 100, -100)

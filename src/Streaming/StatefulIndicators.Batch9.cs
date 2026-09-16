@@ -1752,34 +1752,26 @@ internal sealed class EhlersSuperSmootherFilterEngine
 
 internal sealed class StandardDeviationVolatilityEngine : IDisposable
 {
-    private readonly SimpleMovingAverageSmoother _meanSmoother;
-    private readonly SimpleMovingAverageSmoother _varianceSmoother;
+    private readonly RollingStandardDeviation _stdDev;
 
     public StandardDeviationVolatilityEngine(int length)
     {
-        var resolved = Math.Max(1, length);
-        _meanSmoother = new SimpleMovingAverageSmoother(resolved);
-        _varianceSmoother = new SimpleMovingAverageSmoother(resolved);
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
     }
 
     public double Next(double value, bool isFinal)
     {
-        var mean = _meanSmoother.Next(value, isFinal);
-        var deviation = value - mean;
-        var variance = _varianceSmoother.Next(deviation * deviation, isFinal);
-        return MathHelper.Sqrt(variance);
+        return _stdDev.Next(value, isFinal);
     }
 
     public void Reset()
     {
-        _meanSmoother.Reset();
-        _varianceSmoother.Reset();
+        _stdDev.Reset();
     }
 
     public void Dispose()
     {
-        _meanSmoother.Dispose();
-        _varianceSmoother.Dispose();
+        _stdDev.Dispose();
     }
 }
 
