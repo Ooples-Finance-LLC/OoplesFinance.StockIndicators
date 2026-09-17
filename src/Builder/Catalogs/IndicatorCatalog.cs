@@ -41,6 +41,29 @@ public sealed partial class IndicatorCatalog
     }
 
     /// <summary>
+    /// Calculates any indicator by name and continues from one of its published outputs, named directly.
+    /// </summary>
+    /// <param name="name">The indicator name from the IndicatorName enum.</param>
+    /// <param name="outputKey">The published output to continue from, such as "Median" or "R4".</param>
+    /// <param name="parameters">Optional parameters for the indicator (varies by indicator).</param>
+    /// <param name="input">Optional input series. If null, uses default price series.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    /// <returns>A SeriesHandle for that output of the indicator.</returns>
+    /// <remarks>
+    /// The six <see cref="IndicatorOutput"/> slots are assigned positionally and run out, so 14 indicators
+    /// publish keys no slot can address - CamarillaPivotPoints publishes 17 of them. Naming the key reaches
+    /// any published output. Asking for one the indicator does not publish raises rather than answering with
+    /// a different series. See issue #201.
+    /// </remarks>
+    public SeriesHandle Calculate(IndicatorName name, string outputKey, object[]? parameters = null,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var series = input ?? Price();
+        var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(parameters ?? Array.Empty<object>()), outputKey);
+        return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
+    }
+
+    /// <summary>
     /// Gets the parameter information for a specific indicator.
     /// </summary>
     /// <param name="name">The indicator name.</param>

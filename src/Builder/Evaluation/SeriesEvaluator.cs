@@ -191,6 +191,16 @@ internal sealed class SeriesEvaluator
     /// </summary>
     private static string? ResolveOutputKey(IndicatorSpec spec)
     {
+        // A named key wins, and is read before the Primary branch on purpose: a spec built from a key
+        // carries Output = Primary, so checking the slot first would return null and silently discard the
+        // key - answering with the indicator's own value instead of the output that was asked for. The key
+        // is not validated here; the indicator's published outputs are the authority on what it publishes,
+        // and GeneratedIndicatorOutputs.KeysFor knows only the six slots. See issue #201.
+        if (spec.OutputKey is not null)
+        {
+            return spec.OutputKey;
+        }
+
         if (spec.Output == IndicatorOutput.Primary)
         {
             return null;
@@ -393,6 +403,25 @@ internal sealed class SeriesEvaluator
     /// </summary>
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
+        // A named key is answered out of what the indicator actually published, and judged against the same
+        // thing. The six-slot map cannot serve as the authority here: it holds at most six keys per
+        // indicator, so every key this feature exists to reach - CamarillaPivotPoints has eleven - would be
+        // rejected as unpublished. See issue #201.
+        if (spec.OutputKey is not null)
+        {
+            if (result.OutputValues is not null && result.OutputValues.TryGetValue(spec.OutputKey, out var named))
+            {
+                return named.ToArray();
+            }
+
+            var published = result.OutputValues is null || result.OutputValues.Count == 0
+                ? "none"
+                : string.Join(", ", result.OutputValues.Keys);
+
+            throw new CalculationException(
+                $"{spec.Name} does not publish an output named '{spec.OutputKey}'. Available outputs: {published}.");
+        }
+
         var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
         if (key is not null && result.OutputValues.TryGetValue(key, out var list))
         {
