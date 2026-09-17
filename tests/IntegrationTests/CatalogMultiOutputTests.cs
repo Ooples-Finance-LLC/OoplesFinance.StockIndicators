@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Builder.Catalogs;
 
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.IntegrationTests;
@@ -95,5 +96,177 @@ public sealed class CatalogMultiOutputTests : GlobalTestData
         // way round, so this is exactly the comparison a Jaws/Lips swap or duplication shows up in -
         // and the only one of the three that was absent.
         jawSeries.Should().NotEqual(lipsSeries, "the jaws and the lips are different series");
+    }
+
+    /// <summary>
+    /// Every handle of every multi-output catalog result, held to the output it names.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Alligator above was found by accident. These cover the rest of the surface, because the defects all
+    /// sat in the same place: of the nineteen handles the catalog hands out, the ones a test drove were
+    /// correct and the ones nothing drove were not. Stochastic's D, all four of Ichimoku's non-primary
+    /// spans and Keltner's parameters had no test between them.
+    /// </para>
+    /// <para>
+    /// Each handle is compared against the indicator's own named output rather than merely asserted to
+    /// produce values. "Produces values" is true of any series, including another handle's - which is the
+    /// defect this file was created for and the one it caught again here.
+    /// </para>
+    /// </remarks>
+    private static List<double[]> Evaluate(Func<IndicatorCatalog, SeriesHandle[]> configure)
+    {
+        var stockData = new StockData(StockTestData.Take(200));
+        var builder = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(stockData));
+
+        var handles = Array.Empty<SeriesHandle>();
+        builder.ConfigureIndicators(catalog => handles = configure(catalog));
+
+        using var runtime = builder.Build();
+        runtime.Start();
+
+        var series = new List<double[]>(handles.Length);
+        foreach (var handle in handles)
+        {
+            runtime.Subscribe(handle);
+            series.Add(runtime.GetSeries(handle).ToArray());
+        }
+
+        return series;
+    }
+
+    /// <summary>Holds each handle to the batch output it claims to be, and to being its own series.</summary>
+    private static void AssertHandlesAre(List<double[]> actual, StockData batch, params string[] keys)
+    {
+        actual.Should().HaveCount(keys.Length, "one series per handle");
+
+        for (var i = 0; i < keys.Length; i++)
+        {
+            var expected = batch.OutputValues[keys[i]];
+            var overlap = Math.Min(actual[i].Length, expected.Count);
+
+            overlap.Should().BeGreaterThan(0, $"the {keys[i]} handle must produce values");
+            actual[i].Take(overlap).Should().Equal(expected.Take(overlap),
+                $"the catalog handle for {keys[i]} must be that output, not another of them");
+        }
+
+        // Two handles returning one series is the failure mode, so it is asserted directly rather than
+        // left to follow from the comparisons above.
+        for (var i = 0; i < actual.Count; i++)
+        {
+            for (var j = i + 1; j < actual.Count; j++)
+            {
+                actual[i].Should().NotEqual(actual[j],
+                    $"{keys[i]} and {keys[j]} are different outputs and must be different series");
+            }
+        }
+    }
+
+    [Fact]
+    public void Macd_EveryHandleIsTheOutputItNames()
+    {
+        var actual = Evaluate(c => { var r = c.Macd(12, 26, 9); return new[] { r.Primary, r.Signal, r.Histogram }; });
+        var batch = new StockData(StockTestData.Take(200))
+            .CalculateMovingAverageConvergenceDivergence(MovingAvgType.ExponentialMovingAverage, 12, 26, 9);
+
+        AssertHandlesAre(actual, batch, "Macd", "Signal", "Histogram");
+    }
+
+    [Fact]
+    public void BollingerBands_EveryHandleIsTheOutputItNames()
+    {
+        var actual = Evaluate(c => { var r = c.BollingerBands(20, 2); return new[] { r.Upper, r.Middle, r.Lower }; });
+        var batch = new StockData(StockTestData.Take(200))
+            .CalculateBollingerBands(MovingAvgType.SimpleMovingAverage, 20, 2);
+
+        AssertHandlesAre(actual, batch, "UpperBand", "MiddleBand", "LowerBand");
+    }
+
+    /// <summary>
+    /// The D line is the discriminating one: the registry pinned it to "SignalFastK", which this
+    /// indicator does not publish - it publishes FastK, FastD and SlowD.
+    /// </summary>
+    [Fact]
+    public void Stochastic_EveryHandleIsTheOutputItNames()
+    {
+        var actual = Evaluate(c => { var r = c.Stochastic(14, 3); return new[] { r.K, r.D }; });
+        var batch = new StockData(StockTestData.Take(200))
+            .CalculateStochasticOscillator(MovingAvgType.SimpleMovingAverage, 14, 3, 3);
+
+        AssertHandlesAre(actual, batch, "FastK", "FastD");
+    }
+
+    [Fact]
+    public void DonchianChannels_EveryHandleIsTheOutputItNames()
+    {
+        var actual = Evaluate(c => { var r = c.DonchianChannels(20); return new[] { r.Upper, r.Middle, r.Lower }; });
+        var batch = new StockData(StockTestData.Take(200)).CalculateDonchianChannels(20);
+
+        AssertHandlesAre(actual, batch, "UpperChannel", "MiddleChannel", "LowerChannel");
+    }
+
+    /// <summary>
+    /// Keltner's second catalog argument is a band multiplier, and the generated factory reads the second
+    /// generic parameter as the ATR length.
+    /// </summary>
+    /// <remarks>
+    /// The batch side is given the parameters the catalog means - a 20-bar basis, a 10-bar ATR and a
+    /// multiplier of 2 - rather than the ones it currently produces, so a multiplier that lands on the
+    /// wrong parameter shows up as a value mismatch. The existing ordering test cannot see this: upper
+    /// stays above middle stays above lower whatever the ATR length is.
+    /// </remarks>
+    [Fact]
+    public void KeltnerChannels_EveryHandleIsTheOutputItNames()
+    {
+        var actual = Evaluate(c => { var r = c.KeltnerChannels(20, 2); return new[] { r.Upper, r.Middle, r.Lower }; });
+        var batch = new StockData(StockTestData.Take(200)).CalculateKeltnerChannels(
+            MovingAvgType.ExponentialMovingAverage, 20, 10, 2, MovingAvgType.WildersSmoothingMethod);
+
+        AssertHandlesAre(actual, batch, "UpperBand", "MiddleBand", "LowerBand");
+    }
+
+    /// <summary>
+    /// Ichimoku's four published spans, each held to its own output.
+    /// </summary>
+    /// <remarks>
+    /// The registry has no Histogram entry for this indicator, so the fifth handle falls through to the
+    /// generated map, which puts SenkouSpanA on Histogram - two handles, one series. The distinctness
+    /// assertion is what shows that; comparing each against its named output alone would not, since four
+    /// of the five would still match.
+    /// </remarks>
+    [Fact]
+    public void Ichimoku_TheFourPublishedSpansAreTheOutputsTheyName()
+    {
+        var actual = Evaluate(c =>
+        {
+            var r = c.Ichimoku(9, 26, 52);
+            return new[] { r.TenkanSen, r.KijunSen, r.SenkouSpanA, r.SenkouSpanB };
+        });
+        var batch = new StockData(StockTestData.Take(200)).CalculateIchimokuCloud(9, 26, 52);
+
+        AssertHandlesAre(actual, batch, "TenkanSen", "KijunSen", "SenkouSpanA", "SenkouSpanB");
+    }
+
+    /// <summary>
+    /// The Chikou span is the close itself, and CalculateIchimokuCloud does not publish it at all - the
+    /// library computes it as a separate indicator.
+    /// </summary>
+    [Fact]
+    public void Ichimoku_ChikouSpanIsTheChikouSpan()
+    {
+        var actual = Evaluate(c =>
+        {
+            var r = c.Ichimoku(9, 26, 52);
+            return new[] { r.ChikouSpan, r.SenkouSpanA };
+        });
+        var batch = new StockData(StockTestData.Take(200)).CalculateIchimokuChikouSpan();
+        var expected = batch.OutputValues["ChikouSpan"];
+        var overlap = Math.Min(actual[0].Length, expected.Count);
+
+        overlap.Should().BeGreaterThan(0, "the Chikou span handle must produce values");
+        actual[0].Take(overlap).Should().Equal(expected.Take(overlap),
+            "the ChikouSpan handle must be the Chikou span, which IchimokuCloud does not publish");
+        actual[0].Should().NotEqual(actual[1],
+            "the Chikou span and Senkou Span A are different series, not one series behind two handles");
     }
 }

@@ -432,8 +432,11 @@ public static class IndicatorOutputRegistry
         { (IndicatorName.BollingerBands, IndicatorOutput.MiddleBand), "MiddleBand" },
         { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
 
-        // Stochastic outputs (K/D lines)
-        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "SignalFastK" },
+        // Stochastic outputs (K/D lines). The D line is "FastD": the indicator publishes FastK, FastD and
+        // SlowD, and nothing anywhere publishes "SignalFastK". A key that resolves to nothing does not
+        // raise here - BuilderArmBinding answers an unpublished key with the series the indicator does
+        // publish - so the D handle silently returned the K line, two handles over one series.
+        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "FastD" },
 
         // ADX outputs (DI+, DI-, ADX)
         { (IndicatorName.AverageDirectionalIndex, IndicatorOutput.Signal), "Adx" },
