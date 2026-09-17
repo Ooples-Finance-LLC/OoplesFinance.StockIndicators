@@ -2608,7 +2608,7 @@ public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState,
         var filt = _firstSmoother.Next(deriv, isFinal);
         var filtMa1 = _secondSmoother.Next(filt, isFinal);
         var filtMa2 = _thirdSmoother.Next(filtMa1, isFinal);
-        var roc = (_length / 2) * Math.PI * (filtMa2 - _prevFilt);
+        var roc = (_length / 2.0) * Math.PI * (filtMa2 - _prevFilt);
 
         if (isFinal)
         {
@@ -3740,7 +3740,7 @@ public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorStat
         var value = _input.GetValue(bar);
         var deriv = value - bar.Open;
         var filt = _smoother.Next(deriv, isFinal);
-        var roc = (_length / 2) * Math.PI * (filt - _prevFilt);
+        var roc = (_length / 2.0) * Math.PI * (filt - _prevFilt);
 
         if (isFinal)
         {

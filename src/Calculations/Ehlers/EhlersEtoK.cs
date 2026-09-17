@@ -864,7 +864,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
@@ -918,7 +918,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
@@ -1115,19 +1115,19 @@ public static partial class Calculations
             var bp1 = i <= 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1_1) - (s1 * prevBp1_2);
             bp1List.Add(bp1);
 
-            var q1 = i <= 4 ? 0 : length / 2 * Math.PI * (bp1 - prevBp1_1);
+            var q1 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp1 - prevBp1_1);
             q1List.Add(q1);
 
             var bp2 = i <= 3 ? 0 : (0.5 * (1 - s2) * (currentValue - prevValue)) + (l2 * (1 + s2) * prevBp2_1) - (s2 * prevBp2_2);
             bp2List.Add(bp2);
 
-            var q2 = i <= 4 ? 0 : length / 2 * Math.PI * (bp2 - prevBp2_1);
+            var q2 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp2 - prevBp2_1);
             q2List.Add(q2);
 
             var bp3 = i <= 3 ? 0 : (0.5 * (1 - s3) * (currentValue - prevValue)) + (l3 * (1 + s3) * prevBp3_1) - (s3 * prevBp3_2);
             bp3List.Add(bp3);
 
-            var q3 = i <= 4 ? 0 : length / 2 * Math.PI * (bp3 - prevBp3_1);
+            var q3 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp3 - prevBp3_1);
             q3List.Add(q3);
 
             double p1 = 0, p2 = 0, p3 = 0;
