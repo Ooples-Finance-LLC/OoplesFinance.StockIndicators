@@ -1649,7 +1649,11 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
         var prevValue = _hasPrev ? _prevValue : 0;
         var temp = prevValue != 0 ? value / prevValue : 0;
         var ccLog = temp > 0 ? Math.Log(temp) : 0;
-        var ccDev = _ccDev.Next(ccLog, isFinal);
+
+        // The first bar's log return is fabricated, so it is kept out of the window entirely rather than
+        // counted as an observation. The window then fills one bar later, at index length1, which is where
+        // the batch publishes its first value too - neither counts it, so the two stay aligned. See #209.
+        var ccDev = _hasPrev ? _ccDev.Next(ccLog, isFinal) : 0;
         var ccDevAvg = _ccDevAvg.Next(ccDev, isFinal);
 
         double max1 = 0;

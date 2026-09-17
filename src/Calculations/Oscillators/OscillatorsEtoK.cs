@@ -2100,6 +2100,18 @@ public static partial class Calculations
         // The deviation of the log-return window about its own mean, which the readings below divide by.
         // See #190.
         var ccDevList = GetStandardDeviationList(ccLogList, length1);
+
+        // The first bar has no prior close, so its log return is a fabricated zero rather than a return. A
+        // window still holding it is one genuine return short, and here that dilution does not stay put: the
+        // deviation is smoothed and then divided by, so a too-small divisor inflates the readings for as
+        // long as the average carries it. Suppressed before the smoothing rather than at consumption, for
+        // that reason. Nothing is published until index length1, where the window is returns 1..length1.
+        // See #209.
+        for (var i = 0; i < length1 && i < ccDevList.Count; i++)
+        {
+            ccDevList[i] = 0;
+        }
+
         var ccDevAvgList = GetMovingAverageList(stockData, maType, length2, ccDevList);
         for (var i = 0; i < stockData.Count; i++)
         {
