@@ -355,7 +355,6 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
         // Volatility - VolatilityCore (Additional Batch 3)
         "StandardDeviationChannel",
-        "StandardDeviationVolatility",
         "AverageTrueRangeChannel",
         "VolatilityRatio",
 
@@ -1299,7 +1298,6 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
 
             // Volatility (Additional Batch 3)
             "StandardDeviationChannel" => "ComputeStandardDeviationChannelFast",
-            "StandardDeviationVolatility" => "ComputeStandardDeviationVolatilityFast",
             "AverageTrueRangeChannel" => "ComputeAverageTrueRangeChannelFast",
             "VolatilityRatio" => "ComputeVolatilityRatioFast",
 

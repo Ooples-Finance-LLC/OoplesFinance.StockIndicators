@@ -257,6 +257,64 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         }
     }
 
+    /// <summary>
+    /// Historical volatility is the deviation of the log returns about their own mean, annualised.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// On a series whose close alternates between P and P*r, the log returns alternate between +ln(r) and
+    /// -ln(r). Over an even window their mean is exactly zero and every squared deviation is (ln r)^2, so
+    /// the deviation is exactly ln(r) and the published value is 100 * ln(r) * sqrt(365). A closed form,
+    /// with no second implementation to compare against.
+    /// </para>
+    /// <para>
+    /// The indicator took its dispersion from CalculateStandardDeviationVolatility, which smooths the log
+    /// returns and measures each bar's distance from that smoothed line rather than the spread of the window
+    /// about its own mean. Historical volatility is defined as the standard deviation of returns, so that
+    /// was the wrong quantity for the one indicator whose whole definition names it. See #190.
+    /// </para>
+    /// <para>
+    /// The fixture has to alternate. A constant series and a geometric one both have log returns that never
+    /// vary, so their deviation is zero under either quantity and the test would pass against the defect it
+    /// was written for.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(14, 1.01)]
+    [InlineData(20, 1.02)]
+    public void HistoricalVolatility_IsTheDeviationOfItsLogReturns(int length, double ratio)
+    {
+        var bars = AlternatingReturnSeries(length + 40, 100.0, ratio);
+        var expected = 100 * Math.Log(ratio) * Math.Sqrt(365);
+        const double tolerance = 1e-7;
+
+        var batch = new StockData(bars)
+            .CalculateHistoricalVolatility(MovingAvgType.ExponentialMovingAverage, length)
+            .CustomValuesList;
+
+        using var state = new HistoricalVolatilityState(MovingAvgType.ExponentialMovingAverage, length);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        // Bar 0 has no prior bar, so its log return is zero and any window still holding it is not
+        // alternating. From bar length + 1 the window carries genuine returns only.
+        for (var i = length + 1; i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected, tolerance,
+                $"alternating returns of +/-ln({ratio}) have a deviation of exactly ln({ratio}), so the "
+                + $"annualised value is {expected:F6} (bar {i})");
+            streaming[i].Should().BeApproximately(expected, tolerance,
+                $"the streaming state computes what the batch computes (bar {i})");
+        }
+    }
+
     #region Reference formula implementations
 
     /// <summary>
@@ -426,6 +484,37 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
                 High = price,
                 Low = price,
                 Close = price,
+                Volume = 1_000_000
+            });
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// A series whose close alternates between a price and that price times <paramref name="ratio"/>.
+    /// </summary>
+    /// <remarks>
+    /// Its log returns alternate between +ln(ratio) and -ln(ratio), so over an even window their mean is
+    /// exactly zero and every squared deviation is the same, making the population deviation exactly
+    /// ln(ratio). That gives historical volatility a closed form to be held to, which neither a constant nor
+    /// a geometric series can: both have log returns that never vary, so their deviation is zero under any
+    /// definition - and zero is also what the defect produced, so such a fixture would pass against it.
+    /// </remarks>
+    private static List<TickerData> AlternatingReturnSeries(int count, double start, double ratio)
+    {
+        var data = new List<TickerData>(count);
+        var date = new DateTime(2024, 1, 1);
+        for (var i = 0; i < count; i++)
+        {
+            var close = i % 2 == 0 ? start : start * ratio;
+            data.Add(new TickerData
+            {
+                Date = date.AddDays(i),
+                Open = close,
+                High = close,
+                Low = close,
+                Close = close,
                 Volume = 1_000_000
             });
         }

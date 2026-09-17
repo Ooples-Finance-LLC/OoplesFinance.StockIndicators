@@ -4723,7 +4723,8 @@ public sealed class DonchianChannelWidthState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Hv")]
 public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the log-return window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _annualSqrt;
     private double _prevValue;
@@ -4732,7 +4733,7 @@ public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDispo
 
     public HistoricalVolatilityState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
     {
-        _stdDev = new StandardDeviationVolatilityState(maType, length, _ => _logReturn);
+        _stdDev = new RollingStandardDeviation(length);
         _input = new StreamingInputResolver(InputName.Close, null);
         _annualSqrt = MathHelper.Sqrt(365);
     }
@@ -4753,7 +4754,7 @@ public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDispo
         var prevValue = _hasPrev ? _prevValue : 0;
         var temp = prevValue != 0 ? value / prevValue : 0;
         _logReturn = temp > 0 ? Math.Log(temp) : 0;
-        var stdDevLog = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDevLog = _stdDev.Next(_logReturn, isFinal);
         var hv = 100 * stdDevLog * _annualSqrt;
 
         if (isFinal)
