@@ -1641,8 +1641,13 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
         var c = sma + (0.25 * stdDev);
         var d = sma + (1.75 * stdDev);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
-        var length = MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-            _maxLength, _minLength);
+
+        // No deviation yet means no signal to move the length on, matching the batch calculation and the
+        // variable-length average this decision is repeated from; see #190.
+        var length = stdDev == 0
+            ? prevLength
+            : MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
+                _maxLength, _minLength);
         var len = Math.Max(1, (int)length);
         var typical = (bar.High + bar.Low + bar.Close) / 3d;
         var rawFlow = typical * bar.Volume;

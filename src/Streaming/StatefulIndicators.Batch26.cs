@@ -569,8 +569,12 @@ public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState,
         var c = sma + (0.25 * stdDev);
         var d = sma + (1.75 * stdDev);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
-        var length = MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-            _maxLength, _minLength);
+
+        // No deviation yet means no signal to move the length on, matching the batch calculation; see #190.
+        var length = stdDev == 0
+            ? prevLength
+            : MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
+                _maxLength, _minLength);
         var sc = 2 / (length + 1);
         var prevVlma = _hasPrev ? _prevVlma : value;
         var vlma = (value * sc) + ((1 - sc) * prevVlma);

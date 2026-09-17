@@ -96,6 +96,49 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
     }
 
     /// <summary>
+    /// The variable length moving average holds its length while there is no deviation to judge it by.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The length moves on where the price sits against four levels drawn at 0.25 and 1.75 sigma either side
+    /// of the average: inside the inner pair it lengthens, outside the outer pair it shortens, and between
+    /// them it holds. Until the window fills there is no sigma, and the windowed deviation says so by
+    /// publishing 0 - which collapses all four levels onto the average itself. A price that is not exactly on
+    /// the average is then outside the outer pair by construction, so the length shortens on every warm-up
+    /// bar. Measured rather than inferred: without the hold, bar 0 alone already reads 49 of 50 and 39 of 40,
+    /// and this test passing across the whole warm-up range is what shows the length no longer drifts at all.
+    /// </para>
+    /// <para>
+    /// That is shortening on the absence of a measurement rather than on a measurement, and a zero-width band
+    /// is not evidence of low volatility. It is also a regression introduced by taking the windowed deviation
+    /// here: the quantity this replaced published a value from the first bar, so the levels were never
+    /// degenerate and the question never arose. The parity sweeps cannot see it, because both engines shorten
+    /// in step - which is the blind spot this file exists for.
+    /// </para>
+    /// <para>
+    /// A constant series cannot test this. There the price sits exactly on the average, the inner branch wins,
+    /// and the length is pinned at its maximum whichever way the question is decided. It takes a trend.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(5, 50)]
+    [InlineData(10, 40)]
+    public void VariableLengthMovingAverage_HoldsItsLengthWhileThereIsNoDeviationYet(int minLength, int maxLength)
+    {
+        var bars = LinearSeries(maxLength + 40, 100.0, 2.5);
+
+        var result = new StockData(bars)
+            .CalculateVariableLengthMovingAverage(MovingAvgType.SimpleMovingAverage, minLength, maxLength);
+        var lengths = result.OutputValues["Length"];
+
+        for (var i = 0; i < maxLength - 1; i++)
+        {
+            lengths[i].Should().Be(maxLength,
+                $"there is no {maxLength}-bar deviation at bar {i}, so nothing yet says the length should move");
+        }
+    }
+
+    /// <summary>
     /// The scatter about the fitted line is zero when the window lies exactly on a line.
     /// </summary>
     /// <remarks>
