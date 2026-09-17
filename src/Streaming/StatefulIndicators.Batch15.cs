@@ -1253,7 +1253,9 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _dtrAvg;
-    private readonly StandardDeviationVolatilityState _dtrStd;
+
+    // The deviation of the true-range window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _dtrStd;
     private readonly PooledRingBuffer<double> _lowValues;
     private readonly PooledRingBuffer<double> _closeValues;
     private StreamingInputResolver _input;
@@ -1261,7 +1263,6 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
     private readonly double _stdDev2;
     private readonly double _stdDev3;
     private readonly double _stdDev4;
-    private double _dtrValue;
 
     public KaseDevStopV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20,
         double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
@@ -1272,7 +1273,7 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
         _dtrAvg = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dtrStd = new StandardDeviationVolatilityState(maType, resolved, _ => _dtrValue);
+        _dtrStd = new RollingStandardDeviation(resolved);
         _lowValues = new PooledRingBuffer<double>(2);
         _closeValues = new PooledRingBuffer<double>(2);
         _input = new StreamingInputResolver(InputName.TypicalPrice, null);
@@ -1295,7 +1296,6 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
         _dtrStd.Reset();
         _lowValues.Clear();
         _closeValues.Clear();
-        _dtrValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1304,9 +1304,8 @@ public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, 
         var prevClose = EhlersStreamingWindow.GetOffsetValue(_closeValues, 2);
         var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, 2);
         var dtr = Math.Max(Math.Max(bar.High - prevLow, Math.Abs(bar.High - prevClose)), Math.Abs(bar.Low - prevClose));
-        _dtrValue = dtr;
         var dtrAvg = _dtrAvg.Next(dtr, isFinal);
-        var dtrStd = _dtrStd.Update(bar, isFinal, includeOutputs: false).Value;
+        var dtrStd = _dtrStd.Next(dtr, isFinal);
         var maFast = _fastSmoother.Next(value, isFinal);
         var maSlow = _slowSmoother.Next(value, isFinal);
 
@@ -1361,7 +1360,9 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _rangeAvg;
-    private readonly StandardDeviationVolatilityState _rangeStd;
+
+    // The deviation of the range window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _rangeStd;
     private readonly PooledRingBuffer<double> _highValues;
     private readonly PooledRingBuffer<double> _lowValues;
     private readonly PooledRingBuffer<double> _inputValues;
@@ -1370,7 +1371,6 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
     private readonly double _stdDev2;
     private readonly double _stdDev3;
     private readonly double _stdDev4;
-    private double _rangeValue;
 
     public KaseDevStopV2State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 10, int slowLength = 21, int length = 20, double stdDev1 = 0, double stdDev2 = 1,
@@ -1382,7 +1382,7 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
         _rangeAvg = MovingAverageSmootherFactory.Create(maType, resolved);
-        _rangeStd = new StandardDeviationVolatilityState(maType, resolved, _ => _rangeValue);
+        _rangeStd = new RollingStandardDeviation(resolved);
         _highValues = new PooledRingBuffer<double>(2);
         _lowValues = new PooledRingBuffer<double>(2);
         _inputValues = new PooledRingBuffer<double>(2);
@@ -1404,7 +1404,6 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
         _highValues.Clear();
         _lowValues.Clear();
         _inputValues.Clear();
-        _rangeValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1422,9 +1421,8 @@ public sealed class KaseDevStopV2State : IStreamingIndicatorState, IDisposable
         var mmax = Math.Max(Math.Max(bar.High, prevHigh), prevClose);
         var mmin = Math.Min(Math.Min(bar.Low, prevLow), prevClose);
         var rrange = mmax - mmin;
-        _rangeValue = rrange;
         var avg = _rangeAvg.Next(rrange, isFinal);
-        var dev = _rangeStd.Update(bar, isFinal, includeOutputs: false).Value;
+        var dev = _rangeStd.Next(rrange, isFinal);
 
         var val = (price + (-1 * trend)) * (avg + (_stdDev1 * dev));
         var val1 = (price + (-1 * trend)) * (avg + (_stdDev2 * dev));
@@ -1601,14 +1599,14 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
     private readonly int _fastLength;
     private readonly int _slowLength;
     private readonly double _sensitivity;
-    private readonly StandardDeviationVolatilityState _ccDev;
+    // The deviation of the log-return window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _ccDev;
     private readonly IMovingAverageSmoother _ccDevAvg;
     private readonly RollingWindowSum _x1Sum;
     private readonly RollingWindowSum _x2Sum;
     private readonly PooledRingBuffer<double> _highValues;
     private readonly PooledRingBuffer<double> _lowValues;
     private readonly StreamingInputResolver _input;
-    private double _ccLogValue;
     private double _prevValue;
     private bool _hasPrev;
 
@@ -1622,7 +1620,7 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
         var resolvedLength1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         var resolvedSmooth = Math.Max(1, smoothLength);
-        _ccDev = new StandardDeviationVolatilityState(maType, resolvedLength1, _ => _ccLogValue);
+        _ccDev = new RollingStandardDeviation(resolvedLength1);
         _ccDevAvg = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
         _x1Sum = new RollingWindowSum(resolvedSmooth);
         _x2Sum = new RollingWindowSum(resolvedSmooth);
@@ -1641,7 +1639,6 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
         _x2Sum.Reset();
         _highValues.Clear();
         _lowValues.Clear();
-        _ccLogValue = 0;
         _prevValue = 0;
         _hasPrev = false;
     }
@@ -1651,8 +1648,8 @@ public sealed class KasePeakOscillatorV2State : IStreamingIndicatorState, IDispo
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var temp = prevValue != 0 ? value / prevValue : 0;
-        _ccLogValue = temp > 0 ? Math.Log(temp) : 0;
-        var ccDev = _ccDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var ccLog = temp > 0 ? Math.Log(temp) : 0;
+        var ccDev = _ccDev.Next(ccLog, isFinal);
         var ccDevAvg = _ccDevAvg.Next(ccDev, isFinal);
 
         double max1 = 0;
@@ -2013,12 +2010,15 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
     private readonly WilderState _atr;
     private readonly IMovingAverageSmoother _pkSmoother;
     private readonly IMovingAverageSmoother _mnSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the peak-oscillator window about its own mean, matching the batch calculation; see
+    // #190. This engine is the third implementation of the Kase peak oscillator: the batch, the V1 state,
+    // and this, which KasePeakOscillatorV1State and KaseConvergenceDivergenceState both compose.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _highValues;
     private readonly PooledRingBuffer<double> _lowValues;
     private double _prevClose;
     private bool _hasPrev;
-    private double _pkValue;
 
     public KasePeakOscillatorV1Engine(int length, int smoothLength)
     {
@@ -2027,7 +2027,7 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
         _atr = new WilderState(_length);
         _pkSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, smoothLength));
         _mnSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, _length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length, _ => _pkValue);
+        _stdDev = new RollingStandardDeviation(_length);
         _highValues = new PooledRingBuffer<double>(_length);
         _lowValues = new PooledRingBuffer<double>(_length);
     }
@@ -2044,8 +2044,7 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
         var rwl = atr != 0 ? (prevHigh - bar.Low) / atr * _sqrtLength : 0;
         var diff = rwh - rwl;
         var pk = _pkSmoother.Next(diff, isFinal);
-        _pkValue = pk;
-        stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        stdDev = _stdDev.Next(pk, isFinal);
         mn = _mnSmoother.Next(pk, isFinal);
 
         if (isFinal)
@@ -2069,7 +2068,6 @@ internal sealed class KasePeakOscillatorV1Engine : IDisposable
         _lowValues.Clear();
         _prevClose = 0;
         _hasPrev = false;
-        _pkValue = 0;
     }
 
     public void Dispose()

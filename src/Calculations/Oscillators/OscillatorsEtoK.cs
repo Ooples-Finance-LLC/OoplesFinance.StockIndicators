@@ -2024,8 +2024,9 @@ public static partial class Calculations
 
         var pkList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, smoothLength, diffList);
         var mnList = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, length, pkList);
-        stockData.SetCustomValues(pkList);
-        var sdList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the peak-oscillator window about its own mean; the levels below are mn + 1.33 * sd,
+        // a band at a multiple of sigma. See #190.
+        var sdList = GetStandardDeviationList(pkList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var pk = pkList[i];
@@ -2096,8 +2097,9 @@ public static partial class Calculations
             ccLogList.Add(ccLog);
         }
 
-        stockData.SetCustomValues(ccLogList);
-        var ccDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
+        // The deviation of the log-return window about its own mean, which the readings below divide by.
+        // See #190.
+        var ccDevList = GetStandardDeviationList(ccLogList, length1);
         var ccDevAvgList = GetMovingAverageList(stockData, maType, length2, ccDevList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2136,8 +2138,8 @@ public static partial class Calculations
             xpAbsAvgList.Add(xpAbsAvg);
         }
 
-        stockData.SetCustomValues(xpAbsList);
-        var xpAbsStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length3).ChainedValues;
+        // The deviation of that window about its own mean, again as a band multiplier below. See #190.
+        var xpAbsStdDevList = GetStandardDeviationList(xpAbsList, length3);
         for (var i = 0; i < stockData.Count; i++)
         {
             var xpAbsAvg = xpAbsAvgList[i];
