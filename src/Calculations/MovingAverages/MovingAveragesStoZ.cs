@@ -470,24 +470,11 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var sma = smaList[i];
             var stdDev = stdDevList[i];
-            var a = sma - (1.75 * stdDev);
-            var b = sma - (0.25 * stdDev);
-            var c = sma + (0.25 * stdDev);
-            var d = sma + (1.75 * stdDev);
-
             var prevLength = i >= 1 ? lengthList[i - 1] : maxLength;
 
-            // No deviation yet means no signal to move the length on. Until the window fills the windowed
-            // deviation is 0, which collapses all four levels onto the average, so a price that is not exactly
-            // on the average is outside the outer pair by construction and the length shortens on every
-            // warm-up bar - measured at 49 of 50 by bar 0 alone. That is shortening on the absence of a
-            // measurement rather than on one, and a zero-width band is not evidence of low volatility. A
-            // genuinely flat window reads 0 too and carries no dispersion signal either, so holding is right
-            // there as well. See #190.
-            var length = stdDev == 0
-                ? prevLength
-                : MinOrMax(currentValue >= b && currentValue <= c ? prevLength + 1 : currentValue < a ||
-                    currentValue > d ? prevLength - 1 : prevLength, maxLength, minLength);
+            // One decision, in one place: the streaming state and UltimateMovingAverageState take the same
+            // one, and a copy here could drift from theirs. See MovingAverageCore.VariableLength and #190.
+            var length = MovingAverageCore.VariableLength(currentValue, sma, stdDev, prevLength, minLength, maxLength);
             lengthList.Add(length);
 
             var sc = 2 / (length + 1);

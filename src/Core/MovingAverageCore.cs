@@ -39,6 +39,62 @@ internal static class MovingAverageCore
         }
     }
 
+    /// <summary>
+    /// The variable-length average's next length: the one decision, in one place.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The length moves on where the value sits against four levels drawn at 0.25 and 1.75 deviations either
+    /// side of the average. Inside the inner pair it lengthens, outside the outer pair it shortens, between
+    /// them it holds. A deviation of 0 holds too: until the window fills there is no deviation, which would
+    /// collapse all four levels onto the average and make any value not exactly on it "outside" by
+    /// construction - shortening on the absence of a measurement rather than on one. A genuinely flat window
+    /// reads 0 as well and carries no dispersion signal either. See issue #190.
+    /// </para>
+    /// <para>
+    /// This is here because three places computed it: the batch calculation, the variable-length streaming
+    /// state, and UltimateMovingAverageState, which repeats the decision inline because the batch ultimate
+    /// moving average reads the variable-length average's own Length output. Converting the deviation in only
+    /// some of them made the engines choose different lengths, which compounds because each bar's length
+    /// carries into the next, and the streaming parity sweeps caught it at bar 49. One copy cannot drift from
+    /// another.
+    /// </para>
+    /// </remarks>
+    /// <param name="value">The bar's resolved input value.</param>
+    /// <param name="average">The moving average the levels are measured from.</param>
+    /// <param name="deviation">The deviation of the window about its own mean, or 0 where none is known yet.</param>
+    /// <param name="previousLength">The length carried in from the previous bar.</param>
+    /// <param name="minLength">The shortest length allowed.</param>
+    /// <param name="maxLength">The longest length allowed.</param>
+    internal static double VariableLength(double value, double average, double deviation, double previousLength,
+        int minLength, int maxLength)
+    {
+        if (deviation == 0)
+        {
+            return previousLength;
+        }
+
+        var inner = 0.25 * deviation;
+        var outer = 1.75 * deviation;
+
+        double next;
+        if (value >= average - inner && value <= average + inner)
+        {
+            next = previousLength + 1;
+        }
+        else if (value < average - outer || value > average + outer)
+        {
+            next = previousLength - 1;
+        }
+        else
+        {
+            next = previousLength;
+        }
+
+        // Max then min, as both call sites clamped it.
+        return MathHelper.MinOrMax(next, maxLength, minLength);
+    }
+
     internal static void WeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         if (output.Length < input.Length)

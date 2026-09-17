@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
+using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -564,17 +565,10 @@ public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState,
 
         // Fed the resolved input rather than the bar, so this measures the same series the average above does.
         var stdDev = _stdDev.Next(value, isFinal);
-        var a = sma - (1.75 * stdDev);
-        var b = sma - (0.25 * stdDev);
-        var c = sma + (0.25 * stdDev);
-        var d = sma + (1.75 * stdDev);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
 
-        // No deviation yet means no signal to move the length on, matching the batch calculation; see #190.
-        var length = stdDev == 0
-            ? prevLength
-            : MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-                _maxLength, _minLength);
+        // The same decision the batch calculation takes, from the same place. See #190.
+        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
         var sc = 2 / (length + 1);
         var prevVlma = _hasPrev ? _prevVlma : value;
         var vlma = (value * sc) + ((1 - sc) * prevVlma);

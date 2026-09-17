@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
+using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -1636,18 +1637,12 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
 
         // Fed the resolved input rather than the bar, so this measures the same series the average above does.
         var stdDev = _stdDev.Next(value, isFinal);
-        var a = sma - (1.75 * stdDev);
-        var b = sma - (0.25 * stdDev);
-        var c = sma + (0.25 * stdDev);
-        var d = sma + (1.75 * stdDev);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
 
-        // No deviation yet means no signal to move the length on, matching the batch calculation and the
-        // variable-length average this decision is repeated from; see #190.
-        var length = stdDev == 0
-            ? prevLength
-            : MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-                _maxLength, _minLength);
+        // The variable-length average's decision, taken from the one place that holds it rather than repeated
+        // here: the batch ultimate moving average reads that indicator's own Length output, so a copy here
+        // could disagree with it. See #190.
+        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
         var len = Math.Max(1, (int)length);
         var typical = (bar.High + bar.Low + bar.Close) / 3d;
         var rawFlow = typical * bar.Volume;
