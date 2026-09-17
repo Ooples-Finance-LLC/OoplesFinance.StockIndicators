@@ -2135,6 +2135,36 @@ public static class CalculationsHelper
     /// whole-series sum could not be computed by a streaming state at all.
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// Whether <paramref name="value"/> lies inside the bar's range, and so is price-like under the per-bar
+    /// rule described on <see cref="GetCustomRangeLists"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The comparison allows for rounding, because an exact one would let a rounding artefact decide a
+    /// question about meaning. A typical price is (high + low + close) / 3, and on a bar with no range of
+    /// its own that is (c + c + c) / 3, which does not always round-trip to c. Where it does not, an exact
+    /// test puts a price-like value in the "its own scale" branch and gives the bar a range it never had -
+    /// the bar-to-bar move instead of zero. That is issue #212.
+    /// </para>
+    /// <para>
+    /// The tolerance cannot reclassify a series that genuinely has its own scale: those are outside by
+    /// whole units, such as the log close near 5 measured against highs near 180 that this rule exists to
+    /// catch. It is scaled to the prices involved so that it means the same thing at any magnitude, and
+    /// has no floor for that reason: flooring the scale at one unit stops it scaling below a price of 1
+    /// and leaves a flat absolute 1e-12, which on a bar near 1e-8 is a hundred million times looser than
+    /// the same rule applied at 180. Sub-unit prices are ordinary, so the floor was not a safe default.
+    /// Nothing is lost at zero, where the rounding this allows for cannot arise: (0 + 0 + 0) / 3 is
+    /// exactly 0. Raised by review on PR #215.
+    /// </para>
+    /// </remarks>
+    internal static bool IsWithinBarRange(double value, double low, double high)
+    {
+        var tolerance = 1e-12 * Math.Max(Math.Abs(high), Math.Abs(low));
+
+        return value >= low - tolerance && value <= high + tolerance;
+    }
+
     internal static (List<double> HighList, List<double> LowList) GetCustomRangeLists(IReadOnlyList<double> values,
         IReadOnlyList<double> highs, IReadOnlyList<double> lows)
     {
@@ -2148,7 +2178,7 @@ public static class CalculationsHelper
             var high = i < highs.Count ? highs[i] : value;
             var low = i < lows.Count ? lows[i] : value;
 
-            if (value >= low && value <= high)
+            if (IsWithinBarRange(value, low, high))
             {
                 highList.Add(high);
                 lowList.Add(low);
