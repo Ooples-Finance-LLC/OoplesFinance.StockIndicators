@@ -129,7 +129,35 @@ public sealed class IndicatorReachabilityAnalyzer : DiagnosticAnalyzer
         body.DescendantNodes()
             .OfType<AssignmentExpressionSyntax>()
             .Any(assignment => assignment.Left is MemberAccessExpressionSyntax left
-                && left.Name.Identifier.Text == "IndicatorName");
+                && left.Name.Identifier.Text == "IndicatorName"
+                && NamesAnIndicator(assignment.Right));
+
+    /// <summary>
+    /// Whether the value assigned actually names an indicator.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <c>default</c> and <c>IndicatorName.None</c> both satisfy "there is an assignment" while leaving the
+    /// calculation exactly as unreachable as assigning nothing at all: IndicatorOutputMapGenerator emits an
+    /// entry only for a concrete member that is not None, and HelperRoutedOutputs applies the same rule to
+    /// the names it resolves. Accepting a sentinel here would let this rule pass on a calculation the
+    /// Builder still cannot reach, which is the one thing it exists to prevent.
+    /// </para>
+    /// <para>
+    /// A bare identifier is accepted on purpose. That is a helper handing on the name it was given, and the
+    /// literal it stands for sits at the caller rather than here - <c>HelperRoutedOutputs</c> resolves it
+    /// across the two, so this rule must not demand a literal the method cannot have.
+    /// </para>
+    /// </remarks>
+    private static bool NamesAnIndicator(ExpressionSyntax value) => value switch
+    {
+        MemberAccessExpressionSyntax member =>
+            member.Expression is IdentifierNameSyntax qualifier
+            && qualifier.Identifier.Text == "IndicatorName"
+            && member.Name.Identifier.Text != "None",
+        IdentifierNameSyntax => true,
+        _ => false
+    };
 
     /// <summary>
     /// Whether it passes an <c>IndicatorName</c> to something else, which is how the routed calculations
@@ -141,5 +169,6 @@ public sealed class IndicatorReachabilityAnalyzer : DiagnosticAnalyzer
             .SelectMany(invocation => invocation.ArgumentList.Arguments)
             .Any(argument => argument.Expression is MemberAccessExpressionSyntax member
                 && member.Expression is IdentifierNameSyntax name
-                && name.Identifier.Text == "IndicatorName");
+                && name.Identifier.Text == "IndicatorName"
+                && member.Name.Identifier.Text != "None");
 }
