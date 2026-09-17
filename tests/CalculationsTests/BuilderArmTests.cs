@@ -131,6 +131,16 @@ public sealed class BuilderArmTests : GlobalTestData
                 double[]? primary = null;
                 foreach (IndicatorOutput output in Enum.GetValues(typeof(IndicatorOutput)))
                 {
+                    // A slot the indicator publishes no key for has nothing to compare. It used to pass because
+                    // both sides answered with the primary series - the arm and the batch indicator agreeing on
+                    // a series neither was asked for - and both now refuse instead. A key that resolves but is
+                    // not published is NOT skipped: that is a wrong pin rather than an absent slot.
+                    if (output != IndicatorOutput.Primary
+                        && IndicatorOutputRegistry.GetOutputKey(target.Name, output) is null)
+                    {
+                        continue;
+                    }
+
                     var spec = new IndicatorSpec(target.Name, options, output);
                     double[]? arm;
                     try

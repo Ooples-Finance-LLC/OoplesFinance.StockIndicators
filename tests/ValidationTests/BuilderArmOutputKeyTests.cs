@@ -2,102 +2,116 @@ using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Exceptions;
+using OoplesFinance.StockIndicators.Tests.Unit.CalculationsTests;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 /// <summary>
-/// A Builder slot served by a typed spec's batch indicator answers with the series it was asked for, or fails -
-/// never with the primary series wearing another slot's name.
+/// A Builder slot an indicator does not publish is refused, rather than answered with its primary series.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <see cref="BuilderArmBinding"/> ends by answering an unresolved slot with the indicator's primary series:
-/// </para>
-/// <code>
-/// if (key is null) { return result.CustomValuesList; }
-/// return result.ChainedOutputs.TryGetValue(key, out var series) ? series : result.ChainedValues;
-/// </code>
-/// <para>
-/// That is the defect #186 removed from <c>SeriesEvaluator</c>, which now raises instead, saying so in its own
-/// words: answering a slot the indicator does not produce "would be a wrong number rather than an error". The
-/// same substitution survived here, in the other resolver.
+/// <see cref="BuilderArmBinding"/> used to end by handing back the primary series whenever it could not resolve
+/// the slot it was asked for. That is the defect #186 removed from <c>SeriesEvaluator</c>, which raises instead
+/// and says why in its own words: a slot the indicator does not produce "would be a wrong number rather than an
+/// error". The substitution survived in the other resolver, defended by a comment claiming the registry invents
+/// a key for any indicator - which stopped being true when <c>IndicatorOutputRegistry</c> was changed to stop
+/// guessing. The fallback outlived its own justification.
 /// </para>
 /// <para>
-/// It is reachable from the public Builder rather than from tests alone. <c>IndicatorCompute.TryComputeFast</c>
-/// routes every typed spec whose (options, output) pair is not among the verified arms straight to
-/// <see cref="BuilderArmBinding"/>, so of the arm table's slots only the verified ones compute themselves and
-/// all the rest land on this fallback.
+/// It is reachable from the public Builder, not from tests alone: <c>IndicatorCompute.TryComputeFast</c> sends
+/// every typed spec whose (options, output) pair is not among the verified arms straight to
+/// <see cref="BuilderArmBinding"/>. Over 845 arm targets and six slots less the 213 verified arms, 4857
+/// combinations reach it, and 3594 of those name a slot the indicator publishes no key for.
 /// </para>
 /// <para>
-/// The comment defending the fallback - that the registry "answers UpperBand, MiddleBand, LowerBand, Signal and
-/// Histogram for any indicator, whether or not it publishes one" - describes behaviour that no longer exists.
-/// <c>IndicatorOutputRegistry.GetOutputKey</c> was changed to stop guessing, and says so: "a slot either has a
-/// key the indicator genuinely publishes or it has none". The fallback outlived its own justification.
-/// </para>
-/// <para>
-/// This resolves each slot exactly as <c>BuilderArmBinding.Compute</c> does and holds the answer to a key the
-/// indicator publishes. It reads the tables rather than running indicators, so it is a census rather than a
-/// sample: every reachable combination is judged, not the handful a fixture happens to exercise.
+/// Those 3594 are not defects in the tables - it is perfectly correct that an absolute price oscillator has no
+/// upper band. What was wrong was the answer given when one was asked for. So this asserts the behaviour rather
+/// than the tables: the slot is refused. A sample is taken because each call runs the batch indicator, and
+/// running several thousand of them would buy nothing over a spread of them.
 /// </para>
 /// </remarks>
-public sealed class BuilderArmOutputKeyTests
+public sealed class BuilderArmOutputKeyTests : GlobalTestData
 {
+    /// <summary>Enough indicators to span the table, few enough that each can run its calculation.</summary>
+    private const int Sampled = 20;
+
     [Fact]
-    public void NoArmSlotAnswersWithASeriesItWasNotAskedFor()
+    public void ASlotTheIndicatorPublishesNoKeyForIsRefused()
     {
-        var answeredWithPrimary = new List<string>();
-        var unpublishedKey = new List<string>();
-        var reachable = 0;
+        var bars = StockTestData.Take(120).ToList();
+        var answered = new List<string>();
+        var refused = 0;
 
-        foreach (var (optionsType, target) in BuilderArmTargets.Targets)
+        foreach (var (optionsType, target, output) in UnpublishedSlots().Take(Sampled))
         {
-            var published = GeneratedIndicatorOutputs.KeysFor(target.Name);
-
-            foreach (IndicatorOutput output in Enum.GetValues(typeof(IndicatorOutput)))
+            var options = BuilderArmTests.Create(optionsType, alternate: false);
+            if (options is null)
             {
-                // A verified arm computes itself through ComputeArm; only the rest reach BuilderArmBinding.
-                if (BuilderVerifiedArms.Arms.Contains((optionsType, output)))
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                reachable++;
+            var spec = new IndicatorSpec(target.Name, options, output);
 
-                var key = output == IndicatorOutput.Primary
-                    ? target.OutputKey
-                    : IndicatorOutputRegistry.GetOutputKey(target.Name, output);
-
-                if (key is null)
-                {
-                    // Primary legitimately has no key: that is where a single-output indicator publishes.
-                    if (output != IndicatorOutput.Primary)
-                    {
-                        answeredWithPrimary.Add($"{optionsType.Name}.{output} -> {target.Name} publishes no key for that slot");
-                    }
-
-                    continue;
-                }
-
-                if (!published.Contains(key))
-                {
-                    unpublishedKey.Add($"{optionsType.Name}.{output} -> \"{key}\", which {target.Name} does not publish");
-                }
+            try
+            {
+                var values = BuilderArmBinding.Compute(new StockData(bars), spec, target);
+                answered.Add($"{optionsType.Name}.{output} answered with {values.Count} values from {target.Name}, "
+                    + "which publishes no key for that slot");
+            }
+            catch (CalculationException)
+            {
+                refused++;
             }
         }
 
-        reachable.Should().BeGreaterThan(0, "the arm table has slots that reach this fallback");
-
         using var scope = new AssertionScope();
-        answeredWithPrimary.Should().BeEmpty(
-            $"a slot the indicator has no key for must fail rather than answer with the primary series "
-            + $"({answeredWithPrimary.Count} of {reachable} reachable slots): {Sample(answeredWithPrimary)}");
-        unpublishedKey.Should().BeEmpty(
-            $"a pinned key the indicator does not publish must fail rather than answer with the primary series "
-            + $"({unpublishedKey.Count} of {reachable} reachable slots): {Sample(unpublishedKey)}");
+        refused.Should().BeGreaterThan(0, "the sample must actually exercise the refusal, or it proves nothing");
+        answered.Should().BeEmpty(
+            $"a slot with no key must be refused rather than answered with the primary series: {string.Join(" | ", answered)}");
     }
 
-    /// <summary>Enough to diagnose, not so much that the failure is unreadable.</summary>
-    private static string Sample(IReadOnlyList<string> items) =>
-        string.Join(" | ", items.Take(12))
-        + (items.Count > 12 ? $" ... and {items.Count - 12} more" : string.Empty);
+    /// <summary>
+    /// The refusal names what the indicator does publish, so a caller can correct the request.
+    /// </summary>
+    /// <remarks>
+    /// The same wording <c>SeriesEvaluator</c> already uses, so a caller cannot tell which resolver refused and
+    /// does not get two different accounts of the same mistake.
+    /// </remarks>
+    [Fact]
+    public void TheRefusalNamesTheOutputsTheIndicatorDoesPublish()
+    {
+        var bars = StockTestData.Take(120).ToList();
+        var (optionsType, target, output) = UnpublishedSlots().First();
+        var options = BuilderArmTests.Create(optionsType, alternate: false);
+        options.Should().NotBeNull("the first sampled options type must be constructible");
+
+        var spec = new IndicatorSpec(target.Name, options ?? throw new InvalidOperationException("no options"), output);
+        var act = () => BuilderArmBinding.Compute(new StockData(bars), spec, target);
+
+        act.Should().Throw<CalculationException>()
+            .WithMessage($"*{target.Name}*{output}*Available outputs:*",
+                "the message says which indicator, which slot, and what it does publish");
+    }
+
+    /// <summary>Every reachable slot whose key resolves to nothing, in a stable order.</summary>
+    private static IEnumerable<(Type OptionsType, BuilderArmTarget Target, IndicatorOutput Output)> UnpublishedSlots()
+    {
+        foreach (var (optionsType, target) in BuilderArmTargets.Targets.OrderBy(t => t.Key.Name, StringComparer.Ordinal))
+        {
+            foreach (IndicatorOutput output in Enum.GetValues(typeof(IndicatorOutput)))
+            {
+                // Primary legitimately has no key: that is where a single-output indicator publishes.
+                if (output == IndicatorOutput.Primary
+                    || BuilderVerifiedArms.Arms.Contains((optionsType, output))
+                    || IndicatorOutputRegistry.GetOutputKey(target.Name, output) is not null)
+                {
+                    continue;
+                }
+
+                yield return (optionsType, target, output);
+            }
+        }
+    }
 }
