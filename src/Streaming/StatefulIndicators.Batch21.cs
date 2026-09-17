@@ -1197,7 +1197,10 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Rvi")]
 public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. It is fed
+    // the resolved input rather than resolving one of its own, so a composed reading - the V2 indicator
+    // builds one of these on the high and one on the low - still measures the series it was composed on.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _upAvg;
     private readonly IMovingAverageSmoother _downAvg;
     private readonly StreamingInputResolver _input;
@@ -1209,7 +1212,7 @@ public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, I
     // required, so this can never be chosen in place of the public constructor.
     internal RelativeVolatilityIndexV1State(MovingAvgType maType, int length, int smoothLength, InputName inputName)
     {
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length), inputName);
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
         _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(inputName, null);
@@ -1218,7 +1221,7 @@ public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, I
     public RelativeVolatilityIndexV1State(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 10, int smoothLength = 14)
     {
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length));
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
         _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -1239,7 +1242,7 @@ public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, I
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var up = value > prevValue ? stdDev : 0;
         var down = value < prevValue ? stdDev : 0;
         var avgUp = _upAvg.Next(up, isFinal);
