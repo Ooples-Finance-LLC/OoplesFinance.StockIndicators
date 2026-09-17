@@ -386,19 +386,27 @@ public sealed partial class IndicatorCatalog
     /// <summary>
     /// Calculates Keltner Channels.
     /// </summary>
-    public KeltnerChannelResult KeltnerChannels(int length = 20, double multiplier = 2, SeriesHandle? input = null,
+    public KeltnerChannelResult KeltnerChannels(int length = 20, double multiplier = 2, int atrLength = 10,
+        SeriesHandle? input = null,
         IndicatorKey? upperKey = null, IndicatorKey? middleKey = null, IndicatorKey? lowerKey = null)
     {
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
+
+        // Three arguments, in the order the indicator takes them: basis length, ATR length, multiplier.
+        // Passing two put the multiplier where the ATR length belongs, so a caller asking for a 20-bar
+        // channel at two sigma got a two-bar ATR and the default multiplier, and the multiplier argument
+        // did nothing at all. The ATR length is a real parameter of this indicator, so it is named here
+        // rather than left to a positional default.
+        var arguments = new object[] { length, atrLength, multiplier };
         var upper = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.UpperBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), IndicatorOutput.UpperBand),
             series, seriesKey, upperKey);
         var middle = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.MiddleBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), IndicatorOutput.MiddleBand),
             series, seriesKey, middleKey);
         var lower = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.LowerBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), IndicatorOutput.LowerBand),
             series, seriesKey, lowerKey);
         return new KeltnerChannelResult(upper, middle, lower);
     }
@@ -465,7 +473,13 @@ public sealed partial class IndicatorCatalog
         var kijunSen = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.Signal), series, seriesKey, null);
         var senkouSpanA = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.UpperBand), series, seriesKey, null);
         var senkouSpanB = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.LowerBand), series, seriesKey, null);
-        var chikouSpan = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.Histogram), series, seriesKey, null);
+        // The Chikou span is its own indicator. CalculateIchimokuCloud publishes TenkanSen, KijunSen,
+        // SenkouSpanA and SenkouSpanB and no Chikou span at all, so asking it for a fifth slot resolved to
+        // SenkouSpanA and handed back a series this result already exposes.
+        var chikouSpan = _builder.AddIndicator(
+            IndicatorSpecs.Create(IndicatorName.IchimokuChikouSpan, new IchimokuChikouSpanSpecOptions(kijunLength),
+                IndicatorOutput.Primary),
+            series, seriesKey, null);
         return new IchimokuResult(tenkanSen, kijunSen, senkouSpanA, senkouSpanB, chikouSpan);
     }
 
