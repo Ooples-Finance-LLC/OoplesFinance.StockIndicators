@@ -41,7 +41,8 @@ internal static class BatchCompute
                 continue;
             }
 
-            if (result.Outputs is null || !result.Outputs.TryGetValue(outputKey!, out var value))
+            var requested = outputKey ?? string.Empty;
+            if (result.Outputs is null || !result.Outputs.TryGetValue(requested, out var value))
             {
                 var available = result.Outputs is null || result.Outputs.Count == 0
                     ? "none"

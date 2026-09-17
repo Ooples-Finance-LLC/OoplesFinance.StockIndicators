@@ -105,6 +105,32 @@ public sealed class CommonSubexpressionEliminationTests : GlobalTestData
         lips.Should().NotBe(jaws);
     }
 
+    /// <summary>
+    /// Two named outputs of one indicator are two nodes, the same as two slots are.
+    /// </summary>
+    /// <remarks>
+    /// An output named directly is part of what a node computes, so it has to be part of the node's
+    /// identity. Left out, these two specs differ in nothing the key records, share a node, and the second
+    /// silently returns the first's series - a support level answering as a resistance level, with no error.
+    /// Removing the key from <c>IndicatorNodeKey.TryCreate</c> makes this fail, which is what makes it worth
+    /// having. See issue #201.
+    /// </remarks>
+    [Fact]
+    public void DifferentNamedOutputsOfOneIndicatorAreDifferentNodes()
+    {
+        var builder = CreateBuilder();
+        SeriesHandle support = default;
+        SeriesHandle resistance = default;
+
+        builder.ConfigureIndicators(catalog =>
+        {
+            support = catalog.Calculate(IndicatorName.CamarillaPivotPoints, "S1");
+            resistance = catalog.Calculate(IndicatorName.CamarillaPivotPoints, "R5");
+        });
+
+        support.Should().NotBe(resistance, "a named output is part of what the node computes");
+    }
+
     [Fact]
     public void SharingANodeDoesNotChangeTheValues()
     {

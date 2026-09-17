@@ -28,6 +28,34 @@ public sealed class IndicatorSpec
     }
 
     /// <summary>
+    /// Creates a specification that continues from a published output named directly, rather than from one
+    /// of the six <see cref="IndicatorOutput"/> slots.
+    /// </summary>
+    /// <remarks>
+    /// The slots cannot name every output. They are assigned positionally and run out, so 14 indicators
+    /// publish keys that no slot can address - CamarillaPivotPoints publishes 17 and 11 of them are
+    /// unreachable. Naming the key removes that ceiling rather than raising it. See issue #201.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when options is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when the output key is blank.</exception>
+    public IndicatorSpec(IndicatorName name, IIndicatorSpecOptions options, string outputKey)
+    {
+        if (options is null) throw new ArgumentNullException(nameof(options));
+        if (string.IsNullOrWhiteSpace(outputKey))
+        {
+            throw new ArgumentException("An output key is required.", nameof(outputKey));
+        }
+
+        Name = name;
+        Options = options;
+        OutputKey = outputKey;
+
+        // The slot is unused once a key is named, and Primary is the one value that cannot be mistaken for
+        // a request: it means "the indicator's own value" everywhere else in the resolver.
+        Output = IndicatorOutput.Primary;
+    }
+
+    /// <summary>
     /// Gets the indicator name.
     /// </summary>
     public IndicatorName Name { get; }
@@ -41,6 +69,15 @@ public sealed class IndicatorSpec
     /// Gets the output type.
     /// </summary>
     public IndicatorOutput Output { get; }
+
+    /// <summary>
+    /// Gets the published output key this spec continues from, or null when it uses a slot.
+    /// </summary>
+    /// <remarks>
+    /// When set, this wins over <see cref="Output"/>: the resolver reads the key straight out of the
+    /// indicator's published outputs instead of going through the six-slot map.
+    /// </remarks>
+    public string? OutputKey { get; }
 }
 
 /// <summary>
@@ -335,6 +372,17 @@ public static class IndicatorSpecs
     public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options, IndicatorOutput output = IndicatorOutput.Primary)
     {
         return new IndicatorSpec(name, options, output);
+    }
+
+    /// <summary>
+    /// Creates a generic indicator specification that continues from a named published output.
+    /// </summary>
+    /// <remarks>
+    /// For the outputs the six <see cref="IndicatorOutput"/> slots cannot address. See issue #201.
+    /// </remarks>
+    public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options, string outputKey)
+    {
+        return new IndicatorSpec(name, options, outputKey);
     }
 
     /// <summary>
