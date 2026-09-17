@@ -257,6 +257,130 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         }
     }
 
+    /// <summary>
+    /// Historical volatility is the deviation of the log returns about their own mean, annualised.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// On a series whose close alternates between P and P*r, the log returns alternate between +ln(r) and
+    /// -ln(r). Over an even window their mean is exactly zero and every squared deviation is (ln r)^2, so
+    /// the deviation is exactly ln(r) and the published value is 100 * ln(r) * sqrt(365). A closed form,
+    /// with no second implementation to compare against.
+    /// </para>
+    /// <para>
+    /// The indicator took its dispersion from CalculateStandardDeviationVolatility, which smooths the log
+    /// returns and measures each bar's distance from that smoothed line rather than the spread of the window
+    /// about its own mean. Historical volatility is defined as the standard deviation of returns, so that
+    /// was the wrong quantity for the one indicator whose whole definition names it. See #190.
+    /// </para>
+    /// <para>
+    /// The fixture has to alternate. A constant series and a geometric one both have log returns that never
+    /// vary, so their deviation is zero under either quantity and the test would pass against the defect it
+    /// was written for.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(14, 1.01)]
+    [InlineData(20, 1.02)]
+    public void HistoricalVolatility_IsTheDeviationOfItsLogReturns(int length, double ratio)
+    {
+        var bars = AlternatingReturnSeries(length + 40, 100.0, ratio);
+        var expected = 100 * Math.Log(ratio) * Math.Sqrt(365);
+        const double tolerance = 1e-7;
+
+        var batch = new StockData(bars)
+            .CalculateHistoricalVolatility(MovingAvgType.ExponentialMovingAverage, length)
+            .CustomValuesList;
+
+        using var state = new HistoricalVolatilityState(MovingAvgType.ExponentialMovingAverage, length);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        // Bar 0 has no prior close, so its log return is a fabricated zero. A window still holding it is one
+        // genuine return short, and publishing a deviation over it would dilute that value with an
+        // observation that never happened - so nothing is published until index length.
+        for (var i = 0; i < length; i++)
+        {
+            batch[i].Should().Be(0,
+                $"the window still holds the first bar's fabricated return, so nothing is published (bar {i})");
+            streaming[i].Should().Be(0,
+                $"the streaming state withholds the same bars as the batch (bar {i})");
+        }
+
+        // From index length the window is returns 1..length, every one of them real.
+        for (var i = length; i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected, tolerance,
+                $"alternating returns of +/-ln({ratio}) have a deviation of exactly ln({ratio}), so the "
+                + $"annualised value is {expected:F6} (bar {i})");
+            streaming[i].Should().BeApproximately(expected, tolerance,
+                $"the streaming state computes what the batch computes (bar {i})");
+        }
+    }
+
+    /// <summary>
+    /// The relative volatility index is the relative strength index with the standard deviation of the
+    /// window in place of the price change.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// It took that dispersion from CalculateStandardDeviationVolatility, which smooths the series and
+    /// measures each bar's distance from the smoothed line rather than the spread of the window about its
+    /// own mean - and its own RviHigh and RviLow siblings already took the latter, through
+    /// VolatilityCore.StandardDeviation. The family computed its defining quantity two different ways. See
+    /// #190.
+    /// </para>
+    /// <para>
+    /// Held to a reference implementation rather than a closed form, because no simple fixture separates
+    /// the two quantities here. On any periodic series the deviation is the same constant on rising and
+    /// falling bars, so it cancels in the ratio of the two averages and the reading is 50 either way; on a
+    /// ramp every bar rises, the falling average stays zero and the reading is 100 either way. The series
+    /// has to have both directions and a spread that varies, which is what the gapping fixture gives.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(10, 14)]
+    [InlineData(14, 10)]
+    public void RelativeVolatilityIndex_IsTheRelativeStrengthOfItsDeviation(int length, int smoothLength)
+    {
+        var bars = GappingSeriesWithoutRange(length + smoothLength + 60);
+        var closes = bars.Select(bar => bar.Close).ToArray();
+        var expected = RelativeVolatilityIndexReference(closes, length, smoothLength);
+        const double tolerance = 1e-8;
+
+        var batch = new StockData(bars)
+            .CalculateRelativeVolatilityIndexV1(MovingAvgType.WildersSmoothingMethod, length, smoothLength)
+            .CustomValuesList;
+
+        using var state = new RelativeVolatilityIndexV1State(
+            MovingAvgType.WildersSmoothingMethod, length, smoothLength);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        for (var i = length - 1; i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected[i], tolerance,
+                $"the relative volatility index is the relative strength of the window's own deviation "
+                + $"(bar {i})");
+            streaming[i].Should().BeApproximately(expected[i], tolerance,
+                $"the streaming state computes what the batch computes (bar {i})");
+        }
+    }
+
     #region Reference formula implementations
 
     /// <summary>
@@ -293,6 +417,58 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
 
             var total = up + down;
             result[i] = total != 0 ? 100 * (up - down) / total : 0;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The relative volatility index written out from its definition: the relative strength index with the
+    /// standard deviation of the window in place of the price change.
+    /// </summary>
+    /// <remarks>
+    /// The deviation is the spread of the window about its own mean and is zero until the window fills, as
+    /// <c>VolatilityCore.StandardDeviation</c> leaves it. The averages are Wilder's, which both engines
+    /// implement as <c>value/n + previous*(1 - 1/n)</c> seeded at zero, with no separate warm-up.
+    /// </remarks>
+    private static double[] RelativeVolatilityIndexReference(double[] values, int length, int smoothLength)
+    {
+        var result = new double[values.Length];
+        var k = 1.0 / Math.Max(1, smoothLength);
+        double avgUp = 0;
+        double avgDown = 0;
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            double deviation = 0;
+            if (i >= length - 1)
+            {
+                double mean = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    mean += values[j];
+                }
+
+                mean /= length;
+
+                double sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += (values[j] - mean) * (values[j] - mean);
+                }
+
+                deviation = Math.Sqrt(sum / length);
+            }
+
+            var previous = i >= 1 ? values[i - 1] : 0;
+            var up = values[i] > previous ? deviation : 0;
+            var down = values[i] < previous ? deviation : 0;
+
+            avgUp = (up * k) + (avgUp * (1 - k));
+            avgDown = (down * k) + (avgDown * (1 - k));
+
+            var rs = avgDown != 0 ? avgUp / avgDown : 0;
+            result[i] = avgDown == 0 ? 100 : avgUp == 0 ? 0 : Math.Min(Math.Max(100 - (100 / (1 + rs)), 0), 100);
         }
 
         return result;
@@ -426,6 +602,37 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
                 High = price,
                 Low = price,
                 Close = price,
+                Volume = 1_000_000
+            });
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// A series whose close alternates between a price and that price times <paramref name="ratio"/>.
+    /// </summary>
+    /// <remarks>
+    /// Its log returns alternate between +ln(ratio) and -ln(ratio), so over an even window their mean is
+    /// exactly zero and every squared deviation is the same, making the population deviation exactly
+    /// ln(ratio). That gives historical volatility a closed form to be held to, which neither a constant nor
+    /// a geometric series can: both have log returns that never vary, so their deviation is zero under any
+    /// definition - and zero is also what the defect produced, so such a fixture would pass against it.
+    /// </remarks>
+    private static List<TickerData> AlternatingReturnSeries(int count, double start, double ratio)
+    {
+        var data = new List<TickerData>(count);
+        var date = new DateTime(2024, 1, 1);
+        for (var i = 0; i < count; i++)
+        {
+            var close = i % 2 == 0 ? start : start * ratio;
+            data.Add(new TickerData
+            {
+                Date = date.AddDays(i),
+                Open = close,
+                High = close,
+                Low = close,
+                Close = close,
                 Volume = 1_000_000
             });
         }

@@ -1950,10 +1950,13 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
 
 internal sealed class RelativeVolatilityIndexEngine : IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation and the V1 state; see
+    // #190. This engine is the third implementation of the relative volatility index: the batch reaches it
+    // through CalculateRelativeVolatilityIndexV2, the V1 and V2 states are their own pair, and Inertia
+    // composes this. All three have to move together or Inertia's two engines disagree during warm-up.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _upSmoother;
     private readonly IMovingAverageSmoother _downSmoother;
-    private double _inputValue;
     private double _prevValue;
     private bool _hasPrev;
 
@@ -1961,15 +1964,14 @@ internal sealed class RelativeVolatilityIndexEngine : IDisposable
     {
         var resolvedLength = Math.Max(1, length);
         var resolvedSmooth = Math.Max(1, smoothLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolvedLength, _ => _inputValue);
+        _stdDev = new RollingStandardDeviation(resolvedLength);
         _upSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
         _downSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
     }
 
     public double Next(double value, OhlcvBar bar, bool isFinal)
     {
-        _inputValue = value;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var prevValue = _hasPrev ? _prevValue : 0;
         var up = value > prevValue ? stdDev : 0;
         var down = value < prevValue ? stdDev : 0;
@@ -1992,7 +1994,6 @@ internal sealed class RelativeVolatilityIndexEngine : IDisposable
         _stdDev.Reset();
         _upSmoother.Reset();
         _downSmoother.Reset();
-        _inputValue = 0;
         _prevValue = 0;
         _hasPrev = false;
     }

@@ -1161,48 +1161,6 @@ internal static class VolatilityCore
     }
 
     /// <summary>
-    /// Computes Standard Deviation Volatility (annualized).
-    /// </summary>
-    internal static void StandardDeviationVolatility(ReadOnlySpan<double> close, Span<double> output, int length = 20, int annualizationFactor = 252)
-    {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrtAnnualize = Math.Sqrt(annualizationFactor);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate returns
-            var returns = new double[length];
-            for (var j = 0; j < length; j++)
-            {
-                var idx = i - length + 1 + j;
-                returns[j] = idx > 0 && close[idx - 1] != 0 ? (close[idx] - close[idx - 1]) / close[idx - 1] : 0;
-            }
-
-            // Calculate mean
-            double mean = 0;
-            foreach (var r in returns) mean += r;
-            mean /= length;
-
-            // Calculate standard deviation of returns
-            double variance = 0;
-            foreach (var r in returns) variance += (r - mean) * (r - mean);
-            variance /= length;
-
-            output[i] = Math.Sqrt(variance) * sqrtAnnualize * 100;
-        }
-    }
-
-    /// <summary>
     /// Computes Average True Range Channel (middle line = ATR-based).
     /// </summary>
     internal static void AverageTrueRangeChannel(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)

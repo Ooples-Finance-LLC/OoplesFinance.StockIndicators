@@ -90,11 +90,17 @@ public static partial class Calculations
             tempLogList.Add(tempLog);
         }
 
-        stockData.SetCustomValues(tempLogList);
-        var stdDevLogList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the log-return window about its own mean, not the mean squared residual from a
+        // moving average of that series. Historical volatility is defined as the standard deviation of
+        // returns, so this is the quantity it is defined against; see #190.
+        var stdDevLogList = GetStandardDeviationList(tempLogList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var stdDevLog = stdDevLogList[i];
+            // The first bar has no prior close, so its log return is a fabricated zero. A window still
+            // holding it is one genuine return short, and a deviation taken over it is diluted by an
+            // observation that never happened. Nothing is published until index length, where the window is
+            // returns 1..length and every one of them is real.
+            var stdDevLog = i >= length ? stdDevLogList[i] : 0;
             var currentEma = emaList[i];
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
             var currentValue = inputList[i];

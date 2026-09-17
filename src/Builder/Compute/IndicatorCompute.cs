@@ -343,7 +343,6 @@ internal static partial class IndicatorCompute
             YangZhangVolatilitySpecOptions yzv => ComputeYangZhangVolatilityFast(data, context, yzv.Length),
             DownsideDeviationSpecOptions dd => ComputeDownsideDeviationFast(data, context, dd.Length),
             StandardDeviationChannelSpecOptions sdch => ComputeStandardDeviationChannelFast(data, context, sdch.Length),
-            StandardDeviationVolatilitySpecOptions sdv => ComputeStandardDeviationVolatilityFast(data, context, sdv.Length, sdv.AnnualizationFactor),
             VolatilityRatioSpecOptions vr => ComputeVolatilityRatioFast(data, context, vr.Length),
 
             // Batch 5 - Bands/Channels
@@ -4440,14 +4439,6 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         VolatilityCore.StandardDeviationChannel(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    internal static ComputeBuffer ComputeStandardDeviationVolatilityFast(StockData data, ComputeContext context, int length = 20, int annualizationFactor = 252)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardDeviationVolatility(close, buffer.WritableSpan, length, annualizationFactor);
         return buffer;
     }
 
