@@ -1584,7 +1584,12 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
     private readonly int _maxLength;
     private readonly double _acc;
     private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // This is the second streaming implementation of the variable-length average's length decision: the batch
+    // ultimate moving average reads that indicator's own Length output, while this recomputes it inline below.
+    // Both have to take the same sigma or the two engines choose different lengths for the same bar, which
+    // then compounds, because each bar's length carries forward into the next. See #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly RollingCumulativeSum _posFlowSum;
     private readonly RollingCumulativeSum _negFlowSum;
     private readonly PooledRingBuffer<double> _values;
@@ -1600,7 +1605,9 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
         _maxLength = Math.Max(_minLength, maxLength);
         _acc = acc;
         _smaSmoother = MovingAverageSmootherFactory.Create(maType, _maxLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, _maxLength);
+
+        // No maType, and _maxLength to match the variable-length average whose decision this repeats.
+        _stdDev = new RollingStandardDeviation(_maxLength);
         _posFlowSum = new RollingCumulativeSum();
         _negFlowSum = new RollingCumulativeSum();
         _values = new PooledRingBuffer<double>(_maxLength);
@@ -1626,7 +1633,9 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
     {
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input rather than the bar, so this measures the same series the average above does.
+        var stdDev = _stdDev.Next(value, isFinal);
         var a = sma - (1.75 * stdDev);
         var b = sma - (0.25 * stdDev);
         var c = sma + (0.25 * stdDev);

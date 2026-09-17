@@ -456,7 +456,13 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, maxLength, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, maxLength).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The four levels are bands at 0.25 and 1.75 sigma either side of the average, and sigma in a
+        // band is the windowed deviation; CalculateStandardDeviationVolatility is a different quantity, about
+        // 55% wider on a typical price series, so every level sat further from the average than the indicator
+        // places it and the length was held constant where it should have moved. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, maxLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {
