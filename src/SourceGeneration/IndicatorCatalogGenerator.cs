@@ -250,11 +250,13 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
                 sb.AppendLine("        var seriesKey = _builder.ResolveSeriesKey(series);");
                 sb.AppendLine($"        var opts = new GenericIndicatorOptions(LengthParameters(length));");
 
-                for (int i = 0; i < outputs.Length; i++)
+                // Each handle names the key it wants. This used to assign slots by position - the first output
+                // Primary, the second Signal, everything after that Histogram - so an indicator publishing four
+                // keys gave its third and fourth handles the same slot and therefore the same series. Ichimoku
+                // was exactly that: its Chikou span handle resolved to Senkou Span A. See issue #219.
+                foreach (var output in outputs)
                 {
-                    var outputName = outputs[i].ToLowerInvariant();
-                    var outputType = i == 0 ? "Primary" : (i == 1 ? "Signal" : "Histogram");
-                    sb.AppendLine($"        var {outputName} = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.{indicatorName}, opts, IndicatorOutput.{outputType}), series, seriesKey, null);");
+                    sb.AppendLine($"        var {output.ToLowerInvariant()} = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.{indicatorName}, opts, \"{output}\"), series, seriesKey, null);");
                 }
 
                 var outputArgs = string.Join(", ", outputs.Select(o => o.ToLowerInvariant()));
@@ -268,7 +270,7 @@ public class IndicatorCatalogGenerator : IIncrementalGenerator
                 sb.AppendLine($"    public SeriesHandle {methodName}(int? length = null, SeriesHandle? input = null, IndicatorKey? key = null)");
                 sb.AppendLine("    {");
                 sb.AppendLine("        var series = input ?? Price();");
-                sb.AppendLine($"        var spec = IndicatorSpecs.Create(IndicatorName.{indicatorName}, new GenericIndicatorOptions(LengthParameters(length)), IndicatorOutput.Primary);");
+                sb.AppendLine($"        var spec = IndicatorSpecs.Create(IndicatorName.{indicatorName}, new GenericIndicatorOptions(LengthParameters(length)));");
                 sb.AppendLine("        return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);");
                 sb.AppendLine("    }");
             }

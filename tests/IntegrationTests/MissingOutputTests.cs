@@ -9,26 +9,34 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.IntegrationTests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Resolving a slot used to fall through to the primary series when the indicator published no key for
-/// it. That returns a number, and the number is wrong: the caller asked for the signal line and received
-/// the indicator itself. Alligator, Gator, Aroon, Elder Ray and Trix each handed back the same series for
-/// every band that way, which is why <c>GetOutputKey</c> now returns null rather than guessing at a
-/// literal key, and why the resolver raises instead of substituting.
+/// Resolution used to fall through to the primary series when the indicator published nothing under the
+/// name asked for. That returns a number, and the number is wrong: the caller asked for the signal line and
+/// received the indicator itself. Alligator, Gator, Aroon, Elder Ray and Trix each handed back the same
+/// series for every band that way, which is why resolution raises instead of substituting.
 /// </para>
 /// <para>
-/// The subject is a single-output indicator on purpose. 484 of the indicators in the generated map publish
-/// exactly one slot, so this is the common shape rather than a corner: every one of them would have
-/// answered a request for a signal line with its own primary values.
+/// The subject is a single-output indicator on purpose. Most of the indicators in the generated map publish
+/// exactly one key, so this is the common shape rather than a corner: every one of them would have answered
+/// a request for a signal line with its own values.
+/// </para>
+/// <para>
+/// These used to ask through <c>IndicatorOutput</c>, a six-member enum the generated map filled positionally.
+/// Every request here now names the published key directly. That is not a translation of the same question:
+/// a slot was answered by whichever key happened to land in that position, so a test could name a band and be
+/// handed something that was not one. See issue #219.
 /// </para>
 /// </remarks>
 public sealed class MissingOutputTests : GlobalTestData
 {
     private const IndicatorName SingleOutput = IndicatorName.AlphaDecreasingExponentialMovingAverage;
 
+    /// <summary>
+    /// This indicator publishes exactly one key, <c>Ema</c>, so <c>Signal</c> names nothing it produces.
+    /// </summary>
     [Fact]
-    public void AskingForASlotTheIndicatorDoesNotPublishRaises()
+    public void AskingForAnOutputThisIndicatorDoesNotPublishRaises()
     {
-        var act = () => Evaluate(IndicatorOutput.Signal);
+        var act = () => EvaluateSingleOutput("Signal");
 
         act.Should().Throw<CalculationException>(
                 "an indicator asked for an output it does not publish must say so, not answer with another series")
@@ -40,23 +48,27 @@ public sealed class MissingOutputTests : GlobalTestData
     [Fact]
     public void TheErrorNamesTheOutputsTheIndicatorDoesPublish()
     {
-        var act = () => Evaluate(IndicatorOutput.Histogram);
+        var act = () => EvaluateSingleOutput("Histogram");
 
         act.Should().Throw<CalculationException>().WithMessage("*Ema*");
     }
 
     /// <summary>
-    /// The primary slot still resolves, because that is where a single-output indicator publishes its
-    /// value. The fix narrows the fallback rather than removing it.
+    /// A spec naming no key at all resolves to the indicator's own series.
     /// </summary>
+    /// <remarks>
+    /// This is what the primary slot used to mean, and it is the one part of the slot enum that carried real
+    /// behaviour rather than a position: a caller who names no output wants the indicator itself. Naming no
+    /// key now says that directly, so the meaning survived the enum. See issue #219.
+    /// </remarks>
     [Fact]
-    public void ThePrimarySlotStillResolves()
+    public void TheIndicatorsOwnSeriesResolvesWithoutAKey()
     {
-        var series = Evaluate(IndicatorOutput.Primary);
+        var series = Evaluate(SingleOutput, new object[] { 14 });
 
-        series.Should().NotBeEmpty("the primary slot is the one output this indicator publishes");
+        series.Should().NotBeEmpty("a spec naming no key resolves to the indicator's own series");
         series.Count(v => !double.IsNaN(v) && v != 0)
-            .Should().BeGreaterThan(0, "the primary series must carry values, not only warm-up zeros");
+            .Should().BeGreaterThan(0, "that series must carry values, not only warm-up zeros");
     }
 
     /// <summary>The mean absolute deviation bands resolve every band they publish.</summary>
@@ -69,12 +81,12 @@ public sealed class MissingOutputTests : GlobalTestData
     /// being unreachable through the Builder. Asking for all three bands is what pins the stamp.
     /// </remarks>
     [Theory]
-    [InlineData(IndicatorOutput.UpperBand)]
-    [InlineData(IndicatorOutput.MiddleBand)]
-    [InlineData(IndicatorOutput.LowerBand)]
-    public void TheMeanAbsoluteDeviationBandsResolveEveryBandTheyPublish(IndicatorOutput output)
+    [InlineData("UpperBand")]
+    [InlineData("MiddleBand")]
+    [InlineData("LowerBand")]
+    public void TheMeanAbsoluteDeviationBandsResolveEveryBandTheyPublish(string outputKey)
     {
-        var series = Evaluate(IndicatorName.MeanAbsoluteDeviationBands, new object[] { 20, 2.0 }, output);
+        var series = Evaluate(IndicatorName.MeanAbsoluteDeviationBands, new object[] { 20, 2.0 }, outputKey);
 
         series.Should().NotBeEmpty("the deviation bands publish an upper, a middle and a lower band");
         series.Count(v => !double.IsNaN(v) && v != 0)
@@ -91,12 +103,12 @@ public sealed class MissingOutputTests : GlobalTestData
     /// own output dictionary does not contain.
     /// </remarks>
     [Theory]
-    [InlineData(IndicatorOutput.UpperBand)]
-    [InlineData(IndicatorOutput.MiddleBand)]
-    [InlineData(IndicatorOutput.LowerBand)]
-    public void TheTrendTraderBandsResolveTheirOwnBands(IndicatorOutput output)
+    [InlineData("UpperBand")]
+    [InlineData("MiddleBand")]
+    [InlineData("LowerBand")]
+    public void TheTrendTraderBandsResolveTheirOwnBands(string outputKey)
     {
-        var series = Evaluate(IndicatorName.TrendTraderBands, Array.Empty<object>(), output);
+        var series = Evaluate(IndicatorName.TrendTraderBands, Array.Empty<object>(), outputKey);
 
         series.Count(v => !double.IsNaN(v) && v != 0)
             .Should().BeGreaterThan(0, "the band must carry the trend trader bands' own values");
@@ -104,23 +116,33 @@ public sealed class MissingOutputTests : GlobalTestData
 
     /// <summary>An indicator that stamped another's name was unreachable through the Builder entirely.</summary>
     /// <remarks>
-    /// Neither of these appears in the output map while its calculation stamps a different indicator, so a
-    /// named slot raises "Available outputs: none" even though the calculation itself is correct.
     /// <para>
-    /// The signal slot is the subject on purpose. Asking for Primary does not discriminate: the resolver
-    /// still falls back to the primary series for that one slot, as <see cref="ThePrimarySlotStillResolves"/>
-    /// records, so this test passed with the defect in place until it was pointed at a named slot.
+    /// Neither of these appears in the output map while its calculation stamps a different indicator, so a
+    /// named output raises "Available outputs: none" even though the calculation itself is correct.
+    /// </para>
+    /// <para>
+    /// A named output is the subject on purpose. Naming no key does not discriminate: resolution answers with
+    /// the indicator's own series in that case, as <see cref="TheIndicatorsOwnSeriesResolvesWithoutAKey"/>
+    /// records, so this test passed with the defect in place until it was pointed at a named output.
+    /// </para>
+    /// <para>
+    /// The key is now given per indicator rather than taken from a slot, and that changed what is being
+    /// asserted. This used to ask both indicators for <c>IndicatorOutput.Signal</c> and claim each "publishes
+    /// a signal series of its own" - but neither does. The slot was answered by whichever key sat second in
+    /// the generated map, which is <c>Ch-1</c> here and <c>Roc</c> there: an inner lower channel line and a
+    /// rate of change, neither of them a signal line. The assertion held while its own description of the
+    /// indicators was false. See issue #219.
     /// </para>
     /// </remarks>
     [Theory]
-    [InlineData(IndicatorName.TimeAndMoneyChannel)]
-    [InlineData(IndicatorName.EhlersSimpleWindowIndicator)]
-    public void AnIndicatorThatStampedAnothersNameIsReachable(IndicatorName indicator)
+    [InlineData(IndicatorName.TimeAndMoneyChannel, "Ch-1")]
+    [InlineData(IndicatorName.EhlersSimpleWindowIndicator, "Roc")]
+    public void AnIndicatorThatStampedAnothersNameIsReachable(IndicatorName indicator, string outputKey)
     {
-        var series = Evaluate(indicator, Array.Empty<object>(), IndicatorOutput.Signal);
+        var series = Evaluate(indicator, Array.Empty<object>(), outputKey);
 
         series.Count(v => !double.IsNaN(v) && v != 0)
-            .Should().BeGreaterThan(0, "the indicator publishes a signal series of its own");
+            .Should().BeGreaterThan(0, $"{indicator} publishes '{outputKey}' and it must be reachable by name");
     }
 
     /// <summary>
@@ -221,10 +243,15 @@ public sealed class MissingOutputTests : GlobalTestData
             .WithMessage("*Pivot*");
     }
 
-    private static double[] Evaluate(IndicatorOutput output) =>
-        Evaluate(SingleOutput, new object[] { 14 }, output);
+    private static double[] EvaluateSingleOutput(string outputKey) =>
+        Evaluate(SingleOutput, new object[] { 14 }, outputKey);
 
-    private static double[] Evaluate(IndicatorName indicator, object[] parameters, IndicatorOutput output)
+    /// <summary>The whole Builder path, for a spec that names no output of its own.</summary>
+    private static double[] Evaluate(IndicatorName indicator, object[] parameters) =>
+        Evaluate(indicator, parameters, outputKey: null);
+
+    /// <summary>The same path, asking for a published output by name.</summary>
+    private static double[] Evaluate(IndicatorName indicator, object[] parameters, string? outputKey)
     {
         var stockData = new StockData(StockTestData.Take(200));
         var builder = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(stockData));
@@ -232,28 +259,10 @@ public sealed class MissingOutputTests : GlobalTestData
         SeriesHandle handle = default;
         builder.ConfigureIndicators(catalog =>
         {
-            var spec = IndicatorSpecs.Create(indicator, new GenericIndicatorOptions(parameters), output);
-            var price = catalog.Price();
-            handle = builder.AddIndicator(spec, price, builder.ResolveSeriesKey(price), key: null);
-        });
-
-        using var runtime = builder.Build();
-        runtime.Start();
-        runtime.Subscribe(handle);
-
-        return runtime.GetSeries(handle).ToArray();
-    }
-
-    /// <summary>The same path, asking for a published output by name rather than by slot.</summary>
-    private static double[] Evaluate(IndicatorName indicator, object[] parameters, string outputKey)
-    {
-        var stockData = new StockData(StockTestData.Take(200));
-        var builder = new StockIndicatorBuilder(IndicatorDataSource.FromBatch(stockData));
-
-        SeriesHandle handle = default;
-        builder.ConfigureIndicators(catalog =>
-        {
-            var spec = IndicatorSpecs.Create(indicator, new GenericIndicatorOptions(parameters), outputKey);
+            var options = new GenericIndicatorOptions(parameters);
+            var spec = outputKey is null
+                ? IndicatorSpecs.Create(indicator, options)
+                : IndicatorSpecs.Create(indicator, options, outputKey);
             var price = catalog.Price();
             handle = builder.AddIndicator(spec, price, builder.ResolveSeriesKey(price), key: null);
         });

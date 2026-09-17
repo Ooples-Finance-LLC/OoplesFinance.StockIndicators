@@ -1356,7 +1356,7 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
     private static double[] Arm(IndicatorName name, IIndicatorSpecOptions options, List<TickerData> bars)
     {
         using var context = new ComputeContext();
-        var spec = new IndicatorSpec(name, options, IndicatorOutput.Primary);
+        var spec = new IndicatorSpec(name, options);
         var result = IndicatorCompute.ComputeArm(new StockData(bars), spec, context);
         result.Should().NotBeNull($"{name} has a fast arm this test drives directly");
         using var buffer = result!.Value;

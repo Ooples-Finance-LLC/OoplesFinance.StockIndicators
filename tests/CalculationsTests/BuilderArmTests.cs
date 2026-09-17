@@ -129,19 +129,15 @@ public sealed class BuilderArmTests : GlobalTestData
                 }
 
                 double[]? primary = null;
-                foreach (IndicatorOutput output in Enum.GetValues(typeof(IndicatorOutput)))
-                {
-                    // A slot the indicator publishes no key for has nothing to compare. It used to pass because
-                    // both sides answered with the primary series - the arm and the batch indicator agreeing on
-                    // a series neither was asked for - and both now refuse instead. A key that resolves but is
-                    // not published is NOT skipped: that is a wrong pin rather than an absent slot.
-                    if (output != IndicatorOutput.Primary
-                        && IndicatorOutputRegistry.GetOutputKey(target.Name, output) is null)
-                    {
-                        continue;
-                    }
 
-                    var spec = new IndicatorSpec(target.Name, options, output);
+                // The indicator's own series first, then every key it publishes. This used to walk the six
+                // IndicatorOutput slots and skip the ones the indicator had no key for; the published keys are
+                // the same question asked directly, and they reach the outputs no slot could name. See #219.
+                foreach (var outputKey in OwnSeriesThenPublishedKeys(target.Name))
+                {
+                    var spec = outputKey is null
+                        ? new IndicatorSpec(target.Name, options)
+                        : new IndicatorSpec(target.Name, options, outputKey);
                     double[]? arm;
                     try
                     {
@@ -150,21 +146,21 @@ public sealed class BuilderArmTests : GlobalTestData
                     catch (Exception)
                     {
                         // An arm that cannot run is not served unless verified; the served path is checked below.
-                        arm = output == IndicatorOutput.Primary ? Array.Empty<double>() : null;
+                        arm = outputKey is null ? Array.Empty<double>() : null;
                     }
 
-                    if (arm is null || (output != IndicatorOutput.Primary && primary is not null && Same(primary, arm)))
+                    if (arm is null || (outputKey is not null && primary is not null && Same(primary, arm)))
                     {
                         continue;
                     }
 
-                    if (output == IndicatorOutput.Primary)
+                    if (outputKey is null)
                     {
                         primary = arm;
                     }
 
                     compared++;
-                    var label = $"{type.Name} {output}{(alternate ? " (alternate parameters)" : string.Empty)}";
+                    var label = $"{type.Name} {outputKey ?? "own series"}{(alternate ? " (alternate parameters)" : string.Empty)}";
                     try
                     {
                         var served = Run(IndicatorCompute.TryComputeFast, tickers, spec)
@@ -197,7 +193,10 @@ public sealed class BuilderArmTests : GlobalTestData
     public void EveryVerifiedArmIsABoundSpec()
     {
         using var scope = new AssertionScope();
-        foreach (var (options, _) in BuilderVerifiedArms.Arms)
+
+        // Arms was a set of (options type, slot) pairs and is now a set of options types: a verified arm is
+        // verified for the indicator, not for one of six slots of it. See issue #219.
+        foreach (var options in BuilderVerifiedArms.Arms)
         {
             BuilderArmBinding.TryGetTarget(options, out _).Should().BeTrue($"{options.Name} is verified against a batch indicator it must name");
         }
@@ -217,6 +216,17 @@ public sealed class BuilderArmTests : GlobalTestData
     }
 
     private static bool Same(double[] a, double[] b) => a.Length == b.Length && !a.Where((v, i) => !IsClose(v, b[i])).Any();
+
+    /// <summary>A null for the indicator's own series, then each key it publishes.</summary>
+    private static IEnumerable<string?> OwnSeriesThenPublishedKeys(IndicatorName name)
+    {
+        yield return null;
+
+        foreach (var key in GeneratedIndicatorOutputs.KeysFor(name))
+        {
+            yield return key;
+        }
+    }
 
     internal static IIndicatorSpecOptions? Create(Type type, bool alternate)
     {

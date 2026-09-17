@@ -218,38 +218,6 @@ public enum SignalGroupMode
 /// <summary>
 /// Indicator output types.
 /// </summary>
-public enum IndicatorOutput
-{
-    /// <summary>
-    /// Primary output value.
-    /// </summary>
-    Primary,
-
-    /// <summary>
-    /// Signal line output (e.g., MACD signal).
-    /// </summary>
-    Signal,
-
-    /// <summary>
-    /// Histogram output (e.g., MACD histogram).
-    /// </summary>
-    Histogram,
-
-    /// <summary>
-    /// Upper band output (e.g., Bollinger upper).
-    /// </summary>
-    UpperBand,
-
-    /// <summary>
-    /// Middle band output (e.g., Bollinger middle).
-    /// </summary>
-    MiddleBand,
-
-    /// <summary>
-    /// Lower band output (e.g., Bollinger lower).
-    /// </summary>
-    LowerBand
-}
 
 /// <summary>
 /// Formula operations for computed series.

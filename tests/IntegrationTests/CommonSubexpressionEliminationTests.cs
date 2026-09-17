@@ -243,8 +243,7 @@ public sealed class CommonSubexpressionEliminationTests : GlobalTestData
 
     private static IndicatorNodeKey? KeyFor(SeriesKey seriesKey, SeriesHandle input, object[] parameters) =>
         IndicatorNodeKey.TryCreate(seriesKey, input,
-            new IndicatorSpec(IndicatorName.SimpleMovingAverage, new GenericIndicatorOptions(parameters),
-                IndicatorOutput.Primary));
+            new IndicatorSpec(IndicatorName.SimpleMovingAverage, new GenericIndicatorOptions(parameters)));
 
     private static List<double> Compute(bool useElimination)
     {

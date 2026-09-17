@@ -80,27 +80,24 @@ internal static class BuilderArmBinding
         }
 
         var result = method.Invoke(null, args) as StockData ?? bars;
-        var key = spec.Output == IndicatorOutput.Primary
-            ? target.OutputKey
-            : IndicatorOutputRegistry.GetOutputKey(target.Name, spec.Output);
+
+        // The key the caller named, else the one this arm stands for. A spec naming neither wants the
+        // indicator's own series, which is where a single-output indicator publishes it.
+        var key = spec.OutputKey ?? target.OutputKey;
         if (key is null)
         {
-            // Only the primary slot may answer with the single series: that is where an indicator with one
-            // output publishes it. Any other slot resolving to nothing means the caller asked for a series this
-            // indicator does not produce, and its primary series would be a wrong number rather than an answer.
-            if (spec.Output != IndicatorOutput.Primary)
-            {
-                throw DoesNotPublish(target.Name, spec.Output);
-            }
-
             return result.CustomValuesList;
         }
 
         if (!result.ChainedOutputs.TryGetValue(key, out var series))
         {
-            // A pinned key naming a series the indicator does not publish. Answering with the series it does
-            // publish is exactly how "SignalFastK" passed for a D line: two slots over one series, silently.
-            throw DoesNotPublish(target.Name, spec.Output);
+            // A key naming a series the indicator does not publish. Answering with the series it does publish
+            // is exactly how "SignalFastK" passed for a D line: two slots over one series, silently.
+            //
+            // A caller who named the key is told which key, not which slot: saying "does not publish a Primary
+            // output" of a request that asked for "Signal" would describe the wrong thing, since a key-addressed
+            // spec carries Primary by construction. The wording matches SeriesEvaluator's for the same failure.
+            throw DoesNotPublishKey(target.Name, key);
         }
 
         return series;
@@ -114,13 +111,19 @@ internal static class BuilderArmBinding
     /// indicator does not produce is an error, not a series. The same message is used here so a caller cannot
     /// tell which of the two refused, and so both name what the indicator does publish.
     /// </remarks>
-    private static CalculationException DoesNotPublish(IndicatorName name, IndicatorOutput output)
+    /// <summary>
+    /// The refusal for a key the indicator does not publish, worded as <c>SeriesEvaluator</c> words it.
+    /// </summary>
+    private static CalculationException DoesNotPublishKey(IndicatorName name, string outputKey)
+    {
+        return new CalculationException(
+            $"{name} does not publish an output named '{outputKey}'. Available outputs: {Available(name)}.");
+    }
+
+    private static string Available(IndicatorName name)
     {
         var available = GeneratedIndicatorOutputs.KeysFor(name);
-        var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
-
-        return new CalculationException(
-            $"{name} does not publish a {output} output. Available outputs: {availableText}.");
+        return available.Count == 0 ? "none" : string.Join(", ", available);
     }
 
     /// <summary>
