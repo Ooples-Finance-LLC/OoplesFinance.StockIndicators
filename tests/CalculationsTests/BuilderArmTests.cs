@@ -143,8 +143,19 @@ public sealed class BuilderArmTests : GlobalTestData
                     {
                         arm = Run(IndicatorCompute.ComputeArm, tickers, spec);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        // A verified arm IS served, so an arm that throws on a key the indicator publishes is a
+                        // broken served path, not an absent one - and skipping it below would retire the only
+                        // assertion that would have caught it. This used to be safe by accident: the loop walked
+                        // six slots and most nulls were slots with no key at all, whereas every key reaching here
+                        // now is one the indicator publishes. Raised by review on PR #230.
+                        if (outputKey is not null && BuilderVerifiedArms.Arms.Contains(type))
+                        {
+                            var thrown = ex.InnerException ?? ex;
+                            failures.Add($"{type.Name} {outputKey}: verified arm threw {thrown.GetType().Name} {thrown.Message}");
+                        }
+
                         // An arm that cannot run is not served unless verified; the served path is checked below.
                         arm = outputKey is null ? Array.Empty<double>() : null;
                     }

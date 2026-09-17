@@ -104,17 +104,16 @@ internal static class BuilderArmBinding
     }
 
     /// <summary>
-    /// The refusal <c>SeriesEvaluator</c> already gives, so both resolvers answer an impossible slot alike.
-    /// </summary>
-    /// <remarks>
-    /// #186 replaced this substitution with a raise in the other resolver, and recorded why there: a slot the
-    /// indicator does not produce is an error, not a series. The same message is used here so a caller cannot
-    /// tell which of the two refused, and so both name what the indicator does publish.
-    /// </remarks>
-    /// <summary>
     /// The refusal for a key the indicator does not publish, worded as <c>SeriesEvaluator</c> words it.
     /// </summary>
-    private static CalculationException DoesNotPublishKey(IndicatorName name, string outputKey)
+    /// <remarks>
+    /// #186 replaced this substitution with a raise in the other resolver, and recorded why there: an output the
+    /// indicator does not produce is an error, not a series. The same message is used here so a caller cannot
+    /// tell which of the resolvers refused, and so all of them name what the indicator does publish. Internal
+    /// rather than private for that reason: the streaming registration in <c>IndicatorRuntime</c> refuses the
+    /// same mistake, and a second wording there would be a second account of one failure. See PR #230.
+    /// </remarks>
+    internal static CalculationException DoesNotPublishKey(IndicatorName name, string outputKey)
     {
         return new CalculationException(
             $"{name} does not publish an output named '{outputKey}'. Available outputs: {Available(name)}.");

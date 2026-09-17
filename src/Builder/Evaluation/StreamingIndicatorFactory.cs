@@ -49,14 +49,4 @@ internal static class StreamingIndicatorFactory
         // A spec that names no key wants the state's own value.
         return update.Value;
     }
-
-    /// <summary>
-    /// The key this indicator publishes for this slot.
-    /// </summary>
-    /// <remarks>
-    /// This knew about two indicators by hand - MACD and Bollinger Bands - and returned null for the
-    /// other seven hundred and sixty-nine, which turned into a NaN series. The generated map is read
-    /// out of the SetOutputValues calls, so every indicator that publishes a named output is covered
-    /// and none of them are spelled out here.
-    /// </remarks>
 }
