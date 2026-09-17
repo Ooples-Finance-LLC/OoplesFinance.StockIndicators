@@ -434,6 +434,137 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         }
     }
 
+    /// <summary>
+    /// A fractal is a five-bar pattern, so none can be confirmed until five real bars exist.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Missing history is represented by 0, and 0 is below every positive price, so the two far-left
+    /// comparisons of the five-bar test pass by default while the window is still filling. Three falling
+    /// opening bars are then enough to confirm a fractal centred on bar 0 - a pattern whose left-hand half
+    /// never happened. Raised by review on PR #214; the same fabricated-value mistake was fixed for the
+    /// log-return windows in #205 and #209.
+    /// </para>
+    /// <para>
+    /// Only the upper band can be fabricated this way, and that asymmetry is a property of the test rather
+    /// than a gap in the fixture: confirming a down fractal requires the missing bars to sit above the
+    /// centre, and 0 never does while prices are positive.
+    /// </para>
+    /// <para>
+    /// Bar 10 is a genuine fractal and is asserted alongside, so the test cannot pass by the indicator
+    /// having stopped finding anything at all.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void FractalChaosBands_ConfirmNothingBeforeFiveBars()
+    {
+        var bars = SeriesOpeningWithFallingHighs(20);
+        const double tolerance = 1e-9;
+
+        var firstHigh = bars[0].High;
+        var fractalHigh = bars[10].High;
+
+        var batch = new StockData(bars).CalculateFractalChaosBands().OutputValues["UpperBand"];
+
+        using var state = new FractalChaosBandsState();
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            var result = state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: true);
+            result.Outputs.Should().NotBeNull("outputs were requested");
+            streaming.Add(result.Outputs?["UpperBand"] ?? 0);
+        }
+
+        // Bars 0-3 have fewer than four bars behind them, so the band has nothing to anchor to yet.
+        for (var i = 0; i < 4; i++)
+        {
+            batch[i].Should().BeApproximately(0, tolerance,
+                $"bar {i} cannot complete a five-bar pattern, so no fractal is confirmed there");
+            streaming[i].Should().BeApproximately(0, tolerance,
+                $"the streaming state computes what the batch computes, including at bar {i}");
+        }
+
+        batch[2].Should().NotBeApproximately(firstHigh, tolerance,
+            $"bar 0's high of {firstHigh} beats bars 1 and 2, but its two left-hand neighbours do not "
+            + "exist and must not be read as 0");
+        streaming[2].Should().NotBeApproximately(firstHigh, tolerance,
+            "an unfilled buffer must not be read as 0 either");
+
+        // The genuine fractal at bar 10 is confirmed at bar 12, so the guard has not silenced the indicator.
+        batch[12].Should().BeApproximately(fractalHigh, tolerance,
+            "bar 10 beats all four of its neighbours and has a complete window behind it");
+        streaming[12].Should().BeApproximately(fractalHigh, tolerance,
+            "the streaming state computes what the batch computes");
+    }
+
+    /// <summary>
+    /// A fractal is a five-bar pattern, so a bar that beats only its immediate neighbours does not anchor
+    /// the band.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The indicator compared its candidate centre against one bar on each side, which is an ordinary
+    /// three-bar pivot: it fires on any single-bar wiggle, so the bands re-anchor far more often and sit
+    /// much closer to price than fractal bands should. See #202.
+    /// </para>
+    /// <para>
+    /// The fixture plants both shapes. Bar 10 beats all four of its neighbours and is a fractal under
+    /// either test - it is here to show the fix has not simply stopped finding anything. Bar 20 beats bars
+    /// 19 and 21 but not bars 18 and 22, so only the three-bar test accepts it. A fractal centred two bars
+    /// back is confirmed two bars later, which is why the readings are taken at 12 and 22.
+    /// </para>
+    /// <para>
+    /// Bars 18 and 22 are themselves fractals - that is unavoidable once they are raised above bar 20 - so
+    /// the band legitimately re-anchors to bar 18's high at bar 20. That is what makes bar 22 the
+    /// discriminating reading: the old code moves the band down to the wiggle's 102.20 there, the fixed
+    /// code holds bar 18's 103.18.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void FractalChaosBands_IgnoreAThreeBarWiggle()
+    {
+        var bars = SeriesWithOneFractalAndOneWiggle(40);
+        const double tolerance = 1e-9;
+
+        var fractalHigh = bars[10].High;
+        var wiggleHigh = bars[20].High;
+        var leftShoulderHigh = bars[18].High;
+
+        var batch = new StockData(bars).CalculateFractalChaosBands().OutputValues["UpperBand"];
+
+        using var state = new FractalChaosBandsState();
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            var result = state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: true);
+            result.Outputs.Should().NotBeNull("outputs were requested");
+            streaming.Add(result.Outputs?["UpperBand"] ?? 0);
+        }
+
+        // The genuine fractal at bar 10 is confirmed at bar 12 and anchors the band.
+        batch[12].Should().BeApproximately(fractalHigh, tolerance,
+            "bar 10 beats both bars on each side of it, so it is a fractal");
+        streaming[12].Should().BeApproximately(fractalHigh, tolerance,
+            "the streaming state computes what the batch computes");
+
+        // The wiggle at bar 20 would be confirmed at bar 22 by a three-bar test, and must not be.
+        batch[22].Should().BeApproximately(leftShoulderHigh, tolerance,
+            $"bar 20's high of {wiggleHigh} beats bars 19 and 21 but not bars 18 and 22, so it is a "
+            + "three-bar pivot rather than a fractal and must not move the band");
+        batch[22].Should().NotBeApproximately(wiggleHigh, tolerance,
+            "anchoring to the wiggle is precisely the defect");
+        streaming[22].Should().BeApproximately(leftShoulderHigh, tolerance,
+            "the streaming state rejects the wiggle exactly as the batch does");
+    }
+
     #region Reference formula implementations
 
     /// <summary>
@@ -721,6 +852,118 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
                 High = close,
                 Low = close,
                 Close = close,
+                Volume = 1_000_000
+            });
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// A series whose opening bars fall, so that a five-bar test applied before its window has filled
+    /// confirms a fractal centred on the first bar.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The fall is what makes this discriminating, and it is why the wiggle fixture below cannot stand in:
+    /// that one drifts upward, so bar 1's high never falls below bar 0's and the right-hand half of the
+    /// pattern is never satisfied during warm-up. Here it is, leaving only the two absent left-hand
+    /// neighbours between the indicator and a fabricated fractal.
+    /// </para>
+    /// <para>
+    /// Highs and lows are given real ranges for the same reason as the fixture below: a fractal is a
+    /// statement about highs and lows, and the fixtures that set both to the close cannot express one.
+    /// </para>
+    /// </remarks>
+    private static List<TickerData> SeriesOpeningWithFallingHighs(int count)
+    {
+        var data = new List<TickerData>(count);
+        var date = new DateTime(2024, 1, 1);
+
+        for (var i = 0; i < count; i++)
+        {
+            // Bars 0-4 fall, so bar 0's high beats bars 1 and 2 - the whole right-hand half of a five-bar
+            // test centred on it. Its left-hand half is the two bars that do not exist. The drift afterwards
+            // is gentle and monotone so that nothing but the planted peak can form an extreme.
+            var high = i <= 4 ? 110 - i : 106 + ((i - 4) * 0.01);
+            var low = i <= 4 ? 90 + i : 94 - ((i - 4) * 0.01);
+
+            // Bar 10 beats all four of its neighbours with a complete window behind it: a genuine fractal.
+            if (i == 10)
+            {
+                high += 5;
+                low -= 5;
+            }
+
+            data.Add(new TickerData
+            {
+                Date = date.AddDays(i),
+                Open = (high + low) / 2,
+                High = high,
+                Low = low,
+                Close = (high + low) / 2,
+                Volume = 1_000_000
+            });
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// A series carrying one genuine five-bar fractal and one three-bar wiggle that is not a fractal.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every other fixture here sets the high and the low to the close, so no fractal can be expressed in
+    /// them at all: the pattern is a statement about highs and lows moving independently of where the bar
+    /// closed. This one gives each bar a real range.
+    /// </para>
+    /// <para>
+    /// The discriminating shape is the wiggle. Its high beats both immediate neighbours but not the bars
+    /// two out, so a three-bar pivot test anchors a band to it and a five-bar fractal test does not - which
+    /// is the whole of #202. The peak is the opposite: it beats all four of its neighbours, so both tests
+    /// agree it is a fractal, and it is there to prove the fix has not simply stopped finding anything.
+    /// </para>
+    /// </remarks>
+    private static List<TickerData> SeriesWithOneFractalAndOneWiggle(int count)
+    {
+        var data = new List<TickerData>(count);
+        var date = new DateTime(2024, 1, 1);
+
+        for (var i = 0; i < count; i++)
+        {
+            // A gentle drift, so nothing but the two planted shapes can form an extreme.
+            var high = 100 + (i * 0.01);
+            var low = 90 - (i * 0.01);
+
+            // Bar 10 beats all four neighbours: a real fractal under either test.
+            if (i == 10)
+            {
+                high += 5;
+                low -= 5;
+            }
+
+            // Bar 20 beats only its immediate neighbours; bars 18 and 22 are raised above it, so the
+            // five-bar test rejects it and the three-bar test does not.
+            if (i == 20)
+            {
+                high += 2;
+                low -= 2;
+            }
+
+            if (i == 18 || i == 22)
+            {
+                high += 3;
+                low -= 3;
+            }
+
+            data.Add(new TickerData
+            {
+                Date = date.AddDays(i),
+                Open = (high + low) / 2,
+                High = high,
+                Low = low,
+                Close = (high + low) / 2,
                 Volume = 1_000_000
             });
         }

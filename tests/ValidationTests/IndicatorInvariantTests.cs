@@ -264,10 +264,12 @@ public sealed class IndicatorInvariantTests
     /// which is the honest outcome rather than an exclusion.
     /// </para>
     /// <para>
-    /// FractalChaosBands is not the zero seed it was first taken for. Its first violation is at bar 60,
-    /// where a down fractal at 172 sits above an up fractal at 163.41 - not a band left at zero. Bands
-    /// built from the last fractal of each kind genuinely cross in a strong trend, because a recent low
-    /// can form above an older high.
+    /// FractalChaosBands was not the zero seed it was first taken for either: its first violation was at
+    /// bar 60, where a down fractal at 172 sat above an up fractal at 163.41 - not a band left at zero.
+    /// That was read at the time as bands of this shape genuinely crossing in a trend. It was narrower than
+    /// that: the indicator was finding three-bar pivots rather than five-bar fractals, and re-anchoring on
+    /// wiggles is what let one band overtake the other. Corrected in #202, after which the same fixture
+    /// crosses on none of its 251 bars.
     /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsOutOfOrder = new()
@@ -281,13 +283,28 @@ public sealed class IndicatorInvariantTests
     /// Indicators whose upper and lower bands genuinely cross, so that no series can lie between them.
     /// </summary>
     /// <remarks>
-    /// Not a defect, and measured rather than assumed. FractalChaosBands publishes the last up fractal
-    /// as its upper band and the last down fractal as its lower one. In a strong trend a recent low can
-    /// form above an older high, and the two are then crossed: on the fixture that happens first at bar
-    /// 60, where a down fractal at 172 sits above an up fractal at 163.41, and on 2 of the 251 bars in
-    /// all. Its middle band is the mean of the other two, so it lies between them whenever they are
-    /// ordered and cannot itself be at fault - this invariant is simply not a statement about an
-    /// indicator built this way.
+    /// <para>
+    /// Not a defect. FractalChaosBands publishes the last up fractal as its upper band and the last down
+    /// fractal as its lower one, and those two anchors move independently: a down fractal forming later, at
+    /// a higher level after an upward gap, sits above an up fractal still being carried from earlier. No
+    /// width of pattern prevents that, so no series can be guaranteed to lie between them. Its middle band
+    /// is the mean of the other two, so it lies between them whenever they are ordered and cannot itself be
+    /// at fault - this invariant is simply not a statement about an indicator built this way.
+    /// </para>
+    /// <para>
+    /// The numbers once recorded here were inflated by a separate defect and are worth correcting rather
+    /// than repeating. They were 2 crossings in 251 bars, first at bar 60 where a down fractal at 172 sat
+    /// above an up fractal at 163.41 - measured when the indicator was comparing each candidate against one
+    /// bar on each side, which is a three-bar pivot rather than a five-bar fractal. Re-anchoring on every
+    /// single-bar wiggle is what dragged one band past the other that often. Given the pattern a fractal
+    /// actually is, the same fixture now crosses on none of its 251 bars (#202).
+    /// </para>
+    /// <para>
+    /// That measurement is why the entry stays rather than why it would go. Zero crossings on one fixture
+    /// shows the old count was an artefact; it does not show the bands cannot cross, and the structure
+    /// above says they can. An exclusion resting on the shape of the indicator outlives any particular set
+    /// of bars.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsThatGenuinelyCross = new()
     {
