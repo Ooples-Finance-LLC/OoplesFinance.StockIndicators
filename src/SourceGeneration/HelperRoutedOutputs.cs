@@ -66,43 +66,25 @@ public static class HelperRoutedOutputs
         public List<KeyRef> Keys { get; } = new List<KeyRef>();
     }
 
-    /// <summary>One call to a helper, and the literals it passed, by parameter name.</summary>
-    public sealed class CallSite
-    {
-        public string MethodName { get; set; } = string.Empty;
-
-        /// <summary>Parameter name to the <c>IndicatorName</c> member passed for it.</summary>
-        public Dictionary<string, string> IndicatorArguments { get; } =
-            new Dictionary<string, string>(StringComparer.Ordinal);
-
-        /// <summary>Parameter name to the string literal passed for it.</summary>
-        public Dictionary<string, string> StringArguments { get; } =
-            new Dictionary<string, string>(StringComparer.Ordinal);
-    }
-
     /// <summary>What one method contributed: a helper declaration, calls to helpers, or both.</summary>
     public sealed class Reading
     {
         public HelperDeclaration? Declaration { get; set; }
 
-        public List<CallSite> Calls { get; } = new List<CallSite>();
+        public List<HelperCallSites.CallSite> Calls { get; } = new List<HelperCallSites.CallSite>();
     }
 
     /// <summary>
     /// Any <c>Calculate</c> method, including the expression-bodied ones the other readers skip because
     /// they test <c>Body is not null</c> - two of the four wrappers here are a single <c>=&gt;</c> call.
     /// </summary>
-    public static bool IsCandidate(SyntaxNode node) =>
-        node is MethodDeclarationSyntax method
-        && method.Identifier.Text.StartsWith("Calculate", StringComparison.Ordinal)
-        && (method.Body is not null || method.ExpressionBody is not null);
+    public static bool IsCandidate(SyntaxNode node) => HelperCallSites.IsCandidate(node);
 
     /// <summary>Reads one method, or null when it neither declares nor calls a routed helper.</summary>
     public static Reading? Read(GeneratorSyntaxContext context)
     {
         var method = (MethodDeclarationSyntax)context.Node;
-        SyntaxNode? body = method.Body;
-        body ??= method.ExpressionBody;
+        var body = HelperCallSites.BodyOf(method);
         if (body is null)
         {
             return null;
@@ -116,14 +98,7 @@ public static class HelperRoutedOutputs
             Declaration = ReadDeclaration(method.Identifier.Text, body, parameters)
         };
 
-        foreach (var invocation in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
-        {
-            var call = ReadCallSite(invocation, context.SemanticModel);
-            if (call is not null)
-            {
-                reading.Calls.Add(call);
-            }
-        }
+        reading.Calls.AddRange(HelperCallSites.ReadCalls(body, context.SemanticModel));
 
         return reading.Declaration is null && reading.Calls.Count == 0 ? null : reading;
     }
@@ -171,7 +146,7 @@ public static class HelperRoutedOutputs
         Resolve(readings).SelectMany(published => published.Keys);
 
     private static IndicatorOutputMapGenerator.PublishedOutputs? Resolve(
-        CallSite call, Dictionary<string, HelperDeclaration> helpers)
+        HelperCallSites.CallSite call, Dictionary<string, HelperDeclaration> helpers)
     {
         if (!helpers.TryGetValue(call.MethodName, out var helper))
         {
@@ -238,7 +213,7 @@ public static class HelperRoutedOutputs
 
         foreach (var invocation in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
-            if (InvokedName(invocation) != "SetOutputValues")
+            if (HelperCallSites.InvokedName(invocation) != "SetOutputValues")
             {
                 continue;
             }
@@ -273,64 +248,4 @@ public static class HelperRoutedOutputs
         return routed && declaration.Keys.Count > 0 ? declaration : null;
     }
 
-    private static CallSite? ReadCallSite(InvocationExpressionSyntax invocation, SemanticModel model)
-    {
-        var invoked = InvokedName(invocation);
-        if (invoked is null || !invoked.StartsWith("Calculate", StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        // The parameter each argument binds to is the whole point; without the symbol there is no way to
-        // know, and the two helpers' mirrored orders make an index actively wrong.
-        if (model.GetSymbolInfo(invocation).Symbol is not IMethodSymbol symbol)
-        {
-            return null;
-        }
-
-        var call = new CallSite { MethodName = symbol.Name };
-        var arguments = invocation.ArgumentList.Arguments;
-
-        for (var i = 0; i < arguments.Count; i++)
-        {
-            var argument = arguments[i];
-            var parameter = ParameterFor(argument, i, symbol);
-            if (parameter is null)
-            {
-                continue;
-            }
-
-            if (argument.Expression is MemberAccessExpressionSyntax member
-                && member.Expression is IdentifierNameSyntax enumName
-                && enumName.Identifier.Text == "IndicatorName")
-            {
-                call.IndicatorArguments[parameter] = member.Name.Identifier.Text;
-            }
-            else if (argument.Expression is LiteralExpressionSyntax literal
-                && literal.IsKind(SyntaxKind.StringLiteralExpression))
-            {
-                call.StringArguments[parameter] = literal.Token.ValueText;
-            }
-        }
-
-        return call.IndicatorArguments.Count == 0 && call.StringArguments.Count == 0 ? null : call;
-    }
-
-    private static string? ParameterFor(ArgumentSyntax argument, int index, IMethodSymbol symbol)
-    {
-        var named = argument.NameColon?.Name.Identifier.Text;
-        if (named is not null)
-        {
-            return named;
-        }
-
-        return index < symbol.Parameters.Length ? symbol.Parameters[index].Name : null;
-    }
-
-    private static string? InvokedName(InvocationExpressionSyntax invocation) => invocation.Expression switch
-    {
-        MemberAccessExpressionSyntax member => member.Name.Identifier.Text,
-        IdentifierNameSyntax identifier => identifier.Identifier.Text,
-        _ => null
-    };
 }

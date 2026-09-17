@@ -22,19 +22,32 @@ namespace OoplesFinance.StockIndicators.SourceGeneration;
 /// by sigma, wants the second one. See issue #190.
 /// </para>
 /// <para>
-/// This exists because counting these by hand went wrong. The issue reports 79 call sites; there are 41,
-/// and the difference is doc comments, a see-also in another method's remarks, and helper files that
-/// only name the method in prose. A list read from the syntax cannot drift from the code, cannot be
-/// miscounted, and covers an indicator added tomorrow without anyone remembering to add it - the same
-/// reason IndicatorInvariantTests takes its set from GetSupportedIndicators rather than a list of names.
+/// This exists because counting these by hand went wrong. Issue #190 reports 79 call sites; the count is
+/// nowhere near that, and the difference is doc comments, a see-also in another method's remarks, and
+/// helper files that only name the method in prose. A list read from the syntax cannot drift from the
+/// code, cannot be miscounted, and covers an indicator added tomorrow without anyone remembering to add
+/// it - the same reason IndicatorInvariantTests takes its set from GetSupportedIndicators rather than a
+/// list of names.
 /// </para>
 /// <para>
-/// The chained series is the point of the second field. 25 of the sites set CustomValuesList to some
+/// The counts themselves live on the emitted type, as <c>Count</c> and <c>ChainedCount</c>, and not in
+/// this remark. A number written here is a second copy that goes stale the moment an indicator is added:
+/// this comment claimed 41 sites and 25 chained while the generator was emitting 32 and 19. See #222.
+/// </para>
+/// <para>
+/// The chained series is the point of the second field. Many of the sites set CustomValuesList to some
 /// other series immediately before asking for the dispersion - a true range, a log return, an on balance
 /// volume - which is the chaining mechanism used deliberately, in the sense #173 settled. Those are
 /// asking for the dispersion OF THAT SERIES, so their replacement is the windowed deviation of the same
 /// list and not of the price input. Recording which is which is what stops the migration from quietly
 /// redirecting an indicator onto the wrong series.
+/// </para>
+/// <para>
+/// Indicators that route the call through a shared private helper are read too. Two wrappers over
+/// <c>CalculateVolatilityIndexDynamicAverage</c> hand it their name as an argument, so the helper's body
+/// names a parameter and neither wrapper's body names anything - the same blind spot #199 fixed for the
+/// output map. One dispersion call inside that helper therefore belongs to both indicators, and is
+/// recorded once for each. See #222.
 /// </para>
 /// <para>
 /// It emits an inventory, not a verdict. Whether a given consumer should move is a judgement about that
@@ -51,8 +64,8 @@ public class DispersionConsumerGenerator : IIncrementalGenerator
     {
         var consumers = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => IsCandidateMethod(node),
-                transform: static (ctx, _) => Extract(ctx.Node))
+                predicate: static (node, _) => HelperCallSites.IsCandidate(node),
+                transform: static (ctx, _) => Read(ctx))
             .Where(static x => x is not null)
             .Collect();
 
@@ -81,33 +94,92 @@ public class DispersionConsumerGenerator : IIncrementalGenerator
         public string ChainedSeries { get; set; } = string.Empty;
     }
 
-    private static bool IsCandidateMethod(SyntaxNode node) =>
-        node is MethodDeclarationSyntax method
-        && method.Identifier.Text.StartsWith("Calculate", System.StringComparison.Ordinal)
-        && method.Body is not null;
-
-    private static ImmutableArray<DispersionUse>? Extract(SyntaxNode node)
+    /// <summary>A helper's dispersion calls, and the parameter its indicator name arrives in.</summary>
+    public sealed class RoutedHelper
     {
-        var method = (MethodDeclarationSyntax)node;
-        var body = method.Body;
-        if (body is null || method.Identifier.Text == Dispersion)
+        public string MethodName { get; set; } = string.Empty;
+
+        /// <summary>The parameter the caller passes the indicator name in.</summary>
+        public string NameParameter { get; set; } = string.Empty;
+
+        /// <summary>The series chained in at each dispersion call, in source order, one entry per call.</summary>
+        public List<string> ChainedSeries { get; } = new List<string>();
+    }
+
+    /// <summary>What one method contributed: its own uses, a routed helper, or calls to one.</summary>
+    public sealed class Reading
+    {
+        /// <summary>Uses whose indicator this method names outright.</summary>
+        public List<DispersionUse> Uses { get; } = new List<DispersionUse>();
+
+        /// <summary>Set when this method takes its indicator name as a parameter and uses the dispersion.</summary>
+        public RoutedHelper? Helper { get; set; }
+
+        /// <summary>Calls this method makes to a helper, and the literals it passed.</summary>
+        public List<HelperCallSites.CallSite> Calls { get; } = new List<HelperCallSites.CallSite>();
+    }
+
+    private static Reading? Read(GeneratorSyntaxContext context)
+    {
+        var method = (MethodDeclarationSyntax)context.Node;
+        if (method.Identifier.Text == Dispersion)
         {
             return null;
         }
 
-        var indicatorName = ReadIndicatorName(body);
-        if (indicatorName is null)
+        var body = HelperCallSites.BodyOf(method);
+        if (body is null)
         {
             return null;
         }
 
+        var reading = new Reading();
+
+        // A wrapper's body is often nothing but the call to its helper, so the calls are read whether or not
+        // this method uses the dispersion itself.
+        reading.Calls.AddRange(HelperCallSites.ReadCalls(body, context.SemanticModel));
+
+        var chainedAt = ReadDispersionChains(body);
+        if (chainedAt.Count > 0)
+        {
+            var parameters = new HashSet<string>(
+                method.ParameterList.Parameters.Select(p => p.Identifier.Text), System.StringComparer.Ordinal);
+            var (literalName, nameParameter) = ReadIndicatorName(body, parameters);
+
+            if (literalName is not null)
+            {
+                foreach (var chained in chainedAt)
+                {
+                    reading.Uses.Add(new DispersionUse { IndicatorName = literalName, ChainedSeries = chained });
+                }
+            }
+            else if (nameParameter is not null)
+            {
+                // The helper cannot say which indicator it is; only its callers can. Recorded now, joined
+                // once every method has been seen. See issue #222.
+                var helper = new RoutedHelper
+                {
+                    MethodName = method.Identifier.Text,
+                    NameParameter = nameParameter
+                };
+                helper.ChainedSeries.AddRange(chainedAt);
+                reading.Helper = helper;
+            }
+        }
+
+        return reading.Uses.Count == 0 && reading.Helper is null && reading.Calls.Count == 0 ? null : reading;
+    }
+
+    /// <summary>The series chained in at each dispersion call in this body, in source order.</summary>
+    private static List<string> ReadDispersionChains(SyntaxNode body)
+    {
         // Source order, so the chained series in force at each call is the last one set before it.
         var chained = string.Empty;
-        var uses = ImmutableArray.CreateBuilder<DispersionUse>();
+        var chains = new List<string>();
 
         foreach (var invocation in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
-            var name = InvokedName(invocation);
+            var name = HelperCallSites.InvokedName(invocation);
             if (name == "SetCustomValues")
             {
                 var argument = invocation.ArgumentList.Arguments.FirstOrDefault()?.Expression;
@@ -127,43 +199,87 @@ public class DispersionConsumerGenerator : IIncrementalGenerator
 
             if (name == Dispersion)
             {
-                uses.Add(new DispersionUse { IndicatorName = indicatorName, ChainedSeries = chained });
+                chains.Add(chained);
             }
         }
 
-        return uses.Count > 0 ? uses.ToImmutable() : null;
+        return chains;
     }
 
-    private static string? InvokedName(InvocationExpressionSyntax invocation) => invocation.Expression switch
-    {
-        MemberAccessExpressionSyntax member => member.Name.Identifier.Text,
-        IdentifierNameSyntax identifier => identifier.Identifier.Text,
-        _ => null
-    };
-
-    private static string? ReadIndicatorName(BlockSyntax body)
+    /// <summary>The indicator this body stamps: a literal, or the parameter it is handed.</summary>
+    private static (string? Literal, string? Parameter) ReadIndicatorName(SyntaxNode body, HashSet<string> parameters)
     {
         foreach (var assignment in body.DescendantNodes().OfType<AssignmentExpressionSyntax>())
         {
-            if (assignment.Left is MemberAccessExpressionSyntax left
-                && left.Name.Identifier.Text == "IndicatorName"
-                && assignment.Right is MemberAccessExpressionSyntax right
+            if (assignment.Left is not MemberAccessExpressionSyntax left
+                || left.Name.Identifier.Text != "IndicatorName")
+            {
+                continue;
+            }
+
+            if (assignment.Right is MemberAccessExpressionSyntax right
                 && right.Expression is IdentifierNameSyntax enumName
                 && enumName.Identifier.Text == "IndicatorName")
             {
                 var value = right.Name.Identifier.Text;
-                return value == "None" ? null : value;
+                return (value == "None" ? null : value, null);
+            }
+
+            if (assignment.Right is IdentifierNameSyntax identifier
+                && parameters.Contains(identifier.Identifier.Text))
+            {
+                return (null, identifier.Identifier.Text);
+            }
+
+            break;
+        }
+
+        return (null, null);
+    }
+
+    private static void Emit(SourceProductionContext context, ImmutableArray<Reading?> items)
+    {
+        // The helpers first, because a call site can appear before the helper it calls.
+        var helpers = new Dictionary<string, RoutedHelper>(System.StringComparer.Ordinal);
+        foreach (var reading in items)
+        {
+            var helper = reading?.Helper;
+            if (helper is not null && !helpers.ContainsKey(helper.MethodName))
+            {
+                helpers[helper.MethodName] = helper;
             }
         }
 
-        return null;
-    }
+        var all = new List<DispersionUse>();
+        foreach (var reading in items)
+        {
+            if (reading is null)
+            {
+                continue;
+            }
 
-    private static void Emit(SourceProductionContext context, ImmutableArray<ImmutableArray<DispersionUse>?> items)
-    {
-        var all = items
-            .SelectMany(item => item ?? ImmutableArray<DispersionUse>.Empty)
-            .ToList();
+            all.AddRange(reading.Uses);
+
+            foreach (var call in reading.Calls)
+            {
+                if (!helpers.TryGetValue(call.MethodName, out var helper)
+                    || !call.IndicatorArguments.TryGetValue(helper.NameParameter, out var name)
+                    || string.IsNullOrEmpty(name)
+                    || name == "None")
+                {
+                    // Not a routed dispersion helper, or the caller passed something that is not a literal
+                    // IndicatorName. Say nothing rather than guess.
+                    continue;
+                }
+
+                // One call inside the helper belongs to every indicator that routes through it, so it is
+                // recorded once per caller. Two wrappers over one helper means two entries. See issue #222.
+                foreach (var chained in helper.ChainedSeries)
+                {
+                    all.Add(new DispersionUse { IndicatorName = name, ChainedSeries = chained });
+                }
+            }
+        }
 
         if (all.Count == 0)
         {
