@@ -750,6 +750,98 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
             "the fixture must actually blend somewhere, or every weight is zero and this holds trivially");
     }
 
+    /// <summary>
+    /// The normal equations are solved against the variances of the very windows its covariances come from,
+    /// and those windows are the bar index and its square.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <c>n</c> is the bar index and <c>n2</c> its square, so the two variance terms do not depend on the
+    /// prices at all. Over a full window of <c>L</c> consecutive integers the population variance is exactly
+    /// <c>(L^2 - 1) / 12</c> - 33.25 at a length of 20 and 208.25 at 50. This reference substitutes that
+    /// closed form rather than re-deriving it from the series, so one side of the comparison is arithmetic
+    /// the indicator cannot influence at all.
+    /// </para>
+    /// <para>
+    /// Before #223 those terms came from <c>CalculateStandardDeviationVolatility</c> of the price series,
+    /// which is of order one against a required 33.25 or 208.25. Reverting the fix moves the published
+    /// series by orders of magnitude, so this cannot hold both ways.
+    /// </para>
+    /// <para>
+    /// Raised by review on PR #224, and the reasoning there is worth keeping: the generic parity sweep
+    /// compares this indicator's streaming state against its batch twin, so it passes whenever both engines
+    /// make the same mistake, and the golden-file test asserts only that the values are finite. Neither
+    /// could fail if the corrected terms were put back.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(20)]
+    [InlineData(50)]
+    public void QuadraticLeastSquaresMovingAverage_SolvesAgainstTheIndexWindowsVariances(int length)
+    {
+        var bars = GappingSeriesWithoutRange(length + 120);
+        var closes = bars.Select(b => b.Close).ToArray();
+
+        var result = new StockData(bars).CalculateQuadraticLeastSquaresMovingAverage(
+            MovingAvgType.SimpleMovingAverage, length);
+        var qlma = result.OutputValues["Qlma"];
+
+        var n = new double[bars.Count];
+        var n2 = new double[bars.Count];
+        var nn2 = new double[bars.Count];
+        var n2v = new double[bars.Count];
+        var nv = new double[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            n[i] = i;
+            n2[i] = (double)i * i;
+            nn2[i] = n[i] * n2[i];
+            n2v[i] = n2[i] * closes[i];
+            nv[i] = n[i] * closes[i];
+        }
+
+        // The population variance of L consecutive integers, which is what the n window always is.
+        var indexVariance = (((double)length * length) - 1) / 12;
+        var solved = 0;
+
+        for (var i = length - 1; i < bars.Count; i++)
+        {
+            var sma = WindowAverage(closes, i, length);
+            var nSma = WindowAverage(n, i, length);
+            var n2Sma = WindowAverage(n2, i, length);
+            var nn2Sma = WindowAverage(nn2, i, length);
+            var n2vSma = WindowAverage(n2v, i, length);
+            var nvSma = WindowAverage(nv, i, length);
+
+            var nn2Cov = nn2Sma - (nSma * n2Sma);
+            var n2vCov = n2vSma - (n2Sma * sma);
+            var nvCov = nvSma - (nSma * sma);
+
+            var n2Dev = WindowDeviation(n2, i, length);
+            var n2Variance = n2Dev * n2Dev;
+
+            var norm = (n2Variance * indexVariance) - (nn2Cov * nn2Cov);
+            if (norm == 0)
+            {
+                continue;
+            }
+
+            solved++;
+            var a = ((n2vCov * indexVariance) - (nvCov * nn2Cov)) / norm;
+            var b = ((nvCov * n2Variance) - (n2vCov * nn2Cov)) / norm;
+            var c = sma - (a * n2Sma) - (b * nSma);
+            var expected = (a * n2[i]) + (b * i) + c;
+
+            // Relative, because the index terms grow with the bar: n2 reaches five figures on this fixture,
+            // and the determinant divides two large products, so an absolute floor would be meaningless.
+            qlma[i].Should().BeApproximately(expected, 1e-6 * Math.Max(1, Math.Abs(expected)),
+                $"the quadratic fit solves against the index window's variance of {indexVariance} (bar {i})");
+        }
+
+        solved.Should().BeGreaterThan(0,
+            "the fixture must produce a solvable system, or every bar is skipped and this holds trivially");
+    }
+
     #region Reference formula implementations
 
     /// <summary>
