@@ -727,13 +727,17 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var varList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // ka and kb divide this by secma and sects, which are squared distances, and the result is used as a
+        // smoothing constant between 0 and 1. That only holds if this is a variance. It was a deviation, and
+        // one taken from the moving-average line rather than the window's own mean. See issue #223.
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var sma = smaList[i];
-            var prevVar = i >= length ? varList[i - length] : 0;
+            var prevDev = i >= length ? devList[i - length] : 0;
+            var prevVar = prevDev * prevDev;
             var prevCma = i >= 1 ? GetLastOrDefault(cmaList) : currentValue;
             var prevCts = i >= 1 ? GetLastOrDefault(ctsList) : currentValue;
             var secma = Pow(sma - prevCma, 2);
