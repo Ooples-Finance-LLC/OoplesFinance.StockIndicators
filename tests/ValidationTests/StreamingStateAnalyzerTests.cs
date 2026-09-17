@@ -231,7 +231,13 @@ public sealed class StreamingStateAnalyzerTests
     /// known types by metadata name and returns without checking anything if any of them is missing - so a
     /// short reference list would turn every case here silently green.
     /// </remarks>
-    private static IReadOnlyList<MetadataReference> PlatformReferences()
+    /// <param name="includeLibrary">
+    /// Whether to reference the library itself. SI0006's tests say no: that rule only runs in a compilation
+    /// named for the library, and a compilation may not sensibly reference an assembly of its own name. Its
+    /// snippets declare their own stub types instead, which the rule is happy with because it reads syntax
+    /// rather than symbols.
+    /// </param>
+    internal static IReadOnlyList<MetadataReference> PlatformReferences(bool includeLibrary = true)
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var references = new List<MetadataReference>();
@@ -248,7 +254,7 @@ public sealed class StreamingStateAnalyzerTests
         }
 
         var library = typeof(IStreamingIndicatorState).Assembly.Location;
-        if (seen.Add(Path.GetFileName(library)))
+        if (includeLibrary && seen.Add(Path.GetFileName(library)))
         {
             references.Add(MetadataReference.CreateFromFile(library));
         }
