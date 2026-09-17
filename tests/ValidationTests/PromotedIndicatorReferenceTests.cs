@@ -381,6 +381,59 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
         }
     }
 
+    /// <summary>
+    /// The Kase dev stop sets its stops a multiple of the range window's own deviation from that window's
+    /// average.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// It took that dispersion from CalculateStandardDeviationVolatility, which smooths the range series and
+    /// measures each bar's distance from the smoothed line rather than the spread of the window about its
+    /// own mean. A stop at avg + k * sigma is defined against the latter. See #190.
+    /// </para>
+    /// <para>
+    /// The band factor is passed to all four stops on purpose. <c>stdDev1</c> defaults to zero, so the first
+    /// stop is avg + 0 * dev - the deviation cancels out of it entirely, and it is the slot the existing
+    /// parity spec drives. A reference test written against the default first stop would agree under either
+    /// quantity and prove nothing about which one is taken.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(10, 21, 20, 1.0)]
+    [InlineData(5, 13, 14, 2.2)]
+    public void KaseDevStop_ScalesItsStopsByTheWindowsOwnDeviation(
+        int fastLength, int slowLength, int length, double stdDev)
+    {
+        var bars = GappingSeriesWithoutRange(length + slowLength + 60);
+        var expected = KaseDevStopV2Reference(bars, fastLength, slowLength, length, stdDev);
+        const double tolerance = 1e-8;
+
+        var batch = new StockData(bars)
+            .CalculateKaseDevStopV2(MovingAvgType.SimpleMovingAverage, fastLength, slowLength, length,
+                stdDev, stdDev, stdDev, stdDev)
+            .OutputValues["Dev1"];
+
+        using var state = new KaseDevStopV2State(MovingAvgType.SimpleMovingAverage, fastLength, slowLength,
+            length, stdDev, stdDev, stdDev, stdDev);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        for (var i = Math.Max(length, slowLength); i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected[i], tolerance,
+                $"the stop is the range window's average plus {stdDev} of its own deviation (bar {i})");
+            streaming[i].Should().BeApproximately(expected[i], tolerance,
+                $"the streaming state computes what the batch computes (bar {i})");
+        }
+    }
+
     #region Reference formula implementations
 
     /// <summary>
@@ -417,6 +470,93 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
 
             var total = up + down;
             result[i] = total != 0 ? 100 * (up - down) / total : 0;
+        }
+
+        return result;
+    }
+
+    /// <summary>The mean of the window ending at <paramref name="index"/>, or zero before it fills.</summary>
+    private static double WindowAverage(double[] values, int index, int length)
+    {
+        if (index < length - 1)
+        {
+            return 0;
+        }
+
+        double sum = 0;
+        for (var j = index - length + 1; j <= index; j++)
+        {
+            sum += values[j];
+        }
+
+        return sum / length;
+    }
+
+    /// <summary>The deviation of that window about its own mean, or zero before it fills.</summary>
+    private static double WindowDeviation(double[] values, int index, int length)
+    {
+        if (index < length - 1)
+        {
+            return 0;
+        }
+
+        var mean = WindowAverage(values, index, length);
+        double sum = 0;
+        for (var j = index - length + 1; j <= index; j++)
+        {
+            sum += (values[j] - mean) * (values[j] - mean);
+        }
+
+        return Math.Sqrt(sum / length);
+    }
+
+    /// <summary>
+    /// The Kase dev stop written out from its definition: a stop set a multiple of the range window's own
+    /// deviation away from that window's average.
+    /// </summary>
+    /// <remarks>
+    /// Both the averages and the deviation are zero until their windows fill, which is what
+    /// <c>MovingAverageCore.SimpleMovingAverage</c> and <c>VolatilityCore.StandardDeviation</c> both do, so
+    /// the warm-up needs no special case. During it the two averages are equal, the trend reads -1 rather
+    /// than 1, and that is reproduced here rather than corrected for.
+    /// </remarks>
+    private static double[] KaseDevStopV2Reference(
+        List<TickerData> bars, int fastLength, int slowLength, int length, double stdDev)
+    {
+        var count = bars.Count;
+        var closes = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            closes[i] = bars[i].Close;
+        }
+
+        var ranges = new double[count];
+        var prices = new double[count];
+        var trends = new double[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            var high = bars[i].High;
+            var low = bars[i].Low;
+            var previousHigh = i >= 1 ? bars[i - 1].High : 0;
+            var previousLow = i >= 1 ? bars[i - 1].Low : 0;
+            var previousClose = i >= 2 ? closes[i - 2] : 0;
+
+            trends[i] = WindowAverage(closes, i, fastLength) > WindowAverage(closes, i, slowLength) ? 1 : -1;
+
+            var price = trends[i] == 1 ? high : low;
+            prices[i] = trends[i] > 0 ? Math.Max(price, high) : Math.Min(price, low);
+
+            ranges[i] = Math.Max(Math.Max(high, previousHigh), previousClose)
+                - Math.Min(Math.Min(low, previousLow), previousClose);
+        }
+
+        var result = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            var average = WindowAverage(ranges, i, length);
+            var deviation = WindowDeviation(ranges, i, length);
+            result[i] = (prices[i] + (-1 * trends[i])) * (average + (stdDev * deviation));
         }
 
         return result;
