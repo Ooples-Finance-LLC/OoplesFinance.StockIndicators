@@ -462,9 +462,10 @@ public static class IndicatorOutputRegistry
         { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
 
         // Stochastic outputs (K/D lines). The D line is "FastD": the indicator publishes FastK, FastD and
-        // SlowD, and nothing anywhere publishes "SignalFastK". A key that resolves to nothing does not
-        // raise here - BuilderArmBinding answers an unpublished key with the series the indicator does
-        // publish - so the D handle silently returned the K line, two handles over one series.
+        // SlowD, and nothing anywhere publishes "SignalFastK". The wrong pin looked harmless because
+        // BuilderArmBinding answered an unpublished key with the series the indicator does publish, so the D
+        // handle quietly returned the K line - two handles over one series. That fallback raises now, which
+        // is what turns this pin from a wrong number into a failure, and why it is corrected here.
         { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "FastD" },
 
         // ADX outputs (DI+, DI-, ADX)

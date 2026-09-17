@@ -85,12 +85,42 @@ internal static class BuilderArmBinding
             : IndicatorOutputRegistry.GetOutputKey(target.Name, spec.Output);
         if (key is null)
         {
+            // Only the primary slot may answer with the single series: that is where an indicator with one
+            // output publishes it. Any other slot resolving to nothing means the caller asked for a series this
+            // indicator does not produce, and its primary series would be a wrong number rather than an answer.
+            if (spec.Output != IndicatorOutput.Primary)
+            {
+                throw DoesNotPublish(target.Name, spec.Output);
+            }
+
             return result.CustomValuesList;
         }
 
-        // The registry answers UpperBand, MiddleBand, LowerBand, Signal and Histogram for any indicator, whether
-        // or not it publishes one. An indicator that does not is answered with the series it does publish.
-        return result.ChainedOutputs.TryGetValue(key, out var series) ? series : result.ChainedValues;
+        if (!result.ChainedOutputs.TryGetValue(key, out var series))
+        {
+            // A pinned key naming a series the indicator does not publish. Answering with the series it does
+            // publish is exactly how "SignalFastK" passed for a D line: two slots over one series, silently.
+            throw DoesNotPublish(target.Name, spec.Output);
+        }
+
+        return series;
+    }
+
+    /// <summary>
+    /// The refusal <c>SeriesEvaluator</c> already gives, so both resolvers answer an impossible slot alike.
+    /// </summary>
+    /// <remarks>
+    /// #186 replaced this substitution with a raise in the other resolver, and recorded why there: a slot the
+    /// indicator does not produce is an error, not a series. The same message is used here so a caller cannot
+    /// tell which of the two refused, and so both name what the indicator does publish.
+    /// </remarks>
+    private static CalculationException DoesNotPublish(IndicatorName name, IndicatorOutput output)
+    {
+        var available = GeneratedIndicatorOutputs.KeysFor(name);
+        var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
+
+        return new CalculationException(
+            $"{name} does not publish a {output} output. Available outputs: {availableText}.");
     }
 
     /// <summary>
