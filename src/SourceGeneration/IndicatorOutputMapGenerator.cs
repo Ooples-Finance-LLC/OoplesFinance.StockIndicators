@@ -11,40 +11,32 @@ using System.Text;
 namespace OoplesFinance.StockIndicators.SourceGeneration;
 
 /// <summary>
-/// Emits the mapping from an indicator's <c>IndicatorOutput</c> slot to the output key it actually
-/// publishes, read out of the calculations themselves.
+/// Emits every output key an indicator publishes, in publication order, read out of the calculations
+/// themselves.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The map this replaces was written by hand and covered about twenty-five of seven hundred indicators.
-/// Everything else fell through to a guess - <c>IndicatorOutput.Signal</c> became the literal string
+/// Everything else fell through to a guess - a request for a signal line became the literal string
 /// "Signal" - and when that key did not exist the caller silently returned the primary series instead.
 /// So a result with three distinct bands handed back the same band three times, with nothing to
 /// indicate anything had gone wrong. Alligator, Gator, Aroon, Elder Ray and Trix all behaved that way.
 /// </para>
 /// <para>
-/// Reading the keys from the <c>SetOutputValues</c> calls removes the guess. A slot either has a key
-/// this indicator genuinely publishes, or it has none and the caller is told so.
+/// Reading the keys from the <c>SetOutputValues</c> calls removes the guess: an indicator publishes a
+/// key or it does not, and a caller naming one it does not publish is told so.
+/// </para>
+/// <para>
+/// This used to assign those keys to the six members of an <c>IndicatorOutput</c> enum by position, and
+/// stopped once they ran out. An indicator publishing more than six keys had the rest unaddressable -
+/// CamarillaPivotPoints publishes seventeen - and the slot names stopped describing the series well
+/// before that ceiling, so <c>UpperBand</c> could answer with a lower channel line. Every published key
+/// is now emitted under its own name and the enum is gone. See issue #219.
 /// </para>
 /// </remarks>
 [Generator]
 public class IndicatorOutputMapGenerator : IIncrementalGenerator
 {
-    /// <summary>
-    /// Slots whose name is itself meaningful: when an indicator publishes a key of the same name, that
-    /// is what the slot refers to. Remaining keys fill the remaining slots in the order they are
-    /// published.
-    /// </summary>
-    private static readonly string[] NamedSlots =
-    {
-        "Signal", "Histogram", "UpperBand", "MiddleBand", "LowerBand"
-    };
-
-    private static readonly string[] SlotOrder =
-    {
-        "Primary", "Signal", "Histogram", "UpperBand", "MiddleBand", "LowerBand"
-    };
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var indicators = context.SyntaxProvider
