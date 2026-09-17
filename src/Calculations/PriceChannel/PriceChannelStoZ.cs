@@ -336,7 +336,13 @@ public static partial class Calculations
             var basis = basisList[i];
             var currentValue = inputList[i];
 
-            var diff = currentValue - basis;
+            // A band half-width is a distance, so this is the mean absolute deviation from the basis.
+            // Measured signed, its average sits near zero for a series that oscillates about its own
+            // average, and dev = 2 * diffMa then turns negative on every bar where price is below the
+            // basis - which put the upper band below the lower one on 135 of the 251 fixture bars.
+            // VortexBands is a variation on the same Better Bollinger Bands construction as DEnvelope,
+            // and DEnvelope measures its width the same way, as an average of |value - centre|.
+            var diff = Math.Abs(currentValue - basis);
             diffList.Add(diff);
         }
 
@@ -1005,6 +1011,7 @@ public static partial class Calculations
         List<double> extList = new(stockData.Count);
         List<double> yList = new(stockData.Count);
         List<double> xList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
@@ -1038,14 +1045,21 @@ public static partial class Calculations
             var prevY = i >= 1 ? yList[i - 1] : 0;
             var prevExt = i >= 1 ? extList[i - 1] : 0;
 
+            // The centre of the two bands published, both of which are extremes of the extrapolation.
+            middleBandList.Add((upperBandList[i] + lowerBandList[i]) / 2);
+
             var signal = GetCompareSignal(y - ext, prevY - prevExt);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the highest and lowest of the extrapolation; y is the deviation of price from
+            // its own average, a different quantity entirely, and it was above the upper band on 199 of
+            // the 251 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", upperBandList },
-            { "MiddleBand", yList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowerBandList },
+            { "Deviation", yList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1068,6 +1082,7 @@ public static partial class Calculations
         int length2 = 20)
     {
         List<double> scalperList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
@@ -1086,14 +1101,22 @@ public static partial class Calculations
             var scalper = Math.PI * currentAtr > 0 ? currentSma - Math.Log(Math.PI * currentAtr) : currentSma;
             scalperList.Add(scalper);
 
+            // The centre of the two bands published: a rolling high and a rolling low over the same
+            // window, so their midpoint lies between them on every bar by construction.
+            middleBandList.Add((highestList[i] + lowestList[i]) / 2);
+
             var signal = GetCompareSignal(currentValue - scalper, prevValue - prevScalper);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are a rolling high and a rolling low; the scalper line is sma - log(pi * atr),
+            // a third quantity with no reason to lie between them, and it sat below the rolling low on
+            // 19 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", highestList },
-            { "MiddleBand", scalperList },
-            { "LowerBand", lowestList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowestList },
+            { "Scalper", scalperList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

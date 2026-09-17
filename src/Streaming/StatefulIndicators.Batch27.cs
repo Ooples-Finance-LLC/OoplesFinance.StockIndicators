@@ -503,7 +503,9 @@ public sealed class VortexBandsState : IStreamingIndicatorState, IDisposable
     {
         var value = _input.GetValue(bar);
         var basis = _basisMa.Next(value, isFinal);
-        var diff = value - basis;
+        // A band half-width is a distance; see the batch calculation for the full reasoning. Measured
+        // signed it turns negative whenever price sits below the basis, inverting the two bands.
+        var diff = Math.Abs(value - basis);
         var diffMa = _diffMa.Next(diff, isFinal);
         var dev = 2 * diffMa;
         var upper = basis + dev;

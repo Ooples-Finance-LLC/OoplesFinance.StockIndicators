@@ -573,14 +573,62 @@ public static partial class Calculations
             var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
             var prevA2 = i >= 2 ? aList[i - 2] : currentValue;
             var prevB2 = i >= 2 ? bList[i - 2] : currentValue;
-            var prevA3 = i >= 3 ? aList[i - 3] : currentValue;
-            var prevB3 = i >= 3 ? bList[i - 3] : currentValue;
             var l = stdDev != 0 ? (double)1 / length * stdDev : 0;
 
-            var a = currentValue > prevA1 ? prevA1 + (currentValue - prevA1) : prevA2 == prevA3 ? prevA2 - l : prevA2;
+            // Each band carries forward from its own previous value. Written against the value two and
+            // three bars back, the band was two interleaved series that never interact - the odd bars
+            // reading only odd bars and the even only even - so once it stopped moving it held two
+            // different values for ever rather than one. On a market that never moved the spread across
+            // the last hundred bars was 6.88303 at a thousand bars, and still exactly 6.88303 at five
+            // thousand and at twenty thousand: a period-2 cycle, not convergence that needed more bars.
+            // The band jumps to price when price passes it and otherwise decays by l once it has gone
+            // flat, which is the behaviour the indicator is named for.
+            //
+            // The decay stops at price. Each band is an envelope - price rising above the upper one pulls
+            // it up, price falling below the lower one pulls it down - so the upper must not drift down
+            // through price, nor the lower drift up through it. That keeps a >= price >= b, which makes
+            // the two ordered by construction rather than by luck. Without it both seed at the first
+            // close, stdDev is zero through the warmup so l is zero and neither moves, and the first
+            // non-zero l steps them toward each other from the same value and crosses them at once - at
+            // bar 15 of the AAPL fixture, publishing an upper band 0.418 below the middle.
+            //
+            // The equality below is deliberate, and a tolerance would be wrong. It is not two
+            // computations that ought to agree to within rounding: it is one stored value against the one
+            // stored before it, asking whether the band carried forward untouched. Reading a real decay
+            // of l as "no change" would decay it a second time, and holding until price touches it is the
+            // behaviour this indicator is named for.
+#pragma warning disable S1244 // Floating point numbers should not be tested for equality
+            double a;
+            if (currentValue > prevA1)
+            {
+                a = currentValue;
+            }
+            else if (prevA1 == prevA2)
+            {
+                a = Math.Max(prevA1 - l, currentValue);
+            }
+            else
+            {
+                a = prevA1;
+            }
+
             aList.Add(a);
 
-            var b = currentValue < prevB1 ? prevB1 + (currentValue - prevB1) : prevB2 == prevB3 ? prevB2 + l : prevB2;
+            double b;
+            if (currentValue < prevB1)
+            {
+                b = currentValue;
+            }
+            else if (prevB1 == prevB2)
+            {
+                b = Math.Min(prevB1 + l, currentValue);
+            }
+            else
+            {
+                b = prevB1;
+            }
+#pragma warning restore S1244
+
             bList.Add(b);
 
             var prevTos = GetLastOrDefault(tosList);

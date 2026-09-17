@@ -1079,7 +1079,7 @@ public sealed class VervoortHeikenAshiLongTermCandlestickOscillatorState : IStre
     }
 }
 
-[PrimaryOutput("MiddleBand")]
+[PrimaryOutput("PercentB")]
 public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly IMovingAverageSmoother _hacMa1;
@@ -1163,11 +1163,14 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
+            // The bands are 50 plus and minus a multiple of the deviation, so their mean is the centre;
+            // %b is the series they are drawn around. See the batch calculation.
+            outputs = new Dictionary<string, double>(4)
             {
                 { "UpperBand", upper },
-                { "MiddleBand", percb },
-                { "LowerBand", lower }
+                { "MiddleBand", (upper + lower) / 2 },
+                { "LowerBand", lower },
+                { "PercentB", percb }
             };
         }
 

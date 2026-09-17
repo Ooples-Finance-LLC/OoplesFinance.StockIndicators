@@ -566,9 +566,14 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // Not a MiddleBand: aatr is the width the two bands are pulled in by, about 5 on a market
+            // trading near 180, so as a middle band it sat below the lower one on all 251 fixture bars.
+            // There is no centre to publish in its place either - these bands are a squeeze, drawn as
+            // highest - aatr and lowest + aatr, and they genuinely cross: 171 of the 251 bars have the
+            // upper below the lower. Any series put between them would be wrong on those bars.
             { "UpperBand", upperBandList },
             { "LowerBand", lowerBandList },
-            { "MiddleBand", aatrList }
+            { "Aatr", aatrList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1903,7 +1908,7 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Math.PI", kpiList }
+            { "PerformanceIndex", kpiList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(kpiList);

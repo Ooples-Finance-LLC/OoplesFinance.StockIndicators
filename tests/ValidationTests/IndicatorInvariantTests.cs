@@ -56,24 +56,71 @@ public sealed class IndicatorInvariantTests
     /// previous smoothed value instead of the one it had just computed. IIRLeastSquaresEstimate is in
     /// the convergence set below, not here: the fix was real, and what remains settles by bar 4900.
     /// </para>
+    /// <para>
+    /// EhlersSpectrumDerivedFilterBank and EhlersRestoringPullIndicator have since moved to that same
+    /// convergence set. Every period in the bank now runs its own two-sample recursion rather than
+    /// reading one shared per-bar list, and the attenuation the bank takes a logarithm of is held at the
+    /// 0.01 floor it can never mathematically fall below - without which an amplitude decayed into the
+    /// denormal range made the ratio round to exactly one and put an infinity into both sums. Both
+    /// settle to a constant now, they simply need more than a thousand bars to get there. The pull
+    /// indicator was never independently broken: it is the bank multiplied by volume.
+    /// </para>
+    /// <para>
+    /// EhlersEnhancedSignalToNoiseRatio is gone from this set entirely rather than reclassified. A ratio
+    /// in decibels is only defined for a positive ratio, and on a market with no range the noise estimate
+    /// decays to zero and takes the signal with it, so the unguarded logarithm published negative infinity
+    /// for the whole series from bar 0. EhlersAlternateSignalToNoiseRatio, the same measurement in the same
+    /// family, already guarded its logarithm this way. It now settles to a spread of exactly 0 at a
+    /// thousand bars, so this suite holds it to the invariant like any other indicator.
+    /// </para>
+    /// <para>
+    /// FlaggingBands has gone the same way, and its band ordering is now guaranteed rather than lucky.
+    /// Each band was written against its own value two and three bars back, which split it into odd and
+    /// even subsequences that never interact, so a band that stopped moving held two different values
+    /// for ever: the spread was 6.88303 at a thousand bars and still exactly 6.88303 at five thousand
+    /// and at twenty thousand - a period-2 cycle, not convergence needing more bars. Each band now
+    /// carries forward from its own previous value, and its decay stops at price, so the upper cannot
+    /// drift down through price nor the lower up through it. Without that clamp both seed at the first
+    /// close and the first non-zero decay crossed them at bar 15. It settles to a spread of 0, and
+    /// a >= price >= b makes BandsAreOrderedUpperMiddleLower hold by construction.
+    /// </para>
+    /// <para>
+    /// EhlersDeviationScaledSuperSmoother was the clearest of them once measured over a long enough run.
+    /// Its momentum scaled by its own RMS is zero on a market that never moved, and zero is the single
+    /// value its coefficients cannot take: a1 becomes exp(0) = 1, so c2 = 2, c3 = -1 and c1 = 0, leaving
+    /// a double integrator with both poles at z = 1 that stops reading its input and carries whatever
+    /// straight line it already held. The output drifted linearly at 0.01286 per bar - 112.65 at bar
+    /// 1000, 164.07 at 5000, 356.90 at 20000 - which a hundred-bar window reads as a fixed spread of
+    /// 1.27268 at every length, so it looked frozen rather than divergent. The scaling now falls back to
+    /// a magnitude of one when there is no deviation to scale by, which is the nominal period and gives
+    /// exactly the coefficients CalculateEhlersSuperSmootherFilter uses.
+    /// </para>
+    /// <para>
+    /// EhlersCombFilterSpectralEstimate carried the same defect as the spectrum derived filter bank, in
+    /// both of the places it kept state. Each period's two-sample recursion read a single shared list
+    /// holding one value per bar - whichever period the loop finished on, always the longest - and the
+    /// power sum that picks the dominant cycle read that same list at every lag, so the power was summed
+    /// over a mixture of periods rather than over the one being measured. A test on prevBp / j also
+    /// dropped every bar where the bandpass ran negative, half of them for a filter centred on zero,
+    /// from what is by definition a sum of squares. Each period now runs its own recursion over its own
+    /// history, and the spread falls from 25.2476 to 0 at a thousand bars, and is 0 at five and at
+    /// twenty thousand as well.
+    /// </para>
+    /// <para>
+    /// Its settled value still depends on how long it has run: 29 at a thousand bars, 30.5 at five
+    /// thousand, and 0 at twenty thousand, once the amplitudes have decayed far enough that every power
+    /// underflows and no period clears the half-power test. That is deliberately left alone rather than
+    /// clamped into the scanned band the way the bank's dominant cycle is. The bank needed that clamp
+    /// because EhlersRestoringPullIndicator divides into its output as 2*pi/domCyc, so a zero propagated
+    /// into everything downstream; nothing reads this one, and a market with no cycle in it reporting no
+    /// cycle is an honest answer rather than a defect to paper over.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> MovesOnAFlatMarket = new()
     {
-        // 275820 at bar 900 on a market priced at 100, still 194020 at 4900.
-        IndicatorName.EhlersRestoringPullIndicator,
-
-        // Non-finite on a flat market at every length tried.
-        IndicatorName.EhlersEnhancedSignalToNoiseRatio,
-
-        // Spread at 900 -> 4900: unchanged, or larger.
-        IndicatorName.EhlersCombFilterSpectralEstimate,   // 25.2476  -> 24.7286
-        IndicatorName.EhlersSpectrumDerivedFilterBank,    //  9.625   -> 11.1402  (grew)
-        IndicatorName.FlaggingBands,                      //  6.88303 ->  6.88303 (identical)
-        IndicatorName.EhlersDeviationScaledSuperSmoother, //  1.27268 ->  1.27268 (identical)
-        IndicatorName.MorphedSineWave,                    //  0.0194986 -> 0.0194986 (identical)
-
-        // Shrinks, but only 5.4x over a 5x longer run - slower than convergence and not yet settled.
-        IndicatorName.FastSlowDegreeOscillator            //  1.28917 ->  0.236896
+        // Empty. Every indicator that was here has been fixed, or shown by measurement to belong in one
+        // of the two sets below - which are not defects. The set is kept so that the next one found has
+        // somewhere to go and a count that stays visible.
     };
 
     /// <summary>
@@ -88,20 +135,32 @@ public sealed class IndicatorInvariantTests
     /// </para>
     /// <para>
     /// They stay excluded so the suite passes at 1000 bars, but they are separated from the defects
-    /// above so the outstanding count is eight rather than twenty-five.
+    /// above so that the count of outstanding defects stays visible rather than being buried among the
+    /// indicators that are merely slow. That count is now zero.
     /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> SettlesAfterMoreBarsThanThisTestRuns = new()
     {
+        IndicatorName.EhlersRestoringPullIndicator,           // 3262.55   -> settles
         IndicatorName.StationaryExtrapolatedLevelsOscillator, // 100       -> settles
         IndicatorName.StationaryExtrapolatedLevels,           //  50       -> settles
         IndicatorName.LinearExtrapolation,                    //  24.7996  -> settles
+        IndicatorName.EhlersSpectrumDerivedFilterBank,        //   0.878421-> settles
         IndicatorName.SimpleCycle,                            //   0.0537  -> settles
         IndicatorName.DoubleExponentialSmoothing,             //   0.0183  -> settles
         IndicatorName.GChannels,                              //   0.00809 -> settles
         IndicatorName.EhlersDeviationScaledMovingAverage,     //   0.00736 -> settles
         IndicatorName.AdaptiveMovingAverage,                  //   7.95e-6 -> settles
         IndicatorName.IIRLeastSquaresEstimate,                //   1.51e-6 -> settles
+
+        // Converges as 1/n, which is real but harmonic: measured across the last hundred bars of runs of
+        // 1000, 5000 and 20000 the spread is 1.11986, 0.20589 and 0.0507055, and multiplying each by its
+        // own bar count gives 1119.9, 1029.5 and 1014.1 - a constant. Its fast and slow halves use the
+        // same two polynomial terms, which cancel exactly, leaving rolling sums of sin(x)/(i+1) whose
+        // terms fall off as 1/i. So it does reach zero, but no run this suite could afford gets it to
+        // 1e-6; that needs of the order of a billion bars. Listed here rather than above because the
+        // limit is right and the rate is a property of the weighting, not a defect.
+        IndicatorName.FastSlowDegreeOscillator,               //   1.11986 -> 1/n
 
         IndicatorName.PseudoPolynomialChannel,                //  66.8218  -> 0.668654
         IndicatorName.GrandTrendForecasting,                  //  18.6118  -> 0.733483
@@ -129,31 +188,110 @@ public sealed class IndicatorInvariantTests
     };
 
     /// <summary>
-    /// Indicators publishing an upper band below their middle, or a middle below their lower. Each is
-    /// a defect; see issue #178.
+    /// Indicators that oscillate on any market at all, because the oscillation is not read from the bars.
     /// </summary>
     /// <remarks>
-    /// Two mechanisms account for most of them. FractalChaosBands computes its middle as the mean of
-    /// the other two, which is between them by construction - so the only way it can fail is for the
-    /// upper band to sit below the lower one, and both start at zero because GetLastOrDefault returns
-    /// zero until the first fractal forms. ScalpersChannel labels three unrelated quantities as bands:
-    /// a rolling high, a rolling low, and <c>sma - log(pi * atr)</c>, which has no reason to lie
-    /// between them.
+    /// <para>
+    /// Not a defect, and distinct from <see cref="UnboundedByDefinition"/>: nothing here grows without
+    /// bound, it simply never stops moving. MorphedSineWave adds a sine wave to price to morph the two
+    /// together, and the sine's argument is the bar index alone - not any quantity taken from the bars -
+    /// so the same carrier rides on a flat market as on any other, and no market can settle it.
+    /// </para>
+    /// <para>
+    /// The amplitude is the arithmetic rather than an observation: the published value is
+    /// <c>price + sin(i / p) / power</c>, so a full swing is 2/power, which at the default power of 100
+    /// is 0.02. Measured across the last hundred bars it is 0.0194986 - a hundred samples of a sine not
+    /// quite reaching both extremes - and identical at 1000, 5000 and 20000 bars.
+    /// </para>
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> OscillatesByConstruction = new()
+    {
+        IndicatorName.MorphedSineWave
+    };
+
+    /// <summary>
+    /// Indicators publishing an upper band below their middle, or a middle below their lower. Each would
+    /// be a defect; see issue #178. The set is now empty.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Each mechanism below is measured on the AAPL fixture rather than assumed. DEnvelope is fixed and
+    /// gone from this set: its centre line used McNicholl's zero-lag form grouped as
+    /// <c>(2 - alpha) * (mt - ut)</c>, which cannot reproduce a constant - at a constant price mt and ut
+    /// are both that price and the centre came out 0. It published a middle band of -13.86 for a stock
+    /// trading at 145, and the same grouping drove the width negative on 112 of the 251 bars, inverting
+    /// both bands. Corrected, its centre line agrees to every digit with CalculateMcNichollMovingAverage
+    /// reached by an entirely separate path.
+    /// </para>
+    /// <para>
+    /// VortexBands is fixed and gone from this set as well. It is a variation on that same Better
+    /// Bollinger Bands construction, and it measured its half-width as twice the mean of the signed
+    /// deviation from the basis. That mean sits near zero for a series oscillating about its own
+    /// average, and turns negative on every bar where price is below it, which inverted the two bands
+    /// on 135 of the 251 bars - its own signal line gave the game away by testing both orderings.
+    /// Measured as a distance instead, it agrees with DEnvelope to seven figures on all three bands at
+    /// bar 200, through code the two share none of. The Builder serves this one from a verified fast
+    /// path, so that third implementation moves with the other two.
+    /// </para>
+    /// <para>
+    /// PriceLineChannel and PriceCurveChannel are fixed and gone from this set as well, and they broke
+    /// for the reason FlaggingBands did. Both bands seed at the first close and then step away from it,
+    /// the upper decaying down and the lower rising up, so the upper ends bar 0 below the lower before
+    /// the channel has any width. At that bar the second previous values are still zero, which makes
+    /// prevA1 - prevA2 the whole price and positive: it sets the upper band's step to a full average
+    /// true range while the lower band's test for a negative difference fails. Each is an envelope of
+    /// price, so its drift now stops at price, which keeps a >= price >= b and puts their mean between
+    /// them by construction. Each showed exactly one violation of each kind, both at bar 0.
+    /// </para>
+    /// <para>
+    /// Seven more published a MiddleBand holding a different quantity from the one their upper and lower
+    /// bands bracket, and all seven are fixed. Each now publishes the centre its own bands are drawn
+    /// around, and the displaced series keeps its own name rather than being dropped:
+    /// AverageTrueRangeChannel moved its moving average to Sma; MovingAverageBands publishes the slow
+    /// average its bands are built from and moved the fast one to FastMa; RateOfChangeBands is centred on
+    /// zero, since its bands are plus and minus an RMS, and moved the rate of change to Roc;
+    /// ScalpersChannel publishes the midpoint of its rolling high and low and moved
+    /// <c>sma - log(pi * atr)</c> to Scalper; StationaryExtrapolatedLevels moved the deviation of price
+    /// from its average to Deviation; and VervoortModifiedBollingerBandIndicator publishes the mean of
+    /// its bands - which it already computed and never published - and moved %b to PercentB.
+    /// </para>
+    /// <para>
+    /// LBRPaintBars is the one of those seven with no centre to publish. Its bands are a squeeze, the
+    /// rolling high minus an ATR multiple against the rolling low plus one, and they genuinely cross:
+    /// measured on the fixture the upper band is below the lower on 171 of the 251 bars. Any series put
+    /// between them would be wrong on those bars, so its width moved to Aatr and it publishes no middle
+    /// band at all. This invariant reads the published names, so it no longer applies to that indicator -
+    /// which is the honest outcome rather than an exclusion.
+    /// </para>
+    /// <para>
+    /// FractalChaosBands is not the zero seed it was first taken for. Its first violation is at bar 60,
+    /// where a down fractal at 172 sits above an up fractal at 163.41 - not a band left at zero. Bands
+    /// built from the last fractal of each kind genuinely cross in a strong trend, because a recent low
+    /// can form above an older high.
+    /// </para>
     /// </remarks>
     private static readonly HashSet<IndicatorName> BandsOutOfOrder = new()
     {
-        IndicatorName.AverageTrueRangeChannel,
-        IndicatorName.DEnvelope,
-        IndicatorName.FractalChaosBands,
-        IndicatorName.LBRPaintBars,
-        IndicatorName.MovingAverageBands,
-        IndicatorName.PriceCurveChannel,
-        IndicatorName.PriceLineChannel,
-        IndicatorName.RateOfChangeBands,
-        IndicatorName.ScalpersChannel,
-        IndicatorName.StationaryExtrapolatedLevels,
-        IndicatorName.VervoortModifiedBollingerBandIndicator,
-        IndicatorName.VortexBands
+        // Empty. Every indicator that was here has been fixed, or shown by measurement to belong in the
+        // set below - which is not a defect. The set is kept so that the next one found has somewhere to
+        // go and a count that stays visible.
+    };
+
+    /// <summary>
+    /// Indicators whose upper and lower bands genuinely cross, so that no series can lie between them.
+    /// </summary>
+    /// <remarks>
+    /// Not a defect, and measured rather than assumed. FractalChaosBands publishes the last up fractal
+    /// as its upper band and the last down fractal as its lower one. In a strong trend a recent low can
+    /// form above an older high, and the two are then crossed: on the fixture that happens first at bar
+    /// 60, where a down fractal at 172 sits above an up fractal at 163.41, and on 2 of the 251 bars in
+    /// all. Its middle band is the mean of the other two, so it lies between them whenever they are
+    /// ordered and cannot itself be at fault - this invariant is simply not a statement about an
+    /// indicator built this way.
+    /// </remarks>
+    private static readonly HashSet<IndicatorName> BandsThatGenuinelyCross = new()
+    {
+        IndicatorName.FractalChaosBands
     };
 
     public static TheoryData<IndicatorName> AllIndicators
@@ -295,7 +433,7 @@ public sealed class IndicatorInvariantTests
     public void SettlesToAConstantOnAFlatMarket(IndicatorName name)
     {
         if (MovesOnAFlatMarket.Contains(name) || SettlesAfterMoreBarsThanThisTestRuns.Contains(name)
-            || UnboundedByDefinition.Contains(name))
+            || UnboundedByDefinition.Contains(name) || OscillatesByConstruction.Contains(name))
         {
             return;
         }
@@ -334,7 +472,7 @@ public sealed class IndicatorInvariantTests
     [MemberData(nameof(AllIndicators))]
     public void BandsAreOrderedUpperMiddleLower(IndicatorName name)
     {
-        if (BandsOutOfOrder.Contains(name))
+        if (BandsOutOfOrder.Contains(name) || BandsThatGenuinelyCross.Contains(name))
         {
             return;
         }

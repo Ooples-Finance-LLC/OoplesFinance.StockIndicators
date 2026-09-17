@@ -262,9 +262,14 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are 50 plus and minus a multiple of the deviation, so 50 is their centre, and
+            // percbSignal is already exactly that mean - it simply was not published. What was published
+            // as the middle is %b itself, the series the bands are drawn around, which reached 636 while
+            // the bands sat at 169 and -69.
             { "UpperBand", ubList },
-            { "MiddleBand", percbList },
-            { "LowerBand", lbList }
+            { "MiddleBand", percbSignalList },
+            { "LowerBand", lbList },
+            { "PercentB", percbList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

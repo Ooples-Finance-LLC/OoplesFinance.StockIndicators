@@ -107,7 +107,12 @@ public sealed class MovingAverageBandWidthState : IStreamingIndicatorState, IDis
         var dev = MathHelper.Sqrt(countAfter > 0 ? sum / countAfter : 0) * _mult;
         var upper = slow + dev;
         var lower = slow - dev;
-        var mabw = fast != 0 ? (upper - lower) / fast * 100 : 0;
+        // Divided by the average the bands are centred on, which is the slow one: they are slow +/- dev.
+        // This divided by the fast average instead, and agreed with the batch only because the batch read
+        // it from MovingAverageBands' MiddleBand, which was publishing the fast average rather than the
+        // centre. With that corrected the batch moved and this had to follow, which is the clearest sign
+        // the mislabelled band was not merely cosmetic: a second indicator was dividing by it.
+        var mabw = slow != 0 ? (upper - lower) / slow * 100 : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

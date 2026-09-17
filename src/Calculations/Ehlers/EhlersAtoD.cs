@@ -1294,34 +1294,50 @@ public static partial class Calculations
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
         List<double> domCycList = new(stockData.Count);
-        List<double> bpList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var roofingFilterList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersRoofingFilterV2(data, length1, length2));
+
+        // One bandpass per period in the comb, each with its own two-sample recursion and its own
+        // history. Both were read from a single list holding one value per bar - whichever period the
+        // loop happened to finish on, always the longest - so every period was driven by another
+        // period's output, and the power that picks the dominant cycle was summed over a mixture of
+        // periods instead of over the one being measured. The same defect, and the same fix, as the
+        // spectrum derived filter bank.
+        var ring = length1;
+        var bpPrev1 = new double[length1 + 1];
+        var bpPrev2 = new double[length1 + 1];
+        var bpHistory = new double[length1 + 1, ring];
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var roofingFilter = roofingFilterList[i];
             var prevRoofingFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
             var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            double bp = 0, maxPwr = 0, spx = 0, sp = 0;
+            double maxPwr = 0, spx = 0, sp = 0;
+            var slot = i % ring;
             for (var j = length2; j <= length1; j++)
             {
                 var beta = Math.Cos(2 * Math.PI / j);
                 var gamma = 1 / Math.Cos(2 * Math.PI * bw / j);
                 var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-                bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
+                var bp = (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) + (beta * (1 + alpha) * bpPrev1[j]) - (alpha * bpPrev2[j]);
 
                 double pwr = 0;
                 for (var k = 1; k <= j; k++)
                 {
-                    var prevBp = i >= k ? bpList[i - k] : 0;
-                    pwr += prevBp / j >= 0 ? Pow(prevBp / j, 2) : 0;
+                    // This period's own output k bars ago, and every one of them. A power is a sum of
+                    // squares and cannot depend on the sign of what is squared, so gating this on
+                    // prevBp / j >= 0 discarded every bar where the bandpass ran negative - half of
+                    // them, for a filter centred on zero.
+                    var prevBp = i >= k ? bpHistory[j, ((slot - k) % ring + ring) % ring] : 0;
+                    pwr += Pow(prevBp / j, 2);
                 }
+
+                bpHistory[j, slot] = bp;
+                bpPrev2[j] = bpPrev1[j];
+                bpPrev1[j] = bp;
 
                 maxPwr = Math.Max(pwr, maxPwr);
                 pwr = maxPwr != 0 ? pwr / maxPwr : 0;
@@ -1332,7 +1348,6 @@ public static partial class Calculations
                     sp += pwr;
                 }
             }
-            bpList.Add(bp);
 
             var domCyc = sp != 0 ? spx / sp : 0;
             domCycList.Add(domCyc);

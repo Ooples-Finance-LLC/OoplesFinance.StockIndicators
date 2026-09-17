@@ -506,10 +506,10 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("AverageTrueRangeChannel.MiddleBand",
+                new StatefulIndicatorSpec("AverageTrueRangeChannel.Sma",
                     () => new AverageTrueRangeChannelState(MovingAvgType.SimpleMovingAverage, 14, 2.5),
                     data => data.CalculateAverageTrueRangeChannel(MovingAvgType.SimpleMovingAverage, 14, 2.5)
-                        .OutputValues["MiddleBand"])
+                        .OutputValues["Sma"])
             };
             yield return new object[]
             {
@@ -628,17 +628,17 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("StationaryExtrapolatedLevels.MiddleBand",
+                new StatefulIndicatorSpec("StationaryExtrapolatedLevels.Deviation",
                     () => new StationaryExtrapolatedLevelsState(MovingAvgType.SimpleMovingAverage, 50),
                     data => data.CalculateStationaryExtrapolatedLevels(MovingAvgType.SimpleMovingAverage, 50)
-                        .OutputValues["MiddleBand"])
+                        .OutputValues["Deviation"])
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("ScalpersChannel.MiddleBand",
+                new StatefulIndicatorSpec("ScalpersChannel.Scalper",
                     () => new ScalpersChannelState(MovingAvgType.SimpleMovingAverage, 15, 20),
                     data => data.CalculateScalpersChannel(MovingAvgType.SimpleMovingAverage, 15, 20)
-                        .OutputValues["MiddleBand"])
+                        .OutputValues["Scalper"])
             };
             yield return new object[]
             {
@@ -662,10 +662,10 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("RateOfChangeBands.MiddleBand",
+                new StatefulIndicatorSpec("RateOfChangeBands.Roc",
                     () => new RateOfChangeBandsState(MovingAvgType.ExponentialMovingAverage, 12, 3),
                     data => data.CalculateRateOfChangeBands(MovingAvgType.ExponentialMovingAverage, 12, 3)
-                        .OutputValues["MiddleBand"])
+                        .OutputValues["Roc"])
             };
             yield return new object[]
             {
@@ -906,10 +906,10 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("MovingAverageBands.MiddleBand",
+                new StatefulIndicatorSpec("MovingAverageBands.FastMa",
                     () => new MovingAverageBandsState(MovingAvgType.ExponentialMovingAverage, 10, 50, 1),
                     data => data.CalculateMovingAverageBands(MovingAvgType.ExponentialMovingAverage, 10, 50, 1)
-                        .OutputValues["MiddleBand"])
+                        .OutputValues["FastMa"])
             };
             yield return new object[]
             {
@@ -2860,9 +2860,9 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             };
             yield return new object[]
             {
-                new StatefulIndicatorSpec("LBRPaintBars.MiddleBand",
+                new StatefulIndicatorSpec("LBRPaintBars.Aatr",
                     () => new LBRPaintBarsState(),
-                    data => data.CalculateLBRPaintBars().OutputValues["MiddleBand"])
+                    data => data.CalculateLBRPaintBars().OutputValues["Aatr"])
             };
             yield return new object[]
             {
