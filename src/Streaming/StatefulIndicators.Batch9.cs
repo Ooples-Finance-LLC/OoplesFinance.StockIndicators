@@ -1326,17 +1326,17 @@ public sealed class EhlersFourierSeriesAnalysisState : IStreamingIndicatorState,
         var bp1 = _index <= 3
             ? 0
             : (0.5 * (1 - _s1) * (value - prevValue)) + (_l1 * (1 + _s1) * prevBp1_1) - (_s1 * prevBp1_2);
-        var q1 = _index <= 4 ? 0 : (_length / 2) * Math.PI * (bp1 - prevBp1_1);
+        var q1 = _index <= 4 ? 0 : (_length / 2.0) * Math.PI * (bp1 - prevBp1_1);
 
         var bp2 = _index <= 3
             ? 0
             : (0.5 * (1 - _s2) * (value - prevValue)) + (_l2 * (1 + _s2) * prevBp2_1) - (_s2 * prevBp2_2);
-        var q2 = _index <= 4 ? 0 : (_length / 2) * Math.PI * (bp2 - prevBp2_1);
+        var q2 = _index <= 4 ? 0 : (_length / 2.0) * Math.PI * (bp2 - prevBp2_1);
 
         var bp3 = _index <= 3
             ? 0
             : (0.5 * (1 - _s3) * (value - prevValue)) + (_l3 * (1 + _s3) * prevBp3_1) - (_s3 * prevBp3_2);
-        var q3 = _index <= 4 ? 0 : (_length / 2) * Math.PI * (bp3 - prevBp3_1);
+        var q3 = _index <= 4 ? 0 : (_length / 2.0) * Math.PI * (bp3 - prevBp3_1);
 
         double p1 = 0;
         double p2 = 0;

@@ -41,14 +41,22 @@ internal static class IndicatorRunner
     }
 
     /// <summary>Runs a batch method with its default arguments; its series by output name.</summary>
-    public static Dictionary<string, List<double>> RunBatch(MethodInfo method, List<TickerData> tickers)
+    /// <param name="overrides">
+    /// Arguments to supply instead of the declared default, by parameter name. Omitted or unnamed parameters keep
+    /// their default. By name rather than by position because the caller pairing this with a streaming state is
+    /// reading two signatures that are written separately and ordered differently.
+    /// </param>
+    public static Dictionary<string, List<double>> RunBatch(MethodInfo method, List<TickerData> tickers,
+        IReadOnlyDictionary<string, object?>? overrides = null)
     {
         var parameters = method.GetParameters();
         var args = new object?[parameters.Length];
         args[0] = new StockData(tickers);
         for (var i = 1; i < parameters.Length; i++)
         {
-            args[i] = parameters[i].DefaultValue;
+            args[i] = parameters[i].Name is { } name && overrides is not null && overrides.TryGetValue(name, out var supplied)
+                ? supplied
+                : parameters[i].DefaultValue;
         }
 
         var result = method.Invoke(null, args) as StockData

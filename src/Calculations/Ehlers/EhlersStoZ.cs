@@ -1158,7 +1158,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
@@ -1211,7 +1211,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtMa2List[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtMa2List[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);

@@ -226,7 +226,11 @@ public sealed class BuilderArmTests : GlobalTestData
 
     // Defaults as declared, and an alternate set that moves every length and multiplier off its default, so an arm
     // that matches only at its defaults does not count as verified.
-    private static object? Value(Type type, object? declared, bool alternate)
+    //
+    // Internal rather than private because the alternate set is the same idea the streaming parity sweep needs for
+    // indicators with no typed spec, and two sets of perturbation rules that drifted apart would make the two
+    // suites disagree about what "alternate parameters" even means.
+    internal static object? Value(Type type, object? declared, bool alternate)
     {
         if (type == typeof(int))
         {
