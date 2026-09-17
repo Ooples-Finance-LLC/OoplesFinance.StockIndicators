@@ -989,12 +989,12 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
     private readonly IMovingAverageSmoother _nn2Ma;
     private readonly IMovingAverageSmoother _n2vMa;
     private readonly IMovingAverageSmoother _nvMa;
-    private readonly StandardDeviationVolatilityState _nStdDev;
-    private readonly StandardDeviationVolatilityState _n2StdDev;
+    // The normal equations below solve against a covariance matrix, so these carry the variances of the n
+    // and n^2 windows: each window's deviation about its own mean, squared. See issue #223.
+    private readonly RollingStandardDeviation _nStdDev;
+    private readonly RollingStandardDeviation _n2StdDev;
     private readonly StreamingInputResolver _input;
     private int _index;
-    private double _nValue;
-    private double _n2Value;
 
     public QuadraticLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50,
         int forecastLength = 14)
@@ -1007,8 +1007,8 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
         _nn2Ma = MovingAverageSmootherFactory.Create(maType, _length);
         _n2vMa = MovingAverageSmootherFactory.Create(maType, _length);
         _nvMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _nStdDev = new StandardDeviationVolatilityState(maType, _length, _ => _nValue);
-        _n2StdDev = new StandardDeviationVolatilityState(maType, _length, _ => _n2Value);
+        _nStdDev = new RollingStandardDeviation(_length);
+        _n2StdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1025,8 +1025,6 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
         _nStdDev.Reset();
         _n2StdDev.Reset();
         _index = 0;
-        _nValue = 0;
-        _n2Value = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1034,8 +1032,6 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
         var value = _input.GetValue(bar);
         var n = (double)_index;
         var n2 = n * n;
-        _nValue = n;
-        _n2Value = n2;
         var nn2 = n * n2;
         var n2v = n2 * value;
         var nv = n * value;
@@ -1048,8 +1044,10 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
         var nn2Cov = nn2Sma - (nSma * n2Sma);
         var n2vCov = n2vSma - (n2Sma * sma);
         var nvCov = nvSma - (nSma * sma);
-        var nVariance = _nStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var n2Variance = _n2StdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var nDev = _nStdDev.Next(n, isFinal);
+        var n2Dev = _n2StdDev.Next(n2, isFinal);
+        var nVariance = nDev * nDev;
+        var n2Variance = n2Dev * n2Dev;
         var norm = (n2Variance * nVariance) - MathHelper.Pow(nn2Cov, 2);
         var a = norm != 0 ? ((n2vCov * nVariance) - (nvCov * nn2Cov)) / norm : 0;
         var b = norm != 0 ? ((nvCov * n2Variance) - (n2vCov * nn2Cov)) / norm : 0;
@@ -1323,7 +1321,11 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
 {
     private readonly ConnorsRelativeStrengthIndexState _connors;
     private readonly IMovingAverageSmoother _whiteNoiseSma;
-    private readonly StandardDeviationVolatilityState _whiteNoiseStdDev;
+
+    // The deviation of the noise window about its own mean, matching the batch calculation: WhiteNoiseVariance
+    // is this squared, and squaring the smoothed residual measure gives a quantity that is not a variance.
+    // See issue #223.
+    private readonly RollingStandardDeviation _whiteNoiseStdDev;
     private readonly double _divisor;
     private double _whiteNoiseValue;
 
@@ -1334,7 +1336,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
         var resolvedNoise = Math.Max(1, noiseLength);
         _connors = new ConnorsRelativeStrengthIndexState(maType, resolvedNoise, resolvedNoise, resolvedLength);
         _whiteNoiseSma = MovingAverageSmootherFactory.Create(maType, resolvedNoise);
-        _whiteNoiseStdDev = new StandardDeviationVolatilityState(maType, resolvedNoise, _ => _whiteNoiseValue);
+        _whiteNoiseStdDev = new RollingStandardDeviation(resolvedNoise);
         _divisor = divisor;
     }
 
@@ -1353,7 +1355,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
         var connors = _connors.Update(bar, isFinal, includeOutputs: false).Value;
         _whiteNoiseValue = (connors - 50) * (1d / _divisor);
         var whiteNoiseMa = _whiteNoiseSma.Next(_whiteNoiseValue, isFinal);
-        var whiteNoiseStdDev = _whiteNoiseStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var whiteNoiseStdDev = _whiteNoiseStdDev.Next(_whiteNoiseValue, isFinal);
         var whiteNoiseVariance = MathHelper.Pow(whiteNoiseStdDev, 2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1444,7 +1446,10 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
 {
     private readonly int _length;
     private readonly LinearRegressionState _linreg;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The numerator of a slope whose denominator is the window deviation built below, so the two halves have
+    // to be the same quantity. See issue #223.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _sma;
     private readonly RollingWindowCorrelation _x2Correlation;
     private readonly RollingWindowCorrelation _y1Correlation;
@@ -1459,7 +1464,7 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
     {
         _length = Math.Max(1, length);
         _linreg = new LinearRegressionState(_length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
+        _stdDev = new RollingStandardDeviation(_length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
         _x2Correlation = new RollingWindowCorrelation(_length);
         _y1Correlation = new RollingWindowCorrelation(_length);
@@ -1488,7 +1493,7 @@ public sealed class R2AdaptiveRegressionState : IStreamingIndicatorState, IDispo
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(value, isFinal);
         var sma = _sma.Next(value, isFinal);
         var y1 = _linreg.Update(bar, isFinal, includeOutputs: false).Value;
         var x2 = _hasPrev ? _prevOut : value;

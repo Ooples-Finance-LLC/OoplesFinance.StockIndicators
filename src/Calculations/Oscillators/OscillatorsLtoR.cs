@@ -495,8 +495,11 @@ public static partial class Calculations
         }
 
         var whiteNoiseSmaList = GetMovingAverageList(stockData, maType, noiseLength, whiteNoiseList);
-        stockData.SetCustomValues(whiteNoiseList);
-        var whiteNoiseStdDevList = CalculateStandardDeviationVolatility(stockData, maType, noiseLength).ChainedValues;
+        // WhiteNoiseVariance below is this squared, so it has to be the deviation of the noise window about
+        // its own mean. Squaring CalculateStandardDeviationVolatility recovers the mean squared residual
+        // from a moving average, which is not the variance the published output name promises. Both series
+        // are published, so the mismatch was visible to callers. See issue #223.
+        var whiteNoiseStdDevList = GetStandardDeviationList(whiteNoiseList, noiseLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var whiteNoiseStdDev = whiteNoiseStdDevList[i];

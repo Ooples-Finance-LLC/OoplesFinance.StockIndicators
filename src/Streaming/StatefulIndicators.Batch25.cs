@@ -1415,7 +1415,10 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
 {
     private readonly int _length;
     private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // ka and kb divide the buffered value by a squared distance, so what is buffered has to square into a
+    // variance. See issue #223.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _stdDevValues;
     private readonly StreamingInputResolver _input;
     private double _prevCma;
@@ -1426,7 +1429,7 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
     {
         _length = Math.Max(1, length);
         _smaSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
+        _stdDev = new RollingStandardDeviation(_length);
         _stdDevValues = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1447,8 +1450,9 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
     {
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevVar = EhlersStreamingWindow.GetOffsetValue(_stdDevValues, _length);
+        var stdDev = _stdDev.Next(value, isFinal);
+        var prevDev = EhlersStreamingWindow.GetOffsetValue(_stdDevValues, _length);
+        var prevVar = prevDev * prevDev;
         var prevCma = _hasPrev ? _prevCma : value;
         var prevCts = _hasPrev ? _prevCts : value;
         var secma = MathHelper.Pow(sma - prevCma, 2);

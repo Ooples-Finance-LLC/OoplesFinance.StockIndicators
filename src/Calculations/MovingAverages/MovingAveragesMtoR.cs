@@ -363,16 +363,21 @@ public static partial class Calculations
             nvCovList.Add(nvCov);
         }
 
-        stockData.SetCustomValues(nList);
-        var nVarianceList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
-        stockData.SetCustomValues(n2List);
-        var n2VarianceList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // norm below is the determinant of a 2x2 covariance matrix, and nn2Cov, n2vCov and nvCov are all
+        // genuine covariances over these windows. So these two terms have to be the variances of the same
+        // windows. CalculateStandardDeviationVolatility is neither a variance nor a deviation about the
+        // window's own mean - it is the mean squared residual from the moving-average line, rooted - so the
+        // normal equations were being solved against mismatched quantities. See issue #223.
+        var nDevList = GetStandardDeviationList(nList, length);
+        var n2DevList = GetStandardDeviationList(n2List, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var n2Variance = n2VarianceList[i];
-            var nVariance = nVarianceList[i];
+            var n2Dev = n2DevList[i];
+            var nDev = nDevList[i];
+            var n2Variance = n2Dev * n2Dev;
+            var nVariance = nDev * nDev;
             var nn2Cov = nn2CovList[i];
             var n2vCov = n2vCovList[i];
             var nvCov = nvCovList[i];
@@ -1106,11 +1111,14 @@ public static partial class Calculations
         RollingSum x2PowSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = stockData.CaptureInputSeries();
         var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
-        // The deviation is of the prices, not of the regression line just published onto CustomValuesList.
-        stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The slope below is sigma_y * r^2 / sigma_x, and sigma_x is built a few lines down as the root of
+        // the mean squared distance from that window's own mean. Taking the numerator from
+        // CalculateStandardDeviationVolatility made the two halves of one ratio two different quantities -
+        // the method already demonstrates which one it wants. Reading the price window's deviation directly
+        // also removes the capture/restore that existed only to keep the regression line out of this call.
+        // See issue #223.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
