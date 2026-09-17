@@ -27,22 +27,23 @@ internal static class BatchCompute
     {
         var count = data.Count;
         var results = new double[count];
-        var wantsNamedOutput = outputKey is not null;
         state.Reset();
 
         for (var i = 0; i < count; i++)
         {
             var bar = CreateBar(data, i);
-            var result = state.Update(bar, isFinal: true, includeOutputs: wantsNamedOutput);
+            var result = state.Update(bar, isFinal: true, includeOutputs: outputKey is not null);
 
-            if (!wantsNamedOutput)
+            // Tested directly rather than through a flag, so the compiler narrows it: after this branch
+            // outputKey is known non-null, and the lookup below needs neither a null-forgiving operator
+            // nor a coalesce whose fallback could never run.
+            if (outputKey is null)
             {
                 results[i] = result.Value;
                 continue;
             }
 
-            var requested = outputKey ?? string.Empty;
-            if (result.Outputs is null || !result.Outputs.TryGetValue(requested, out var value))
+            if (result.Outputs is null || !result.Outputs.TryGetValue(outputKey, out var value))
             {
                 var available = result.Outputs is null || result.Outputs.Count == 0
                     ? "none"
