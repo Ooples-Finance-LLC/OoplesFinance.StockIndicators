@@ -4754,7 +4754,11 @@ public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDispo
         var prevValue = _hasPrev ? _prevValue : 0;
         var temp = prevValue != 0 ? value / prevValue : 0;
         _logReturn = temp > 0 ? Math.Log(temp) : 0;
-        var stdDevLog = _stdDev.Next(_logReturn, isFinal);
+
+        // The first bar's log return is a fabricated zero, so it is kept out of the window entirely rather
+        // than counted as an observation. The window then fills one bar later, at index length, which is
+        // where the batch publishes its first value too - the two stay aligned because neither counts it.
+        var stdDevLog = _hasPrev ? _stdDev.Next(_logReturn, isFinal) : 0;
         var hv = 100 * stdDevLog * _annualSqrt;
 
         if (isFinal)

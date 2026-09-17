@@ -303,9 +303,19 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
                 includeOutputs: false).Value);
         }
 
-        // Bar 0 has no prior bar, so its log return is zero and any window still holding it is not
-        // alternating. From bar length + 1 the window carries genuine returns only.
-        for (var i = length + 1; i < bars.Count; i++)
+        // Bar 0 has no prior close, so its log return is a fabricated zero. A window still holding it is one
+        // genuine return short, and publishing a deviation over it would dilute that value with an
+        // observation that never happened - so nothing is published until index length.
+        for (var i = 0; i < length; i++)
+        {
+            batch[i].Should().Be(0,
+                $"the window still holds the first bar's fabricated return, so nothing is published (bar {i})");
+            streaming[i].Should().Be(0,
+                $"the streaming state withholds the same bars as the batch (bar {i})");
+        }
+
+        // From index length the window is returns 1..length, every one of them real.
+        for (var i = length; i < bars.Count; i++)
         {
             batch[i].Should().BeApproximately(expected, tolerance,
                 $"alternating returns of +/-ln({ratio}) have a deviation of exactly ln({ratio}), so the "
