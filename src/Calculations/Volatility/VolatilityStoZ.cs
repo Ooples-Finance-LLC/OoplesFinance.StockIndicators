@@ -760,39 +760,66 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStandardDevation(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> cList = new(stockData.Count);
-        List<double> powList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> sumList = new(stockData.Count);
+        List<double> cList;
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum tempSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
 
-        for (var i = 0; i < stockData.Count; i++)
+        if (maType == MovingAvgType.SimpleMovingAverage)
         {
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSumWindow.Add(currentValue);
-
-            var sum = tempSumWindow.Sum(length);
-            var sumPow = Pow(sum, 2);
-            sumList.Add(sumPow);
-
-            var pow = Pow(currentValue, 2);
-            powList.Add(pow);
+            // sqrt(E[x^2] - mean^2) is the same population deviation as the two-pass form when the mean is
+            // the window's own, but it computes it by subtracting two large nearly-equal numbers. The
+            // clamp below was the admission: it exists because the difference can come out negative from
+            // rounding alone. Measured over 300 bars at length 14, against the two-pass form:
+            //
+            //     AAPL fixture            relative error 8.6e-13     0 bars clamped
+            //     price 150, spread 6     relative error 6.4e-13     0 bars clamped
+            //     price 1e6, spread 0.001 relative error 36          186 bars clamped
+            //     price 1e7, spread 0.001 relative error 413         187 bars clamped
+            //
+            // Realistic equity data is fine, so this was latent rather than live; but where the price is
+            // large next to its spread the indicator publishes exactly 0 while the true deviation is
+            // positive - at bar 200 of the 1e6 series, 0 against 0.000714. GetStandardDeviationList sums
+            // the squared deviations over the window instead, which is the same quantity computed in a
+            // way that cannot cancel, and it zeroes the same warm-up bars this did (verified: 0
+            // disagreements before the window fills, on all four series above).
+            cList = GetStandardDeviationList(inputList, length);
         }
-
-        var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var a = powSmaList[i];
-            var sum = sumList[i];
-            var b = sum / Pow(length, 2);
+            // Left as it was. With any other average this is not a population deviation at all: it takes a
+            // moving average of x^2 but subtracts the square of a plain window mean, so the two halves are
+            // not the same mean and the result has no clean reading. Changing it would move published
+            // values for a quantity nobody has defined, which is a separate decision from this one.
+            List<double> powList = new(stockData.Count);
+            List<double> sumList = new(stockData.Count);
+            RollingSum tempSumWindow = new();
+            cList = new List<double>(stockData.Count);
 
-            var c = a - b >= 0 ? Sqrt(a - b) : 0;
-            cList.Add(c);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                tempSumWindow.Add(currentValue);
+
+                var sum = tempSumWindow.Sum(length);
+                var sumPow = Pow(sum, 2);
+                sumList.Add(sumPow);
+
+                var pow = Pow(currentValue, 2);
+                powList.Add(pow);
+            }
+
+            var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var a = powSmaList[i];
+                var sum = sumList[i];
+                var b = sum / Pow(length, 2);
+
+                var c = a - b >= 0 ? Sqrt(a - b) : 0;
+                cList.Add(c);
+            }
         }
 
         var cSmaList = GetMovingAverageList(stockData, maType, length, cList);

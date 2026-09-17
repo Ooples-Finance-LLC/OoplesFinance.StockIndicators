@@ -62,21 +62,31 @@ public class IndicatorSeriesAccessorGenerator : IIncrementalGenerator
             .Where(static names => names.Length > 0)
             .Collect();
 
+        // Keys a calculation hands to a shared helper are identifiers where that helper publishes them, so
+        // reading SetOutputValues alone misses them - Cvida1, Vida1, RviHigh and their pairs had no
+        // accessor at all. Their literals sit at the helper's call sites instead. See issue #199.
+        var helperRouted = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => HelperRoutedOutputs.IsCandidate(node),
+                transform: static (ctx, _) => HelperRoutedOutputs.Read(ctx))
+            .Where(static x => x is not null)
+            .Collect();
+
         // The generator ships inside the package, so it also runs in every consumer's compilation.
         // These types live in this library's namespace and are already compiled into its assembly;
         // emitting them again on the consumer side would give two classes with the same full name and
         // ambiguous extension methods between them. Custom indicators written by a consumer get their
         // own generator with its own output rather than a second copy of this one.
-        var guarded = context.CompilationProvider.Combine(outputNames);
+        var guarded = context.CompilationProvider.Combine(outputNames).Combine(helperRouted);
 
         context.RegisterSourceOutput(guarded, static (spc, source) =>
         {
-            if (source.Left.AssemblyName != LibraryAssemblyName)
+            if (source.Left.Left.AssemblyName != LibraryAssemblyName)
             {
                 return;
             }
 
-            Emit(spc, source.Right);
+            Emit(spc, source.Left.Right, source.Right);
         });
     }
 
@@ -156,12 +166,23 @@ public class IndicatorSeriesAccessorGenerator : IIncrementalGenerator
             && SyntaxFacts.GetContextualKeywordKind(name) == SyntaxKind.None;
     }
 
-    private static void Emit(SourceProductionContext context, ImmutableArray<ImmutableArray<string>> collected)
+    private static void Emit(SourceProductionContext context, ImmutableArray<ImmutableArray<string>> collected,
+        ImmutableArray<HelperRoutedOutputs.Reading?> helperReadings)
     {
         var names = new SortedSet<string>(System.StringComparer.Ordinal);
         foreach (var group in collected)
         {
             foreach (var name in group)
+            {
+                names.Add(name);
+            }
+        }
+
+        // These arrive as literals at a helper's call site rather than inside a SetOutputValues, so they go
+        // through the same identifier check the others already passed.
+        foreach (var name in HelperRoutedOutputs.ResolvedKeys(helperReadings))
+        {
+            if (IsUsableIdentifier(name))
             {
                 names.Add(name);
             }

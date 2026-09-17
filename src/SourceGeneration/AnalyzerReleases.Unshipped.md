@@ -10,3 +10,4 @@ SI0002 | StreamingInput | Error | StreamingStateAnalyzer: no public input-name o
 SI0003 | StreamingInput | Error | StreamingStateAnalyzer: a non-close default input needs ICustomInputConsumer
 SI0004 | StreamingInput | Error | StreamingStateAnalyzer: a resolved input must be read
 SI0005 | StreamingInput | Error | StreamingStateAnalyzer: a state must declare its primary output
+SI0006 | IndicatorOutputs | Error | IndicatorReachabilityAnalyzer: a calculation must say which indicator it is

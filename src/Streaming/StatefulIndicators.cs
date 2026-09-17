@@ -5507,12 +5507,18 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
     private readonly IMovingAverageSmoother _signalMa;
     private readonly StreamingInputResolver _input;
 
+    // The two-pass population deviation, for the simple average only - the batch calculation takes the
+    // same branch and for the same reason. See there for why the one-pass form below cannot be trusted
+    // when the price is large next to its spread.
+    private readonly RollingStandardDeviation? _population;
+
     public StandardDeviationState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         _length = Math.Max(1, length);
         _sumWindow = new RollingWindowSum(_length);
         _powMa = MovingAverageSmootherFactory.Create(maType, _length);
         _signalMa = MovingAverageSmootherFactory.Create(maType, _length);
+        _population = maType == MovingAvgType.SimpleMovingAverage ? new RollingStandardDeviation(_length) : null;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -5523,18 +5529,28 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
         _sumWindow.Reset();
         _powMa.Reset();
         _signalMa.Reset();
+        _population?.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        int sumCount;
-        var sum = isFinal ? _sumWindow.Add(value, out sumCount) : _sumWindow.Preview(value, out sumCount);
-        var powMean = _powMa.Next(value * value, isFinal);
-        var denom = (double)_length * _length;
-        var b = denom != 0 ? (sum * sum) / denom : 0;
-        var diff = powMean - b;
-        var std = diff >= 0 ? MathHelper.Sqrt(diff) : 0;
+        double std;
+        if (_population is not null)
+        {
+            std = _population.Next(value, isFinal);
+        }
+        else
+        {
+            int sumCount;
+            var sum = isFinal ? _sumWindow.Add(value, out sumCount) : _sumWindow.Preview(value, out sumCount);
+            var powMean = _powMa.Next(value * value, isFinal);
+            var denom = (double)_length * _length;
+            var b = denom != 0 ? (sum * sum) / denom : 0;
+            var diff = powMean - b;
+            std = diff >= 0 ? MathHelper.Sqrt(diff) : 0;
+        }
+
         var signal = _signalMa.Next(std, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -5555,6 +5571,7 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
         _sumWindow.Dispose();
         _powMa.Dispose();
         _signalMa.Dispose();
+        _population?.Dispose();
     }
 }
 
