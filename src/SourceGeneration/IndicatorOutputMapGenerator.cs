@@ -54,19 +54,29 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Collect();
 
+        // The indicators that hand their name and keys to a shared helper instead of naming them here.
+        // Extract cannot see those: the helper's body names a parameter and the callers' bodies name
+        // nothing, so the join has to happen once everything has been collected. See issue #199.
+        var helperRouted = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => HelperRoutedOutputs.IsCandidate(node),
+                transform: static (ctx, _) => HelperRoutedOutputs.Read(ctx))
+            .Where(static x => x is not null)
+            .Collect();
+
         // Guarded for the same reason as the accessors: this generator ships in the package and runs
         // in consumer compilations too, where emitting GeneratedIndicatorOutputs again would collide
         // with the copy already compiled into this library.
-        var guarded = context.CompilationProvider.Combine(indicators);
+        var guarded = context.CompilationProvider.Combine(indicators).Combine(helperRouted);
 
         context.RegisterSourceOutput(guarded, static (spc, source) =>
         {
-            if (source.Left.AssemblyName != "OoplesFinance.StockIndicators")
+            if (source.Left.Left.AssemblyName != "OoplesFinance.StockIndicators")
             {
                 return;
             }
 
-            Emit(spc, source.Right);
+            Emit(spc, source.Left.Right, source.Right);
         });
     }
 
@@ -160,11 +170,17 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
         return result.Keys.Count > 0 ? result : null;
     }
 
-    private static void Emit(SourceProductionContext context, ImmutableArray<PublishedOutputs?> items)
+    private static void Emit(SourceProductionContext context, ImmutableArray<PublishedOutputs?> items,
+        ImmutableArray<HelperRoutedOutputs.Reading?> helperReadings)
     {
+        // The routed indicators join in here rather than in Extract, which sees one method at a time and so
+        // can never pair a helper's parameter with the literal its caller passed.
+        var readings = new List<PublishedOutputs?>(items);
+        readings.AddRange(HelperRoutedOutputs.Resolve(helperReadings));
+
         // One indicator can be published from more than one method; keep the richest set of keys.
         var byIndicator = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
-        foreach (var item in items)
+        foreach (var item in readings)
         {
             if (item is null)
             {
