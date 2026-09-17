@@ -1268,6 +1268,64 @@ public sealed class ForecastOscillatorState : IStreamingIndicatorState, IDisposa
     }
 }
 
+/// <summary>
+/// The five-bar fractal test shared by <see cref="FractalChaosBandsState"/> and
+/// <see cref="FractalChaosOscillatorState"/>.
+/// </summary>
+/// <remarks>
+/// One copy rather than two. The oscillator's batch twin chains CalculateFractalChaosBands and reads that
+/// indicator's bands, so in streaming the two states are the only places this test lives and they have to
+/// agree - keeping a second copy is what lets them drift apart. See #202.
+/// </remarks>
+internal static class StreamingFractal
+{
+    /// <summary>
+    /// Reports the fractals confirmed by <paramref name="bar"/>, or <see langword="null"/> where there is
+    /// none. The centre is two bars back: its right-hand neighbours are the previous bar and this one, its
+    /// left-hand neighbours are three and four bars back.
+    /// </summary>
+    /// <remarks>
+    /// Both buffers hold only finalised bars, so offset N is N bars back from <paramref name="bar"/>.
+    /// </remarks>
+    public static void Find(
+        PooledRingBuffer<double> highs,
+        PooledRingBuffer<double> lows,
+        OhlcvBar bar,
+        out double? upFractal,
+        out double? downFractal)
+    {
+        upFractal = null;
+        downFractal = null;
+
+        // Nothing is judged until four prior bars have been seen. An unfilled buffer reads as 0, and 0 is
+        // below any positive price, so judging earlier would confirm a fractal whose left-hand neighbour
+        // never happened - the same fabricated-value mistake fixed for the log-return windows in #205
+        // and #209.
+        if (highs.Count < 4 || lows.Count < 4)
+        {
+            return;
+        }
+
+        var prevHigh1 = EhlersStreamingWindow.GetOffsetValue(highs, 1);
+        var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(highs, 2);
+        var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(highs, 3);
+        var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(highs, 4);
+        if (prevHigh1 < prevHigh2 && bar.High < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2)
+        {
+            upFractal = prevHigh2;
+        }
+
+        var prevLow1 = EhlersStreamingWindow.GetOffsetValue(lows, 1);
+        var prevLow2 = EhlersStreamingWindow.GetOffsetValue(lows, 2);
+        var prevLow3 = EhlersStreamingWindow.GetOffsetValue(lows, 3);
+        var prevLow4 = EhlersStreamingWindow.GetOffsetValue(lows, 4);
+        if (prevLow1 > prevLow2 && bar.Low > prevLow2 && prevLow3 > prevLow2 && prevLow4 > prevLow2)
+        {
+            downFractal = prevLow2;
+        }
+    }
+}
+
 [PrimaryOutput("MiddleBand")]
 public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposable
 {
@@ -1296,24 +1354,10 @@ public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        // The centre is two bars back, so its right-hand neighbours are the previous bar and this one, and
-        // its left-hand neighbours are three and four bars back. The buffer is appended to only when the
-        // bar is final, below, so offset N here is N bars back from the current bar. See #202.
-        var prevHigh1 = EhlersStreamingWindow.GetOffsetValue(_highs, 1);
-        var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(_highs, 2);
-        var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(_highs, 3);
-        var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(_highs, 4);
-        var prevLow1 = EhlersStreamingWindow.GetOffsetValue(_lows, 1);
-        var prevLow2 = EhlersStreamingWindow.GetOffsetValue(_lows, 2);
-        var prevLow3 = EhlersStreamingWindow.GetOffsetValue(_lows, 3);
-        var prevLow4 = EhlersStreamingWindow.GetOffsetValue(_lows, 4);
-        double oklUpper = prevHigh1 < prevHigh2 && bar.High < prevHigh2 ? 1 : 0;
-        double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
-        double oklLower = prevLow1 > prevLow2 && bar.Low > prevLow2 ? 1 : 0;
-        double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
+        StreamingFractal.Find(_highs, _lows, bar, out var upFractal, out var downFractal);
 
-        var upper = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : _prevUpper;
-        var lower = oklLower == 1 && okrLower == 1 ? prevLow2 : _prevLower;
+        var upper = upFractal ?? _prevUpper;
+        var lower = downFractal ?? _prevLower;
         var middle = (upper + lower) / 2;
 
         if (isFinal)
@@ -1375,25 +1419,13 @@ public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        // Five-bar, matching the bands this oscillator reports on: the centre is two bars back, its
-        // right-hand neighbours are the previous bar and this one, and its left-hand neighbours are three
-        // and four bars back. Its batch twin chains CalculateFractalChaosBands and reads that indicator's
-        // bands, so this state is the only place the oscillator's own fractal test lives. See #202.
-        var prevHigh1 = EhlersStreamingWindow.GetOffsetValue(_highs, 1);
-        var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(_highs, 2);
-        var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(_highs, 3);
-        var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(_highs, 4);
-        var prevLow1 = EhlersStreamingWindow.GetOffsetValue(_lows, 1);
-        var prevLow2 = EhlersStreamingWindow.GetOffsetValue(_lows, 2);
-        var prevLow3 = EhlersStreamingWindow.GetOffsetValue(_lows, 3);
-        var prevLow4 = EhlersStreamingWindow.GetOffsetValue(_lows, 4);
-        double oklUpper = prevHigh1 < prevHigh2 && bar.High < prevHigh2 ? 1 : 0;
-        double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
-        double oklLower = prevLow1 > prevLow2 && bar.Low > prevLow2 ? 1 : 0;
-        double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
+        // Its batch twin chains CalculateFractalChaosBands and reads that indicator's bands, so this state
+        // is the only place the oscillator's own fractal test lives - it shares one with the bands state
+        // rather than keeping a second copy. See #202.
+        StreamingFractal.Find(_highs, _lows, bar, out var upFractal, out var downFractal);
 
-        var upper = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : _prevUpper;
-        var lower = oklLower == 1 && okrLower == 1 ? prevLow2 : _prevLower;
+        var upper = upFractal ?? _prevUpper;
+        var lower = downFractal ?? _prevLower;
         var fco = upper != _prevUpper ? 1 : lower != _prevLower ? -1 : 0;
 
         if (isFinal)

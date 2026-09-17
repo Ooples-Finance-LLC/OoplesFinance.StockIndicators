@@ -24,6 +24,11 @@ public static partial class Calculations
             // fires on any single-bar wiggle and re-anchors the bands far more often than a fractal does.
             // The centre is two bars back, so its right-hand neighbours are the previous bar and the
             // current one, and its left-hand neighbours are three and four bars back. See #202.
+            // Nothing is judged until five real bars exist. Missing history reads as 0, and 0 is below any
+            // positive price, so evaluating earlier would confirm a fractal whose left-hand neighbour never
+            // happened - the same fabricated-value mistake fixed for the log-return windows in #205 and
+            // #209.
+            var complete = i >= 4;
             var currentHigh = highList[i];
             var currentLow = lowList[i];
             var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
@@ -36,10 +41,10 @@ public static partial class Calculations
             var prevLow4 = i >= 4 ? lowList[i - 4] : 0;
             var currentClose = inputList[i];
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            double oklUpper = prevHigh1 < prevHigh2 && currentHigh < prevHigh2 ? 1 : 0;
-            double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
-            double oklLower = prevLow1 > prevLow2 && currentLow > prevLow2 ? 1 : 0;
-            double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
+            double oklUpper = complete && prevHigh1 < prevHigh2 && currentHigh < prevHigh2 ? 1 : 0;
+            double okrUpper = complete && prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
+            double oklLower = complete && prevLow1 > prevLow2 && currentLow > prevLow2 ? 1 : 0;
+            double okrLower = complete && prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
             var upperBand = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : prevUpperBand;
