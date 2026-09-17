@@ -14073,7 +14073,8 @@ internal static partial class IndicatorCompute
     {
         // V1 Algorithm: Vortex Bands
         // 1. Calculate MA of price (basis)
-        // 2. Calculate diff = price - basis
+        // 2. Calculate diff = |price - basis|, a distance - see the batch calculation for why signed
+        //    is wrong: it averages to near zero and drives the half-width negative
         // 3. Calculate MA of diff
         // 4. dev = 2 * diffMa
         // 5. upper = basis + dev (primary output)
@@ -14091,7 +14092,7 @@ internal static partial class IndicatorCompute
         var basisSpan = basisBuffer.Span;
         for (int i = 0; i < count; i++)
         {
-            diffSpan[i] = close[i] - basisSpan[i];
+            diffSpan[i] = Math.Abs(close[i] - basisSpan[i]);
         }
 
         // Calculate MA of diff

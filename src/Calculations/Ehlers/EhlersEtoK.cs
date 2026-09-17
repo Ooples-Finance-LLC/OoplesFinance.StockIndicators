@@ -989,7 +989,14 @@ public static partial class Calculations
 
             var temp = noise != 0 ? signalValue / noise : 0;
             var prevSnr = GetLastOrDefault(snrList);
-            var snr = (0.33 * (10 * Math.Log(temp) / Math.Log(10))) + (0.67 * prevSnr);
+
+            // A ratio in decibels is only defined for a positive ratio. On a market with no range at all
+            // the noise estimate decays geometrically to zero and the signal decays with it, so temp is
+            // zero and the unguarded logarithm publishes negative infinity for every remaining bar - the
+            // whole series, since this starts at bar 0. EhlersAlternateSignalToNoiseRatio is the same
+            // measurement in the same family and already guards its logarithm in exactly this way.
+            var logTemp = temp > 0 ? 10 * Math.Log(temp) / Math.Log(10) : 0;
+            var snr = (0.33 * logTemp) + (0.67 * prevSnr);
             snrList.Add(snr);
 
             var signal = GetVolatilitySignal(currentValue - smooth, prevValue - prevSmooth, snr, length);

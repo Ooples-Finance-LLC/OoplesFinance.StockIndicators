@@ -163,7 +163,12 @@ public static partial class Calculations
             var ut = (alp * mt) + ((1 - alp) * prevUt);
             utList.Add(ut);
 
-            var s = (2 - alp) * (mt - ut) / (1 - alp);
+            // McNicholl's zero-lag form, written here as it is in CalculateMcNichollMovingAverage. Grouped
+            // as (2 - alp) * (mt - ut) it collapses toward zero, because mt and ut converge on each other,
+            // and d = abssio - s then returns abssio very nearly unchanged - so the detrending this line
+            // exists to perform silently did not happen. No invariant catches it: both forms settle on a
+            // flat market, which is why it survived alongside the same defect in DEnvelope.
+            var s = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 0;
             var prevd = GetLastOrDefault(dList);
             var d = abssio - s;
             dList.Add(d);
