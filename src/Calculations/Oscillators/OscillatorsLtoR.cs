@@ -1903,7 +1903,7 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Math.PI", kpiList }
+            { "PerformanceIndex", kpiList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(kpiList);

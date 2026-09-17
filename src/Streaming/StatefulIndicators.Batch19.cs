@@ -1340,7 +1340,7 @@ public sealed class PercentChangeOscillatorState : IStreamingIndicatorState, IDi
     }
 }
 
-[PrimaryOutput("Math.PI")]
+[PrimaryOutput("PerformanceIndex")]
 public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1381,7 +1381,7 @@ public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposabl
         {
             outputs = new Dictionary<string, double>(1)
             {
-                { "Math.PI", kpi }
+                { "PerformanceIndex", kpi }
             };
         }
 
