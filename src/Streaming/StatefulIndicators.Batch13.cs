@@ -1278,8 +1278,10 @@ public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposab
 
     public FractalChaosBandsState()
     {
-        _highs = new PooledRingBuffer<double>(3);
-        _lows = new PooledRingBuffer<double>(3);
+        // Four, not three: a five-bar fractal centred two bars back reaches four bars back on its left,
+        // and its right-hand neighbours are the previous bar and the current one. See #202.
+        _highs = new PooledRingBuffer<double>(4);
+        _lows = new PooledRingBuffer<double>(4);
     }
 
     public IndicatorName Name => IndicatorName.FractalChaosBands;
@@ -1294,16 +1296,21 @@ public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        // The centre is two bars back, so its right-hand neighbours are the previous bar and this one, and
+        // its left-hand neighbours are three and four bars back. The buffer is appended to only when the
+        // bar is final, below, so offset N here is N bars back from the current bar. See #202.
         var prevHigh1 = EhlersStreamingWindow.GetOffsetValue(_highs, 1);
         var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(_highs, 2);
         var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(_highs, 3);
+        var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(_highs, 4);
         var prevLow1 = EhlersStreamingWindow.GetOffsetValue(_lows, 1);
         var prevLow2 = EhlersStreamingWindow.GetOffsetValue(_lows, 2);
         var prevLow3 = EhlersStreamingWindow.GetOffsetValue(_lows, 3);
-        double oklUpper = prevHigh1 < prevHigh2 ? 1 : 0;
-        double okrUpper = prevHigh3 < prevHigh2 ? 1 : 0;
-        double oklLower = prevLow1 > prevLow2 ? 1 : 0;
-        double okrLower = prevLow3 > prevLow2 ? 1 : 0;
+        var prevLow4 = EhlersStreamingWindow.GetOffsetValue(_lows, 4);
+        double oklUpper = prevHigh1 < prevHigh2 && bar.High < prevHigh2 ? 1 : 0;
+        double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
+        double oklLower = prevLow1 > prevLow2 && bar.Low > prevLow2 ? 1 : 0;
+        double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
 
         var upper = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : _prevUpper;
         var lower = oklLower == 1 && okrLower == 1 ? prevLow2 : _prevLower;
@@ -1348,8 +1355,12 @@ public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDis
 
     public FractalChaosOscillatorState()
     {
-        _highs = new PooledRingBuffer<double>(3);
-        _lows = new PooledRingBuffer<double>(3);
+        // Four, matching the bands this oscillator reports on. Its batch twin chains
+        // CalculateFractalChaosBands and reads that indicator's bands, so this state is the only place the
+        // oscillator's own fractal test lives - it has to move with them or the two engines disagree.
+        // See #202.
+        _highs = new PooledRingBuffer<double>(4);
+        _lows = new PooledRingBuffer<double>(4);
     }
 
     public IndicatorName Name => IndicatorName.FractalChaosOscillator;
@@ -1364,16 +1375,22 @@ public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        // Five-bar, matching the bands this oscillator reports on: the centre is two bars back, its
+        // right-hand neighbours are the previous bar and this one, and its left-hand neighbours are three
+        // and four bars back. Its batch twin chains CalculateFractalChaosBands and reads that indicator's
+        // bands, so this state is the only place the oscillator's own fractal test lives. See #202.
         var prevHigh1 = EhlersStreamingWindow.GetOffsetValue(_highs, 1);
         var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(_highs, 2);
         var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(_highs, 3);
+        var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(_highs, 4);
         var prevLow1 = EhlersStreamingWindow.GetOffsetValue(_lows, 1);
         var prevLow2 = EhlersStreamingWindow.GetOffsetValue(_lows, 2);
         var prevLow3 = EhlersStreamingWindow.GetOffsetValue(_lows, 3);
-        double oklUpper = prevHigh1 < prevHigh2 ? 1 : 0;
-        double okrUpper = prevHigh3 < prevHigh2 ? 1 : 0;
-        double oklLower = prevLow1 > prevLow2 ? 1 : 0;
-        double okrLower = prevLow3 > prevLow2 ? 1 : 0;
+        var prevLow4 = EhlersStreamingWindow.GetOffsetValue(_lows, 4);
+        double oklUpper = prevHigh1 < prevHigh2 && bar.High < prevHigh2 ? 1 : 0;
+        double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
+        double oklLower = prevLow1 > prevLow2 && bar.Low > prevLow2 ? 1 : 0;
+        double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
 
         var upper = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : _prevUpper;
         var lower = oklLower == 1 && okrLower == 1 ? prevLow2 : _prevLower;

@@ -19,18 +19,27 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
+            // A Williams fractal is a five-bar pattern: the centre must beat the TWO bars on each side of
+            // it. Comparing it against one neighbour each way makes it an ordinary three-bar pivot, which
+            // fires on any single-bar wiggle and re-anchors the bands far more often than a fractal does.
+            // The centre is two bars back, so its right-hand neighbours are the previous bar and the
+            // current one, and its left-hand neighbours are three and four bars back. See #202.
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
             var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
             var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
             var prevHigh3 = i >= 3 ? highList[i - 3] : 0;
+            var prevHigh4 = i >= 4 ? highList[i - 4] : 0;
             var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
             var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
             var prevLow3 = i >= 3 ? lowList[i - 3] : 0;
+            var prevLow4 = i >= 4 ? lowList[i - 4] : 0;
             var currentClose = inputList[i];
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            double oklUpper = prevHigh1 < prevHigh2 ? 1 : 0;
-            double okrUpper = prevHigh3 < prevHigh2 ? 1 : 0;
-            double oklLower = prevLow1 > prevLow2 ? 1 : 0;
-            double okrLower = prevLow3 > prevLow2 ? 1 : 0;
+            double oklUpper = prevHigh1 < prevHigh2 && currentHigh < prevHigh2 ? 1 : 0;
+            double okrUpper = prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
+            double oklLower = prevLow1 > prevLow2 && currentLow > prevLow2 ? 1 : 0;
+            double okrLower = prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
             var upperBand = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : prevUpperBand;
