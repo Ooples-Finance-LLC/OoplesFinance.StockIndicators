@@ -776,7 +776,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving
+        // average of it. The relative volatility index is the relative strength index with the standard
+        // deviation in place of the price change, so this is the quantity its definition names - and the one
+        // its own RviHigh and RviLow siblings already take, through VolatilityCore.StandardDeviation.
+        // See #190.
+        var stdDeviationList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
