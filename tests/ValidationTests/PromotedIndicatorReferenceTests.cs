@@ -32,6 +32,70 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
     private const double Tolerance = 1e-9;
 
     /// <summary>
+    /// A band at k sigma is k standard deviations wide either side, and a straight line says exactly what
+    /// that is.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The ultimate moving average bands are the Bollinger construction: upper = average + k sigma, lower =
+    /// average - k sigma. So the width is 2k sigma and the average cancels out of it entirely, which makes the
+    /// width a reading of sigma alone and leaves the ultimate moving average unable to hide a wrong one.
+    /// </para>
+    /// <para>
+    /// A window of L values in arithmetic progression with common difference m has population variance exactly
+    /// m^2 (L^2 - 1) / 12, so the width is 2k m sqrt((L^2 - 1) / 12) - here 4 * 2.5 * sqrt(399/12), about
+    /// 57.66.
+    /// </para>
+    /// <para>
+    /// This is the discriminating fixture rather than a convenient one, and the control arm was run to say so
+    /// in numbers: with the conversion reverted, all three cases fail, at 95.0, 114.0 and 355.67 against the
+    /// 57.66, 69.20 and 86.55 asserted here. A constant series could not tell the two quantities apart - both
+    /// are zero - and an alternating series could not either, because its moving average is flat and the two
+    /// coincide exactly. Only a trend separates them.
+    /// </para>
+    /// <para>
+    /// The first two of those numbers are the closed form of the old quantity and the third deliberately is
+    /// not, which is worth recording because the tidy story is wrong. CalculateStandardDeviationVolatility
+    /// measures each bar from the moving average at that bar and then averages the squares, so it warms in two
+    /// stages and is only itself from about bar 2L - 2. Where it is warm, the lagging average sits a constant
+    /// m (L - 1) / 2 below a straight line, every residual is that same constant, and the width is 2k m (L -
+    /// 1) / 2: 95.0 at L = 20, k = 2, m = 2.5, and 114.0 at L = 20, k = 1.5, m = 4. At L = 30 bar 50 is still
+    /// short of bar 58, so the outer average still holds bars whose own average window had not filled, whose
+    /// residual is of the order of the price itself rather than of the slope - which is how it reaches 355.67
+    /// instead of the 145 that formula would give. See issue #190.
+    /// </para>
+    /// <para>
+    /// Read from the batch calculation's own published bands rather than through the Builder, because the
+    /// width needs two named outputs at once and this is the calculation the conversion changed.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(20, 2.0, 2.5)]
+    [InlineData(20, 1.5, 4.0)]
+    [InlineData(30, 2.0, 2.5)]
+    public void UltimateMovingAverageBands_AreTwoKSigmaWideOnALine(int minLength, double stdDevMult, double slope)
+    {
+        const int MaxLength = 50;
+        var bars = LinearSeries(160, 100.0, slope);
+
+        var result = new StockData(bars)
+            .CalculateUltimateMovingAverageBands(MovingAvgType.SimpleMovingAverage, minLength, MaxLength, stdDevMult);
+        var upper = result.OutputValues["UpperBand"];
+        var lower = result.OutputValues["LowerBand"];
+
+        var sigma = slope * Math.Sqrt(((double)(minLength * minLength) - 1) / 12);
+        var expected = 2 * stdDevMult * sigma;
+
+        // From past the longest window, so the ultimate moving average is warm too - it cancels out of the
+        // width, but only once it is a number.
+        for (var i = MaxLength; i < bars.Count; i++)
+        {
+            (upper[i] - lower[i]).Should().BeApproximately(expected, 1e-6,
+                $"a band at {stdDevMult} sigma over {minLength} bars of slope {slope} is {expected} wide (bar {i})");
+        }
+    }
+
+    /// <summary>
     /// The scatter about the fitted line is zero when the window lies exactly on a line.
     /// </summary>
     /// <remarks>

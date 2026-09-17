@@ -129,7 +129,13 @@ public static partial class Calculations
         var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).ChainedValues;
         // The band width is the deviation of the prices, not of the UMA just published onto CustomValuesList.
         stockData.RestoreInputSeries(callerSeries);
-        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, minLength).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. A band at k sigma is the Bollinger construction, and sigma there is the windowed deviation;
+        // CalculateStandardDeviationVolatility is a different quantity, about 55% wider on a typical price
+        // series, so these bands were about that much too wide - the same defect #186 fixed in the Bollinger
+        // bands themselves. Taken over inputList, which is the caller's own series captured above. See #190.
+        var stdevList = GetStandardDeviationList(inputList, minLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -1689,14 +1689,26 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
 public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly UltimateMovingAverageState _uma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. The band is
+    // the Bollinger construction, so the two engines have to take the same sigma or they draw bands of
+    // different widths over the same prices.
+    private readonly RollingStandardDeviation _stdDev;
+
+    // RollingStandardDeviation takes a value rather than a bar, where the state it replaces resolved its own
+    // input. Close is what the batch calculation's GetInputValuesList resolves, so the two agree.
+    private readonly StreamingInputResolver _input;
     private readonly double _stdDevMult;
 
     public UltimateMovingAverageBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
         int maxLength = 50, double stdDevMult = 2)
     {
         _uma = new UltimateMovingAverageState(maType, minLength, maxLength, 1);
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, minLength));
+
+        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
+        // for a type to choose.
+        _stdDev = new RollingStandardDeviation(Math.Max(1, minLength));
+        _input = new StreamingInputResolver(InputName.Close, null);
         _stdDevMult = stdDevMult;
     }
 
@@ -1711,7 +1723,7 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var uma = _uma.Update(bar, isFinal, includeOutputs: false).Value;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_input.GetValue(bar), isFinal);
         var upper = uma + (_stdDevMult * stdDev);
         var lower = uma - (_stdDevMult * stdDev);
 
