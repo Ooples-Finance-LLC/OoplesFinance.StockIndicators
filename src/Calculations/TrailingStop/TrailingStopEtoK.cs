@@ -159,8 +159,9 @@ public static partial class Calculations
         var dtrAvgList = GetMovingAverageList(stockData, maType, length, dtrList);
         var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
         var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        stockData.SetCustomValues(dtrList);
-        var dtrStdList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the true-range window about its own mean; the band below is avg + k * dev, so
+        // this is the quantity a band at k sigma is defined against. See #190.
+        var dtrStdList = GetStandardDeviationList(dtrList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var maFast = smaFastList[i];
@@ -257,8 +258,8 @@ public static partial class Calculations
         }
 
         var rangeAvgList = GetMovingAverageList(stockData, maType, length, rrangeList);
-        stockData.SetCustomValues(rrangeList);
-        var rangeStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the range window about its own mean; the stops below are avg + k * dev. See #190.
+        var rangeStdDevList = GetStandardDeviationList(rrangeList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var price = priceList[i];
