@@ -95,6 +95,62 @@ public sealed class BuilderArmOutputKeyTests : GlobalTestData
                 "the message says which indicator, which slot, and what it does publish");
     }
 
+    /// <summary>
+    /// A key that resolves, but names a series the indicator does not publish, is refused as well.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// There are two ways to reach the refusal and the tests above cover only one. That one is a slot with no
+    /// key at all. This is the other: a key that resolves to something, where the indicator publishes nothing
+    /// under that name. It is how <c>"SignalFastK"</c> passed for the stochastic's D line, and since #226
+    /// corrected that pin there is no longer a live instance of it anywhere - so nothing exercises this branch
+    /// by accident, and a regression in it would be silent.
+    /// </para>
+    /// <para>
+    /// Neither existing test reaches it. <see cref="UnpublishedSlots"/> yields only slots whose key resolves to
+    /// null, and <c>BuilderArmTests</c> compares <c>TryComputeFast</c> against this same method, so a change
+    /// here moves both sides of that comparison together and it keeps agreeing with itself. Raised by review
+    /// on PR #229.
+    /// </para>
+    /// <para>
+    /// The bad key is handed in through the target rather than registered, on purpose.
+    /// <c>IndicatorOutputRegistry</c> is process-wide, and this assembly declares no collection behaviour, so
+    /// xunit runs these classes in parallel: a test that mutated the registry could answer a different test's
+    /// question while it ran, and restoring it in a finally would not close that window. The target is already
+    /// a parameter of the method under test, so nothing global moves.
+    /// </para>
+    /// <para>
+    /// The published key is checked first. Asserting only that an unpublished key raises would pass just as
+    /// well if the call raised for some unrelated reason, so the same call is made with a key the indicator
+    /// does publish and required to answer. That is what attributes the refusal to the key.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void AKeyThatResolvesButIsNotPublishedIsRefused()
+    {
+        var bars = StockTestData.Take(120).ToList();
+
+        // Taken from the table the Builder itself reads, rather than naming the indicator here twice.
+        BuilderArmBinding.TryGetTarget(typeof(MacdSpecOptions), out var bound)
+            .Should().BeTrue("the MACD options type stands for a batch indicator");
+
+        var spec = new IndicatorSpec(bound.Name, new MacdSpecOptions(12, 26, 9), IndicatorOutput.Primary);
+        var published = GeneratedIndicatorOutputs.KeysFor(bound.Name);
+        published.Should().NotBeEmpty("the indicator must publish something for this to discriminate");
+
+        var answered = BuilderArmBinding.Compute(new StockData(bars),
+            spec, new BuilderArmTarget(bound.Name, published[0]));
+        answered.Should().NotBeEmpty($"{published[0]} is published, so asking for it answers with that series");
+
+        var act = () => BuilderArmBinding.Compute(new StockData(bars),
+            spec, new BuilderArmTarget(bound.Name, "Missing"));
+
+        act.Should().Throw<CalculationException>()
+            .WithMessage($"*{bound.Name}*Available outputs:*",
+                "a key naming nothing the indicator publishes must raise; answering with the series it does "
+                + "publish is exactly how a wrong pin passed for a real one");
+    }
+
     /// <summary>Every reachable slot whose key resolves to nothing, in a stable order.</summary>
     private static IEnumerable<(Type OptionsType, BuilderArmTarget Target, IndicatorOutput Output)> UnpublishedSlots()
     {
