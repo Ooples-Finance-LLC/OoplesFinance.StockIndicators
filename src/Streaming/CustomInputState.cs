@@ -110,7 +110,7 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
 
         double high;
         double low;
-        if (value >= bar.Low && value <= bar.High)
+        if (CalculationsHelper.IsWithinBarRange(value, bar.Low, bar.High))
         {
             high = bar.High;
             low = bar.Low;

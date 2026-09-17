@@ -565,6 +565,62 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
             "the streaming state rejects the wiggle exactly as the batch does");
     }
 
+    /// <summary>
+    /// The stop is measured against the range of the bars themselves, not against a range manufactured from
+    /// the typical price.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The discriminating fixture is one whose bars have no range of their own. The typical price is
+    /// (high + low + close) / 3, so on such a bar it is the close - but (c + c + c) / 3 does not always
+    /// round-trip to c, and on twelve of these bars it does not. An exact containment test then read the
+    /// typical price as a series with its own scale and gave those bars the move from the previous bar as
+    /// their range, inflating every window holding one. See #212.
+    /// </para>
+    /// <para>
+    /// No parity sweep could catch it, which is why it is asserted against the definition here. The two
+    /// engines disagreed on precisely these bars: the streaming state reads the bar's own high and low, so
+    /// only the batch arm was inflated, and on ordinary bars the typical price sits strictly inside the
+    /// range and the two agree. Both arms are compared against the reference rather than against each
+    /// other.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(5, 21, 20, 1.0)]
+    [InlineData(5, 13, 14, 2.2)]
+    public void KaseDevStopV1_MeasuresTheBarsOwnRange(
+        int fastLength, int slowLength, int length, double stdDev)
+    {
+        var bars = GappingSeriesWithoutRange(length + slowLength + 60);
+        var expected = KaseDevStopV1Reference(bars, fastLength, slowLength, length, stdDev);
+        const double tolerance = 1e-8;
+
+        var batch = new StockData(bars)
+            .CalculateKaseDevStopV1(MovingAvgType.SimpleMovingAverage, fastLength, slowLength, length,
+                stdDev, stdDev, stdDev, stdDev)
+            .OutputValues["Dev1"];
+
+        using var state = new KaseDevStopV1State(MovingAvgType.SimpleMovingAverage, fastLength, slowLength,
+            length, stdDev, stdDev, stdDev, stdDev);
+        var streaming = new List<double>(bars.Count);
+        foreach (var bar in bars)
+        {
+            streaming.Add(state.Update(
+                new OhlcvBar("TEST", BarTimeframe.Tick, bar.Date, bar.Date, bar.Open, bar.High, bar.Low,
+                    bar.Close, bar.Volume, isFinal: true),
+                isFinal: true,
+                includeOutputs: false).Value);
+        }
+
+        for (var i = Math.Max(length, slowLength); i < bars.Count; i++)
+        {
+            batch[i].Should().BeApproximately(expected[i], tolerance,
+                $"the stop is the bars' own range window plus {stdDev} of that window's deviation (bar {i})");
+            streaming[i].Should().BeApproximately(expected[i], tolerance,
+                $"the streaming state computes what the batch computes (bar {i})");
+        }
+    }
+
     #region Reference formula implementations
 
     /// <summary>
@@ -688,6 +744,52 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
             var average = WindowAverage(ranges, i, length);
             var deviation = WindowDeviation(ranges, i, length);
             result[i] = (prices[i] + (-1 * trends[i])) * (average + (stdDev * deviation));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The Kase dev stop V1 written out from its definition: the typical price displaced by the average
+    /// range of the bars themselves and a multiple of that window's own deviation.
+    /// </summary>
+    /// <remarks>
+    /// The averages and the deviation are zero until their windows fill, as both engines leave them. The
+    /// first two bars have no bar two back, and the zero standing in for it is reproduced here rather than
+    /// corrected for, so the reference says what the indicator says. The test asserts only from the longest
+    /// window on, so that warm-up is not what either side is being judged by.
+    /// </remarks>
+    private static double[] KaseDevStopV1Reference(
+        List<TickerData> bars, int fastLength, int slowLength, int length, double stdDev)
+    {
+        var count = bars.Count;
+        var typical = new double[count];
+        var ranges = new double[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            var high = bars[i].High;
+            var low = bars[i].Low;
+            typical[i] = (high + low + bars[i].Close) / 3;
+
+            var previousClose = i >= 2 ? bars[i - 2].Close : 0;
+            var previousLow = i >= 2 ? bars[i - 2].Low : 0;
+            ranges[i] = Math.Max(
+                Math.Max(high - previousLow, Math.Abs(high - previousClose)),
+                Math.Abs(low - previousClose));
+        }
+
+        var result = new double[count];
+        for (var i = 0; i < count; i++)
+        {
+            var average = WindowAverage(ranges, i, length);
+            var deviation = WindowDeviation(ranges, i, length);
+            var fast = WindowAverage(typical, i, fastLength);
+            var slow = WindowAverage(typical, i, slowLength);
+
+            result[i] = fast < slow
+                ? typical[i] + average + (stdDev * deviation)
+                : typical[i] - average - (stdDev * deviation);
         }
 
         return result;
