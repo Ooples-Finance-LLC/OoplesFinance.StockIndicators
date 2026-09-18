@@ -135,7 +135,14 @@ internal static class BatchCompute
             throw new ArgumentException("A fused chain needs at least one state.", nameof(chain));
         }
 
-        var count = data.Count;
+        // The head is fed the series a fast arm would have read, not the bar's close. Those are the same list
+        // until a caller assigns or mutates StockData.InputValues, and StockData lets them do both - InputValues
+        // hands back the list itself, so a mutation never passes through a setter and nothing can record that it
+        // happened. Reading the same expression the arm reads makes the head's input identical by construction
+        // instead of by a check that a later mutation could invalidate.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+
+        var count = Math.Min(data.Count, inputList.Count);
         var results = new double[count];
         for (var s = 0; s < chain.Count; s++)
         {
@@ -144,9 +151,10 @@ internal static class BatchCompute
 
         for (var i = 0; i < count; i++)
         {
-            // The head reads the bar itself; every later state reads a bar carrying the previous value as its
-            // close, which is the chaining convention ComputeAllWithCustomInput already uses.
-            var value = chain[0].Update(CreateBar(data, i), isFinal: true, includeOutputs: false).Value;
+            // Every state reads a bar carrying its input as the close: the head the caller's input series, each
+            // later one the value the state before produced, which is the convention ComputeAllWithCustomInput
+            // already uses.
+            var value = chain[0].Update(CreateBarWithCustomClose(data, i, inputList[i]), isFinal: true, includeOutputs: false).Value;
             for (var s = 1; s < chain.Count; s++)
             {
                 value = chain[s].Update(CreateBarWithCustomClose(data, i, value), isFinal: true, includeOutputs: false).Value;

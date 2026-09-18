@@ -192,7 +192,7 @@ internal sealed class SeriesEvaluator
         // Chained indicator path. When nothing else needs the series between the links, the chain runs as one
         // pass over the bars and the intermediate array is never built.
         _standardPathHits++;
-        if (TryBuildFusedChain(node, baseData, out var chain))
+        if (TryBuildFusedChain(node, out var chain))
         {
             _fusedChainHits++;
             return BatchCompute.ComputeAllChained(baseData, chain);
@@ -221,18 +221,13 @@ internal sealed class SeriesEvaluator
     /// <see cref="FusableChainHeads"/>.
     /// </para>
     /// </remarks>
-    private bool TryBuildFusedChain(SeriesNode node, StockData baseData, out List<IStreamingIndicatorState> chain)
+    private bool TryBuildFusedChain(SeriesNode node, out List<IStreamingIndicatorState> chain)
     {
         chain = new List<IStreamingIndicatorState>();
 
-        // A fast arm reads the input series, a state reads the bar's close, and StockData lets a caller make
-        // those different. Asked this way the question is a field test; asking InputValues would allocate a
-        // copy of the closes in order to compare it against the closes.
-        if (!baseData.InputSeriesIsBarClose)
-        {
-            return false;
-        }
-
+        // Nothing is asked here about which series the head will read. ComputeAllChained feeds it the same
+        // expression a fast arm reads, so the two agree by construction; a check instead would have to hold
+        // against a caller mutating the list InputValues returns, which passes through no setter at all.
         if (!TryWalkToBars(node, out var specs) || specs.Count < 2)
         {
             // One indicator reading the bars is not a chain; it has no intermediate to save.

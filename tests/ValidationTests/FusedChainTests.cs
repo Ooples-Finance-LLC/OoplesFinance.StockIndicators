@@ -147,31 +147,37 @@ public sealed class FusedChainTests : GlobalTestData
     }
 
     /// <summary>
-    /// A head whose input series is not the bars' close is not fused.
+    /// A head reading an input series other than the bars' close fuses, and still returns the arm's values.
     /// </summary>
     /// <remarks>
-    /// A fast arm reads <c>InputValues</c>; a streaming state reads the bar's close. Those are the same series
-    /// only until a caller sets <c>InputValues</c> to something else, and <c>StockData</c> lets them - so
-    /// fusing here would quietly move the whole chain onto a different input. The values are what the arm
-    /// gives, and the refusal is what keeps them that way.
+    /// A fast arm reads <c>ChainedValues</c> or <c>InputValues</c>; a state reads the bar's close. Those are
+    /// the same series until a caller assigns <c>InputValues</c> - or mutates the list it hands back, which
+    /// passes through no setter and so cannot be recorded. Rather than gate fusion on a check a later mutation
+    /// would invalidate, <see cref="BatchCompute.ComputeAllChained"/> feeds the head the same expression the
+    /// arm reads, which makes the two identical by construction. This holds it to that: a chain over a custom
+    /// input series fuses, and agrees exactly with the materialised chain over the same data.
     /// </remarks>
     [Fact]
-    public void AHeadReadingAnInputOtherThanTheCloseIsNotFused()
+    public void AHeadReadingAnInputOtherThanTheCloseFusesAndKeepsTheArmsValues()
     {
         var tickers = StockTestData.ToList();
-        var data = new StockData(tickers)
-        {
-            InputValues = tickers.Select(t => (t.High + t.Low) / 2).ToList()
-        };
+        var midpoints = tickers.Select(t => (t.High + t.Low) / 2).ToList();
 
-        using var context = new ComputeContext();
-        var evaluator = new SeriesEvaluator(data, BuildChain(), context);
-        var values = evaluator.Evaluate(new[] { Ema });
+        var fusedData = new StockData(tickers) { InputValues = midpoints };
+        using var fusedContext = new ComputeContext();
+        var fusedEvaluator = new SeriesEvaluator(fusedData, BuildChain(), fusedContext);
+        var fused = fusedEvaluator.Evaluate(new[] { Ema });
 
-        evaluator.FusedChainHits.Should().Be(0,
-            "the arm would read the midpoint series while a fused head would read the close, so they are not "
-            + "the same computation and the chain stays materialised");
-        values[Ema].Should().NotBeEmpty();
+        var plainData = new StockData(tickers) { InputValues = midpoints };
+        using var plainContext = new ComputeContext();
+        var plainEvaluator = new SeriesEvaluator(plainData, BuildChain(), plainContext);
+        var plain = plainEvaluator.Evaluate(new[] { Sma, Ema });
+
+        fusedEvaluator.FusedChainHits.Should().Be(1,
+            "which series the head reads is settled by feeding it that series, not by refusing to fuse");
+        plainEvaluator.FusedChainHits.Should().Be(0, "asking for the SMA itself means it has to be published");
+        fused[Ema].Should().Equal(plain[Ema],
+            "the fused head reads the caller's input series, which is what the fast arm it replaces reads");
     }
 
     /// <summary>
