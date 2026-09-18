@@ -429,18 +429,19 @@ internal static partial class IndicatorCompute
             StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length),
             FastSlowStochasticOscillatorSpecOptions fsso => ComputeFastSlowStochasticOscillatorFast(data, context, fsso.Length),
             DiNapoliPreferredStochasticOscillatorSpecOptions dnpso => ComputeDiNapoliPreferredStochasticOscillatorFast(data, context, dnpso.Length),
-            DMIStochasticSpecOptions dmis => ComputeDMIStochasticFast(data, context, dmis.Length),
+            DMIStochasticSpecOptions dmis => ComputeDMIStochasticFast(data, context, dmis.Length, dmis.MaType),
             // Length is declared obsolete because CCTStochRelativeStrengthIndex has no parameter it could
             // set, so this spec asks for the same series the defaults give.
             CCTStochRelativeStrengthIndexSpecOptions => ComputeCCTStochRelativeStrengthIndexFast(data, context),
 
             // Batch 6 - DT/Dynamic oscillators
-            DTOscillatorSpecOptions dto => ComputeDTOscillatorFast(data, context, dto.Length),
+            DTOscillatorSpecOptions dto => ComputeDTOscillatorFast(data, context, dto.Length, dto.MaType),
             DynamicMomentumOscillatorSpecOptions dmo => ComputeDynamicMomentumOscillatorFast(data, context, dmo.Length),
 
             // Batch 6 - Price/Momentum oscillators
             ComparePriceMomentumOscillatorSpecOptions cpmo => ComputeComparePriceMomentumOscillatorFast(data, context, cpmo.Length),
-            DailyAveragePriceDeltaSpecOptions dapd => ComputeDailyAveragePriceDeltaFast(data, context, dapd.Length),
+            DailyAveragePriceDeltaSpecOptions dapd => ComputeDailyAveragePriceDeltaFast(data, context,
+                dapd.Length, dapd.MaType),
             PriceCycleOscillatorSpecOptions pco => ComputePriceCycleOscillatorFast(data, context, pco.Length),
             PriceVolumeOscillatorSpecOptions pvo2 => ComputePriceVolumeOscillatorFast(data, context, pvo2.Length),
             PercentChangeOscillatorSpecOptions pchosc => ComputePercentChangeOscillatorFast(data, context, pchosc.Length),
@@ -873,7 +874,7 @@ internal static partial class IndicatorCompute
             AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context,
                 atrts.Length, atrts.Multiplier, atrts.MaType),
             WellesWilderSummationSpecOptions wws => ComputeWellesWilderSummationFast(data, context, wws.Length),
-            DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length),
+            DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length, di.MaType),
             DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength, didi.MediumLength, didi.LongLength),
             VerticalHorizontalFilterSpecOptions vhf => ComputeVerticalHorizontalFilterFast(data, context, vhf.Length),
             LinearRegressionSlopeSpecOptions lrs => ComputeLinearRegressionSlopeFast(data, context, lrs.Length),
@@ -907,7 +908,9 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Additional Oscillators with Core methods
             ChandeQuickStickSpecOptions cqs => ComputeChandeQuickStickFast(data, context, cqs.Length, cqs.MaType),
-            DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length1, dma.Length2),
+            // Length1 and MaType only smooth the Signal and Histogram lines CalculateDeltaMovingAverage
+            // publishes beside the delta, and this spec is bound to the delta itself.
+            DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length2),
             FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length),
             EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.SignalLength),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
@@ -1576,13 +1579,12 @@ internal static partial class IndicatorCompute
     /// Computes Average Directional Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    private static (ComputeBuffer Plus, ComputeBuffer Minus) DirectionalIndicators(StockData data,
+        ComputeContext context, int length, MovingAvgType maType)
     {
-        // CalculateAverageDirectionalIndex smooths the directional movements and the true range with
-        // whichever average it was given, so the core's hardcoded Wilder's smoothing answered for one type
-        // only. It also copied the whole OHLC into three fresh arrays, on a path whose purpose is not to
-        // allocate.
+        // The pair CalculateAverageDirectionalIndex publishes as DiPlus and DiMinus: how much of the smoothed
+        // true range each direction's movement accounts for. The index itself and every indicator that reads
+        // the pair start here, so they cannot drift apart.
         var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
         var count = inputList.Count;
         var input = SpanCompat.AsReadOnlySpan(inputList);
@@ -1624,15 +1626,42 @@ internal static partial class IndicatorCompute
         MovingAverage(data, maType, length, dmMinus, smoothedMinus);
         MovingAverage(data, maType, length, trueRange, smoothedRange);
 
+        var plusBuffer = context.Rent(count);
+        var minusBuffer = context.Rent(count);
+        var diPlus = plusBuffer.WritableSpan;
+        var diMinus = minusBuffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var range = smoothedRange[i];
+            diPlus[i] = range != 0 ? MathHelper.MinOrMax(100 * smoothedPlus[i] / range, 100, 0) : 0;
+            diMinus[i] = range != 0 ? MathHelper.MinOrMax(100 * smoothedMinus[i] / range, 100, 0) : 0;
+        }
+
+        return (plusBuffer, minusBuffer);
+    }
+
+    internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        // CalculateAverageDirectionalIndex smooths how far apart the two directional indicators are with
+        // whichever average it was given, so the core's hardcoded Wilder's smoothing answered for one type
+        // only.
+        var (plusBuffer, minusBuffer) = DirectionalIndicators(data, context, length, maType);
+        using var diPlusBuffer = plusBuffer;
+        using var diMinusBuffer = minusBuffer;
+        var diPlus = diPlusBuffer.Span;
+        var diMinus = diMinusBuffer.Span;
+        var count = diPlus.Length;
+
         using var diBuffer = context.Rent(count);
         var di = diBuffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            var range = smoothedRange[i];
-            var diPlus = range != 0 ? MathHelper.MinOrMax(100 * smoothedPlus[i] / range, 100, 0) : 0;
-            var diMinus = range != 0 ? MathHelper.MinOrMax(100 * smoothedMinus[i] / range, 100, 0) : 0;
-            var diSum = diPlus + diMinus;
-            di[i] = diSum != 0 ? MathHelper.MinOrMax(100 * Math.Abs(diPlus - diMinus) / diSum, 100, 0) : 0;
+            var diSum = diPlus[i] + diMinus[i];
+            di[i] = diSum != 0
+                ? MathHelper.MinOrMax(100 * Math.Abs(diPlus[i] - diMinus[i]) / diSum, 100, 0)
+                : 0;
         }
 
         var buffer = context.Rent(count);
@@ -5537,13 +5566,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DTOscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDTOscillatorFast(StockData data, ComputeContext context, int length = 13)
+    internal static ComputeBuffer ComputeDTOscillatorFast(StockData data, ComputeContext context, int length1 = 13,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length2 = 8, int length3 = 5)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DTOscillator(high, low, close, buffer.WritableSpan, length, 8, 5);
+        // CalculateDTOscillator rescales a smoothed price against its own length2 range and averages that
+        // over length3. The further average it takes is its signal line, which is a different series.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        using var smoothedBuffer = context.Rent(count);
+        var smoothed = smoothedBuffer.WritableSpan;
+        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(inputList), smoothed);
+
+        var window = new RollingMinMax(Math.Max(length2, 2));
+        var stochasticSum = new RollingSum();
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var value = smoothed[i];
+            window.Add(value);
+
+            var range = window.Max - window.Min;
+            var stochastic = range != 0
+                ? MathHelper.MinOrMax(100 * (value - window.Min) / range, 100, 0)
+                : 0;
+
+            stochasticSum.Add(stochastic);
+            output[i] = stochasticSum.Average(length3);
+        }
+
         return buffer;
     }
 
@@ -5562,12 +5616,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Daily Average Price Delta using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(StockData data, ComputeContext context,
+        int length = 21, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DailyAveragePriceDelta(inputSpan, buffer.WritableSpan, length);
+        // CalculateDailyAveragePriceDelta widens each bar by how far the average high sits above the average
+        // low, and this spec is bound to the upper band: the high widened upwards. The close never enters it.
+        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = highList.Count;
+        var high = SpanCompat.AsReadOnlySpan(highList);
+
+        using var averageHighBuffer = context.Rent(count);
+        using var averageLowBuffer = context.Rent(count);
+        var averageHigh = averageHighBuffer.WritableSpan;
+        var averageLow = averageLowBuffer.WritableSpan;
+        MovingAverage(data, maType, length, high, averageHigh);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(lowList), averageLow);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = high[i] + (averageHigh[i] - averageLow[i]);
+        }
+
         return buffer;
     }
 
@@ -5662,13 +5734,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DMI Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDMIStochasticFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDMIStochasticFast(StockData data, ComputeContext context,
+        int length1 = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length2 = 10,
+        int length3 = 3, int length4 = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DMIStochastic(high, low, close, buffer.WritableSpan, length, 10);
+        // CalculateDMIStochastic rescales the gap between the two directional indicators against its own
+        // length2 range and then smooths that twice, with whichever average it was given.
+        var (plusBuffer, minusBuffer) = DirectionalIndicators(data, context, length1, maType);
+        using var diPlusBuffer = plusBuffer;
+        using var diMinusBuffer = minusBuffer;
+        var diPlus = diPlusBuffer.Span;
+        var diMinus = diMinusBuffer.Span;
+        var count = diPlus.Length;
+
+        using var fastKBuffer = context.Rent(count);
+        var fastK = fastKBuffer.WritableSpan;
+        var window = new RollingMinMax(Math.Max(length2, 2));
+
+        for (var i = 0; i < count; i++)
+        {
+            var oscillator = diMinus[i] - diPlus[i];
+            window.Add(oscillator);
+
+            var range = window.Max - window.Min;
+            fastK[i] = range != 0 ? MathHelper.MinOrMax((oscillator - window.Min) / range * 100, 100, 0) : 0;
+        }
+
+        using var slowKBuffer = context.Rent(count);
+        MovingAverage(data, maType, length3, fastK, slowKBuffer.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length4, slowKBuffer.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -10181,12 +10278,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Damping Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.DampingIndex(inputSpan, buffer.WritableSpan, length);
+        // CalculateDampingIndex compares the average bar range one bar back with the average range six bars
+        // before that, so a market whose range has been shrinking reads below one. The average takes whichever
+        // type the indicator was given, and the price itself only reaches its signal.
+        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = highList.Count;
+
+        using var rangeBuffer = context.Rent(count);
+        var range = rangeBuffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            range[i] = highList[i] - lowList[i];
+        }
+
+        using var averageRangeBuffer = context.Rent(count);
+        var averageRange = averageRangeBuffer.WritableSpan;
+        MovingAverage(data, maType, length, range, averageRange);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            // Both readings are taken from before this bar, as the batch does.
+            var previous = i >= 1 ? averageRange[i - 1] : 0;
+            var older = i >= 6 ? averageRange[i - 6] : 0;
+            output[i] = older != 0 ? previous / older : 0;
+        }
+
         return buffer;
     }
 
@@ -10589,12 +10712,24 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Delta Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 5)
+    internal static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context,
+        int length2 = 5)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DeltaMovingAverage(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        // CalculateDeltaMovingAverage measures how far the close has travelled since the open length2 bars
+        // back. The average it also takes smooths that into its signal and histogram, other series.
+        var (inputList, _, _, openList, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            // Bars before the start of the series count as zero, which is what the batch does.
+            var previousOpen = i >= length2 ? openList[i - length2] : 0;
+            output[i] = inputList[i] - previousOpen;
+        }
+
         return buffer;
     }
 
