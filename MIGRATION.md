@@ -1,4 +1,4 @@
-# Migration Guide: v1.x to v2.0
+﻿# Migration Guide: v1.x to v2.0
 
 This guide helps you migrate from OoplesFinance.StockIndicators v1.x to v2.0.
 
@@ -229,6 +229,11 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
 ### Removed
 
 - All v1.x `Calculate*` methods are still available (they will be deprecated in v3.0).
+- `AlpacaBroker` and `AlpacaMarketDataProvider` have moved out of the
+  `OoplesFinance.StockIndicators` package into a new `OoplesFinance.StockIndicators.Trading` package.
+  They are the only two types that used the Alpaca SDK. `AutoTradingCatalog.Alpaca(...)` and
+  `AlpacaTradeAdapter` stay in the core package - they are named for Alpaca but use no part of the
+  SDK, so they need no new package reference.
 - `TrixResult` is gone. `IndicatorCatalog.Trix()` now returns a plain `SeriesHandle`.
 - `AroonOscillatorResult.Up`, `.Down` and `.Oscillator` are gone, as are
   `AlligatorIndexResult.Jaw` and `GatorOscillatorResult.Upper` / `.Lower`. The result types
@@ -310,6 +315,32 @@ var bottom = runtime.GetSeries(gator.Bottom);
 ```
 
 `ElderRayIndexResult` is unchanged: it is the one entry the old list had right.
+
+#### Moving to the Trading package
+
+`AlpacaBroker` and `AlpacaMarketDataProvider` now live in their own repository and package,
+[OoplesFinance.StockIndicators.Trading](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators.Trading).
+Their namespaces are unchanged, so no `using` needs editing - but the types are no longer in the
+core package, so a project that uses them needs the new package reference:
+
+```xml
+<PackageReference Include="OoplesFinance.StockIndicators" Version="..." />
+<PackageReference Include="OoplesFinance.StockIndicators.Trading" Version="..." />
+```
+
+The two packages version independently. Trading takes a minimum core version rather than a pin, so
+you choose which core version you resolve provided it is at least that floor.
+
+Nothing else needs to change: same types, same members, same namespaces.
+
+**Why:** `Alpaca.Markets` is a broker SDK, and only those two adapters needed it. Carrying it in the
+core package meant a project that only wanted to compute an RSI also restored a trading API client
+and its transitive dependencies - the nuspec of the published `OoplesFinance.StockIndicators` 1.1.0
+package, the last release made before this change, declares `Alpaca.Markets` and
+`Alpaca.Markets.Extensions` as hard dependencies for exactly that reason. Type forwarding would have
+made the move invisible, but the Trading assembly references the core one, so a forwarder in the
+core assembly would be a reference cycle. The move is therefore breaking, and is marked as such
+rather than hidden.
 
 ### Changed
 
