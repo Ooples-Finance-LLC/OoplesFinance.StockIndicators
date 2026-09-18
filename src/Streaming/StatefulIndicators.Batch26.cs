@@ -1093,14 +1093,15 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     private readonly IMovingAverageSmoother _hacMa2;
     private readonly IMovingAverageSmoother _zlhaMa;
     private readonly IMovingAverageSmoother _wma;
-    private readonly StandardDeviationVolatilityState _zlhaStdDev;
-    private readonly StandardDeviationVolatilityState _percbStdDev;
+    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
+    // the smoothed Heikin-Ashi series over length1 and the other the percent-b series over length2 - two
+    // different series over two different windows, which must not be crossed in either respect.
+    private readonly RollingStandardDeviation _zlhaStdDev;
+    private readonly RollingStandardDeviation _percbStdDev;
     private StreamingInputResolver _input;
     private readonly double _stdDevMult;
     private double _prevInput;
     private double _prevHao;
-    private double _zlhaTemaValue;
-    private double _percbValue;
     private bool _hasPrev;
 
     public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18, int length2 = 200,
@@ -1111,8 +1112,9 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _hacMa2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _zlhaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length1));
-        _zlhaStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length1), _ => _zlhaTemaValue);
-        _percbStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), _ => _percbValue);
+        // No moving-average type, and no selectors: each series is passed to Next directly.
+        _zlhaStdDev = new RollingStandardDeviation(Math.Max(1, length1));
+        _percbStdDev = new RollingStandardDeviation(Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
     }
 
@@ -1131,8 +1133,6 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _percbStdDev.Reset();
         _prevInput = 0;
         _prevHao = 0;
-        _zlhaTemaValue = 0;
-        _percbValue = 0;
         _hasPrev = false;
     }
 
@@ -1148,15 +1148,15 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         var tma2 = _hacMa2.Next(tma1, isFinal);
         var zlha = tma1 + (tma1 - tma2);
         var zlhaTema = _zlhaMa.Next(zlha, isFinal);
-        _zlhaTemaValue = zlhaTema;
 
-        var zlhaStdDev = _zlhaStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the smoothed Heikin-Ashi series, which is the series this measures.
+        var zlhaStdDev = _zlhaStdDev.Next(zlhaTema, isFinal);
         var wma = _wma.Next(zlhaTema, isFinal);
         var percb = zlhaStdDev != 0
             ? (zlhaTema + (2 * zlhaStdDev) - wma) / (4 * zlhaStdDev) * 100
             : 0;
-        _percbValue = percb;
-        var percbStdDev = _percbStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the percent-b series, over its own window rather than the one above.
+        var percbStdDev = _percbStdDev.Next(percb, isFinal);
         var upper = 50 + (_stdDevMult * percbStdDev);
         var lower = 50 - (_stdDevMult * percbStdDev);
 

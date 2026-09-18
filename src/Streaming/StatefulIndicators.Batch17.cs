@@ -1603,13 +1603,14 @@ public sealed class MoveTrackerState : IStreamingIndicatorState
 public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _filter;
     private readonly double _fastAlpha;
     private readonly double _slowAlpha;
     private double _prevAma;
-    private double _amaDiff;
     private bool _hasPrev;
 
     public MovingAverageAdaptiveFilterState(int length = 10, double filter = 0.15,
@@ -1617,7 +1618,8 @@ public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState,
     {
         var resolved = Math.Max(1, length);
         _er = new EfficiencyRatioState(resolved);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolved, _ => _amaDiff);
+        // No moving-average type, and no selector: the change is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _filter = filter;
         _fastAlpha = fastAlpha;
@@ -1631,7 +1633,6 @@ public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState,
         _er.Reset();
         _stdDev.Reset();
         _prevAma = 0;
-        _amaDiff = 0;
         _hasPrev = false;
     }
 
@@ -1642,8 +1643,10 @@ public sealed class MovingAverageAdaptiveFilterState : IStreamingIndicatorState,
         var er = _er.Next(value, isFinal);
         var smooth = MathHelper.Pow((er * (_fastAlpha - _slowAlpha)) + _slowAlpha, 2);
         var ama = prevAma + (smooth * (value - prevAma));
-        _amaDiff = ama - prevAma;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var amaDiff = ama - prevAma;
+
+        // Fed the adaptive average's own change, which is the series this measures.
+        var stdDev = _stdDev.Next(amaDiff, isFinal);
         var maaf = stdDev * _filter;
 
         if (isFinal)

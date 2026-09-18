@@ -89,7 +89,13 @@ public static partial class Calculations
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
         stockData.SetCustomValues(rsiList);
-        var rsiStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The overbought and oversold levels are 50 plus and minus a multiple of the deviation of the
+        // relative strength index, so sigma is the windowed deviation of that index; the quantity this
+        // replaces is about 55% wider, which pushed both levels further from 50 and made the indicator reach
+        // them less often. Taken over rsiList by name. See #190.
+        var rsiStdDevList = GetStandardDeviationList(rsiList, length);
         var rsiSmaList = GetMovingAverageList(stockData, maType, smoothingLength, rsiList);
 
         for (var i = 0; i < stockData.Count; i++)

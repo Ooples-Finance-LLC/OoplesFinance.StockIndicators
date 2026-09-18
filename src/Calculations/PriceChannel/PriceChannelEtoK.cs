@@ -952,9 +952,17 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(val2List);
-        var stdDevFastList = CalculateStandardDeviationVolatility(stockData, length: fastLength).ChainedValues;
-        stockData.SetCustomValues(val2List);
-        var stdDevSlowList = CalculateStandardDeviationVolatility(stockData, length: slowLength).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The step holds until price escapes a band of one deviation, blended between a fast and a slow
+        // one by the efficiency ratio, so sigma in that band is the windowed deviation; the quantity this
+        // replaces is about 55% wider on a typical price series, so both bands were too wide.
+        //
+        // Both are taken over the same list - val2List - at two different lengths. That is the opposite of the
+        // pairs elsewhere in this issue, where two deviations measure two different series over one window:
+        // here it is one series over two windows, and it is the lengths that must not be crossed. See #190.
+        var stdDevFastList = GetStandardDeviationList(val2List, fastLength);
+        var stdDevSlowList = GetStandardDeviationList(val2List, slowLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
