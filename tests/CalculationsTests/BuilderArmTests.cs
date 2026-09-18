@@ -858,6 +858,25 @@ public sealed class BuilderArmTests : GlobalTestData
         "VariableLengthMovingAverageSpecOptions",
     };
 
+    /// <summary>Keeps the first divergence recorded for a type, so the default parameter set is reported.</summary>
+    private static void Record(Dictionary<string, string> divergence, string name, string detail)
+    {
+        if (!divergence.ContainsKey(name))
+        {
+            divergence[name] = detail;
+        }
+    }
+
+    /// <summary>The recorded divergence for each named type, or a note that none was captured.</summary>
+    private static string Describe(Dictionary<string, string> divergence, IEnumerable<string> names)
+    {
+        var described = names
+            .Select(name => divergence.TryGetValue(name, out var detail) ? $"{name} -> {detail}" : $"{name} -> no divergence captured")
+            .ToList();
+
+        return described.Count == 0 ? "nothing to describe" : string.Join(" | ", described);
+    }
+
     /// <summary>
     /// No arm the Builder serves computes a different indicator, and the set that does cannot grow.
     /// </summary>
@@ -883,6 +902,11 @@ public sealed class BuilderArmTests : GlobalTestData
     {
         var tickers = StockTestData.ToList();
         var disagreed = new SortedSet<string>(StringComparer.Ordinal);
+
+        // Where each one first parts company with its bound call. Detection alone leaves the next author
+        // reading two implementations side by side to find out why; the bar index and the two values say
+        // which one to look at and from where, which is the difference between a list and a work queue.
+        var divergence = new Dictionary<string, string>(StringComparer.Ordinal);
         var compared = 0;
 
         foreach (var type in OptionTypes)
@@ -921,22 +945,37 @@ public sealed class BuilderArmTests : GlobalTestData
                 }
 
                 compared++;
+                var label = alternate ? "alternate parameters" : "default parameters";
                 try
                 {
                     var expected = BuilderArmBinding.Compute(new StockData(tickers), spec, target);
-                    if (arm.Length != expected.Count || !Same(arm, expected.ToArray()))
+                    if (arm.Length != expected.Count)
                     {
                         disagreed.Add(type.Name);
+                        Record(divergence, type.Name,
+                            $"{label}: arm produced {arm.Length} values, {target.Name} produced {expected.Count}");
+                        continue;
+                    }
+
+                    var bar = Enumerable.Range(0, arm.Length).FirstOrDefault(i => !IsClose(expected[i], arm[i]), -1);
+                    if (bar >= 0)
+                    {
+                        disagreed.Add(type.Name);
+                        Record(divergence, type.Name,
+                            $"{label}: first differs at bar {bar} - arm {arm[bar]:R}, {target.Name} {expected[bar]:R}");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    var inner = ex.InnerException ?? ex;
                     disagreed.Add(type.Name);
+                    Record(divergence, type.Name, $"{label}: {inner.GetType().Name} {inner.Message}");
                 }
             }
         }
 
         var servedAndWrong = disagreed.Where(name => BuilderVerifiedArms.Arms.Any(t => t.Name == name)).ToList();
+        var unexpected = disagreed.Except(ArmsDisagreeingWithTheirBoundCall).ToList();
 
         using var scope = new AssertionScope();
         compared.Should().BeGreaterThan(200, "every bound spec with an arm is driven through that arm");
@@ -944,11 +983,12 @@ public sealed class BuilderArmTests : GlobalTestData
         // The promotion guard. A verified arm IS served, so a verified arm that computes something else is
         // wrong numbers reaching callers - which is exactly what promoting a listed type would do.
         servedAndWrong.Should().BeEmpty(
-            "an arm in BuilderVerifiedArms is served, so it must compute the indicator it is named for");
+            "an arm in BuilderVerifiedArms is served, so it must compute the indicator it is named for. "
+            + $"Where each one parts company: {Describe(divergence, servedAndWrong)}");
 
-        disagreed.Except(ArmsDisagreeingWithTheirBoundCall).Should().BeEmpty(
-            "an arm that has started computing something other than its batch indicator joins the list, and is "
-            + "a blocker for ever verifying it");
+        unexpected.Should().BeEmpty(
+            "an arm that has started disagreeing with its bound call is a blocker for ever verifying it. "
+            + $"Where each one parts company: {Describe(divergence, unexpected)}");
         ArmsDisagreeingWithTheirBoundCall.Except(disagreed).Should().BeEmpty(
             "an arm repaired to compute its batch indicator leaves the list, so the list shrinks visibly");
 
