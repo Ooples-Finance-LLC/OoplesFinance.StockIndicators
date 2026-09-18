@@ -191,35 +191,12 @@ internal sealed class SeriesEvaluator
     /// </summary>
     private static string? ResolveOutputKey(IndicatorSpec spec)
     {
-        // A named key wins, and is read before the Primary branch on purpose: a spec built from a key
-        // carries Output = Primary, so checking the slot first would return null and silently discard the
-        // key - answering with the indicator's own value instead of the output that was asked for. The key
-        // is not validated here; the indicator's published outputs are the authority on what it publishes,
-        // and GeneratedIndicatorOutputs.KeysFor knows only the six slots. See issue #201.
-        if (spec.OutputKey is not null)
-        {
-            return spec.OutputKey;
-        }
-
-        if (spec.Output == IndicatorOutput.Primary)
-        {
-            return null;
-        }
-
-        // Go through the registry, not straight to the generated map: the registry consults explicit
-        // registrations first, which is how an indicator whose key does not resemble its slot name is
-        // pinned - DonchianChannels publishes UpperChannel for the UpperBand slot.
-        var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
-        if (key is not null)
-        {
-            return key;
-        }
-
-        var available = GeneratedIndicatorOutputs.KeysFor(spec.Name);
-        var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
-
-        throw new CalculationException(
-            $"{spec.Name} does not publish a {spec.Output} output. Available outputs: {availableText}.");
+        // The key the caller named, or null for the indicator's own series. There is nothing to resolve any
+        // more: a spec either names a published output or it wants the single series, and the indicator's own
+        // published outputs are the authority on which keys exist. The six-slot map that used to sit here
+        // could not name every output and answered some of them wrongly - UpperBand returning a lower
+        // channel - which is what issue #219 removed.
+        return spec.OutputKey;
     }
 
     /// <summary>
@@ -422,149 +399,8 @@ internal sealed class SeriesEvaluator
                 $"{spec.Name} does not publish an output named '{spec.OutputKey}'. Available outputs: {published}.");
         }
 
-        var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
-        if (key is not null && result.OutputValues.TryGetValue(key, out var list))
-        {
-            return list.ToArray();
-        }
-
-        // Only the primary slot may fall back to CustomValuesList - that is where an indicator with a
-        // single output publishes it. Any other slot resolving to nothing means the caller asked for a
-        // series this indicator does not produce, and answering with the primary series would be a
-        // wrong number rather than an error.
-        if (spec.Output != IndicatorOutput.Primary)
-        {
-            var available = GeneratedIndicatorOutputs.KeysFor(spec.Name);
-            var availableText = available.Count == 0 ? "none" : string.Join(", ", available);
-
-            throw new CalculationException(
-                $"{spec.Name} does not publish a {spec.Output} output. Available outputs: {availableText}.");
-        }
-
+        // A spec that names no key wants the indicator's own series, which is where a single-output
+        // indicator publishes it.
         return result.CustomValuesList.ToArray();
-    }
-}
-
-/// <summary>
-/// Extensible registry for indicator output key mappings.
-/// </summary>
-public static class IndicatorOutputRegistry
-{
-    private static readonly Dictionary<(IndicatorName, IndicatorOutput), string> OutputKeyMap = new()
-    {
-        // MACD outputs
-        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Signal), "Signal" },
-        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Histogram), "Histogram" },
-
-        // Bollinger Bands outputs
-        { (IndicatorName.BollingerBands, IndicatorOutput.UpperBand), "UpperBand" },
-        { (IndicatorName.BollingerBands, IndicatorOutput.MiddleBand), "MiddleBand" },
-        { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
-
-        // Stochastic outputs (K/D lines). The D line is "FastD": the indicator publishes FastK, FastD and
-        // SlowD, and nothing anywhere publishes "SignalFastK". The wrong pin looked harmless because
-        // BuilderArmBinding answered an unpublished key with the series the indicator does publish, so the D
-        // handle quietly returned the K line - two handles over one series. That fallback raises now, which
-        // is what turns this pin from a wrong number into a failure, and why it is corrected here.
-        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "FastD" },
-
-        // ADX outputs (DI+, DI-, ADX)
-        { (IndicatorName.AverageDirectionalIndex, IndicatorOutput.Signal), "Adx" },
-
-        // Aroon outputs
-        { (IndicatorName.AroonOscillator, IndicatorOutput.UpperBand), "AroonUp" },
-        { (IndicatorName.AroonOscillator, IndicatorOutput.LowerBand), "AroonDown" },
-
-        // CCI outputs
-        { (IndicatorName.CommodityChannelIndex, IndicatorOutput.Primary), "Cci" },
-
-        // Williams %R outputs
-        { (IndicatorName.WilliamsR, IndicatorOutput.Primary), "WilliamsR" },
-
-        // Donchian Channels outputs
-        { (IndicatorName.DonchianChannels, IndicatorOutput.UpperBand), "UpperChannel" },
-        { (IndicatorName.DonchianChannels, IndicatorOutput.MiddleBand), "MiddleChannel" },
-        { (IndicatorName.DonchianChannels, IndicatorOutput.LowerBand), "LowerChannel" },
-
-        // Keltner Channels outputs
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.UpperBand), "UpperBand" },
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.MiddleBand), "MiddleBand" },
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.LowerBand), "LowerBand" },
-
-        // Ichimoku Cloud outputs
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.Primary), "TenkanSen" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.Signal), "KijunSen" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.UpperBand), "SenkouSpanA" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.LowerBand), "SenkouSpanB" },
-    };
-
-    private static readonly object RegistryLock = new();
-
-    /// <summary>
-    /// Gets the output key for an indicator and output type.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <returns>The output key string, or null if using default output.</returns>
-    public static string? GetOutputKey(IndicatorName name, IndicatorOutput output)
-    {
-        // Primary output typically uses CustomValuesList, not OutputValues
-        if (output == IndicatorOutput.Primary)
-        {
-            // Check if there's a specific mapping for this indicator's primary output
-            lock (RegistryLock)
-            {
-                if (OutputKeyMap.TryGetValue((name, output), out var key))
-                {
-                    return key;
-                }
-            }
-            return GeneratedIndicatorOutputs.TryGetKey(name, output, out var generatedPrimary)
-                ? generatedPrimary
-                : null;
-        }
-
-        lock (RegistryLock)
-        {
-            if (OutputKeyMap.TryGetValue((name, output), out var key))
-            {
-                return key;
-            }
-        }
-
-        // No guessing. This used to turn IndicatorOutput.Signal into the literal string "Signal" for
-        // every indicator, and callers then quietly substituted the primary series when that key did
-        // not exist - so Alligator, Gator, Aroon, Elder Ray and Trix each returned the same series for
-        // every band. The generated map below is read out of the SetOutputValues calls themselves, so a
-        // slot either has a key the indicator genuinely publishes or it has none.
-        return GeneratedIndicatorOutputs.TryGetKey(name, output, out var generated) ? generated : null;
-    }
-
-    /// <summary>
-    /// Registers a custom output key mapping.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <param name="key">The output key string.</param>
-    public static void Register(IndicatorName name, IndicatorOutput output, string key)
-    {
-        lock (RegistryLock)
-        {
-            OutputKeyMap[(name, output)] = key;
-        }
-    }
-
-    /// <summary>
-    /// Checks if an output key mapping exists.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <returns>True if a mapping exists.</returns>
-    public static bool HasMapping(IndicatorName name, IndicatorOutput output)
-    {
-        lock (RegistryLock)
-        {
-            return OutputKeyMap.ContainsKey((name, output));
-        }
     }
 }

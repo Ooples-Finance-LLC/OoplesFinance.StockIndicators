@@ -11,40 +11,32 @@ using System.Text;
 namespace OoplesFinance.StockIndicators.SourceGeneration;
 
 /// <summary>
-/// Emits the mapping from an indicator's <c>IndicatorOutput</c> slot to the output key it actually
-/// publishes, read out of the calculations themselves.
+/// Emits every output key an indicator publishes, in publication order, read out of the calculations
+/// themselves.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The map this replaces was written by hand and covered about twenty-five of seven hundred indicators.
-/// Everything else fell through to a guess - <c>IndicatorOutput.Signal</c> became the literal string
+/// Everything else fell through to a guess - a request for a signal line became the literal string
 /// "Signal" - and when that key did not exist the caller silently returned the primary series instead.
 /// So a result with three distinct bands handed back the same band three times, with nothing to
 /// indicate anything had gone wrong. Alligator, Gator, Aroon, Elder Ray and Trix all behaved that way.
 /// </para>
 /// <para>
-/// Reading the keys from the <c>SetOutputValues</c> calls removes the guess. A slot either has a key
-/// this indicator genuinely publishes, or it has none and the caller is told so.
+/// Reading the keys from the <c>SetOutputValues</c> calls removes the guess: an indicator publishes a
+/// key or it does not, and a caller naming one it does not publish is told so.
+/// </para>
+/// <para>
+/// This used to assign those keys to the six members of an <c>IndicatorOutput</c> enum by position, and
+/// stopped once they ran out. An indicator publishing more than six keys had the rest unaddressable -
+/// CamarillaPivotPoints publishes seventeen - and the slot names stopped describing the series well
+/// before that ceiling, so <c>UpperBand</c> could answer with a lower channel line. Every published key
+/// is now emitted under its own name and the enum is gone. See issue #219.
 /// </para>
 /// </remarks>
 [Generator]
 public class IndicatorOutputMapGenerator : IIncrementalGenerator
 {
-    /// <summary>
-    /// Slots whose name is itself meaningful: when an indicator publishes a key of the same name, that
-    /// is what the slot refers to. Remaining keys fill the remaining slots in the order they are
-    /// published.
-    /// </summary>
-    private static readonly string[] NamedSlots =
-    {
-        "Signal", "Histogram", "UpperBand", "MiddleBand", "LowerBand"
-    };
-
-    private static readonly string[] SlotOrder =
-    {
-        "Primary", "Signal", "Histogram", "UpperBand", "MiddleBand", "LowerBand"
-    };
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var indicators = context.SyntaxProvider
@@ -208,17 +200,17 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
         sb.AppendLine("namespace OoplesFinance.StockIndicators.Builder;");
         sb.AppendLine();
         sb.AppendLine("/// <summary>");
-        sb.AppendLine("/// Which output key each indicator publishes for each output slot, read from the");
-        sb.AppendLine("/// SetOutputValues calls in the calculations themselves.");
+        sb.AppendLine("/// Every output key each indicator publishes, read from the SetOutputValues calls in the");
+        sb.AppendLine("/// calculations themselves.");
         sb.AppendLine("/// </summary>");
         sb.AppendLine("/// <remarks>");
-        sb.AppendLine("/// A slot that is absent here is one the indicator does not publish. Callers must treat that");
+        sb.AppendLine("/// A key that is absent here is one the indicator does not publish. Callers must treat that");
         sb.AppendLine("/// as an error rather than substituting the primary series - doing so is what made");
         sb.AppendLine("/// Alligator, Gator, Aroon, Elder Ray and Trix hand back the same series for every band.");
         sb.AppendLine("/// </remarks>");
         sb.AppendLine("public static class GeneratedIndicatorOutputs");
         sb.AppendLine("{");
-        sb.AppendLine("    private static readonly Dictionary<(IndicatorName, IndicatorOutput), string> Map = new()");
+        sb.AppendLine("    private static readonly Dictionary<IndicatorName, string[]> Map = new()");
         sb.AppendLine("    {");
 
         var pairs = 0;
@@ -226,71 +218,32 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
         {
             var indicator = kvp.Key;
             var keys = kvp.Value;
-            var assigned = new Dictionary<string, string>(StringComparer.Ordinal);
-            var remaining = new List<string>(keys);
-
-            // A key that names a slot claims that slot.
-            foreach (var slot in NamedSlots)
-            {
-                var match = remaining.FirstOrDefault(k => string.Equals(k, slot, StringComparison.Ordinal));
-                if (match is not null)
-                {
-                    assigned[slot] = match;
-                    remaining.Remove(match);
-                }
-            }
-
-            // Everything else fills the slots still free, in publication order.
-            foreach (var key in remaining)
-            {
-                var slot = SlotOrder.FirstOrDefault(s => !assigned.ContainsKey(s));
-                if (slot is null)
-                {
-                    break;
-                }
-
-                assigned[slot] = key;
-            }
-
-            if (assigned.Count == 0)
+            if (keys.Count == 0)
             {
                 continue;
             }
 
-            sb.AppendLine($"        // {indicator}: publishes {string.Join(", ", keys)}");
-            foreach (var slot in SlotOrder)
-            {
-                if (assigned.TryGetValue(slot, out var key))
-                {
-                    sb.AppendLine($"        {{ (IndicatorName.{indicator}, IndicatorOutput.{slot}), \"{key}\" }},");
-                    pairs++;
-                }
-            }
+            // Every key the indicator publishes, in publication order. This used to be squeezed into six
+            // positional slots: a key matching a slot name claimed it, the rest filled whatever was free, and
+            // anything past the sixth was dropped. That is what made IndicatorOutput.UpperBand answer with
+            // Ch-2 - a lower channel - for TimeAndMoneyChannel, and what left 11 of CamarillaPivotPoints' 17
+            // keys unreachable at any slot. Naming them removes the ceiling rather than raising it. See #219.
+            sb.AppendLine($"        {{ IndicatorName.{indicator}, new[] {{ {string.Join(", ", keys.Select(k => $"\"{k}\""))} }} }},");
+            pairs += keys.Count;
         }
 
         sb.AppendLine("    };");
         sb.AppendLine();
-        sb.AppendLine($"    /// <summary>Number of indicator and slot pairs known from the source: {pairs}.</summary>");
+        sb.AppendLine($"    /// <summary>Number of published output keys known from the source: {pairs}.</summary>");
         sb.AppendLine($"    public static int Count => {pairs};");
         sb.AppendLine();
-        sb.AppendLine("    /// <summary>Gets the key this indicator publishes for this slot, if it publishes one.</summary>");
-        sb.AppendLine("    public static bool TryGetKey(IndicatorName name, IndicatorOutput output, out string key) =>");
-        sb.AppendLine("        Map.TryGetValue((name, output), out key!);");
+        sb.AppendLine("    /// <summary>Whether this indicator publishes an output under this name.</summary>");
+        sb.AppendLine("    public static bool Publishes(IndicatorName name, string outputKey) =>");
+        sb.AppendLine("        Map.TryGetValue(name, out var keys) && System.Array.IndexOf(keys, outputKey) >= 0;");
         sb.AppendLine();
-        sb.AppendLine("    /// <summary>Gets every slot this indicator publishes, for diagnostics.</summary>");
-        sb.AppendLine("    public static IReadOnlyList<string> KeysFor(IndicatorName name)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        var found = new List<string>();");
-        sb.AppendLine("        foreach (var entry in Map)");
-        sb.AppendLine("        {");
-        sb.AppendLine("            if (entry.Key.Item1 == name)");
-        sb.AppendLine("            {");
-        sb.AppendLine("                found.Add(entry.Value);");
-        sb.AppendLine("            }");
-        sb.AppendLine("        }");
-        sb.AppendLine();
-        sb.AppendLine("        return found;");
-        sb.AppendLine("    }");
+        sb.AppendLine("    /// <summary>Every output this indicator publishes, in publication order.</summary>");
+        sb.AppendLine("    public static IReadOnlyList<string> KeysFor(IndicatorName name) =>");
+        sb.AppendLine("        Map.TryGetValue(name, out var keys) ? keys : System.Array.Empty<string>();");
         sb.AppendLine("}");
 
         context.AddSource("GeneratedIndicatorOutputs.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));

@@ -43,7 +43,7 @@ public sealed class BuilderStreamingArmTests : GlobalTestData
                     break;
                 }
 
-                var spec = new IndicatorSpec(target.Name, options, IndicatorOutput.Primary);
+                var spec = new IndicatorSpec(target.Name, options);
                 IStreamingIndicatorState state;
                 try
                 {

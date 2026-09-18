@@ -81,7 +81,7 @@ internal static partial class StatefulIndicatorFactory
             UltimateOscillatorSpecOptions uo => new UltimateOscillatorState(length1: uo.Length1, length2: uo.Length2, length3: uo.Length3),
 
             // MACD variants
-            MacdSpecOptions macd => CreateMacdState(spec.Output, macd),
+            MacdSpecOptions macd => CreateMacdState(macd),
             MacdLineSpecOptions macdl => new MovingAverageConvergenceDivergenceState(macdl.FastLength, macdl.SlowLength),
             MacdSignalSpecOptions macds => new MovingAverageConvergenceDivergenceState(macds.FastLength, macds.SlowLength, macds.SignalLength),
             MacdHistogramSpecOptions macdh => new MovingAverageConvergenceDivergenceState(macdh.FastLength, macdh.SlowLength, macdh.SignalLength),
@@ -214,7 +214,7 @@ internal static partial class StatefulIndicatorFactory
     /// <summary>
     /// Creates MACD state with appropriate output selection.
     /// </summary>
-    private static IStreamingIndicatorState CreateMacdState(IndicatorOutput output, MacdSpecOptions macd)
+    private static IStreamingIndicatorState CreateMacdState(MacdSpecOptions macd)
     {
         // MACD state handles all outputs internally - just return the base state
         return new MovingAverageConvergenceDivergenceState(macd.FastLength, macd.SlowLength, macd.SignalLength);

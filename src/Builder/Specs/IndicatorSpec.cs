@@ -19,22 +19,21 @@ public sealed class IndicatorSpec
     /// Creates a new indicator specification.
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown when options is null.</exception>
-    public IndicatorSpec(IndicatorName name, IIndicatorSpecOptions options, IndicatorOutput output)
+    public IndicatorSpec(IndicatorName name, IIndicatorSpecOptions options)
     {
         if (options is null) throw new ArgumentNullException(nameof(options));
         Name = name;
         Options = options;
-        Output = output;
     }
 
     /// <summary>
-    /// Creates a specification that continues from a published output named directly, rather than from one
-    /// of the six <see cref="IndicatorOutput"/> slots.
+    /// Creates a specification that continues from a published output, named directly.
     /// </summary>
     /// <remarks>
-    /// The slots cannot name every output. They are assigned positionally and run out, so 14 indicators
-    /// publish keys that no slot can address - CamarillaPivotPoints publishes 17 and 11 of them are
-    /// unreachable. Naming the key removes that ceiling rather than raising it. See issue #201.
+    /// This used to sit beside a constructor taking one of six <c>IndicatorOutput</c> slots. The slots were
+    /// assigned positionally and ran out, so 14 indicators published keys no slot could address -
+    /// CamarillaPivotPoints publishes 17, of which 11 were unreachable - and the fill inverted band meanings
+    /// where it did reach, answering UpperBand with a lower channel. See issues #201 and #219.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when options is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the output key is blank.</exception>
@@ -49,10 +48,6 @@ public sealed class IndicatorSpec
         Name = name;
         Options = options;
         OutputKey = outputKey;
-
-        // The slot is unused once a key is named, and Primary is the one value that cannot be mistaken for
-        // a request: it means "the indicator's own value" everywhere else in the resolver.
-        Output = IndicatorOutput.Primary;
     }
 
     /// <summary>
@@ -66,16 +61,11 @@ public sealed class IndicatorSpec
     public IIndicatorSpecOptions Options { get; }
 
     /// <summary>
-    /// Gets the output type.
-    /// </summary>
-    public IndicatorOutput Output { get; }
-
-    /// <summary>
-    /// Gets the published output key this spec continues from, or null when it uses a slot.
+    /// Gets the published output this spec continues from, or null for the indicator's own series.
     /// </summary>
     /// <remarks>
-    /// When set, this wins over <see cref="Output"/>: the resolver reads the key straight out of the
-    /// indicator's published outputs instead of going through the six-slot map.
+    /// The resolver reads this key straight out of the indicator's published outputs. A key it does not
+    /// publish is refused rather than answered with a different series.
     /// </remarks>
     public string? OutputKey { get; }
 }
@@ -90,7 +80,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Sma(int length)
     {
-        return new IndicatorSpec(IndicatorName.SimpleMovingAverage, new SmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.SimpleMovingAverage, new SmaSpecOptions(length));
     }
 
     /// <summary>
@@ -98,7 +88,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Ema(int length)
     {
-        return new IndicatorSpec(IndicatorName.ExponentialMovingAverage, new EmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.ExponentialMovingAverage, new EmaSpecOptions(length));
     }
 
     /// <summary>
@@ -106,24 +96,24 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Rsi(int length)
     {
-        return new IndicatorSpec(IndicatorName.RelativeStrengthIndex, new RsiSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.RelativeStrengthIndex, new RsiSpecOptions(length));
     }
 
     /// <summary>
     /// Creates a MACD specification.
     /// </summary>
-    public static IndicatorSpec Macd(int fastLength, int slowLength, int signalLength, IndicatorOutput output)
+    public static IndicatorSpec Macd(int fastLength, int slowLength, int signalLength, string outputKey)
     {
         return new IndicatorSpec(IndicatorName.MovingAverageConvergenceDivergence,
-            new MacdSpecOptions(fastLength, slowLength, signalLength), output);
+            new MacdSpecOptions(fastLength, slowLength, signalLength), outputKey);
     }
 
     /// <summary>
     /// Creates a Bollinger Bands specification.
     /// </summary>
-    public static IndicatorSpec BollingerBands(int length, double stdDevMult, IndicatorOutput output)
+    public static IndicatorSpec BollingerBands(int length, double stdDevMult, string outputKey)
     {
-        return new IndicatorSpec(IndicatorName.BollingerBands, new BollingerBandsSpecOptions(length, stdDevMult), output);
+        return new IndicatorSpec(IndicatorName.BollingerBands, new BollingerBandsSpecOptions(length, stdDevMult), outputKey);
     }
 
     /// <summary>
@@ -131,15 +121,15 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Atr(int length)
     {
-        return new IndicatorSpec(IndicatorName.AverageTrueRange, new AtrSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.AverageTrueRange, new AtrSpecOptions(length));
     }
 
     /// <summary>
     /// Creates a Stochastic specification.
     /// </summary>
-    public static IndicatorSpec Stochastic(int kLength, int dLength, IndicatorOutput output)
+    public static IndicatorSpec Stochastic(int kLength, int dLength, string outputKey)
     {
-        return new IndicatorSpec(IndicatorName.StochasticOscillator, new StochasticSpecOptions(kLength, dLength), output);
+        return new IndicatorSpec(IndicatorName.StochasticOscillator, new StochasticSpecOptions(kLength, dLength), outputKey);
     }
 
     /// <summary>
@@ -147,7 +137,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Adx(int length)
     {
-        return new IndicatorSpec(IndicatorName.AverageDirectionalIndex, new AdxSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.AverageDirectionalIndex, new AdxSpecOptions(length));
     }
 
     /// <summary>
@@ -155,7 +145,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Wma(int length)
     {
-        return new IndicatorSpec(IndicatorName.WeightedMovingAverage, new WmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.WeightedMovingAverage, new WmaSpecOptions(length));
     }
 
     /// <summary>
@@ -163,7 +153,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Dema(int length)
     {
-        return new IndicatorSpec(IndicatorName.DoubleExponentialMovingAverage, new DemaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.DoubleExponentialMovingAverage, new DemaSpecOptions(length));
     }
 
     /// <summary>
@@ -171,7 +161,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Tema(int length)
     {
-        return new IndicatorSpec(IndicatorName.TripleExponentialMovingAverage, new TemaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.TripleExponentialMovingAverage, new TemaSpecOptions(length));
     }
 
     /// <summary>
@@ -179,7 +169,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Hma(int length)
     {
-        return new IndicatorSpec(IndicatorName.HullMovingAverage, new HmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.HullMovingAverage, new HmaSpecOptions(length));
     }
 
     /// <summary>
@@ -187,7 +177,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Tma(int length)
     {
-        return new IndicatorSpec(IndicatorName.TriangularMovingAverage, new TmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.TriangularMovingAverage, new TmaSpecOptions(length));
     }
 
     /// <summary>
@@ -195,7 +185,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Wwma(int length)
     {
-        return new IndicatorSpec(IndicatorName.WellesWilderMovingAverage, new WwmaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.WellesWilderMovingAverage, new WwmaSpecOptions(length));
     }
 
     /// <summary>
@@ -203,7 +193,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec LinReg(int length)
     {
-        return new IndicatorSpec(IndicatorName.LinearRegression, new LinRegSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.LinearRegression, new LinRegSpecOptions(length));
     }
 
     /// <summary>
@@ -211,7 +201,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Kama(int length)
     {
-        return new IndicatorSpec(IndicatorName.KaufmanAdaptiveMovingAverage, new KamaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.KaufmanAdaptiveMovingAverage, new KamaSpecOptions(length));
     }
 
     /// <summary>
@@ -219,7 +209,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Zlema(int length)
     {
-        return new IndicatorSpec(IndicatorName.ZeroLagExponentialMovingAverage, new ZlemaSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.ZeroLagExponentialMovingAverage, new ZlemaSpecOptions(length));
     }
 
     /// <summary>
@@ -227,7 +217,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Roc(int length)
     {
-        return new IndicatorSpec(IndicatorName.RateOfChange, new RocSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.RateOfChange, new RocSpecOptions(length));
     }
 
     /// <summary>
@@ -235,7 +225,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Momentum(int length)
     {
-        return new IndicatorSpec(IndicatorName.MomentumOscillator, new MomentumSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.MomentumOscillator, new MomentumSpecOptions(length));
     }
 
     /// <summary>
@@ -243,7 +233,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec WilliamsR(int length)
     {
-        return new IndicatorSpec(IndicatorName.WilliamsR, new WilliamsRSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.WilliamsR, new WilliamsRSpecOptions(length));
     }
 
     /// <summary>
@@ -251,7 +241,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Cci(int length)
     {
-        return new IndicatorSpec(IndicatorName.CommodityChannelIndex, new CciSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.CommodityChannelIndex, new CciSpecOptions(length));
     }
 
     /// <summary>
@@ -259,7 +249,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Cmo(int length)
     {
-        return new IndicatorSpec(IndicatorName.ChandeMomentumOscillator, new CmoSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.ChandeMomentumOscillator, new CmoSpecOptions(length));
     }
 
     /// <summary>
@@ -267,7 +257,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Ppo(int fastLength, int slowLength)
     {
-        return new IndicatorSpec(IndicatorName.PercentagePriceOscillator, new PpoSpecOptions(fastLength, slowLength), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.PercentagePriceOscillator, new PpoSpecOptions(fastLength, slowLength));
     }
 
     /// <summary>
@@ -275,7 +265,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Apo(int fastLength, int slowLength)
     {
-        return new IndicatorSpec(IndicatorName.AbsolutePriceOscillator, new ApoSpecOptions(fastLength, slowLength), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.AbsolutePriceOscillator, new ApoSpecOptions(fastLength, slowLength));
     }
 
     /// <summary>
@@ -283,7 +273,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec UltimateOscillator(int length1, int length2, int length3)
     {
-        return new IndicatorSpec(IndicatorName.UltimateOscillator, new UltimateOscillatorSpecOptions(length1, length2, length3), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.UltimateOscillator, new UltimateOscillatorSpecOptions(length1, length2, length3));
     }
 
     /// <summary>
@@ -291,7 +281,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Tsi(int longLength, int shortLength)
     {
-        return new IndicatorSpec(IndicatorName.TrueStrengthIndex, new TsiSpecOptions(longLength, shortLength), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.TrueStrengthIndex, new TsiSpecOptions(longLength, shortLength));
     }
 
     /// <summary>
@@ -299,15 +289,15 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec StochRsi(int rsiLength, int stochLength)
     {
-        return new IndicatorSpec(IndicatorName.StochasticRelativeStrengthIndex, new StochRsiSpecOptions(rsiLength, stochLength), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.StochasticRelativeStrengthIndex, new StochRsiSpecOptions(rsiLength, stochLength));
     }
 
     /// <summary>
     /// Creates an Aroon specification.
     /// </summary>
-    public static IndicatorSpec Aroon(int length, IndicatorOutput output)
+    public static IndicatorSpec Aroon(int length, string outputKey)
     {
-        return new IndicatorSpec(IndicatorName.AroonOscillator, new AroonSpecOptions(length), output);
+        return new IndicatorSpec(IndicatorName.AroonOscillator, new AroonSpecOptions(length), outputKey);
     }
 
     /// <summary>
@@ -315,7 +305,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Dpo(int length)
     {
-        return new IndicatorSpec(IndicatorName.DetrendedPriceOscillator, new DpoSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.DetrendedPriceOscillator, new DpoSpecOptions(length));
     }
 
     /// <summary>
@@ -323,7 +313,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Trix(int length)
     {
-        return new IndicatorSpec(IndicatorName.Trix, new TrixSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.Trix, new TrixSpecOptions(length));
     }
 
     /// <summary>
@@ -331,7 +321,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec MassIndex(int emaLength, int sumLength)
     {
-        return new IndicatorSpec(IndicatorName.MassIndex, new MassIndexSpecOptions(emaLength, sumLength), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.MassIndex, new MassIndexSpecOptions(emaLength, sumLength));
     }
 
     /// <summary>
@@ -339,7 +329,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Obv()
     {
-        return new IndicatorSpec(IndicatorName.OnBalanceVolume, new ObvSpecOptions(), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.OnBalanceVolume, new ObvSpecOptions());
     }
 
     /// <summary>
@@ -347,7 +337,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Adl()
     {
-        return new IndicatorSpec(IndicatorName.AccumulationDistributionLine, new AdlSpecOptions(), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.AccumulationDistributionLine, new AdlSpecOptions());
     }
 
     /// <summary>
@@ -355,7 +345,7 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec Cmf(int length)
     {
-        return new IndicatorSpec(IndicatorName.ChaikinMoneyFlow, new CmfSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.ChaikinMoneyFlow, new CmfSpecOptions(length));
     }
 
     /// <summary>
@@ -363,23 +353,20 @@ public static class IndicatorSpecs
     /// </summary>
     public static IndicatorSpec ForceIndex(int length)
     {
-        return new IndicatorSpec(IndicatorName.ForceIndex, new ForceIndexSpecOptions(length), IndicatorOutput.Primary);
+        return new IndicatorSpec(IndicatorName.ForceIndex, new ForceIndexSpecOptions(length));
     }
 
     /// <summary>
     /// Creates a generic indicator specification.
     /// </summary>
-    public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options, IndicatorOutput output = IndicatorOutput.Primary)
+    public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options)
     {
-        return new IndicatorSpec(name, options, output);
+        return new IndicatorSpec(name, options);
     }
 
     /// <summary>
     /// Creates a generic indicator specification that continues from a named published output.
     /// </summary>
-    /// <remarks>
-    /// For the outputs the six <see cref="IndicatorOutput"/> slots cannot address. See issue #201.
-    /// </remarks>
     public static IndicatorSpec Create(IndicatorName name, IIndicatorSpecOptions options, string outputKey)
     {
         return new IndicatorSpec(name, options, outputKey);
@@ -388,9 +375,9 @@ public static class IndicatorSpecs
     /// <summary>
     /// Creates a multi-stock indicator specification.
     /// </summary>
-    public static IndicatorSpec CreateMultiStock(IndicatorName name, MultiStockIndicatorOptions options, IndicatorOutput output = IndicatorOutput.Primary)
+    public static IndicatorSpec CreateMultiStock(IndicatorName name, MultiStockIndicatorOptions options)
     {
-        return new IndicatorSpec(name, options, output);
+        return new IndicatorSpec(name, options);
     }
 }
 

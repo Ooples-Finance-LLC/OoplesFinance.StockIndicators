@@ -35,7 +35,7 @@ internal static partial class IndicatorCompute
         // A typed arm is served only once BuilderArmTests has shown it computes its batch indicator. Every other
         // typed spec with a batch indicator is computed by that indicator; see BuilderArmBinding.
         var optionsType = spec.Options.GetType();
-        if (BuilderArmTargets.Targets.ContainsKey(optionsType) && !BuilderVerifiedArms.Arms.Contains((optionsType, spec.Output)))
+        if (BuilderArmTargets.Targets.ContainsKey(optionsType) && !BuilderVerifiedArms.Arms.Contains(optionsType))
         {
             return BuilderArmBinding.TryCompute(data, spec, context);
         }
@@ -50,26 +50,28 @@ internal static partial class IndicatorCompute
     {
         return spec.Options switch
         {
-            // Multi-output indicators with nested switch
-            MacdSpecOptions macd => spec.Output switch
+            // Multi-output indicators, dispatched on the key the caller named. A spec that names none wants the
+            // indicator's own series, which is the first key each of these publishes.
+            MacdSpecOptions macd => spec.OutputKey switch
             {
-                IndicatorOutput.Primary => ComputeMacdLineFast(data, context, macd.FastLength, macd.SlowLength),
-                IndicatorOutput.Signal => ComputeMacdSignalFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
-                IndicatorOutput.Histogram => ComputeMacdHistogramFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
+                null or "Macd" => ComputeMacdLineFast(data, context, macd.FastLength, macd.SlowLength),
+                "Signal" => ComputeMacdSignalFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
+                "Histogram" => ComputeMacdHistogramFast(data, context, macd.FastLength, macd.SlowLength, macd.SignalLength),
                 _ => null
             },
-            BollingerBandsSpecOptions bb => spec.Output switch
+            BollingerBandsSpecOptions bb => spec.OutputKey switch
             {
-                IndicatorOutput.UpperBand => ComputeBollingerUpperFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
-                IndicatorOutput.MiddleBand => ComputeBollingerMiddleFast(data, context, bb.Length, bb.MaType),
-                IndicatorOutput.LowerBand => ComputeBollingerLowerFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
-                IndicatorOutput.Primary => ComputeBollingerMiddleFast(data, context, bb.Length, bb.MaType), // Primary defaults to middle
+                "UpperBand" => ComputeBollingerUpperFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
+                // Bollinger publishes no single series of its own, so an unnamed request is the middle band -
+                // the same answer the slot path gave for Primary.
+                null or "MiddleBand" => ComputeBollingerMiddleFast(data, context, bb.Length, bb.MaType),
+                "LowerBand" => ComputeBollingerLowerFast(data, context, bb.Length, bb.StdDevMult, bb.MaType),
                 _ => null
             },
-            StochasticSpecOptions stoch => spec.Output switch
+            StochasticSpecOptions stoch => spec.OutputKey switch
             {
-                IndicatorOutput.Primary => ComputeStochasticKFast(data, context, stoch.KLength),
-                IndicatorOutput.Signal => ComputeStochasticDFast(data, context, stoch.KLength, stoch.DLength),
+                null or "FastK" => ComputeStochasticKFast(data, context, stoch.KLength),
+                "FastD" => ComputeStochasticDFast(data, context, stoch.KLength, stoch.DLength),
                 _ => null
             },
 
@@ -896,26 +898,24 @@ internal static partial class IndicatorCompute
             StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length, stfo.SmoothLength1),
 
             // Multi-output: KeltnerChannels
-            KeltnerChannelsSpecOptions kc => spec.Output switch
+            KeltnerChannelsSpecOptions kc => spec.OutputKey switch
             {
-                IndicatorOutput.Primary => ComputeKeltnerMiddleFast(data, context, kc.Length1),
-                IndicatorOutput.MiddleBand => ComputeKeltnerMiddleFast(data, context, kc.Length1),
+                null or "MiddleBand" => ComputeKeltnerMiddleFast(data, context, kc.Length1),
                 _ => null
             },
 
             // Multi-output: ElderRayIndex
-            ElderRayIndexSpecOptions eri => spec.Output switch
+            ElderRayIndexSpecOptions eri => spec.OutputKey switch
             {
-                IndicatorOutput.Primary => ComputeElderRayBullPowerFast(data, context, eri.Length),
+                null or "BullPower" => ComputeElderRayBullPowerFast(data, context, eri.Length),
                 _ => null
             },
 
             // Multi-output: ChandelierExit
-            ChandelierExitSpecOptions ce => spec.Output switch
+            ChandelierExitSpecOptions ce => spec.OutputKey switch
             {
-                IndicatorOutput.Primary => ComputeChandelierExitLongFast(data, context, ce.Length),
-                IndicatorOutput.UpperBand => ComputeChandelierExitLongFast(data, context, ce.Length),
-                IndicatorOutput.LowerBand => ComputeChandelierExitShortFast(data, context, ce.Length),
+                null or "ExitLong" => ComputeChandelierExitLongFast(data, context, ce.Length),
+                "ExitShort" => ComputeChandelierExitShortFast(data, context, ce.Length),
                 _ => null
             },
 

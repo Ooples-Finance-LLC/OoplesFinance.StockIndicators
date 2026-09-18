@@ -66,14 +66,17 @@ internal sealed class IndicatorNodeKey : IEquatable<IndicatorNodeKey>
         AppendText(builder, seriesKey.Symbol.ToString());
         AppendText(builder, seriesKey.Timeframe?.ToString());
         builder.Append(input.Id).Append('|')
-            .Append((int)spec.Name).Append('|')
-            .Append((int)spec.Output).Append('|');
+            .Append((int)spec.Name).Append('|');
 
         // The named output key is part of what a node computes, so it is part of the node's identity.
         // Without it, two specs differing only by key produce the same identity, share one node, and the
         // second silently returns the first's series - CamarillaPivotPoints.S3 handing back S1 with no
         // error. That is the collision this type exists to rule out. Length-prefixed for the reason
         // AppendText gives: a key is free-form text that could otherwise forge a field boundary. See #201.
+        //
+        // This used to carry an IndicatorOutput slot as well. The key replaced it rather than joining it:
+        // the slot could name at most six outputs and named some of them wrongly, so nothing is lost here
+        // that the key does not already say. See issue #219.
         AppendText(builder, spec.OutputKey);
         AppendText(builder, spec.Options.GetType().FullName);
 

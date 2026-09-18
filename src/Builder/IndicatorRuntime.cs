@@ -393,6 +393,18 @@ public sealed class IndicatorRuntime : IDisposable
                 continue;
             }
 
+            // A key this indicator does not publish would reach ExtractValue on every bar and answer NaN for
+            // ever - a wrong number rather than an error, which is the substitution #186 removed. The batch half
+            // already refuses it in BuilderArmBinding, and streaming quietly did not, so the same request was an
+            // exception through one engine and a dead series through the other. Raised by review on PR #230.
+            //
+            // Checked here rather than before CreateState on purpose: a spec with no streaming state never
+            // reaches ExtractValue at all, so refusing one earlier would fail requests that are not broken.
+            if (spec.OutputKey is { } outputKey && !GeneratedIndicatorOutputs.Publishes(spec.Name, outputKey))
+            {
+                throw BuilderArmBinding.DoesNotPublishKey(spec.Name, outputKey);
+            }
+
             _streamingSession.RegisterStatefulIndicator(key.Symbol.Value, key.Timeframe, state, update =>
             {
                 var value = StreamingIndicatorFactory.ExtractValue(update, spec);
