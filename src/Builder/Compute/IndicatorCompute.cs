@@ -3174,11 +3174,9 @@ internal static partial class IndicatorCompute
     {
         _ = length; // Average price doesn't use length
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        TrendCore.AveragePrice(open, high, low, close, buffer.WritableSpan);
+        TrendCore.AveragePrice(open, close, buffer.WritableSpan);
         return buffer;
     }
 
@@ -5452,11 +5450,13 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSupportAndResistanceOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
+        _ = length; // The indicator reads one bar plus the previous close, so there is no lookback to set.
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        OscillatorCore.SupportAndResistanceOscillator(high, low, close, buffer.WritableSpan, length);
+        OscillatorCore.SupportAndResistanceOscillator(open, high, low, close, buffer.WritableSpan);
         return buffer;
     }
 

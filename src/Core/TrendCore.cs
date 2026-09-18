@@ -739,16 +739,19 @@ internal static class TrendCore
     /// <summary>
     /// Computes Average Price.
     /// </summary>
-    internal static void AveragePrice(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    internal static void AveragePrice(ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output)
     {
         if (output.Length < close.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The mean of the open and the close, which is what CalculateAveragePrice and
+        // DerivedSeriesKind.AveragePrice both compute. This used to average all four prices, but that is a
+        // different series the library already has a name for: FullTypicalPrice, and DerivedSeriesKind.Ohlc4.
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+            output[i] = (open[i] + close[i]) / 2;
         }
     }
 

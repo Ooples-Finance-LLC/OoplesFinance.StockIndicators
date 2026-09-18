@@ -6986,7 +6986,14 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Support and Resistance Oscillator.
     /// </summary>
-    internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    /// <remarks>
+    /// The share of the bar's true range spent above the open and below the close, clamped to [0, 1]. There
+    /// is no lookback: the indicator reads one bar plus the previous close, which is why it takes no length.
+    /// This used to scale a 14-bar stochastic position onto -100..+100 - a different oscillator entirely,
+    /// and one neither <c>CalculateSupportAndResistanceOscillator</c> nor
+    /// <c>SupportAndResistanceOscillatorState</c> computes.
+    /// </remarks>
+    internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
         if (output.Length < close.Length)
         {
@@ -6995,32 +7002,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var highestHigh = high[i];
-                var lowestLow = low[i];
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (high[j] > highestHigh) highestHigh = high[j];
-                    if (low[j] < lowestLow) lowestLow = low[j];
-                }
-
-                var range = highestHigh - lowestLow;
-                if (range != 0)
-                {
-                    // Position relative to support/resistance levels
-                    var position = (close[i] - lowestLow) / range;
-                    output[i] = (position - 0.5) * 200; // -100 to +100
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
+            // The first bar has no previous close, so its true range is simply high - low.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            var trueRange = CalculationsHelper.CalculateTrueRange(high[i], low[i], prevClose);
+            output[i] = trueRange != 0
+                ? MathHelper.MinOrMax((high[i] - open[i] + (close[i] - low[i])) / (2 * trueRange), 1, 0)
+                : 0;
         }
     }
 

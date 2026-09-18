@@ -206,8 +206,8 @@ public sealed class BuilderArmTests : GlobalTestData
     /// <remarks>
     /// <para>
     /// Measured, not chosen. Driving <c>IndicatorCompute.ComputeArm</c> over every bound spec at two parameter
-    /// sets, these 594 option types return something other than <see cref="BuilderArmBinding"/> does for the
-    /// same spec, at one or both of those sets. A type is listed once however many of its parameter sets
+    /// sets, each option type named here returns something other than <see cref="BuilderArmBinding"/> does for
+    /// the same spec, at one or both of those sets. A type is listed once however many of its parameter sets
     /// disagree. That is close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229
     /// stopped serving them: the Builder computes those specs with their batch indicator, so callers get
     /// correct numbers today.
@@ -223,11 +223,12 @@ public sealed class BuilderArmTests : GlobalTestData
     /// verify; only the first means the arm implements the wrong maths.
     /// </para>
     /// <para>
-    /// Split that way the 594 are 543 whose every option maps to a real, non-obsolete parameter of the bound
-    /// indicator, and 51 carrying an <c>[Obsolete]</c> option the indicator has no parameter for. None has an
-    /// unmapped non-obsolete option; <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that.
-    /// 543 is an upper bound on "wrong maths" rather than a count of it: an arm can also disagree by ignoring
-    /// an option it was handed, which this partition cannot see from the outside.
+    /// An <c>[Obsolete]</c> option does not decide which of the two a given arm is, and reading the attribute
+    /// instead of the arm is how the first batch was mis-sorted. <c>AveragePriceSpecOptions.Length</c> is
+    /// obsolete and its arm did ignore it, yet the arm still disagreed, because it averaged all four prices
+    /// where the indicator averages the open and the close. Only the arm's own body says whether it reads the
+    /// option, so each one has to be opened. None has an unmapped non-obsolete option;
+    /// <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that.
     /// </para>
     /// <para>
     /// Every entry here is a repair, never a removal. A <c>Compute*Fast</c> arm is the zero-allocation batch
@@ -284,7 +285,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "AutonomousRecursiveMaSpecOptions",
         "AverageDirectionalIndexSpecOptions",
         "AverageMoneyFlowOscillatorSpecOptions",
-        "AveragePriceSpecOptions",
         "AverageTrueRangeChannelSpecOptions",
         "AverageTrueRangeSpecOptions",
         "AverageTrueRangeTrailingStopsSpecOptions",
@@ -711,8 +711,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "SortinoRatioSpecOptions",
         "SpearmanIndicatorSpecOptions",
         "SpecialKSpecOptions",
-        "Spencer15PointMovingAverageSpecOptions",
-        "Spencer21PointMovingAverageSpecOptions",
         "SquareRootWeightedMovingAverageSpecOptions",
         "SqueezeMomentumIndicatorSpecOptions",
         "StandardDevationSpecOptions",
@@ -738,7 +736,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "StrengthOfMovementSpecOptions",
         "SuperSmootherSpecOptions",
         "SuperTrendSpecOptions",
-        "SupportAndResistanceOscillatorSpecOptions",
         "SurfaceRoughnessEstimatorSpecOptions",
         "SvamaSpecOptions",
         "SwingIndexSpecOptions",
