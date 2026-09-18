@@ -105,7 +105,7 @@ internal static partial class IndicatorCompute
             DpoSpecOptions dpo => ComputeDpoFast(data, context, dpo.Length),
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.SumLength),
-            AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length),
+            AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
             AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length),
 
             // Volume
@@ -140,8 +140,8 @@ internal static partial class IndicatorCompute
             VhfSpecOptions vhf => ComputeVhfFast(data, context, vhf.Length),
 
             // Additional Oscillators
-            AwesomeOscillatorSpecOptions ao => ComputeAwesomeOscillatorFast(data, context, ao.Length),
-            AcceleratorOscillatorSpecOptions aco => ComputeAcceleratorOscillatorFast(data, context, aco.Length),
+            AwesomeOscillatorSpecOptions ao => ComputeAwesomeOscillatorFast(data, context, ao.Length, ao.MaType),
+            AcceleratorOscillatorSpecOptions aco => ComputeAcceleratorOscillatorFast(data, context, aco.Length, aco.MaType),
             StochasticKSpecOptions sk => ComputeStochasticKFast(data, context, sk.Length),
             FisherTransformSpecOptions ft => ComputeFisherTransformFast(data, context, ft.Length),
             ConnorsRsiSpecOptions crsi => ComputeConnorsRsiFast(data, context, crsi.Length),
@@ -180,7 +180,7 @@ internal static partial class IndicatorCompute
             PvoSpecOptions pvo => ComputePvoFast(data, context, pvo.Length),
 
             // Batch 3 - More Oscillators
-            CoppockCurveSpecOptions coppock => ComputeCoppockCurveFast(data, context, coppock.Length),
+            CoppockCurveSpecOptions coppock => ComputeCoppockCurveFast(data, context, coppock.Length, coppock.MaType),
             ChandeForecastOscillatorSpecOptions cfo => ComputeChandeForecastOscillatorFast(data, context, cfo.Length),
             BullPowerSpecOptions bp => ComputeBullPowerFast(data, context, bp.Length),
             BearPowerSpecOptions bear => ComputeBearPowerFast(data, context, bear.Length),
@@ -238,7 +238,7 @@ internal static partial class IndicatorCompute
             SmoothedRocSpecOptions sroc => ComputeSmoothedRocFast(data, context, sroc.Length),
             DerivativeOscillatorSpecOptions dro => ComputeDerivativeOscillatorFast(data, context, dro.Length),
             FractalChaosOscillatorSpecOptions fco => ComputeFractalChaosOscillatorFast(data, context, fco.Length),
-            DisparityIndexSpecOptions di => ComputeDisparityIndexFast(data, context, di.Length),
+            DisparityIndexSpecOptions di => ComputeDisparityIndexFast(data, context, di.Length, di.MaType),
             DynamicMomentumIndexSpecOptions dmi => ComputeDynamicMomentumIndexFast(data, context, dmi.Length),
 
             // Batch 4 - More MAs
@@ -826,7 +826,7 @@ internal static partial class IndicatorCompute
             JmaRsxCloneSpecOptions jrsx => ComputeJmaRsxCloneFast(data, context, jrsx.Length),
             RateOfChangeSpecOptions roc => ComputeRateOfChangeFast(data, context, roc.Length),
             WilliamsFractalsSpecOptions wf => ComputeWilliamsFractalsFast(data, context, wf.Length),
-            DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
+            DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length, dpo.MaType),
             PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength),
             SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
             SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength, sroc.SmoothLength),
@@ -858,7 +858,7 @@ internal static partial class IndicatorCompute
             AccumulationDistributionLineSpecOptions adl2 => ComputeAccumulationDistributionLineFast(data, context),
             AdaptiveExponentialMovingAverageSpecOptions aema => ComputeAdaptiveExponentialMovingAverageFast(data, context, aema.Length),
             AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length),
-            AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length),
+            AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length, atr2.MaType),
             ChandeMomentumOscillatorSpecOptions cmo2 => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length),
             EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Length),
             EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length),
@@ -1964,25 +1964,16 @@ internal static partial class IndicatorCompute
     /// Computes Average True Range using zero-allocation fast path.
     /// Uses VolatilityCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-
-        // Extract OHLC data into spans
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
-
-        var buffer = context.Rent(count);
-        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, length);
+        // CalculateAverageTrueRange smooths the true range with whichever average it was given, over the whole
+        // series and from the first bar. The core here builds its first reading from a simple mean of the
+        // opening window and blanks everything before it, which is a different average under the same name and
+        // published nothing at all until the lookback had arrived.
+        var trueRange = CalculationsHelper.GetTrueRangeList(data);
+        var buffer = context.Rent(trueRange.Count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(trueRange), buffer.WritableSpan);
 
         return buffer;
     }
@@ -2642,38 +2633,55 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Awesome Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAwesomeOscillatorFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAwesomeOscillatorFast(StockData data, ComputeContext context, int fastLength = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int slowLength = 34)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
+        // CalculateAwesomeOscillator is the gap between two averages of the median price, both of whichever
+        // type it was given. GetDerivedSeriesList is the same median the indicator reads, including the rule
+        // that follows the high and low around a chained close.
+        var median = CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hl2);
+        var count = median.Count;
+        var medianSpan = SpanCompat.AsReadOnlySpan(median);
+
+        using var fastBuffer = context.Rent(count);
+        using var slowBuffer = context.Rent(count);
+        var fast = fastBuffer.WritableSpan;
+        var slow = slowBuffer.WritableSpan;
+        MovingAverage(data, maType, fastLength, medianSpan, fast);
+        MovingAverage(data, maType, slowLength, medianSpan, slow);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
+            output[i] = fast[i] - slow[i];
         }
-        var buffer = context.Rent(count);
-        OscillatorCore.AwesomeOscillator(high, low, buffer.WritableSpan, length);
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Accelerator Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAcceleratorOscillatorFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAcceleratorOscillatorFast(StockData data, ComputeContext context, int fastLength = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int slowLength = 34, int smoothLength = 5)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
+        // CalculateAcceleratorOscillator is the awesome oscillator less an average of itself, so it is built
+        // from the awesome oscillator rather than from a second reading of the price.
+        using var awesome = ComputeAwesomeOscillatorFast(data, context, fastLength, maType, slowLength);
+        var count = awesome.Length;
+
+        using var smoothedBuffer = context.Rent(count);
+        var smoothed = smoothedBuffer.WritableSpan;
+        MovingAverage(data, maType, smoothLength, awesome.Span, smoothed);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
+            output[i] = awesome.Span[i] - smoothed[i];
         }
-        var buffer = context.Rent(count);
-        OscillatorCore.AcceleratorOscillator(high, low, buffer.WritableSpan, length);
+
         return buffer;
     }
 
@@ -2949,14 +2957,40 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Coppock Curve using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCoppockCurveFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCoppockCurveFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int fastLength = 11, int slowLength = 14)
     {
-        _ = length; // Coppock uses fixed parameters internally
+        // CalculateCoppockCurve averages the sum of two rates of change over length bars, with whichever
+        // average it was given. The length was discarded here as decoration on a curve with fixed parameters,
+        // when it is the only window the indicator smooths over.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.CoppockCurve(inputSpan, buffer.WritableSpan);
+
+        using var totalBuffer = context.Rent(count);
+        var total = totalBuffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            total[i] = RateOfChange(inputSpan, i, fastLength) + RateOfChange(inputSpan, i, slowLength);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, total, buffer.WritableSpan);
+
         return buffer;
+    }
+
+    /// <summary>
+    /// The rate of change at <paramref name="index"/> over <paramref name="length"/> bars, as
+    /// CalculateRateOfChange reports it.
+    /// </summary>
+    /// <remarks>
+    /// A bar that has not arrived reads as zero, and a zero there is no change rather than a division.
+    /// </remarks>
+    private static double RateOfChange(ReadOnlySpan<double> input, int index, int length)
+    {
+        var prevValue = index >= length ? input[index - length] : 0;
+        return prevValue != 0 ? (input[index] - prevValue) / prevValue * 100 : 0;
     }
 
     /// <summary>
@@ -3426,11 +3460,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Disparity Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDisparityIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DisparityIndex(close, buffer.WritableSpan, length);
+        // CalculateDisparityIndex measures the input series against an average of it, of whichever type it was
+        // given. This read the close rather than the input series as well, so a chained indicator measured a
+        // price the caller had already replaced.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var averageBuffer = context.Rent(count);
+        var average = averageBuffer.WritableSpan;
+        MovingAverage(data, maType, length, inputSpan, average);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = average[i] != 0 ? (inputSpan[i] - average[i]) / average[i] * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -8992,12 +9042,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Detrended Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDetrendedPriceOscillatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDetrendedPriceOscillatorFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateDetrendedPriceOscillator holds the price of half a window ago against an average of
+        // whichever type it was given, and reads a bar that has not arrived as zero rather than blanking.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DetrendedPriceOscillator(inputSpan, buffer.WritableSpan, length);
+        var lookback = MathHelper.MinOrMax((int)Math.Ceiling((length / 2.0) + 1));
+
+        using var averageBuffer = context.Rent(count);
+        var average = averageBuffer.WritableSpan;
+        MovingAverage(data, maType, length, inputSpan, average);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= lookback ? inputSpan[i - lookback] : 0;
+            output[i] = prevValue - average[i];
+        }
+
         return buffer;
     }
 
@@ -9381,22 +9447,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average True Range using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAverageTrueRangeFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageTrueRangeFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
-        var buffer = context.Rent(count);
-        VolatilityCore.AverageTrueRange(high, low, close, buffer.WritableSpan, length);
-        return buffer;
+        // Both specs name IndicatorName.AverageTrueRange, so there is one answer to give.
+        return ComputeAtrFast(data, context, length, maType);
     }
 
     /// <summary>

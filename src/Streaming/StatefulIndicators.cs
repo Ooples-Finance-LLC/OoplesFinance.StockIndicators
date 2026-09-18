@@ -7280,16 +7280,14 @@ public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposab
 public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 {
     private readonly RateOfChangeState _rocFast;
-    private readonly int _slowLength;
-    private readonly PooledRingBuffer<double> _rocFastWindow;
+    private readonly RateOfChangeState _rocSlow;
     private readonly IMovingAverageSmoother _smoother;
 
     public CoppockCurveState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10, int fastLength = 11,
         int slowLength = 14)
     {
         _rocFast = new RateOfChangeState(Math.Max(1, fastLength));
-        _slowLength = Math.Max(1, slowLength);
-        _rocFastWindow = new PooledRingBuffer<double>(_slowLength);
+        _rocSlow = new RateOfChangeState(Math.Max(1, slowLength));
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
 
@@ -7298,19 +7296,17 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
     public void Reset()
     {
         _rocFast.Reset();
-        _rocFastWindow.Clear();
+        _rocSlow.Reset();
         _smoother.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        // CalculateCoppockCurve sums two rates of change of the price. This took the slow one of the fast
+        // rate of change instead, because the batch indicator used to hand its second component the first
+        // one's output through the chained series.
         var rocFast = _rocFast.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevRocFast = _rocFastWindow.Count >= _slowLength ? _rocFastWindow[0] : 0;
-        var rocSlow = prevRocFast != 0 ? (rocFast - prevRocFast) / prevRocFast * 100 : 0;
-        if (isFinal)
-        {
-            _rocFastWindow.TryAdd(rocFast, out _);
-        }
+        var rocSlow = _rocSlow.Update(bar, isFinal, includeOutputs: false).Value;
         var rocTotal = rocFast + rocSlow;
         var coppock = _smoother.Next(rocTotal, isFinal);
 
@@ -7329,7 +7325,7 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
     public void Dispose()
     {
         _rocFast.Dispose();
-        _rocFastWindow.Dispose();
+        _rocSlow.Dispose();
         _smoother.Dispose();
     }
 }
