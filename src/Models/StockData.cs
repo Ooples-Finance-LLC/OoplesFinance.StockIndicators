@@ -1,4 +1,4 @@
-﻿//     Ooples Finance Stock Indicator Library
+//     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
 //     Copyright © Franklin Moormann, 2020-2022
@@ -41,6 +41,7 @@ public class StockData : IStockData
         }
         set => _inputValues = value ?? new List<double>();
     }
+
 
     public List<double> OpenPrices
     {
