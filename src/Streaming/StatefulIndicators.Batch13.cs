@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
@@ -504,8 +504,10 @@ public sealed class FibonacciWeightedMovingAverageState : IStreamingIndicatorSta
         double weightSum = 0;
         for (var j = 0; j < resolved; j++)
         {
+            // Binet's formula for the (resolved - j)th Fibonacci number. The alternating term is raised to
+            // that same index; keying it to j instead flipped its sign for every odd length.
             var pow = Math.Pow(phi, resolved - j);
-            var weight = (pow - (Math.Pow(-1, j) / pow)) / Math.Sqrt(5);
+            var weight = (pow - (Math.Pow(-1, resolved - j) / pow)) / Math.Sqrt(5);
             _weights[j] = weight;
             weightSum += weight;
         }

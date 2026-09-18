@@ -265,7 +265,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "AlligatorJawSpecOptions",
         "AlligatorLipsSpecOptions",
         "AlligatorTeethSpecOptions",
-        "AlmaSpecOptions",
         "AlphaDecreasingEmaSpecOptions",
         "AmaSpecOptions",
         "AnchoredMomentumSpecOptions",
@@ -337,12 +336,9 @@ public sealed class BuilderArmTests : GlobalTestData
         "ConstanceBrownCompositeIndexSpecOptions",
         "CoppockCurveSpecOptions",
         "CorrectedMovingAverageSpecOptions",
-        "CubedWeightedMovingAverageSpecOptions",
-        "CubicWmaSpecOptions",
         "DMIStochasticSpecOptions",
         "DTOscillatorSpecOptions",
         "DailyAveragePriceDeltaSpecOptions",
-        "DampedSineWaveWeightedFilterSpecOptions",
         "DampingIndexSpecOptions",
         "DeMarkerSpecOptions",
         "DecisionPointBreadthSwenlinTradingOscillatorSpecOptions",
@@ -464,7 +460,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "FearAndGreedIndicatorSpecOptions",
         "FibonacciPivotPointSpecOptions",
         "FibonacciRetraceSpecOptions",
-        "FibonacciWeightedMovingAverageSpecOptions",
         "FiniteVolumeElementsSpecOptions",
         "FireflyOscillatorSpecOptions",
         "FisherLeastSquaresMovingAverageSpecOptions",
@@ -651,7 +646,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "QuadraticLeastSquaresMovingAverageSpecOptions",
         "QuadraticMovingAverageSpecOptions",
         "QuadraticRegressionSpecOptions",
-        "QuadraticWmaSpecOptions",
         "QuadrupleExponentialMovingAverageSpecOptions",
         "QuickMovingAverageSpecOptions",
         "R2AdaptiveRegressionSpecOptions",
@@ -701,7 +695,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "SimpleLinesSpecOptions",
         "SimplifiedLeastSquaresMovingAverageSpecOptions",
         "SimplifiedWeightedMovingAverageSpecOptions",
-        "SineWmaSpecOptions",
         "SlowSmoothedMovingAverageSpecOptions",
         "SmmaSpecOptions",
         "SmoothedDeltaRatioOscillatorSpecOptions",
@@ -710,7 +703,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "SortinoRatioSpecOptions",
         "SpearmanIndicatorSpecOptions",
         "SpecialKSpecOptions",
-        "SquareRootWeightedMovingAverageSpecOptions",
         "SqueezeMomentumIndicatorSpecOptions",
         "StandardDevationSpecOptions",
         "StandardDeviationChannelSpecOptions",
@@ -901,6 +893,7 @@ public sealed class BuilderArmTests : GlobalTestData
         // reading two implementations side by side to find out why; the bar index and the two values say
         // which one to look at and from where, which is the difference between a list and a work queue.
         var divergence = new Dictionary<string, string>(StringComparer.Ordinal);
+        var stats = new Dictionary<string, string>(StringComparer.Ordinal);
         var compared = 0;
 
         foreach (var type in OptionTypes)
@@ -952,6 +945,23 @@ public sealed class BuilderArmTests : GlobalTestData
                     }
 
                     var bar = Enumerable.Range(0, arm.Length).FirstOrDefault(i => !IsClose(expected[i], arm[i]), -1);
+                    if (bar >= 0 && !stats.ContainsKey(type.Name))
+                    {
+                        var diffs = Enumerable.Range(0, arm.Length).Where(i => !IsClose(expected[i], arm[i])).ToList();
+                        var tailStart = Math.Min(60, arm.Length);
+                        double tailMax = 0;
+                        for (var i = tailStart; i < arm.Length; i++)
+                        {
+                            if (!IsClose(expected[i], arm[i]))
+                            {
+                                var denom = Math.Max(Math.Abs(expected[i]), Math.Abs(arm[i]));
+                                tailMax = Math.Max(tailMax, denom > 0 ? Math.Abs(expected[i] - arm[i]) / denom : 1);
+                            }
+                        }
+
+                        stats[type.Name] = $"{arm.Length}	{diffs.Count}	{diffs[0]}	{diffs[^1]}	{tailMax:R}";
+                    }
+
                     if (bar >= 0)
                     {
                         disagreed.Add(type.Name);
@@ -966,6 +976,22 @@ public sealed class BuilderArmTests : GlobalTestData
                     Record(divergence, type.Name, $"{label}: {inner.GetType().Name} {inner.Message}");
                 }
             }
+        }
+
+        // The assertion message can only carry the arms that changed, which is the right size for a
+        // failure but the wrong size for planning: with hundreds of arms still to repair, the question is
+        // which of them share a cause. Set ARM_DIVERGENCE_DUMP to a path and the whole set is written as
+        // tab-separated name, length, differing bars, first, last, worst relative difference from bar 60
+        // onwards, and the sentence above - enough to tell a run-in convention apart from different
+        // arithmetic without opening a single file. Unset, which is how CI runs, this does nothing.
+        var dumpPath = Environment.GetEnvironmentVariable("ARM_DIVERGENCE_DUMP");
+        if (!string.IsNullOrWhiteSpace(dumpPath))
+        {
+            File.WriteAllLines(dumpPath, disagreed.Select(name =>
+                string.Join("	",
+                    name,
+                    stats.TryGetValue(name, out var stat) ? stat : "			",
+                    divergence.TryGetValue(name, out var detail) ? detail : "no divergence captured")));
         }
 
         var servedAndWrong = disagreed.Where(name => BuilderVerifiedArms.Arms.Any(t => t.Name == name)).ToList();

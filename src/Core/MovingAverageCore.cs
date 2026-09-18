@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 using OoplesFinance.StockIndicators.Helpers;
@@ -715,16 +715,14 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what CalculateArnaudLegouxMovingAverage does, so the run-in is damped rather
+                // than blank. The weights above are already normalised, so no divisor appears here.
                 double alma = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    alma += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    alma += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = alma;
             }
@@ -895,16 +893,13 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what the batch indicator does, so the run-in is damped rather than blank.
                 double sum = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    sum += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    sum += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = sum / weightSum;
             }
@@ -943,16 +938,13 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what the batch indicator does, so the run-in is damped rather than blank.
                 double sum = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    sum += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    sum += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = sum / weightSum;
             }
@@ -1195,17 +1187,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = (j + 1) * (j + 1) * (j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1547,17 +1536,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = (j + 1) * (j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1584,17 +1570,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = length * length - (length - 1 - j) * (length - 1 - j);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1712,17 +1695,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = Math.Sqrt(j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -2693,11 +2673,13 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length && i >= j; j++)
+            for (var j = 0; j < length; j++)
             {
                 var weight = Math.Pow(length - j, 3);
-                sum += input[i - j] * weight;
+                sum += i >= j ? input[i - j] * weight : 0;
                 weightedSum += weight;
             }
             output[i] = weightedSum != 0 ? sum / weightedSum : 0;
@@ -2753,12 +2735,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double wSum = 0, wvSum = 0;
-            for (var j = 1; j <= length && i >= j - 1; j++)
+            for (var j = 1; j <= length; j++)
             {
                 var ratio = (double)j / length;
                 var w = Math.Sin(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ratio))) / j;
-                wvSum += w * input[i - (j - 1)];
+                wvSum += i >= j - 1 ? w * input[i - (j - 1)] : 0;
                 wSum += w;
             }
             output[i] = wSum != 0 ? wvSum / wSum : 0;
@@ -2821,11 +2805,13 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0, weightSum = 0;
-            for (var j = 0; j < length && i >= j; j++)
+            for (var j = 0; j < length; j++)
             {
                 var weight = fibs[length - 1 - j];
-                sum += input[i - j] * weight;
+                sum += i >= j ? input[i - j] * weight : 0;
                 weightSum += weight;
             }
             output[i] = weightSum != 0 ? sum / weightSum : 0;
