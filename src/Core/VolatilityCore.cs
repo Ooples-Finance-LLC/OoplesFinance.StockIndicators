@@ -884,8 +884,10 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // Both variances divide by length - 1, and so does k: a one-bar window has no reading.
+        length = Math.Max(2, length);
         var sqrtFactor = Math.Sqrt(252);
-        var k = 0.34 / (1 + (double)(length + 1) / (length - 1));
+        var k = 0.34 / (1.34 + (double)(length + 1) / (length - 1));
 
         for (var i = 0; i < close.Length; i++)
         {
@@ -1155,48 +1157,6 @@ internal static class VolatilityCore
                 sum += close[j];
             }
             output[i] = sum / length;
-        }
-    }
-
-    /// <summary>
-    /// Computes Standard Deviation Volatility (annualized).
-    /// </summary>
-    internal static void StandardDeviationVolatility(ReadOnlySpan<double> close, Span<double> output, int length = 20, int annualizationFactor = 252)
-    {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrtAnnualize = Math.Sqrt(annualizationFactor);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate returns
-            var returns = new double[length];
-            for (var j = 0; j < length; j++)
-            {
-                var idx = i - length + 1 + j;
-                returns[j] = idx > 0 && close[idx - 1] != 0 ? (close[idx] - close[idx - 1]) / close[idx - 1] : 0;
-            }
-
-            // Calculate mean
-            double mean = 0;
-            foreach (var r in returns) mean += r;
-            mean /= length;
-
-            // Calculate standard deviation of returns
-            double variance = 0;
-            foreach (var r in returns) variance += (r - mean) * (r - mean);
-            variance /= length;
-
-            output[i] = Math.Sqrt(variance) * sqrtAnnualize * 100;
         }
     }
 

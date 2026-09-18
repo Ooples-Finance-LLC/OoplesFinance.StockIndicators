@@ -36,42 +36,17 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static double ExtractValue(StreamingIndicatorStateUpdate update, IndicatorSpec spec)
     {
-        if (spec.Output == IndicatorOutput.Primary || spec.Output == IndicatorOutput.MiddleBand)
+        // A named key wins, and is read before the slot: a spec built from a key carries Output = Primary, so
+        // the branch below would answer with the state's own value and never look at the named outputs - the
+        // batch half of that same mistake is in BuilderArmBinding. See issue #219.
+        if (spec.OutputKey is { } named)
         {
-            return update.Value;
+            return update.Outputs is not null && update.Outputs.TryGetValue(named, out var namedValue)
+                ? namedValue
+                : double.NaN;
         }
 
-        if (update.Outputs == null)
-        {
-            return double.NaN;
-        }
-
-        var key = GetOutputKey(spec.Name, spec.Output);
-        return key != null && update.Outputs.TryGetValue(key, out var value) ? value : double.NaN;
-    }
-
-    private static string? GetOutputKey(IndicatorName name, IndicatorOutput output)
-    {
-        if (name == IndicatorName.MovingAverageConvergenceDivergence)
-        {
-            return output switch
-            {
-                IndicatorOutput.Signal => "Signal",
-                IndicatorOutput.Histogram => "Histogram",
-                _ => null
-            };
-        }
-
-        if (name == IndicatorName.BollingerBands)
-        {
-            return output switch
-            {
-                IndicatorOutput.UpperBand => "UpperBand",
-                IndicatorOutput.LowerBand => "LowerBand",
-                _ => "MiddleBand"
-            };
-        }
-
-        return null;
+        // A spec that names no key wants the state's own value.
+        return update.Value;
     }
 }

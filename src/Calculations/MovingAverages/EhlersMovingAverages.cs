@@ -579,10 +579,15 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="length"></param>
+    /// <param name="poles">
+    /// Which of Ehlers' one- to four-pole filters is the single series; all four are always published as Egf1 to
+    /// Egf4, and the four-pole filter stays the default.
+    /// </param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersGaussianFilter(this StockData stockData, int length = 14)
+    public static StockData CalculateEhlersGaussianFilter(this StockData stockData, int length = 14, int poles = 4)
     {
+        var resolvedPoles = Math.Min(Math.Max(poles, 1), 4);
         List<double> gf1List = new(stockData.Count);
         List<double> gf2List = new(stockData.Count);
         List<double> gf3List = new(stockData.Count);
@@ -629,7 +634,9 @@ public static partial class Calculations
                 (4 * Pow(1 - alpha4, 3) * prevGf4_3) - (Pow(1 - alpha4, 4) * prevGf4_4);
             gf4List.Add(gf4);
 
-            var signal = GetCompareSignal(currentValue - gf4, prevValue - prevGf4_1);
+            var gf = resolvedPoles switch { 1 => gf1, 2 => gf2, 3 => gf3, _ => gf4 };
+            var prevGf = resolvedPoles switch { 1 => prevGf1, 2 => prevGf2_1, 3 => prevGf3_1, _ => prevGf4_1 };
+            var signal = GetCompareSignal(currentValue - gf, prevValue - prevGf);
             signalsList?.Add(signal);
         }
 
@@ -640,7 +647,7 @@ public static partial class Calculations
             { "Egf4", gf4List }
         });
         stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gf4List);
+        stockData.SetCustomValues(resolvedPoles switch { 1 => gf1List, 2 => gf2List, 3 => gf3List, _ => gf4List });
         stockData.IndicatorName = IndicatorName.EhlersGaussianFilter;
 
         return stockData;
@@ -1325,7 +1332,7 @@ public static partial class Calculations
 
         var ssf2PoleList = GetMovingAverageList(stockData, maType, fastLength, avgZerosList);
         stockData.SetCustomValues(ssf2PoleList);
-        var ssf2PoleStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        var ssf2PoleStdDevList = GetStandardDeviationList(ssf2PoleList, slowLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -1454,11 +1461,8 @@ public static partial class Calculations
             var filtPowMa = filtPowSumWindow.Average(length2);
             var rms = filtPowMa > 0 ? Sqrt(filtPowMa) : 0;
             var scaledFilt = rms != 0 ? filt / rms : 0;
-            var a1 = Exp(-MathHelper.Sqrt2 * Math.PI * Math.Abs(scaledFilt) / length1);
-            var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI * Math.Abs(scaledFilt) / length1);
-            var c2 = b1;
-            var c3 = -a1 * a1;
-            var c1 = 1 - c2 - c3;
+
+            var (c1, c2, c3) = DeviationScaledSuperSmootherCoefficients(scaledFilt, length1);
 
             var dsss = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevDsss1) + (c3 * prevDsss2);
             dsssList.Add(dsss);
@@ -1475,6 +1479,38 @@ public static partial class Calculations
         stockData.IndicatorName = IndicatorName.EhlersDeviationScaledSuperSmoother;
 
         return stockData;
+    }
+
+    /// <summary>
+    /// The two-pole super smoother coefficients for a momentum already divided by its own RMS.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// scaledFilt is a momentum in units of its own RMS, so its natural magnitude is one. Zero is the
+    /// single value these coefficients cannot take: a1 becomes exp(0) = 1, so c2 = 2, c3 = -1 and
+    /// c1 = 1 - c2 - c3 = 0. That is a double integrator with both poles at z = 1 - it stops reading its
+    /// input altogether and carries whatever straight line it already held. On a market that never moved
+    /// the output drifted linearly and for ever, by 0.01286 per bar: 112.65 at bar 1000, 164.07 at 5000
+    /// and 356.90 at 20000, the same slope across both spans.
+    /// </para>
+    /// <para>
+    /// A flat market arrives at zero two ways - an all-zero window making rms zero, and a zero filt
+    /// against a still non-zero rms during warmup - so the floor belongs on the ratio rather than on rms.
+    /// With no deviation to scale by there is no adaptive information to act on, and a magnitude of one
+    /// is the neutral: it gives exactly the coefficients CalculateEhlersSuperSmootherFilter uses at this
+    /// length.
+    /// </para>
+    /// </remarks>
+    private static (double C1, double C2, double C3) DeviationScaledSuperSmootherCoefficients(double scaledFilt, int length1)
+    {
+        var scaledAbs = Math.Abs(scaledFilt);
+        scaledAbs = scaledAbs != 0 ? scaledAbs : 1;
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI * scaledAbs / length1);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI * scaledAbs / length1);
+        var c2 = b1;
+        var c3 = -a1 * a1;
+
+        return (1 - c2 - c3, c2, c3);
     }
 
     /// <summary>

@@ -12,6 +12,37 @@ High-precision technical indicators with a growing streaming and performance-foc
 ## Indicators
 See the full list in `INDICATORS.md`.
 
+## Writing your own indicator
+
+Derive from `IndicatorBase`, override `Calculate`, and chaining, branching and named outputs come
+with it:
+
+```csharp
+[Indicator("Range Bands")]
+public sealed class RangeBands : IndicatorBase
+{
+    protected override void Calculate()
+    {
+        var basis = MovingAverage(MovingAvgType.SimpleMovingAverage, 20);
+        var range = AverageTrueRange(20);
+
+        var upper = NewSeries();
+        for (var i = 0; i < Count; i++)
+        {
+            upper.Add(basis[i] + (range[i] * 2));
+        }
+
+        Publish("UpperBand", upper);
+        SetPrimary(basis);
+    }
+}
+
+var bands = new RangeBands().Run(data);
+var rsiOfUpper = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(14);
+```
+
+See [docs/creating-an-indicator.md](docs/creating-an-indicator.md) for the full guide.
+
 ## Quick start (batch)
 ```csharp
 using OoplesFinance.StockIndicators.Models;

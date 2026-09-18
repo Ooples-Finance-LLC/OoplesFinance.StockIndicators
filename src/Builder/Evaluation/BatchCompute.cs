@@ -18,7 +18,12 @@ internal static class BatchCompute
     /// <param name="data">The stock data to compute on.</param>
     /// <param name="state">The stateful indicator to use.</param>
     /// <returns>Array of indicator values for each bar.</returns>
-    public static double[] ComputeAll(StockData data, IStreamingIndicatorState state)
+    /// <param name="outputKey">
+    /// The named output to read, or null for the indicator's primary value. Passing null for an
+    /// indicator with several outputs is what made every band of a multi-output result come back as the
+    /// same series: the slot the caller asked for was simply not consulted.
+    /// </param>
+    public static double[] ComputeAll(StockData data, IStreamingIndicatorState state, string? outputKey = null)
     {
         var count = data.Count;
         var results = new double[count];
@@ -27,8 +32,28 @@ internal static class BatchCompute
         for (var i = 0; i < count; i++)
         {
             var bar = CreateBar(data, i);
-            var result = state.Update(bar, isFinal: true, includeOutputs: false);
-            results[i] = result.Value;
+            var result = state.Update(bar, isFinal: true, includeOutputs: outputKey is not null);
+
+            // Tested directly rather than through a flag, so the compiler narrows it: after this branch
+            // outputKey is known non-null, and the lookup below needs neither a null-forgiving operator
+            // nor a coalesce whose fallback could never run.
+            if (outputKey is null)
+            {
+                results[i] = result.Value;
+                continue;
+            }
+
+            if (result.Outputs is null || !result.Outputs.TryGetValue(outputKey, out var value))
+            {
+                var available = result.Outputs is null || result.Outputs.Count == 0
+                    ? "none"
+                    : string.Join(", ", result.Outputs.Keys);
+
+                throw new CalculationException(
+                    $"{state.Name} does not publish an output named '{outputKey}'. Available outputs: {available}.");
+            }
+
+            results[i] = value;
         }
 
         return results;
@@ -75,6 +100,70 @@ internal static class BatchCompute
             data.ClosePrices[index],
             data.Volumes[index],
             isFinal: true);
+    }
+
+    /// <summary>
+    /// Computes a chain of indicators in a single pass, without materialising the series between them.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A chained indicator is evaluated by resolving its input to a complete array and then walking that array
+    /// again: <c>SeriesEvaluator.ResolveIndicator</c> calls <c>Resolve</c> on the input node, which computes and
+    /// caches the whole upstream series, and <see cref="ComputeAllWithCustomInput"/> then loops over it. An
+    /// SMA feeding an EMA is therefore two traversals and one array that exists only to be read once.
+    /// </para>
+    /// <para>
+    /// This is the same computation with the array removed. Each bar goes through the chain in order - the
+    /// first state sees the real bar, and each state after it sees a bar whose close is the value the state
+    /// before produced, which is exactly what <see cref="ComputeAllWithCustomInput"/> constructs one bar at a
+    /// time. The states are the same objects, driven in the same order with the same <c>isFinal</c>, so the
+    /// values are identical rather than merely close; the tests hold them to that and not to a tolerance.
+    /// </para>
+    /// <para>
+    /// Only the last state's value is published, so this is only correct when nothing else needs the
+    /// intermediates. The caller decides that, not this method: see the fusion conditions in
+    /// <c>SeriesEvaluator</c>, which fuses only where an intermediate has a single consumer and is not itself
+    /// asked for. See issue #107.
+    /// </para>
+    /// </remarks>
+    /// <param name="data">The stock data to compute on.</param>
+    /// <param name="chain">The states in order, the first reading the bars and each next reading the previous.</param>
+    public static double[] ComputeAllChained(StockData data, IReadOnlyList<IStreamingIndicatorState> chain)
+    {
+        if (chain is null || chain.Count == 0)
+        {
+            throw new ArgumentException("A fused chain needs at least one state.", nameof(chain));
+        }
+
+        // The head is fed the series a fast arm would have read, not the bar's close. Those are the same list
+        // until a caller assigns or mutates StockData.InputValues, and StockData lets them do both - InputValues
+        // hands back the list itself, so a mutation never passes through a setter and nothing can record that it
+        // happened. Reading the same expression the arm reads makes the head's input identical by construction
+        // instead of by a check that a later mutation could invalidate.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+
+        var count = Math.Min(data.Count, inputList.Count);
+        var results = new double[count];
+        for (var s = 0; s < chain.Count; s++)
+        {
+            chain[s].Reset();
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            // Every state reads a bar carrying its input as the close: the head the caller's input series, each
+            // later one the value the state before produced, which is the convention ComputeAllWithCustomInput
+            // already uses.
+            var value = chain[0].Update(CreateBarWithCustomClose(data, i, inputList[i]), isFinal: true, includeOutputs: false).Value;
+            for (var s = 1; s < chain.Count; s++)
+            {
+                value = chain[s].Update(CreateBarWithCustomClose(data, i, value), isFinal: true, includeOutputs: false).Value;
+            }
+
+            results[i] = value;
+        }
+
+        return results;
     }
 
     /// <summary>

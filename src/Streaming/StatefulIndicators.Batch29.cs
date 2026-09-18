@@ -9,6 +9,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// Streaming form of <c>CalculateSchaffTrendCycleShk</c>: the double-smoothed Schaff Trend Cycle from
 /// the "STC Indicator - A Better MACD [SHK]" script.
 /// </summary>
+[PrimaryOutput("Stc")]
 public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _fastEma;
@@ -27,18 +28,9 @@ public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDispos
     private bool _hasPrev;
 
     public SchaffTrendCycleShkState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int fastLength = 23, int slowLength = 50, int cycleLength = 10, int d1Length = 3, int d2Length = 3,
-        InputName inputName = InputName.Close)
+        int fastLength = 23, int slowLength = 50, int cycleLength = 10, int d1Length = 3, int d2Length = 3)
         : this(maType, fastLength, slowLength, cycleLength, d1Length, d2Length,
-            new StreamingInputResolver(inputName, null))
-    {
-    }
-
-    public SchaffTrendCycleShkState(MovingAvgType maType, int fastLength, int slowLength, int cycleLength,
-        int d1Length, int d2Length, Func<OhlcvBar, double> selector)
-        : this(maType, fastLength, slowLength, cycleLength, d1Length, d2Length,
-            new StreamingInputResolver(InputName.Close,
-                selector ?? throw new ArgumentNullException(nameof(selector))))
+            new StreamingInputResolver(InputName.Close, null))
     {
     }
 
@@ -141,6 +133,7 @@ public sealed class SchaffTrendCycleShkState : IStreamingIndicatorState, IDispos
 /// Streaming form of <c>CalculateUtBotAlerts</c>: an ATR trailing stop that ratchets in the direction
 /// of the trend and flips when price closes through it.
 /// </summary>
+[PrimaryOutput("TrailingStop")]
 public sealed class UtBotAlertsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _atrSmoother;
@@ -152,16 +145,8 @@ public sealed class UtBotAlertsState : IStreamingIndicatorState, IDisposable
     private bool _hasPrev;
 
     public UtBotAlertsState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10,
-        double keyValue = 1, InputName inputName = InputName.Close)
-        : this(maType, length, keyValue, new StreamingInputResolver(inputName, null))
-    {
-    }
-
-    public UtBotAlertsState(MovingAvgType maType, int length, double keyValue,
-        Func<OhlcvBar, double> selector)
-        : this(maType, length, keyValue,
-            new StreamingInputResolver(InputName.Close,
-                selector ?? throw new ArgumentNullException(nameof(selector))))
+        double keyValue = 1)
+        : this(maType, length, keyValue, new StreamingInputResolver(InputName.Close, null))
     {
     }
 

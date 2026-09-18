@@ -90,7 +90,7 @@ public static partial class Calculations
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             var max = priorValue != 0 ? Math.Max(prevHighest, priorValue) : prevHighest;
             var min = priorValue != 0 ? Math.Min(prevLowest, priorValue) : prevLowest;
 
@@ -202,7 +202,11 @@ public static partial class Calculations
             deviationSquaredList.Add(deviationSquared);
         }
 
-        var divisionOfSumList = GetMovingAverageList(stockData, maType, length, deviationSquaredList);
+        // The downside deviation is exactly 0 when no return in the window falls below the mean. A running
+        // SMA left a residue near 1e-19 there, and the ratio divided by its root came out near 1e7.
+        var divisionOfSumList = maType == MovingAvgType.SimpleMovingAverage
+            ? GetExactWindowAverageList(deviationSquaredList, length)
+            : GetMovingAverageList(stockData, maType, length, deviationSquaredList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var divisionOfSum = divisionOfSumList[i];
@@ -259,7 +263,7 @@ public static partial class Calculations
 
         var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
         stockData.SetCustomValues(retList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = GetStandardDeviationList(retList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var stdDeviation = stdDevList[i];

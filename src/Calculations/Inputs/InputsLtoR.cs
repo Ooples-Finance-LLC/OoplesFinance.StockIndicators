@@ -11,7 +11,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMedianPrice(this StockData stockData)
     {
-        var medianPriceList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hl2);
+        // Chained: the same per-bar high and low every other indicator reads for a custom series
+        // (GetCustomRangeLists). Unchained: the cached derived series, exactly as before.
+        List<double> medianPriceList;
+        if (stockData.ChainedValues is { Count: > 0 })
+        {
+            var (seriesList, seriesHighList, seriesLowList, seriesOpenList, _) = GetInputValuesList(stockData);
+            medianPriceList = new List<double>(seriesList.Count);
+            for (var i = 0; i < seriesList.Count; i++)
+            {
+                medianPriceList.Add((seriesHighList[i] + seriesLowList[i]) / 2);
+            }
+        }
+        else
+        {
+            medianPriceList = GetDerivedSeriesList(stockData, DerivedSeriesKind.Hl2);
+        }
         var count = medianPriceList.Count;
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 

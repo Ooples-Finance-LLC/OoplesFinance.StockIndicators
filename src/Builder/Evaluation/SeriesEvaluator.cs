@@ -26,6 +26,15 @@ internal sealed class SeriesEvaluator
     // Statistics for fast path usage
     private int _fastPathHits;
     private int _standardPathHits;
+    private int _fusedChainHits;
+
+    // How many nodes name each handle as an input, counted once from _nodes. A handle named by exactly one
+    // other node has a single consumer, which is what makes its series safe to leave unmaterialised.
+    private Dictionary<SeriesHandle, int>? _inDegree;
+
+    // The handles this evaluation was asked for. An intermediate that is itself requested has to be published,
+    // so it must be computed as a series of its own however few nodes read it.
+    private HashSet<SeriesHandle>? _requested;
 
     /// <summary>
     /// Creates a new series evaluator with single-symbol data (backwards compatible).
@@ -77,8 +86,19 @@ internal sealed class SeriesEvaluator
     /// </summary>
     public int StandardPathHits => _standardPathHits;
 
+    /// <summary>
+    /// Gets the number of chains computed in a single pass instead of through an intermediate series.
+    /// </summary>
+    /// <remarks>
+    /// Fusion is an optimisation, so it changes no value and no test can see it in the results - which is
+    /// exactly how a test that never fuses would pass. This counter is the signal that the chain really was
+    /// fused, and the fusion tests assert on it for that reason. See issue #107.
+    /// </remarks>
+    public int FusedChainHits => _fusedChainHits;
+
     public Dictionary<SeriesHandle, double[]> Evaluate(IReadOnlyCollection<SeriesHandle> handles)
     {
+        _requested = new HashSet<SeriesHandle>(handles);
         var result = new Dictionary<SeriesHandle, double[]>();
         foreach (var handle in handles)
         {
@@ -91,6 +111,7 @@ internal sealed class SeriesEvaluator
 
     public double[] Evaluate(SeriesHandle handle)
     {
+        _requested = new HashSet<SeriesHandle> { handle };
         _visitingSet.Clear();
         return Resolve(handle);
     }
@@ -168,10 +189,170 @@ internal sealed class SeriesEvaluator
             return ComputeWithV2(baseData, node.Spec);
         }
 
-        // Chained indicator path: use custom input values with V2 computation
+        // Chained indicator path. When nothing else needs the series between the links, the chain runs as one
+        // pass over the bars and the intermediate array is never built.
         _standardPathHits++;
+        if (TryBuildFusedChain(node, out var chain))
+        {
+            _fusedChainHits++;
+            return BatchCompute.ComputeAllChained(baseData, chain);
+        }
+
         var input = Resolve(node.Input.Value);
         return ComputeWithV2CustomInput(baseData, input, node.Spec);
+    }
+
+    /// <summary>
+    /// The states of a chain that can run in one pass, or nothing when this chain has to be materialised.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Walks back from <paramref name="node"/> through its inputs to the bars, and refuses as soon as anything
+    /// would make the intermediate series observable. An intermediate survives only when it is read by exactly
+    /// one node, is not itself requested, is not already computed, and publishes its own value rather than a
+    /// named output - the last because <see cref="BatchCompute.ComputeAllChained"/> carries each state's value
+    /// forward, which is what the unfused chained path carries too, while a named output is answered by
+    /// <c>ComputeWithV2</c> instead.
+    /// </para>
+    /// <para>
+    /// The head carries two conditions of its own, because the head is the only link whose implementation
+    /// fusion changes: unfused it can be served a fast arm, fused it is always its streaming state. It must
+    /// read the same series both ways, and it must be a spec those two engines agree on exactly - see
+    /// <see cref="FusableChainHeads"/>.
+    /// </para>
+    /// </remarks>
+    private bool TryBuildFusedChain(SeriesNode node, out List<IStreamingIndicatorState> chain)
+    {
+        chain = new List<IStreamingIndicatorState>();
+
+        // Nothing is asked here about which series the head will read. ComputeAllChained feeds it the same
+        // expression a fast arm reads, so the two agree by construction; a check instead would have to hold
+        // against a caller mutating the list InputValues returns, which passes through no setter at all.
+        if (!TryWalkToBars(node, out var specs) || specs.Count < 2)
+        {
+            // One indicator reading the bars is not a chain; it has no intermediate to save.
+            return false;
+        }
+
+        specs.Reverse();
+        return TryCreateStates(specs, chain);
+    }
+
+    /// <summary>
+    /// The specs from <paramref name="node"/> back to the bars, nearest first, or nothing when one of the
+    /// series between them has to exist.
+    /// </summary>
+    private bool TryWalkToBars(SeriesNode node, out List<IndicatorSpec> specs)
+    {
+        specs = new List<IndicatorSpec>();
+        var walked = new HashSet<SeriesHandle>();
+        var current = node;
+        while (true)
+        {
+            if (current.Spec is null || !current.Input.HasValue || !current.SeriesKey.Equals(node.SeriesKey))
+            {
+                return false;
+            }
+
+            specs.Add(current.Spec);
+            var inputHandle = current.Input.Value;
+            if (IsBaseSeriesInput(inputHandle, node.SeriesKey))
+            {
+                return true;
+            }
+
+            if (!CanFoldAway(inputHandle, walked)
+                || !_nodes.TryGetValue(inputHandle, out var upstream)
+                || upstream.Kind != SeriesNodeKind.Indicator)
+            {
+                return false;
+            }
+
+            current = upstream;
+        }
+    }
+
+    /// <summary>Whether the series at this handle can be left unbuilt.</summary>
+    private bool CanFoldAway(SeriesHandle handle, HashSet<SeriesHandle> walked)
+    {
+        // A handle seen twice on one walk is a cycle. Resolve catches those with _visitingSet, and this path
+        // does not go through Resolve, so it catches its own.
+        if (!walked.Add(handle))
+        {
+            return false;
+        }
+
+        if (_cache.ContainsKey(handle) || _requested is null || _requested.Contains(handle))
+        {
+            return false;
+        }
+
+        return InDegree().TryGetValue(handle, out var consumers) && consumers == 1;
+    }
+
+    /// <summary>The states for a chain given head first, or nothing when one of its links cannot be fused.</summary>
+    private static bool TryCreateStates(List<IndicatorSpec> specs, List<IStreamingIndicatorState> chain)
+    {
+        if (!FusableChainHeads.Types.Contains(specs[0].Options.GetType()))
+        {
+            return false;
+        }
+
+        for (var i = 0; i < specs.Count; i++)
+        {
+            // Every link but the last is carried forward by value, so one addressed by a named output would be
+            // a different series from the one the unfused path resolves.
+            if (i < specs.Count - 1 && specs[i].OutputKey is not null)
+            {
+                return false;
+            }
+
+            try
+            {
+                chain.Add(StatefulIndicatorFactory.Create(specs[i]));
+            }
+            catch (NotSupportedException)
+            {
+                // No streaming state for this spec, so there is no chain to run.
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// How many nodes name each handle as an input, computed once for this evaluator.
+    /// </summary>
+    /// <remarks>
+    /// Counted over every node rather than the reachable ones, which can only overstate a handle's consumers
+    /// and so can only refuse a fusion that would have been safe.
+    /// </remarks>
+    private Dictionary<SeriesHandle, int> InDegree()
+    {
+        if (_inDegree is not null)
+        {
+            return _inDegree;
+        }
+
+        var counts = new Dictionary<SeriesHandle, int>();
+        foreach (var node in _nodes.Values)
+        {
+            CountInput(counts, node.Input);
+            CountInput(counts, node.Left);
+            CountInput(counts, node.Right);
+        }
+
+        _inDegree = counts;
+        return counts;
+    }
+
+    private static void CountInput(Dictionary<SeriesHandle, int> counts, SeriesHandle? handle)
+    {
+        if (handle is { } value)
+        {
+            counts[value] = counts.TryGetValue(value, out var count) ? count + 1 : 1;
+        }
     }
 
     /// <summary>
@@ -180,7 +361,23 @@ internal sealed class SeriesEvaluator
     private static double[] ComputeWithV2(StockData data, IndicatorSpec spec)
     {
         var state = StatefulIndicatorFactory.Create(spec);
-        return BatchCompute.ComputeAll(data, state);
+
+        // Ask for the slot the caller actually requested. Without this every output of a multi-output
+        // indicator returned the primary series - three identical bands from one Alligator.
+        return BatchCompute.ComputeAll(data, state, ResolveOutputKey(spec));
+    }
+
+    /// <summary>
+    /// The output key this spec is asking for, or null when it wants the primary value.
+    /// </summary>
+    private static string? ResolveOutputKey(IndicatorSpec spec)
+    {
+        // The key the caller named, or null for the indicator's own series. There is nothing to resolve any
+        // more: a spec either names a published output or it wants the single series, and the indicator's own
+        // published outputs are the authority on which keys exist. The six-slot map that used to sit here
+        // could not name every output and answered some of them wrongly - UpperBand returning a lower
+        // channel - which is what issue #219 removed.
+        return spec.OutputKey;
     }
 
     /// <summary>
@@ -273,7 +470,7 @@ internal sealed class SeriesEvaluator
             });
         }
 
-        return new StockData(tickerList, InputName.Close);
+        return new StockData(tickerList);
     }
 
     /// <summary>
@@ -364,134 +561,27 @@ internal sealed class SeriesEvaluator
     /// </summary>
     private static double[] ExtractOutput(StockData result, IndicatorSpec spec)
     {
-        var key = IndicatorOutputRegistry.GetOutputKey(spec.Name, spec.Output);
-        if (key is not null && result.OutputValues.TryGetValue(key, out var list))
+        // A named key is answered out of what the indicator actually published, and judged against the same
+        // thing. The six-slot map cannot serve as the authority here: it holds at most six keys per
+        // indicator, so every key this feature exists to reach - CamarillaPivotPoints has eleven - would be
+        // rejected as unpublished. See issue #201.
+        if (spec.OutputKey is not null)
         {
-            return list.ToArray();
+            if (result.OutputValues is not null && result.OutputValues.TryGetValue(spec.OutputKey, out var named))
+            {
+                return named.ToArray();
+            }
+
+            var published = result.OutputValues is null || result.OutputValues.Count == 0
+                ? "none"
+                : string.Join(", ", result.OutputValues.Keys);
+
+            throw new CalculationException(
+                $"{spec.Name} does not publish an output named '{spec.OutputKey}'. Available outputs: {published}.");
         }
 
+        // A spec that names no key wants the indicator's own series, which is where a single-output
+        // indicator publishes it.
         return result.CustomValuesList.ToArray();
-    }
-}
-
-/// <summary>
-/// Extensible registry for indicator output key mappings.
-/// </summary>
-public static class IndicatorOutputRegistry
-{
-    private static readonly Dictionary<(IndicatorName, IndicatorOutput), string> OutputKeyMap = new()
-    {
-        // MACD outputs
-        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Signal), "Signal" },
-        { (IndicatorName.MovingAverageConvergenceDivergence, IndicatorOutput.Histogram), "Histogram" },
-
-        // Bollinger Bands outputs
-        { (IndicatorName.BollingerBands, IndicatorOutput.UpperBand), "UpperBand" },
-        { (IndicatorName.BollingerBands, IndicatorOutput.MiddleBand), "MiddleBand" },
-        { (IndicatorName.BollingerBands, IndicatorOutput.LowerBand), "LowerBand" },
-
-        // Stochastic outputs (K/D lines)
-        { (IndicatorName.StochasticOscillator, IndicatorOutput.Signal), "SignalFastK" },
-
-        // ADX outputs (DI+, DI-, ADX)
-        { (IndicatorName.AverageDirectionalIndex, IndicatorOutput.Signal), "Adx" },
-
-        // Aroon outputs
-        { (IndicatorName.AroonOscillator, IndicatorOutput.UpperBand), "AroonUp" },
-        { (IndicatorName.AroonOscillator, IndicatorOutput.LowerBand), "AroonDown" },
-
-        // CCI outputs
-        { (IndicatorName.CommodityChannelIndex, IndicatorOutput.Primary), "Cci" },
-
-        // Williams %R outputs
-        { (IndicatorName.WilliamsR, IndicatorOutput.Primary), "WilliamsR" },
-
-        // Donchian Channels outputs
-        { (IndicatorName.DonchianChannels, IndicatorOutput.UpperBand), "UpperChannel" },
-        { (IndicatorName.DonchianChannels, IndicatorOutput.MiddleBand), "MiddleChannel" },
-        { (IndicatorName.DonchianChannels, IndicatorOutput.LowerBand), "LowerChannel" },
-
-        // Keltner Channels outputs
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.UpperBand), "UpperBand" },
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.MiddleBand), "MiddleBand" },
-        { (IndicatorName.KeltnerChannels, IndicatorOutput.LowerBand), "LowerBand" },
-
-        // Ichimoku Cloud outputs
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.Primary), "TenkanSen" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.Signal), "KijunSen" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.UpperBand), "SenkouSpanA" },
-        { (IndicatorName.IchimokuCloud, IndicatorOutput.LowerBand), "SenkouSpanB" },
-    };
-
-    private static readonly object RegistryLock = new();
-
-    /// <summary>
-    /// Gets the output key for an indicator and output type.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <returns>The output key string, or null if using default output.</returns>
-    public static string? GetOutputKey(IndicatorName name, IndicatorOutput output)
-    {
-        // Primary output typically uses CustomValuesList, not OutputValues
-        if (output == IndicatorOutput.Primary)
-        {
-            // Check if there's a specific mapping for this indicator's primary output
-            lock (RegistryLock)
-            {
-                if (OutputKeyMap.TryGetValue((name, output), out var key))
-                {
-                    return key;
-                }
-            }
-            return null;
-        }
-
-        lock (RegistryLock)
-        {
-            if (OutputKeyMap.TryGetValue((name, output), out var key))
-            {
-                return key;
-            }
-        }
-
-        // Fallback mappings for common output types
-        return output switch
-        {
-            IndicatorOutput.UpperBand => "UpperBand",
-            IndicatorOutput.MiddleBand => "MiddleBand",
-            IndicatorOutput.LowerBand => "LowerBand",
-            IndicatorOutput.Signal => "Signal",
-            IndicatorOutput.Histogram => "Histogram",
-            _ => null
-        };
-    }
-
-    /// <summary>
-    /// Registers a custom output key mapping.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <param name="key">The output key string.</param>
-    public static void Register(IndicatorName name, IndicatorOutput output, string key)
-    {
-        lock (RegistryLock)
-        {
-            OutputKeyMap[(name, output)] = key;
-        }
-    }
-
-    /// <summary>
-    /// Checks if an output key mapping exists.
-    /// </summary>
-    /// <param name="name">The indicator name.</param>
-    /// <param name="output">The output type.</param>
-    /// <returns>True if a mapping exists.</returns>
-    public static bool HasMapping(IndicatorName name, IndicatorOutput output)
-    {
-        lock (RegistryLock)
-        {
-            return OutputKeyMap.ContainsKey((name, output));
-        }
     }
 }

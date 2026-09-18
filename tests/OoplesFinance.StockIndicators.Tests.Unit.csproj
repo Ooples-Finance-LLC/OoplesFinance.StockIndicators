@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="FluentAssertions" Version="8.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="FluentAssertions" Version="8.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageReference Include="NSubstitute" Version="6.2.0" />
     <PackageReference Include="coverlet.collector" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -33,6 +33,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit" Version="2.9.3" />
+    <!-- Pinned to the generator project's own Roslyn floor (4.8.0), not merely "some recent Roslyn".
+         StreamingStateAnalyzerTests compiles snippets in-process and runs the analyzer over them, so the
+         host here must not drift away from the version the analyzer is built against. Raising this is the
+         same decision as raising the floor; SourceGeneratorRoslynFloorTests guards that side. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <!-- The analyzer types themselves. src references this project with ReferenceOutputAssembly="false",
+         so nothing flows from there and the test project takes its own reference. -->
+    <ProjectReference Include="..\src\SourceGeneration\OoplesFinance.StockIndicators.SourceGeneration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -220,9 +220,9 @@ public static partial class Calculations
         int length = 14, double stdDevMult = 3)
     {
         var narrowChannelList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = narrowChannelList.OutputValues["UpperBand"];
-        var middleBandList = narrowChannelList.OutputValues["MiddleBand"];
-        var lowerBandList = narrowChannelList.OutputValues["LowerBand"];
+        var upperBandList = narrowChannelList.ChainedOutputs["UpperBand"];
+        var middleBandList = narrowChannelList.ChainedOutputs["MiddleBand"];
+        var lowerBandList = narrowChannelList.ChainedOutputs["LowerBand"];
         var signalsList = narrowChannelList.SignalsList;
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -456,9 +456,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(highList);
-        var pnoUpBandList = CalculatePrimeNumberOscillator(stockData, length).CustomValuesList;
+        var pnoUpBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
         stockData.SetCustomValues(lowList);
-        var pnoDnBandList = CalculatePrimeNumberOscillator(stockData, length).CustomValuesList;
+        var pnoDnBandList = CalculatePrimeNumberOscillator(stockData, length).ChainedValues;
         var (upperBandList, _) = GetMaxAndMinValuesList(pnoUpBandList, length);
         var (_, lowerBandList) = GetMaxAndMinValuesList(pnoDnBandList, length);
 
@@ -661,7 +661,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -685,10 +685,16 @@ public static partial class Calculations
             var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
             sizeCList.Add(sizeC);
 
-            var a = Math.Max(currentValue, prevA1) - (sizeA / length);
+            // Each band is an envelope of price, so its drift stops at price: the upper cannot decay down
+            // through price, nor the lower rise up through it. Both seed at the first close, and at bar 0
+            // prevA2 and prevB2 are still zero, so prevA1 - prevA2 is the whole price and positive - which
+            // sets sizeA to the full average true range while failing the lower band's < 0 test. The two
+            // then step away from the same seed in opposite directions and the upper band ends the bar
+            // below the lower one, before the channel has any width at all.
+            var a = Math.Max(Math.Max(currentValue, prevA1) - (sizeA / length), currentValue);
             aList.Add(a);
 
-            var b = Math.Min(currentValue, prevB1) + (sizeB / length);
+            var b = Math.Min(Math.Min(currentValue, prevB1) + (sizeB / length), currentValue);
             bList.Add(b);
 
             var prevMid = GetLastOrDefault(midList);
@@ -732,7 +738,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -759,10 +765,12 @@ public static partial class Calculations
             var barsSinceA = aChgList.Count - 1 - maxIndexA;
             var barsSinceB = bChgList.Count - 1 - maxIndexB;
 
-            var a = Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1));
+            // Each band is an envelope of price and its drift stops there; see CalculatePriceLineChannel,
+            // which inverts at bar 0 for the same reason and takes the same clamp.
+            var a = Math.Max(Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1)), currentValue);
             aList.Add(a);
 
-            var b = Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1));
+            var b = Math.Min(Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1)), currentValue);
             bList.Add(b);
 
             var prevMid = GetLastOrDefault(midList);
@@ -802,9 +810,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         stockData.SetCustomValues(lowList);
-        var lowSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var lowSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
         stockData.SetCustomValues(highList);
-        var highSlopeList = CalculateLinearRegression(stockData, length).OutputValues["Slope"];
+        var highSlopeList = CalculateLinearRegression(stockData, length).ChainedOutputs["Slope"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -973,10 +981,11 @@ public static partial class Calculations
         List<double> rocSquaredList = new(stockData.Count);
         List<double> upperBandList = new(stockData.Count);
         List<double> lowerBandList = new(stockData.Count);
+        List<double> centreList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum rocSquaredSum = new();
 
-        var rocList = CalculateRateOfChange(stockData, length).CustomValuesList;
+        var rocList = CalculateRateOfChange(stockData, length).ChainedValues;
         var middleBandList = GetMovingAverageList(stockData, maType, smoothLength, rocList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -999,15 +1008,24 @@ public static partial class Calculations
             var lowerBand = -upperBand;
             lowerBandList.Add(lowerBand);
 
+            // The bands are plus and minus the root mean square of the rate of change, so they are
+            // centred on zero. The rate of change itself travels between them, the way price travels
+            // between Bollinger bands; it is not the centre line.
+            centreList.Add(0);
+
             var signal = GetBollingerBandsSignal(middleBand - prevMiddleBand1, prevMiddleBand1 - prevMiddleBand2, middleBand, prevMiddleBand1, 
                 upperBand, prevUpperBand, lowerBand, prevLowerBand);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The smoothed rate of change was published as the middle band, and it crossed the envelope
+            // it is measured against - above the upper on 40 bars and below the lower on 61. It keeps its
+            // own name; zero, which is what plus and minus the RMS is centred on, becomes the centre.
             { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", centreList },
+            { "LowerBand", lowerBandList },
+            { "Roc", middleBandList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1132,9 +1150,13 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the slow average plus and minus dev, so the slow average is what they are
+            // centred on. The fast one was published here instead, and being a different quantity it has
+            // no reason to lie between them - it left the upper band on 28 bars and the lower on 111.
             { "UpperBand", upperBandList },
-            { "MiddleBand", fastMaList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", slowMaList },
+            { "LowerBand", lowerBandList },
+            { "FastMa", fastMaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1344,7 +1366,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1374,7 +1396,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MeanAbsoluteErrorBands;
+        stockData.IndicatorName = IndicatorName.MeanAbsoluteDeviationBands;
 
         return stockData;
     }

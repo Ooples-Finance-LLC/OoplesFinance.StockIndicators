@@ -68,7 +68,13 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     AroonOscillator,
     [Category(IndicatorType.Momentum)]
+    AroonDown,
+    [Category(IndicatorType.Momentum)]
+    AroonUp,
+    [Category(IndicatorType.Momentum)]
     AsymmetricalRelativeStrengthIndex,
+    [Category(IndicatorType.Volatility)]
+    AtrChannelWidth,
     [Category(IndicatorType.Trend)]
     AtrFilteredExponentialMovingAverage,
     [Category(IndicatorType.Volatility)]
@@ -83,6 +89,8 @@ public enum IndicatorName
     AutonomousRecursiveMovingAverage,
     [Category(IndicatorType.Momentum)]
     AverageAbsoluteErrorNormalization,
+    [Category(IndicatorType.Volatility)]
+    AverageDayRange,
     [Category(IndicatorType.Trend)]
     AverageDirectionalIndex,
     [Category(IndicatorType.Momentum)]
@@ -178,7 +186,11 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     ChoppinessIndex,
     [Category(IndicatorType.Volatility)]
+    CloseToCloseVolatility,
+    [Category(IndicatorType.Volatility)]
     ClosedFormDistanceVolatility,
+    [Category(IndicatorType.Volatility)]
+    CoefficientOfVariation,
     [Category(IndicatorType.Momentum)]
     CommodityChannelIndex,
     [Category(IndicatorType.Volatility)]
@@ -205,6 +217,10 @@ public enum IndicatorName
     CorrectedMovingAverage,
     [Category(IndicatorType.Trend)]
     CubedWeightedMovingAverage,
+    [Category(IndicatorType.Trend)]
+    CumulativeSum,
+    [Category(IndicatorType.Volume)]
+    CumulativeVolumeIndex,
     [Category(IndicatorType.Volatility)]
     DEnvelope,
     [Category(IndicatorType.Volatility)]
@@ -221,6 +237,8 @@ public enum IndicatorName
     DeltaMovingAverage,
     [Category(IndicatorType.Momentum)]
     Dema2Lines,
+    [Category(IndicatorType.Volume)]
+    DemandIndex,
     [Category(IndicatorType.Momentum)]
     DemandOscillator,
     [Category(IndicatorType.SupportAndResistance)]
@@ -277,6 +295,8 @@ public enum IndicatorName
     DoubleSmoothedStochastic,
     [Category(IndicatorType.Momentum)]
     DoubleStochasticOscillator,
+    [Category(IndicatorType.Volatility)]
+    DownsideDeviation,
     [Category(IndicatorType.Volatility)]
     DrunkardWalk,
     [Category(IndicatorType.Momentum)]
@@ -607,6 +627,8 @@ public enum IndicatorName
     ElasticVolumeWeightedMovingAverageV1,
     [Category(IndicatorType.Trend)]
     ElasticVolumeWeightedMovingAverageV2,
+    [Category(IndicatorType.Trend)]
+    ElderImpulseSystem,
     [Category(IndicatorType.Volatility)]
     ElderMarketThermometer,
     [Category(IndicatorType.Trend)]
@@ -715,6 +737,10 @@ public enum IndicatorName
     GeneralFilterEstimator,
     [Category(IndicatorType.Trend)]
     GeneralizedDoubleExponentialMovingAverage,
+    [Category(IndicatorType.Trend)]
+    GeometricMeanMovingAverage,
+    [Category(IndicatorType.Trend)]
+    GeometricMovingAverage,
     [Category(IndicatorType.Volatility)]
     GopalakrishnanRangeIndex,
     [Category(IndicatorType.Trend)]
@@ -736,9 +762,13 @@ public enum IndicatorName
     [Category(IndicatorType.Volume)]
     HawkeyeVolumeIndicator,
     [Category(IndicatorType.Trend)]
+    HarmonicMeanMovingAverage,
+    [Category(IndicatorType.Trend)]
     HendersonWeightedMovingAverage,
     [Category(IndicatorType.Momentum)]
     HerrickPayoffIndex,
+    [Category(IndicatorType.SupportAndResistance)]
+    HighestHigh,
     [Category(IndicatorType.SupportAndResistance)]
     HighLowBands,
     [Category(IndicatorType.Momentum)]
@@ -767,6 +797,8 @@ public enum IndicatorName
     IchimokuCloud,
     [Category(IndicatorType.Trend)]
     IIRLeastSquaresEstimate,
+    [Category(IndicatorType.Trend)]
+    IchimokuChikouSpan,
     [Category(IndicatorType.Momentum)]
     ImpulseMovingAverageConvergenceDivergence,
     [Category(IndicatorType.Momentum)]
@@ -828,6 +860,8 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     KaufmanStressIndicator,
     [Category(IndicatorType.Volatility)]
+    KeltnerChannelWidth,
+    [Category(IndicatorType.Volatility)]
     KeltnerChannels,
     [Category(IndicatorType.Volatility)]
     KendallRankCorrelationCoefficient,
@@ -870,6 +904,10 @@ public enum IndicatorName
     [Category(IndicatorType.Momentum)]
     LogisticCorrelation,
     [Category(IndicatorType.Momentum)]
+    LogReturns,
+    [Category(IndicatorType.SupportAndResistance)]
+    LowestLow,
+    [Category(IndicatorType.Momentum)]
     MacZIndicator,
     [Category(IndicatorType.Volume)]
     MacZVwapIndicator,
@@ -901,6 +939,8 @@ public enum IndicatorName
     MeanAbsoluteErrorBands,
     [Category(IndicatorType.Trend)]
     MedianPrice,
+    [Category(IndicatorType.Trend)]
+    MedianValue,
     [Category(IndicatorType.Trend)]
     MiddleHighLowMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -989,10 +1029,18 @@ public enum IndicatorName
     NegativeVolumeDisparityIndicator,
     [Category(IndicatorType.Volume)]
     NegativeVolumeIndex,
+    [Category(IndicatorType.Volume)]
+    NetVolume,
     [Category(IndicatorType.Trend)]
     NickRypockTrailingReverse,
+    [Category(IndicatorType.Volatility)]
+    NormalizedAverageTrueRange,
+    [Category(IndicatorType.Momentum)]
+    NormalizedMacd,
     [Category(IndicatorType.Momentum)]
     NormalizedRelativeVigorIndex,
+    [Category(IndicatorType.Volume)]
+    NormalizedVolume,
     [Category(IndicatorType.Momentum)]
     NthOrderDifferencingOscillator,
     [Category(IndicatorType.Momentum)]
@@ -1023,6 +1071,8 @@ public enum IndicatorName
     ParabolicSAR,
     [Category(IndicatorType.Trend)]
     ParabolicWeightedMovingAverage,
+    [Category(IndicatorType.Volatility)]
+    ParkinsonVolatility,
     [Category(IndicatorType.Trend)]
     ParametricCorrectiveLinearMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -1033,6 +1083,8 @@ public enum IndicatorName
     PentupleExponentialMovingAverage,
     [Category(IndicatorType.Momentum)]
     PercentChangeOscillator,
+    [Category(IndicatorType.Momentum)]
+    PercentRank,
     [Category(IndicatorType.Momentum)]
     PercentagePriceOscillator,
     [Category(IndicatorType.Momentum)]
@@ -1062,6 +1114,8 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     PoweredKaufmanAdaptiveMovingAverage,
     [Category(IndicatorType.Momentum)]
+    PpoMovingAverage,
+    [Category(IndicatorType.Momentum)]
     PremierStochasticOscillator,
     [Category(IndicatorType.Momentum)]
     PrettyGoodOscillator,
@@ -1075,6 +1129,8 @@ public enum IndicatorName
     PriceHeadleyAccelerationBands,
     [Category(IndicatorType.Volatility)]
     PriceLineChannel,
+    [Category(IndicatorType.Momentum)]
+    PriceMomentum,
     [Category(IndicatorType.Momentum)]
     PriceMomentumOscillator,
     [Category(IndicatorType.Volume)]
@@ -1122,11 +1178,15 @@ public enum IndicatorName
     [Category(IndicatorType.Trend)]
     R2AdaptiveRegression,
     [Category(IndicatorType.Momentum)]
+    RSquared,
+    [Category(IndicatorType.Momentum)]
     RahulMohindarOscillator,
     [Category(IndicatorType.Momentum)]
     RainbowOscillator,
     [Category(IndicatorType.Trend)]
     RandomWalkIndex,
+    [Category(IndicatorType.Volatility)]
+    Range,
     [Category(IndicatorType.Momentum)]
     RangeActionVerificationIndex,
     [Category(IndicatorType.Volatility)]
@@ -1173,6 +1233,10 @@ public enum IndicatorName
     RelativeVolatilityIndexV1,
     [Category(IndicatorType.Volatility)]
     RelativeVolatilityIndexV2,
+    [Category(IndicatorType.Volatility)]
+    RelativeVolatilityIndexHigh,
+    [Category(IndicatorType.Volatility)]
+    RelativeVolatilityIndexLow,
     [Category(IndicatorType.Volume)]
     RelativeVolumeIndicator,
     [Category(IndicatorType.Momentum)]
@@ -1195,6 +1259,12 @@ public enum IndicatorName
     RightSidedRickerMovingAverage,
     [Category(IndicatorType.Momentum)]
     RobustWeightingOscillator,
+    [Category(IndicatorType.SupportAndResistance)]
+    RollingMax,
+    [Category(IndicatorType.SupportAndResistance)]
+    RollingMin,
+    [Category(IndicatorType.Volatility)]
+    RogersSatchellVolatility,
     [Category(IndicatorType.Volatility)]
     RootMovingAverageSquaredErrorBands,
     [Category(IndicatorType.Momentum)]
@@ -1239,6 +1309,10 @@ public enum IndicatorName
     SimpleLines,
     [Category(IndicatorType.Trend)]
     SimpleMovingAverage,
+    [Category(IndicatorType.Momentum)]
+    SimpleReturns,
+    [Category(IndicatorType.Momentum)]
+    SimplePriceZone,
     [Category(IndicatorType.Trend)]
     SimplifiedLeastSquaresMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -1247,6 +1321,8 @@ public enum IndicatorName
     SineWeightedMovingAverage,
     [Category(IndicatorType.Trend)]
     SlowSmoothedMovingAverage,
+    [Category(IndicatorType.Momentum)]
+    Skewness,
     [Category(IndicatorType.SupportAndResistance)]
     SmartEnvelope,
     [Category(IndicatorType.Momentum)]
@@ -1257,6 +1333,8 @@ public enum IndicatorName
     SmoothedRateOfChange,
     [Category(IndicatorType.Volatility)]
     SmoothedVolatilityBands,
+    [Category(IndicatorType.Momentum)]
+    SmoothedWilliamsR,
     [Category(IndicatorType.Momentum)]
     SmoothedWilliamsAccumulationDistribution,
     [Category(IndicatorType.Volatility)]
@@ -1277,6 +1355,10 @@ public enum IndicatorName
     StandardDeviationChannel,
     [Category(IndicatorType.Volatility)]
     StandardDeviationVolatility,
+    [Category(IndicatorType.Volatility)]
+    StandardError,
+    [Category(IndicatorType.Volatility)]
+    StandardErrorOfTheMean,
     [Category(IndicatorType.SupportAndResistance)]
     StandardPivotPoints,
     [Category(IndicatorType.Trend)]
@@ -1321,6 +1403,8 @@ public enum IndicatorName
     Svama,
     [Category(IndicatorType.Momentum)]
     SwamiStochastics,
+    [Category(IndicatorType.Momentum)]
+    SwingIndex,
     [Category(IndicatorType.Trend)]
     SymmetricallyWeightedMovingAverage,
     [Category(IndicatorType.Trend)]
@@ -1405,6 +1489,10 @@ public enum IndicatorName
     TripleExponentialMovingAverage,
     [Category(IndicatorType.Momentum)]
     Trix,
+    [Category(IndicatorType.Volatility)]
+    TrueRange,
+    [Category(IndicatorType.Trend)]
+    TrueRangeAdjustedExponentialMovingAverage,
     [Category(IndicatorType.Momentum)]
     TrueStrengthIndex,
     [Category(IndicatorType.Trend)]
@@ -1421,6 +1509,8 @@ public enum IndicatorName
     TwiggsMoneyFlow,
     [Category(IndicatorType.Trend)]
     TypicalPrice,
+    [Category(IndicatorType.Volatility)]
+    TypicalPriceVolatility,
     [Category(IndicatorType.Trend)]
     UberTrendIndicator,
     [Category(IndicatorType.Momentum)]
@@ -1464,6 +1554,8 @@ public enum IndicatorName
     [Category(IndicatorType.Volatility)]
     VariableMovingAverageBands,
     [Category(IndicatorType.Volatility)]
+    Variance,
+    [Category(IndicatorType.Volatility)]
     VerticalHorizontalFilter,
     [Category(IndicatorType.Trend)]
     VerticalHorizontalMovingAverage,
@@ -1490,6 +1582,8 @@ public enum IndicatorName
     [Category(IndicatorType.Volatility)]
     VolatilityRatio,
     [Category(IndicatorType.Volatility)]
+    VolatilityStop,
+    [Category(IndicatorType.Volatility)]
     VolatilitySwitchIndicator,
     [Category(IndicatorType.Trend)]
     VolatilityWaveMovingAverage,
@@ -1504,15 +1598,25 @@ public enum IndicatorName
     [Category(IndicatorType.Volume)]
     VolumeFlowIndicator,
     [Category(IndicatorType.Volume)]
+    VolumeMomentum,
+    [Category(IndicatorType.Volume)]
+    VolumeMomentumOscillator,
+    [Category(IndicatorType.Volume)]
+    VolumeOscillator,
+    [Category(IndicatorType.Volume)]
     VolumePositiveNegativeIndicator,
     [Category(IndicatorType.Volume)]
     VolumePriceConfirmationIndicator,
+    [Category(IndicatorType.Volume)]
+    VolumeRateOfChange,
     [Category(IndicatorType.Trend)]
     VolumeWeightedAveragePrice,
     [Category(IndicatorType.Trend)]
     VolumeWeightedMovingAverage,
     [Category(IndicatorType.Momentum)]
     VolumeWeightedRelativeStrengthIndex,
+    [Category(IndicatorType.Volume)]
+    VolumeZoneOscillator,
     [Category(IndicatorType.Trend)]
     VortexBands,
     [Category(IndicatorType.Trend)]
@@ -1551,6 +1655,8 @@ public enum IndicatorName
     WoodieCommodityChannelIndex,
     [Category(IndicatorType.SupportAndResistance)]
     WoodiePivotPoints,
+    [Category(IndicatorType.Volatility)]
+    YangZhangVolatility,
     [Category(IndicatorType.Volume)]
     ZDistanceFromVwap,
     [Category(IndicatorType.Momentum)]
@@ -1563,6 +1669,8 @@ public enum IndicatorName
     ZeroLagTripleExponentialMovingAverage,
     [Category(IndicatorType.Trend)]
     ZeroLowLagMovingAverage,
+    [Category(IndicatorType.Trend)]
+    ZigZag,
     [Category(IndicatorType.Momentum)]
     ZweigMarketBreadthIndicator
 }

@@ -300,9 +300,6 @@ public static partial class Calculations
         length2 = Math.Max(length2, 1);
         List<double> dcList = new(stockData.Count);
         List<double> domCycList = new(stockData.Count);
-        List<double> realList = new(stockData.Count);
-        List<double> imagList = new(stockData.Count);
-        List<double> q1List = new(stockData.Count);
         List<double> hpList = new(stockData.Count);
         List<double> smoothHpList = new(stockData.Count);
         using var domCycMedian = new RollingMedian(length2);
@@ -311,6 +308,15 @@ public static partial class Calculations
 
         var twoPiPer = MinOrMax(2 * Math.PI / length1, 0.99, 0.01);
         var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
+
+        // One bandpass per period in the bank, each with its own two-sample recursion. These used to be
+        // read out of a single list holding one value per bar - the last period's - so every period was
+        // fed another period's output, and the bank never settled on a market that never moved.
+        var realPrev1 = new double[maxLength + 1];
+        var realPrev2 = new double[maxLength + 1];
+        var imagPrev1 = new double[maxLength + 1];
+        var imagPrev2 = new double[maxLength + 1];
+        var q1Prev = new double[maxLength + 1];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -337,26 +343,40 @@ public static partial class Calculations
                 var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * delta / j, 0.99, 0.01));
                 var alpha = gamma - Sqrt((gamma * gamma) - 1);
                 var priorSmoothHp = i >= j ? smoothHpList[i - j] : 0;
-                var prevReal = i >= j ? realList[i - j] : 0;
-                var priorReal = i >= j * 2 ? realList[i - (j * 2)] : 0;
-                var prevImag = i >= j ? imagList[i - j] : 0;
-                var priorImag = i >= j * 2 ? imagList[i - (j * 2)] : 0;
-                var prevQ1 = i >= j ? q1List[i - j] : 0;
+                var prevReal = realPrev1[j];
+                var priorReal = realPrev2[j];
+                var prevImag = imagPrev1[j];
+                var priorImag = imagPrev2[j];
+                var prevQ1 = q1Prev[j];
 
                 q1 = j / Math.PI * 2 * (smoothHp - prevSmoothHp);
                 real = (0.5 * (1 - alpha) * (smoothHp - priorSmoothHp)) + (beta * (1 + alpha) * prevReal) - (alpha * priorReal);
                 imag = (0.5 * (1 - alpha) * (q1 - prevQ1)) + (beta * (1 + alpha) * prevImag) - (alpha * priorImag);
+                realPrev2[j] = realPrev1[j];
+                realPrev1[j] = real;
+                imagPrev2[j] = imagPrev1[j];
+                imagPrev1[j] = imag;
+                q1Prev[j] = q1;
+
                 var ampl = (real * real) + (imag * imag);
                 maxAmpl = ampl > maxAmpl ? ampl : maxAmpl;
-                var db = maxAmpl != 0 && ampl / maxAmpl > 0 ? -length2 * Math.Log(0.01 / (1 - (0.99 * ampl / maxAmpl))) / Math.Log(length2) : 0;
+
+                // An amplitude cannot exceed the running maximum, so this attenuation is 0.01 at its
+                // smallest and db is bounded by [0, 20]. Left as the raw expression it still reaches zero:
+                // once the amplitudes decay into the denormal range there are too few mantissa bits left
+                // for 0.99 * ampl to differ from ampl, so the ratio rounds to exactly one, 0.01/0 makes db
+                // negative infinity, and -infinity passes the db <= 3 test - putting an infinity into both
+                // sums so that the dominant cycle comes out as infinity/infinity. Measured on a market that
+                // never moved at bar 3152, where ampl = maxAmpl = 1.1363509854348671E-322.
+                var ratio = maxAmpl != 0 ? ampl / maxAmpl : 0;
+                var db = ratio > 0 ? -length2 * Math.Log(0.01 / Math.Max(1 - (0.99 * ratio), 0.01)) / Math.Log(length2) : 0;
                 db = db > maxLength ? maxLength : db;
                 num += db <= 3 ? j * (maxLength - db) : 0;
                 denom += db <= 3 ? maxLength - db : 0;
-                dc = denom != 0 ? num / denom : 0;
+                // The dominant cycle is a period inside the band that was scanned. Anything else is not
+                // a cycle this bank can see, and a zero propagates as 2*pi/0 into everything downstream.
+                dc = denom != 0 ? MinOrMax(num / denom, maxLength, minLength) : minLength;
             }
-            q1List.Add(q1);
-            realList.Add(real);
-            imagList.Add(imag);
             dcList.Add(dc);
             domCycMedian.Add(dc);
 
@@ -1138,7 +1158,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
@@ -1191,7 +1211,7 @@ public static partial class Calculations
             var prevFilt1 = i >= 1 ? filtMa2List[i - 1] : 0;
             var prevFilt2 = i >= 2 ? filtMa2List[i - 2] : 0;
 
-            var roc = length / 2 * Math.PI * (filt - prevFilt1);
+            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
@@ -1204,7 +1224,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersTriangleWindowIndicator;
+        stockData.IndicatorName = IndicatorName.EhlersSimpleWindowIndicator;
 
         return stockData;
     }
@@ -1831,6 +1851,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSineWaveIndicatorV2(this StockData stockData, int length = 5, double alpha = 0.07)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         length = Math.Max(length, 1);
         List<double> sineList = new(stockData.Count);
         List<double> leadSineList = new(stockData.Count);
@@ -1839,16 +1860,15 @@ public static partial class Calculations
 
         var periodList = GetOutputValuesInternal(stockData,
             data => CalculateEhlersAdaptiveCyberCycle(data, length, alpha))["Period"];
-        // Reset to use close prices for CyberCycle (clear both CustomValues and Signals)
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
         var cycleList = GetCustomValuesListInternal(stockData,
             data => CalculateEhlersCyberCycle(data));
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var period = periodList[i];
-            var dcPeriod = (int)Math.Ceiling(period);
+            var dcPeriod = MathHelper.CeilingCycle(period);
 
             double realPart = 0, imagPart = 0;
             for (var j = 0; j <= dcPeriod - 1; j++)

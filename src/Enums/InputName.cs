@@ -10,7 +10,7 @@
 
 namespace OoplesFinance.StockIndicators.Enums;
 
-public enum InputName
+internal enum InputName
 {
     AdjustedClose,
     Close,

@@ -4,6 +4,109 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Zig Zag.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The line joining the turning points that moved the price by at least <paramref name="deviation"/> per
+    /// cent, with the bars between two turning points filled in along the straight line between them. A move
+    /// smaller than that is noise and does not turn the line.
+    /// </para>
+    /// <para>
+    /// This indicator has no streaming twin, and cannot have one: a turning point is only known once the
+    /// price has moved far enough past it, and recognising it rewrites the bars since the previous turning
+    /// point. A streaming engine has already published those bars and cannot take them back, so a faithful
+    /// bar-by-bar zig zag does not exist. The Builder computes it with this method.
+    /// </para>
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="deviation"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateZigZag(this StockData stockData, double deviation = 5)
+    {
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var count = highList.Count;
+        List<double> zigZagList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var zigZag = new double[count];
+        if (count > 0)
+        {
+            var lastPivotIndex = 0;
+            var lastPivotValue = (highList[0] + lowList[0]) / 2;
+            var lastPivotIsHigh = true;
+            var deviationPercent = deviation / 100;
+
+            for (var i = 0; i < count; i++)
+            {
+                zigZag[i] = lastPivotValue;
+            }
+
+            for (var i = 1; i < count; i++)
+            {
+                if (lastPivotIsHigh)
+                {
+                    if (lowList[i] < lastPivotValue * (1 - deviationPercent))
+                    {
+                        for (var j = lastPivotIndex; j <= i; j++)
+                        {
+                            zigZag[j] = lastPivotValue + ((lowList[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
+                        }
+
+                        lastPivotIndex = i;
+                        lastPivotValue = lowList[i];
+                        lastPivotIsHigh = false;
+                    }
+                    else if (highList[i] > lastPivotValue)
+                    {
+                        lastPivotValue = highList[i];
+                        lastPivotIndex = i;
+                    }
+                }
+                else
+                {
+                    if (highList[i] > lastPivotValue * (1 + deviationPercent))
+                    {
+                        for (var j = lastPivotIndex; j <= i; j++)
+                        {
+                            zigZag[j] = lastPivotValue + ((highList[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
+                        }
+
+                        lastPivotIndex = i;
+                        lastPivotValue = highList[i];
+                        lastPivotIsHigh = true;
+                    }
+                    else if (lowList[i] < lastPivotValue)
+                    {
+                        lastPivotValue = lowList[i];
+                        lastPivotIndex = i;
+                    }
+                }
+            }
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            zigZagList.Add(zigZag[i]);
+
+            var prevZigZag1 = i >= 1 ? zigZag[i - 1] : 0;
+            var prevZigZag2 = i >= 2 ? zigZag[i - 2] : 0;
+            var signal = GetCompareSignal(zigZag[i] - prevZigZag1, prevZigZag1 - prevZigZag2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "ZigZag", zigZagList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(zigZagList);
+        stockData.IndicatorName = IndicatorName.ZigZag;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Trend Trigger Factor
     /// </summary>
     /// <param name="stockData"></param>
@@ -127,7 +230,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The step holds until price escapes a band two deviations either side of it, and sigma in a
+        // band is the windowed deviation; the quantity this replaces is about 55% wider on a typical price
+        // series, so the band was that much too wide and the step held through moves that should have moved
+        // it. The i < length guard below already covers the bars before the window fills. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -352,7 +460,14 @@ public static partial class Calculations
         var slowMaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var fastMaList = GetMovingAverageList(stockData, maType, length2, inputList);
         stockData.SetCustomValues(slowMaList);
-        var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. This one publishes the deviation itself as Tai rather than using it in a band, so the change
+        // is directly visible in the indicator's own output rather than in something derived from it - about
+        // 55% narrower on a typical price series. The quantity the indicator is named for is a standard
+        // deviation, and that is the windowed one. Taken over slowMaList by name, which is the series it
+        // measures - the batch chained it in on purpose. See #190.
+        var taiList = GetStandardDeviationList(slowMaList, length2);
         var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -400,9 +515,9 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         stockData.SetCustomValues(atrList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = GetStandardDeviationList(atrList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -803,7 +918,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -874,8 +989,16 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        stockData.SetCustomValues(macdList);
-        var stcList = CalculateStochasticOscillator(stockData, maType, length: cycleLength).CustomValuesList;
+        // The stochastic of the MACD over the MACD's own range. Chained into the stochastic indicator, the MACD
+        // was measured against the bars' highs and lows - an oscillator set against a price range.
+        var (macdHighestList, macdLowestList) = GetMaxAndMinValuesList(macdList, cycleLength);
+        var stcList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var macdRange = macdHighestList[i] - macdLowestList[i];
+            stcList.Add(macdRange != 0 ? MinOrMax((macdList[i] - macdLowestList[i]) / macdRange * 100, 100, 0) : 0);
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var stc = stcList[i];
@@ -1064,20 +1187,19 @@ public static partial class Calculations
     /// Calculates the Wave Trend Oscillator
     /// </summary>
     /// <param name="stockData"></param>
-    /// <param name="inputName"></param>
     /// <param name="maType"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="smoothLength"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateWaveTrendOscillator(this StockData stockData, InputName inputName = InputName.FullTypicalPrice,
+    public static StockData CalculateWaveTrendOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 21, int smoothLength = 4)
     {
         List<double> absApEsaList = new(stockData.Count);
         List<double> ciList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 

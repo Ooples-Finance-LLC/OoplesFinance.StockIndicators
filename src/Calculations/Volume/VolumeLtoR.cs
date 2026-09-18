@@ -1,17 +1,111 @@
 ﻿
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Core;
+
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Net Volume
+    /// </summary>
+    /// <remarks>
+    /// The bar's volume signed by its direction: positive when it closed up, negative when it closed down,
+    /// and zero when it closed unchanged. The first bar has nothing to compare with and is zero. This is the
+    /// per-bar quantity the cumulative volume index accumulates.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNetVolume(this StockData stockData)
+    {
+        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> netVolumeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            double netVolume = 0;
+            if (i >= 1)
+            {
+                var currentValue = inputList[i];
+                var prevValue = inputList[i - 1];
+                netVolume = currentValue > prevValue ? volumeList[i] : currentValue < prevValue ? -volumeList[i] : 0;
+            }
+
+            netVolumeList.Add(netVolume);
+
+            var prevNetVolume1 = i >= 1 ? netVolumeList[i - 1] : 0;
+            var prevNetVolume2 = i >= 2 ? netVolumeList[i - 2] : 0;
+            var signal = GetCompareSignal(netVolume - prevNetVolume1, prevNetVolume1 - prevNetVolume2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "NetVolume", netVolumeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(netVolumeList);
+        stockData.IndicatorName = IndicatorName.NetVolume;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Normalized Volume
+    /// </summary>
+    /// <remarks>
+    /// The bar's volume as a multiple of the average volume of the last <paramref name="length"/> bars: one
+    /// when the bar is typical, two when it traded twice its recent average. A bar before the average has
+    /// filled, or one whose average is zero, has nothing to be a multiple of and publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculateNormalizedVolume(this StockData stockData, int length = 20)
+    {
+        length = Math.Max(length, 1);
+        var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var count = volumeList.Count;
+        List<double> normalizedVolumeList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
+        var smaBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.SimpleMovingAverage(volumeSpan, smaBuffer.Span, length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var averageVolume = smaBuffer.Span[i];
+            var normalizedVolume = averageVolume != 0 ? volumeList[i] / averageVolume : 0;
+            normalizedVolumeList.Add(normalizedVolume);
+
+            var prevNormalized1 = i >= 1 ? normalizedVolumeList[i - 1] : 0;
+            var prevNormalized2 = i >= 2 ? normalizedVolumeList[i - 2] : 0;
+            var signal = GetCompareSignal(normalizedVolume - prevNormalized1, prevNormalized1 - prevNormalized2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "NormalizedVolume", normalizedVolumeList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(normalizedVolumeList);
+        stockData.IndicatorName = IndicatorName.NormalizedVolume;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the Money Flow Index
     /// </summary>
     /// <param name="stockData">The stock data.</param>
-    /// <param name="inputName">Name of the input.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateMoneyFlowIndex(this StockData stockData, InputName inputName = InputName.TypicalPrice, int length = 14)
+    public static StockData CalculateMoneyFlowIndex(this StockData stockData, int length = 14)
     {
         List<double> mfiList = new(stockData.Count);
         List<double> posMoneyFlowList = new(stockData.Count);
@@ -19,7 +113,7 @@ public static partial class Calculations
         var posMoneyFlowSumWindow = new RollingSum();
         var negMoneyFlowSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(inputName, stockData);
+        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -238,7 +332,7 @@ public static partial class Calculations
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length1).CustomValuesList;
+        var obvList = CalculateOnBalanceVolume(stockData, maType, length1).ChainedValues;
         var obvmList = GetMovingAverageList(stockData, maType, length1, obvList);
         var sigList = GetMovingAverageList(stockData, maType, length2, obvmList);
 
@@ -330,20 +424,27 @@ public static partial class Calculations
     public static StockData CalculateOnBalanceVolumeDisparityIndicator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> obvdiList = new(stockData.Count);
         List<double> bscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length).CustomValuesList;
+        var obvList = CalculateOnBalanceVolume(stockData, maType, length).ChainedValues;
         var obvSmaList = GetMovingAverageList(stockData, maType, length, obvList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
+        // The deviation of each window about its own mean, not the mean squared residual from a moving average
+        // of it. Both halves build the Bollinger construction - a value's position between bands two
+        // deviations either side of its average - so sigma is the windowed deviation in each. See #190.
+        //
+        // Taken over the two lists by name rather than by chaining, which is what keeps them apart: the first
+        // measures the prices and the second the on balance volume. Measuring one on the other's window is the
+        // redirection #190 warns of for chained sites.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(obvList);
-        var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var obvStdDevList = GetStandardDeviationList(obvList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -406,20 +507,23 @@ public static partial class Calculations
     public static StockData CalculateNegativeVolumeDisparityIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 33, int signalLength = 4, double top = 1.1, double bottom = 0.9)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> nvdiList = new(stockData.Count);
         List<double> bscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).CustomValuesList;
+        var nviList = CalculateNegativeVolumeIndex(stockData, maType, length).ChainedValues;
         var nviSmaList = GetMovingAverageList(stockData, maType, length, nviList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Reset CustomValuesList to ensure stdDev uses close prices, not smaList
-        stockData.SetCustomValues(new List<double>());
-        stockData.SignalsList = new List<Signal>();
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // The next component reads the caller's series, not the previous component's output.
+        stockData.RestoreInputSeries(callerSeries);
+        // The deviation of each window about its own mean, as in the on balance volume disparity above: the
+        // first measures the prices and the second the negative volume index, each about its own mean. See
+        // #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(nviList);
-        var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var nviStdDevList = GetStandardDeviationList(nviList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -486,7 +590,7 @@ public static partial class Calculations
 
         var smaVolumeList = GetMovingAverageList(stockData, maType, length, volumeList);
         stockData.SetCustomValues(volumeList);
-        var stdDevVolumeList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevVolumeList = GetStandardDeviationList(volumeList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {

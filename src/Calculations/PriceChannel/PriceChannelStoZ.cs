@@ -18,8 +18,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDeviationList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
-        var regressionList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var stdDeviationList = GetStandardDeviationList(inputList, length);
+        var regressionList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -72,7 +72,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -125,8 +125,17 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).CustomValuesList;
-        var stdevList = CalculateStandardDeviationVolatility(stockData, maType, minLength).CustomValuesList;
+        var callerSeries = stockData.CaptureInputSeries();
+        var umaList = CalculateUltimateMovingAverage(stockData, maType, minLength, maxLength, 1).ChainedValues;
+        // The band width is the deviation of the prices, not of the UMA just published onto CustomValuesList.
+        stockData.RestoreInputSeries(callerSeries);
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. A band at k sigma is the Bollinger construction, and sigma there is the windowed deviation;
+        // CalculateStandardDeviationVolatility is a different quantity, about 55% wider on a typical price
+        // series, so these bands were about that much too wide - the same defect #186 fixed in the Bollinger
+        // bands themselves. Taken over inputList, which is the caller's own series captured above. See #190.
+        var stdevList = GetStandardDeviationList(inputList, minLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -243,7 +252,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength).CustomValuesList;
+        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length, smoothLength).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsi = rsiList[i];
@@ -333,7 +342,13 @@ public static partial class Calculations
             var basis = basisList[i];
             var currentValue = inputList[i];
 
-            var diff = currentValue - basis;
+            // A band half-width is a distance, so this is the mean absolute deviation from the basis.
+            // Measured signed, its average sits near zero for a series that oscillates about its own
+            // average, and dev = 2 * diffMa then turns negative on every bar where price is below the
+            // basis - which put the upper band below the lower one on 135 of the 251 fixture bars.
+            // VortexBands is a variation on the same Better Bollinger Bands construction as DEnvelope,
+            // and DEnvelope measures its width the same way, as an average of |value - centre|.
+            var diff = Math.Abs(currentValue - basis);
             diffList.Add(diff);
         }
 
@@ -449,7 +464,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -592,7 +607,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -740,7 +755,7 @@ public static partial class Calculations
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.TrendTraderBands;
+        stockData.IndicatorName = IndicatorName.TimeAndMoneyChannel;
 
         return stockData;
     }
@@ -837,7 +852,7 @@ public static partial class Calculations
         double absDiffSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var tsList = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var tsList = CalculateLinearRegression(stockData, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1002,6 +1017,7 @@ public static partial class Calculations
         List<double> extList = new(stockData.Count);
         List<double> yList = new(stockData.Count);
         List<double> xList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
@@ -1035,14 +1051,21 @@ public static partial class Calculations
             var prevY = i >= 1 ? yList[i - 1] : 0;
             var prevExt = i >= 1 ? extList[i - 1] : 0;
 
+            // The centre of the two bands published, both of which are extremes of the extrapolation.
+            middleBandList.Add((upperBandList[i] + lowerBandList[i]) / 2);
+
             var signal = GetCompareSignal(y - ext, prevY - prevExt);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the highest and lowest of the extrapolation; y is the deviation of price from
+            // its own average, a different quantity entirely, and it was above the upper band on 199 of
+            // the 251 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", upperBandList },
-            { "MiddleBand", yList },
-            { "LowerBand", lowerBandList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowerBandList },
+            { "Deviation", yList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1065,12 +1088,13 @@ public static partial class Calculations
         int length2 = 20)
     {
         List<double> scalperList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
         var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var smaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1083,14 +1107,22 @@ public static partial class Calculations
             var scalper = Math.PI * currentAtr > 0 ? currentSma - Math.Log(Math.PI * currentAtr) : currentSma;
             scalperList.Add(scalper);
 
+            // The centre of the two bands published: a rolling high and a rolling low over the same
+            // window, so their midpoint lies between them on every bar by construction.
+            middleBandList.Add((highestList[i] + lowestList[i]) / 2);
+
             var signal = GetCompareSignal(currentValue - scalper, prevValue - prevScalper);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are a rolling high and a rolling low; the scalper line is sma - log(pi * atr),
+            // a third quantity with no reason to lie between them, and it sat below the rolling low on
+            // 19 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
             { "UpperBand", highestList },
-            { "MiddleBand", scalperList },
-            { "LowerBand", lowestList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", lowestList },
+            { "Scalper", scalperList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -1121,7 +1153,7 @@ public static partial class Calculations
 
         var atrPeriod = (length1 * 2) - 1;
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrPeriod).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, atrPeriod).ChainedValues;
         var maList = GetMovingAverageList(stockData, maType, length1, inputList);
         var middleBandList = GetMovingAverageList(stockData, maType, length2, inputList);
 

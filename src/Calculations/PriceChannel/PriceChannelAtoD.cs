@@ -65,10 +65,11 @@ public static partial class Calculations
     {
         List<double> innerTopAtrChannelList = new(stockData.Count);
         List<double> innerBottomAtrChannelList = new(stockData.Count);
+        List<double> middleBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -87,15 +88,24 @@ public static partial class Calculations
             var bottomInner = Math.Round(currentValue - (atr * mult));
             innerBottomAtrChannelList.Add(bottomInner);
 
+            // The centre of the two bands actually published. Both are drawn around the current value,
+            // so their mean is that value carried through the same rounding, and it lies between them by
+            // construction.
+            middleBandList.Add((topInner + bottomInner) / 2);
+
             var signal = GetBollingerBandsSignal(currentValue - sma, prevValue - prevSma, currentValue, prevValue, topInner,
                 prevTopInner, bottomInner, prevBottomInner);
             signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are the current value plus and minus a multiple of the average true range. The
+            // moving average was published between them, and it is a different quantity with no reason
+            // to sit there: it was above the upper band on 9 bars and below the lower on 19.
             { "UpperBand", innerTopAtrChannelList },
-            { "MiddleBand", smaList },
-            { "LowerBand", innerBottomAtrChannelList }
+            { "MiddleBand", middleBandList },
+            { "LowerBand", innerBottomAtrChannelList },
+            { "Sma", smaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -168,7 +178,7 @@ public static partial class Calculations
 
         var mult = Sqrt(length);
 
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).CustomValuesList;
+        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -291,7 +301,15 @@ public static partial class Calculations
             utList.Add(ut);
 
             var prevDt = GetLastOrDefault(dtList);
-            var dt = (2 - alp) * (mt - ut) / (1 - alp);
+
+            // McNicholl's zero-lag form, which everywhere else in this library is written
+            // ((2 - alpha) * ema1 - ema2) / (1 - alpha) - see CalculateMcNichollMovingAverage and
+            // MovingAverageCore.McNichollMovingAverage. Grouped instead as (2 - alp) * (mt - ut) it is a
+            // different quantity altogether: at a constant price mt and ut are both that price, so the
+            // centre line came out as 0 rather than the price. A de-lagged average has to reproduce a
+            // constant, and this one could not. On the AAPL fixture it published a middle band of -13.86
+            // for a stock trading at 145.
+            var dt = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 0;
             dtList.Add(dt);
 
             var prevMt2 = GetLastOrDefault(mt2List);
@@ -302,7 +320,11 @@ public static partial class Calculations
             var ut2 = (alp * mt2) + ((1 - alp) * prevUt2);
             ut2List.Add(ut2);
 
-            var dt2 = (2 - alp) * (mt2 - ut2) / (1 - alp);
+            // The same de-lagging, applied to the mean absolute deviation rather than to price. The old
+            // grouping drove this to zero as well, and it is what set the width of both bands - so the
+            // width went negative whenever the deviation was falling, inverting the bands on 112 of the
+            // 251 fixture bars.
+            var dt2 = 1 - alp != 0 ? (((2 - alp) * mt2) - ut2) / (1 - alp) : 0;
             var prevBut = GetLastOrDefault(butList);
             var but = dt + (devFactor * dt2);
             butList.Add(but);

@@ -75,11 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LinqOptimizer.CSharp" Version="0.7.0" />
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Fork: grant ONLY the platform's indicator adapter access to the internal,
          deprecated reflection breadth-engine (IndicatorInvoker) instead of making
          it public. Keeps it out of the library's public API. -->
@@ -98,6 +93,19 @@
   <!-- Source Generator: Reference the built analyzer DLL -->
   <ItemGroup>
     <Analyzer Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll" />
+  </ItemGroup>
+
+  <!--
+    Ship the generator inside the package as well, not only use it while building this project.
+    Without this the published nupkg holds three lib folders and nothing else, so a consumer gets no
+    generation at all - no series accessors, no output map, and no way for an indicator they write
+    themselves to take part in any of it. analyzers/dotnet/cs is where the SDK looks.
+  -->
+  <ItemGroup>
+    <None Include="SourceGeneration\bin\$(Configuration)\netstandard2.0\OoplesFinance.StockIndicators.SourceGeneration.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">

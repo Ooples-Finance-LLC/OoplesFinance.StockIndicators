@@ -209,7 +209,7 @@ public static partial class Calculations
         double absDiffSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -342,7 +342,7 @@ public static partial class Calculations
             var currentLow = lowList[i];
             // For TrueRange on first bar, use current close to avoid inflated TR
             var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
 
             var trVal = currentValue != 0 ? tr / currentValue : tr;
             trValList.Add(trVal);
@@ -438,7 +438,7 @@ public static partial class Calculations
             var currentHigh = highList[i];
             var currentLow = lowList[i];
 
-            var tr = CalculateTrueRange(currentHigh, currentLow, prevValue);
+            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
             tempList.Add(tr);
             trWindow.Add(tr);
 
@@ -564,7 +564,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -585,7 +585,7 @@ public static partial class Calculations
 
         var xMaList = GetMovingAverageList(stockData, maType, length, xList);
         stockData.SetCustomValues(xList);
-        var mxList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var mxList = GetStandardDeviationList(xList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var my = devList[i];
@@ -631,7 +631,17 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var devList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The line holds until price escapes a band one deviation either side of it, and sigma in a band
+        // is the windowed deviation; CalculateStandardDeviationVolatility is a different quantity, about 55%
+        // wider on a typical price series, so the band was that much too wide and the line held through moves
+        // that should have moved it. See #190.
+        //
+        // The deviation is 0 until the window fills, which at the default length of 500 is a long warm-up. The
+        // band is then zero-width and the line simply follows price, which is the honest answer where no
+        // deviation is known yet - and unlike a carried-forward length, it costs nothing later: the line picks
+        // up its band as soon as the window fills.
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -671,7 +681,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        // The deviation of the window about its own mean, as in the automatic line above: the band the line
+        // holds within is one deviation either side of it, and sigma in a band is the windowed deviation. The
+        // quantity this replaces is about 55% wider, so the band was too wide and the line drifted where it
+        // should have jumped. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -721,7 +735,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // stdev(src, length) in the original: the prices' own standard deviation.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -834,7 +849,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -985,7 +1000,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var v1List = CalculateStandardDeviationVolatility(stockData, maType, length).OutputValues["Variance"];
+        // Uhl's v1 is the variance of the source over the window: a plain population variance of the prices.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var tolerance = Pow(10, -5);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -994,7 +1010,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var sma = smaList[i];
             var prevCma = i >= 1 ? cmaList[i - 1] : sma;
-            var v1 = v1List[i];
+            var v1 = stdDevList[i] * stdDevList[i];
             var v2 = Pow(prevCma - sma, 2);
             var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
 
@@ -1008,7 +1024,8 @@ public static partial class Calculations
                 kPrev = k;
             }
 
-            var cma = prevCma + (k * (sma - prevCma));
+            // Seeded at the average until the window is full, as the original's na(cma[1]) ? sma.
+            var cma = i < length ? sma : prevCma + (k * (sma - prevCma));
             cmaList.Add(cma);
 
             var signal = GetCompareSignal(currentValue - cma, prevValue - prevCma);
@@ -1286,8 +1303,8 @@ public static partial class Calculations
         double tempSum = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var shortStdDevList = CalculateStandardDeviationVolatility(stockData, length: fastLength).CustomValuesList;
-        var longStdDevList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+        var shortStdDevList = GetStandardDeviationList(inputList, fastLength);
+        var longStdDevList = GetStandardDeviationList(inputList, slowLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {

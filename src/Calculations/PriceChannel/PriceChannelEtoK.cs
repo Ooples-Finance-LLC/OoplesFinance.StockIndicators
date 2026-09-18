@@ -19,18 +19,32 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
+            // A Williams fractal is a five-bar pattern: the centre must beat the TWO bars on each side of
+            // it. Comparing it against one neighbour each way makes it an ordinary three-bar pivot, which
+            // fires on any single-bar wiggle and re-anchors the bands far more often than a fractal does.
+            // The centre is two bars back, so its right-hand neighbours are the previous bar and the
+            // current one, and its left-hand neighbours are three and four bars back. See #202.
+            // Nothing is judged until five real bars exist. Missing history reads as 0, and 0 is below any
+            // positive price, so evaluating earlier would confirm a fractal whose left-hand neighbour never
+            // happened - the same fabricated-value mistake fixed for the log-return windows in #205 and
+            // #209.
+            var complete = i >= 4;
+            var currentHigh = highList[i];
+            var currentLow = lowList[i];
             var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
             var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
             var prevHigh3 = i >= 3 ? highList[i - 3] : 0;
+            var prevHigh4 = i >= 4 ? highList[i - 4] : 0;
             var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
             var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
             var prevLow3 = i >= 3 ? lowList[i - 3] : 0;
+            var prevLow4 = i >= 4 ? lowList[i - 4] : 0;
             var currentClose = inputList[i];
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            double oklUpper = prevHigh1 < prevHigh2 ? 1 : 0;
-            double okrUpper = prevHigh3 < prevHigh2 ? 1 : 0;
-            double oklLower = prevLow1 > prevLow2 ? 1 : 0;
-            double okrLower = prevLow3 > prevLow2 ? 1 : 0;
+            double oklUpper = complete && prevHigh1 < prevHigh2 && currentHigh < prevHigh2 ? 1 : 0;
+            double okrUpper = complete && prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2 ? 1 : 0;
+            double oklLower = complete && prevLow1 > prevLow2 && currentLow > prevLow2 ? 1 : 0;
+            double okrLower = complete && prevLow3 > prevLow2 && prevLow4 > prevLow2 ? 1 : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
             var upperBand = oklUpper == 1 && okrUpper == 1 ? prevHigh2 : prevUpperBand;
@@ -78,8 +92,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var trimeanList = CalculateTrimean(stockData, length);
-        var q1List = trimeanList.OutputValues["Q1"];
-        var q3List = trimeanList.OutputValues["Q3"];
+        var q1List = trimeanList.ChainedOutputs["Q1"];
+        var q3List = trimeanList.ChainedOutputs["Q3"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -296,8 +310,12 @@ public static partial class Calculations
         var scl_2 = MinOrMax((int)Math.Ceiling((double)scl / 2));
         var mcl_2 = MinOrMax((int)Math.Ceiling((double)mcl / 2));
 
-        var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).CustomValuesList;
-        var mclAtrList = CalculateAverageTrueRange(stockData, maType, mcl).CustomValuesList;
+        var callerSeries = stockData.CaptureInputSeries();
+        var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).ChainedValues;
+        // Both channels are ATRs of the prices. The first ATR publishes itself onto CustomValuesList, and the
+        // second used to take it for the close - a true range measured against an ATR.
+        stockData.RestoreInputSeries(callerSeries);
+        var mclAtrList = CalculateAverageTrueRange(stockData, maType, mcl).ChainedValues;
         var sclRmaList = GetMovingAverageList(stockData, maType, scl, inputList);
         var mclRmaList = GetMovingAverageList(stockData, maType, mcl, inputList);
 
@@ -482,7 +500,7 @@ public static partial class Calculations
 
         var wmaList = GetMovingAverageList(stockData, maType, length, absD1List);
         stockData.SetCustomValues(d1List);
-        var s1List = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var s1List = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema = emaList[i];
@@ -495,7 +513,7 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(d2List);
-        var s2List = CalculateLinearRegression(stockData, length).CustomValuesList;
+        var s2List = CalculateLinearRegression(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema = emaList[i];
@@ -558,7 +576,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).CustomValuesList;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The bands decay by a fraction of a deviation and jump to price when price passes them, so the
+        // step is a deviation and it is the windowed one that names. The quantity this replaces is about 55%
+        // wider on a typical price series, so the bands decayed faster than the indicator specifies. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -569,14 +591,62 @@ public static partial class Calculations
             var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
             var prevA2 = i >= 2 ? aList[i - 2] : currentValue;
             var prevB2 = i >= 2 ? bList[i - 2] : currentValue;
-            var prevA3 = i >= 3 ? aList[i - 3] : currentValue;
-            var prevB3 = i >= 3 ? bList[i - 3] : currentValue;
             var l = stdDev != 0 ? (double)1 / length * stdDev : 0;
 
-            var a = currentValue > prevA1 ? prevA1 + (currentValue - prevA1) : prevA2 == prevA3 ? prevA2 - l : prevA2;
+            // Each band carries forward from its own previous value. Written against the value two and
+            // three bars back, the band was two interleaved series that never interact - the odd bars
+            // reading only odd bars and the even only even - so once it stopped moving it held two
+            // different values for ever rather than one. On a market that never moved the spread across
+            // the last hundred bars was 6.88303 at a thousand bars, and still exactly 6.88303 at five
+            // thousand and at twenty thousand: a period-2 cycle, not convergence that needed more bars.
+            // The band jumps to price when price passes it and otherwise decays by l once it has gone
+            // flat, which is the behaviour the indicator is named for.
+            //
+            // The decay stops at price. Each band is an envelope - price rising above the upper one pulls
+            // it up, price falling below the lower one pulls it down - so the upper must not drift down
+            // through price, nor the lower drift up through it. That keeps a >= price >= b, which makes
+            // the two ordered by construction rather than by luck. Without it both seed at the first
+            // close, stdDev is zero through the warmup so l is zero and neither moves, and the first
+            // non-zero l steps them toward each other from the same value and crosses them at once - at
+            // bar 15 of the AAPL fixture, publishing an upper band 0.418 below the middle.
+            //
+            // The equality below is deliberate, and a tolerance would be wrong. It is not two
+            // computations that ought to agree to within rounding: it is one stored value against the one
+            // stored before it, asking whether the band carried forward untouched. Reading a real decay
+            // of l as "no change" would decay it a second time, and holding until price touches it is the
+            // behaviour this indicator is named for.
+#pragma warning disable S1244 // Floating point numbers should not be tested for equality
+            double a;
+            if (currentValue > prevA1)
+            {
+                a = currentValue;
+            }
+            else if (prevA1 == prevA2)
+            {
+                a = Math.Max(prevA1 - l, currentValue);
+            }
+            else
+            {
+                a = prevA1;
+            }
+
             aList.Add(a);
 
-            var b = currentValue < prevB1 ? prevB1 + (currentValue - prevB1) : prevB2 == prevB3 ? prevB2 + l : prevB2;
+            double b;
+            if (currentValue < prevB1)
+            {
+                b = currentValue;
+            }
+            else if (prevB1 == prevB2)
+            {
+                b = Math.Min(prevB1 + l, currentValue);
+            }
+            else
+            {
+                b = prevB1;
+            }
+#pragma warning restore S1244
+
             bList.Add(b);
 
             var prevTos = GetLastOrDefault(tosList);
@@ -631,7 +701,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length2).CustomValuesList;
+        var linRegList = CalculateLinearRegression(stockData, length2).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -693,7 +763,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -750,6 +820,7 @@ public static partial class Calculations
         int length1 = 20, int length2 = 10, double multFactor = 2,
         MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
+        var callerSeries = stockData.CaptureInputSeries();
         List<double> upperChannelList = new(stockData.Count);
         List<double> lowerChannelList = new(stockData.Count);
         List<double> midChannelList = new(stockData.Count);
@@ -762,8 +833,8 @@ public static partial class Calculations
         // MOVING AVERAGE rather than to the previous close - on AAPL that inflated ATR(10) from 3.9553 to
         // 9.7261 and pushed the upper band from 143.74 to 155.28. The ATR is computed here, before any
         // moving average touches stockData.
-        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).CustomValuesList;
-        stockData.SetCustomValues(new List<double>());
+        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
@@ -870,7 +941,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -881,9 +952,17 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(val2List);
-        var stdDevFastList = CalculateStandardDeviationVolatility(stockData, length: fastLength).CustomValuesList;
-        stockData.SetCustomValues(val2List);
-        var stdDevSlowList = CalculateStandardDeviationVolatility(stockData, length: slowLength).CustomValuesList;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The step holds until price escapes a band of one deviation, blended between a fast and a slow
+        // one by the efficiency ratio, so sigma in that band is the windowed deviation; the quantity this
+        // replaces is about 55% wider on a typical price series, so both bands were too wide.
+        //
+        // Both are taken over the same list - val2List - at two different lengths. That is the opposite of the
+        // pairs elsewhere in this issue, where two deviations measure two different series over one window:
+        // here it is one series over two windows, and it is the lengths that must not be crossed. See #190.
+        var stdDevFastList = GetStandardDeviationList(val2List, fastLength);
+        var stdDevSlowList = GetStandardDeviationList(val2List, slowLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

@@ -36,7 +36,30 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Calculate(IndicatorName name, object[]? parameters = null, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(parameters ?? Array.Empty<object>()), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(parameters ?? Array.Empty<object>()));
+        return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
+    }
+
+    /// <summary>
+    /// Calculates any indicator by name and continues from one of its published outputs, named directly.
+    /// </summary>
+    /// <param name="name">The indicator name from the IndicatorName enum.</param>
+    /// <param name="outputKey">The published output to continue from, such as "Median" or "R4".</param>
+    /// <param name="parameters">Optional parameters for the indicator (varies by indicator).</param>
+    /// <param name="input">Optional input series. If null, uses default price series.</param>
+    /// <param name="key">Optional key for named lookup.</param>
+    /// <returns>A SeriesHandle for that output of the indicator.</returns>
+    /// <remarks>
+    /// Every published output is reachable this way. Asking for one the indicator does not publish raises
+    /// rather than answering with a different series. This replaced six positional slots that could not name
+    /// every output - CamarillaPivotPoints publishes 17 - and mislabelled some of the ones they did reach.
+    /// See issues #201 and #219.
+    /// </remarks>
+    public SeriesHandle Calculate(IndicatorName name, string outputKey, object[]? parameters = null,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        var series = input ?? Price();
+        var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(parameters ?? Array.Empty<object>()), outputKey);
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -69,7 +92,7 @@ public sealed partial class IndicatorCatalog
         // V2 approach: Try to create the state - if it works, it's supported
         try
         {
-            var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(Array.Empty<object>()), IndicatorOutput.Primary);
+            var spec = IndicatorSpecs.Create(name, new GenericIndicatorOptions(Array.Empty<object>()));
             var state = StatefulIndicatorFactory.Create(spec);
             // If we got here, it's supported. Dispose if needed.
             if (state is IDisposable disposable)
@@ -209,11 +232,11 @@ public sealed partial class IndicatorCatalog
     {
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
-        var primary = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, IndicatorOutput.Primary),
+        var primary = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, "Macd"),
             series, seriesKey, primaryKey);
-        var signal = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, IndicatorOutput.Signal),
+        var signal = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, "Signal"),
             series, seriesKey, signalKey);
-        var histogram = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, IndicatorOutput.Histogram),
+        var histogram = _builder.AddIndicator(IndicatorSpecs.Macd(fastLength, slowLength, signalLength, "Histogram"),
             series, seriesKey, histogramKey);
 
         return new MacdResult(primary, signal, histogram);
@@ -227,11 +250,11 @@ public sealed partial class IndicatorCatalog
     {
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
-        var upper = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, IndicatorOutput.UpperBand),
+        var upper = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, "UpperBand"),
             series, seriesKey, upperKey);
-        var middle = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, IndicatorOutput.MiddleBand),
+        var middle = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, "MiddleBand"),
             series, seriesKey, middleKey);
-        var lower = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, IndicatorOutput.LowerBand),
+        var lower = _builder.AddIndicator(IndicatorSpecs.BollingerBands(length, stdDevMult, "LowerBand"),
             series, seriesKey, lowerKey);
 
         return new BollingerBandsResult(upper, middle, lower);
@@ -263,9 +286,9 @@ public sealed partial class IndicatorCatalog
     {
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
-        var k = _builder.AddIndicator(IndicatorSpecs.Stochastic(kLength, dLength, IndicatorOutput.Primary),
+        var k = _builder.AddIndicator(IndicatorSpecs.Stochastic(kLength, dLength, "FastK"),
             series, seriesKey, kKey);
-        var d = _builder.AddIndicator(IndicatorSpecs.Stochastic(kLength, dLength, IndicatorOutput.Signal),
+        var d = _builder.AddIndicator(IndicatorSpecs.Stochastic(kLength, dLength, "FastD"),
             series, seriesKey, dKey);
         return new StochasticResult(k, d);
     }
@@ -276,7 +299,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Wma(int length, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.WeightedMovingAverage, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.WeightedMovingAverage, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -286,7 +309,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Hma(int length, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.HullMovingAverage, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.HullMovingAverage, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -296,7 +319,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Tema(int length, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.TripleExponentialMovingAverage, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.TripleExponentialMovingAverage, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -306,7 +329,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Dema(int length, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.DoubleExponentialMovingAverage, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.DoubleExponentialMovingAverage, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -316,7 +339,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Cci(int length = 20, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.CommodityChannelIndex, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.CommodityChannelIndex, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -326,7 +349,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle WilliamsR(int length = 14, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.WilliamsR, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.WilliamsR, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -336,7 +359,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Roc(int length = 12, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.RateOfChange, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.RateOfChange, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -346,7 +369,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Momentum(int length = 10, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.MomentumOscillator, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.MomentumOscillator, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -356,26 +379,34 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Sar(double accelerationStart = 0.02, double accelerationMax = 0.2, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.ParabolicSAR, new GenericIndicatorOptions(new object[] { accelerationStart, accelerationMax }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.ParabolicSAR, new GenericIndicatorOptions(new object[] { accelerationStart, accelerationMax }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
     /// <summary>
     /// Calculates Keltner Channels.
     /// </summary>
-    public KeltnerChannelResult KeltnerChannels(int length = 20, double multiplier = 2, SeriesHandle? input = null,
+    public KeltnerChannelResult KeltnerChannels(int length = 20, double multiplier = 2, int atrLength = 10,
+        SeriesHandle? input = null,
         IndicatorKey? upperKey = null, IndicatorKey? middleKey = null, IndicatorKey? lowerKey = null)
     {
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
+
+        // Three arguments, in the order the indicator takes them: basis length, ATR length, multiplier.
+        // Passing two put the multiplier where the ATR length belongs, so a caller asking for a 20-bar
+        // channel at two sigma got a two-bar ATR and the default multiplier, and the multiplier argument
+        // did nothing at all. The ATR length is a real parameter of this indicator, so it is named here
+        // rather than left to a positional default.
+        var arguments = new object[] { length, atrLength, multiplier };
         var upper = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.UpperBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), "UpperBand"),
             series, seriesKey, upperKey);
         var middle = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.MiddleBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), "MiddleBand"),
             series, seriesKey, middleKey);
         var lower = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(new object[] { length, multiplier }), IndicatorOutput.LowerBand),
+            IndicatorSpecs.Create(IndicatorName.KeltnerChannels, new GenericIndicatorOptions(arguments), "LowerBand"),
             series, seriesKey, lowerKey);
         return new KeltnerChannelResult(upper, middle, lower);
     }
@@ -389,13 +420,13 @@ public sealed partial class IndicatorCatalog
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
         var upper = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.UpperBand),
+            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), "UpperChannel"),
             series, seriesKey, upperKey);
         var middle = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.MiddleBand),
+            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), "MiddleChannel"),
             series, seriesKey, middleKey);
         var lower = _builder.AddIndicator(
-            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.LowerBand),
+            IndicatorSpecs.Create(IndicatorName.DonchianChannels, new GenericIndicatorOptions(new object[] { length }), "LowerChannel"),
             series, seriesKey, lowerKey);
         return new DonchianChannelResult(upper, middle, lower);
     }
@@ -406,7 +437,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Vwap(SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.VolumeWeightedAveragePrice, new GenericIndicatorOptions(Array.Empty<object>()), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.VolumeWeightedAveragePrice, new GenericIndicatorOptions(Array.Empty<object>()));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -416,7 +447,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Obv(SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.OnBalanceVolume, new GenericIndicatorOptions(Array.Empty<object>()), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.OnBalanceVolume, new GenericIndicatorOptions(Array.Empty<object>()));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -426,7 +457,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Mfi(int length = 14, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.MoneyFlowIndex, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.MoneyFlowIndex, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -438,11 +469,16 @@ public sealed partial class IndicatorCatalog
         var series = input ?? Price();
         var seriesKey = _builder.ResolveSeriesKey(series);
         var opts = new GenericIndicatorOptions(new object[] { tenkanLength, kijunLength, senkouBLength });
-        var tenkanSen = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.Primary), series, seriesKey, null);
-        var kijunSen = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.Signal), series, seriesKey, null);
-        var senkouSpanA = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.UpperBand), series, seriesKey, null);
-        var senkouSpanB = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.LowerBand), series, seriesKey, null);
-        var chikouSpan = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, IndicatorOutput.Histogram), series, seriesKey, null);
+        var tenkanSen = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts), series, seriesKey, null);
+        var kijunSen = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, "KijunSen"), series, seriesKey, null);
+        var senkouSpanA = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, "SenkouSpanA"), series, seriesKey, null);
+        var senkouSpanB = _builder.AddIndicator(IndicatorSpecs.Create(IndicatorName.IchimokuCloud, opts, "SenkouSpanB"), series, seriesKey, null);
+        // The Chikou span is its own indicator. CalculateIchimokuCloud publishes TenkanSen, KijunSen,
+        // SenkouSpanA and SenkouSpanB and no Chikou span at all, so asking it for a fifth slot resolved to
+        // SenkouSpanA and handed back a series this result already exposes.
+        var chikouSpan = _builder.AddIndicator(
+            IndicatorSpecs.Create(IndicatorName.IchimokuChikouSpan, new IchimokuChikouSpanSpecOptions(kijunLength)),
+            series, seriesKey, null);
         return new IchimokuResult(tenkanSen, kijunSen, senkouSpanA, senkouSpanB, chikouSpan);
     }
 
@@ -452,7 +488,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle StdDev(int length = 20, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.StandardDeviation, new GenericIndicatorOptions(new object[] { length }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.StandardDeviation, new GenericIndicatorOptions(new object[] { length }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -462,7 +498,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Tsi(int longLength = 25, int shortLength = 13, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.TrueStrengthIndex, new GenericIndicatorOptions(new object[] { longLength, shortLength }), IndicatorOutput.Primary);
+        var spec = IndicatorSpecs.Create(IndicatorName.TrueStrengthIndex, new GenericIndicatorOptions(new object[] { longLength, shortLength }));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -516,8 +552,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.RSMKIndicator,
-            new MultiStockIndicatorOptions(length, smoothLength, MovingAvgType.ExponentialMovingAverage),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length, smoothLength, MovingAvgType.ExponentialMovingAverage));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 
@@ -537,8 +572,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.ComparePriceMomentumOscillator,
-            new MultiStockIndicatorOptions(length1, length2, signalLength, MovingAvgType.ExponentialMovingAverage),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length1, length2, signalLength, MovingAvgType.ExponentialMovingAverage));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 
@@ -556,8 +590,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.KaufmanStressIndicator,
-            new MultiStockIndicatorOptions(length),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 
@@ -575,8 +608,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.RelativeNormalizedVolatility,
-            new MultiStockIndicatorOptions(length, MovingAvgType.SimpleMovingAverage),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length, MovingAvgType.SimpleMovingAverage));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 
@@ -598,8 +630,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.RelativeStrength3DIndicator,
-            new MultiStockIndicatorOptions(length1, length2, length3, length4, length5, MovingAvgType.ExponentialMovingAverage),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length1, length2, length3, length4, length5, MovingAvgType.ExponentialMovingAverage));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 
@@ -618,8 +649,7 @@ public sealed partial class IndicatorCatalog
         var stockPrice = input ?? Price();
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.SectorRotationModel,
-            new MultiStockIndicatorOptions(length1, length2, MovingAvgType.ExponentialMovingAverage),
-            IndicatorOutput.Primary);
+            new MultiStockIndicatorOptions(length1, length2, MovingAvgType.ExponentialMovingAverage));
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 

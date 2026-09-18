@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 
+using OoplesFinance.StockIndicators.Helpers;
+
 namespace OoplesFinance.StockIndicators.Core;
 
 internal static class MovingAverageCore
@@ -22,7 +24,75 @@ internal static class MovingAverageCore
             }
 
             output[i] = i >= length - 1 ? sum / length : 0;
+
+            // Rebuilt from its window every length bars, once the bar's value is taken. A running sum otherwise
+            // keeps the rounding error of every value it has ever held: after prices near 100,000 it was still
+            // off by 1e-9 at prices near 10, which a deviation from the mean of a tenth turns into 1e-8.
+            if (length > 0 && (i + 1) % length == 0)
+            {
+                sum = 0;
+                for (var j = i - length + 1; j <= i; j++)
+                {
+                    sum += input[j];
+                }
+            }
         }
+    }
+
+    /// <summary>
+    /// The variable-length average's next length: the one decision, in one place.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The length moves on where the value sits against four levels drawn at 0.25 and 1.75 deviations either
+    /// side of the average. Inside the inner pair it lengthens, outside the outer pair it shortens, between
+    /// them it holds. A deviation of 0 holds too: until the window fills there is no deviation, which would
+    /// collapse all four levels onto the average and make any value not exactly on it "outside" by
+    /// construction - shortening on the absence of a measurement rather than on one. A genuinely flat window
+    /// reads 0 as well and carries no dispersion signal either. See issue #190.
+    /// </para>
+    /// <para>
+    /// This is here because three places computed it: the batch calculation, the variable-length streaming
+    /// state, and UltimateMovingAverageState, which repeats the decision inline because the batch ultimate
+    /// moving average reads the variable-length average's own Length output. Converting the deviation in only
+    /// some of them made the engines choose different lengths, which compounds because each bar's length
+    /// carries into the next, and the streaming parity sweeps caught it at bar 49. One copy cannot drift from
+    /// another.
+    /// </para>
+    /// </remarks>
+    /// <param name="value">The bar's resolved input value.</param>
+    /// <param name="average">The moving average the levels are measured from.</param>
+    /// <param name="deviation">The deviation of the window about its own mean, or 0 where none is known yet.</param>
+    /// <param name="previousLength">The length carried in from the previous bar.</param>
+    /// <param name="minLength">The shortest length allowed.</param>
+    /// <param name="maxLength">The longest length allowed.</param>
+    internal static double VariableLength(double value, double average, double deviation, double previousLength,
+        int minLength, int maxLength)
+    {
+        if (deviation == 0)
+        {
+            return previousLength;
+        }
+
+        var inner = 0.25 * deviation;
+        var outer = 1.75 * deviation;
+
+        double next;
+        if (value >= average - inner && value <= average + inner)
+        {
+            next = previousLength + 1;
+        }
+        else if (value < average - outer || value > average + outer)
+        {
+            next = previousLength - 1;
+        }
+        else
+        {
+            next = previousLength;
+        }
+
+        // Max then min, as both call sites clamped it.
+        return MathHelper.MinOrMax(next, maxLength, minLength);
     }
 
     internal static void WeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
@@ -48,6 +118,21 @@ internal static class MovingAverageCore
             }
 
             output[i] = numerator / weightedSumDenominator;
+
+            // Rebuilt from the window every length bars, once the bar's value is taken, as SimpleMovingAverage
+            // rebuilds its sum: the running numerator otherwise carried a relative error of 1e-6 from prices near
+            // 100,000 into prices near 10.
+            if (length > 0 && (i + 1) % length == 0)
+            {
+                numerator = 0;
+                windowSum = 0;
+                for (var j = 0; j < length; j++)
+                {
+                    var windowValue = input[i - length + 1 + j];
+                    numerator += (j + 1) * windowValue;
+                    windowSum += windowValue;
+                }
+            }
         }
     }
 
@@ -291,44 +376,12 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Rolling sums for incremental computation
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-
+        // The line through the trailing window, x counted from its first value: running sums over the bar index
+        // cancel catastrophically and drift, see RollingLeastSquares. A one-value window returns the value.
+        using var regression = new RollingLeastSquares(length);
         for (var i = 0; i < input.Length; i++)
         {
-            var currentY = input[i];
-            var currentX = (double)i;
-
-            // Add current values to sums
-            sumX += currentX;
-            sumY += currentY;
-            sumXY += currentX * currentY;
-            sumX2 += currentX * currentX;
-
-            // Remove old values if window is full
-            if (i >= length)
-            {
-                var oldX = (double)(i - length);
-                var oldY = input[i - length];
-                sumX -= oldX;
-                sumY -= oldY;
-                sumXY -= oldX * oldY;
-                sumX2 -= oldX * oldX;
-            }
-
-            var n = Math.Min(i + 1, length);
-            var denominator = (n * sumX2) - (sumX * sumX);
-
-            if (denominator == 0)
-            {
-                output[i] = n > 0 ? sumY / n : 0;
-            }
-            else
-            {
-                var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
-                var intercept = (sumY - (slope * sumX)) / n;
-                output[i] = intercept + (slope * currentX);
-            }
+            output[i] = regression.Next(input[i], isFinal: true).Last;
         }
     }
 
@@ -531,42 +584,49 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Vidya (Variable Index Dynamic Average).
     /// </summary>
-    internal static void Vidya(ReadOnlySpan<double> input, Span<double> output, int length, int cmoLength = 9)
+    internal static void Vidya(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The same VIDYA as CalculateVariableIndexDynamicAverage: the CMO over `length` bars, and the average
+        // seeded at 0. This fast path used a fixed 9-bar CMO and seeded at the first price, so
+        // MovingAvgType.VariableIndexDynamicAverage meant a different average here than in the indicator.
+        var resolved = Math.Max(1, length);
+        var alpha = 2d / (resolved + 1);
         var pool = ArrayPool<double>.Shared;
-        var cmoArray = pool.Rent(input.Length);
+        var changesArray = pool.Rent(input.Length * 2);
 
         try
         {
-            var cmo = cmoArray.AsSpan(0, input.Length);
-            OscillatorCore.ChandeMomentumOscillator(input, cmo, cmoLength);
-
-            var sc = 2.0 / (length + 1);
-            double vidya = 0;
+            var pos = changesArray.AsSpan(0, input.Length);
+            var neg = changesArray.AsSpan(input.Length, input.Length);
+            double posSum = 0, negSum = 0, vidya = 0;
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i == 0)
+                var diff = i >= 1 ? input[i] - input[i - 1] : 0;
+                pos[i] = diff > 0 ? diff : 0;
+                neg[i] = diff < 0 ? Math.Abs(diff) : 0;
+                posSum += pos[i];
+                negSum += neg[i];
+                if (i >= resolved)
                 {
-                    vidya = input[i];
-                    output[i] = vidya;
+                    posSum -= pos[i - resolved];
+                    negSum -= neg[i - resolved];
                 }
-                else
-                {
-                    var absChmo = Math.Abs(cmo[i]) / 100;
-                    vidya = (sc * absChmo * input[i]) + ((1 - sc * absChmo) * vidya);
-                    output[i] = vidya;
-                }
+
+                var cmo = posSum + negSum != 0 ? Math.Min(Math.Max((posSum - negSum) / (posSum + negSum) * 100, -100), 100) : 0;
+                var currentCmo = Math.Abs(cmo / 100);
+                vidya = (input[i] * alpha * currentCmo) + (vidya * (1 - (alpha * currentCmo)));
+                output[i] = vidya;
             }
         }
         finally
         {
-            pool.Return(cmoArray);
+            pool.Return(changesArray);
         }
     }
 
@@ -580,34 +640,41 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
+        // Chande's VMA as LazyBear writes it, the same algorithm as CalculateVariableMovingAverage. This fast
+        // path used to compute a different average altogether - an EMA weighted by sd / (sd + 0.001), seeded at
+        // the first price - so MovingAvgType.VariableMovingAverage meant one thing here and another there.
+        var resolved = Math.Max(1, length);
+        var k = 1d / resolved;
+        // The same rolling window as the indicator: the highest and lowest iS, O(1) amortised per bar.
+        var isWindow = new RollingMinMax(resolved);
+        double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0, vma = 0;
 
-        try
+        for (var i = 0; i < input.Length; i++)
         {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            VolatilityCore.StandardDeviation(input, stdDev, length);
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var pdm = i >= 1 ? Math.Max(currentValue - prevValue, 0) : 0;
+            var mdm = i >= 1 ? Math.Max(prevValue - currentValue, 0) : 0;
 
-            double vma = 0;
+            pdmS = ((1 - k) * pdmS) + (k * pdm);
+            mdmS = ((1 - k) * mdmS) + (k * mdm);
+            var s = pdmS + mdmS;
+            var pdi = s != 0 ? pdmS / s : 0;
+            var mdi = s != 0 ? mdmS / s : 0;
 
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    vma = input[i];
-                    output[i] = vma;
-                }
-                else
-                {
-                    var k = stdDev[i] / (stdDev[i] + 0.001);
-                    vma = (k * input[i]) + ((1 - k) * vma);
-                    output[i] = vma;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
+            pdiS = ((1 - k) * pdiS) + (k * pdi);
+            mdiS = ((1 - k) * mdiS) + (k * mdi);
+            var d = Math.Abs(pdiS - mdiS);
+            var s1 = pdiS + mdiS;
+            var dS1 = s1 != 0 ? d / s1 : 0;
+
+            iS = ((1 - k) * iS) + (k * dS1);
+            isWindow.Add(iS);
+
+            var d1 = isWindow.Max - isWindow.Min;
+            var vI = d1 != 0 ? (iS - isWindow.Min) / d1 : 0;
+            vma = ((1 - (k * vI)) * vma) + (k * vI * currentValue);
+            output[i] = vma;
         }
     }
 
@@ -2822,18 +2889,20 @@ internal static class MovingAverageCore
                 continue;
             }
 
-            var product = 1.0;
+            // Summed as logarithms rather than multiplied: the product of a long window overflows a
+            // double once length * log10(price) passes about 308, and published infinity instead.
+            double logSum = 0;
             var count = 0;
             for (var j = 0; j < length; j++)
             {
                 var val = input[i - j];
                 if (val > 0)
                 {
-                    product *= val;
+                    logSum += Math.Log(val);
                     count++;
                 }
             }
-            output[i] = count > 0 ? Math.Pow(product, 1.0 / count) : 0;
+            output[i] = count > 0 ? Math.Exp(logSum / count) : 0;
         }
     }
 
@@ -3641,41 +3710,30 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        // McNicholl's zero-lag EMA, the same as CalculateMcNichollMovingAverage:
+        // ((2 - alpha) * ema1 - ema2) / (1 - alpha), with ema2 the EMA of ema1. This fast path returned
+        // ema + EMA(price - ema), a different average, so MovingAvgType.McNichollMovingAverage meant one thing
+        // here and another in the indicator.
+        var alpha = 2d / (length + 1);
+        var pool = ArrayPool<double>.Shared;
+        var ema1Buffer = pool.Rent(input.Length);
+        var ema2Buffer = pool.Rent(input.Length);
         try
         {
-            var ema = emaBuffer.AsSpan(0, input.Length);
-            ExponentialMovingAverage(input, ema, length);
+            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+            var ema2 = ema2Buffer.AsSpan(0, input.Length);
+            ExponentialMovingAverage(input, ema1, length);
+            ExponentialMovingAverage(ema1, ema2, length);
 
-            // Compute difference and EMA of difference
-            var diffBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-            var diffEmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-            try
+            for (var i = 0; i < input.Length; i++)
             {
-                var diff = diffBuffer.AsSpan(0, input.Length);
-                var diffEma = diffEmaBuffer.AsSpan(0, input.Length);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    diff[i] = input[i] - ema[i];
-                }
-
-                ExponentialMovingAverage(diff, diffEma, length);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    output[i] = ema[i] + diffEma[i];
-                }
-            }
-            finally
-            {
-                ArrayPool<double>.Shared.Return(diffBuffer);
-                ArrayPool<double>.Shared.Return(diffEmaBuffer);
+                output[i] = 1 - alpha != 0 ? (((2 - alpha) * ema1[i]) - ema2[i]) / (1 - alpha) : 0;
             }
         }
         finally
         {
-            ArrayPool<double>.Shared.Return(emaBuffer);
+            pool.Return(ema1Buffer);
+            pool.Return(ema2Buffer);
         }
     }
 
@@ -3734,27 +3792,27 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // First compute TEMA
-        var temaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        // The same as CalculateZeroLagTripleExponentialMovingAverage: 2 * TEMA - TEMA(TEMA). This fast path
+        // took the second average as an EMA of the TEMA, a different line from the indicator of the same name.
+        var tema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
+        var tema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            var tema = temaBuffer.AsSpan(0, input.Length);
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
+            var tema1 = tema1Buffer.AsSpan(0, input.Length);
+            var tema2 = tema2Buffer.AsSpan(0, input.Length);
 
-            TripleExponentialMovingAverage(input, tema, length);
-            ExponentialMovingAverage(tema, ema1, length);
+            TripleExponentialMovingAverage(input, tema1, length);
+            TripleExponentialMovingAverage(tema1, tema2, length);
 
-            // Zero lag = 2*TEMA - EMA(TEMA)
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * tema[i]) - ema1[i];
+                output[i] = tema1[i] + (tema1[i] - tema2[i]);
             }
         }
         finally
         {
-            ArrayPool<double>.Shared.Return(temaBuffer);
-            ArrayPool<double>.Shared.Return(ema1Buffer);
+            ArrayPool<double>.Shared.Return(tema1Buffer);
+            ArrayPool<double>.Shared.Return(tema2Buffer);
         }
     }
 
@@ -5827,22 +5885,30 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var alpha = 2.0 / (length + 1);
+        // Ehlers' noise elimination technology, the same as CalculateEhlersNoiseEliminationTechnology: a
+        // Kendall-style count of how the last `length` values are ordered, scaled to [-1, 1]. This fast path
+        // was an adaptive EMA of the input instead - a price-scale average where the indicator is an oscillator.
+        length = Math.Max(length, 1);
+        var denom = 0.5 * length * (length - 1);
+        var xArray = new double[length + 1];
 
         for (var i = 0; i < input.Length; i++)
         {
-            var currentValue = input[i];
-            var prevNet = i >= 1 ? output[i - 1] : currentValue;
+            for (var j = 1; j <= length; j++)
+            {
+                xArray[j] = i >= j - 1 ? input[i - (j - 1)] : 0;
+            }
 
-            // Noise elimination through adaptive smoothing
-            var change = Math.Abs(currentValue - prevNet);
-            var prevChange = i >= 1 ? Math.Abs(input[i - 1] - (i >= 2 ? output[i - 2] : input[i - 1])) : 0;
+            double num = 0;
+            for (var j = 2; j <= length; j++)
+            {
+                for (var k = 1; k <= j - 1; k++)
+                {
+                    num -= Math.Sign(xArray[j] - xArray[k]);
+                }
+            }
 
-            // Reduce alpha when changes are small (noise)
-            var noiseRatio = prevChange > 0 ? Math.Min(change / prevChange, 2) : 1;
-            var adaptiveAlpha = alpha * Math.Min(noiseRatio, 1);
-
-            output[i] = prevNet + (adaptiveAlpha * (currentValue - prevNet));
+            output[i] = denom != 0 ? num / denom : 0;
         }
     }
 

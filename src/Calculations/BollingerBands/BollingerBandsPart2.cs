@@ -92,8 +92,8 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -138,9 +138,9 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.OutputValues["UpperBand"];
-        var lowerBandList = bbList.OutputValues["LowerBand"];
-        var middleBandList = bbList.OutputValues["MiddleBand"];
+        var upperBandList = bbList.ChainedOutputs["UpperBand"];
+        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
+        var middleBandList = bbList.ChainedOutputs["MiddleBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -175,7 +175,6 @@ public static partial class Calculations
     /// </summary>
     /// <param name="stockData"></param>
     /// <param name="maType"></param>
-    /// <param name="inputName"></param>
     /// <param name="length1"></param>
     /// <param name="length2"></param>
     /// <param name="smoothLength"></param>
@@ -183,7 +182,7 @@ public static partial class Calculations
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVervoortModifiedBollingerBandIndicator(this StockData stockData,
-        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, InputName inputName = InputName.FullTypicalPrice, int length1 = 18,
+        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18,
         int length2 = 200, int smoothLength = 8, double stdDevMult = 1.6)
     {
         List<double> haOpenList = new(stockData.Count);
@@ -194,7 +193,7 @@ public static partial class Calculations
         List<double> lbList = new(stockData.Count);
         List<double> percbSignalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(inputName, stockData);
+        var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -225,7 +224,12 @@ public static partial class Calculations
 
         var zlhaTemaList = GetMovingAverageList(stockData, maType, smoothLength, zlhaList);
         stockData.SetCustomValues(zlhaTemaList);
-        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. This is the Bollinger construction on the smoothed Heikin-Ashi series - a value's position
+        // between bands two deviations either side - and sigma appears as both the band offset and the
+        // divisor, so a value about 55% high moved the band and shrank the result at once. See #190.
+        var zlhaTemaStdDevList = GetStandardDeviationList(zlhaTemaList, length1);
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -238,7 +242,11 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(percbList);
-        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
+
+        // The deviation of the percent-b series about its own mean, at length2 rather than length1. Taken over
+        // percbList by name: this is a second deviation, of a different series and over a different window
+        // from the one above, and the two must not be crossed in either respect. See #190.
+        var percbStdDevList = GetStandardDeviationList(percbList, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = percbList[i];
@@ -263,9 +271,14 @@ public static partial class Calculations
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            // The bands are 50 plus and minus a multiple of the deviation, so 50 is their centre, and
+            // percbSignal is already exactly that mean - it simply was not published. What was published
+            // as the middle is %b itself, the series the bands are drawn around, which reached 636 while
+            // the bands sat at 169 and -69.
             { "UpperBand", ubList },
-            { "MiddleBand", percbList },
-            { "LowerBand", lbList }
+            { "MiddleBand", percbSignalList },
+            { "LowerBand", lbList },
+            { "PercentB", percbList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());

@@ -150,11 +150,168 @@ var handle = indicators.Calculate(
 
 ## Breaking Changes
 
+### Custom input: one mechanism for every streaming indicator
+
+Every streaming state used to take custom input through its own selector constructor -
+`new RsiState(14, bar => ...)` - and 82 of them had none, so some indicators could not take custom
+values at all. Those per-state selector constructors are removed. `CustomInputState` wraps any state
+instead, and ready-made `InputSeries` presets are named after the input names they replace.
+
+```csharp
+// Before
+var rsi = new RelativeStrengthIndexState(14, 3, bar => (bar.High + bar.Low) / 2);
+
+// After - a preset
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.MedianPrice);
+
+// After - any function of the bar
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), bar => (bar.High + bar.Low) / 2);
+
+// After - another indicator's output (streaming chaining)
+var rsi = new CustomInputState(new RelativeStrengthIndexState(14), InputSeries.Of(new MidpointState(14)));
+```
+
+The same presets work in batch, where `UseInput` chains a series:
+
+```csharp
+var rsi = stockData.UseInput(InputSeries.MedianPrice).CalculateRelativeStrengthIndex(length: 14);
+```
+
+| Input | Preset |
+|---|---|
+| close, adjusted close, open, high, low, volume | `InputSeries.Close`, `.AdjustedClose`, `.Open`, `.High`, `.Low`, `.Volume` |
+| median, typical, full typical, weighted close, average price | `InputSeries.MedianPrice`, `.TypicalPrice`, `.FullTypicalPrice`, `.WeightedClose`, `.AveragePrice` |
+| midpoint, midprice over *n* bars | `InputSeries.Midpoint(n)`, `InputSeries.Midprice(n)` |
+| any function of the bar | `InputSeries.Of(bar => ...)` |
+| another indicator's output | `InputSeries.Of(state)` |
+
+A custom series changes more than the close: when its value lies outside the bar's range, the
+indicator's high and low come from the series itself (the max and min of its previous and current
+value). Batch applies the same rule to a chained series, so the two engines give the same numbers.
+
+### InputName is removed
+
+Callers pass values, not a name for them. `InputName` is gone from every indicator constructor, every
+`Calculate*` method, `StockData`, and the streaming options. An indicator built with no input named reads
+exactly what it read by default before; to compute it on something else, pass the series.
+
+```csharp
+// Streaming - default input: just drop the argument
+var cci = new CommodityChannelIndexState(InputName.TypicalPrice, MovingAvgType.SimpleMovingAverage, 20); // before
+var cci = new CommodityChannelIndexState(MovingAvgType.SimpleMovingAverage, 20);                         // after
+
+// Streaming - a different input: wrap the state
+var cci = new CustomInputState(new CommodityChannelIndexState(), InputSeries.MedianPrice);
+
+// Batch - default input: just drop the argument
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage, InputName.MedianPrice); // before
+var ao = data.CalculateAwesomeOscillator(MovingAvgType.SimpleMovingAverage);                         // after
+
+// Batch - a different input: chain it
+var ao = data.UseInput(InputSeries.TypicalPrice).CalculateAwesomeOscillator();
+```
+
+| Removed | Replacement |
+|---|---|
+| `InputName` parameter on a streaming state | drop it for the default; `new CustomInputState(state, InputSeries.X)` otherwise |
+| `inputName` parameter on a `Calculate*` method | drop it for the default; `data.UseInput(InputSeries.X).CalculateY()` otherwise |
+| `new StockData(tickers, InputName.X)` and `StockData.InputName` | `new StockData(tickers).UseInput(InputSeries.X)` |
+| `StreamingOptions.InputName`, `IndicatorSubscriptionOptions.InputName` | a `CustomInputState` per indicator |
+| `VolumeFlowIndicatorSpecOptions(inputName, ...)` | nothing - it was never read |
+| the `InputName` enum, `StreamingInputSelector`, `GetInputValuesList(InputName, StockData)` | now internal; name a series with `InputSeries` |
+
+**This can change results, in the direction of correctness.** `StockData`'s input name was stored and then
+ignored by about 650 indicators: `new StockData(tickers, InputName.MedianPrice).CalculateRsi()` computed an
+RSI of the close (#182). `new StockData(tickers).UseInput(InputSeries.MedianPrice).CalculateRsi()` really
+computes it on the median price. The same holds for the two streaming options, which fed that same ignored
+value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation ever read.
+
 ### Removed
 
 - All v1.x `Calculate*` methods are still available (they will be deprecated in v3.0).
 - The Alpaca adapters have moved out of the `OoplesFinance.StockIndicators` package into a new
   `OoplesFinance.StockIndicators.Trading` package.
+- `TrixResult` is gone. `IndicatorCatalog.Trix()` now returns a plain `SeriesHandle`.
+- `AroonOscillatorResult.Up`, `.Down` and `.Oscillator` are gone, as are
+  `AlligatorIndexResult.Jaw` and `GatorOscillatorResult.Upper` / `.Lower`. The result types
+  survive; the members are renamed to the outputs the indicators actually publish.
+
+#### Why: the removed members never worked
+
+The catalog generator was given a hand-maintained list of which indicators publish more than one
+output and under what names. That list had drifted from the calculations in five of its six entries:
+
+| Indicator | The list said | The calculation publishes |
+|---|---|---|
+| `AroonOscillator` | `Up`, `Down`, `Oscillator` | `Aroon`, `AroonUp`, `AroonDown` |
+| `AlligatorIndex` | `Jaw`, `Teeth`, `Lips` | `Lips`, `Teeth`, `Jaws` |
+| `GatorOscillator` | `Upper`, `Lower` | `Top`, `Bottom` |
+| `Trix` | `Trix`, `Signal` | one output only |
+| `PPO` | `Ppo`, `Signal`, `Histogram` | (key never matched `IndicatorName`) |
+| `ElderRayIndex` | `BullPower`, `BearPower` | `BullPower`, `BearPower` |
+
+Handles were generated for outputs that do not exist, and resolving a handle for an output an
+indicator does not publish fell back to the primary series without raising anything. So
+`aroon.Up`, `aroon.Down` and `aroon.Oscillator` were three names for one series, `trix.Trix` and
+`trix.Signal` were the same series, and every band of `gator` and `alligator` came back identical.
+The names are now read out of the calculations' own `SetOutputValues` calls, so the catalog can no
+longer describe an output that is not there.
+
+`PPO` is deliberately still a plain handle: its list key never matched the `IndicatorName` member,
+so it has always returned one, and giving it a result type now would be a new API rather than a
+repair.
+
+#### Migrating
+
+```csharp
+// Before - .Up, .Down and .Oscillator were three names for the oscillator series
+var aroon = indicators.AroonOscillator(25);
+var osc = runtime.GetSeries(aroon.Oscillator);
+var up = runtime.GetSeries(aroon.Up);       // same series as osc
+
+// After - Aroon is the oscillator; AroonUp and AroonDown are the real component series
+var aroon = indicators.AroonOscillator(25);
+var osc = runtime.GetSeries(aroon.Aroon);
+var up = runtime.GetSeries(aroon.AroonUp);
+var down = runtime.GetSeries(aroon.AroonDown);
+```
+
+```csharp
+// Before - .Signal was the same series as .Trix
+var trix = indicators.Trix(14);
+var line = runtime.GetSeries(trix.Trix);
+
+// After - Trix publishes one series, so the catalog returns one handle
+var trix = indicators.Trix(14);
+var line = runtime.GetSeries(trix);
+```
+
+If you need a Trix signal line, chain a moving average over the Trix handle yourself; the catalog no
+longer supplies one that is secretly the Trix series itself.
+
+```csharp
+// Before - .Jaw silently resolved to the primary series (Lips)
+var alligator = indicators.AlligatorIndex();
+var jaw = runtime.GetSeries(alligator.Jaw);
+
+// After - the member is named for the output the indicator publishes
+var alligator = indicators.AlligatorIndex();
+var jaws = runtime.GetSeries(alligator.Jaws);
+```
+
+```csharp
+// Before - Upper and Lower both resolved to the primary series
+var gator = indicators.GatorOscillator();
+var upper = runtime.GetSeries(gator.Upper);
+var lower = runtime.GetSeries(gator.Lower);
+
+// After
+var gator = indicators.GatorOscillator();
+var top = runtime.GetSeries(gator.Top);
+var bottom = runtime.GetSeries(gator.Bottom);
+```
+
+`ElderRayIndexResult` is unchanged: it is the one entry the old list had right.
 
 #### Moving to the Trading package
 
@@ -185,6 +342,172 @@ rather than hidden.
 
 - `IndicatorBuffer<T>` is now the primary container for indicator values (replaces raw lists)
 - Results are accessed via `runtime.GetSeries(handle)` instead of `OutputValues*` properties
+- **A typed Builder spec computes its batch indicator.** Each spec ran a fast arm written apart from the
+  indicator it names and never compared with it; over half of the comparable arms disagreed. The Builder now
+  serves an arm only where `BuilderArmTests` shows it matches, and computes every other spec with its batch
+  indicator, so a spec's values are the indicator's values.
+- **Every typed spec now names an indicator this library has.** 57 specs computed something no indicator
+  computed - the highest high, a rolling variance, Yang-Zhang volatility, a zig zag - and were pinned in
+  `BuilderArmTests.AwaitingPromotion` while they waited. All 57 are bound now and that list is empty. Most
+  became new indicators, written from their published definitions and held to their arms; a few turned out
+  to be indicators the library already had under another name, and bind to those instead: the median moving
+  average is the median value, the ATR percent is the normalized average true range, and both average day
+  range specs name the one indicator. Each new indicator has a streaming twin held to it bar by bar, with
+  one exception below.
+- **`ZigZag` has no streaming twin, and cannot have one.** A turning point is only known once the price has
+  moved far enough past it, and recognising it rewrites the bars back to the previous turning point. A
+  streaming engine has already published those bars. `CalculateZigZag` computes it, and the Builder serves
+  it from there; there is no `ZigZagState`.
+- **Eight more spec options are `[Obsolete]`** as having no effect, for the same reason as the 66 before
+  them - their indicator has no parameter to set: the true range, the range, net volume, the cumulative
+  volume index, the demand index and the Ichimoku lagging span read one bar or two and take no length; the
+  Keltner channel width always averages exponentially; and the zig zag's option was being passed as a
+  deviation percentage rather than a bar count.
+- **A spec's options reach that indicator.** 177 options reached no parameter at all. 111 now set the parameter
+  they name - the alligator and ichimoku lines, didi, tsi, the fast and slow pairs, the multipliers and band
+  widths, the stochastic's %K and %D, the cyber cycle and laguerre alphas - through 118 mappings, since seven
+  options set more than one parameter, as their own arms do: the decycler and osc oscillators' length sets both
+  a fast and a slow length, and the mass index's two set three. The remaining 66 that their indicator has no
+  parameter for are marked `[Obsolete]` as having no effect. `EhlersRoofingFilterSpecOptions` defaults to
+  Ehlers' 48-bar high pass and 10-bar smoother, and `DoubleSmoothedMomentaSpecOptions` to the batch
+  indicator's 2, 5 and 25, instead of settings that described another formula.
+- **Three indicators gained a parameter their spec sets**, each part of the published definition and each
+  defaulting to today's behaviour: the stochastic RSI's own stochastic lookback, Inertia's RVI smoothing
+  length, and the Gaussian filter's pole count.
+- **A typed spec streams what it computes.** The Builder built streaming states from a second table that had
+  never been compared with the batch path: 30 specs streamed another indicator, another parameter, or ignored
+  the moving-average type the batch honoured. `BuilderStreamingArmTests` now holds all 168 to their batch
+  indicator. `AverageTrueRangeState`, `AverageDirectionalIndexState`, `RelativeStrengthIndexState`,
+  `TrixState`, `AwesomeOscillatorState` and `AcceleratorOscillatorState` take a `maType`, defaulting to the
+  average each hard-coded, so no existing value changes.
+- **`ComparePriceMomentumOscillatorSpecOptions` is obsolete.** It compares a stock with a market series, which
+  one series cannot supply; use `IndicatorCatalog.ComparePriceMomentumOscillator`, which passes both.
+
+### Corrected values
+
+Every streaming state is now held to computing, on every bar, every value its batch twin computes
+(`StreamingBatchValueParityTests`, all 769 states). The hand-written parity specs had covered a subset,
+often only a band indicator's middle band, and 50 indicators disagreed between engines. Each was fixed to
+the indicator's published definition, so **some batch values change**:
+
+- **Moving averages no longer leak into the next calculation.** `GetMovingAverageList` left its result on
+  `CustomValuesList`, so whatever an indicator calculated next ran on the average rather than the price.
+- **Bollinger Bands** use the population standard deviation of the prices, as Bollinger defines them. The
+  batch bands were about 55% too wide at steady state and far wider during warmup. %B, Width, the Bayesian
+  Oscillator, BB-ATR, the Narrow Sideways Channel and Waddah Attar Explosion's bands follow.
+- **Composite indicators read the prices in every component** instead of the previous component's output:
+  Pring Special K, Technical Ratings, Technical Rank, Trading Made More Simpler Oscillator, Waddah Attar
+  Explosion, Woodie CCI, Ultimate Momentum Indicator, Ultimate Moving Average and its bands, QMA-SMA
+  Difference, Hurst Cycle Channel, R2 Adaptive Regression and T-Step LSMA.
+- **A stochastic of a derived series is taken over that series' own range**, not the bars' highs and lows:
+  Schaff Trend Cycle, Strength of Movement, and Technical Ratings' Stochastic RSI.
+- **Corrected Moving Average, 1LC LSMA and the Linear Regression Line** use the true variance and standard
+  deviation of the source.
+- **`MovingAvgType` fast paths compute the indicator of the same name** for the Variable Moving Average
+  (now LazyBear's formula, which also corrects the VMA indicator itself), VIDYA, McNicholl, Ehlers' Noise
+  Elimination Technology and the Zero-Lag TEMA.
+- **Z Distance from VWAP and MAC-Z VWAP** compute LazyBear's `calc_zvwap`.
+- **Sortino Ratio** sums its downside window exactly, so a window with no downside is 0 instead of a
+  rounding residue that inflated the ratio to around 1e7.
+- **Gopalakrishnan Range Index** publishes its `Signal` series, which was always empty.
+- **Window calculations no longer drift over a long series** (`StreamingLongRunStabilityTests`). After
+  100,000 bars near 100,000 and 100,000 near 10, the weighted moving average was 1e-6 off and the standard
+  deviation channel 3e-4 off in both engines, carrying rounding from values long out of the window. The
+  simple and weighted moving averages now rebuild their running sums from the window every `length` bars,
+  and window sums taken as the difference of two prefix sums (about 120 batch indicators, among them CMO,
+  MFI and Vortex) keep each prefix as a compensated pair.
+  The linear regression counts x from the window's first bar instead of the series' (its `Intercept` is
+  still reported at bar 0), slides in O(1) with the same periodic rebuild, and fits the bars there are
+  while its window fills, rather than dividing by the full length as though the missing points sat at the
+  origin; Chande Forecast, the standard deviation channel, Inertia and Projection Bands follow. Correlation is taken from each value's distance to the window mean, so a
+  window with one side constant correlates at 0 rather than a rounding residue of either sign; the
+  Periodic Channel sums that sign. Otherwise values change only in their last digits.
+- **`IncludeCustomValues = false` hides a result without changing any.** It used to empty the one list
+  that both the caller and the next calculation read, so a chain ran on the close, 176 indicators threw
+  and the Accelerator, Derivative and McClellan oscillators computed other values
+  (`IncludeCustomValuesTests`). Every indicator now computes with the option off exactly what it computes
+  with it on, and only `CustomValuesList` is empty. `Clear()` gives the data a new, empty series rather
+  than emptying the list in place, so a list you kept from an earlier result survives it; setting
+  `CustomValuesList` to null now reads back as an empty list.
+- **`IncludeOutputValues = false` and `RoundingDigits` change only what is published**, the same way
+  (`IncludeOutputValuesTests`, `RoundingDigitsTests`). With output values off, 56 indicators threw reading a
+  component's named series from the emptied dictionary; it is now replaced rather than cleared in place.
+  With rounding on, 187 indicators computed on rounded values - a component's result, or an intermediate
+  series handed on as input - so their final digits were the rounding of a different computation. Every
+  indicator now computes on unrounded values and rounds only what it publishes.
+- **Four indicators take each component of the price, as they are defined.** Each component call publishes
+  its result for the next one, and these called the next component without handing back the caller's series;
+  their streaming states copied the chain. CCT StochRSI took every RSI after the first of the RSI before it,
+  the Fast and Slow RSI Oscillator took its kurtosis term of the RSI, and the Sector Rotation Model took its
+  second rate of change of the first. Connors RSI ranked a 100-bar rate of change of the RSI; it ranks the
+  one-bar rate of change of the price over 100 bars, as Connors defines it, and the Stochastic Connors RSI and
+  Quasi White Noise built on it follow.
+- **Adaptive Ehlers windows take a cycle within float noise of an integer as that integer** before
+  rounding up to whole bars. A dominant cycle of exactly 29 in exact arithmetic could arrive as
+  29.000000000000004 and average over 30 bars, and which side it fell depended on summation order. Values
+  move only on bars where the cycle sat within a relative 1e-9 of an integer.
+
+Streaming-only corrections (batch unchanged): the first bar's true range in the ATR channels, Stoller
+channels, dynamic support/resistance, Bollinger Fibonacci ratios, Hurst cycle channel, trend trader bands,
+VMA bands, Trender and the volume positive/negative indicator; the Time Price Indicator's band offset; the
+defaults of the Ergodic Mean Deviation Indicator (signal length 5) and Quadratic Least Squares MA (length
+50); VIDYA's seed; and the Trend Analysis Index, Trender and Vervoort Smoothed Oscillator deviations. The
+first bar's true range in the Grover Llorens Cycle Oscillator and the Ultimate Trader Oscillator is also
+High - Low now, not the whole high. Half Trend, the Volatility Ratio and the ATR Filtered Exponential
+Moving Average measure it against the bar's own close too, as their batch twins do. Only the last of the
+three publishes different values: the other two discard that first range before it reaches a result - the
+Volatility Ratio because its window bounds are still zero and their difference gates the ratio, Half Trend
+because its average true range reaches only the arrow levels, which feed a signal and nothing either
+engine publishes - so those two had agreed with the batch by luck rather than by construction.
+
+A preview (`isFinal: false`) of a bar now publishes what that bar publishes once final
+(`StreamingPreviewTests`, every state). Nine did not: ALMA, Interquartile Range Bands and Trimean left the
+forming bar out of their window; Alligator, Gator and the Ehlers Fractal Adaptive Moving Average read their
+displaced value a bar late; and Connors RSI, with the Stochastic Connors RSI and Quasi White Noise built on
+it, ranked the forming value against a value the commit evicts. The autocorrelation periodogram behind the
+adaptive Ehlers indicators divided the previous bar's powers by the forming bar's maximum.
+
+`BollingerBandsState` takes an optional `maType`, and `CalculateVolatilityIndexDynamicAverageIndicator` is
+the batch twin of the streaming state of the same name.
+
+**`MovingAvgType` means the indicator of that name.** `GetMovingAverageList` smoothed through span fast
+paths meant to reproduce the indicator of the same name, and 120 of 162 did not (a different formula, a
+different warmup, or a numerical blow-up). Every type is now computed by its indicator unless its fast path
+is verified to match it (`MovingAverageFastPathTests` holds every type to its indicator). Batch indicators
+that smooth with one of the 118 unverified types, whether by default or through a `maType` you pass, give
+the indicator's values. Routing also corrected the indicators it exposed:
+
+- **Kaufman's Adaptive Moving Average** passes the price through until its efficiency window fills, then
+  recurses from it, as TA-Lib and Pine seed it. It was seeded at 0 in both engines, crawled up from zero, and
+  on a flat market was still converging thousands of bars later.
+- Asking `GetMovingAverageList` for the dynamically adjustable, adaptive, Ehlers adaptive Laguerre or middle
+  high-low average without a fast length now uses the indicator's own default instead of 0.
+
+**The Accumulative Swing Index is Wilder's.** Both engines ran his numerator backwards (the previous close
+less today's) and took K and R from signed moves where he takes their sizes; they now compute
+`50 * ((C - Cy) + 0.5 * (C - O) + 0.25 * (Cy - Oy)) / R * K / T` with his three-case R, and the first bar,
+which has no previous bar, contributes 0. `CalculateAccumulativeSwingIndex` and `AccumulativeSwingIndexState`
+take Wilder's limit move T as `limitMove`; the default of 0 keeps each bar's range in its place, as before.
+ASI values and its signal change.
+
+**Four Builder arms computed something other than the indicator they name.** Each served a typed spec
+directly, so its values reached callers even while the spec named no indicator of its own:
+
+- **Yang-Zhang volatility** weighed the open-to-close variance by `0.34 / (1 + (n + 1) / (n - 1))`. The
+  published weight has 1.34 in that denominator rather than 1, which at a length of 20 makes it 0.1390
+  instead of 0.1615 and moves the published volatility by about one per cent on every bar. A length of one
+  also divided by zero, and is clamped to two: both variances are taken about a mean drawn from the same
+  window, so a single bar has no reading.
+- **The simple price zone** took a change out of its running sums one bar early, subtracting a raw price
+  that had never been added to them. From bar `length` onwards both sums were wrong for good, and the zone
+  left the range it is defined on, reading as high as 120 where it cannot pass 100.
+- **The standard error** measured every residual against the fitted line's endpoint rather than against the
+  line at each position in the window, so a window lying exactly on a sloped line reported scatter where
+  there is none.
+- **The geometric mean moving average** multiplied its window rather than summing logarithms, so a long
+  window overflowed a double and published infinity: at a price of 1000 that happens by a length of 103.
+
+Their batch and streaming twins are new here and never published the wrong values; these are the arms only.
 
 ### New Dependencies (net461 only)
 

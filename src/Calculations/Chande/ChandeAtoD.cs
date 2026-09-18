@@ -31,9 +31,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).CustomValuesList;
-        var stdDev10List = CalculateStandardDeviationVolatility(stockData, maType, length2).CustomValuesList;
-        var stdDev20List = CalculateStandardDeviationVolatility(stockData, maType, length3).CustomValuesList;
+        var stdDevList = GetStandardDeviationList(inputList, length1);
+        var stdDev10List = GetStandardDeviationList(inputList, length2);
+        var stdDev20List = GetStandardDeviationList(inputList, length3);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -5,6 +5,7 @@ using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Streaming;
 
+[PrimaryOutput("Elf")]
 public sealed class EhlersLaguerreFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha;
@@ -16,22 +17,10 @@ public sealed class EhlersLaguerreFilterState : IStreamingIndicatorState, IDispo
     private double _prevL3;
     private bool _hasPrev;
 
-    public EhlersLaguerreFilterState(double alpha = 0.2, InputName inputName = InputName.Close)
+    public EhlersLaguerreFilterState(double alpha = 0.2)
     {
         _alpha = alpha;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersLaguerreFilterState(double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(3);
     }
 
@@ -90,6 +79,7 @@ public void Dispose()
 }
 }
 
+[PrimaryOutput("Eri")]
 public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -101,7 +91,7 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
     private readonly PooledRingBuffer<double> _filterValues;
     private double _prevMs;
 
-    public EhlersReflexIndicatorState(int length = 20, InputName inputName = InputName.Close)
+    public EhlersReflexIndicatorState(int length = 20)
     {
         _length = Math.Max(1, length);
         var period = 0.5 * _length;
@@ -110,26 +100,7 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(1);
-        _filterValues = new PooledRingBuffer<double>(_length);
-    }
-
-    public EhlersReflexIndicatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        var period = 0.5 * _length;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(1);
         _filterValues = new PooledRingBuffer<double>(_length);
     }
@@ -191,6 +162,7 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Eiftrsi")]
 public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsi;
@@ -198,25 +170,11 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
     private readonly StreamingInputResolver _input;
 
     public EhlersRelativeStrengthIndexInverseFisherTransformState(
-        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14, int signalLength = 9,
-        InputName inputName = InputName.Close)
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14, int signalLength = 9)
     {
         _rsi = new RsiState(maType, length);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersRelativeStrengthIndexInverseFisherTransformState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _rsi = new RsiState(maType, length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform;
@@ -255,6 +213,7 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
     }
 }
 
+[PrimaryOutput("Ervi")]
 public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _rviSmoother;
@@ -262,24 +221,11 @@ public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, ID
     private readonly StreamingInputResolver _input;
 
     public EhlersRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10,
-        int signalLength = 4, InputName inputName = InputName.Close)
+        int signalLength = 4)
     {
         _rviSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersRelativeVigorIndexState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _rviSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersRelativeVigorIndex;
@@ -320,6 +266,7 @@ public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Rpi")]
 public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersSpectrumDerivedFilterBankEngine _sdfb;
@@ -327,28 +274,13 @@ public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState
     private readonly StreamingInputResolver _input;
 
     public EhlersRestoringPullIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10, InputName inputName = InputName.Close)
+        int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
     {
         var resolvedMin = Math.Max(1, minLength);
         var resolvedMax = Math.Max(maxLength, resolvedMin);
         _sdfb = new EhlersSpectrumDerivedFilterBankEngine(resolvedMin, resolvedMax, length1, length2);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedMin);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersRestoringPullIndicatorState(MovingAvgType maType, int minLength, int maxLength, int length1, int length2,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedMin = Math.Max(1, minLength);
-        var resolvedMax = Math.Max(maxLength, resolvedMin);
-        _sdfb = new EhlersSpectrumDerivedFilterBankEngine(resolvedMin, resolvedMax, length1, length2);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedMin);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersRestoringPullIndicator;
@@ -386,26 +318,16 @@ public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Erema")]
 public sealed class EhlersReverseExponentialMovingAverageIndicatorV1State : IStreamingIndicatorState
 {
     private readonly ReverseEmaEngine _engine;
     private readonly StreamingInputResolver _input;
 
-    public EhlersReverseExponentialMovingAverageIndicatorV1State(double alpha = 0.1, InputName inputName = InputName.Close)
+    public EhlersReverseExponentialMovingAverageIndicatorV1State(double alpha = 0.1)
     {
         _engine = new ReverseEmaEngine(alpha);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersReverseExponentialMovingAverageIndicatorV1State(double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _engine = new ReverseEmaEngine(alpha);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV1;
@@ -433,31 +355,18 @@ public sealed class EhlersReverseExponentialMovingAverageIndicatorV1State : IStr
     }
 }
 
+[PrimaryOutput("EremaCycle")]
 public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State : IStreamingIndicatorState
 {
     private readonly ReverseEmaEngine _trendEngine;
     private readonly ReverseEmaEngine _cycleEngine;
     private readonly StreamingInputResolver _input;
 
-    public EhlersReverseExponentialMovingAverageIndicatorV2State(double trendAlpha = 0.05, double cycleAlpha = 0.3,
-        InputName inputName = InputName.Close)
+    public EhlersReverseExponentialMovingAverageIndicatorV2State(double trendAlpha = 0.05, double cycleAlpha = 0.3)
     {
         _trendEngine = new ReverseEmaEngine(trendAlpha);
         _cycleEngine = new ReverseEmaEngine(cycleAlpha);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersReverseExponentialMovingAverageIndicatorV2State(double trendAlpha, double cycleAlpha,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _trendEngine = new ReverseEmaEngine(trendAlpha);
-        _cycleEngine = new ReverseEmaEngine(cycleAlpha);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2;
@@ -489,6 +398,7 @@ public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State : IStr
     }
 }
 
+[PrimaryOutput("Errsi")]
 public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -503,7 +413,7 @@ public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicator
     private double _prevTmp;
 
     public EhlersRocketRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2,
-        int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1, InputName inputName = InputName.Close)
+        int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1)
     {
         _length1 = Math.Max(1, length1);
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
@@ -511,24 +421,7 @@ public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicator
         _upSum = new RollingWindowSum(_length1);
         _downSum = new RollingWindowSum(_length1);
         _mult = mult;
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersRocketRelativeStrengthIndexState(MovingAvgType maType, int length1, int length2, double obosLevel,
-        double mult, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _values = new PooledRingBuffer<double>(_length1);
-        _upSum = new RollingWindowSum(_length1);
-        _downSum = new RollingWindowSum(_length1);
-        _mult = mult;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersRocketRelativeStrengthIndex;
@@ -594,6 +487,7 @@ public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Erfi")]
 public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _a1;
@@ -607,7 +501,7 @@ public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState
     private double _prevFilter1;
     private double _prevFilter2;
 
-    public EhlersRoofingFilterIndicatorState(int length1 = 80, int length2 = 40, InputName inputName = InputName.Close)
+    public EhlersRoofingFilterIndicatorState(int length1 = 80, int length2 = 40)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -619,28 +513,7 @@ public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState
         _c2 = b1;
         _c3 = -a2 * a2;
         _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
-    public EhlersRoofingFilterIndicatorState(int length1, int length2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var alphaArg = Math.Min(MathHelper.Sqrt2 * Math.PI / resolved1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _a1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a2 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved2);
-        var b1 = 2 * a2 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / resolved2, 0.99));
-        _c2 = b1;
-        _c3 = -a2 * a2;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(2);
     }
 
@@ -692,6 +565,7 @@ public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Erf")]
 public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly HighPassFilterV1Engine _hp;
@@ -700,27 +574,13 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
     private double _prevHp;
 
     public EhlersRoofingFilterV1State(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
-        int length1 = 48, int length2 = 10, InputName inputName = InputName.Close)
+        int length1 = 48, int length2 = 10)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
         _hp = new HighPassFilterV1Engine(resolved1, 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersRoofingFilterV1State(MovingAvgType maType, int length1, int length2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _hp = new HighPassFilterV1Engine(resolved1, 1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersRoofingFilterV1;
@@ -762,6 +622,7 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Esnr")]
 public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersHilbertTransformIndicatorEngine _engine;
@@ -771,26 +632,12 @@ public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, 
     private double _prevRange;
     private double _prevAmp;
 
-    public EhlersSignalToNoiseRatioV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 7,
-        InputName inputName = InputName.Close)
+    public EhlersSignalToNoiseRatioV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 7)
     {
         var resolved = Math.Max(1, length);
         _engine = new EhlersHilbertTransformIndicatorEngine(resolved, 0.635, 0.338);
         _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersSignalToNoiseRatioV1State(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _engine = new EhlersHilbertTransformIndicatorEngine(resolved, 0.635, 0.338);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersSignalToNoiseRatioV1;
@@ -843,6 +690,7 @@ public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Esnr")]
 public sealed class EhlersSignalToNoiseRatioV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -851,23 +699,11 @@ public sealed class EhlersSignalToNoiseRatioV2State : IStreamingIndicatorState, 
     private double _prevRange;
     private double _prevSnr;
 
-    public EhlersSignalToNoiseRatioV2State(int length = 6, InputName inputName = InputName.Close)
+    public EhlersSignalToNoiseRatioV2State(int length = 6)
     {
         _length = Math.Max(1, length);
         _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersSignalToNoiseRatioV2State(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersSignalToNoiseRatioV2;
@@ -913,6 +749,7 @@ public sealed class EhlersSignalToNoiseRatioV2State : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Elrsi")]
 public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicatorState
 {
     private readonly double _gamma;
@@ -923,21 +760,10 @@ public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicat
     private double _prevL3;
     private bool _hasPrev;
 
-    public EhlersLaguerreRelativeStrengthIndexState(double gamma = 0.5, InputName inputName = InputName.Close)
+    public EhlersLaguerreRelativeStrengthIndexState(double gamma = 0.5)
     {
         _gamma = gamma;
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersLaguerreRelativeStrengthIndexState(double gamma, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _gamma = gamma;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersLaguerreRelativeStrengthIndex;
@@ -990,6 +816,7 @@ public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Elrsiwsa")]
 public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1004,24 +831,10 @@ public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSta
     private double _prevValue;
     private bool _hasPrev;
 
-    public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length = 13, InputName inputName = InputName.Close)
+    public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length = 13)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _highMax = new RollingWindowMax(_length);
-        _lowMin = new RollingWindowMin(_length);
-        _ratioSum = new RollingWindowSum(_length);
-    }
-
-    public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _highMax = new RollingWindowMax(_length);
         _lowMin = new RollingWindowMin(_length);
         _ratioSum = new RollingWindowSum(_length);
@@ -1103,6 +916,7 @@ public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSta
     }
 }
 
+[PrimaryOutput("Eli")]
 public sealed class EhlersLeadingIndicatorState : IStreamingIndicatorState
 {
     private readonly double _alpha1;
@@ -1113,23 +927,11 @@ public sealed class EhlersLeadingIndicatorState : IStreamingIndicatorState
     private double _prevValue;
     private bool _hasPrev;
 
-    public EhlersLeadingIndicatorState(double alpha1 = 0.25, double alpha2 = 0.33, InputName inputName = InputName.Close)
+    public EhlersLeadingIndicatorState(double alpha1 = 0.25, double alpha2 = 0.33)
     {
         _alpha1 = alpha1;
         _alpha2 = alpha2;
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersLeadingIndicatorState(double alpha1, double alpha2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _alpha1 = alpha1;
-        _alpha2 = alpha2;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersLeadingIndicator;
@@ -1173,6 +975,7 @@ public sealed class EhlersLeadingIndicatorState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Emsi")]
 public sealed class EhlersMarketStateIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersCorrelationAngleIndicatorState _angleState;
@@ -1226,6 +1029,7 @@ public sealed class EhlersMarketStateIndicatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Maaf")]
 public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -1239,27 +1043,11 @@ public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicator
     private double _prevValue2;
     private double _prevFilter;
 
-    public EhlersMedianAverageAdaptiveFilterState(int length = 39, double threshold = 0.002, InputName inputName = InputName.Close)
+    public EhlersMedianAverageAdaptiveFilterState(int length = 39, double threshold = 0.002)
     {
         _length = Math.Max(1, length);
         _threshold = threshold;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(3);
-        _smthValues = new PooledRingBuffer<double>(_length);
-        _windowScratch = new double[_length];
-        _medianScratch = new double[_length];
-    }
-
-    public EhlersMedianAverageAdaptiveFilterState(int length, double threshold, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _threshold = threshold;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(3);
         _smthValues = new PooledRingBuffer<double>(_length);
         _windowScratch = new double[_length];
@@ -1397,6 +1185,7 @@ public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicator
         return (scratch[leftRank - 1] + scratch[rightRank - 1]) / 2; // 0-indexed
     }
 }
+[PrimaryOutput("Predict")]
 public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1432,53 +1221,14 @@ public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState
     private int _index;
 
     public EhlersMesaPredictIndicatorV1State(int length1 = 5, int length2 = 4, int length3 = 10,
-        int lowerLength = 12, int upperLength = 54, InputName inputName = InputName.Close)
+        int lowerLength = 12, int upperLength = 54)
     {
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
         _length3 = Math.Max(1, length3);
         _lowerLength = Math.Max(1, lowerLength);
         _upperLength = Math.Max(1, upperLength);
-        _input = new StreamingInputResolver(inputName, null);
-
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / _upperLength, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / _upperLength, 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = (1 + _c2 - _c3) / 4;
-
-        var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / _lowerLength, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / _lowerLength, 0.99, 0.01));
-        _coef2 = b;
-        _coef3 = -a * a;
-        _coef1 = 1 - _coef2 - _coef3;
-
-        _pwrSum = new RollingWindowSum(_upperLength);
-        _ssfValues = new PooledRingBuffer<double>(_upperLength);
-        _bb1Array = new double[_upperLength + 2];
-        _bb2Array = new double[_upperLength + 2];
-        _coefArray = new double[_length2 + 2];
-        _coefAArray = new double[_length2 + 2];
-        _pArray = new double[_length2 + 2];
-        _coef1Array = new double[_lowerLength + 2];
-        _hCoefArray = new double[_length2 + 2];
-        _xxArray = new double[_upperLength + Math.Max(_length1, _length3) + 2];
-    }
-
-    public EhlersMesaPredictIndicatorV1State(int length1, int length2, int length3, int lowerLength, int upperLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _lowerLength = Math.Max(1, lowerLength);
-        _upperLength = Math.Max(1, upperLength);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
 
         var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / _upperLength, -0.01, -0.99));
         var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / _upperLength, 0.99, 0.01));
@@ -1678,6 +1428,7 @@ public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Predict")]
 public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -1705,48 +1456,13 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
     private int _index;
 
     public EhlersMesaPredictIndicatorV2State(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
-        int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, InputName inputName = InputName.Close)
+        int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4)
     {
         _length1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         var resolvedLength3 = Math.Max(1, length3);
         _length4 = Math.Max(1, length4);
-        _input = new StreamingInputResolver(inputName, null);
-
-        _coefArray = new[] { 4.525, -8.45, 8.145, -4.045, 0.825 };
-
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-1.414 * Math.PI / resolvedLength2, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(1.414 * Math.PI / resolvedLength2, 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = (1 + _c2 - _c3) / 4;
-
-        var a = MathHelper.Exp(MathHelper.MinOrMax(-1.414 * Math.PI / resolvedLength3, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(1.414 * Math.PI / resolvedLength3, 0.99, 0.01));
-        _coef2 = b;
-        _coef3 = -a * a;
-        _coef1 = 1 - _coef2 - _coef3;
-
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength3);
-        _filtValues = new PooledRingBuffer<double>(_length1);
-        var bufferLength = Math.Max((2 * _length1) + 2, _length1 + _length4 + 2);
-        _xxArray = new double[bufferLength];
-        _yyArray = new double[bufferLength];
-    }
-
-    public EhlersMesaPredictIndicatorV2State(MovingAvgType maType, int length1, int length2, int length3, int length4,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var resolvedLength3 = Math.Max(1, length3);
-        _length4 = Math.Max(1, length4);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
 
         _coefArray = new[] { 4.525, -8.45, 8.145, -4.045, 0.825 };
 
@@ -1864,6 +1580,7 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Emoef")]
 public sealed class EhlersModifiedOptimumEllipticFilterState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -1874,19 +1591,9 @@ public sealed class EhlersModifiedOptimumEllipticFilterState : IStreamingIndicat
     private double _prevMoef2;
     private int _index;
 
-    public EhlersModifiedOptimumEllipticFilterState(InputName inputName = InputName.Close)
+    public EhlersModifiedOptimumEllipticFilterState()
     {
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersModifiedOptimumEllipticFilterState(Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersModifiedOptimumEllipticFilter;
@@ -1936,6 +1643,7 @@ public sealed class EhlersModifiedOptimumEllipticFilterState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Emrsi")]
 public sealed class EhlersModifiedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _c1;
@@ -2029,6 +1737,7 @@ public sealed class EhlersModifiedRelativeStrengthIndexState : IStreamingIndicat
     }
 }
 
+[PrimaryOutput("Emsi")]
 public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _c1;
@@ -2042,7 +1751,7 @@ public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicator
     private double _prevModStoc2;
 
     public EhlersModifiedStochasticIndicatorState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
-        int length1 = 48, int length2 = 10, int length3 = 20, InputName inputName = InputName.Close)
+        int length1 = 48, int length2 = 10, int length3 = 20)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -2052,28 +1761,7 @@ public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicator
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, resolved1, resolved2, inputName);
-        _maxWindow = new RollingWindowMax(resolved3);
-        _minWindow = new RollingWindowMin(resolved3);
-    }
-
-    public EhlersModifiedStochasticIndicatorState(MovingAvgType maType, int length1, int length2, int length3,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved1);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved1, 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, resolved1, resolved2, selector);
+        _roofingFilter = new EhlersRoofingFilterV1State(maType, resolved1, resolved2);
         _maxWindow = new RollingWindowMax(resolved3);
         _minWindow = new RollingWindowMin(resolved3);
     }
@@ -2126,6 +1814,7 @@ public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Emad")]
 public sealed class EhlersMovingAverageDifferenceIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _shortSmoother;
@@ -2133,24 +1822,11 @@ public sealed class EhlersMovingAverageDifferenceIndicatorState : IStreamingIndi
     private readonly StreamingInputResolver _input;
 
     public EhlersMovingAverageDifferenceIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int fastLength = 8, int slowLength = 23, InputName inputName = InputName.Close)
+        int fastLength = 8, int slowLength = 23)
     {
         _shortSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _longSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersMovingAverageDifferenceIndicatorState(MovingAvgType maType, int fastLength, int slowLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _shortSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _longSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersMovingAverageDifferenceIndicator;
@@ -2187,6 +1863,7 @@ public sealed class EhlersMovingAverageDifferenceIndicatorState : IStreamingIndi
     }
 }
 
+[PrimaryOutput("Enet")]
 public sealed class EhlersNoiseEliminationTechnologyState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -2195,25 +1872,11 @@ public sealed class EhlersNoiseEliminationTechnologyState : IStreamingIndicatorS
     private readonly PooledRingBuffer<double> _values;
     private readonly double[] _scratch;
 
-    public EhlersNoiseEliminationTechnologyState(int length = 14, InputName inputName = InputName.Close)
+    public EhlersNoiseEliminationTechnologyState(int length = 14)
     {
         _length = Math.Max(1, length);
         _denom = 0.5 * _length * (_length - 1);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length);
-        _scratch = new double[_length + 1];
-    }
-
-    public EhlersNoiseEliminationTechnologyState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _denom = 0.5 * _length * (_length - 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_length);
         _scratch = new double[_length + 1];
     }
@@ -2268,6 +1931,7 @@ public sealed class EhlersNoiseEliminationTechnologyState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Emoef")]
 public sealed class EhlersOptimumEllipticFilterState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
@@ -2277,19 +1941,9 @@ public sealed class EhlersOptimumEllipticFilterState : IStreamingIndicatorState
     private double _prevOef2;
     private int _index;
 
-    public EhlersOptimumEllipticFilterState(InputName inputName = InputName.Close)
+    public EhlersOptimumEllipticFilterState()
     {
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersOptimumEllipticFilterState(Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersOptimumEllipticFilter;
@@ -2336,6 +1990,7 @@ public sealed class EhlersOptimumEllipticFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Epadc")]
 public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -2353,7 +2008,7 @@ public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndica
     private int _index;
 
     public EhlersPhaseAccumulationDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 10,
-        int length4 = 40, InputName inputName = InputName.Close)
+        int length4 = 40)
     {
         _length1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -2364,28 +2019,7 @@ public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndica
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
-        _hilbert = new EhlersHilbertTransformerEngine(_length1, resolved2, inputName);
-        _dPhaseValues = new PooledRingBuffer<double>(_length4);
-    }
-
-    public EhlersPhaseAccumulationDominantCycleState(int length1, int length2, int length3, int length4,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _length4 = Math.Max(1, length4);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / resolved2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolved2);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _hilbert = new EhlersHilbertTransformerEngine(_length1, resolved2, selector);
+        _hilbert = new EhlersHilbertTransformerEngine(_length1, resolved2, InputName.Close);
         _dPhaseValues = new PooledRingBuffer<double>(_length4);
     }
 
@@ -2463,6 +2097,7 @@ public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndica
     }
 }
 
+[PrimaryOutput("Phase")]
 public sealed class EhlersPhaseCalculationState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -2470,24 +2105,10 @@ public sealed class EhlersPhaseCalculationState : IStreamingIndicatorState, IDis
     private readonly IMovingAverageSmoother _smoother;
     private readonly PooledRingBuffer<double> _values;
 
-    public EhlersPhaseCalculationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 15,
-        InputName inputName = InputName.Close)
+    public EhlersPhaseCalculationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 15)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public EhlersPhaseCalculationState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length);
         _values = new PooledRingBuffer<double>(_length);
     }
@@ -2546,6 +2167,7 @@ public sealed class EhlersPhaseCalculationState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Ermf")]
 public sealed class EhlersRecursiveMedianFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha;
@@ -2554,31 +2176,14 @@ public sealed class EhlersRecursiveMedianFilterState : IStreamingIndicatorState,
     private readonly double[] _medianScratch;
     private double _prevRmf;
 
-    public EhlersRecursiveMedianFilterState(int length1 = 5, int length2 = 12, InputName inputName = InputName.Close)
+    public EhlersRecursiveMedianFilterState(int length1 = 5, int length2 = 12)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
         var alphaArg = MathHelper.MinOrMax(2 * Math.PI / resolved2, 0.99, 0.01);
         var alphaArgCos = Math.Cos(alphaArg);
         _alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(resolved1);
-        _medianScratch = new double[resolved1];
-    }
-
-    public EhlersRecursiveMedianFilterState(int length1, int length2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / resolved2, 0.99, 0.01);
-        var alphaArgCos = Math.Cos(alphaArg);
-        _alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(resolved1);
         _medianScratch = new double[resolved1];
     }
@@ -2621,6 +2226,7 @@ public sealed class EhlersRecursiveMedianFilterState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Ermo")]
 public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha1;
@@ -2633,8 +2239,7 @@ public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorSt
     private double _prevRmo1;
     private double _prevRmo2;
 
-    public EhlersRecursiveMedianOscillatorState(int length1 = 5, int length2 = 12, int length3 = 30,
-        InputName inputName = InputName.Close)
+    public EhlersRecursiveMedianOscillatorState(int length1 = 5, int length2 = 12, int length3 = 30)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -2645,28 +2250,7 @@ public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorSt
         var alpha2ArgCos = Math.Cos(alpha2Arg);
         _alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
         _alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(resolved1);
-        _medianScratch = new double[resolved1];
-    }
-
-    public EhlersRecursiveMedianOscillatorState(int length1, int length2, int length3, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var alpha1Arg = MathHelper.MinOrMax(2 * Math.PI / resolved2, 0.99, 0.01);
-        var alpha1ArgCos = Math.Cos(alpha1Arg);
-        var alpha2Arg = MathHelper.MinOrMax((1 / MathHelper.Sqrt2) * 2 * Math.PI / resolved3, 0.99, 0.01);
-        var alpha2ArgCos = Math.Cos(alpha2Arg);
-        _alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
-        _alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(resolved1);
         _medianScratch = new double[resolved1];
     }
@@ -2717,6 +2301,7 @@ public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Esci")]
 public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -2728,29 +2313,11 @@ public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, I
     private readonly PooledRingBuffer<double> _clipValues;
 
     public EhlersSimpleClipIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22,
-        InputName inputName = InputName.Close)
+        int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22)
     {
         _length1 = Math.Max(1, length1);
         _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(inputName, null);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _values = new PooledRingBuffer<double>(_length1);
-        _derivValues = new PooledRingBuffer<double>(_length3);
-        _clipValues = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersSimpleClipIndicatorState(MovingAvgType maType, int length1, int length2, int length3,
-        int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _values = new PooledRingBuffer<double>(_length1);
         _derivValues = new PooledRingBuffer<double>(_length3);
@@ -2816,6 +2383,7 @@ public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Esci")]
 public sealed class EhlersSimpleCycleIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _alpha;
@@ -2825,24 +2393,10 @@ public sealed class EhlersSimpleCycleIndicatorState : IStreamingIndicatorState, 
     private readonly PooledRingBuffer<double> _cycleValues;
     private int _index;
 
-    public EhlersSimpleCycleIndicatorState(double alpha = 0.07, InputName inputName = InputName.Close)
+    public EhlersSimpleCycleIndicatorState(double alpha = 0.07)
     {
         _alpha = alpha;
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(4);
-        _smoothValues = new PooledRingBuffer<double>(3);
-        _cycleValues = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersSimpleCycleIndicatorState(double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(4);
         _smoothValues = new PooledRingBuffer<double>(3);
         _cycleValues = new PooledRingBuffer<double>(3);
@@ -2902,6 +2456,7 @@ public sealed class EhlersSimpleCycleIndicatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("MiddleBand")]
 public sealed class EhlersSimpleDecyclerState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _upperPct;
@@ -2909,25 +2464,11 @@ public sealed class EhlersSimpleDecyclerState : IStreamingIndicatorState, IDispo
     private readonly StreamingInputResolver _input;
     private readonly HighPassFilterV1Engine _hp;
 
-    public EhlersSimpleDecyclerState(int length = 125, double upperPct = 0.5, double lowerPct = 0.5,
-        InputName inputName = InputName.Close)
+    public EhlersSimpleDecyclerState(int length = 125, double upperPct = 0.5, double lowerPct = 0.5)
     {
         _upperPct = upperPct;
         _lowerPct = lowerPct;
-        _input = new StreamingInputResolver(inputName, null);
-        _hp = new HighPassFilterV1Engine(Math.Max(1, length), 1);
-    }
-
-    public EhlersSimpleDecyclerState(int length, double upperPct, double lowerPct, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _upperPct = upperPct;
-        _lowerPct = lowerPct;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _hp = new HighPassFilterV1Engine(Math.Max(1, length), 1);
     }
 
@@ -2965,6 +2506,7 @@ public sealed class EhlersSimpleDecyclerState : IStreamingIndicatorState, IDispo
     }
 }
 
+[PrimaryOutput("Esdi")]
 public sealed class EhlersSimpleDerivIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -2974,24 +2516,10 @@ public sealed class EhlersSimpleDerivIndicatorState : IStreamingIndicatorState, 
     private readonly PooledRingBuffer<double> _derivValues;
 
     public EhlersSimpleDerivIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 2,
-        int signalLength = 8, InputName inputName = InputName.Close)
+        int signalLength = 8)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _values = new PooledRingBuffer<double>(_length);
-        _derivValues = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersSimpleDerivIndicatorState(MovingAvgType maType, int length, int signalLength, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _values = new PooledRingBuffer<double>(_length);
         _derivValues = new PooledRingBuffer<double>(3);
@@ -3044,6 +2572,7 @@ public sealed class EhlersSimpleDerivIndicatorState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Etwi")]
 public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -3053,25 +2582,10 @@ public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState,
     private readonly IMovingAverageSmoother _thirdSmoother;
     private double _prevFilt;
 
-    public EhlersSimpleWindowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
-        InputName inputName = InputName.Close)
+    public EhlersSimpleWindowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _firstSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _secondSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _thirdSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-    }
-
-    public EhlersSimpleWindowIndicatorState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _firstSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _secondSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _thirdSmoother = MovingAverageSmootherFactory.Create(maType, _length);
@@ -3094,7 +2608,7 @@ public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState,
         var filt = _firstSmoother.Next(deriv, isFinal);
         var filtMa1 = _secondSmoother.Next(filt, isFinal);
         var filtMa2 = _thirdSmoother.Next(filtMa1, isFinal);
-        var roc = (_length / 2) * Math.PI * (filtMa2 - _prevFilt);
+        var roc = (_length / 2.0) * Math.PI * (filtMa2 - _prevFilt);
 
         if (isFinal)
         {
@@ -3122,28 +2636,17 @@ public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Sine")]
 public sealed class EhlersSineWaveIndicatorV1State : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _smoothValues;
 
-    public EhlersSineWaveIndicatorV1State(InputName inputName = InputName.Close)
+    public EhlersSineWaveIndicatorV1State()
     {
         _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(inputName, null);
-        _smoothValues = new PooledRingBuffer<double>(64);
-    }
-
-    public EhlersSineWaveIndicatorV1State(Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _smoothValues = new PooledRingBuffer<double>(64);
     }
 
@@ -3207,6 +2710,7 @@ public sealed class EhlersSineWaveIndicatorV1State : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Sine")]
 public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, IDisposable
 {
     private readonly AdaptiveCyberCyclePeriodState _periodState;
@@ -3214,26 +2718,12 @@ public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, I
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _cycleValues;
 
-    public EhlersSineWaveIndicatorV2State(int length = 5, double alpha = 0.07, InputName inputName = InputName.Close)
+    public EhlersSineWaveIndicatorV2State(int length = 5, double alpha = 0.07)
     {
         var resolved = Math.Max(1, length);
         _periodState = new AdaptiveCyberCyclePeriodState(resolved, alpha);
-        _cycleState = new EhlersCyberCycleState(0.07, inputName);
-        _input = new StreamingInputResolver(inputName, null);
-        _cycleValues = new PooledRingBuffer<double>(64);
-    }
-
-    public EhlersSineWaveIndicatorV2State(int length, double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _periodState = new AdaptiveCyberCyclePeriodState(resolved, alpha);
-        _cycleState = new EhlersCyberCycleState(0.07, selector);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _cycleState = new EhlersCyberCycleState(0.07);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _cycleValues = new PooledRingBuffer<double>(64);
     }
 
@@ -3251,7 +2741,7 @@ public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, I
         var value = _input.GetValue(bar);
         var period = _periodState.Next(value, isFinal);
         var cycle = _cycleState.Update(bar, isFinal, includeOutputs: false).Value;
-        var dcPeriod = Math.Max(1, (int)Math.Ceiling(period));
+        var dcPeriod = Math.Max(1, MathHelper.CeilingCycle(period));
 
         double realPart = 0;
         double imagPart = 0;
@@ -3296,6 +2786,7 @@ public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Esam")]
 public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _coef1;
@@ -3309,7 +2800,7 @@ public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingInd
     private readonly PooledRingBuffer<double> _f3Values;
 
     public EhlersSmoothedAdaptiveMomentumIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 5, int length2 = 8, InputName inputName = InputName.Close)
+        int length1 = 5, int length2 = 8)
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
@@ -3321,31 +2812,7 @@ public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingInd
         _coef4 = c1 * c1;
         _coef1 = 1 - _coef2 - _coef3 - _coef4;
         _periodState = new AdaptiveCyberCyclePeriodState(resolved1, 0.07);
-        _input = new StreamingInputResolver(inputName, null);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _values = new PooledRingBuffer<double>(Math.Max(64, resolved1 * 2));
-        _f3Values = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersSmoothedAdaptiveMomentumIndicatorState(MovingAvgType maType, int length1, int length2,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var a1 = MathHelper.Exp(-Math.PI / resolved2);
-        var b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / resolved2);
-        var c1 = MathHelper.Pow(a1, 2);
-        _coef2 = b1 + c1;
-        _coef3 = -1 * (c1 + (b1 * c1));
-        _coef4 = c1 * c1;
-        _coef1 = 1 - _coef2 - _coef3 - _coef4;
-        _periodState = new AdaptiveCyberCyclePeriodState(resolved1, 0.07);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
         _values = new PooledRingBuffer<double>(Math.Max(64, resolved1 * 2));
         _f3Values = new PooledRingBuffer<double>(3);
@@ -3402,6 +2869,7 @@ public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingInd
     }
 }
 
+[PrimaryOutput("Erf")]
 public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -3416,7 +2884,7 @@ public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicator
     private int _index;
 
     public EhlersSnakeUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
-        int length1 = 23, int length2 = 50, double bw = 1.4, InputName inputName = InputName.Close)
+        int length1 = 23, int length2 = 50, double bw = 1.4)
     {
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
@@ -3424,27 +2892,7 @@ public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicator
         var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / (2 * _length1), 0.99, 0.01));
         _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(2);
-        _bpValues = new PooledRingBuffer<double>(2);
-        _powerSum = new RollingWindowSum(_length2);
-    }
-
-    public EhlersSnakeUniversalTradingFilterState(MovingAvgType maType, int length1, int length2, double bw,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / (2 * _length1), 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / (2 * _length1), 0.99, 0.01));
-        _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(2);
         _bpValues = new PooledRingBuffer<double>(2);
         _powerSum = new RollingWindowSum(_length2);
@@ -3505,6 +2953,7 @@ public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Esri")]
 public sealed class EhlersSpearmanRankIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -3513,25 +2962,10 @@ public sealed class EhlersSpearmanRankIndicatorState : IStreamingIndicatorState,
     private readonly double[] _priceArray;
     private readonly double[] _rankArray;
 
-    public EhlersSpearmanRankIndicatorState(int length = 20, InputName inputName = InputName.Close)
+    public EhlersSpearmanRankIndicatorState(int length = 20)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length);
-        var arrayLength = Math.Max(50, _length + 1);
-        _priceArray = new double[arrayLength];
-        _rankArray = new double[arrayLength];
-    }
-
-    public EhlersSpearmanRankIndicatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_length);
         var arrayLength = Math.Max(50, _length + 1);
         _priceArray = new double[arrayLength];
@@ -3604,28 +3038,16 @@ public sealed class EhlersSpearmanRankIndicatorState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Esdfb")]
 public sealed class EhlersSpectrumDerivedFilterBankState : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersSpectrumDerivedFilterBankEngine _engine;
     private readonly StreamingInputResolver _input;
 
-    public EhlersSpectrumDerivedFilterBankState(int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10,
-        InputName inputName = InputName.Close)
+    public EhlersSpectrumDerivedFilterBankState(int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
     {
         _engine = new EhlersSpectrumDerivedFilterBankEngine(minLength, maxLength, length1, length2);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersSpectrumDerivedFilterBankState(int minLength, int maxLength, int length1, int length2,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _engine = new EhlersSpectrumDerivedFilterBankEngine(minLength, maxLength, length1, length2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersSpectrumDerivedFilterBank;
@@ -3658,6 +3080,7 @@ public sealed class EhlersSpectrumDerivedFilterBankState : IStreamingIndicatorSt
     }
 }
 
+[PrimaryOutput("Esi")]
 public sealed class EhlersSquelchIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length1;
@@ -3672,29 +3095,12 @@ public sealed class EhlersSquelchIndicatorState : IStreamingIndicatorState, IDis
     private double _prevPhase;
     private double _prevDcPeriod;
 
-    public EhlersSquelchIndicatorState(int length1 = 6, int length2 = 20, int length3 = 40,
-        InputName inputName = InputName.Close)
+    public EhlersSquelchIndicatorState(int length1 = 6, int length2 = 20, int length3 = 40)
     {
         _length1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
         _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length1);
-        _v1Values = new PooledRingBuffer<double>(Math.Max(_length1, 4));
-        _dPhaseValues = new PooledRingBuffer<double>(_length3);
-    }
-
-    public EhlersSquelchIndicatorState(int length1, int length2, int length3, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_length1);
         _v1Values = new PooledRingBuffer<double>(Math.Max(_length1, 4));
         _dPhaseValues = new PooledRingBuffer<double>(_length3);
@@ -3780,6 +3186,7 @@ public sealed class EhlersSquelchIndicatorState : IStreamingIndicatorState, IDis
     }
 }
 
+[PrimaryOutput("Escog")]
 public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -3789,26 +3196,11 @@ public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingI
     private readonly PooledRingBuffer<double> _v1Values;
     private readonly PooledRingBuffer<double> _v2Values;
 
-    public EhlersStochasticCenterOfGravityOscillatorState(int length = 8, InputName inputName = InputName.Close)
+    public EhlersStochasticCenterOfGravityOscillatorState(int length = 8)
     {
         _length = Math.Max(1, length);
         _windowLength = Math.Max(_length, 2);
-        _cogState = new EhlersCenterofGravityOscillatorState(_length, inputName);
-        _cgValues = new PooledRingBuffer<double>(_windowLength);
-        _v1Values = new PooledRingBuffer<double>(3);
-        _v2Values = new PooledRingBuffer<double>(1);
-    }
-
-    public EhlersStochasticCenterOfGravityOscillatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _windowLength = Math.Max(_length, 2);
-        _cogState = new EhlersCenterofGravityOscillatorState(_length, selector);
+        _cogState = new EhlersCenterofGravityOscillatorState(_length);
         _cgValues = new PooledRingBuffer<double>(_windowLength);
         _v1Values = new PooledRingBuffer<double>(3);
         _v2Values = new PooledRingBuffer<double>(1);
@@ -3882,6 +3274,7 @@ public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingI
     }
 }
 
+[PrimaryOutput("Ezmrf")]
 public sealed class EhlersZeroMeanRoofingFilterState : IStreamingIndicatorState
 {
     private readonly double _alpha1;
@@ -3890,29 +3283,14 @@ public sealed class EhlersZeroMeanRoofingFilterState : IStreamingIndicatorState
     private double _prevZmr;
     private bool _hasPrev;
 
-    public EhlersZeroMeanRoofingFilterState(int length1 = 48, int length2 = 10, InputName inputName = InputName.Close)
+    public EhlersZeroMeanRoofingFilterState(int length1 = 48, int length2 = 10)
     {
         var resolvedLength1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         var alphaArg = Math.Min(2 * Math.PI / resolvedLength1, 0.99);
         var alphaCos = Math.Cos(alphaArg);
         _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _roofingFilter = new EhlersHpLpRoofingFilterState(resolvedLength1, resolvedLength2, inputName);
-    }
-
-    public EhlersZeroMeanRoofingFilterState(int length1, int length2, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var alphaArg = Math.Min(2 * Math.PI / resolvedLength1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _roofingFilter = new EhlersHpLpRoofingFilterState(resolvedLength1, resolvedLength2, selector);
+        _roofingFilter = new EhlersHpLpRoofingFilterState(resolvedLength1, resolvedLength2);
     }
 
     public IndicatorName Name => IndicatorName.EhlersZeroMeanRoofingFilter;
@@ -3952,6 +3330,7 @@ public sealed class EhlersZeroMeanRoofingFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Eti")]
 public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -3964,7 +3343,7 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
     private double _prevMs;
     private bool _hasPrev;
 
-    public EhlersTrendflexIndicatorState(int length = 20, InputName inputName = InputName.Close)
+    public EhlersTrendflexIndicatorState(int length = 20)
     {
         _length = Math.Max(1, length);
         var period = 0.5 * _length;
@@ -3973,25 +3352,7 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
         _c2 = b1;
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(inputName, null);
-        _filterValues = new PooledRingBuffer<double>(_length);
-    }
-
-    public EhlersTrendflexIndicatorState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        var period = 0.5 * _length;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _filterValues = new PooledRingBuffer<double>(_length);
     }
 
@@ -4051,6 +3412,7 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
     }
 }
 
+[PrimaryOutput("Trend")]
 public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -4063,32 +3425,14 @@ public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisp
     private int _index;
 
     public EhlersTrendExtractionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 20, double delta = 0.1, InputName inputName = InputName.Close)
+        int length = 20, double delta = 0.1)
     {
         _length = Math.Max(1, length);
         _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01));
         var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / _length, 0.99, 0.01));
         _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
         _trendSmoother = MovingAverageSmootherFactory.Create(maType, _length * 2);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(2);
-        _bpValues = new PooledRingBuffer<double>(2);
-    }
-
-    public EhlersTrendExtractionState(MovingAvgType maType, int length, double delta,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / _length, 0.99, 0.01));
-        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-        _trendSmoother = MovingAverageSmootherFactory.Create(maType, _length * 2);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(2);
         _bpValues = new PooledRingBuffer<double>(2);
     }
@@ -4142,6 +3486,7 @@ public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisp
     }
 }
 
+[PrimaryOutput("Eutf")]
 public sealed class EhlersUniversalTradingFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _hannLength;
@@ -4151,30 +3496,13 @@ public sealed class EhlersUniversalTradingFilterState : IStreamingIndicatorState
     private readonly RollingWindowSum _powerSum;
 
     public EhlersUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
-        int length1 = 16, int length2 = 50, double mult = 2, InputName inputName = InputName.Close)
+        int length1 = 16, int length2 = 50, double mult = 2)
     {
         var resolvedLength1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         _hannLength = (int)Math.Ceiling(mult * resolvedLength1);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_hannLength);
-        _powerSum = new RollingWindowSum(resolvedLength2);
-    }
-
-    public EhlersUniversalTradingFilterState(MovingAvgType maType, int length1, int length2, double mult,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _hannLength = (int)Math.Ceiling(mult * resolvedLength1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_hannLength);
         _powerSum = new RollingWindowSum(resolvedLength2);
     }
@@ -4226,6 +3554,7 @@ public sealed class EhlersUniversalTradingFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Espf")]
 public sealed class EhlersSuperPassbandFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _a1;
@@ -4235,8 +3564,7 @@ public sealed class EhlersSuperPassbandFilterState : IStreamingIndicatorState, I
     private readonly PooledRingBuffer<double> _espfValues;
     private readonly RollingWindowSum _powerSum;
 
-    public EhlersSuperPassbandFilterState(int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50,
-        InputName inputName = InputName.Close)
+    public EhlersSuperPassbandFilterState(int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
@@ -4244,27 +3572,7 @@ public sealed class EhlersSuperPassbandFilterState : IStreamingIndicatorState, I
         var resolvedLength2 = Math.Max(1, length2);
         _a1 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedFast, 0.99, 0.01);
         _a2 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedSlow, 0.99, 0.01);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(1);
-        _espfValues = new PooledRingBuffer<double>(2);
-        _powerSum = new RollingWindowSum(resolvedLength2);
-    }
-
-    public EhlersSuperPassbandFilterState(int fastLength, int slowLength, int length1, int length2,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _a1 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedFast, 0.99, 0.01);
-        _a2 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedSlow, 0.99, 0.01);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(1);
         _espfValues = new PooledRingBuffer<double>(2);
         _powerSum = new RollingWindowSum(resolvedLength2);
@@ -4324,26 +3632,16 @@ public sealed class EhlersSuperPassbandFilterState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Essf")]
 public sealed class EhlersSuperSmootherFilterState : IStreamingIndicatorState
 {
     private readonly EhlersSuperSmootherFilterEngine _engine;
     private readonly StreamingInputResolver _input;
 
-    public EhlersSuperSmootherFilterState(int length = 10, InputName inputName = InputName.Close)
+    public EhlersSuperSmootherFilterState(int length = 10)
     {
         _engine = new EhlersSuperSmootherFilterEngine(Math.Max(1, length));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersSuperSmootherFilterState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _engine = new EhlersSuperSmootherFilterEngine(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersSuperSmootherFilter;
@@ -4371,26 +3669,16 @@ public sealed class EhlersSuperSmootherFilterState : IStreamingIndicatorState
     }
 }
 
+[PrimaryOutput("Etma")]
 public sealed class EhlersTriangleMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly EhlersTriangleMovingAverageSmoother _smoother;
     private readonly StreamingInputResolver _input;
 
-    public EhlersTriangleMovingAverageState(int length = 20, InputName inputName = InputName.Close)
+    public EhlersTriangleMovingAverageState(int length = 20)
     {
         _smoother = new EhlersTriangleMovingAverageSmoother(length);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersTriangleMovingAverageState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _smoother = new EhlersTriangleMovingAverageSmoother(length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersTriangleMovingAverage;
@@ -4423,6 +3711,7 @@ public sealed class EhlersTriangleMovingAverageState : IStreamingIndicatorState,
     }
 }
 
+[PrimaryOutput("Etwi")]
 public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -4431,22 +3720,10 @@ public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorStat
     private double _prevFilt;
 
     public EhlersTriangleWindowIndicatorState(MovingAvgType maType = MovingAvgType.EhlersTriangleMovingAverage,
-        int length = 20, InputName inputName = InputName.Close)
+        int length = 20)
     {
         _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(inputName, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-    }
-
-    public EhlersTriangleWindowIndicatorState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length);
     }
 
@@ -4463,7 +3740,7 @@ public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorStat
         var value = _input.GetValue(bar);
         var deriv = value - bar.Open;
         var filt = _smoother.Next(deriv, isFinal);
-        var roc = (_length / 2) * Math.PI * (filt - _prevFilt);
+        var roc = (_length / 2.0) * Math.PI * (filt - _prevFilt);
 
         if (isFinal)
         {
@@ -4489,6 +3766,7 @@ public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Etbpf")]
 public sealed class EhlersTruncatedBandPassFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length2;
@@ -4498,33 +3776,14 @@ public sealed class EhlersTruncatedBandPassFilterState : IStreamingIndicatorStat
     private readonly PooledRingBuffer<double> _values;
     private readonly double[] _scratch;
 
-    public EhlersTruncatedBandPassFilterState(int length1 = 20, int length2 = 10, double bw = 0.1,
-        InputName inputName = InputName.Close)
+    public EhlersTruncatedBandPassFilterState(int length1 = 20, int length2 = 10, double bw = 0.1)
     {
         var resolvedLength1 = Math.Max(1, length1);
         _length2 = Math.Max(1, length2);
         _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
         var g1 = Math.Cos(bw * 2 * Math.PI / resolvedLength1);
         _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length2 + 2);
-        _scratch = new double[_length2 + 3];
-    }
-
-    public EhlersTruncatedBandPassFilterState(int length1, int length2, double bw,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedLength1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
-        var g1 = Math.Cos(bw * 2 * Math.PI / resolvedLength1);
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_length2 + 2);
         _scratch = new double[_length2 + 3];
     }
@@ -4573,6 +3832,7 @@ public sealed class EhlersTruncatedBandPassFilterState : IStreamingIndicatorStat
     }
 }
 
+[PrimaryOutput("Euo")]
 public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _c1;
@@ -4588,7 +3848,7 @@ public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, I
     private double _prevEuo;
 
     public EhlersUniversalOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 20, int signalLength = 9, InputName inputName = InputName.Close)
+        int length = 20, int signalLength = 9)
     {
         var resolvedLength = Math.Max(1, length);
         var resolvedSignal = Math.Max(1, signalLength);
@@ -4598,27 +3858,7 @@ public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, I
         _c3 = -a1 * a1;
         _c1 = 1 - _c2 - _c3;
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSignal);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
-    public EhlersUniversalOscillatorState(MovingAvgType maType, int length, int signalLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSignal = Math.Max(1, signalLength);
-        var a1 = MathHelper.Exp(-MathHelper.MinOrMax(1.414 * Math.PI / resolvedLength, 0.99, 0.01));
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolvedLength);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSignal);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(2);
     }
 
@@ -4675,6 +3915,7 @@ public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, I
     }
 }
 
+[PrimaryOutput("Ezcdc")]
 public sealed class EhlersZeroCrossingsDominantCycleState : IStreamingIndicatorState
 {
     private readonly EhlersBandPassFilterV1State _bandPass;
@@ -4683,19 +3924,9 @@ public sealed class EhlersZeroCrossingsDominantCycleState : IStreamingIndicatorS
     private int _counter;
     private int _index;
 
-    public EhlersZeroCrossingsDominantCycleState(int length = 20, double bw = 0.7, InputName inputName = InputName.Close)
+    public EhlersZeroCrossingsDominantCycleState(int length = 20, double bw = 0.7)
     {
-        _bandPass = new EhlersBandPassFilterV1State(length, bw, inputName);
-    }
-
-    public EhlersZeroCrossingsDominantCycleState(int length, double bw, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _bandPass = new EhlersBandPassFilterV1State(length, bw, selector);
+        _bandPass = new EhlersBandPassFilterV1State(length, bw);
     }
 
     public IndicatorName Name => IndicatorName.EhlersZeroCrossingsDominantCycle;
@@ -4744,6 +3975,7 @@ public sealed class EhlersZeroCrossingsDominantCycleState : IStreamingIndicatorS
     }
 }
 
+[PrimaryOutput("Escc")]
 public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -4753,25 +3985,11 @@ public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, 
     private readonly PooledRingBuffer<double> _stochValues;
     private double _prevStochCc;
 
-    public EhlersStochasticCyberCycleState(int length = 14, double alpha = 0.7, InputName inputName = InputName.Close)
+    public EhlersStochasticCyberCycleState(int length = 14, double alpha = 0.7)
     {
         _length = Math.Max(1, length);
         _windowLength = Math.Max(_length, 2);
-        _cycleState = new EhlersCyberCycleState(alpha, inputName);
-        _cycleValues = new PooledRingBuffer<double>(_windowLength);
-        _stochValues = new PooledRingBuffer<double>(3);
-    }
-
-    public EhlersStochasticCyberCycleState(int length, double alpha, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _windowLength = Math.Max(_length, 2);
-        _cycleState = new EhlersCyberCycleState(alpha, selector);
+        _cycleState = new EhlersCyberCycleState(alpha);
         _cycleValues = new PooledRingBuffer<double>(_windowLength);
         _stochValues = new PooledRingBuffer<double>(3);
     }
@@ -4842,6 +4060,7 @@ public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("Es")]
 public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length2;
@@ -4852,26 +4071,11 @@ public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposabl
     private double _prevStoch;
 
     public EhlersStochasticState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
-        int length1 = 48, int length2 = 20, int length3 = 10, InputName inputName = InputName.Close)
+        int length1 = 48, int length2 = 20, int length3 = 10)
     {
         _length2 = Math.Max(1, length2);
         _windowLength = Math.Max(_length2, 2);
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, Math.Max(1, length1), Math.Max(1, length3), inputName);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
-        _rfValues = new PooledRingBuffer<double>(_windowLength);
-    }
-
-    public EhlersStochasticState(MovingAvgType maType, int length1, int length2, int length3,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length2 = Math.Max(1, length2);
-        _windowLength = Math.Max(_length2, 2);
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, Math.Max(1, length1), Math.Max(1, length3), selector);
+        _roofingFilter = new EhlersRoofingFilterV1State(maType, Math.Max(1, length1), Math.Max(1, length3));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
         _rfValues = new PooledRingBuffer<double>(_windowLength);
     }
@@ -4937,6 +4141,7 @@ public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposabl
     }
 }
 
+[PrimaryOutput("Etdld")]
 public sealed class EhlersTripleDelayLineDetrenderState : IStreamingIndicatorState, IDisposable
 {
     private readonly StreamingInputResolver _input;
@@ -4946,27 +4151,12 @@ public sealed class EhlersTripleDelayLineDetrenderState : IStreamingIndicatorSta
     private readonly PooledRingBuffer<double> _tmp2Values;
 
     public EhlersTripleDelayLineDetrenderState(MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter,
-        int length = 14, InputName inputName = InputName.Close)
+        int length = 14)
     {
         var resolved = Math.Max(1, length);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(inputName, null);
-        _tmp1Values = new PooledRingBuffer<double>(6);
-        _tmp2Values = new PooledRingBuffer<double>(12);
-    }
-
-    public EhlersTripleDelayLineDetrenderState(MovingAvgType maType, int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _tmp1Values = new PooledRingBuffer<double>(6);
         _tmp2Values = new PooledRingBuffer<double>(12);
     }
@@ -5023,6 +4213,7 @@ public sealed class EhlersTripleDelayLineDetrenderState : IStreamingIndicatorSta
     }
 }
 
+[PrimaryOutput("Evidya")]
 public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _shortSmoother;
@@ -5034,7 +4225,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
     private bool _hasPrev;
 
     public EhlersVariableIndexDynamicAverageState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int fastLength = 9, int slowLength = 30, InputName inputName = InputName.Close)
+        int fastLength = 9, int slowLength = 30)
     {
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
@@ -5042,24 +4233,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
         _longSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
         _shortPowSum = new RollingWindowSum(resolvedFast);
         _longPowSum = new RollingWindowSum(resolvedSlow);
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public EhlersVariableIndexDynamicAverageState(MovingAvgType maType, int fastLength, int slowLength,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _shortSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _longSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _shortPowSum = new RollingWindowSum(resolvedFast);
-        _longPowSum = new RollingWindowSum(resolvedSlow);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EhlersVariableIndexDynamicAverage;
@@ -5121,6 +4295,7 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
     }
 }
 
+[PrimaryOutput("Ezlema")]
 public sealed class EhlersZeroLagExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _lag;
@@ -5129,26 +4304,11 @@ public sealed class EhlersZeroLagExponentialMovingAverageState : IStreamingIndic
     private readonly PooledRingBuffer<double> _values;
 
     public EhlersZeroLagExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14, InputName inputName = InputName.Close)
+        int length = 14)
     {
         var resolved = Math.Max(1, length);
         _lag = MathHelper.MinOrMax((int)Math.Floor((double)(resolved - 1) / 2));
-        _input = new StreamingInputResolver(inputName, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _values = new PooledRingBuffer<double>(_lag);
-    }
-
-    public EhlersZeroLagExponentialMovingAverageState(MovingAvgType maType, int length,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _lag = MathHelper.MinOrMax((int)Math.Floor((double)(resolved - 1) / 2));
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _values = new PooledRingBuffer<double>(_lag);
     }
@@ -5192,6 +4352,7 @@ public sealed class EhlersZeroLagExponentialMovingAverageState : IStreamingIndic
     }
 }
 
+[PrimaryOutput("Voss")]
 public sealed class EhlersVossPredictiveFilterState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _order;
@@ -5203,34 +4364,14 @@ public sealed class EhlersVossPredictiveFilterState : IStreamingIndicatorState, 
     private readonly PooledRingBuffer<double> _vossValues;
     private int _index;
 
-    public EhlersVossPredictiveFilterState(int length = 20, double predict = 3, double bw = 0.25,
-        InputName inputName = InputName.Close)
+    public EhlersVossPredictiveFilterState(int length = 20, double predict = 3, double bw = 0.25)
     {
         var resolved = Math.Max(1, length);
         _order = MathHelper.MinOrMax((int)Math.Ceiling(3 * predict));
         _f1 = Math.Cos(2 * Math.PI / resolved);
         var g1 = Math.Cos(bw * 2 * Math.PI / resolved);
         _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(2);
-        _filterValues = new PooledRingBuffer<double>(2);
-        _vossValues = new PooledRingBuffer<double>(_order);
-    }
-
-    public EhlersVossPredictiveFilterState(int length, double predict, double bw,
-        Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        var resolved = Math.Max(1, length);
-        _order = MathHelper.MinOrMax((int)Math.Ceiling(3 * predict));
-        _f1 = Math.Cos(2 * Math.PI / resolved);
-        var g1 = Math.Cos(bw * 2 * Math.PI / resolved);
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(2);
         _filterValues = new PooledRingBuffer<double>(2);
         _vossValues = new PooledRingBuffer<double>(_order);
@@ -5294,6 +4435,7 @@ public sealed class EhlersVossPredictiveFilterState : IStreamingIndicatorState, 
     }
 }
 
+[PrimaryOutput("SmaFilter")]
 public sealed class EhlersSwissArmyKnifeIndicatorState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
@@ -5321,26 +4463,12 @@ public sealed class EhlersSwissArmyKnifeIndicatorState : IStreamingIndicatorStat
     private double _prevBs2;
     private int _index;
 
-    public EhlersSwissArmyKnifeIndicatorState(int length = 20, double delta = 0.1, InputName inputName = InputName.Close)
+    public EhlersSwissArmyKnifeIndicatorState(int length = 20, double delta = 0.1)
     {
         _length = Math.Max(1, length);
         _twoPiPrd = MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01);
         _deltaPrd = MathHelper.MinOrMax(2 * Math.PI * 2 * delta / _length, 0.99, 0.01);
-        _input = new StreamingInputResolver(inputName, null);
-        _values = new PooledRingBuffer<double>(_length + 2);
-    }
-
-    public EhlersSwissArmyKnifeIndicatorState(int length, double delta, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _twoPiPrd = MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01);
-        _deltaPrd = MathHelper.MinOrMax(2 * Math.PI * 2 * delta / _length, 0.99, 0.01);
-        _input = new StreamingInputResolver(InputName.Close, selector);
+        _input = new StreamingInputResolver(InputName.Close, null);
         _values = new PooledRingBuffer<double>(_length + 2);
     }
 

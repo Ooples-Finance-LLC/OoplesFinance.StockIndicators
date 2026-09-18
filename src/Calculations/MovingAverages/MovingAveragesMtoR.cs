@@ -6,6 +6,97 @@ namespace OoplesFinance.StockIndicators;
 public static partial class Calculations
 {
     /// <summary>
+    /// Calculates the Ppo Moving Average.
+    /// </summary>
+    /// <remarks>
+    /// The gap between a fast and a slow exponential average of the series, as a percentage of the slow one.
+    /// It is the percentage price oscillator without a signal line, and unlike
+    /// <see cref="CalculatePercentagePriceOscillator"/> it always averages exponentially rather than taking
+    /// the average a caller asks for. A bar whose slow average is zero has nothing to take a percentage of.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="fastLength"></param>
+    /// <param name="slowLength"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePpoMovingAverage(this StockData stockData, int fastLength = 12, int slowLength = 26)
+    {
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> ppoMaList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var fastBuffer = SpanCompat.CreateOutputBuffer(count);
+        var slowBuffer = SpanCompat.CreateOutputBuffer(count);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, fastBuffer.Span, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(inputSpan, slowBuffer.Span, slowLength);
+
+        for (var i = 0; i < count; i++)
+        {
+            var slowEma = slowBuffer.Span[i];
+            var ppoMa = slowEma != 0 ? (fastBuffer.Span[i] - slowEma) / slowEma * 100 : 0;
+            ppoMaList.Add(ppoMa);
+
+            var prevPpoMa1 = i >= 1 ? ppoMaList[i - 1] : 0;
+            var prevPpoMa2 = i >= 2 ? ppoMaList[i - 2] : 0;
+            var signal = GetCompareSignal(ppoMa - prevPpoMa1, prevPpoMa1 - prevPpoMa2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "PpoMa", ppoMaList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(ppoMaList);
+        stockData.IndicatorName = IndicatorName.PpoMovingAverage;
+
+        return stockData;
+    }
+
+    /// <summary>
+    /// Calculates the Price Momentum.
+    /// </summary>
+    /// <remarks>
+    /// The change in the series over <paramref name="length"/> bars, in the price's own units rather than as
+    /// a proportion. A bar with no value that far back publishes zero.
+    /// </remarks>
+    /// <param name="stockData"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
+    public static StockData CalculatePriceMomentum(this StockData stockData, int length = 10)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var count = inputList.Count;
+        List<double> momentumList = new(count);
+        List<Signal>? signalsList = CreateSignalsList(stockData, count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var momentum = i >= length ? inputList[i] - inputList[i - length] : 0;
+            momentumList.Add(momentum);
+
+            var prevMomentum1 = i >= 1 ? momentumList[i - 1] : 0;
+            var prevMomentum2 = i >= 2 ? momentumList[i - 2] : 0;
+            var signal = GetCompareSignal(momentum - prevMomentum1, prevMomentum1 - prevMomentum2);
+            signalsList?.Add(signal);
+        }
+
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
+            { "Pm", momentumList }
+        });
+        stockData.SetSignals(signalsList);
+        stockData.SetCustomValues(momentumList);
+        stockData.IndicatorName = IndicatorName.PriceMomentum;
+
+        return stockData;
+    }
+
+    /// <summary>
     /// Calculates the powered kaufman adaptive moving average.
     /// </summary>
     /// <param name="stockData">The stock data.</param>
@@ -21,7 +112,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -272,16 +363,21 @@ public static partial class Calculations
             nvCovList.Add(nvCov);
         }
 
-        stockData.SetCustomValues(nList);
-        var nVarianceList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
-        stockData.SetCustomValues(n2List);
-        var n2VarianceList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        // norm below is the determinant of a 2x2 covariance matrix, and nn2Cov, n2vCov and nvCov are all
+        // genuine covariances over these windows. So these two terms have to be the variances of the same
+        // windows. CalculateStandardDeviationVolatility is neither a variance nor a deviation about the
+        // window's own mean - it is the mean squared residual from the moving-average line, rooted - so the
+        // normal equations were being solved against mismatched quantities. See issue #223.
+        var nDevList = GetStandardDeviationList(nList, length);
+        var n2DevList = GetStandardDeviationList(n2List, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var n2Variance = n2VarianceList[i];
-            var nVariance = nVarianceList[i];
+            var n2Dev = n2DevList[i];
+            var nDev = nDevList[i];
+            var n2Variance = n2Dev * n2Dev;
+            var nVariance = nDev * nDev;
             var nn2Cov = nn2CovList[i];
             var n2vCov = n2vCovList[i];
             var nvCov = nvCovList[i];
@@ -551,9 +647,9 @@ public static partial class Calculations
 
         var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(indexList);
-        var indexStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var indexStdDevList = GetStandardDeviationList(indexList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -1015,8 +1111,14 @@ public static partial class Calculations
         RollingSum x2PowSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linregList = CalculateLinearRegression(stockData, length).CustomValuesList;
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).CustomValuesList;
+        var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
+        // The slope below is sigma_y * r^2 / sigma_x, and sigma_x is built a few lines down as the root of
+        // the mean squared distance from that window's own mean. Taking the numerator from
+        // CalculateStandardDeviationVolatility made the two halves of one ratio two different quantities -
+        // the method already demonstrates which one it wants. Reading the price window's deviation directly
+        // also removes the capture/restore that existed only to keep the regression line out of this call.
+        // See issue #223.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1487,7 +1589,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).OutputValues["Er"];
+        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1561,7 +1663,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var mhlList = CalculateMidpoint(stockData, length2).CustomValuesList;
+        var mhlList = CalculateMidpoint(stockData, length2).ChainedValues;
         var mhlMaList = GetMovingAverageList(stockData, maType, length1, mhlList);
 
         for (var i = 0; i < stockData.Count; i++)

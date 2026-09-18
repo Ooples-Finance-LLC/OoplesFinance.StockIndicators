@@ -38,6 +38,26 @@ public static class MathHelper
     }
 
     /// <summary>
+    /// Rounds a measured cycle length up to the whole number of bars it spans.
+    /// </summary>
+    /// <remarks>
+    /// A dominant cycle is a weighted mean of periods, so it is often an integer in exact arithmetic - 29 when
+    /// the periodogram's powers are all equal - and arrives a few ulps either side of it. A bare
+    /// <see cref="Math.Ceiling(double)"/> turns that noise into a window one bar longer, and whether it does
+    /// depends on the order a sum was taken in, so batch and streaming disagreed on the same bars. A value
+    /// within a relative 1e-9 of an integer is taken as that integer, the same closeness the parity tests use.
+    /// </remarks>
+    /// <param name="cycle">The measured cycle length, in bars.</param>
+    /// <returns>The cycle length rounded up to whole bars.</returns>
+    public static int CeilingCycle(double cycle)
+    {
+        var nearest = Math.Round(cycle);
+        return Math.Abs(cycle - nearest) <= 1e-9 * Math.Max(1, Math.Abs(cycle))
+            ? (int)nearest
+            : (int)Math.Ceiling(cycle);
+    }
+
+    /// <summary>
     /// Convert to Degrees From Radians
     /// </summary>
     /// <param name="val">The value to convert to degrees</param>
