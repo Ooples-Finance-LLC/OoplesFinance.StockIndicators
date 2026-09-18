@@ -218,6 +218,14 @@ public sealed class BuilderArmTests : GlobalTestData
     /// <c>minLength: 5, maxLength: 50</c> while the arm ran at the option's length. Both make an arm unsafe to
     /// verify, which is what this guards; only the first means the arm implements the wrong maths.
     /// </para>
+    /// <para>
+    /// Split by that test, the 589 are 538 whose every option maps to a real, non-obsolete parameter of the
+    /// bound indicator - compared like for like, so the arm's maths is what differs - and 51 carrying an
+    /// <c>[Obsolete]</c> option the indicator has no parameter for. None has an unmapped non-obsolete option;
+    /// <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that. 538 is an upper bound on "wrong
+    /// maths" rather than a count of it: an arm can also disagree by ignoring an option it was handed, which
+    /// this partition cannot see from the outside.
+    /// </para>
     /// That is
     /// close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229 stopped serving them:
     /// the Builder computes those specs with their batch indicator, so callers get correct numbers today.
