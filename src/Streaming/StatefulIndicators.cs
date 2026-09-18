@@ -1672,8 +1672,11 @@ public sealed class StatisticalVolatilityState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Vsi")]
 public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly IMovingAverageSmoother _varianceSmoother;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. This state
+    // used to write the other quantity out by hand - a moving average of the returns, each return's distance
+    // from it, a moving average of those squared, and a root - which is the mean squared residual from a
+    // moving-average line rather than a deviation, and is why a grep for the old state's type did not find it.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
@@ -1682,8 +1685,9 @@ public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, I
     public VolatilitySwitchIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14)
     {
         var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _varianceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        // No moving-average type for the deviation: it is taken about the window's own mean. maType still
+        // selects the average that smooths it into Vsi, below.
+        _stdDev = new RollingStandardDeviation(resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1692,8 +1696,7 @@ public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, I
 
     public void Reset()
     {
-        _meanSmoother.Reset();
-        _varianceSmoother.Reset();
+        _stdDev.Reset();
         _signalSmoother.Reset();
         _prevValue = 0;
         _hasPrev = false;
@@ -1706,10 +1709,9 @@ public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, I
         var rocSma = (value + prevValue) / 2;
         var dr = _hasPrev && rocSma != 0 ? (value - prevValue) / rocSma : 0;
 
-        var mean = _meanSmoother.Next(dr, isFinal);
-        var deviation = dr - mean;
-        var variance = _varianceSmoother.Next(deviation * deviation, isFinal);
-        var stdDev = MathHelper.Sqrt(variance);
+        // Fed the return series, which is what this measures, and taken about the window's own mean rather
+        // than about a moving average of it - matching the batch calculation.
+        var stdDev = _stdDev.Next(dr, isFinal);
         var vswitch = _signalSmoother.Next(stdDev, isFinal);
 
         if (isFinal)
@@ -1732,8 +1734,7 @@ public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, I
 
     public void Dispose()
     {
-        _meanSmoother.Dispose();
-        _varianceSmoother.Dispose();
+        _stdDev.Dispose();
         _signalSmoother.Dispose();
     }
 }
@@ -12650,7 +12651,10 @@ public sealed class ChandeTrendScoreState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Cvida1")]
 public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. This is the
+    // Chande-named twin of VolatilityIndexDynamicAverageIndicatorState, and the two share one batch helper,
+    // so they move together.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _stdDevSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _alpha1;
@@ -12663,7 +12667,9 @@ public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState : IStreami
         int length = 20, double alpha1 = 0.2, double alpha2 = 0.04)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean.
+        _stdDev = new RollingStandardDeviation(resolved);
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _alpha1 = alpha1;
@@ -12684,7 +12690,9 @@ public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState : IStreami
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input, which is the series this measures, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var stdDevEma = _stdDevSmoother.Next(stdDev, isFinal);
         var ratio = stdDevEma != 0 ? stdDev / stdDevEma : 0;
         var prevVidya1 = _hasPrev ? _prevVidya1 : value;

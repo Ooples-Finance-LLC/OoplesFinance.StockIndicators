@@ -1514,7 +1514,8 @@ public sealed class VixTradingSystemState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Vida1")]
 public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _stdDevSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _alpha1;
@@ -1527,7 +1528,10 @@ public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndi
         int length = 20, double alpha1 = 0.2, double alpha2 = 0.04)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the average it is measured against, below.
+        _stdDev = new RollingStandardDeviation(resolved);
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _alpha1 = alpha1;
@@ -1548,7 +1552,9 @@ public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input, which is the series this measures, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var stdDevEma = _stdDevSmoother.Next(stdDev, isFinal);
         var ratio = stdDevEma != 0 ? stdDev / stdDevEma : 0;
         var prevVidya1 = _hasPrev ? _prevVidya1 : value;

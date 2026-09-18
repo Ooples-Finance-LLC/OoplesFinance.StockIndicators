@@ -460,7 +460,14 @@ public static partial class Calculations
         var slowMaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var fastMaList = GetMovingAverageList(stockData, maType, length2, inputList);
         stockData.SetCustomValues(slowMaList);
-        var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. This one publishes the deviation itself as Tai rather than using it in a band, so the change
+        // is directly visible in the indicator's own output rather than in something derived from it - about
+        // 55% narrower on a typical price series. The quantity the indicator is named for is a standard
+        // deviation, and that is the windowed one. Taken over slowMaList by name, which is the series it
+        // measures - the batch chained it in on purpose. See #190.
+        var taiList = GetStandardDeviationList(slowMaList, length2);
         var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
 
         for (var i = 0; i < stockData.Count; i++)

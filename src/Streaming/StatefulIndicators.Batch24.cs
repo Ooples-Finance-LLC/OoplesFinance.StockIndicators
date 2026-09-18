@@ -1676,10 +1676,11 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
 {
     private readonly IMovingAverageSmoother _slowMa;
     private readonly IMovingAverageSmoother _fastMa;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. This state
+    // publishes the deviation itself as Tai, so the conversion lands directly in its output.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
-    private double _slowValue;
 
     public TrendAnalysisIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 21, int length2 = 4)
@@ -1688,7 +1689,8 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
         var resolved2 = Math.Max(1, length2);
         _slowMa = MovingAverageSmootherFactory.Create(maType, resolved1);
         _fastMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved2, _ => _slowValue);
+        // No moving-average type, and no selector: the slow average is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolved2);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1701,17 +1703,16 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
         _fastMa.Reset();
         _stdDev.Reset();
         _signalSmoother.Reset();
-        _slowValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         // The index is the deviation of the slow average, as the batch computes it: it chains the slow MA
-        // into the deviation on purpose.
-        _slowValue = _slowMa.Next(value, isFinal);
+        // into the deviation on purpose, and the average is now passed to Next rather than held in a field.
+        var slowValue = _slowMa.Next(value, isFinal);
         _ = _fastMa.Next(value, isFinal);
-        var tai = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var tai = _stdDev.Next(slowValue, isFinal);
         var signal = _signalSmoother.Next(tai, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
