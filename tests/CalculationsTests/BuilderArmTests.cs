@@ -201,13 +201,24 @@ public sealed class BuilderArmTests : GlobalTestData
     }
 
     /// <summary>
-    /// Every bound arm shown to compute something other than its batch indicator.
+    /// Every bound arm whose result differs from the batch call its spec is bound to.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Measured, not chosen. Driving <c>IndicatorCompute.ComputeArm</c> over every bound spec at two parameter
-    /// sets, these 594 option types return something other than the indicator they are named for at one or both
-    /// of those parameter sets. A type is listed once however many of its parameter sets disagree. That is
+    /// sets, these option types return something other than <see cref="BuilderArmBinding"/> does for the same
+    /// spec, at one or both of those sets. A type is listed once however many of its parameter sets disagree.
+    /// <para>
+    /// "Disagrees with its bound call" is the claim, and it is deliberately weaker than "computes a different
+    /// indicator". Two causes reach this list. One is a genuinely different formula:
+    /// <c>AutoLineSpecOptions</c> maps its <c>Length</c> straight onto <c>CalculateAutoLine(length)</c>, so its
+    /// arm was compared like for like and still disagreed. The other is parameterisation:
+    /// <c>UltimateMovingAverageSpecOptions.Length</c> is <c>[Obsolete]</c> because the indicator has no
+    /// parameter it could set, <c>MapArguments</c> skips obsolete properties, so the bound call ran at
+    /// <c>minLength: 5, maxLength: 50</c> while the arm ran at the option's length. Both make an arm unsafe to
+    /// verify, which is what this guards; only the first means the arm implements the wrong maths.
+    /// </para>
+    /// That is
     /// close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229 stopped serving them:
     /// the Builder computes those specs with their batch indicator, so callers get correct numbers today.
     /// </para>
@@ -218,7 +229,7 @@ public sealed class BuilderArmTests : GlobalTestData
     /// stale in either direction. See issue #233.
     /// </para>
     /// </remarks>
-    private static readonly HashSet<string> ArmsComputingAnotherIndicator = new(StringComparer.Ordinal)
+    private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
     {
         "AbsoluteStrengthIndexSpecOptions",
         "AbsoluteStrengthMTFIndicatorSpecOptions",
@@ -842,14 +853,15 @@ public sealed class BuilderArmTests : GlobalTestData
     /// </para>
     /// <para>
     /// This drives <c>IndicatorCompute.ComputeArm</c>, the arm itself, unchecked. The property that matters is
-    /// not "every arm is correct" - 594 are not - but that <b>verification and correctness cannot come apart</b>:
+    /// not "every arm is correct" - hundreds are not - but that <b>verification and agreement cannot come
+    /// apart</b>:
     /// adding an options type to <see cref="BuilderVerifiedArms"/> starts serving its arm immediately, and
     /// before this test nothing on that path would have noticed the arm computed something else. Promote one of
-    /// the 594 and the first assertion below fails.
+    /// the listed types and the first assertion below fails.
     /// </para>
     /// </remarks>
     [Fact]
-    public void NoServedArmComputesADifferentIndicator()
+    public void NoServedArmDisagreesWithItsBoundCall()
     {
         var tickers = StockTestData.ToList();
         var disagreed = new SortedSet<string>(StringComparer.Ordinal);
@@ -912,14 +924,14 @@ public sealed class BuilderArmTests : GlobalTestData
         compared.Should().BeGreaterThan(200, "every bound spec with an arm is driven through that arm");
 
         // The promotion guard. A verified arm IS served, so a verified arm that computes something else is
-        // wrong numbers reaching callers - which is exactly what promoting one of the 594 would do.
+        // wrong numbers reaching callers - which is exactly what promoting a listed type would do.
         servedAndWrong.Should().BeEmpty(
             "an arm in BuilderVerifiedArms is served, so it must compute the indicator it is named for");
 
-        disagreed.Except(ArmsComputingAnotherIndicator).Should().BeEmpty(
+        disagreed.Except(ArmsDisagreeingWithTheirBoundCall).Should().BeEmpty(
             "an arm that has started computing something other than its batch indicator joins the list, and is "
             + "a blocker for ever verifying it");
-        ArmsComputingAnotherIndicator.Except(disagreed).Should().BeEmpty(
+        ArmsDisagreeingWithTheirBoundCall.Except(disagreed).Should().BeEmpty(
             "an arm repaired to compute its batch indicator leaves the list, so the list shrinks visibly");
 
         foreach (var named in ArmsNamedInIssue233)
