@@ -523,7 +523,7 @@ internal static partial class IndicatorCompute
             // Batch 6 - Ehlers oscillators
             EhlersCenterOfGravityOscillatorSpecOptions ecogo => ComputeEhlersCenterOfGravityOscillatorFast(data, context, ecogo.Length),
             EhlersDecyclerOscillatorV1SpecOptions edov1 => ComputeEhlersDecyclerOscillatorV1Fast(data, context, edov1.Length),
-            EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength),
+            EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
             EhlersHilbertOscillatorSpecOptions eho => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length),
             EhlersUniversalOscillatorSpecOptions euo => ComputeEhlersUniversalOscillatorFast(data, context, euo.Length),
             EhlersRecursiveMedianOscillatorSpecOptions ermo => ComputeEhlersRecursiveMedianOscillatorFast(data, context, ermo.Length),
@@ -622,7 +622,7 @@ internal static partial class IndicatorCompute
             EhlersHammingMovingAverageSpecOptions ehmma => ComputeEhlersHammingMovingAverageFast(data, context, ehmma.Length),
             EhlersLeadingIndicatorSpecOptions eli => ComputeEhlersLeadingIndicatorFast(data, context, eli.Length),
             EhlersHighPassFilterV1SpecOptions ehpv1 => ComputeEhlersHighPassFilterV1Fast(data, context, ehpv1.Length),
-            EhlersHighPassFilterV2SpecOptions ehpv2 => ComputeEhlersHighPassFilterV2Fast(data, context, ehpv2.Length),
+            EhlersHighPassFilterV2SpecOptions ehpv2 => ComputeEhlersHighPassFilterV2Fast(data, context, ehpv2.Length, ehpv2.MaType),
             DistanceWeightedMovingAverageSpecOptions dwma => ComputeDistanceWeightedMovingAverageFast(data, context, dwma.Length),
             EhlersFilterSpecOptions efilter => ComputeEhlersFilterFast(data, context, efilter.Length),
             EhlersFirFilterSpecOptions efir => ComputeEhlersFirFilterFast(data, context, efir.Length),
@@ -674,7 +674,7 @@ internal static partial class IndicatorCompute
                 cma.MaType),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
-            EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length),
+            EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length, epf.MaType),
             EhlersAllPassPhaseShifterSpecOptions eapps => ComputeEhlersAllPassPhaseShifterFast(data, context, eapps.Length),
             EhlersAverageErrorFilterSpecOptions eaef => ComputeEhlersAverageErrorFilterFast(data, context, eaef.Length),
             EhlersDistanceCoefficientFilterSpecOptions edcf => ComputeEhlersDistanceCoefficientFilterFast(data, context, edcf.Length),
@@ -764,7 +764,9 @@ internal static partial class IndicatorCompute
             EhlersRoofingFilterSpecOptions eroof => ComputeEhlersRoofingFilterFast(data, context, eroof.HpLength, eroof.LpLength),
 
             // Batch 28
-            EhlersDeviationScaledSuperSmootherSpecOptions edsss => ComputeEhlersDeviationScaledSuperSmootherFast(data, context, edsss.Length, edsss.Poles),
+            // Poles is marked as having no effect: the cutoff is set per bar by the scaled deviation,
+            // so there is no pole count for it to choose.
+            EhlersDeviationScaledSuperSmootherSpecOptions edsss => ComputeEhlersDeviationScaledSuperSmootherFast(data, context, edsss.Length, edsss.MaType),
             PpoMaSpecOptions ppoma => ComputePpoMaFast(data, context, ppoma.FastLength, ppoma.SlowLength),
             PriceOscillatorSpecOptions posc => ComputePriceOscillatorFast(data, context, posc.ShortLength, posc.LongLength),
             ReverseEngineeringRsiSpecOptions rersi => ComputeReverseEngineeringRsiFast(data, context, rersi.Length, rersi.RsiLevel),
@@ -897,7 +899,9 @@ internal static partial class IndicatorCompute
             AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length, adx2.MaType),
             AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length, atr2.MaType),
             ChandeMomentumOscillatorSpecOptions cmo2 => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length),
-            EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Length),
+            // Length and MaType reach only the Signal line of CalculateEaseOfMovement, not the series
+            // this spec is bound to, so neither is passed.
+            EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Divisor),
             EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length),
             HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length),
             KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
@@ -7045,11 +7049,26 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Decycler Oscillator V2 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context,
+        int fastLength = 10, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int slowLength = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersDecyclerOscillatorV2(close, buffer.WritableSpan, length > 0 ? length * 9 : 125);
+        // The slow high-pass filter less the fast one. Both read the caller's own series: the second is not
+        // chained onto the first, which is the distinction CalculateEhlersDecyclerOscillatorV2 restores its
+        // input series to make.
+        using var fastBuffer = EhlersHighPassFilterV2(data, context, fastLength, maType);
+        using var slowBuffer = EhlersHighPassFilterV2(data, context, slowLength, maType);
+        var fast = fastBuffer.Span;
+        var slow = slowBuffer.Span;
+        var count = fast.Length;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = slow[i] - fast[i];
+        }
+
         return buffer;
     }
 
@@ -7713,11 +7732,50 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers High Pass Filter V2 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersHighPassFilterV2Fast(StockData data, ComputeContext context, int length = 48)
+    internal static ComputeBuffer ComputeEhlersHighPassFilterV2Fast(StockData data, ComputeContext context,
+        int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersHighPassFilterV2(close, buffer.WritableSpan, length);
+        return EhlersHighPassFilterV2(data, context, length, maType);
+    }
+
+    /// <summary>
+    /// The twice-smoothed two-pole high-pass filter that CalculateEhlersHighPassFilterV2 publishes.
+    /// </summary>
+    /// <remarks>
+    /// Shared rather than copied into each caller: the decycler oscillator is the difference of two of these
+    /// at different lengths, and a second copy of the recursion would be a second chance to drift from it.
+    /// </remarks>
+    private static ComputeBuffer EhlersHighPassFilterV2(StockData data, ComputeContext context, int length,
+        MovingAvgType maType)
+    {
+        length = Math.Max(length, 1);
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var angle = MathHelper.Sqrt2 * Math.PI / length;
+        var a1 = MathHelper.Exp(-angle);
+        var c2 = 2 * a1 * Math.Cos(angle);
+        var c3 = -a1 * a1;
+        var c1 = (1 + c2 - c3) / 4;
+
+        using var highPassBuffer = context.Rent(count);
+        using var smoothedBuffer = context.Rent(count);
+        var highPass = highPassBuffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            highPass[i] = i < 4
+                ? 0
+                : (c1 * (input[i] - (2 * input[i - 1]) + input[i - 2]))
+                    + (c2 * highPass[i - 1]) + (c3 * highPass[i - 2]);
+        }
+
+        MovingAverage(data, maType, length, highPass, smoothedBuffer.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, smoothedBuffer.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -8131,12 +8189,57 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Edge Preserving Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context,
+        int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 50)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EdgePreservingFilter(inputSpan, buffer.WritableSpan, length);
+        // CalculateEdgePreservingFilter averages the input over a run that restarts whenever the regressed
+        // distance from the moving average reaches a new high on the side the input is not on. The output is
+        // that running mean, so the edge is preserved by the restart rather than by any weighting.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var averageBuffer = context.Rent(count);
+        MovingAverage(data, maType, length, input, averageBuffer.WritableSpan);
+        var average = averageBuffer.Span;
+
+        using var offsetBuffer = context.Rent(count);
+        using var regressedBuffer = context.Rent(count);
+        var offset = offsetBuffer.WritableSpan;
+        var regressed = regressedBuffer.WritableSpan;
+        using var leastSquares = new RollingLeastSquares(smoothLength);
+
+        for (var i = 0; i < count; i++)
+        {
+            offset[i] = input[i] - average[i];
+            regressed[i] = leastSquares.Next(Math.Abs(offset[i]), isFinal: true).Last;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var window = new RollingMinMax(Math.Max(length, 2));
+        double previousRatio = 0;
+        double runLength = 0;
+        double runSum = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(regressed[i]);
+
+            var ratio = window.Max != 0 ? regressed[i] / window.Max : 0;
+            var restart = ratio == 1 && previousRatio != 1 && offset[i] != 0;
+            previousRatio = ratio;
+
+            // The run is one bar long before the first bar, and the sum is seeded with that bar's own
+            // value, so a bar that does not restart the run counts itself twice - as the batch does.
+            var previousRunLength = i >= 1 ? runLength : 1;
+            var previousRunSum = i >= 1 ? runSum : input[i];
+            runLength = restart ? 1 : previousRunLength + 1;
+            runSum = runLength == 1 ? input[i] : previousRunSum + input[i];
+
+            output[i] = runLength != 0 ? runSum / runLength : 0;
+        }
+
         return buffer;
     }
 
@@ -9157,12 +9260,59 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Deviation Scaled Super Smoother using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(StockData data, ComputeContext context, int length = 20, int poles = 2)
+    internal static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(StockData data,
+        ComputeContext context, int length1 = 12,
+        MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length2 = 50)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersDeviationScaledSuperSmoother(inputSpan, buffer.WritableSpan, length, poles);
+        // CalculateEhlersDeviationScaledSuperSmoother scales a smoothed momentum by its own root mean square
+        // and lets that magnitude set the super smoother's cutoff bar by bar, so the filter tightens as the
+        // move grows. The coefficients come from the batch's own helper rather than a second copy of them.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var momentumBuffer = context.Rent(count);
+        using var filteredBuffer = context.Rent(count);
+        using var powerBuffer = context.Rent(count);
+        var momentum = momentumBuffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            momentum[i] = input[i] - (i >= length1 ? input[i - length1] : 0);
+        }
+
+        var hannLength = (int)Math.Ceiling(length1 / 1.4m);
+        MovingAverage(data, maType, hannLength, momentum, filteredBuffer.WritableSpan);
+
+        var filtered = filteredBuffer.Span;
+        var power = powerBuffer.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            power[i] = MathHelper.Pow(filtered[i], 2);
+
+            var window = Math.Min(length2, i + 1);
+            double sum = 0;
+            for (var j = i - window + 1; j <= i; j++)
+            {
+                sum += power[j];
+            }
+
+            var meanPower = sum / window;
+            var rms = meanPower > 0 ? MathHelper.Sqrt(meanPower) : 0;
+            var scaled = rms != 0 ? filtered[i] / rms : 0;
+
+            var (c1, c2, c3) = Calculations.DeviationScaledSuperSmootherCoefficients(scaled, length1);
+
+            var previous1 = i >= 1 ? output[i - 1] : 0;
+            var previous2 = i >= 2 ? output[i - 2] : 0;
+            var midpoint = (input[i] + (i >= 1 ? input[i - 1] : 0)) / 2;
+
+            output[i] = (c1 * midpoint) + (c2 * previous1) + (c3 * previous2);
+        }
+
         return buffer;
     }
 
@@ -10847,21 +10997,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ease of Movement using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context,
+        double divisor = 1000000)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var volume = new double[count];
+        // CalculateEaseOfMovement publishes the raw series. Length and MaType only smooth its Signal line,
+        // which is a different output from the one this arm is bound to, so neither reaches this series.
+        var (_, highList, lowList, _, volumeList) = CalculationsHelper.GetInputValuesList(data);
+        var high = SpanCompat.AsReadOnlySpan(highList);
+        var low = SpanCompat.AsReadOnlySpan(lowList);
+        var volume = SpanCompat.AsReadOnlySpan(volumeList);
+        var count = highList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double previousHalfRange = 0;
+        double previousMidpointMove = 0;
+
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            volume[i] = (double)tickerList[i].Volume;
+            var range = high[i] - low[i];
+            var halfRange = range * 0.5;
+            var boxRatio = range != 0 ? volume[i] / range : 0;
+            var midpointMove = halfRange - previousHalfRange;
+
+            output[i] = boxRatio != 0 ? divisor * ((midpointMove - previousMidpointMove) / boxRatio) : 0;
+
+            previousHalfRange = halfRange;
+            previousMidpointMove = midpointMove;
         }
-        var buffer = context.Rent(count);
-        VolumeCore.EaseOfMovement(high, low, volume, buffer.WritableSpan, length);
+
         return buffer;
     }
 
