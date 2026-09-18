@@ -625,7 +625,9 @@ internal static partial class IndicatorCompute
             EhlersHighPassFilterV2SpecOptions ehpv2 => ComputeEhlersHighPassFilterV2Fast(data, context, ehpv2.Length, ehpv2.MaType),
             DistanceWeightedMovingAverageSpecOptions dwma => ComputeDistanceWeightedMovingAverageFast(data, context, dwma.Length),
             EhlersFilterSpecOptions efilter => ComputeEhlersFilterFast(data, context, efilter.Length),
-            EhlersFirFilterSpecOptions efir => ComputeEhlersFirFilterFast(data, context, efir.Length),
+            // The finite impulse response filter is a fixed seven-tap weighted average; it has no length
+            // parameter, which is why both specs mark Length as having no effect.
+            EhlersFirFilterSpecOptions efir => ComputeEhlersFirFilterFast(data, context),
             EhlersIirFilterSpecOptions eiir => ComputeEhlersIirFilterFast(data, context, eiir.Length),
 
             // Batch 7 - Cycle indicators
@@ -787,7 +789,7 @@ internal static partial class IndicatorCompute
 
             // Batch 30 - Additional Missing Core Methods
             GeneralizedDoubleExponentialMovingAverageSpecOptions gdema => ComputeGeneralizedDoubleExponentialMovingAverageFast(data, context, gdema.Length, gdema.VolumeFactor),
-            EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context, efirf.Length),
+            EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context),
             EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
             VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length, vama.Factor),
             AverageDayRangeSpecOptions adr => ComputeAverageDayRangeFast(data, context, adr.Length),
@@ -7806,23 +7808,17 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersFirFilterFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersFirFilterFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersFiniteImpulseResponseFilter(close, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeEhlersFiniteImpulseResponseFilterFast(data, context);
     }
 
     /// <summary>
     /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersIirFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersIirFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersInfiniteImpulseResponseFilter(close, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, length);
     }
 
     /// <summary>
@@ -9539,24 +9535,51 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, double coef1 = 1,
+        double coef2 = 3.5, double coef3 = 4.5, double coef4 = 3, double coef5 = 0.5, double coef6 = -0.5, double coef7 = -1.5)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersFiniteImpulseResponseFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        var coefficientSum = coef1 + coef2 + coef3 + coef4 + coef5 + coef6 + coef7;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var weighted = (coef1 * input[i]) + (coef2 * (i >= 1 ? input[i - 1] : 0)) + (coef3 * (i >= 2 ? input[i - 2] : 0)) +
+                (coef4 * (i >= 3 ? input[i - 3] : 0)) + (coef5 * (i >= 4 ? input[i - 4] : 0)) +
+                (coef6 * (i >= 5 ? input[i - 5] : 0)) + (coef7 * (i >= 6 ? input[i - 6] : 0));
+            output[i] = coefficientSum != 0 ? weighted / coefficientSum : 0;
+        }
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Ehlers Infinite Impulse Response Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersInfiniteImpulseResponseFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var alpha = 2d / (length + 1);
+        var lag = MathHelper.MinOrMax((int)Math.Ceiling((1 / alpha) - 1));
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= lag ? input[i - lag] : 0;
+            var previousFilter = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = (alpha * (input[i] + CalculationsHelper.MinPastValues(i, lag, input[i] - previousValue))) +
+                ((1 - alpha) * previousFilter);
+        }
+
         return buffer;
     }
 
