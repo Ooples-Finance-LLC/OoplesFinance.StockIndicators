@@ -837,7 +837,8 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
     private readonly int _length3;
     private readonly int _upLimit;
     private readonly int _dnLimit;
-    private readonly StandardDeviationVolatilityState _stdDevState;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDevState;
     private readonly IMovingAverageSmoother _stdDevSmoother;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _gains;
@@ -853,7 +854,9 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
         _upLimit = Math.Max(1, upLimit);
         _dnLimit = Math.Max(1, dnLimit);
         var capacity = Math.Max(1, Math.Max(_upLimit, _dnLimit));
-        _stdDevState = new StandardDeviationVolatilityState(maType, Math.Max(1, length1));
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the average that smooths it, below.
+        _stdDevState = new RollingStandardDeviation(Math.Max(1, length1));
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.Close, null);
         _gains = new PooledRingBuffer<double>(capacity);
@@ -880,7 +883,8 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
         var prevValue = _hasPrev ? _prevValue : 0;
         var priceChg = _hasPrev ? value - prevValue : 0;
 
-        var stdDev = _stdDevState.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var stdDev = _stdDevState.Next(value, isFinal);
         var asd = _stdDevSmoother.Next(stdDev, isFinal);
 
         int dTime;

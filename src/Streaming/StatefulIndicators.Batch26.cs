@@ -1773,7 +1773,9 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 {
     private readonly int _length;
     private readonly double _kf;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _wmap1;
     private readonly IMovingAverageSmoother _wmap2;
     private readonly PooledRingBuffer<double> _values;
@@ -1785,7 +1787,9 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
         _length = Math.Max(1, length);
         _kf = kf;
         var s = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(_length)));
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the averages that smooth the weighted mean, below.
+        _stdDev = new RollingStandardDeviation(_length);
         _wmap1 = MovingAverageSmootherFactory.Create(maType, s);
         _wmap2 = MovingAverageSmootherFactory.Create(maType, s);
         _values = new PooledRingBuffer<double>(_length);
@@ -1805,7 +1809,8 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var sdPct = value != 0 ? stdDev / value * 100 : 0;
         var p = sdPct >= 0 ? MathHelper.MinOrMax(MathHelper.Sqrt(sdPct) * _kf, 4, 1) : 1;
 

@@ -576,7 +576,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The bands decay by a fraction of a deviation and jump to price when price passes them, so the
+        // step is a deviation and it is the windowed one that names. The quantity this replaces is about 55%
+        // wider on a typical price series, so the bands decayed faster than the indicator specifies. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -230,7 +230,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The step holds until price escapes a band two deviations either side of it, and sigma in a
+        // band is the windowed deviation; the quantity this replaces is about 55% wider on a typical price
+        // series, so the band was that much too wide and the step held through moves that should have moved
+        // it. The i < length guard below already covers the bars before the window fills. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
