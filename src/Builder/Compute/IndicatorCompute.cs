@@ -106,7 +106,7 @@ internal static partial class IndicatorCompute
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.SumLength),
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
-            AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length),
+            AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length, adx.MaType),
 
             // Volume
             ObvSpecOptions obv => ComputeObvFast(data, context, obv.Length),
@@ -172,8 +172,8 @@ internal static partial class IndicatorCompute
             // Batch 3 - Trend indicators
             ParabolicSarSpecOptions psar => ComputeParabolicSarFast(data, context, psar.Length),
             SuperTrendSpecOptions st => ComputeSuperTrendFast(data, context, st.Length),
-            ChandelierExitLongSpecOptions cel => ComputeChandelierExitLongFast(data, context, cel.Length),
-            ChandelierExitShortSpecOptions ces => ComputeChandelierExitShortFast(data, context, ces.Length),
+            ChandelierExitLongSpecOptions cel => ComputeChandelierExitLongFast(data, context, cel.Length, cel.MaType),
+            ChandelierExitShortSpecOptions ces => ComputeChandelierExitShortFast(data, context, ces.Length, ces.MaType),
 
             // Batch 3 - Volume/Power indicators
             BalanceOfPowerSpecOptions bop => ComputeBalanceOfPowerFast(data, context, bop.Length),
@@ -348,9 +348,11 @@ internal static partial class IndicatorCompute
             VolatilityRatioSpecOptions vr => ComputeVolatilityRatioFast(data, context, vr.Length),
 
             // Batch 5 - Bands/Channels
-            AtrTrailingStopsSpecOptions ats => ComputeAtrTrailingStopsFast(data, context, ats.Length, ats.Multiplier),
+            AtrTrailingStopsSpecOptions ats => ComputeAtrTrailingStopsFast(data, context, ats.Length, ats.Multiplier,
+                ats.MaType),
             AtrChannelWidthSpecOptions acw => ComputeAtrChannelWidthFast(data, context, acw.Length, acw.Multiplier),
-            AverageTrueRangeChannelSpecOptions atrc => ComputeAverageTrueRangeChannelFast(data, context, atrc.Length, atrc.Multiplier),
+            AverageTrueRangeChannelSpecOptions atrc => ComputeAverageTrueRangeChannelFast(data, context, atrc.Length,
+                atrc.Multiplier, atrc.MaType),
             VolatilityStopSpecOptions vs => ComputeVolatilityStopFast(data, context, vs.Length, vs.Multiplier),
             BollingerBandsPercentBSpecOptions bbpb => ComputeBollingerBandsPercentBFast(data, context, bbpb.Length, bbpb.Multiplier),
             BollingerBandsAtrSpecOptions bbatr => ComputeBollingerBandsAtrFast(data, context, bbatr.Length, bbatr.Multiplier),
@@ -845,7 +847,8 @@ internal static partial class IndicatorCompute
             ThreeHmaSpecOptions thma => ComputeThreeHmaFast(data, context, thma.Length),
             AdaptiveAutonomousRecursiveTrailingStopSpecOptions aarts => ComputeAdaptiveAutonomousRecursiveTrailingStopFast(data, context, aarts.Length, aarts.Lambda),
             AdaptiveTrailingStopSpecOptions ats => ComputeAdaptiveTrailingStopFast(data, context, ats.Length, ats.Multiplier),
-            AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context, atrts.Length, atrts.Multiplier),
+            AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context,
+                atrts.Length, atrts.Multiplier, atrts.MaType),
             WellesWilderSummationSpecOptions wws => ComputeWellesWilderSummationFast(data, context, wws.Length),
             DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length),
             DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength, didi.MediumLength, didi.LongLength),
@@ -857,7 +860,7 @@ internal static partial class IndicatorCompute
             AbsolutePriceOscillatorSpecOptions apo2 => ComputeAbsolutePriceOscillatorFast(data, context, apo2.FastLength, apo2.SlowLength),
             AccumulationDistributionLineSpecOptions adl2 => ComputeAccumulationDistributionLineFast(data, context),
             AdaptiveExponentialMovingAverageSpecOptions aema => ComputeAdaptiveExponentialMovingAverageFast(data, context, aema.Length),
-            AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length),
+            AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length, adx2.MaType),
             AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length, atr2.MaType),
             ChandeMomentumOscillatorSpecOptions cmo2 => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length),
             EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Length),
@@ -914,8 +917,8 @@ internal static partial class IndicatorCompute
             // Multi-output: ChandelierExit
             ChandelierExitSpecOptions ce => spec.OutputKey switch
             {
-                null or "ExitLong" => ComputeChandelierExitLongFast(data, context, ce.Length),
-                "ExitShort" => ComputeChandelierExitShortFast(data, context, ce.Length),
+                null or "ExitLong" => ComputeChandelierExitLongFast(data, context, ce.Length, ce.MaType, ce.Mult),
+                "ExitShort" => ComputeChandelierExitShortFast(data, context, ce.Length, ce.MaType, ce.Mult),
                 _ => null
             },
 
@@ -1546,25 +1549,67 @@ internal static partial class IndicatorCompute
     /// Computes Average Directional Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
+        // CalculateAverageDirectionalIndex smooths the directional movements and the true range with
+        // whichever average it was given, so the core's hardcoded Wilder's smoothing answered for one type
+        // only. It also copied the whole OHLC into three fresh arrays, on a path whose purpose is not to
+        // allocate.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(highList);
+        var low = SpanCompat.AsReadOnlySpan(lowList);
 
-        // Extract OHLC data into spans
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        using var dmPlusBuffer = context.Rent(count);
+        using var dmMinusBuffer = context.Rent(count);
+        using var trBuffer = context.Rent(count);
+        var dmPlus = dmPlusBuffer.WritableSpan;
+        var dmMinus = dmMinusBuffer.WritableSpan;
+        var trueRange = trBuffer.WritableSpan;
 
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            var currentHigh = high[i];
+            var currentLow = low[i];
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+
+            // The first bar has no previous close, and the current one keeps its true range from opening
+            // at the whole day's move.
+            var prevClose = i >= 1 ? input[i - 1] : input[i];
+            var highDiff = currentHigh - prevHigh;
+            var lowDiff = prevLow - currentLow;
+
+            dmPlus[i] = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
+            dmMinus[i] = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
+            trueRange[i] = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
+        }
+
+        using var smoothedPlusBuffer = context.Rent(count);
+        using var smoothedMinusBuffer = context.Rent(count);
+        using var smoothedRangeBuffer = context.Rent(count);
+        var smoothedPlus = smoothedPlusBuffer.WritableSpan;
+        var smoothedMinus = smoothedMinusBuffer.WritableSpan;
+        var smoothedRange = smoothedRangeBuffer.WritableSpan;
+        MovingAverage(data, maType, length, dmPlus, smoothedPlus);
+        MovingAverage(data, maType, length, dmMinus, smoothedMinus);
+        MovingAverage(data, maType, length, trueRange, smoothedRange);
+
+        using var diBuffer = context.Rent(count);
+        var di = diBuffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var range = smoothedRange[i];
+            var diPlus = range != 0 ? MathHelper.MinOrMax(100 * smoothedPlus[i] / range, 100, 0) : 0;
+            var diMinus = range != 0 ? MathHelper.MinOrMax(100 * smoothedMinus[i] / range, 100, 0) : 0;
+            var diSum = diPlus + diMinus;
+            di[i] = diSum != 0 ? MathHelper.MinOrMax(100 * Math.Abs(diPlus - diMinus) / diSum, 100, 0) : 0;
         }
 
         var buffer = context.Rent(count);
-        OscillatorCore.AverageDirectionalIndex(high, low, close, buffer.WritableSpan, length);
+        MovingAverage(data, maType, length, di, buffer.WritableSpan);
 
         return buffer;
     }
@@ -3248,27 +3293,78 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chandelier Exit Long using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandelierExitLongFast(StockData data, ComputeContext context, int length = 22)
+    internal static ComputeBuffer ComputeChandelierExitLongFast(StockData data, ComputeContext context, int length = 22,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double mult = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.ChandelierExitLong(high, low, close, buffer.WritableSpan, length);
+        // CalculateChandelierExit hangs its long stop a multiple of the average true range below the
+        // highest high of the window, with whichever average it was given.
+        var (_, highList, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = highList.Count;
+
+        using var atr = ComputeAtrFast(data, context, length, maType);
+        using var highestBuffer = context.Rent(count);
+        using var lowestBuffer = context.Rent(count);
+        var highest = highestBuffer.WritableSpan;
+        HighestAndLowest(data, highest, lowestBuffer.WritableSpan, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = highest[i] - (atr.Span[i] * mult);
+        }
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Chandelier Exit Short using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandelierExitShortFast(StockData data, ComputeContext context, int length = 22)
+    internal static ComputeBuffer ComputeChandelierExitShortFast(StockData data, ComputeContext context, int length = 22,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double mult = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.ChandelierExitShort(high, low, close, buffer.WritableSpan, length);
+        // The short stop is the same distance above the lowest low.
+        var (_, _, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = lowList.Count;
+
+        using var atr = ComputeAtrFast(data, context, length, maType);
+        using var highestBuffer = context.Rent(count);
+        using var lowestBuffer = context.Rent(count);
+        var lowest = lowestBuffer.WritableSpan;
+        HighestAndLowest(data, highestBuffer.WritableSpan, lowest, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = lowest[i] + (atr.Span[i] * mult);
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// The highest high and the lowest low of the last <paramref name="length"/> bars at each index, as
+    /// <see cref="CalculationsHelper.GetMaxAndMinValuesList(List{double}, List{double}, int)"/> reports them.
+    /// </summary>
+    /// <remarks>
+    /// The window counts the current bar, and one that has not filled reports the extremes of what it holds
+    /// rather than nothing.
+    /// </remarks>
+    private static void HighestAndLowest(StockData data, Span<double> highest, Span<double> lowest, int length)
+    {
+        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = highList.Count == lowList.Count ? highList.Count : 0;
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highList[i]);
+            lowWindow.Add(lowList[i]);
+            highest[i] = highWindow.Max;
+            lowest[i] = lowWindow.Min;
+        }
     }
 
     /// <summary>
@@ -4257,14 +4353,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Trailing Stops using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAtrTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    internal static ComputeBuffer ComputeAtrTrailingStopsFast(StockData data, ComputeContext context, int length2 = 21,
+        double factor = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AtrTrailingStops(high, low, close, buffer.WritableSpan, length, multiplier);
-        return buffer;
+        // Both specs name IndicatorName.AverageTrueRangeTrailingStops, so there is one answer to give.
+        return ComputeAverageTrueRangeTrailingStopsFast(data, context, length2, factor, maType);
     }
 
     /// <summary>
@@ -4573,13 +4666,24 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeAverageTrueRangeChannelFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeAverageTrueRangeChannelFast(StockData data, ComputeContext context, int length = 14,
+        double mult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.AverageTrueRangeChannel(high, low, close, buffer.WritableSpan, length, multiplier);
+        // The upper band this arm is bound to is the input a multiple of the average true range above
+        // itself, rounded to whole units as CalculateAverageTrueRangeChannel rounds it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var atr = ComputeAtrFast(data, context, length, maType);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = Math.Round(input[i] + (atr.Span[i] * mult));
+        }
+
         return buffer;
     }
 
@@ -9291,13 +9395,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average True Range Trailing Stops using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context, int length = 14, double multiplier = 3)
+    internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context,
+        int length2 = 21, double factor = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63)
     {
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AverageTrueRangeTrailingStops(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, multiplier);
+        // CalculateAverageTrueRangeTrailingStops ratchets a stop towards the price while a longer average
+        // says which side of it we are on, and both the average and the true range take the type it was
+        // given. The stop only ever moves in the direction of the trend, so it has to be carried forward
+        // bar by bar rather than read out of a window.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var atr = ComputeAtrFast(data, context, length2, maType);
+        using var trendBuffer = context.Rent(count);
+        var trend = trendBuffer.WritableSpan;
+        MovingAverage(data, maType, length1, input, trend);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+
+            // The first bar has no stop to ratchet against, so it starts at the price itself.
+            var prevStop = i >= 1 ? output[i - 1] : currentValue;
+            var band = factor * atr.Span[i];
+
+            output[i] = currentValue > trend[i]
+                ? Math.Max(currentValue - band, prevStop)
+                : Math.Min(currentValue + band, prevStop);
+        }
+
         return buffer;
     }
 
@@ -9426,22 +9554,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Directional Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAverageDirectionalIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAverageDirectionalIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
-        var buffer = context.Rent(count);
-        OscillatorCore.AverageDirectionalIndex(high, low, close, buffer.WritableSpan, length);
-        return buffer;
+        // Both specs name IndicatorName.AverageDirectionalIndex, so there is one answer to give.
+        return ComputeAdxFast(data, context, length, maType);
     }
 
     /// <summary>
