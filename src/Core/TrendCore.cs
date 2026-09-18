@@ -1969,9 +1969,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -1989,9 +1992,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
             output[i] = (pivot * 2) - prevHigh;
@@ -2010,9 +2016,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
             output[i] = (pivot * 2) - prevLow;
@@ -2031,9 +2040,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -2042,20 +2054,24 @@ internal static class TrendCore
     /// <summary>
     /// Computes Woodie Pivot Point.
     /// </summary>
-    internal static void WoodiePivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output)
+    internal static void WoodiePivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < open.Length)
+        if (output.Length < close.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < open.Length; i++)
+        for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var currentOpen = open[i];
+            // CalculateWoodiePivotPoints and WoodiePivotPointsState both double the preceding bar's close,
+            // not the arriving bar's open. Both readings of the Woodie pivot are published elsewhere, and
+            // this library reports the closing one; taking the open here made this the only engine that
+            // did not.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
-            output[i] = (prevHigh + prevLow + (currentOpen * 2)) / 4;
+            output[i] = (prevHigh + prevLow + (prevClose * 2)) / 4;
         }
     }
 
@@ -2071,9 +2087,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -2091,10 +2110,13 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevOpen = i >= 1 ? open[i - 1] : open[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevOpen = i >= 1 ? open[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             double x;
             if (prevClose < prevOpen)

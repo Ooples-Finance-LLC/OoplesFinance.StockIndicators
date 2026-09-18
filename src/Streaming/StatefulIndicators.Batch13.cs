@@ -1047,21 +1047,28 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pivot")]
 public sealed class FloorPivotPointsState : IStreamingIndicatorState
 {
-    private int _index;
+    private double _prevHigh;
+    private double _prevLow;
+    private double _prevClose;
+    private bool _hasPrev;
 
     public IndicatorName Name => IndicatorName.FloorPivotPoints;
 
     public void Reset()
     {
-        _index = 0;
+        _prevHigh = 0;
+        _prevLow = 0;
+        _prevClose = 0;
+        _hasPrev = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var useCurrent = _index >= 1;
-        var prevHigh = useCurrent ? bar.High : 0;
-        var prevLow = useCurrent ? bar.Low : 0;
-        var prevClose = useCurrent ? bar.Close : 0;
+        // The preceding bar, as every other pivot point state here does. Reading the arriving bar's own
+        // high, low and close made a bar's levels depend on how that bar turned out.
+        var prevHigh = _hasPrev ? _prevHigh : 0;
+        var prevLow = _hasPrev ? _prevLow : 0;
+        var prevClose = _hasPrev ? _prevClose : 0;
 
         var range = prevHigh - prevLow;
         var pivot = (prevHigh + prevLow + prevClose) / 3;
@@ -1080,7 +1087,10 @@ public sealed class FloorPivotPointsState : IStreamingIndicatorState
 
         if (isFinal)
         {
-            _index++;
+            _prevHigh = bar.High;
+            _prevLow = bar.Low;
+            _prevClose = bar.Close;
+            _hasPrev = true;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;

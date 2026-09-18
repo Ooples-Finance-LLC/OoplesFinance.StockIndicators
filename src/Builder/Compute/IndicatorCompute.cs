@@ -3190,7 +3190,9 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        TrendCore.PivotPoint(high, low, close, buffer.WritableSpan);
+        // This spec is bound to CalculateFloorPivotPoints, whose pivot is drawn from the preceding bar.
+        // TrendCore.PivotPoint is the typical price of the arriving bar, which is a different series.
+        TrendCore.FloorPivotPoint(high, low, close, buffer.WritableSpan);
         return buffer;
     }
 
@@ -9012,9 +9014,9 @@ internal static partial class IndicatorCompute
     {
         var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
-        TrendCore.WoodiePivotPoint(highSpan, lowSpan, openSpan, buffer.WritableSpan);
+        TrendCore.WoodiePivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
         return buffer;
     }
 
