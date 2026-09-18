@@ -313,7 +313,8 @@ internal static partial class IndicatorCompute
             ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context, eco.Length),
             BayesianOscillatorSpecOptions bayes => ComputeBayesianOscillatorFast(data, context, bayes.Length, bayes.MaType),
             AnchoredMomentumSpecOptions amom => ComputeAnchoredMomentumFast(data, context, amom.Length, amom.MaType),
-            ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length),
+            ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length,
+                cmvi.MaType),
             CenterOfLinearitySpecOptions col => ComputeCenterOfLinearityFast(data, context, col.Length),
             BreakoutRsiSpecOptions brsi => ComputeBreakoutRsiFast(data, context, brsi.Length),
             ChopZoneSpecOptions cz => ComputeChopZoneFast(data, context, cz.Length, cz.MaType),
@@ -332,8 +333,11 @@ internal static partial class IndicatorCompute
             AutoFilterSpecOptions af => ComputeAutoFilterFast(data, context, af.Length, af.MaType),
             BuffAverageSpecOptions ba => ComputeBuffAverageFast(data, context, ba.Length),
             BryantAdaptiveMovingAverageSpecOptions bama => ComputeBryantAdaptiveMovingAverageFast(data, context, bama.Length),
-            CompoundRatioMovingAverageSpecOptions crma => ComputeCompoundRatioMovingAverageFast(data, context, crma.Length),
-            ConditionalAccumulatorSpecOptions ca => ComputeConditionalAccumulatorFast(data, context, ca.Length),
+            CompoundRatioMovingAverageSpecOptions crma => ComputeCompoundRatioMovingAverageFast(data, context,
+                crma.Length, crma.MaType),
+            // Length and MaType only smooth the Signal line CalculateConditionalAccumulator publishes
+            // beside the accumulator, and this spec is bound to the accumulator itself.
+            ConditionalAccumulatorSpecOptions => ComputeConditionalAccumulatorFast(data, context),
             AhrensMovingAverageSpecOptions ahma => ComputeAhrensMovingAverageFast(data, context, ahma.Length),
             AlphaDecreasingEmaSpecOptions adema => ComputeAlphaDecreasingEmaFast(data, context, adema.Length),
             AdaptiveEmaSpecOptions aema => ComputeAdaptiveEmaFast(data, context, aema.Length),
@@ -364,7 +368,8 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Ratio/Performance
             CalmarRatioSpecOptions cr => ComputeCalmarRatioFast(data, context, cr.Length),
-            CommoditySelectionIndexSpecOptions csi => ComputeCommoditySelectionIndexFast(data, context, csi.Length),
+            CommoditySelectionIndexSpecOptions csi => ComputeCommoditySelectionIndexFast(data, context, csi.Length,
+                csi.MaType),
 
             // Batch 5 - Smoothed oscillators
             SmoothedWilliamsRSpecOptions swillr => ComputeSmoothedWilliamsRFast(data, context, swillr.Length, swillr.SmoothLength),
@@ -658,7 +663,8 @@ internal static partial class IndicatorCompute
 
             // Batch 25 - Additional Moving Averages (Unwired Core Methods)
             AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length, aarmao.Lambda),
-            CorrectedMovingAverageSpecOptions cma => ComputeCorrectedMovingAverageFast(data, context, cma.Length),
+            CorrectedMovingAverageSpecOptions cma => ComputeCorrectedMovingAverageFast(data, context, cma.Length,
+                cma.MaType),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
             EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length),
@@ -4466,11 +4472,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chartmill Value Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context,
+        int length = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ChartmillValueIndicator(close, buffer.WritableSpan, length);
+        // CalculateChartmillValueIndicator measures how far the close sits from an average of the median
+        // price, in units of the average true range widened by the square root of the length. Both the
+        // average and the range take whichever type the indicator was given.
+        var (inputList, _, _, _, closeList, _) =
+            CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
+        var count = inputList.Count;
+
+        using var atr = ComputeAtrFast(data, context, length, maType);
+        var atrSpan = atr.Span;
+
+        using var fBuffer = context.Rent(count);
+        var f = fBuffer.WritableSpan;
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), f);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var v = atrSpan[i];
+            output[i] = v != 0
+                ? MathHelper.MinOrMax((closeList[i] - f[i]) / (v * MathHelper.Pow(length, 0.5)), 1, -1)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -4719,22 +4748,79 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Compound Ratio Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context,
+        int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.CompoundRatioMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateCompoundRatioMovingAverage weights the window by a compounding ratio rather than by
+        // position, and then smooths that raw wave over the square root of the length with whichever average
+        // it was given. The series the spec is bound to is the smoothed one.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var r = MathHelper.Pow(length, ((double)1 / (length - 1)) - 1);
+        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
+        var bas = 1 + (r * 2);
+
+        using var rawBuffer = context.Rent(count);
+        var raw = rawBuffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var weight = MathHelper.Pow(bas, length - j);
+
+                // Bars before the start of the series count as zero, which is what the batch does.
+                var previousValue = i >= j ? inputList[i - j] : 0;
+
+                sum += previousValue * weight;
+                weightedSum += weight;
+            }
+
+            raw[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, raw, buffer.WritableSpan);
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Conditional Accumulator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeConditionalAccumulatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeConditionalAccumulatorFast(StockData data, ComputeContext context,
+        double increment = 1)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.ConditionalAccumulator(close, buffer.WritableSpan, length);
+        // CalculateConditionalAccumulator adds an increment for every bar that gaps clear of the previous
+        // bar's range and subtracts one for every bar that gaps below it, and the close never enters it. The
+        // length and the average type it also takes only smooth its signal line, which is a different series.
+        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = highList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double value = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            // The first bar has no predecessor and therefore cannot have gapped.
+            if (i >= 1)
+            {
+                if (lowList[i] > highList[i - 1])
+                {
+                    value += increment;
+                }
+                else if (highList[i] < lowList[i - 1])
+                {
+                    value -= increment;
+                }
+            }
+
+            output[i] = value;
+        }
+
         return buffer;
     }
 
@@ -4819,13 +4905,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Commodity Selection Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeCommoditySelectionIndexFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double pointValue = 50,
+        double margin = 3000, double commission = 10)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.CommoditySelectionIndex(high, low, close, buffer.WritableSpan, length);
+        // CalculateCommoditySelectionIndex scales the average true range by the trend strength the average
+        // directional index reports and by a constant built from the contract's economics, so the arm reuses
+        // the two arms that already answer for those indicators rather than smoothing anything itself.
+        var k = 100 * (pointValue / MathHelper.Sqrt(margin) / (150 + commission));
+
+        using var atr = ComputeAtrFast(data, context, length, maType);
+        using var adx = ComputeAdxFast(data, context, length, maType);
+        var atrSpan = atr.Span;
+        var adxSpan = adx.Span;
+        var count = atrSpan.Length;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = k * atrSpan[i] * adxSpan[i];
+        }
+
         return buffer;
     }
 
@@ -7508,12 +7610,49 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Corrected Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context, int length = 35)
+    internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context,
+        int length = 35, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.CorrectedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        // CalculateCorrectedMovingAverage pulls an average towards the price only as far as the last
+        // correction was large compared with the variance of the window, so a quiet window barely moves it.
+        // The average underneath takes whichever type the indicator was given.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var averageBuffer = context.Rent(count);
+        var average = averageBuffer.WritableSpan;
+        MovingAverage(data, maType, length, input, average);
+
+        using var stdDevBuffer = context.Rent(count);
+        var stdDev = stdDevBuffer.WritableSpan;
+        VolatilityCore.StandardDeviation(input, stdDev, Math.Max(1, length));
+
+        var tolerance = MathHelper.Pow(10, -5);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var sma = average[i];
+            var previousCma = i >= 1 ? output[i - 1] : sma;
+            var v1 = stdDev[i] * stdDev[i];
+            var v2 = MathHelper.Pow(previousCma - sma, 2);
+            var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
+
+            double err = 1, kPrev = 1, k = 1;
+            for (var j = 0; j <= 5000 && err > tolerance; j++)
+            {
+                k = v3 * kPrev * (2 - kPrev);
+                err = kPrev - k;
+                kPrev = k;
+            }
+
+            // Seeded at the average until the window is full, as the batch does.
+            output[i] = i < length ? sma : previousCma + (k * (sma - previousCma));
+        }
+
         return buffer;
     }
 
