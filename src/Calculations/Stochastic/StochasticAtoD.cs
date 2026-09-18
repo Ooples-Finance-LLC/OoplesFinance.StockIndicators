@@ -17,8 +17,13 @@ public static partial class Calculations
         List<double> stcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var srcList = CalculateLinearRegression(stockData, Math.Abs(slowLength - fastLength)).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
+        stockData.RestoreInputSeries(callerSeries);
         var (highest1List, lowest1List) = GetMaxAndMinValuesList(srcList, fastLength);
         var (highest2List, lowest2List) = GetMaxAndMinValuesList(srcList, slowLength);
 

@@ -602,8 +602,13 @@ public static partial class Calculations
         List<double> histList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var linregList = CalculateLinearRegression(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var yList = CalculateQuadraticRegression(stockData, maType, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {

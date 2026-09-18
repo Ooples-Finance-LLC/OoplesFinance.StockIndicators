@@ -424,8 +424,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -609,8 +614,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -944,8 +944,7 @@ public sealed class LeastSquaresMovingAverageState : IStreamingIndicatorState, I
     {
         var value = _input.GetValue(bar);
         var wma = _wma.GetNext(value, isFinal);
-        // Batch LSMA computes SMA of WMA values, not SMA of close prices (due to how GetInputValuesList works)
-        var sma = _sma.Next(wma, isFinal);
+        var sma = _sma.Next(value, isFinal);
         var lsma = (3 * wma) - (2 * sma);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -993,8 +992,7 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
     {
         var value = _input.GetValue(bar);
         var wma = _wma.GetNext(value, isFinal);
-        // Batch LeoMA computes SMA of WMA values, not SMA of close prices (due to how GetInputValuesList works)
-        var sma = _sma.Next(wma, isFinal);
+        var sma = _sma.Next(value, isFinal);
         var lma = (2 * wma) - sma;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1229,16 +1227,13 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
     private readonly LinearRegressionState _linReg;
     private readonly QuadraticRegressionEngine _quadReg;
     private readonly IMovingAverageSmoother _signalSmoother;
-    private double _linRegValue;
 
     public LinearQuadraticConvergenceDivergenceOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 50, int signalLength = 25)
     {
         var resolved = Math.Max(1, length);
         _linReg = new LinearRegressionState(resolved);
-        // Batch contamination: CalculateLinearRegression sets CustomValuesList to linReg output,
-        // then CalculateQuadraticRegression uses those linReg values as input (not original close prices)
-        _quadReg = new QuadraticRegressionEngine(maType, resolved, _ => _linRegValue);
+        _quadReg = new QuadraticRegressionEngine(maType, resolved, InputName.Close);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
@@ -1249,14 +1244,11 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
         _linReg.Reset();
         _quadReg.Reset();
         _signalSmoother.Reset();
-        _linRegValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-        // Must set _linRegValue before _quadReg.Next since quadReg uses selector that returns _linRegValue
-        _linRegValue = linReg;
         var quadReg = _quadReg.Next(bar, isFinal);
         var lqcd = quadReg - linReg;
         var signal = _signalSmoother.Next(lqcd, isFinal);

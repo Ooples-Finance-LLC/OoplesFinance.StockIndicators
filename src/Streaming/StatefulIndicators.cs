@@ -9349,7 +9349,7 @@ public sealed class AdaptiveStochasticState : IStreamingIndicatorState, IDisposa
         var value = _input.GetValue(bar);
         _regressionInput = value;
         var src = _regression.Update(bar, isFinal, includeOutputs: false).Value;
-        var er = _er.Next(src, isFinal);
+        var er = _er.Next(value, isFinal);
         var highest1 = isFinal ? _fastMax.Add(src, out _) : _fastMax.Preview(src, out _);
         var lowest1 = isFinal ? _fastMin.Add(src, out _) : _fastMin.Preview(src, out _);
         var highest2 = isFinal ? _slowMax.Add(src, out _) : _slowMax.Preview(src, out _);
@@ -12857,7 +12857,7 @@ public sealed class ConstanceBrownCompositeIndexState : IStreamingIndicatorState
     {
         var value = _input.GetValue(bar);
         var rsi1 = _rsi1.Next(value, isFinal);
-        var rsi2 = _rsi2.Next(rsi1, isFinal);
+        var rsi2 = _rsi2.Next(value, isFinal);
         var rsiSma = _rsiSmoother.Next(rsi2, isFinal);
         var rsiDelta = _rsi1Window.Count >= _length2 ? _rsi1Window[_rsi1Window.Count - _length2] : 0;
         var s = rsiDelta + rsiSma;

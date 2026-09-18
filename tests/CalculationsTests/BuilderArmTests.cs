@@ -513,7 +513,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "KvoSpecOptions",
         "KwanIndicatorSpecOptions",
         "LBRPaintBarsSpecOptions",
-        "LeoMovingAverageSpecOptions",
         "LinRegInterceptSpecOptions",
         "LindaRaschke310OscillatorSpecOptions",
         "LinearExtrapolationSpecOptions",
