@@ -647,17 +647,14 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // GetMaxAndMinValuesList, which CalculateDonchianChannelWidth reads its extremes from, measures over
+        // however many bars have arrived, so the channel has a width from the first bar rather than none.
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var hh = high[i - length + 1];
-            var ll = low[i - length + 1];
-            for (var j = i - length + 2; j <= i; j++)
+            var start = Math.Max(0, i - length + 1);
+            var hh = high[start];
+            var ll = low[start];
+            for (var j = start + 1; j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];

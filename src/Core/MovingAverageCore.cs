@@ -362,7 +362,11 @@ internal static class MovingAverageCore
                 vSum -= volume[i - length];
             }
 
-            output[i] = vSum != 0 ? pvSum / vSum : 0;
+            // CalculateVolumeWeightedMovingAverage divides by a simple moving average of volume, which is
+            // zero until its window fills, so the whole ratio is zero through the run-in. Dividing the
+            // partial sums by each other here published a volume-weighted price over a window that had not
+            // arrived yet, and the two only met from the length'th bar onwards.
+            output[i] = i >= length - 1 && vSum != 0 ? pvSum / vSum : 0;
         }
     }
 
@@ -4234,6 +4238,15 @@ internal static class MovingAverageCore
 
         // Linear regression line is the same as LSMA
         LinearRegression(input, output, length);
+
+        // CalculateLinearRegressionLine builds its slope from a correlation and a standard deviation, both
+        // of which are zero until their window fills, so it reports nothing through the run-in.
+        // LinearRegression fits through the bars it has, which is right for that indicator but not this one.
+        var blank = Math.Min(length - 1, input.Length);
+        for (var i = 0; i < blank; i++)
+        {
+            output[i] = 0;
+        }
     }
 
     /// <summary>
@@ -6693,6 +6706,16 @@ internal static class MovingAverageCore
             // Calculate standard deviations manually for each point
             for (var i = 0; i < input.Length; i++)
             {
+                // CalculateLightLeastSquaresMovingAverage draws its spread from GetStandardDeviationList,
+                // which is zero until its window fills, so the correction and the base average are both zero
+                // through the run-in. The shorter of the two averages fills first, and measuring it against
+                // a partial spread here published a value from the halfway bar that the indicator never has.
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
                 var n = Math.Min(i + 1, length);
 
                 // StdDev of input

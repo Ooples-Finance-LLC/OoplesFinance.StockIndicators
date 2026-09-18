@@ -93,7 +93,9 @@ internal static class VolumeCore
                 volSum -= volume[i - length];
             }
 
-            output[i] = i >= length - 1 && volSum != 0 ? mfvSum / volSum : 0;
+            // CalculateChaikinMoneyFlow divides one rolling sum by another over however many bars have
+            // arrived, so the flow has a reading from the first bar rather than none.
+            output[i] = volSum != 0 ? mfvSum / volSum : 0;
         }
     }
 

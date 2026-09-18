@@ -993,27 +993,21 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
+        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
+        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
+        // every bar before the window filled and agree on every bar after it.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             double vmPlus = 0;
             double trSum = 0;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                trSum += tr;
-
-                if (j > 0)
-                {
-                    vmPlus += Math.Abs(high[j] - low[j - 1]);
-                }
+                var prevLow = j > 0 ? low[j - 1] : 0;
+                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
+                vmPlus += Math.Abs(high[j] - prevLow);
             }
 
             output[i] = trSum != 0 ? vmPlus / trSum : 0;
@@ -1030,27 +1024,21 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
+        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
+        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
+        // every bar before the window filled and agree on every bar after it.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             double vmMinus = 0;
             double trSum = 0;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                trSum += tr;
-
-                if (j > 0)
-                {
-                    vmMinus += Math.Abs(low[j] - high[j - 1]);
-                }
+                var prevHigh = j > 0 ? high[j - 1] : 0;
+                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
+                vmMinus += Math.Abs(low[j] - prevHigh);
             }
 
             output[i] = trSum != 0 ? vmMinus / trSum : 0;
@@ -1498,20 +1486,17 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateChoppinessIndex sums true range and takes its extremes over however many bars have
+        // arrived, so the run-in is measured rather than blank. On the first bar the range and the sum are
+        // the same span, which makes the logarithm zero of its own accord.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             // Sum of ATR
             double atrSum = 0;
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
                 var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
@@ -8771,8 +8756,14 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-            // nothing, so the run-in shortens the window instead of blanking it.
+            // CalculateZScore divides a deviation from a simple moving average by a standard deviation, and
+            // both of those blank their run-in, so a zero denominator makes the score itself zero until the
+            // window fills. A shortened window here measured a spread against a mean drawn from fewer bars.
+            if (i < length - 1)
+            {
+                output[i] = 0;
+                continue;
+            }
 
             // Calculate SMA
             double sum = 0;
@@ -9479,7 +9470,10 @@ internal static class OscillatorCore
         {
             var currentHigh = high[i];
             var currentLow = low[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
+            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
+            // opening true range the plain high-low span. Falling back to zero instead made it the whole
+            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
             var prevLow = i >= 1 ? low[i - 1] : 0;
 
             var vmPlus = Math.Abs(currentHigh - prevLow);
@@ -9512,7 +9506,10 @@ internal static class OscillatorCore
         {
             var currentHigh = high[i];
             var currentLow = low[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
+            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
+            // opening true range the plain high-low span. Falling back to zero instead made it the whole
+            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
             var prevHigh = i >= 1 ? high[i - 1] : 0;
 
             var vmMinus = Math.Abs(currentLow - prevHigh);

@@ -346,27 +346,26 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateLinearRegression fits through the bars there are until the window fills, see
+        // RollingLeastSquares, so the slope is measured from the second bar rather than from the length'th.
+        // A single bar has no slope, which the zero denominator below already reports as zero.
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            var count = Math.Min(length, i + 1);
 
             double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
+            for (var j = 0; j < count; j++)
             {
                 var x = j;
-                var y = input[i - length + 1 + j];
+                var y = input[i - count + 1 + j];
                 sumX += x;
                 sumY += y;
                 sumXY += x * y;
                 sumX2 += x * x;
             }
 
-            var denominator = (length * sumX2) - (sumX * sumX);
-            output[i] = denominator != 0 ? ((length * sumXY) - (sumX * sumY)) / denominator : 0;
+            var denominator = (count * sumX2) - (sumX * sumX);
+            output[i] = denominator != 0 ? ((count * sumXY) - (sumX * sumY)) / denominator : 0;
         }
     }
 
@@ -1011,20 +1010,17 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
+            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
+            // full window, and it measures the first bar against a previous low and high of zero, so bar
+            // zero carries its own high and low instead of nothing.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
                 double vmPlus = 0;
                 double sumTr = 0;
 
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmPlus += Math.Abs(high[j] - low[j - 1]);
+                    vmPlus += Math.Abs(high[j] - (j > 0 ? low[j - 1] : 0));
                     sumTr += tr[j];
                 }
 
@@ -1055,20 +1051,17 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
+            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
+            // full window, and it measures the first bar against a previous low and high of zero, so bar
+            // zero carries its own high and low instead of nothing.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
                 double vmMinus = 0;
                 double sumTr = 0;
 
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmMinus += Math.Abs(low[j] - high[j - 1]);
+                    vmMinus += Math.Abs(low[j] - (j > 0 ? high[j - 1] : 0));
                     sumTr += tr[j];
                 }
 
@@ -1663,22 +1656,17 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // GetMaxAndMinValuesList, which CalculateIchimokuCloud reads its extremes from, measures over however
+        // many bars have arrived, so the span has a midpoint from the first bar rather than none.
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             var highest = double.MinValue;
             var lowest = double.MaxValue;
 
-            for (var j = 0; j < length; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
-                var idx = i - j;
-                if (high[idx] > highest) highest = high[idx];
-                if (low[idx] < lowest) lowest = low[idx];
+                if (high[j] > highest) highest = high[j];
+                if (low[j] < lowest) lowest = low[j];
             }
 
             output[i] = (highest + lowest) / 2;
