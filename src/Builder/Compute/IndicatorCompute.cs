@@ -301,10 +301,12 @@ internal static partial class IndicatorCompute
             MassThrustSpecOptions mt => ComputeMassThrustFast(data, context, mt.Length),
 
             // Batch 5 - Chande indicators
-            ChandeCompositeMomentumIndexSpecOptions ccmi => ComputeChandeCompositeMomentumIndexFast(data, context, ccmi.ShortLength, ccmi.LongLength),
+            // Both lengths are declared obsolete because ChandeCompositeMomentumIndex has no parameter
+            // they could set, so this spec asks for the same series the defaults give.
+            ChandeCompositeMomentumIndexSpecOptions => ComputeChandeCompositeMomentumIndexFast(data, context),
             ChandeKrollRSquaredIndexSpecOptions ckrsi => ComputeChandeKrollRSquaredIndexFast(data, context, ckrsi.Length,
                 ckrsi.MaType),
-            ChandeTrendScoreSpecOptions cts => ComputeChandeTrendScoreFast(data, context, cts.Length),
+            ChandeTrendScoreSpecOptions cts => ComputeChandeTrendScoreFast(data, context, endLength: cts.Length),
             ChandeMomentumOscillatorAbsoluteSpecOptions cmoa => ComputeChandeMomentumOscillatorAbsoluteFast(data, context, cmoa.Length),
 
             // Batch 5 - Oscillators
@@ -401,9 +403,17 @@ internal static partial class IndicatorCompute
             HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length),
 
             // Batch 6 - Chande oscillators
-            ChandeMomentumOscillatorAbsoluteAverageSpecOptions cmoaa => ComputeChandeMomentumOscillatorAbsoluteAverageFast(data, context, cmoaa.Length),
-            ChandeMomentumOscillatorAverageSpecOptions cmoa2 => ComputeChandeMomentumOscillatorAverageFast(data, context, cmoa2.Length),
-            ChandeMomentumOscillatorAverageDisparityIndexSpecOptions cmoadi => ComputeChandeMomentumOscillatorAverageDisparityIndexFast(data, context, cmoadi.Length),
+            // Length is declared obsolete because ChandeMomentumOscillatorAbsoluteAverage has no parameter
+            // it could set, so this spec asks for the same series the defaults give.
+            ChandeMomentumOscillatorAbsoluteAverageSpecOptions =>
+                ComputeChandeMomentumOscillatorAbsoluteAverageFast(data, context),
+            // Length is declared obsolete because ChandeMomentumOscillatorAverage has no parameter it
+            // could set, so this spec asks for the same series the defaults give.
+            ChandeMomentumOscillatorAverageSpecOptions => ComputeChandeMomentumOscillatorAverageFast(data, context),
+            // Length is declared obsolete because ChandeMomentumOscillatorAverageDisparityIndex has no
+            // parameter it could set, so this spec asks for the same series the defaults give.
+            ChandeMomentumOscillatorAverageDisparityIndexSpecOptions =>
+                ComputeChandeMomentumOscillatorAverageDisparityIndexFast(data, context),
             ChandeMomentumOscillatorFilterSpecOptions cmof => ComputeChandeMomentumOscillatorFilterFast(data, context, cmof.Length),
 
             // Batch 6 - Stochastic variants
@@ -4253,12 +4263,86 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Composite Momentum Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context, int shortLength = 3, int longLength = 10)
+    internal static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context,
+        int length1 = 5, int length2 = 10, int length3 = 20,
+        MovingAvgType maType = MovingAvgType.DoubleExponentialMovingAverage, int smoothLength = 3)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ChandeCompositeMomentumIndex(close, buffer.WritableSpan, shortLength, longLength);
+        // CalculateChandeCompositeMomentumIndex weighs three momentum oscillators of different lengths by how
+        // volatile the price was over the matching window, then publishes an exponential average of that
+        // weighted reading. The three oscillators are smoothed with whichever average it was given.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var deviation1Buffer = context.Rent(count);
+        using var deviation2Buffer = context.Rent(count);
+        using var deviation3Buffer = context.Rent(count);
+        var deviation1 = deviation1Buffer.WritableSpan;
+        var deviation2 = deviation2Buffer.WritableSpan;
+        var deviation3 = deviation3Buffer.WritableSpan;
+        VolatilityCore.StandardDeviation(input, deviation1, Math.Max(1, length1));
+        VolatilityCore.StandardDeviation(input, deviation2, Math.Max(1, length2));
+        VolatilityCore.StandardDeviation(input, deviation3, Math.Max(1, length3));
+
+        using var ratio1Buffer = context.Rent(count);
+        using var ratio2Buffer = context.Rent(count);
+        using var ratio3Buffer = context.Rent(count);
+        var ratio1 = ratio1Buffer.WritableSpan;
+        var ratio2 = ratio2Buffer.WritableSpan;
+        var ratio3 = ratio3Buffer.WritableSpan;
+
+        var gainSum = new RollingSum();
+        var lossSum = new RollingSum();
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+
+            // There is nothing to move from on the first bar.
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            gainSum.Add(currentValue > previousValue ? CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) : 0);
+            lossSum.Add(currentValue < previousValue ? CalculationsHelper.MinPastValues(i, 1, previousValue - currentValue) : 0);
+
+            ratio1[i] = MomentumRatio(gainSum.Sum(length1), lossSum.Sum(length1));
+            ratio2[i] = MomentumRatio(gainSum.Sum(length2), lossSum.Sum(length2));
+            ratio3[i] = MomentumRatio(gainSum.Sum(length3), lossSum.Sum(length3));
+        }
+
+        using var smoothed1Buffer = context.Rent(count);
+        using var smoothed2Buffer = context.Rent(count);
+        using var smoothed3Buffer = context.Rent(count);
+        var smoothed1 = smoothed1Buffer.WritableSpan;
+        var smoothed2 = smoothed2Buffer.WritableSpan;
+        var smoothed3 = smoothed3Buffer.WritableSpan;
+        MovingAverage(data, maType, smoothLength, ratio1, smoothed1);
+        MovingAverage(data, maType, smoothLength, ratio2, smoothed2);
+        MovingAverage(data, maType, smoothLength, ratio3, smoothed3);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var weight = deviation1[i] + deviation2[i] + deviation3[i];
+            var index = weight != 0
+                ? MathHelper.MinOrMax(((deviation1[i] * smoothed1[i]) + (deviation2[i] * smoothed2[i])
+                    + (deviation3[i] * smoothed3[i])) / weight, 100, -100)
+                : 0;
+
+            // The exponential average starts from nothing rather than from the first reading.
+            var previous = i >= 1 ? output[i - 1] : 0;
+            output[i] = CalculationsHelper.CalculateEMA(index, previous, smoothLength);
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Scales the gains and losses of one momentum window into the range the Chande oscillators publish.
+    /// </summary>
+    private static double MomentumRatio(double gains, double losses)
+    {
+        return gains + losses != 0 ? MathHelper.MinOrMax(100 * (gains - losses) / (gains + losses), 100, -100) : 0;
     }
 
     /// <summary>
@@ -4446,11 +4530,32 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Trend Score using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeTrendScoreFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeChandeTrendScoreFast(StockData data, ComputeContext context,
+        int startLength = 11, int endLength = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.ChandeTrendScore(close, buffer.WritableSpan, length);
+        // CalculateChandeTrendScore scores one point for every lookback between startLength and endLength the
+        // price now sits above, and one against for every one it sits below. Before the series is that long
+        // the missing bar counts as zero, so the price is above it and the point is scored.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = inputList[i];
+            var score = 0d;
+
+            for (var j = startLength; j <= endLength; j++)
+            {
+                var priorValue = i >= j ? inputList[i - j] : 0;
+                score += currentValue >= priorValue ? 1 : -1;
+            }
+
+            output[i] = score;
+        }
+
         return buffer;
     }
 
@@ -4990,12 +5095,33 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Chande Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteFast(StockData data, ComputeContext context,
+        int length = 9)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.ChandeMomentumOscillatorAbsolute(inputSpan, buffer.WritableSpan, length);
+        // CalculateChandeMomentumOscillatorAbsolute measures the whole move over the window against the ground
+        // covered bar by bar, so it reads how directly the price travelled rather than which way it went.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var magnitudeSum = new RollingSum();
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = inputList[i];
+
+            // Neither the previous bar nor the bar a whole window back exists at the start of the series.
+            var previousValue = i >= 1 ? inputList[i - 1] : 0;
+            var priorValue = i >= length ? inputList[i - length] : 0;
+            magnitudeSum.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue)));
+
+            var travelled = magnitudeSum.Sum(length);
+            var moved = Math.Abs(100 * CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
+            output[i] = travelled != 0 ? MathHelper.MinOrMax(moved / travelled, 100, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -5226,24 +5352,70 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Absolute Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteAverageFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAbsoluteAverageFast(StockData data,
+        ComputeContext context, int length1 = 5, int length2 = 10, int length3 = 20)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.ChandeMomentumOscillatorAbsoluteAverage(inputSpan, buffer.WritableSpan, length, 5);
+        // CalculateChandeMomentumOscillatorAbsoluteAverage is the averaged reading with its sign discarded, so
+        // it says how strong the move was without saying which way it went.
+        var buffer = context.Rent(data.Count);
+        var output = buffer.WritableSpan;
+        MomentumOscillatorWindowAverage(data, output, length1, length2, length3);
+
+        for (var i = 0; i < output.Length; i++)
+        {
+            output[i] = Math.Abs(output[i]);
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Writes the mean of the momentum oscillator taken over three windows, the reading the Chande momentum
+    /// oscillator averages are both built from.
+    /// </summary>
+    private static void MomentumOscillatorWindowAverage(StockData data, Span<double> output, int length1,
+        int length2, int length3)
+    {
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var differenceSum = new RollingSum();
+        var magnitudeSum = new RollingSum();
+
+        for (var i = 0; i < count; i++)
+        {
+            // The first bar counts its whole price as an advance, which is what the batch indicator does.
+            var previousValue = i >= 1 ? inputList[i - 1] : 0;
+            var difference = inputList[i] - previousValue;
+            differenceSum.Add(difference);
+            magnitudeSum.Add(Math.Abs(difference));
+
+            var first = WindowShare(differenceSum.Sum(length1), magnitudeSum.Sum(length1));
+            var second = WindowShare(differenceSum.Sum(length2), magnitudeSum.Sum(length2));
+            var third = WindowShare(differenceSum.Sum(length3), magnitudeSum.Sum(length3));
+            output[i] = 100 * ((first + second + third) / 3);
+        }
+    }
+
+    /// <summary>
+    /// Gives the share of one window's movement that went in the same direction, between minus one and one.
+    /// </summary>
+    private static double WindowShare(double difference, double magnitude)
+    {
+        return magnitude != 0 ? MathHelper.MinOrMax(difference / magnitude, 1, -1) : 0;
     }
 
     /// <summary>
     /// Computes Chande Momentum Oscillator Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageFast(StockData data, ComputeContext context, int length = 9)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageFast(StockData data, ComputeContext context,
+        int length1 = 5, int length2 = 10, int length3 = 20)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.ChandeMomentumOscillatorAverage(inputSpan, buffer.WritableSpan, length, 5);
+        // CalculateChandeMomentumOscillatorAverage averages the momentum reading over three windows. Unlike
+        // its siblings it does not hold back the first bar, so the opening move counts as a full advance.
+        var buffer = context.Rent(data.Count);
+        MomentumOscillatorWindowAverage(data, buffer.WritableSpan, length1, length2, length3);
+
         return buffer;
     }
 
@@ -5489,13 +5661,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Momentum Oscillator Average Disparity Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast(StockData data,
+        ComputeContext context, int length1 = 200, int length2 = 50, int length3 = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // Length parameter maps to cmoLength; smaLength uses default
-        _ = length;
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ChandeMomentumOscillatorAverageDisparityIndex(close, buffer.WritableSpan, length, 3);
+        // CalculateChandeMomentumOscillatorAverageDisparityIndex averages how far the price sits above three
+        // averages of it, each as a percentage of the price itself.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        MovingAverage(data, maType, length1, input, first.WritableSpan);
+        MovingAverage(data, maType, length2, input, second.WritableSpan);
+        MovingAverage(data, maType, length3, input, third.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var firstDisparity = currentValue != 0 ? (currentValue - first.Span[i]) / currentValue * 100 : 0;
+            var secondDisparity = currentValue != 0 ? (currentValue - second.Span[i]) / currentValue * 100 : 0;
+            var thirdDisparity = currentValue != 0 ? (currentValue - third.Span[i]) / currentValue * 100 : 0;
+            output[i] = (firstDisparity + secondDisparity + thirdDisparity) / 3;
+        }
+
         return buffer;
     }
 
@@ -8654,12 +8848,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Intraday Momentum Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChandeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChandeIntradayMomentumIndexFast(StockData data, ComputeContext context,
+        int length = 14)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ChandeIntradayMomentumIndex(open, close, buffer.WritableSpan, length);
+        // CalculateChandeIntradayMomentumIndex reads how much of each bar closed above where it opened, and
+        // its running gain carries from the previous bar rather than starting fresh, so a run of up bars
+        // compounds and a single down bar resets it to nothing.
+        var (inputList, _, _, openList, _) = CalculationsHelper.GetInputValuesList(data);
+        var count = inputList.Count;
+
+        var gainSum = new RollingSum();
+        var lossSum = new RollingSum();
+        var runningGain = 0d;
+        var runningLoss = 0d;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var close = inputList[i];
+            var open = openList[i];
+
+            runningGain = close > open ? runningGain + (close - open) : 0;
+            runningLoss = close < open ? runningLoss + (open - close) : 0;
+            gainSum.Add(runningGain);
+            lossSum.Add(runningLoss);
+
+            var up = gainSum.Sum(length);
+            var down = lossSum.Sum(length);
+            output[i] = up + down != 0 ? MathHelper.MinOrMax(100 * up / (up + down), 100, 0) : 0;
+        }
+
         return buffer;
     }
 
