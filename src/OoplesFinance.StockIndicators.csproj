@@ -62,11 +62,6 @@
     <EmbeddedResource Remove="bin\**" />
     <None Remove="bin\**" />
     <!-- Exclude source generator files from main project compilation -->
-    <!-- The trading adapters are their own project and package now. Without this they would be
-         globbed straight back into the core compilation, which is the thing being separated. -->
-    <Compile Remove="Trading\**" />
-    <None Remove="Trading\**" />
-
     <Compile Remove="SourceGeneration\**" />
     <None Remove="SourceGeneration\**" />
   </ItemGroup>

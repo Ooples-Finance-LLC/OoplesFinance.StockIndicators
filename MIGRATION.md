@@ -1,4 +1,4 @@
-# Migration Guide: v1.x to v2.0
+﻿# Migration Guide: v1.x to v2.0
 
 This guide helps you migrate from OoplesFinance.StockIndicators v1.x to v2.0.
 
@@ -158,24 +158,28 @@ var handle = indicators.Calculate(
 
 #### Moving to the Trading package
 
-`AlpacaBroker` and `AlpacaMarketDataProvider` are in a separate assembly now. Their namespaces are
-unchanged, so no `using` needs editing - but the types are no longer in the core package, so a
-project that uses them needs the new package reference:
+`AlpacaBroker` and `AlpacaMarketDataProvider` now live in their own repository and package,
+[OoplesFinance.StockIndicators.Trading](https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators.Trading).
+Their namespaces are unchanged, so no `using` needs editing - but the types are no longer in the
+core package, so a project that uses them needs the new package reference:
 
 ```xml
 <PackageReference Include="OoplesFinance.StockIndicators" Version="..." />
 <PackageReference Include="OoplesFinance.StockIndicators.Trading" Version="..." />
 ```
 
-The two packages release together and carry the same version.
+The two packages version independently. Trading takes a minimum core version rather than a pin, so
+you choose which core version you resolve provided it is at least that floor.
 
 Nothing else needs to change: same types, same members, same namespaces.
 
-**Why:** `Alpaca.Markets` is a broker SDK, and only those two adapters need it. Carrying it in the
+**Why:** `Alpaca.Markets` is a broker SDK, and only those two adapters needed it. Carrying it in the
 core package meant a project that only wanted to compute an RSI also restored a trading API client
-and its transitive dependencies. Type forwarding would have made this invisible, but the Trading
-assembly references the core one, so a forwarder in the core assembly would be a reference cycle.
-The move is therefore breaking, and is marked as such rather than hidden.
+and its transitive dependencies - core 1.1.0 declares `Alpaca.Markets` and
+`Alpaca.Markets.Extensions` as hard dependencies for exactly that reason. Type forwarding would have
+made the move invisible, but the Trading assembly references the core one, so a forwarder in the
+core assembly would be a reference cycle. The move is therefore breaking, and is marked as such
+rather than hidden.
 
 ### Changed
 

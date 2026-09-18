@@ -12,10 +12,6 @@
         {
           "type": "generic",
           "path": "src/OoplesFinance.StockIndicators.csproj"
-        },
-        {
-          "type": "generic",
-          "path": "src/Trading/OoplesFinance.StockIndicators.Trading.csproj"
         }
       ]
     }
