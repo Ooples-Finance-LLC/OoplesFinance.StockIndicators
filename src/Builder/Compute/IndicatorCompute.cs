@@ -90,7 +90,7 @@ internal static partial class IndicatorCompute
             ZlemaSpecOptions zlema => ComputeZlemaFast(data, context, zlema.Length),
 
             // Oscillators
-            RsiSpecOptions rsi => ComputeRsiFast(data, context, rsi.Length),
+            RsiSpecOptions rsi => ComputeRsiFast(data, context, rsi.Length, rsi.MaType),
             RocSpecOptions roc => ComputeRocFast(data, context, roc.Length),
             MomentumSpecOptions mom => ComputeMomentumFast(data, context, mom.Length),
             WilliamsRSpecOptions willr => ComputeWilliamsRFast(data, context, willr.Length),
@@ -1339,15 +1339,96 @@ internal static partial class IndicatorCompute
     /// Computes Relative Strength Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var buffer = context.Rent(count);
 
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.RelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+        if (maType == MovingAvgType.WildersSmoothingMethod)
+        {
+            OscillatorCore.RelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+            return buffer;
+        }
 
-        return buffer;
+        // CalculateRelativeStrengthIndex smooths its gains and losses with whichever average it was given, and
+        // only Wilders has a closed form in the core. Every other average goes through the same dispatch the
+        // batch helper uses, so the two read the same series rather than agreeing only at Wilders.
+        var pool = ArrayPool<double>.Shared;
+        var gainArray = pool.Rent(count);
+        var lossArray = pool.Rent(count);
+        var avgGainArray = pool.Rent(count);
+        var avgLossArray = pool.Rent(count);
+
+        try
+        {
+            var gains = gainArray.AsSpan(0, count);
+            var losses = lossArray.AsSpan(0, count);
+
+            for (var i = 0; i < count; i++)
+            {
+                var change = i >= 1 ? inputSpan[i] - inputSpan[i - 1] : 0;
+                gains[i] = change > 0 ? change : 0;
+                losses[i] = change < 0 ? -change : 0;
+            }
+
+            var avgGains = avgGainArray.AsSpan(0, count);
+            var avgLosses = avgLossArray.AsSpan(0, count);
+            MovingAverage(data, maType, length, gains, avgGains);
+            MovingAverage(data, maType, length, losses, avgLosses);
+
+            var output = buffer.WritableSpan;
+            for (var i = 0; i < count; i++)
+            {
+                var avgGain = avgGains[i];
+                var avgLoss = avgLosses[i];
+                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
+
+                output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0
+                    : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
+            }
+
+            return buffer;
+        }
+        finally
+        {
+            pool.Return(gainArray);
+            pool.Return(lossArray);
+            pool.Return(avgGainArray);
+            pool.Return(avgLossArray);
+        }
+    }
+
+    /// <summary>
+    /// Writes <paramref name="maType"/> over <paramref name="input"/> into <paramref name="output"/>, the same
+    /// way the indicator's own helper would.
+    /// </summary>
+    /// <remarks>
+    /// Types with a verified span implementation are written straight into the caller's buffer and allocate
+    /// nothing. The rest are computed by their own indicator, which is what the batch helper does for them too -
+    /// an arm that computed them a second way here would be a different average under the same name.
+    /// </remarks>
+    internal static void MovingAverage(StockData data, MovingAvgType maType, int length, ReadOnlySpan<double> input,
+        Span<double> output)
+    {
+        if (CalculationsHelper.TryComputeMovingAverage(data, maType, length, input, output))
+        {
+            return;
+        }
+
+        var values = new List<double>(input.Length);
+        for (var i = 0; i < input.Length; i++)
+        {
+            values.Add(input[i]);
+        }
+
+        var computed = CalculationsHelper.GetMovingAverageList(data, maType, length, values);
+        for (var i = 0; i < output.Length; i++)
+        {
+            output[i] = i < computed.Count ? computed[i] : 0;
+        }
     }
 
     /// <summary>
@@ -5023,12 +5104,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeGannSwingOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        // Length parameter is unused - Gann Swing uses swing detection
-        _ = length;
+        // CalculateGannSwingOscillator reads its swings from the rolling extremes of the last length bars,
+        // so the length is the indicator, not decoration on it.
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        OscillatorCore.GannSwingOscillator(high, low, buffer.WritableSpan, 2);
+        OscillatorCore.GannSwingOscillator(high, low, buffer.WritableSpan, length);
         return buffer;
     }
 

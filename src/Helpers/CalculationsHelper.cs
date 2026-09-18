@@ -576,11 +576,34 @@ public static class CalculationsHelper
     private static List<double> GetMovingAverageListCore(StockData stockData, MovingAvgType movingAvgType, int length,
         List<double>? customValuesList, int? fastLength, int? slowLength)
     {
-        List<double> movingAvgList = new();
+        var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
+        var outputBuffer = SpanCompat.CreateOutputBuffer(inputList.Count);
 
+        return TryComputeMovingAverage(stockData, movingAvgType, length, SpanCompat.AsReadOnlySpan(inputList),
+            outputBuffer.Span, fastLength, slowLength)
+            ? outputBuffer.ToList()
+            : GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+    }
+
+    /// <summary>
+    /// Writes <paramref name="movingAvgType"/> over <paramref name="input"/> into <paramref name="output"/>, or
+    /// reports that this type has no span implementation for the caller to fall back on one that allocates.
+    /// </summary>
+    /// <remarks>
+    /// This is the same dispatch the batch helper has always used, lifted out of it so that a span arm can
+    /// honour the moving-average type it was given. An arm that hardcodes one average is bound to an indicator
+    /// that takes the type as a parameter, so the two agree only at whichever average the arm happened to pick;
+    /// 313 of the arms in ArmsDisagreeingWithTheirBoundCall carry a MovingAvgType option.
+    ///
+    /// Types outside <see cref="VerifiedFastPaths"/> return false rather than being computed a second way here,
+    /// because the batch helper computes those through their own indicator and an arm has to match it.
+    /// </remarks>
+    internal static bool TryComputeMovingAverage(StockData stockData, MovingAvgType movingAvgType, int length,
+        ReadOnlySpan<double> input, Span<double> output, int? fastLength = null, int? slowLength = null)
+    {
         if (!VerifiedFastPaths.Contains(movingAvgType))
         {
-            return GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+            return false;
         }
 
         // Fast path for moving averages with simple (input, output, length) Core signatures
@@ -666,11 +689,8 @@ public static class CalculationsHelper
             or MovingAvgType.FisherLeastSquaresMovingAverage or MovingAvgType.OvershootReductionMovingAverage
             or MovingAvgType.KaufmanAdaptiveLeastSquaresMovingAverage)
         {
-            var inputList = customValuesList ?? GetInputValuesList(stockData).inputList;
-            var count = inputList.Count;
-            var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-            var outputSpan = outputBuffer.Span;
+            var inputSpan = input;
+            var outputSpan = output;
 
             switch (movingAvgType)
             {
@@ -1132,8 +1152,7 @@ public static class CalculationsHelper
                     break;
             }
 
-            movingAvgList = outputBuffer.ToList();
-            return movingAvgList;
+            return true;
         }
 
         // Fast path for multi-input moving averages (require OHLC/volume data)
@@ -1144,15 +1163,13 @@ public static class CalculationsHelper
             or MovingAvgType.VolumeWeightedAveragePrice or MovingAvgType.TrueRangeAdjustedExponentialMovingAverage
             or MovingAvgType.AtrFilteredExponentialMovingAverage)
         {
-            var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
-            var count = inputList.Count;
-            var inputSpan = SpanCompat.AsReadOnlySpan(customValuesList ?? inputList);
+            var (_, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
+            var inputSpan = input;
             var highSpan = SpanCompat.AsReadOnlySpan(highList);
             var lowSpan = SpanCompat.AsReadOnlySpan(lowList);
             var openSpan = SpanCompat.AsReadOnlySpan(openList);
             var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
-            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-            var outputSpan = outputBuffer.Span;
+            var outputSpan = output;
 
             switch (movingAvgType)
             {
@@ -1191,11 +1208,10 @@ public static class CalculationsHelper
                     break;
             }
 
-            movingAvgList = outputBuffer.ToList();
-            return movingAvgList;
+            return true;
         }
 
-        return GetMovingAverageListByCalculation(stockData, movingAvgType, length, fastLength, slowLength);
+        return false;
     }
 
     /// <summary>

@@ -28,44 +28,28 @@ internal static class OscillatorCore
             return;
         }
 
+        // CalculateRelativeStrengthIndex smooths its gains and losses with WellesWilderMovingAverage from
+        // the first bar, with no simple average to seed it and no blank run-in. Seeding the two averages
+        // from a simple mean over the first fourteen changes, and publishing nothing until then, put this
+        // arm on a different curve from the indicator for the whole series rather than just its opening.
         var k = 1.0 / length;
         double avgGain = 0;
         double avgLoss = 0;
-        double prevValue = input[0];
-        output[0] = 0;
 
-        for (var i = 1; i < input.Length; i++)
+        for (var i = 0; i < input.Length; i++)
         {
-            var currentValue = input[i];
-            var change = currentValue - prevValue;
-            prevValue = currentValue;
-
+            var change = i >= 1 ? input[i] - input[i - 1] : 0;
             var gain = change > 0 ? change : 0;
             var loss = change < 0 ? -change : 0;
 
-            if (i <= length)
-            {
-                // Initial period: simple average
-                avgGain += gain;
-                avgLoss += loss;
+            avgGain = (gain * k) + (avgGain * (1 - k));
+            avgLoss = (loss * k) + (avgLoss * (1 - k));
 
-                if (i == length)
-                {
-                    avgGain /= length;
-                    avgLoss /= length;
-                }
+            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
-                output[i] = 0;
-            }
-            else
-            {
-                // After initial period: Wilder's smoothing
-                avgGain = (gain * k) + (avgGain * (1 - k));
-                avgLoss = (loss * k) + (avgLoss * (1 - k));
-
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                output[i] = avgLoss == 0 ? 100 : 100 - (100 / (1 + rs));
-            }
+            // No losses at all is a full reading, no gains at all is an empty one, which is how the
+            // indicator reports an opening bar that has neither.
+            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
         }
     }
 
@@ -4360,7 +4344,12 @@ internal static class OscillatorCore
             }
 
             var range = max - min;
-            output[i] = range != 0 ? (input[i] - min) / range * 100 : 50;
+
+            // CalculateDoubleStochasticOscillator reports zero when the window it is measuring against is
+            // flat, not the midpoint. On the opening bar, where the inner stochastic has a single value
+            // and therefore no range at all, a midpoint of fifty stayed in the smoothing average for
+            // three bars.
+            output[i] = range != 0 ? (input[i] - min) / range * 100 : 0;
         }
     }
 
@@ -5316,39 +5305,53 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Gann Swing Oscillator.
     /// </summary>
-    internal static void GannSwingOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 2)
+    internal static void GannSwingOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 5)
     {
         if (output.Length < high.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        length = Math.Max(1, length);
+
+        // CalculateGannSwingOscillator turns when the rolling extreme of the last few bars breaks the one
+        // before it and that one had already broken its own predecessor - two consecutive extremes moving
+        // the same way, not a single bar beating the running high. This tracked the latter, and it ignored
+        // the length entirely, so it swung on bars the indicator never counted as a swing.
         double swing = 0;
-        double prevHigh = 0, prevLow = 0;
+        double prevHighest1 = 0, prevHighest2 = 0;
+        double prevLowest1 = 0, prevLowest2 = 0;
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i == 0)
+            // GetMaxAndMinValuesList measures over however many bars have arrived, so the extremes are
+            // there from the first bar.
+            var start = Math.Max(0, i - length + 1);
+            var highest = high[start];
+            var lowest = low[start];
+
+            for (var j = start + 1; j <= i; j++)
             {
-                prevHigh = high[i];
-                prevLow = low[i];
-                output[i] = 0;
-                continue;
+                if (high[j] > highest)
+                {
+                    highest = high[j];
+                }
+
+                if (low[j] < lowest)
+                {
+                    lowest = low[j];
+                }
             }
 
-            // Check for higher high or lower low
-            if (high[i] > prevHigh)
-            {
-                swing = 1; // Bullish swing
-                prevHigh = high[i];
-            }
-            else if (low[i] < prevLow)
-            {
-                swing = -1; // Bearish swing
-                prevLow = low[i];
-            }
-
+            swing = prevHighest2 > prevHighest1 && highest > prevHighest1 ? 1
+                : prevLowest2 < prevLowest1 && lowest < prevLowest1 ? -1
+                : swing;
             output[i] = swing;
+
+            prevHighest2 = prevHighest1;
+            prevHighest1 = highest;
+            prevLowest2 = prevLowest1;
+            prevLowest1 = lowest;
         }
     }
 

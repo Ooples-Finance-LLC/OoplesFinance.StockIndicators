@@ -4722,11 +4722,15 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateEhlersGaussianFilter reads a filter output that does not exist yet as zero, so the
+            // filter starts from nothing and climbs towards the price over its first bars. Seeding the
+            // history with the arriving price instead started it already settled, and the two only met
+            // once the poles had damped the difference away.
             var currentValue = input[i];
-            var prev1 = i >= 1 ? output[i - 1] : currentValue;
-            var prev2 = i >= 2 ? output[i - 2] : currentValue;
-            var prev3 = i >= 3 ? output[i - 3] : currentValue;
-            var prev4 = i >= 4 ? output[i - 4] : currentValue;
+            var prev1 = i >= 1 ? output[i - 1] : 0;
+            var prev2 = i >= 2 ? output[i - 2] : 0;
+            var prev3 = i >= 3 ? output[i - 3] : 0;
+            var prev4 = i >= 4 ? output[i - 4] : 0;
 
             double result;
             if (poles == 1)
