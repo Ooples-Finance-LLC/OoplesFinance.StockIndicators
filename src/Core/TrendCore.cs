@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -1348,52 +1348,6 @@ internal static class TrendCore
             pool.Return(emaArray);
         }
     }
-
-    /// <summary>
-    /// Computes Auto Line indicator.
-    /// Adaptive trend line calculation.
-    /// </summary>
-    internal static void AutoLine(ReadOnlySpan<double> close, Span<double> output, int length = 14)
-    {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = close[0];
-        for (var i = 1; i < close.Length; i++)
-        {
-            var change = Math.Abs(close[i] - close[i - 1]);
-            var alpha = change > 0 ? Math.Min(1.0, change / close[i - 1]) : 0.1;
-            alpha = Math.Max(2.0 / (length + 1), alpha);
-            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]);
-        }
-    }
-
-    /// <summary>
-    /// Computes Auto Line with Drift indicator.
-    /// Adaptive trend line with drift adjustment.
-    /// </summary>
-    internal static void AutoLineWithDrift(ReadOnlySpan<double> close, Span<double> output, int length = 14)
-    {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = close[0];
-        var drift = 0.0;
-        for (var i = 1; i < close.Length; i++)
-        {
-            var change = Math.Abs(close[i] - close[i - 1]);
-            var alpha = change > 0 ? Math.Min(1.0, change / close[i - 1]) : 0.1;
-            alpha = Math.Max(2.0 / (length + 1), alpha);
-
-            drift = alpha * (close[i] - close[i - 1]) + (1 - alpha) * drift;
-            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]) + drift;
-        }
-    }
-
     /// <summary>
     /// Computes Auto Filter indicator.
     /// Adaptive filter for trend detection.

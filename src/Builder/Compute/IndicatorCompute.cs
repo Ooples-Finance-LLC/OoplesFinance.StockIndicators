@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
@@ -322,8 +322,6 @@ internal static partial class IndicatorCompute
             AdaptiveRsiSpecOptions adrisi => ComputeAdaptiveRsiFast(data, context, adrisi.MinLength, adrisi.MaxLength),
 
             // Batch 5 - Moving averages
-            AutoLineSpecOptions al => ComputeAutoLineFast(data, context, al.Length),
-            AutoLineWithDriftSpecOptions alwd => ComputeAutoLineWithDriftFast(data, context, alwd.Length),
             AutoFilterSpecOptions af => ComputeAutoFilterFast(data, context, af.Length),
             BuffAverageSpecOptions ba => ComputeBuffAverageFast(data, context, ba.Length),
             BryantAdaptiveMovingAverageSpecOptions bama => ComputeBryantAdaptiveMovingAverageFast(data, context, bama.Length),
@@ -522,7 +520,6 @@ internal static partial class IndicatorCompute
             MassThrustOscillatorSpecOptions mto => ComputeMassThrustOscillatorFast(data, context, mto.Length),
 
             // Batch 7 - Moving averages
-            UltimateMovingAverageSpecOptions uma => ComputeUltimateMovingAverageFast(data, context, uma.Length),
             SymmetricallyWeightedMovingAverageSpecOptions swma2 => ComputeSymmetricallyWeightedMovingAverageFast(data, context, swma2.Length),
             SquareRootWeightedMovingAverageSpecOptions srwma => ComputeSquareRootWeightedMovingAverageFast(data, context, srwma.Length),
             Spencer15PointMovingAverageSpecOptions sp15 => ComputeSpencer15PointMovingAverageFast(data, context, sp15.Length),
@@ -709,7 +706,6 @@ internal static partial class IndicatorCompute
             TillsonIE2SpecOptions tie2 => ComputeTillsonIE2Fast(data, context, tie2.Length),
             TStepLeastSquaresMovingAverageSpecOptions tslsma => ComputeTStepLeastSquaresMovingAverageFast(data, context, tslsma.Length),
             VariableAdaptiveMovingAverageSpecOptions vama => ComputeVariableAdaptiveMovingAverageFast(data, context, vama.Length),
-            VariableLengthMovingAverageSpecOptions vlma => ComputeVariableLengthMovingAverageFast(data, context, vlma.Length),
             VerticalHorizontalMovingAverageSpecOptions vhma => ComputeVerticalHorizontalMovingAverageFast(data, context, vhma.Length),
             VolatilityMovingAverageSpecOptions volma => ComputeVolatilityMovingAverageFast(data, context, volma.Length),
             VolatilityWaveMovingAverageSpecOptions vwma => ComputeVolatilityWaveMovingAverageFast(data, context, vwma.Length),
@@ -930,7 +926,6 @@ internal static partial class IndicatorCompute
             // Batch 9 - More oscillators and indicators
             SpearmanIndicatorSpecOptions spi => ComputeEhlersSpearmanRankFast(data, context, spi.Length),
             TillsonT3MovingAverageSpecOptions tt3 => ComputeTillsonT3Fast(data, context, tt3.Length, tt3.VFactor),
-            UltimateMovingAverageBandsSpecOptions umab => ComputeUltimateMovingAverageFast(data, context, umab.MaxLength),
 
             // Batch 10 - Ehlers Window indicators
             EhlersHammingWindowIndicatorSpecOptions ehwi => ComputeEhlersHammingWindowFast(data, context, ehwi.Length, ehwi.Pedestal),
@@ -4067,29 +4062,6 @@ internal static partial class IndicatorCompute
         TrendCore.ChopZone(high, low, close, buffer.WritableSpan, length);
         return buffer;
     }
-
-    /// <summary>
-    /// Computes Auto Line using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AutoLine(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Auto Line with Drift using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AutoLineWithDrift(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
     /// <summary>
     /// Computes Auto Filter using zero-allocation fast path.
     /// </summary>
@@ -5780,18 +5752,6 @@ internal static partial class IndicatorCompute
     #endregion
 
     #region Batch 14 - Additional Moving Averages
-
-    /// <summary>
-    /// Computes Ultimate Moving Average using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeUltimateMovingAverageFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.UltimateMovingAverage(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
     /// <summary>
     /// Computes Symmetrically Weighted Moving Average using zero-allocation fast path.
     /// </summary>
@@ -7516,19 +7476,6 @@ internal static partial class IndicatorCompute
         MovingAverageCore.VariableAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
-
-    /// <summary>
-    /// Computes Variable Length Moving Average using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeVariableLengthMovingAverageFast(StockData data, ComputeContext context, int length = 5)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.VariableLengthMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
-    }
-
     /// <summary>
     /// Computes Vertical Horizontal Moving Average using zero-allocation fast path.
     /// </summary>
