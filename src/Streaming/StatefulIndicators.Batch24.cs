@@ -552,8 +552,6 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
     private readonly RollingStandardDeviation _bStdDev;
     private readonly RollingStandardDeviation _cStdDev;
     private readonly StreamingInputResolver _input;
-    private double _bValue;
-    private double _cValue;
     private double _prevEma;
     private double _prevUp;
     private double _prevDn;
@@ -578,8 +576,6 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
         _ema.Reset();
         _bStdDev.Reset();
         _cStdDev.Reset();
-        _bValue = 0;
-        _cValue = 0;
         _prevEma = 0;
         _prevUp = 0;
         _prevDn = 0;
@@ -591,12 +587,16 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
         var value = _input.GetValue(bar);
         var ema = _ema.Next(value, isFinal);
         var prevEma = _hasPrev ? _prevEma : 0;
-        _bValue = ema > prevEma ? ema : 0;
-        _cValue = ema < prevEma ? ema : 0;
+        // Locals, not fields: each is computed and consumed within this one bar, and nothing carries them to
+        // the next. Held as fields they would read like the state above them - _prevEma and the rest do carry
+        // forward - which is state this indicator does not have. They were fields only because the deviation
+        // state they fed resolved its own input and had to be handed a closure over something.
+        var bValue = ema > prevEma ? ema : 0;
+        var cValue = ema < prevEma ? ema : 0;
 
         // Each deviation is fed the series it measures: the rises, and the falls.
-        var bStd = _bStdDev.Next(_bValue, isFinal);
-        var cStd = _cStdDev.Next(_cValue, isFinal);
+        var bStd = _bStdDev.Next(bValue, isFinal);
+        var cStd = _cStdDev.Next(cValue, isFinal);
 
         var prevUp = _hasPrev ? _prevUp : 0;
         var prevDn = _hasPrev ? _prevDn : 0;
