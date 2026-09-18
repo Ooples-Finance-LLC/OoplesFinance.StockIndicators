@@ -979,10 +979,12 @@ internal static partial class IndicatorCompute
             UltimateMovingAverageBandsSpecOptions umab => ComputeUltimateMovingAverageFast(data, context, umab.MaxLength),
 
             // Batch 10 - Ehlers Window indicators
-            EhlersHammingWindowIndicatorSpecOptions ehwi => ComputeEhlersHammingWindowFast(data, context, ehwi.Length, ehwi.Pedestal),
-            EhlersHannWindowIndicatorSpecOptions ehnwi => ComputeEhlersHannWindowFast(data, context, ehnwi.Length),
-            EhlersTriangleWindowIndicatorSpecOptions etwi => ComputeEhlersTriangleWindowFast(data, context, etwi.Length),
-            EhlersImpulseResponseSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length),
+            // The batch never forwards pedestal to the moving average that produces the bound series,
+            // so it cannot change the published values and is not passed here.
+            EhlersHammingWindowIndicatorSpecOptions ehwi => ComputeEhlersHammingWindowFast(data, context, ehwi.Length, ehwi.MaType),
+            EhlersHannWindowIndicatorSpecOptions ehnwi => ComputeEhlersHannWindowFast(data, context, ehnwi.Length, ehnwi.MaType),
+            EhlersTriangleWindowIndicatorSpecOptions etwi => ComputeEhlersTriangleWindowFast(data, context, etwi.Length, etwi.MaType),
+            EhlersImpulseResponseSpecOptions eir => ComputeEhlersImpulseResponseFast(data, context, eir.Length, eir.Bw, eir.MaType),
             EhlersModifiedStochasticIndicatorSpecOptions emsi => ComputeEhlersModifiedStochasticFast(data, context, emsi.Length1, emsi.Length2, emsi.Length3),
 
             // Batch 11 - Additional Moving Averages with Core methods
@@ -11625,50 +11627,83 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Ehlers Hamming Window Indicator using zero-allocation fast path.
+    /// Computes the shared Ehlers window filter: the moving average of the close-open derivative.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersHammingWindowFast(StockData data, ComputeContext context, int length = 20, double pedestal = 10)
+    private static ComputeBuffer EhlersWindowFilter(StockData data, ComputeContext context, int length, MovingAvgType maType)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersHammingMovingAverage(inputSpan, buffer.WritableSpan, length, pedestal);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var count = data.Count;
+
+        using var derivative = context.Rent(count);
+        var deriv = derivative.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            deriv[i] = input[i] - open[i];
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length, 1), derivative.Span, buffer.WritableSpan);
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers Hamming Window Indicator using zero-allocation fast path.
+    /// </summary>
+    internal static ComputeBuffer ComputeEhlersHammingWindowFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.EhlersHammingMovingAverage)
+    {
+        return EhlersWindowFilter(data, context, length, maType);
     }
 
     /// <summary>
     /// Computes Ehlers Hann Window Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersHannWindowFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersHannWindowFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersHannMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        return EhlersWindowFilter(data, context, length, maType);
     }
 
     /// <summary>
     /// Computes Ehlers Triangle Window Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersTriangleWindowFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersTriangleWindowFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.EhlersTriangleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersTriangleMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        return EhlersWindowFilter(data, context, length, maType);
     }
 
     /// <summary>
-    /// Computes Ehlers Impulse Reaction using zero-allocation fast path.
+    /// Computes Ehlers Impulse Response using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersImpulseReactionFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeEhlersImpulseResponseFast(StockData data, ComputeContext context, int length = 20, double bw = 1,
+        MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersImpulseReaction(inputSpan, buffer.WritableSpan, 2, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var hannLength = MathHelper.MinOrMax((int)Math.Ceiling(length / 1.4));
+        var l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
+        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / length, 0.99, 0.01));
+        var s1 = (1 / g1) - MathHelper.Sqrt((1 / MathHelper.Pow(g1, 2)) - 1);
+
+        using var bandPass = context.Rent(count);
+        var bp = bandPass.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 2 ? input[i - 2] : 0;
+            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
+            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
+
+            bp[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (input[i] - previousValue)) + (l1 * (1 + s1) * previousBp1) - (s1 * previousBp2);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, hannLength, bandPass.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -15352,41 +15387,9 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // V1 Algorithm: Triple-pass MA on close-open derivative
-        // 1. Calculate deriv = close - open
-        // 2. Apply MA three times for heavy smoothing (filt -> filt2 -> filt3)
-        // 3. Primary output is the triple-smoothed filter
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        int count = data.Count;
-        length = Math.Max(length, 1);
-
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-
-        // Calculate derivative (close - open)
-        var derivBuffer = context.Rent(count);
-        var derivSpan = derivBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            derivSpan[i] = close[i] - open[i];
-        }
-
-        // First MA pass
-        var filt1Buffer = context.Rent(count);
-        maCore.Compute(derivBuffer.Span, filt1Buffer.WritableSpan, length);
-
-        // Second MA pass
-        var filt2Buffer = context.Rent(count);
-        maCore.Compute(filt1Buffer.Span, filt2Buffer.WritableSpan, length);
-
-        // Third MA pass (primary output)
-        var result = context.Rent(count);
-        maCore.Compute(filt2Buffer.Span, result.WritableSpan, length);
-
-        derivBuffer.Dispose();
-        filt1Buffer.Dispose();
-        filt2Buffer.Dispose();
-        return result;
+        // The batch smooths three times but publishes the first pass, so the extra passes only ever
+        // reached the Roc and Signal lines. The bound series is one moving average of close - open.
+        return EhlersWindowFilter(data, context, length, maType);
     }
 
     internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
