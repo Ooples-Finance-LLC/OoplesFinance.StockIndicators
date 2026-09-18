@@ -967,6 +967,8 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateGeometricMovingAverage returns nothing until the window fills, so the run-in stays blank
+            // here too.
             if (i < length - 1)
             {
                 output[i] = 0;

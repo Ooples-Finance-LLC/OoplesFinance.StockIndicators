@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -166,16 +166,13 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -623,14 +620,11 @@ internal static class TrendCore
 
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var highestHigh = double.MinValue;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     if (high[j] > highestHigh) highestHigh = high[j];
                 }
@@ -664,14 +658,11 @@ internal static class TrendCore
 
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var lowestLow = double.MaxValue;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     if (low[j] < lowestLow) lowestLow = low[j];
                 }
@@ -822,15 +813,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highest = double.MinValue;
             var lowest = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (close[j] > highest) highest = close[j];
                 if (close[j] < lowest) lowest = close[j];
@@ -852,15 +840,12 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1204,16 +1189,13 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double highestHigh = double.MinValue;
             double lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];

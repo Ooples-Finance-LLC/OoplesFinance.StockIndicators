@@ -132,16 +132,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low in the period
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -174,15 +171,13 @@ internal static class OscillatorCore
             // Typical Price
             var tp = (high[i] + low[i] + close[i]) / 3;
 
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate SMA of TP
             double tpSum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 tpSum += (high[j] + low[j] + close[j]) / 3;
             }
@@ -190,7 +185,7 @@ internal static class OscillatorCore
 
             // Calculate Mean Deviation
             double meanDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 meanDev += Math.Abs((high[j] + low[j] + close[j]) / 3 - smaTP);
             }
@@ -217,16 +212,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low in the period
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1246,16 +1238,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -3315,15 +3304,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double highest = double.MinValue;
             double lowest = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 highest = Math.Max(highest, close[j]);
                 lowest = Math.Min(lowest, close[j]);
@@ -4417,16 +4403,13 @@ internal static class OscillatorCore
     {
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var max = input[i];
             var min = input[i];
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (input[j] > max) max = input[j];
                 if (input[j] < min) min = input[j];
@@ -4582,14 +4565,11 @@ internal static class OscillatorCore
             // Sum over period and calculate oscillator
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double sumDemand = 0, sumSupply = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sumDemand += demand[j];
                     sumSupply += supply[j];
@@ -5219,15 +5199,12 @@ internal static class OscillatorCore
     {
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate mean
             var sum = 0.0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -5236,7 +5213,7 @@ internal static class OscillatorCore
             // Calculate variance and fourth moment
             var variance = 0.0;
             var m4 = 0.0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var diff = input[j] - mean;
                 var diff2 = diff * diff;
@@ -5375,15 +5352,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var hh = high[i];
             var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];
@@ -5782,15 +5756,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var hh = high[i];
             var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];
@@ -5872,14 +5843,11 @@ internal static class OscillatorCore
             // Calculate mobility as rolling sum normalized
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var sum = 0.0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sum += range[j];
                 }
@@ -6177,14 +6145,11 @@ internal static class OscillatorCore
             // Normalize to -100 to 100
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var totalVolume = 0.0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     totalVolume += volume[j];
                 }
@@ -8806,15 +8771,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate SMA
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -8822,7 +8784,7 @@ internal static class OscillatorCore
 
             // Calculate standard deviation
             double sumSquaredDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var dev = input[j] - sma;
                 sumSquaredDev += dev * dev;
@@ -8886,6 +8848,8 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateSkewness returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -8933,15 +8897,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate mean
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -8950,7 +8911,7 @@ internal static class OscillatorCore
             // Calculate variance and fourth moment
             double sumSquaredDev = 0;
             double sumFourthDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var dev = input[j] - mean;
                 var devSq = dev * dev;
@@ -9030,6 +8991,8 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
+            // CalculateTypicalPriceVolatility returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -9103,14 +9066,11 @@ internal static class OscillatorCore
             // Calculate rolling sums and REI
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double s1Sum = 0, s2Sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     s1Sum += s1[j];
                     s2Sum += s2[j];
@@ -9162,14 +9122,11 @@ internal static class OscillatorCore
             // Calculate rolling sums and pressure ratio
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double bpSum = 0, spSum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     bpSum += bp[j];
                     spSum += sp[j];
