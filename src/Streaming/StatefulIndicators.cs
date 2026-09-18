@@ -10230,7 +10230,9 @@ public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Al")]
 public sealed class AutoLineState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. The two have
+    // to move together or the engines band the line at different widths over the same prices.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private double _prevX;
     private bool _hasPrev;
@@ -10238,7 +10240,9 @@ public sealed class AutoLineState : IStreamingIndicatorState, IDisposable
     public AutoLineState(int length = 500)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolved);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean.
+        _stdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -10254,7 +10258,10 @@ public sealed class AutoLineState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var dev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input rather than the bar, so a composed reading measures the series it was
+        // composed on rather than resolving a close of its own.
+        var dev = _stdDev.Next(value, isFinal);
         var prevX = _hasPrev ? _prevX : value;
         var x = value > prevX + dev ? value : value < prevX - dev ? value : prevX;
 
@@ -10286,7 +10293,9 @@ public sealed class AutoLineState : IStreamingIndicatorState, IDisposable
 public sealed class AutoLineWithDriftState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
     private double _prevA;
@@ -10296,7 +10305,9 @@ public sealed class AutoLineWithDriftState : IStreamingIndicatorState, IDisposab
     public AutoLineWithDriftState(int length = 500)
     {
         _length = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean.
+        _stdDev = new RollingStandardDeviation(_length);
         _values = new PooledRingBuffer<double>(_length + 2);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -10315,7 +10326,9 @@ public sealed class AutoLineWithDriftState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var dev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var dev = _stdDev.Next(value, isFinal);
         var r = Math.Round(value);
         var prevA = _hasPrev ? _prevA : r;
         var priorA = r;

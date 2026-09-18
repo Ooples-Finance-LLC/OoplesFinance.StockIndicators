@@ -631,7 +631,17 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var devList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The line holds until price escapes a band one deviation either side of it, and sigma in a band
+        // is the windowed deviation; CalculateStandardDeviationVolatility is a different quantity, about 55%
+        // wider on a typical price series, so the band was that much too wide and the line held through moves
+        // that should have moved it. See #190.
+        //
+        // The deviation is 0 until the window fills, which at the default length of 500 is a long warm-up. The
+        // band is then zero-width and the line simply follows price, which is the honest answer where no
+        // deviation is known yet - and unlike a carried-forward length, it costs nothing later: the line picks
+        // up its band as soon as the window fills.
+        var devList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -671,7 +681,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the window about its own mean, as in the automatic line above: the band the line
+        // holds within is one deviation either side of it, and sigma in a band is the windowed deviation. The
+        // quantity this replaces is about 55% wider, so the band was too wide and the line drifted where it
+        // should have jumped. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
