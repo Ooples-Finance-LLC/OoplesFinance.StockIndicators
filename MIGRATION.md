@@ -332,7 +332,8 @@ Nothing else needs to change: same types, same members, same namespaces.
 
 **Why:** `Alpaca.Markets` is a broker SDK, and only those two adapters needed it. Carrying it in the
 core package meant a project that only wanted to compute an RSI also restored a trading API client
-and its transitive dependencies - core 1.1.0 declares `Alpaca.Markets` and
+and its transitive dependencies - the nuspec of the published `OoplesFinance.StockIndicators` 1.1.0
+package, the last release made before this change, declares `Alpaca.Markets` and
 `Alpaca.Markets.Extensions` as hard dependencies for exactly that reason. Type forwarding would have
 made the move invisible, but the Trading assembly references the core one, so a forwarder in the
 core assembly would be a reference cycle. The move is therefore breaking, and is marked as such
