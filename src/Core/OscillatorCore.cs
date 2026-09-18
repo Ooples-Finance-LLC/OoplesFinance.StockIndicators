@@ -263,49 +263,11 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double positiveFlow = 0;
-        double negativeFlow = 0;
-        double prevTypicalPrice = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var typicalPrice = (high[i] + low[i] + close[i]) / 3;
-            var rawMoneyFlow = typicalPrice * volume[i];
-
-            if (i == 0)
-            {
-                prevTypicalPrice = typicalPrice;
-                output[i] = 0;
-                continue;
-            }
-
-            if (typicalPrice > prevTypicalPrice)
-            {
-                positiveFlow += rawMoneyFlow;
-            }
-            else if (typicalPrice < prevTypicalPrice)
-            {
-                negativeFlow += rawMoneyFlow;
-            }
-
-            if (i >= length)
-            {
-                // Remove oldest values (approximation since we don't track history)
-                // For accurate MFI, we'd need to track the last 'length' money flows
-            }
-
-            if (i >= length - 1)
-            {
-                var moneyRatio = negativeFlow != 0 ? positiveFlow / negativeFlow : 0;
-                output[i] = 100 - (100 / (1 + moneyRatio));
-            }
-            else
-            {
-                output[i] = 0;
-            }
-
-            prevTypicalPrice = typicalPrice;
-        }
+        // This was a second money flow index that never dropped a bar out of its window, as the comment
+        // it carried admitted, so every reading past the length'th bar totalled the whole series rather
+        // than the last fourteen bars. VolumeCore holds the one that matches CalculateMoneyFlowIndex,
+        // and both fast arms are bound to that same indicator.
+        VolumeCore.MoneyFlowIndex(high, low, close, volume, output, length);
     }
 
     /// <summary>
@@ -424,15 +386,12 @@ internal static class OscillatorCore
                 sumDown -= oldDown;
             }
 
-            if (i >= length)
-            {
-                var sumTotal = sumUp + sumDown;
-                output[i] = sumTotal != 0 ? 100 * (sumUp - sumDown) / sumTotal : 0;
-            }
-            else
-            {
-                output[i] = 0;
-            }
+            // CalculateChandeMomentumOscillator sums its rises and falls with RollingSum.Sum(length),
+            // which adds up however many changes have arrived rather than waiting for a full window, so
+            // the oscillator reads from the second bar. Blanking the run-in here published nothing over
+            // the first thirteen bars where the indicator already had an answer.
+            var sumTotal = sumUp + sumDown;
+            output[i] = sumTotal != 0 ? 100 * (sumUp - sumDown) / sumTotal : 0;
         }
     }
 
@@ -7012,41 +6971,25 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var currentArray = pool.Rent(close.Length);
-        var prevArray = pool.Rent(close.Length);
-
-        try
+        // CalculateNthOrderDifferencingOscillator subtracts one binomially weighted sum of earlier bars
+        // from the arriving value, reading a bar that has not arrived as zero rather than blanking the
+        // result. Differencing the series in place instead, and blanking each pass, agreed only once
+        // both lookbacks had filled: before that the earlier passes had been zeroed, not merely zero.
+        for (var i = 0; i < close.Length; i++)
         {
-            var current = currentArray.AsSpan(0, close.Length);
-            var prev = prevArray.AsSpan(0, close.Length);
+            double sum = 0;
+            double weight = 1;
 
-            // Start with close prices
-            close.CopyTo(current);
-
-            // Apply differencing n times
-            for (var n = 0; n < order; n++)
+            for (var j = 0; j <= order; j++)
             {
-                current.CopyTo(prev);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    if (i < length)
-                    {
-                        current[i] = 0;
-                    }
-                    else
-                    {
-                        current[i] = prev[i] - prev[i - length];
-                    }
-                }
+                var lookback = length * (j + 1);
+                var prevValue = i >= lookback ? close[i - lookback] : 0;
+                double sign = Math.Sign(((j + 1) % 2) - 0.5);
+                weight *= (order - j) / (double)(j + 1);
+                sum += prevValue * weight * sign;
             }
 
-            current.CopyTo(output);
-        }
-        finally
-        {
-            pool.Return(currentArray);
-            pool.Return(prevArray);
+            output[i] = close[i] - sum;
         }
     }
 
@@ -7106,25 +7049,23 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateEhlersCenterofGravityOscillator reads a bar that has not arrived as zero and keeps
+        // the full set of weights, so the centre of gravity of a partly filled window is measured rather
+        // than blanked. Those leading zeros contribute to neither sum, which leaves the opening bars
+        // weighted towards the newest price.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var num = 0.0;
-                var denom = 0.0;
-                for (var j = 0; j < length; j++)
-                {
-                    var price = close[i - j];
-                    num += (j + 1) * price;
-                    denom += price;
-                }
+            var num = 0.0;
+            var denom = 0.0;
 
-                output[i] = denom != 0 ? -num / denom + (length + 1) / 2.0 : 0;
+            for (var j = 0; j < length; j++)
+            {
+                var price = i >= j ? close[i - j] : 0;
+                num += (j + 1) * price;
+                denom += price;
             }
+
+            output[i] = denom != 0 ? (-num / denom) + ((length + 1) / 2.0) : 0;
         }
     }
 
@@ -9163,17 +9104,14 @@ internal static class OscillatorCore
                 sp[i] = delta < 0 ? ratio * volume[i] : 0;
             }
 
-            // Calculate rolling sums and pressure ratio
+            // Calculate rolling sums and pressure ratio. CalculateDemarkPressureRatioV2 totals its two
+            // pressures with RollingSum.Sum(length), which adds up however many bars have arrived, so the
+            // ratio is measured from the first bar and only falls back to the neutral fifty when there is
+            // no pressure on either side.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 50;  // Default neutral value
-                    continue;
-                }
-
                 double bpSum = 0, spSum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     bpSum += bp[j];
                     spSum += sp[j];
@@ -9794,8 +9732,11 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevValue = i >= length1 ? close[i - length1] : 0;
-            var mom = close[i] - prevValue;
+            // CalculateTrendDetectionIndex passes its momentum through MinPastValues, which reports zero
+            // until the lookback has arrived rather than measuring the price against a previous value of
+            // zero. Taking the whole price as the momentum put an outlier the size of the price itself
+            // into both rolling sums, and the longer of the two carried it for fifty-nine bars.
+            var mom = i >= length1 ? close[i] - close[i - length1] : 0;
             momSum.Add(mom);
             momAbsSum.Add(Math.Abs(mom));
 
