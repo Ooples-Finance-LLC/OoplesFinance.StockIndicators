@@ -1302,7 +1302,13 @@ public static partial class Calculations
 
         var tzList = GetMovingAverageList(stockData, MovingAvgType.TripleExponentialMovingAverage, smoothLength, zlrbList);
         stockData.SetCustomValues(tzList);
-        var hwidthList = CalculateStandardDeviationVolatility(stockData, length: length1).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The half-width sets a band either side of the smoothed series and then divides the position
+        // within it, so sigma appears twice in the same expression and a value about 55% high - which is what
+        // CalculateStandardDeviationVolatility is on a typical price series - both widens the band and shrinks
+        // the result. Taken over tzList by name, which is the series this measures. See #190.
+        var hwidthList = GetStandardDeviationList(tzList, length1);
         var wmatzList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, tzList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2243,7 +2249,12 @@ public static partial class Calculations
         var rList = rsiList.ChainedValues;
         var maList = rsiList.ChainedOutputs["Signal"];
         stockData.SetCustomValues(rList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The bands are the signal line plus and minus 1.6185 deviations of the relative strength
+        // index, so sigma is the windowed deviation of that index; the quantity this replaces is about 55%
+        // wider, which spread the bands by the same factor. Taken over rList by name. See #190.
+        var stdDevList = GetStandardDeviationList(rList, length2);
         var mabList = GetMovingAverageList(stockData, maType, length3, rList);
         var mbbList = GetMovingAverageList(stockData, maType, length4, rList);
 
@@ -2321,9 +2332,17 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(bList);
-        var bStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+
+        // The deviation of each window about its own mean, not the mean squared residual from a moving average
+        // of it. Each ratio is the average over itself plus a deviation, so sigma sets how far the ratio can
+        // fall below one; the quantity this replaces is about 55% wider on a typical price series.
+        //
+        // Taken over the two lists by name, which is what keeps them apart: bList holds the rises and cList
+        // the falls, and they are different series. Measuring one on the other's window is the redirection
+        // #190 warns about for chained sites. See #190.
+        var bStdDevList = GetStandardDeviationList(bList, length);
         stockData.SetCustomValues(cList);
-        var cStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var cStdDevList = GetStandardDeviationList(cList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var a = emaList[i];

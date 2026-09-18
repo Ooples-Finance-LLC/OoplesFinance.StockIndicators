@@ -23,28 +23,43 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 /// <para>
 /// What is deliberately not asserted here is "every consumer is listed", because deriving the expected set
 /// means reimplementing the generator, and a reference built from the code under test agrees with that
-/// code's mistakes. The two named indicators are the shape that was missed; the two count assertions hold
-/// the emitted constants to the emitted rows.
+/// code's mistakes. The two count assertions hold the emitted constants to the emitted rows.
+/// </para>
+/// <para>
+/// The inventory is now empty, because #190's conversion is complete: no calculation takes its dispersion
+/// from <c>CalculateStandardDeviationVolatility</c> any more. So the assertion this file used to make - that
+/// the two helper-routed indicators appear in it - is false by design rather than by defect, and has been
+/// replaced by the emptiness assertion below. The generator no longer returns early on an empty set for the
+/// same reason: an inventory that exists and is empty is a regression guard, and one that is absent is
+/// silence of exactly the kind #222 was about.
 /// </para>
 /// </remarks>
 public sealed class DispersionConsumerInventoryTests
 {
     /// <summary>
-    /// The indicators whose dispersion call lives in a shared helper rather than in their own body.
+    /// Nothing takes its dispersion from the wrong quantity any more, and this is what keeps it that way.
     /// </summary>
     /// <remarks>
-    /// One call site inside <c>CalculateVolatilityIndexDynamicAverage</c> serves both, so it is recorded once
-    /// for each. Both were missing entirely before #222 - not merely attributed to the wrong indicator - so
-    /// this is the assertion the old generator fails.
+    /// <para>
+    /// This replaces an assertion that <c>ChandeVolatilityIndexDynamicAverageIndicator</c> and
+    /// <c>VolatilityIndexDynamicAverageIndicator</c> appear in the inventory. They were the helper-routed
+    /// shape #222 found missing, and holding them there was right while the migration was in progress; both
+    /// are converted now, so requiring their presence would require the defect to persist.
+    /// </para>
+    /// <para>
+    /// The guard it leaves behind is stronger than the one it replaces. A new consumer of
+    /// <c>CalculateStandardDeviationVolatility</c> - or an old one reintroduced - puts a row back into the
+    /// inventory and fails this, whichever indicator it belongs to and whether it names its own dispersion or
+    /// reaches one through a shared helper.
+    /// </para>
     /// </remarks>
-    [Theory]
-    [InlineData(IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator)]
-    [InlineData(IndicatorName.VolatilityIndexDynamicAverageIndicator)]
-    public void AnIndicatorRoutedThroughAHelperIsInTheInventory(IndicatorName indicator)
+    [Fact]
+    public void NoCalculationStillTakesTheOldDispersionQuantity()
     {
-        GeneratedDispersionConsumers.Indicators.Should().Contain(indicator,
-            $"{indicator} takes its dispersion from a shared helper, and a consumer the inventory cannot see "
-            + "is a consumer #190's migration would silently leave behind");
+        GeneratedDispersionConsumers.All.Should().BeEmpty(
+            "every consumer has been moved to the deviation of its own window (#190), so a row here is a "
+            + "calculation that has gone back to the mean squared residual from a moving-average line: "
+            + string.Join(", ", GeneratedDispersionConsumers.All.Select(u => u.Indicator.ToString())));
     }
 
     /// <summary>The count the inventory publishes is the number of rows it actually holds.</summary>

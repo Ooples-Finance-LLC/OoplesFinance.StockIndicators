@@ -256,7 +256,12 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(amaDiffList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The filter is a multiple of a deviation of the adaptive average's own changes, and price has
+        // to move by more than it to count; the quantity this replaces is about 55% wider on a typical price
+        // series, so the filter sat too high. Taken over amaDiffList by name. See #190.
+        var stdDevList = GetStandardDeviationList(amaDiffList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var stdDev = stdDevList[i];

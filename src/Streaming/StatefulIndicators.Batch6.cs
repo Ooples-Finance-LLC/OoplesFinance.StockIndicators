@@ -837,7 +837,8 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
     private readonly int _length3;
     private readonly int _upLimit;
     private readonly int _dnLimit;
-    private readonly StandardDeviationVolatilityState _stdDevState;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDevState;
     private readonly IMovingAverageSmoother _stdDevSmoother;
     private readonly StreamingInputResolver _input;
     private readonly PooledRingBuffer<double> _gains;
@@ -853,7 +854,9 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
         _upLimit = Math.Max(1, upLimit);
         _dnLimit = Math.Max(1, dnLimit);
         var capacity = Math.Max(1, Math.Max(_upLimit, _dnLimit));
-        _stdDevState = new StandardDeviationVolatilityState(maType, Math.Max(1, length1));
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the average that smooths it, below.
+        _stdDevState = new RollingStandardDeviation(Math.Max(1, length1));
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.Close, null);
         _gains = new PooledRingBuffer<double>(capacity);
@@ -880,7 +883,8 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
         var prevValue = _hasPrev ? _prevValue : 0;
         var priceChg = _hasPrev ? value - prevValue : 0;
 
-        var stdDev = _stdDevState.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var stdDev = _stdDevState.Next(value, isFinal);
         var asd = _stdDevSmoother.Next(stdDev, isFinal);
 
         int dTime;
@@ -1358,20 +1362,22 @@ public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
 public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
-    private readonly StandardDeviationVolatilityState _fastStdDev;
-    private readonly StandardDeviationVolatilityState _slowStdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. Both measure
+    // the same series - twice the resolved input - over two different windows, so here it is the lengths that
+    // must not be crossed rather than the series.
+    private readonly RollingStandardDeviation _fastStdDev;
+    private readonly RollingStandardDeviation _slowStdDev;
     private readonly StreamingInputResolver _input;
-    private double _stdDevInput;
     private double _prevA;
     private bool _hasPrev;
 
     public EfficientTrendStepChannelState(int length = 100, int fastLength = 50, int slowLength = 200)
     {
         _er = new EfficiencyRatioState(Math.Max(1, length));
-        _fastStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage,
-            Math.Max(1, fastLength), _ => _stdDevInput);
-        _slowStdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage,
-            Math.Max(1, slowLength), _ => _stdDevInput);
+        // No moving-average type, and no selectors: the series is passed to Next directly.
+        _fastStdDev = new RollingStandardDeviation(Math.Max(1, fastLength));
+        _slowStdDev = new RollingStandardDeviation(Math.Max(1, slowLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1389,9 +1395,12 @@ public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, I
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        _stdDevInput = value * 2;
-        var fastStdDev = _fastStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var slowStdDev = _slowStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Both deviations measure the same series, twice the resolved input, as the batch calculation does
+        // over val2List - differing only in their window.
+        var stdDevInput = value * 2;
+        var fastStdDev = _fastStdDev.Next(stdDevInput, isFinal);
+        var slowStdDev = _slowStdDev.Next(stdDevInput, isFinal);
         var er = _er.Next(value, isFinal);
         var dev = (er * fastStdDev) + ((1 - er) * slowStdDev);
 

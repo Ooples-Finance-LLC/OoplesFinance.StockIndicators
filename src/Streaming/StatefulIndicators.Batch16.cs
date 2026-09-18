@@ -154,7 +154,9 @@ public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState
 public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposable
 {
     private readonly EfficiencyRatioState _er;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _fastSc;
     private readonly double _slowSc;
@@ -162,7 +164,6 @@ public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposab
     private double _prevAma;
     private double _prevAmaLow;
     private double _prevAmaHigh;
-    private double _diffValue;
     private bool _hasPrev;
 
     public KaufmanBinaryWaveState(int length = 20, double fastSc = 0.6022, double slowSc = 0.0645,
@@ -170,7 +171,8 @@ public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposab
     {
         var resolved = Math.Max(1, length);
         _er = new EfficiencyRatioState(resolved);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolved, _ => _diffValue);
+        // No moving-average type, and no selector: the change is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolved);
         _fastSc = fastSc;
         _slowSc = slowSc;
         _filterPct = filterPct;
@@ -186,7 +188,6 @@ public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposab
         _prevAma = 0;
         _prevAmaLow = 0;
         _prevAmaHigh = 0;
-        _diffValue = 0;
         _hasPrev = false;
     }
 
@@ -198,9 +199,9 @@ public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposab
         var smooth = MathHelper.Pow((er * _fastSc) + _slowSc, 2);
         var ama = prevAma + (smooth * (value - prevAma));
         var diff = ama - prevAma;
-        _diffValue = diff;
 
-        var diffStdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the adaptive average's own change, which is the series this measures.
+        var diffStdDev = _stdDev.Next(diff, isFinal);
         var filter = _filterPct / 100d * diffStdDev;
         var amaLow = ama < prevAma ? ama : _prevAmaLow;
         var amaHigh = ama > prevAma ? ama : _prevAmaHigh;

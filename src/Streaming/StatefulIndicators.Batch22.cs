@@ -642,9 +642,10 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
     private readonly double _mult;
     private readonly RsiState _rsi;
     private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
-    private double _rsiValue;
 
     public SelfAdjustingRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, int smoothingLength = 21, double mult = 2)
@@ -653,7 +654,8 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
         var resolvedLength = Math.Max(1, length);
         _rsi = new RsiState(maType, resolvedLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothingLength));
-        _stdDev = new StandardDeviationVolatilityState(maType, resolvedLength, _ => _rsiValue);
+        // No moving-average type, and no selector: the index is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolvedLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -664,15 +666,15 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
         _rsi.Reset();
         _signalSmoother.Reset();
         _stdDev.Reset();
-        _rsiValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        _rsiValue = rsi;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the relative strength index, which is the series this measures.
+        var stdDev = _stdDev.Next(rsi, isFinal);
         var signal = _signalSmoother.Next(rsi, isFinal);
         var adjustingStdDev = _mult * stdDev;
         var obLevel = 50 + adjustingStdDev;

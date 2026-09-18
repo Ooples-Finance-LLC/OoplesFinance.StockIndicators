@@ -435,9 +435,16 @@ public static partial class Calculations
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of each window about its own mean, not the mean squared residual from a moving average
+        // of it. Both halves build the Bollinger construction - a value's position between bands two
+        // deviations either side of its average - so sigma is the windowed deviation in each. See #190.
+        //
+        // Taken over the two lists by name rather than by chaining, which is what keeps them apart: the first
+        // measures the prices and the second the on balance volume. Measuring one on the other's window is the
+        // redirection #190 warns of for chained sites.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(obvList);
-        var obvStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var obvStdDevList = GetStandardDeviationList(obvList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -511,9 +518,12 @@ public static partial class Calculations
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
         // The next component reads the caller's series, not the previous component's output.
         stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of each window about its own mean, as in the on balance volume disparity above: the
+        // first measures the prices and the second the negative volume index, each about its own mean. See
+        // #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         stockData.SetCustomValues(nviList);
-        var nviStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        var nviStdDevList = GetStandardDeviationList(nviList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
