@@ -579,7 +579,13 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(interList);
-        var vinterList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The cutoff is the close times this deviation times a coefficient, and money flow has to clear
+        // it to count, so a deviation about 55% high - which is what CalculateStandardDeviationVolatility is
+        // on a typical price series - raised the cutoff by the same factor. Taken over interList by name,
+        // which is the log returns this measures. See #190.
+        var vinterList = GetStandardDeviationList(interList, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
             var vinter = vinterList[i];

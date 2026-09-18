@@ -224,7 +224,12 @@ public static partial class Calculations
 
         var zlhaTemaList = GetMovingAverageList(stockData, maType, smoothLength, zlhaList);
         stockData.SetCustomValues(zlhaTemaList);
-        var zlhaTemaStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. This is the Bollinger construction on the smoothed Heikin-Ashi series - a value's position
+        // between bands two deviations either side - and sigma appears as both the band offset and the
+        // divisor, so a value about 55% high moved the band and shrank the result at once. See #190.
+        var zlhaTemaStdDevList = GetStandardDeviationList(zlhaTemaList, length1);
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -237,7 +242,11 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(percbList);
-        var percbStdDevList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+
+        // The deviation of the percent-b series about its own mean, at length2 rather than length1. Taken over
+        // percbList by name: this is a second deviation, of a different series and over a different window
+        // from the one above, and the two must not be crossed in either respect. See #190.
+        var percbStdDevList = GetStandardDeviationList(percbList, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = percbList[i];

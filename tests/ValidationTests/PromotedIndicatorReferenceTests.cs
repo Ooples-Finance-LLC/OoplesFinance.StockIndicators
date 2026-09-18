@@ -32,6 +32,80 @@ public sealed class PromotedIndicatorReferenceTests : GlobalTestData
     private const double Tolerance = 1e-9;
 
     /// <summary>
+    /// The automatic line climbs a staircase whose tread is set by the deviation alone.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The line holds where it last jumped until price escapes a band one deviation either side of it, so on a
+    /// rising straight line it holds while price climbs by m a bar and jumps as soon as the gap passes sigma.
+    /// The tread is therefore the smallest k with m k greater than sigma, and since a window of L values in
+    /// arithmetic progression has population deviation exactly m sqrt((L^2 - 1) / 12), that k is
+    /// floor(sqrt((L^2 - 1) / 12)) + 1 - with the slope cancelling out of it entirely.
+    /// </para>
+    /// <para>
+    /// The slope cancelling is what makes this a reading of sigma rather than of the fixture, and the third
+    /// case is here to show it: two different slopes at one length must give the same tread. The control arm
+    /// was run rather than reasoned about: with the conversion reverted all three cases fail, at treads of 10,
+    /// 10 and 15 against the 6, 6 and 9 asserted here. Those are the closed form of the old quantity,
+    /// m (L - 1) / 2 over m, and it holds here - unlike the ultimate moving average bands, where bar 50 was
+    /// still inside that quantity's two-stage warm-up - because the first tread falls at bar 46 and bar 70,
+    /// well past 2L - 2.
+    /// </para>
+    /// <para>
+    /// Measured past the warm-up on purpose. The windowed deviation is 0 until the window fills, which
+    /// collapses the band and lets the line follow price exactly; the staircase only begins once there is a
+    /// deviation to hold against. Several treads are required so that one coincidental gap cannot pass.
+    /// </para>
+    /// <para>
+    /// This indicator has no coverage that could judge it otherwise. Its two golden-file tests assert only
+    /// that values are finite, and the streaming parity sweeps build it from its default length of 500 against
+    /// a 251-bar fixture - so sigma is 0 on every bar there and both engines agree on following price. See
+    /// issue #190.
+    /// </para>
+    /// <para>
+    /// Driven through the batch calculation rather than the Arm helper, because the fast arm for this spec
+    /// does not compute this indicator: <c>ComputeAutoLineFast</c> calls <c>TrendCore.AutoLine</c>, which is an
+    /// adaptive exponential average with no deviation and no band in it, so it changes on every bar and no
+    /// staircase exists to measure. That arm is not served - the options type is absent from
+    /// <c>BuilderVerifiedArms</c>, so the Builder computes this spec with its batch indicator - and it is the
+    /// separate defect #229 describes rather than the wrong-quantity one this test is about.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(20, 2.5)]
+    [InlineData(30, 2.5)]
+    [InlineData(20, 4.0)]
+    public void AutoLine_StepsOnceTheGapPassesTheWindowedDeviation(int length, double slope)
+    {
+        var bars = LinearSeries(220, 100.0, slope);
+
+        var actual = new StockData(bars).CalculateAutoLine(length).OutputValues["Al"];
+
+        // The tread implied by the definition, computed rather than recorded so it follows the length.
+        var ratio = Math.Sqrt(((double)(length * length) - 1) / 12);
+        var expected = (int)Math.Floor(ratio) + 1;
+
+        var steps = new List<int>();
+        for (var i = length + 2; i < actual.Count; i++)
+        {
+            if (Math.Abs(actual[i] - actual[i - 1]) > Tolerance)
+            {
+                steps.Add(i);
+            }
+        }
+
+        steps.Should().HaveCountGreaterThan(3,
+            $"the fixture must climb several treads at length {length}, or one gap could pass by chance");
+
+        for (var j = 1; j < steps.Count; j++)
+        {
+            (steps[j] - steps[j - 1]).Should().Be(expected,
+                $"a band of one deviation over {length} bars is passed every {expected} bars at slope {slope} "
+                + $"(step {j}, bar {steps[j]})");
+        }
+    }
+
+    /// <summary>
     /// A band at k sigma is k standard deviations wide either side, and a straight line says exactly what
     /// that is.
     /// </summary>

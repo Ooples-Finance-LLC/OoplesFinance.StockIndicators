@@ -13,12 +13,13 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
     private readonly double _coef;
     private readonly double _vcoef;
     private readonly RollingWindowSum _vcpSum;
-    private readonly StandardDeviationVolatilityState _vinter;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _vinter;
     private readonly IMovingAverageSmoother _volumeMa;
     private readonly IMovingAverageSmoother _vfiMa;
     private readonly IMovingAverageSmoother _signalMa;
     private StreamingInputResolver _input;
-    private double _inter;
     private double _prevValue;
     private double _prevVave;
     private bool _hasPrev;
@@ -31,7 +32,8 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
         _coef = coef;
         _vcoef = vcoef;
         _vcpSum = new RollingWindowSum(_length1);
-        _vinter = new StandardDeviationVolatilityState(maType, _length2, _ => _inter);
+        // No moving-average type, and no selector: the log return is passed to Next directly.
+        _vinter = new RollingStandardDeviation(_length2);
         _volumeMa = MovingAverageSmootherFactory.Create(maType, _length1);
         _vfiMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _signalMa = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, signalLength));
@@ -50,7 +52,6 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
         _volumeMa.Reset();
         _vfiMa.Reset();
         _signalMa.Reset();
-        _inter = 0;
         _prevValue = 0;
         _prevVave = 0;
         _hasPrev = false;
@@ -61,8 +62,10 @@ public sealed class VolumeFlowIndicatorState : IStreamingIndicatorState, IDispos
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var inter = value > 0 && prevValue > 0 ? Math.Log(value) - Math.Log(prevValue) : 0;
-        _inter = inter;
-        var vinter = _vinter.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the log return, which is the series this measures. The first bar has no prior value and is
+        // defined as 0 here and in the batch calculation alike, so both engines hold the same window.
+        var vinter = _vinter.Next(inter, isFinal);
         var vave = _volumeMa.Next(bar.Volume, isFinal);
         var prevVave = _hasPrev ? _prevVave : 0;
         var cutoff = bar.Close * vinter * _coef;

@@ -281,11 +281,12 @@ public class DispersionConsumerGenerator : IIncrementalGenerator
             }
         }
 
-        if (all.Count == 0)
-        {
-            return;
-        }
-
+        // Emitted even when nothing is left to record. This used to return early, from a time when an empty
+        // inventory could only mean the reader had stopped seeing - the #222 failure, where two helper-routed
+        // indicators went missing and every test passed. Now that #190's conversion is complete, empty is the
+        // expected end state, and returning would delete the very type that says so: the inventory would
+        // vanish, its tests would not compile, and nothing would notice a consumer reintroducing the old
+        // quantity. An empty inventory that exists is a regression guard; one that is absent is silence.
         var ordered = all
             .OrderBy(u => u.IndicatorName, System.StringComparer.Ordinal)
             .ThenBy(u => u.ChainedSeries, System.StringComparer.Ordinal)

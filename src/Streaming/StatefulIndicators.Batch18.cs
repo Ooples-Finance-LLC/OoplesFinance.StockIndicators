@@ -1143,8 +1143,10 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
     private readonly IMovingAverageSmoother _inputSma;
     private readonly IMovingAverageSmoother _nviSma;
     private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StandardDeviationVolatilityState _inputStdDev;
-    private readonly StandardDeviationVolatilityState _nviStdDev;
+    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
+    // the resolved input and the other the negative volume index, and they must not be crossed.
+    private readonly RollingStandardDeviation _inputStdDev;
+    private readonly RollingStandardDeviation _nviStdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _top;
     private readonly double _bottom;
@@ -1153,7 +1155,6 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
     private double _prevNvi;
     private double _prevNvdi;
     private double _prevBsc;
-    private double _nviInput;
     private bool _hasPrev;
 
     public NegativeVolumeDisparityIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33,
@@ -1163,8 +1164,10 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
         _inputSma = MovingAverageSmootherFactory.Create(maType, resolved);
         _nviSma = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _inputStdDev = new StandardDeviationVolatilityState(maType, resolved);
-        _nviStdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _nviInput);
+        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself, so
+        // the index no longer has to be smuggled in through a closure over a field.
+        _inputStdDev = new RollingStandardDeviation(resolved);
+        _nviStdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _top = top;
         _bottom = bottom;
@@ -1184,7 +1187,6 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
         _prevNvi = 0;
         _prevNvdi = 0;
         _prevBsc = 0;
-        _nviInput = 0;
         _hasPrev = false;
     }
 
@@ -1203,9 +1205,9 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
 
         var inputSma = _inputSma.Next(value, isFinal);
         var nviSma = _nviSma.Next(nvi, isFinal);
-        var stdDev = _inputStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        _nviInput = nvi;
-        var nviStdDev = _nviStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Each deviation is fed the series it measures: the resolved input, and the negative volume index.
+        var stdDev = _inputStdDev.Next(value, isFinal);
+        var nviStdDev = _nviStdDev.Next(nvi, isFinal);
 
         var aTop = value - (inputSma - (2 * stdDev));
         var aBot = (value + (2 * stdDev)) - (inputSma - (2 * stdDev));
@@ -1726,8 +1728,10 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
     private readonly IMovingAverageSmoother _inputSma;
     private readonly IMovingAverageSmoother _obvSma;
     private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StandardDeviationVolatilityState _inputStdDev;
-    private readonly StandardDeviationVolatilityState _obvStdDev;
+    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
+    // the resolved input and the other the on balance volume, and they must not be crossed.
+    private readonly RollingStandardDeviation _inputStdDev;
+    private readonly RollingStandardDeviation _obvStdDev;
     private readonly StreamingInputResolver _input;
     private readonly double _top;
     private readonly double _bottom;
@@ -1735,7 +1739,6 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
     private double _prevObv;
     private double _prevObvdi;
     private double _prevBsc;
-    private double _obvInput;
     private bool _hasPrev;
 
     public OnBalanceVolumeDisparityIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 33,
@@ -1745,8 +1748,9 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
         _inputSma = MovingAverageSmootherFactory.Create(maType, resolved);
         _obvSma = MovingAverageSmootherFactory.Create(maType, resolved);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _inputStdDev = new StandardDeviationVolatilityState(maType, resolved);
-        _obvStdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _obvInput);
+        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself.
+        _inputStdDev = new RollingStandardDeviation(resolved);
+        _obvStdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _top = top;
         _bottom = bottom;
@@ -1765,7 +1769,6 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
         _prevObv = 0;
         _prevObvdi = 0;
         _prevBsc = 0;
-        _obvInput = 0;
         _hasPrev = false;
     }
 
@@ -1780,9 +1783,9 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
 
         var inputSma = _inputSma.Next(value, isFinal);
         var obvSma = _obvSma.Next(obv, isFinal);
-        var stdDev = _inputStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        _obvInput = obv;
-        var obvStdDev = _obvStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Each deviation is fed the series it measures: the resolved input, and the on balance volume.
+        var stdDev = _inputStdDev.Next(value, isFinal);
+        var obvStdDev = _obvStdDev.Next(obv, isFinal);
 
         var aTop = value - (inputSma - (2 * stdDev));
         var aBot = value + (2 * stdDev) - (inputSma - (2 * stdDev));

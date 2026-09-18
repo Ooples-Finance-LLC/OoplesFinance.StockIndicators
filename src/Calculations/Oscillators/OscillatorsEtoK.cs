@@ -2289,7 +2289,13 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(diffList);
-        var diffStdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The filter is a percentage of a deviation of the adaptive average's own changes, and a move
+        // has to clear it before the wave turns; the quantity this replaces is about 55% wider on a typical
+        // price series, so the filter sat too high and the wave turned less often than it should. Taken over
+        // diffList by name, which is the series this measures. See #190.
+        var diffStdDevList = GetStandardDeviationList(diffList, length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
