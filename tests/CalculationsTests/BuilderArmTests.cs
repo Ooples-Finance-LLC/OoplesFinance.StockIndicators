@@ -206,8 +206,12 @@ public sealed class BuilderArmTests : GlobalTestData
     /// <remarks>
     /// <para>
     /// Measured, not chosen. Driving <c>IndicatorCompute.ComputeArm</c> over every bound spec at two parameter
-    /// sets, these option types return something other than <see cref="BuilderArmBinding"/> does for the same
-    /// spec, at one or both of those sets. A type is listed once however many of its parameter sets disagree.
+    /// sets, these 594 option types return something other than <see cref="BuilderArmBinding"/> does for the
+    /// same spec, at one or both of those sets. A type is listed once however many of its parameter sets
+    /// disagree. That is close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229
+    /// stopped serving them: the Builder computes those specs with their batch indicator, so callers get
+    /// correct numbers today.
+    /// </para>
     /// <para>
     /// "Disagrees with its bound call" is the claim, and it is deliberately weaker than "computes a different
     /// indicator". Two causes reach this list. One is a genuinely different formula:
@@ -216,21 +220,20 @@ public sealed class BuilderArmTests : GlobalTestData
     /// <c>UltimateMovingAverageSpecOptions.Length</c> is <c>[Obsolete]</c> because the indicator has no
     /// parameter it could set, <c>MapArguments</c> skips obsolete properties, so the bound call ran at
     /// <c>minLength: 5, maxLength: 50</c> while the arm ran at the option's length. Both make an arm unsafe to
-    /// verify, which is what this guards; only the first means the arm implements the wrong maths.
+    /// verify; only the first means the arm implements the wrong maths.
     /// </para>
     /// <para>
-    /// The second cause is now empty here. The 51 arms whose options type carried an <c>[Obsolete]</c>
-    /// "has no effect" option were deleted rather than listed: an arm honouring an option its indicator has no
-    /// parameter for can never agree with the bound call, so it could never be verified, and none was served.
-    /// What remains are 538 whose every option maps to a real, non-obsolete parameter - compared like for like,
-    /// so the arm's maths is what differs. None has an unmapped non-obsolete option;
-    /// <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that. That 538 is still an upper bound
-    /// on "wrong maths" rather than a count of it: an arm can also disagree by ignoring an option it was
-    /// handed, which this partition cannot see from the outside.
+    /// Split that way the 594 are 543 whose every option maps to a real, non-obsolete parameter of the bound
+    /// indicator, and 51 carrying an <c>[Obsolete]</c> option the indicator has no parameter for. None has an
+    /// unmapped non-obsolete option; <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that.
+    /// 543 is an upper bound on "wrong maths" rather than a count of it: an arm can also disagree by ignoring
+    /// an option it was handed, which this partition cannot see from the outside.
     /// </para>
-    /// That is
-    /// close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229 stopped serving them:
-    /// the Builder computes those specs with their batch indicator, so callers get correct numbers today.
+    /// <para>
+    /// Every entry here is a repair, never a removal. A <c>Compute*Fast</c> arm is the zero-allocation batch
+    /// path - it rents a pooled buffer and writes through spans - so deleting one because it disagrees trades
+    /// a wrong fast path for no fast path, and every indicator is meant to have one. An arm leaves this list
+    /// by computing what its bound call computes; then it can be verified, and then it is served.
     /// </para>
     /// <para>
     /// Named one by one rather than counted, so the list shrinks visibly as arms are repaired and so a reader
@@ -253,6 +256,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "AdaptiveLeastSquaresSpecOptions",
         "AdaptivePriceZoneIndicatorSpecOptions",
         "AdaptiveRelativeStrengthIndexSpecOptions",
+        "AdaptiveRsiSpecOptions",
         "AdaptiveStochasticSpecOptions",
         "AdaptiveTrailingStopSpecOptions",
         "AdxSpecOptions",
@@ -261,10 +265,12 @@ public sealed class BuilderArmTests : GlobalTestData
         "AlligatorLipsSpecOptions",
         "AlligatorTeethSpecOptions",
         "AlmaSpecOptions",
+        "AlphaDecreasingEmaSpecOptions",
         "AmaSpecOptions",
         "AnchoredMomentumSpecOptions",
         "ApirineSlowRelativeStrengthIndexSpecOptions",
         "AroonSpecOptions",
+        "AsymmetricalRsiSpecOptions",
         "AtrChannelWidthSpecOptions",
         "AtrFilteredEmaSpecOptions",
         "AtrFilteredExponentialMovingAverageSpecOptions",
@@ -273,9 +279,12 @@ public sealed class BuilderArmTests : GlobalTestData
         "AtrTrailingStopsSpecOptions",
         "AutoDispersionBandsSpecOptions",
         "AutoFilterSpecOptions",
+        "AutoLineSpecOptions",
+        "AutoLineWithDriftSpecOptions",
         "AutonomousRecursiveMaSpecOptions",
         "AverageDirectionalIndexSpecOptions",
         "AverageMoneyFlowOscillatorSpecOptions",
+        "AveragePriceSpecOptions",
         "AverageTrueRangeChannelSpecOptions",
         "AverageTrueRangeSpecOptions",
         "AverageTrueRangeTrailingStopsSpecOptions",
@@ -295,14 +304,19 @@ public sealed class BuilderArmTests : GlobalTestData
         "BullPowerSpecOptions",
         "ButterworthFilterSpecOptions",
         "CCTStochRSISpecOptions",
+        "CCTStochRelativeStrengthIndexSpecOptions",
         "CalmarRatioSpecOptions",
         "CamarillaPivotPointSpecOptions",
         "CciSpecOptions",
         "CenterOfLinearitySpecOptions",
         "ChaikinVolatilitySpecOptions",
+        "ChandeCompositeMomentumIndexSpecOptions",
         "ChandeIntradayMomentumIndexSpecOptions",
         "ChandeKrollRSquaredIndexSpecOptions",
+        "ChandeMomentumOscillatorAbsoluteAverageSpecOptions",
         "ChandeMomentumOscillatorAbsoluteSpecOptions",
+        "ChandeMomentumOscillatorAverageDisparityIndexSpecOptions",
+        "ChandeMomentumOscillatorAverageSpecOptions",
         "ChandeMomentumOscillatorFilterSpecOptions",
         "ChandeMomentumOscillatorSignalSpecOptions",
         "ChandeMomentumOscillatorSpecOptions",
@@ -335,6 +349,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "DecisionPointPriceMomentumOscillatorSpecOptions",
         "DeltaMovingAverageSpecOptions",
         "Dema2LinesSpecOptions",
+        "DemandOscillatorSpecOptions",
         "DemarkPivotPointSpecOptions",
         "DemarkPressureRatioV1SpecOptions",
         "DemarkPressureRatioV2SpecOptions",
@@ -343,16 +358,20 @@ public sealed class BuilderArmTests : GlobalTestData
         "DerivativeOscillatorSpecOptions",
         "DetrendedPriceOscillatorSpecOptions",
         "DetrendedSyntheticPriceSpecOptions",
+        "DiNapoliPercentagePriceOscillatorSpecOptions",
         "DiNapoliPreferredStochasticOscillatorSpecOptions",
         "DidiIndexSpecOptions",
         "DirectionalTrendIndexSpecOptions",
         "DisparityIndexSpecOptions",
         "DonchianChannelSpecOptions",
         "DonchianChannelWidthSpecOptions",
+        "DoubleExponentialSmoothingSpecOptions",
         "DoubleSmoothedMomentaSpecOptions",
+        "DoubleSmoothedRelativeStrengthIndexSpecOptions",
         "DoubleSmoothedStochasticSpecOptions",
         "DoubleStochasticOscillatorSpecOptions",
         "DpoSpecOptions",
+        "DynamicMomentumIndexSpecOptions",
         "DynamicMomentumOscillatorSpecOptions",
         "DynamicSupportAndResistanceSpecOptions",
         "DynamicallyAdjustableFilterSpecOptions",
@@ -370,12 +389,16 @@ public sealed class BuilderArmTests : GlobalTestData
         "EhlersBandPassFilterV1SpecOptions",
         "EhlersBetterExponentialMovingAverageSpecOptions",
         "EhlersCenterOfGravityOscillatorSpecOptions",
+        "EhlersChebyshevLowPassFilterSpecOptions",
         "EhlersClassicHilbertTransformerSpecOptions",
         "EhlersCorrelationTrendIndicatorSpecOptions",
         "EhlersDecyclerOscillatorV1SpecOptions",
         "EhlersDecyclerOscillatorV2SpecOptions",
+        "EhlersDeviationScaledSuperSmootherSpecOptions",
         "EhlersDistanceCoefficientFilterSpecOptions",
         "EhlersFilterSpecOptions",
+        "EhlersFiniteImpulseResponseFilterSpecOptions",
+        "EhlersFirFilterSpecOptions",
         "EhlersFisherizedDeviationScaledOscillatorSpecOptions",
         "EhlersFramaSpecOptions",
         "EhlersGaussianFilterSpecOptions",
@@ -389,9 +412,13 @@ public sealed class BuilderArmTests : GlobalTestData
         "EhlersInverseFisherTransformSpecOptions",
         "EhlersKaufmanAdaptiveMovingAverageSpecOptions",
         "EhlersMedianAverageAdaptiveFilterSpecOptions",
+        "EhlersMesaAdaptiveMovingAverageSpecOptions",
         "EhlersMesaPredictIndicatorV2SpecOptions",
         "EhlersModifiedStochasticIndicatorSpecOptions",
+        "EhlersOptimumEllipticFilterSpecOptions",
         "EhlersPhaseCalculationSpecOptions",
+        "EhlersRecursiveMedianFilterSpecOptions",
+        "EhlersRecursiveMedianOscillatorSpecOptions",
         "EhlersReflexSpecOptions",
         "EhlersRelativeVigorIndexSpecOptions",
         "EhlersReverseEmaIndicatorV2SpecOptions",
@@ -408,6 +435,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "EhlersTriangleWindowIndicatorSpecOptions",
         "EhlersTripleDelayLineDetrenderSpecOptions",
         "EhlersUniversalOscillatorSpecOptions",
+        "EhlersVariableIndexDynamicAverageSpecOptions",
         "EhlersZeroLagEmaSpecOptions",
         "EhlersZeroLagExponentialMovingAverageSpecOptions",
         "ElasticVolumeWeightedMovingAverageV1SpecOptions",
@@ -429,6 +457,8 @@ public sealed class BuilderArmTests : GlobalTestData
         "FallingRisingFilterSpecOptions",
         "FastSlowDegreeOscillatorSpecOptions",
         "FastSlowKurtosisOscillatorSpecOptions",
+        "FastSlowRsiOscillatorSpecOptions",
+        "FastSlowStochasticOscillatorSpecOptions",
         "FastZScoreSpecOptions",
         "FastandSlowKurtosisOscillatorSpecOptions",
         "FearAndGreedIndicatorSpecOptions",
@@ -444,6 +474,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "FloorPivotPointS1SpecOptions",
         "FloorPivotPointSpecOptions",
         "FoldedRelativeStrengthIndexSpecOptions",
+        "FollowingAdaptiveMovingAverageSpecOptions",
         "ForceIndexSpecOptions",
         "ForecastOscillatorSpecOptions",
         "FramaSpecOptions",
@@ -490,6 +521,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "IntradayMomentumIndexSpecOptions",
         "InverseDistanceWeightedMovingAverageSpecOptions",
         "InverseFisherFastZScoreSpecOptions",
+        "InverseFisherTransformCoreSpecOptions",
         "InverseFisherZScoreSpecOptions",
         "JapaneseCorrelationCoefficientSpecOptions",
         "JmaRsxCloneSpecOptions",
@@ -506,10 +538,12 @@ public sealed class BuilderArmTests : GlobalTestData
         "KaufmanAdaptiveCorrelationOscillatorSpecOptions",
         "KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions",
         "KeltnerChannelMiddleSpecOptions",
+        "KeltnerChannelWidthSpecOptions",
         "KeltnerChannelsSpecOptions",
         "KlingerSignalSpecOptions",
         "KnowSureThingSpecOptions",
         "KstSpecOptions",
+        "KurtosisIndicatorSpecOptions",
         "KvoSpecOptions",
         "KwanIndicatorSpecOptions",
         "LBRPaintBarsSpecOptions",
@@ -534,6 +568,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "MassThrustIndicatorSpecOptions",
         "MassThrustOscillatorSpecOptions",
         "MassThrustSpecOptions",
+        "McClellanOscillatorSpecOptions",
         "McNichollMovingAverageSpecOptions",
         "MfiCoreSpecOptions",
         "MfiSpecOptions",
@@ -543,14 +578,17 @@ public sealed class BuilderArmTests : GlobalTestData
         "MidpriceSpecOptions",
         "MirroredPercentagePriceOscillatorSpecOptions",
         "MobilityOscillatorSpecOptions",
+        "ModifiedGannHiloActivatorSpecOptions",
         "ModifiedMaSpecOptions",
         "ModifiedPriceVolumeTrendSpecOptions",
         "ModularFilterSpecOptions",
+        "MomentumOscillatorSpecOptions",
         "MomentumSpecOptions",
         "MovingAverageAdaptiveQSpecOptions",
         "MovingAverageV3SpecOptions",
         "MultiDepthZeroLagExponentialMovingAverageSpecOptions",
         "MultiVoteOnBalanceVolumeSpecOptions",
+        "NarrowSidewaysChannelSpecOptions",
         "NatrSpecOptions",
         "NaturalDirectionalComboSpecOptions",
         "NaturalDirectionalIndexSpecOptions",
@@ -570,6 +608,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "OptimalWeightedMovingAverageSpecOptions",
         "OscOscillatorSpecOptions",
         "OvershootReductionMovingAverageSpecOptions",
+        "ParabolicSarSpecOptions",
         "ParabolicWmaSpecOptions",
         "ParametricCorrectiveLinearMovingAverageSpecOptions",
         "ParametricKalmanFilterSpecOptions",
@@ -581,7 +620,9 @@ public sealed class BuilderArmTests : GlobalTestData
         "PfeSpecOptions",
         "PgoSpecOptions",
         "PhaseChangeIndexSpecOptions",
+        "PivotDetectorOscillatorSpecOptions",
         "PivotPointAverageSpecOptions",
+        "PivotPointSpecOptions",
         "PmoSpecOptions",
         "PolarizedFractalEfficiencySpecOptions",
         "PolynomialLeastSquaresMovingAverageSpecOptions",
@@ -599,6 +640,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "PriceMomentumOscillatorSpecOptions",
         "PriceOscillatorPercentSpecOptions",
         "PriceOscillatorSpecOptions",
+        "PriceVolumeOscillatorSpecOptions",
         "PriceVolumeRankSpecOptions",
         "PriceZoneOscillatorSpecOptions",
         "PrimeNumberOscillatorSpecOptions",
@@ -629,6 +671,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "RelativeDifferenceOfSquaresOscillatorSpecOptions",
         "RelativeMomentumIndexSpecOptions",
         "RelativeSpreadStrengthSpecOptions",
+        "RelativeVigorIndexSignalSpecOptions",
         "RelativeVigorIndexSpecOptions",
         "RelativeVolatilityIndexSpecOptions",
         "RelativeVolatilityIndexV2SpecOptions",
@@ -649,6 +692,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "SellGravitationIndexSpecOptions",
         "SentimentZoneOscillatorSpecOptions",
         "SequentiallyFilteredMovingAverageSpecOptions",
+        "SettingLessTrendStepFilteringSpecOptions",
         "ShapeshiftingMovingAverageSpecOptions",
         "SharpModifiedMovingAverageSpecOptions",
         "SharpeRatioSpecOptions",
@@ -666,6 +710,9 @@ public sealed class BuilderArmTests : GlobalTestData
         "SmoothedWilliamsAccumulationDistributionSpecOptions",
         "SortinoRatioSpecOptions",
         "SpearmanIndicatorSpecOptions",
+        "SpecialKSpecOptions",
+        "Spencer15PointMovingAverageSpecOptions",
+        "Spencer21PointMovingAverageSpecOptions",
         "SquareRootWeightedMovingAverageSpecOptions",
         "SqueezeMomentumIndicatorSpecOptions",
         "StandardDevationSpecOptions",
@@ -691,10 +738,12 @@ public sealed class BuilderArmTests : GlobalTestData
         "StrengthOfMovementSpecOptions",
         "SuperSmootherSpecOptions",
         "SuperTrendSpecOptions",
+        "SupportAndResistanceOscillatorSpecOptions",
         "SurfaceRoughnessEstimatorSpecOptions",
         "SvamaSpecOptions",
         "SwingIndexSpecOptions",
         "T3SpecOptions",
+        "TFSMboPercentagePriceOscillatorSpecOptions",
         "TFSTetherLineIndicatorSpecOptions",
         "TFSVolumeOscillatorSpecOptions",
         "TStepLeastSquaresMovingAverageSpecOptions",
@@ -713,6 +762,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "TrendAnalysisIndicatorSpecOptions",
         "TrendContinuationFactorSpecOptions",
         "TrendDetectionIndexSpecOptions",
+        "TrendDetectionSpecOptions",
         "TrendDirectionForceIndexSpecOptions",
         "TrendExhaustionIndicatorSpecOptions",
         "TrendIntensityIndexSpecOptions",
@@ -726,19 +776,26 @@ public sealed class BuilderArmTests : GlobalTestData
         "TrixSpecOptions",
         "TrueStrengthIndexSpecOptions",
         "TsiSpecOptions",
+        "TurboScalerSpecOptions",
         "TurboStochasticsFastSpecOptions",
         "TurboStochasticsSlowSpecOptions",
+        "TurboTriggerSpecOptions",
         "TwiggsMoneyFlowSpecOptions",
         "UlcerIndexSpecOptions",
+        "UltimateMovingAverageBandsSpecOptions",
+        "UltimateMovingAverageSpecOptions",
         "UltimateOscillatorSpecOptions",
         "UltimateTraderOscillatorSpecOptions",
+        "ValueChartIndicatorSpecOptions",
         "VaradiOscillatorSpecOptions",
         "VariableAdaptiveMovingAverageSpecOptions",
+        "VariableLengthMovingAverageSpecOptions",
         "VariableMovingAverageBandsSpecOptions",
         "VerticalHorizontalFilterSpecOptions",
         "VerticalHorizontalMovingAverageSpecOptions",
         "VervoortHeikenAshiCandlestickOscillatorSpecOptions",
         "VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions",
+        "VervoortSmoothedOscillatorSpecOptions",
         "VervoortVolatilityBandsSpecOptions",
         "VhfSpecOptions",
         "VolatilityBasedMomentumSpecOptions",
@@ -767,6 +824,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "WaveTrendOscillatorSpecOptions",
         "WellRoundedMovingAverageSpecOptions",
         "WildersSummationMethodSpecOptions",
+        "WilliamsADSpecOptions",
         "WilliamsAccumulationDistributionSpecOptions",
         "WilliamsFractalDownSpecOptions",
         "WilliamsFractalUpSpecOptions",
@@ -777,6 +835,7 @@ public sealed class BuilderArmTests : GlobalTestData
         "WoodiePivotPointSpecOptions",
         "ZScoreSpecOptions",
         "ZeroLowLagMovingAverageSpecOptions",
+        "ZigZagSpecOptions",
         "_1LCLeastSquaresMovingAverageSpecOptions",
         "_3HMASpecOptions",
     };
