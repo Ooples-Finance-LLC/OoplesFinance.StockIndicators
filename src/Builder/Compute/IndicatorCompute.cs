@@ -240,7 +240,9 @@ internal static partial class IndicatorCompute
                 dro.MaType),
             FractalChaosOscillatorSpecOptions fco => ComputeFractalChaosOscillatorFast(data, context, fco.Length),
             DisparityIndexSpecOptions di => ComputeDisparityIndexFast(data, context, di.Length, di.MaType),
-            DynamicMomentumIndexSpecOptions dmi => ComputeDynamicMomentumIndexFast(data, context, dmi.Length),
+            // Length is marked as having no effect: CalculateDynamicMomentumIndex chooses its own
+            // lookback per bar and has no parameter a single length could set.
+            DynamicMomentumIndexSpecOptions dmi => ComputeDynamicMomentumIndexFast(data, context, dmi.MaType),
 
             // Batch 4 - More MAs
             SineWmaSpecOptions swma => ComputeSineWmaFast(data, context, swma.Length),
@@ -262,7 +264,7 @@ internal static partial class IndicatorCompute
 
             // Batch 4 - Stochastic variants
             StochasticDSpecOptions sd => ComputeStochasticDFast(data, context, sd.Length),
-            DoubleSmoothedStochasticSpecOptions dss => ComputeDoubleSmoothedStochasticFast(data, context, dss.Length),
+            DoubleSmoothedStochasticSpecOptions dss => ComputeDoubleSmoothedStochasticFast(data, context, dss.Length, dss.MaType),
             PremierStochasticSpecOptions ps => ComputePremierStochasticFast(data, context, ps.Length),
 
             // Batch 4 - Volatility indicators
@@ -389,7 +391,7 @@ internal static partial class IndicatorCompute
             MidRangeSpecOptions mr => ComputeMidRangeFast(data, context),
             OhlcAverageSpecOptions ohlc => ComputeOhlcAverageFast(data, context),
             HlcAverageSpecOptions hlc => ComputeHlcAverageFast(data, context),
-            DoubleSmoothedMomentaSpecOptions dsm => ComputeDoubleSmoothedMomentaFast(data, context, dsm.MomentumLength, dsm.FirstSmooth, dsm.SecondSmooth),
+            DoubleSmoothedMomentaSpecOptions dsm => ComputeDoubleSmoothedMomentaFast(data, context, dsm.MomentumLength, dsm.MaType, dsm.FirstSmooth, dsm.SecondSmooth),
 
             // Batch 5 - Statistical indicators
             HighLowIndexSpecOptions hli => ComputeHighLowIndexFast(data, context, hli.Length),
@@ -424,7 +426,7 @@ internal static partial class IndicatorCompute
             ChandeMomentumOscillatorFilterSpecOptions cmof => ComputeChandeMomentumOscillatorFilterFast(data, context, cmof.Length),
 
             // Batch 6 - Stochastic variants
-            DoubleStochasticOscillatorSpecOptions dso => ComputeDoubleStochasticOscillatorFast(data, context, dso.Length),
+            DoubleStochasticOscillatorSpecOptions dso => ComputeDoubleStochasticOscillatorFast(data, context, dso.MaType, dso.Length),
             BilateralStochasticOscillatorSpecOptions bso => ComputeBilateralStochasticOscillatorFast(data, context, bso.Length,
                 bso.MaType),
             FisherTransformStochasticOscillatorSpecOptions ftso => ComputeFisherTransformStochasticOscillatorFast(data, context, ftso.Length),
@@ -438,7 +440,7 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - DT/Dynamic oscillators
             DTOscillatorSpecOptions dto => ComputeDTOscillatorFast(data, context, dto.Length, dto.MaType),
-            DynamicMomentumOscillatorSpecOptions dmo => ComputeDynamicMomentumOscillatorFast(data, context, dmo.Length),
+            DynamicMomentumOscillatorSpecOptions dmo => ComputeDynamicMomentumOscillatorFast(data, context, dmo.Length, dmo.MaType),
 
             // Batch 6 - Price/Momentum oscillators
             ComparePriceMomentumOscillatorSpecOptions cpmo => ComputeComparePriceMomentumOscillatorFast(data, context, cpmo.Length),
@@ -3788,25 +3790,113 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context,
+        int length1 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 3,
+        int length3 = 15)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DoubleSmoothedStochastic(high, low, close, buffer.WritableSpan, length, 3);
+        // CalculateDoubleSmoothedStochastic smooths the stochastic's numerator and denominator separately -
+        // twice each - and divides only then, so it is not a smoothed stochastic of a smoothed stochastic.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(highList);
+        var low = SpanCompat.AsReadOnlySpan(lowList);
+        var count = inputList.Count;
+
+        using var numeratorBuffer = context.Rent(count);
+        using var denominatorBuffer = context.Rent(count);
+        using var smoothedNumeratorBuffer = context.Rent(count);
+        using var smoothedDenominatorBuffer = context.Rent(count);
+        var numerator = numeratorBuffer.WritableSpan;
+        var denominator = denominatorBuffer.WritableSpan;
+        var highWindow = new RollingMinMax(length1);
+        var lowWindow = new RollingMinMax(length1);
+
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+            numerator[i] = input[i] - lowWindow.Min;
+            denominator[i] = highWindow.Max - lowWindow.Min;
+        }
+
+        MovingAverage(data, maType, length2, numerator, smoothedNumeratorBuffer.WritableSpan);
+        MovingAverage(data, maType, length2, denominator, smoothedDenominatorBuffer.WritableSpan);
+        MovingAverage(data, maType, length3, smoothedNumeratorBuffer.Span, numerator);
+        MovingAverage(data, maType, length3, smoothedDenominatorBuffer.Span, denominator);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = denominator[i] != 0
+                ? MathHelper.MinOrMax(100 * numerator[i] / denominator[i], 100, 0)
+                : 0;
+        }
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Dynamic Momentum Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDynamicMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDynamicMomentumIndexFast(StockData data, ComputeContext context,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5, int length2 = 10,
+        int length3 = 14, int upLimit = 30, int dnLimit = 5)
     {
-        _ = length; // DMI uses min/max lengths, not a single length
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DynamicMomentumIndex(close, buffer.WritableSpan, 3, 30);
+        // CalculateDynamicMomentumIndex is an RSI whose lookback is chosen bar by bar: length3 divided by the
+        // smoothed deviation of the input, clamped between dnLimit and upLimit. A quiet market lengthens it.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var deviationBuffer = context.Rent(count);
+        using var smoothedDeviationBuffer = context.Rent(count);
+        using var gainBuffer = context.Rent(count);
+        using var lossBuffer = context.Rent(count);
+
+        // The deviation of the window about its own mean, which is what GetStandardDeviationList computes
+        // for the batch, not the residual from a moving average.
+        VolatilityCore.StandardDeviation(input, deviationBuffer.WritableSpan, Math.Max(1, length1));
+        MovingAverage(data, maType, length2, deviationBuffer.Span, smoothedDeviationBuffer.WritableSpan);
+
+        var smoothedDeviation = smoothedDeviationBuffer.Span;
+        var gain = gainBuffer.WritableSpan;
+        var loss = lossBuffer.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var deviation = smoothedDeviation[i];
+
+            // Clamped before the cast rather than after it: on a near-flat window length3 / deviation runs
+            // past int.MaxValue, which is the overflow the batch guards with a try around the same cast.
+            var period = deviation != 0
+                ? (int)Math.Min(upLimit, Math.Ceiling(length3 / deviation))
+                : 0;
+            var lookback = Math.Max(Math.Min(period, upLimit), dnLimit);
+
+            var change = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
+            gain[i] = change > 0 ? change : 0;
+            loss[i] = change < 0 ? Math.Abs(change) : 0;
+
+            var window = Math.Min(lookback, i + 1);
+            double gainSum = 0;
+            double lossSum = 0;
+            for (var j = i - window + 1; j <= i; j++)
+            {
+                gainSum += gain[j];
+                lossSum += loss[j];
+            }
+
+            var averageGain = gainSum / window;
+            var averageLoss = lossSum / window;
+            var strength = averageLoss != 0 ? averageGain / averageLoss : 0;
+
+            output[i] = averageLoss == 0 ? 100 : averageGain == 0 ? 0 : 100 - (100 / (1 + strength));
+        }
+
         return buffer;
     }
 
@@ -5443,12 +5533,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Momenta using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDoubleSmoothedMomentaFast(StockData data, ComputeContext context, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    internal static ComputeBuffer ComputeDoubleSmoothedMomentaFast(StockData data, ComputeContext context,
+        int length1 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 5,
+        int length3 = 25)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DoubleSmoothedMomenta(inputSpan, buffer.WritableSpan, momentumLength, firstSmooth, secondSmooth);
+        // CalculateDoubleSmoothedMomenta measures where the bar sits in its length1 range and how wide that
+        // range is, smooths each of those twice, and reads the first as a percentage of the second.
+        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var topBuffer = context.Rent(count);
+        using var bottomBuffer = context.Rent(count);
+        using var smoothedTopBuffer = context.Rent(count);
+        using var smoothedBottomBuffer = context.Rent(count);
+        var top = topBuffer.WritableSpan;
+        var bottom = bottomBuffer.WritableSpan;
+        var window = new RollingMinMax(Math.Max(length1, 2));
+
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(input[i]);
+            top[i] = input[i] - window.Min;
+            bottom[i] = window.Max - window.Min;
+        }
+
+        MovingAverage(data, maType, length2, top, smoothedTopBuffer.WritableSpan);
+        MovingAverage(data, maType, length2, bottom, smoothedBottomBuffer.WritableSpan);
+        MovingAverage(data, maType, length3, smoothedTopBuffer.Span, top);
+        MovingAverage(data, maType, length3, smoothedBottomBuffer.Span, bottom);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = bottom[i] != 0 ? MathHelper.MinOrMax(100 * top[i] / bottom[i], 100, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -5662,13 +5784,50 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDoubleStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDoubleStochasticOscillatorFast(StockData data, ComputeContext context,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, int smoothLength = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DoubleStochasticOscillator(high, low, close, buffer.WritableSpan, length, 3);
+        // CalculateDoubleStochasticOscillator rescales a raw stochastic against its own range and smooths
+        // that once. The second smoothing there is the Signal line, not the series this arm is bound to.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(highList);
+        var low = SpanCompat.AsReadOnlySpan(lowList);
+        var count = inputList.Count;
+
+        using var stochasticBuffer = context.Rent(count);
+        var stochastic = stochasticBuffer.WritableSpan;
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var range = highWindow.Max - lowWindow.Min;
+            stochastic[i] = range != 0
+                ? MathHelper.MinOrMax((input[i] - lowWindow.Min) / range * 100, 100, 0)
+                : 0;
+        }
+
+        using var doubleKBuffer = context.Rent(count);
+        var doubleK = doubleKBuffer.WritableSpan;
+        var stochasticWindow = new RollingMinMax(Math.Max(length, 2));
+
+        for (var i = 0; i < count; i++)
+        {
+            stochasticWindow.Add(stochastic[i]);
+
+            var range = stochasticWindow.Max - stochasticWindow.Min;
+            doubleK[i] = range != 0
+                ? MathHelper.MinOrMax((stochastic[i] - stochasticWindow.Min) / range * 100, 100, 0)
+                : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, doubleK, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -5823,12 +5982,53 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamic Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDynamicMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDynamicMomentumOscillatorFast(StockData data, ComputeContext context,
+        int length1 = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length2 = 20)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DynamicMomentumOscillator(inputSpan, buffer.WritableSpan, length, 5);
+        // CalculateDynamicMomentumOscillator smooths a length1 stochastic by length1 and again by length2,
+        // then swings the midpoint of the running range of the faster line by the gap between the two.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var high = SpanCompat.AsReadOnlySpan(highList);
+        var low = SpanCompat.AsReadOnlySpan(lowList);
+        var count = inputList.Count;
+
+        using var fastBuffer = context.Rent(count);
+        var fast = fastBuffer.WritableSpan;
+        var highWindow = new RollingMinMax(length1);
+        var lowWindow = new RollingMinMax(length1);
+
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(high[i]);
+            lowWindow.Add(low[i]);
+
+            var range = highWindow.Max - lowWindow.Min;
+            fast[i] = range != 0 ? MathHelper.MinOrMax((input[i] - lowWindow.Min) / range * 100, 100, 0) : 0;
+        }
+
+        using var smoothedBuffer = context.Rent(count);
+        using var signalBuffer = context.Rent(count);
+        MovingAverage(data, maType, length1, fast, smoothedBuffer.WritableSpan);
+        MovingAverage(data, maType, length2, smoothedBuffer.Span, signalBuffer.WritableSpan);
+
+        var smoothed = smoothedBuffer.Span;
+        var signal = signalBuffer.Span;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double highest = 0;
+        var lowest = double.MaxValue;
+
+        for (var i = 0; i < count; i++)
+        {
+            var value = smoothed[i];
+            highest = value > highest ? value : highest;
+            lowest = value < lowest ? value : lowest;
+
+            var midpoint = MathHelper.MinOrMax((lowest + highest) / 2, 100, 0);
+            output[i] = MathHelper.MinOrMax(midpoint - (signal[i] - value), 100, 0);
+        }
+
         return buffer;
     }
 
