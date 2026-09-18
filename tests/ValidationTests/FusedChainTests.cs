@@ -60,6 +60,67 @@ public sealed class FusedChainTests : GlobalTestData
     }
 
     /// <summary>
+    /// A cascade of two exponential averages fuses the same way a simple one feeding an exponential one does.
+    /// </summary>
+    /// <remarks>
+    /// Nothing in the fusion decision names an indicator - a chain fuses when its links have streaming states
+    /// and its intermediate is unread - so this pattern is expected to fall out of the same code. Expected is
+    /// not measured, and the epic asks for cascaded exponential averages by name, so it is measured here.
+    /// </remarks>
+    [Fact]
+    public void ACascadeOfExponentialAveragesIsFused()
+    {
+        var data = new StockData(StockTestData.ToList());
+        var fast = new IndicatorSpec(IndicatorName.ExponentialMovingAverage, new EmaSpecOptions(12));
+        var slow = new IndicatorSpec(IndicatorName.ExponentialMovingAverage, new EmaSpecOptions(26));
+
+        Dictionary<SeriesHandle, SeriesNode> Cascade() => new()
+        {
+            [Bars] = SeriesNode.Base(default),
+            [Sma] = SeriesNode.Indicator(default, Bars, fast),
+            [Ema] = SeriesNode.Indicator(default, Sma, slow)
+        };
+
+        using var fusedContext = new ComputeContext();
+        var fusedEvaluator = new SeriesEvaluator(data, Cascade(), fusedContext);
+        var fused = fusedEvaluator.Evaluate(new[] { Ema });
+
+        using var plainContext = new ComputeContext();
+        var plainEvaluator = new SeriesEvaluator(data, Cascade(), plainContext);
+        var plain = plainEvaluator.Evaluate(new[] { Sma, Ema });
+
+        fusedEvaluator.FusedChainHits.Should().Be(1, "a cascaded pair of exponential averages is a chain too");
+        plainEvaluator.FusedChainHits.Should().Be(0, "asking for the faster average means it has to be published");
+        fused[Ema].Should().Equal(plain[Ema], "the cascade fuses without moving a single value");
+    }
+
+    /// <summary>
+    /// The bars every indicator reads are turned into a series once, not once per indicator that reads them.
+    /// </summary>
+    /// <remarks>
+    /// This is the epic's third pattern, and it is the one thing it asks for that was already true:
+    /// <c>GetBaseInput</c> keeps the materialised default input, so a second consumer gets the array the first
+    /// one got rather than another copy of it. Recorded as a test rather than as a claim, so that removing the
+    /// cache fails here instead of quietly doubling the reads.
+    /// </remarks>
+    [Fact]
+    public void TheBarsAreMaterialisedOnceHoweverManyIndicatorsReadThem()
+    {
+        var data = new StockData(StockTestData.ToList());
+        var nodes = BuildChain();
+        nodes[Second] = SeriesNode.Indicator(default, Bars,
+            new IndicatorSpec(IndicatorName.RelativeStrengthIndex, new RsiSpecOptions(14)));
+
+        using var context = new ComputeContext();
+        var evaluator = new SeriesEvaluator(data, nodes, context);
+        var first = evaluator.Evaluate(new[] { Bars, Ema, Second });
+        var second = evaluator.Evaluate(new[] { Bars });
+
+        first[Bars].Should().BeSameAs(second[Bars],
+            "the base series is materialised once for the evaluation and handed to everything that reads it");
+    }
+
+    /// <summary>
     /// An intermediate two indicators read is computed once as a series, not folded into either of them.
     /// </summary>
     /// <remarks>
