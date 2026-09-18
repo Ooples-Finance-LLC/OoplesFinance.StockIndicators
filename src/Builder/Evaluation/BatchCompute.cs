@@ -103,6 +103,62 @@ internal static class BatchCompute
     }
 
     /// <summary>
+    /// Computes a chain of indicators in a single pass, without materialising the series between them.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A chained indicator is evaluated by resolving its input to a complete array and then walking that array
+    /// again: <c>SeriesEvaluator.ResolveIndicator</c> calls <c>Resolve</c> on the input node, which computes and
+    /// caches the whole upstream series, and <see cref="ComputeAllWithCustomInput"/> then loops over it. An
+    /// SMA feeding an EMA is therefore two traversals and one array that exists only to be read once.
+    /// </para>
+    /// <para>
+    /// This is the same computation with the array removed. Each bar goes through the chain in order - the
+    /// first state sees the real bar, and each state after it sees a bar whose close is the value the state
+    /// before produced, which is exactly what <see cref="ComputeAllWithCustomInput"/> constructs one bar at a
+    /// time. The states are the same objects, driven in the same order with the same <c>isFinal</c>, so the
+    /// values are identical rather than merely close; the tests hold them to that and not to a tolerance.
+    /// </para>
+    /// <para>
+    /// Only the last state's value is published, so this is only correct when nothing else needs the
+    /// intermediates. The caller decides that, not this method: see the fusion conditions in
+    /// <c>SeriesEvaluator</c>, which fuses only where an intermediate has a single consumer and is not itself
+    /// asked for. See issue #107.
+    /// </para>
+    /// </remarks>
+    /// <param name="data">The stock data to compute on.</param>
+    /// <param name="chain">The states in order, the first reading the bars and each next reading the previous.</param>
+    public static double[] ComputeAllChained(StockData data, IReadOnlyList<IStreamingIndicatorState> chain)
+    {
+        if (chain is null || chain.Count == 0)
+        {
+            throw new ArgumentException("A fused chain needs at least one state.", nameof(chain));
+        }
+
+        var count = data.Count;
+        var results = new double[count];
+        for (var s = 0; s < chain.Count; s++)
+        {
+            chain[s].Reset();
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            // The head reads the bar itself; every later state reads a bar carrying the previous value as its
+            // close, which is the chaining convention ComputeAllWithCustomInput already uses.
+            var value = chain[0].Update(CreateBar(data, i), isFinal: true, includeOutputs: false).Value;
+            for (var s = 1; s < chain.Count; s++)
+            {
+                value = chain[s].Update(CreateBarWithCustomClose(data, i, value), isFinal: true, includeOutputs: false).Value;
+            }
+
+            results[i] = value;
+        }
+
+        return results;
+    }
+
+    /// <summary>
     /// Creates an OhlcvBar with a custom close value (for chained indicators).
     /// </summary>
     private static OhlcvBar CreateBarWithCustomClose(StockData data, int index, double customClose)

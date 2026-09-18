@@ -26,6 +26,15 @@ internal sealed class SeriesEvaluator
     // Statistics for fast path usage
     private int _fastPathHits;
     private int _standardPathHits;
+    private int _fusedChainHits;
+
+    // How many nodes name each handle as an input, counted once from _nodes. A handle named by exactly one
+    // other node has a single consumer, which is what makes its series safe to leave unmaterialised.
+    private Dictionary<SeriesHandle, int>? _inDegree;
+
+    // The handles this evaluation was asked for. An intermediate that is itself requested has to be published,
+    // so it must be computed as a series of its own however few nodes read it.
+    private HashSet<SeriesHandle>? _requested;
 
     /// <summary>
     /// Creates a new series evaluator with single-symbol data (backwards compatible).
@@ -77,8 +86,19 @@ internal sealed class SeriesEvaluator
     /// </summary>
     public int StandardPathHits => _standardPathHits;
 
+    /// <summary>
+    /// Gets the number of chains computed in a single pass instead of through an intermediate series.
+    /// </summary>
+    /// <remarks>
+    /// Fusion is an optimisation, so it changes no value and no test can see it in the results - which is
+    /// exactly how a test that never fuses would pass. This counter is the signal that the chain really was
+    /// fused, and the fusion tests assert on it for that reason. See issue #107.
+    /// </remarks>
+    public int FusedChainHits => _fusedChainHits;
+
     public Dictionary<SeriesHandle, double[]> Evaluate(IReadOnlyCollection<SeriesHandle> handles)
     {
+        _requested = new HashSet<SeriesHandle>(handles);
         var result = new Dictionary<SeriesHandle, double[]>();
         foreach (var handle in handles)
         {
@@ -91,6 +111,7 @@ internal sealed class SeriesEvaluator
 
     public double[] Evaluate(SeriesHandle handle)
     {
+        _requested = new HashSet<SeriesHandle> { handle };
         _visitingSet.Clear();
         return Resolve(handle);
     }
@@ -168,10 +189,181 @@ internal sealed class SeriesEvaluator
             return ComputeWithV2(baseData, node.Spec);
         }
 
-        // Chained indicator path: use custom input values with V2 computation
+        // Chained indicator path. When nothing else needs the series between the links, the chain runs as one
+        // pass over the bars and the intermediate array is never built.
         _standardPathHits++;
+        if (TryBuildFusedChain(node, baseData, out var chain))
+        {
+            _fusedChainHits++;
+            return BatchCompute.ComputeAllChained(baseData, chain);
+        }
+
         var input = Resolve(node.Input.Value);
         return ComputeWithV2CustomInput(baseData, input, node.Spec);
+    }
+
+    /// <summary>
+    /// The states of a chain that can run in one pass, or nothing when this chain has to be materialised.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Walks back from <paramref name="node"/> through its inputs to the bars, and refuses as soon as anything
+    /// would make the intermediate series observable. An intermediate survives only when it is read by exactly
+    /// one node, is not itself requested, is not already computed, and publishes its own value rather than a
+    /// named output - the last because <see cref="BatchCompute.ComputeAllChained"/> carries each state's value
+    /// forward, which is what the unfused chained path carries too, while a named output is answered by
+    /// <c>ComputeWithV2</c> instead.
+    /// </para>
+    /// <para>
+    /// The head has one more condition, and it is not about arithmetic. A fast arm reads
+    /// <c>ChainedValues</c> or <c>InputValues</c>, while a state reads the bar's close; those are the same
+    /// series only until a caller sets <c>InputValues</c> to something else, and <c>StockData</c> lets them.
+    /// Identical arithmetic over a different input is still a different answer, so the head is fused only when
+    /// the two are the same series. What that leaves is safe for a reason worth stating: for the moving
+    /// averages this serves, the batch core and the streaming state are written to round alike - the same
+    /// warm-up bar, the same grouping, the same rebuild cadence - so replacing the head's arm with its state
+    /// returns the same values, not merely close ones.
+    /// </para>
+    /// </remarks>
+    private bool TryBuildFusedChain(SeriesNode node, StockData baseData, out List<IStreamingIndicatorState> chain)
+    {
+        chain = new List<IStreamingIndicatorState>();
+        if (!HeadReadsTheSameSeriesAsAFastArm(baseData))
+        {
+            return false;
+        }
+
+        var specs = new List<IndicatorSpec>();
+        var walked = new HashSet<SeriesHandle>();
+        var current = node;
+        while (true)
+        {
+            if (current.Spec is null || !current.Input.HasValue || !current.SeriesKey.Equals(node.SeriesKey))
+            {
+                return false;
+            }
+
+            specs.Add(current.Spec);
+            var inputHandle = current.Input.Value;
+            if (IsBaseSeriesInput(inputHandle, node.SeriesKey))
+            {
+                break;
+            }
+
+            // A handle seen twice on one walk is a cycle. Resolve catches those with _visitingSet, and this
+            // path does not go through Resolve, so it has to catch its own.
+            if (!walked.Add(inputHandle))
+            {
+                return false;
+            }
+
+            if (_cache.ContainsKey(inputHandle) || _requested is null || _requested.Contains(inputHandle))
+            {
+                return false;
+            }
+
+            if (!InDegree().TryGetValue(inputHandle, out var consumers) || consumers != 1)
+            {
+                return false;
+            }
+
+            if (!_nodes.TryGetValue(inputHandle, out var upstream) || upstream.Kind != SeriesNodeKind.Indicator)
+            {
+                return false;
+            }
+
+            current = upstream;
+        }
+
+        // One indicator reading the bars is not a chain; it has no intermediate to save.
+        if (specs.Count < 2)
+        {
+            return false;
+        }
+
+        specs.Reverse();
+        for (var i = 0; i < specs.Count; i++)
+        {
+            if (i < specs.Count - 1 && specs[i].OutputKey is not null)
+            {
+                return false;
+            }
+
+            try
+            {
+                chain.Add(StatefulIndicatorFactory.Create(specs[i]));
+            }
+            catch (NotSupportedException)
+            {
+                // No streaming state for this spec, so there is no chain to run.
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Whether the series a fast arm would read for the head is the bars' close a streaming state reads.
+    /// </summary>
+    private static bool HeadReadsTheSameSeriesAsAFastArm(StockData data)
+    {
+        if (data.ChainedValues.Count > 0)
+        {
+            return false;
+        }
+
+        var input = data.InputValues;
+        var closes = data.ClosePrices;
+        if (input.Count != closes.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < input.Count; i++)
+        {
+            // Equals, not ==, so a NaN in the input counts as the same value it is compared against.
+            if (!input[i].Equals(closes[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// How many nodes name each handle as an input, computed once for this evaluator.
+    /// </summary>
+    /// <remarks>
+    /// Counted over every node rather than the reachable ones, which can only overstate a handle's consumers
+    /// and so can only refuse a fusion that would have been safe.
+    /// </remarks>
+    private Dictionary<SeriesHandle, int> InDegree()
+    {
+        if (_inDegree is not null)
+        {
+            return _inDegree;
+        }
+
+        var counts = new Dictionary<SeriesHandle, int>();
+        foreach (var node in _nodes.Values)
+        {
+            CountInput(counts, node.Input);
+            CountInput(counts, node.Left);
+            CountInput(counts, node.Right);
+        }
+
+        _inDegree = counts;
+        return counts;
+    }
+
+    private static void CountInput(Dictionary<SeriesHandle, int> counts, SeriesHandle? handle)
+    {
+        if (handle is { } value)
+        {
+            counts[value] = counts.TryGetValue(value, out var count) ? count + 1 : 1;
+        }
     }
 
     /// <summary>
