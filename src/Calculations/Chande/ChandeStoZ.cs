@@ -47,7 +47,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. Chande's volatility index is a ratio of standard deviations - here the deviation against its
+        // own average - so sigma is the windowed deviation of the prices. The ratio is scale-invariant, which
+        // softens how far the published values move but does not make the other quantity the right one: the
+        // two do not differ by a constant factor bar to bar. See #190.
+        //
+        // This helper serves two indicators, VolatilityIndexDynamicAverageIndicator and its Chande-named
+        // twin, so both move together here.
+        var stdDevList = GetStandardDeviationList(inputList, length);
         var stdDevEmaList = GetMovingAverageList(stockData, maType, length, stdDevList);
 
         for (var i = 0; i < stockData.Count; i++)

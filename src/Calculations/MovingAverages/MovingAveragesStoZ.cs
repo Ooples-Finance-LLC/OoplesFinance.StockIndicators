@@ -1093,7 +1093,12 @@ public static partial class Calculations
 
         var s = MinOrMax((int)Math.Ceiling(Sqrt(length)));
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The deviation is taken as a percentage of price and its root sets the weighting exponent, so
+        // a deviation about 55% high - which is what CalculateStandardDeviationVolatility is on a typical
+        // price series - pushes that exponent up and weights the window more steeply than the indicator
+        // specifies. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {

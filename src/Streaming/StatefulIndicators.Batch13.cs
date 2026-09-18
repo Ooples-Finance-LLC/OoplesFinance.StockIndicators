@@ -924,7 +924,9 @@ public sealed class FisherTransformStochasticOscillatorState : IStreamingIndicat
 public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly PooledRingBuffer<double> _aValues;
     private readonly PooledRingBuffer<double> _bValues;
     private readonly StreamingInputResolver _input;
@@ -934,7 +936,9 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
     public FlaggingBandsState(int length = 14)
     {
         _length = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean.
+        _stdDev = new RollingStandardDeviation(_length);
         _aValues = new PooledRingBuffer<double>(3);
         _bValues = new PooledRingBuffer<double>(3);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -954,7 +958,9 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var prevA1 = _aValues.Count >= 1 ? _aValues[_aValues.Count - 1] : value;
         var prevA2 = _aValues.Count >= 2 ? _aValues[_aValues.Count - 2] : value;
         var prevB1 = _bValues.Count >= 1 ? _bValues[_bValues.Count - 1] : value;

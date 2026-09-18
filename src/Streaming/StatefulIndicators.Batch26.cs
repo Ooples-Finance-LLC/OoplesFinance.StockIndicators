@@ -1093,14 +1093,15 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     private readonly IMovingAverageSmoother _hacMa2;
     private readonly IMovingAverageSmoother _zlhaMa;
     private readonly IMovingAverageSmoother _wma;
-    private readonly StandardDeviationVolatilityState _zlhaStdDev;
-    private readonly StandardDeviationVolatilityState _percbStdDev;
+    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
+    // the smoothed Heikin-Ashi series over length1 and the other the percent-b series over length2 - two
+    // different series over two different windows, which must not be crossed in either respect.
+    private readonly RollingStandardDeviation _zlhaStdDev;
+    private readonly RollingStandardDeviation _percbStdDev;
     private StreamingInputResolver _input;
     private readonly double _stdDevMult;
     private double _prevInput;
     private double _prevHao;
-    private double _zlhaTemaValue;
-    private double _percbValue;
     private bool _hasPrev;
 
     public VervoortModifiedBollingerBandIndicatorState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length1 = 18, int length2 = 200,
@@ -1111,8 +1112,9 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _hacMa2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _zlhaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length1));
-        _zlhaStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length1), _ => _zlhaTemaValue);
-        _percbStdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), _ => _percbValue);
+        // No moving-average type, and no selectors: each series is passed to Next directly.
+        _zlhaStdDev = new RollingStandardDeviation(Math.Max(1, length1));
+        _percbStdDev = new RollingStandardDeviation(Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
     }
 
@@ -1131,8 +1133,6 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         _percbStdDev.Reset();
         _prevInput = 0;
         _prevHao = 0;
-        _zlhaTemaValue = 0;
-        _percbValue = 0;
         _hasPrev = false;
     }
 
@@ -1148,15 +1148,15 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         var tma2 = _hacMa2.Next(tma1, isFinal);
         var zlha = tma1 + (tma1 - tma2);
         var zlhaTema = _zlhaMa.Next(zlha, isFinal);
-        _zlhaTemaValue = zlhaTema;
 
-        var zlhaStdDev = _zlhaStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the smoothed Heikin-Ashi series, which is the series this measures.
+        var zlhaStdDev = _zlhaStdDev.Next(zlhaTema, isFinal);
         var wma = _wma.Next(zlhaTema, isFinal);
         var percb = zlhaStdDev != 0
             ? (zlhaTema + (2 * zlhaStdDev) - wma) / (4 * zlhaStdDev) * 100
             : 0;
-        _percbValue = percb;
-        var percbStdDev = _percbStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the percent-b series, over its own window rather than the one above.
+        var percbStdDev = _percbStdDev.Next(percb, isFinal);
         var upper = 50 + (_stdDevMult * percbStdDev);
         var lower = 50 - (_stdDevMult * percbStdDev);
 
@@ -1212,14 +1212,14 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _ema1;
     private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _tema;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _wma;
     private readonly RollingWindowMax _highWindow;
     private readonly RollingWindowMin _lowWindow;
     private readonly RollingWindowMin _rbcMinWindow;
     private readonly RollingWindowSum _fastKSum;
     private StreamingInputResolver _input;
-    private double _tzValue;
 
     public VervoortSmoothedOscillatorState(int length1 = 18,
         int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
@@ -1242,7 +1242,8 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
+        // No moving-average type, and no selector: the smoothed series is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolvedLength1);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1299,9 +1300,9 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var ema2 = _ema2.Next(ema1, isFinal);
         var zlrb = (2 * ema1) - ema2;
         var tz = _tema.Next(zlrb, isFinal);
-        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close.
-        _tzValue = tz;
-        var hwidth = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close. Passed
+        // to Next directly, so the series being measured is visible at the call rather than held in a field.
+        var hwidth = _stdDev.Next(tz, isFinal);
         var wmatz = _wma.Next(tz, isFinal);
         var zlrbpercb = hwidth != 0
             ? (tz + (_stdDevMult * hwidth) - wmatz) / (2 * _stdDevMult * hwidth * 100)
@@ -1513,7 +1514,8 @@ public sealed class VixTradingSystemState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Vida1")]
 public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _stdDevSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _alpha1;
@@ -1526,7 +1528,10 @@ public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndi
         int length = 20, double alpha1 = 0.2, double alpha2 = 0.04)
     {
         var resolved = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the average it is measured against, below.
+        _stdDev = new RollingStandardDeviation(resolved);
         _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _alpha1 = alpha1;
@@ -1547,7 +1552,9 @@ public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input, which is the series this measures, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var stdDevEma = _stdDevSmoother.Next(stdDev, isFinal);
         var ratio = stdDevEma != 0 ? stdDev / stdDevEma : 0;
         var prevVidya1 = _hasPrev ? _prevVidya1 : value;
@@ -1773,7 +1780,9 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 {
     private readonly int _length;
     private readonly double _kf;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _wmap1;
     private readonly IMovingAverageSmoother _wmap2;
     private readonly PooledRingBuffer<double> _values;
@@ -1785,7 +1794,9 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
         _length = Math.Max(1, length);
         _kf = kf;
         var s = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(_length)));
-        _stdDev = new StandardDeviationVolatilityState(maType, _length);
+        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
+        // selects the averages that smooth the weighted mean, below.
+        _stdDev = new RollingStandardDeviation(_length);
         _wmap1 = MovingAverageSmootherFactory.Create(maType, s);
         _wmap2 = MovingAverageSmootherFactory.Create(maType, s);
         _values = new PooledRingBuffer<double>(_length);
@@ -1805,7 +1816,8 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var stdDev = _stdDev.Next(value, isFinal);
         var sdPct = value != 0 ? stdDev / value * 100 : 0;
         var p = sdPct >= 0 ? MathHelper.MinOrMax(MathHelper.Sqrt(sdPct) * _kf, 4, 1) : 1;
 

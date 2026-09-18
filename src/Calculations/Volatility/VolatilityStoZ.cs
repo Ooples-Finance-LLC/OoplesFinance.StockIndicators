@@ -599,7 +599,12 @@ public static partial class Calculations
         }
 
         stockData.SetCustomValues(drList);
-        var volaList = CalculateStandardDeviationVolatility(stockData, maType, length).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. Like the trend analysis index, this publishes its deviation rather than banding with it: Vsi
+        // is a moving average of the deviation of the returns, so the change lands in the output itself.
+        // Taken over drList by name, which is the return series it measures. See #190.
+        var volaList = GetStandardDeviationList(drList, length);
         var vswitchList = GetMovingAverageList(stockData, maType, length, volaList);
         var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
         for (var i = 0; i < stockData.Count; i++)

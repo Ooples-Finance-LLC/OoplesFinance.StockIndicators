@@ -230,7 +230,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, length: length).ChainedValues;
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. The step holds until price escapes a band two deviations either side of it, and sigma in a
+        // band is the windowed deviation; the quantity this replaces is about 55% wider on a typical price
+        // series, so the band was that much too wide and the step held through moves that should have moved
+        // it. The i < length guard below already covers the bars before the window fills. See #190.
+        var stdDevList = GetStandardDeviationList(inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -455,7 +460,14 @@ public static partial class Calculations
         var slowMaList = GetMovingAverageList(stockData, maType, length1, inputList);
         var fastMaList = GetMovingAverageList(stockData, maType, length2, inputList);
         stockData.SetCustomValues(slowMaList);
-        var taiList = CalculateStandardDeviationVolatility(stockData, maType, length2).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. This one publishes the deviation itself as Tai rather than using it in a band, so the change
+        // is directly visible in the indicator's own output rather than in something derived from it - about
+        // 55% narrower on a typical price series. The quantity the indicator is named for is a standard
+        // deviation, and that is the windowed one. Taken over slowMaList by name, which is the series it
+        // measures - the batch chained it in on purpose. See #190.
+        var taiList = GetStandardDeviationList(slowMaList, length2);
         var taiSmaList = GetMovingAverageList(stockData, maType, length1, taiList);
 
         for (var i = 0; i < stockData.Count; i++)

@@ -305,7 +305,9 @@ public sealed class TrendPersistenceRateState : IStreamingIndicatorState, IDispo
 public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private double _prevA;
     private int _index;
@@ -314,7 +316,9 @@ public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
     public TrendStepState(int length = 50)
     {
         _length = Math.Max(1, length);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, _length);
+
+        // No moving-average type: a windowed deviation is taken about the window's own mean.
+        _stdDev = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -331,7 +335,9 @@ public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var dev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value * 2;
+
+        // Fed the resolved input rather than the bar, matching the batch calculation.
+        var dev = _stdDev.Next(value, isFinal) * 2;
         var prevA = _hasPrev ? _prevA : value;
         var a = _index < _length ? value : value > prevA + dev ? value : value < prevA - dev ? value : prevA;
 
