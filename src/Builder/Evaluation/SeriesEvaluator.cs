@@ -215,25 +215,41 @@ internal sealed class SeriesEvaluator
     /// <c>ComputeWithV2</c> instead.
     /// </para>
     /// <para>
-    /// The head has one more condition, and it is not about arithmetic. A fast arm reads
-    /// <c>ChainedValues</c> or <c>InputValues</c>, while a state reads the bar's close; those are the same
-    /// series only until a caller sets <c>InputValues</c> to something else, and <c>StockData</c> lets them.
-    /// Identical arithmetic over a different input is still a different answer, so the head is fused only when
-    /// the two are the same series. What that leaves is safe for a reason worth stating: for the moving
-    /// averages this serves, the batch core and the streaming state are written to round alike - the same
-    /// warm-up bar, the same grouping, the same rebuild cadence - so replacing the head's arm with its state
-    /// returns the same values, not merely close ones.
+    /// The head carries two conditions of its own, because the head is the only link whose implementation
+    /// fusion changes: unfused it can be served a fast arm, fused it is always its streaming state. It must
+    /// read the same series both ways, and it must be a spec those two engines agree on exactly - see
+    /// <see cref="FusableChainHeads"/>.
     /// </para>
     /// </remarks>
     private bool TryBuildFusedChain(SeriesNode node, StockData baseData, out List<IStreamingIndicatorState> chain)
     {
         chain = new List<IStreamingIndicatorState>();
-        if (!HeadReadsTheSameSeriesAsAFastArm(baseData))
+
+        // A fast arm reads the input series, a state reads the bar's close, and StockData lets a caller make
+        // those different. Asked this way the question is a field test; asking InputValues would allocate a
+        // copy of the closes in order to compare it against the closes.
+        if (!baseData.InputSeriesIsBarClose)
         {
             return false;
         }
 
-        var specs = new List<IndicatorSpec>();
+        if (!TryWalkToBars(node, out var specs) || specs.Count < 2)
+        {
+            // One indicator reading the bars is not a chain; it has no intermediate to save.
+            return false;
+        }
+
+        specs.Reverse();
+        return TryCreateStates(specs, chain);
+    }
+
+    /// <summary>
+    /// The specs from <paramref name="node"/> back to the bars, nearest first, or nothing when one of the
+    /// series between them has to exist.
+    /// </summary>
+    private bool TryWalkToBars(SeriesNode node, out List<IndicatorSpec> specs)
+    {
+        specs = new List<IndicatorSpec>();
         var walked = new HashSet<SeriesHandle>();
         var current = node;
         while (true)
@@ -247,43 +263,50 @@ internal sealed class SeriesEvaluator
             var inputHandle = current.Input.Value;
             if (IsBaseSeriesInput(inputHandle, node.SeriesKey))
             {
-                break;
+                return true;
             }
 
-            // A handle seen twice on one walk is a cycle. Resolve catches those with _visitingSet, and this
-            // path does not go through Resolve, so it has to catch its own.
-            if (!walked.Add(inputHandle))
-            {
-                return false;
-            }
-
-            if (_cache.ContainsKey(inputHandle) || _requested is null || _requested.Contains(inputHandle))
-            {
-                return false;
-            }
-
-            if (!InDegree().TryGetValue(inputHandle, out var consumers) || consumers != 1)
-            {
-                return false;
-            }
-
-            if (!_nodes.TryGetValue(inputHandle, out var upstream) || upstream.Kind != SeriesNodeKind.Indicator)
+            if (!CanFoldAway(inputHandle, walked)
+                || !_nodes.TryGetValue(inputHandle, out var upstream)
+                || upstream.Kind != SeriesNodeKind.Indicator)
             {
                 return false;
             }
 
             current = upstream;
         }
+    }
 
-        // One indicator reading the bars is not a chain; it has no intermediate to save.
-        if (specs.Count < 2)
+    /// <summary>Whether the series at this handle can be left unbuilt.</summary>
+    private bool CanFoldAway(SeriesHandle handle, HashSet<SeriesHandle> walked)
+    {
+        // A handle seen twice on one walk is a cycle. Resolve catches those with _visitingSet, and this path
+        // does not go through Resolve, so it catches its own.
+        if (!walked.Add(handle))
         {
             return false;
         }
 
-        specs.Reverse();
+        if (_cache.ContainsKey(handle) || _requested is null || _requested.Contains(handle))
+        {
+            return false;
+        }
+
+        return InDegree().TryGetValue(handle, out var consumers) && consumers == 1;
+    }
+
+    /// <summary>The states for a chain given head first, or nothing when one of its links cannot be fused.</summary>
+    private static bool TryCreateStates(List<IndicatorSpec> specs, List<IStreamingIndicatorState> chain)
+    {
+        if (!FusableChainHeads.Types.Contains(specs[0].Options.GetType()))
+        {
+            return false;
+        }
+
         for (var i = 0; i < specs.Count; i++)
         {
+            // Every link but the last is carried forward by value, so one addressed by a named output would be
+            // a different series from the one the unfused path resolves.
             if (i < specs.Count - 1 && specs[i].OutputKey is not null)
             {
                 return false;
@@ -296,35 +319,6 @@ internal sealed class SeriesEvaluator
             catch (NotSupportedException)
             {
                 // No streaming state for this spec, so there is no chain to run.
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Whether the series a fast arm would read for the head is the bars' close a streaming state reads.
-    /// </summary>
-    private static bool HeadReadsTheSameSeriesAsAFastArm(StockData data)
-    {
-        if (data.ChainedValues.Count > 0)
-        {
-            return false;
-        }
-
-        var input = data.InputValues;
-        var closes = data.ClosePrices;
-        if (input.Count != closes.Count)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < input.Count; i++)
-        {
-            // Equals, not ==, so a NaN in the input counts as the same value it is compared against.
-            if (!input[i].Equals(closes[i]))
-            {
                 return false;
             }
         }

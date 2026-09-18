@@ -14,6 +14,7 @@ namespace OoplesFinance.StockIndicators.Models;
 public class StockData : IStockData
 {
     private List<double>? _inputValues;
+    private bool _customInputAssigned;
     private List<double> _customValues = new List<double>();
     private Dictionary<string, List<double>> _outputValues = new Dictionary<string, List<double>>();
     private List<double>? _openPrices;
@@ -39,8 +40,25 @@ public class StockData : IStockData
 
             return _inputValues;
         }
-        set => _inputValues = value ?? new List<double>();
+        set
+        {
+            _inputValues = value ?? new List<double>();
+            _customInputAssigned = true;
+        }
     }
+
+    /// <summary>
+    /// Whether the calculation input is the bars' close, answered without materialising anything.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="InputValues"/> allocates a copy of <see cref="ClosePrices"/> the first time anything reads
+    /// it, so asking that property what the input is costs a list and a scan of it - in the one place whose
+    /// whole purpose is to avoid materialising a series. Worse, the copy makes the property non-null from then
+    /// on, so a reader could not tell an assigned series from a materialised one and the answer would depend on
+    /// what had run first. Only a caller assigning a series makes the input something other than the close, and
+    /// that is what this records.
+    /// </remarks>
+    internal bool InputSeriesIsBarClose => !_customInputAssigned && ChainedValues.Count == 0;
 
     public List<double> OpenPrices
     {
@@ -269,6 +287,7 @@ public class StockData : IStockData
         _volumes = source._volumes;
         _dates = source._dates;
         _inputValues = source._inputValues;
+        _customInputAssigned = source._customInputAssigned;
         _columnsInitialized = true;
         _rowsInitialized = false;
         _tickerDataList = null;

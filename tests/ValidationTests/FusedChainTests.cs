@@ -1,6 +1,7 @@
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Tests.Unit.CalculationsTests;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
@@ -171,6 +172,89 @@ public sealed class FusedChainTests : GlobalTestData
             "the arm would read the midpoint series while a fused head would read the close, so they are not "
             + "the same computation and the chain stays materialised");
         values[Ema].Should().NotBeEmpty();
+    }
+
+    /// <summary>
+    /// Every spec a chain may begin with returns the same values from its fast arm and its streaming state.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the assumption fusion rests on, and the one the rest of the suite cannot see. Fusing a chain
+    /// swaps the head from whatever <c>TryComputeFast</c> serves to the head's streaming state; if those two
+    /// disagree anywhere, fusion moves published values for every caller who chained something onto that
+    /// indicator.
+    /// </para>
+    /// <para>
+    /// Neither existing arm suite establishes this. <c>BuilderArmTests</c> compares an arm to its batch
+    /// indicator and <c>BuilderStreamingArmTests</c> compares a state to the same indicator, but both use an
+    /// <c>IsClose</c> tolerance, and two things that are each close to a third can still differ from one
+    /// another. Compared here as raw bits, which is stricter than <c>==</c> and says exactly what is meant.
+    /// </para>
+    /// <para>
+    /// Driven from <see cref="FusableChainHeads.Types"/> itself, so the set cannot outgrow its evidence: a spec
+    /// added to it is proven here or it fails here.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void EveryFusableHeadAgreesExactlyWithTheArmItReplaces()
+    {
+        var tickers = StockTestData.ToList();
+        var failures = new List<string>();
+        var comparedTypes = new HashSet<Type>();
+
+        foreach (var type in FusableChainHeads.Types)
+        {
+            if (!BuilderArmBinding.TryGetTarget(type, out var target))
+            {
+                failures.Add($"{type.Name}: names no batch indicator, so nothing says what it computes");
+                continue;
+            }
+
+            foreach (var alternate in new[] { false, true })
+            {
+                var options = BuilderArmTests.Create(type, alternate);
+                if (options is null)
+                {
+                    failures.Add($"{type.Name}: no constructor this can build");
+                    break;
+                }
+
+                var label = $"{type.Name}{(alternate ? " (alternate parameters)" : string.Empty)}";
+                var spec = new IndicatorSpec(target.Name, options);
+
+                using var context = new ComputeContext();
+                var fast = IndicatorCompute.TryComputeFast(new StockData(tickers), spec, context);
+                if (fast is null)
+                {
+                    // No arm serves this head, so fusing it substitutes nothing.
+                    continue;
+                }
+
+                using var buffer = fast.Value;
+                var armed = buffer.ToArray();
+                var streamed = BatchCompute.ComputeAll(new StockData(tickers), StatefulIndicatorFactory.Create(spec));
+                comparedTypes.Add(type);
+
+                if (armed.Length != streamed.Length)
+                {
+                    failures.Add($"{label}: {armed.Length} values from the arm, {streamed.Length} streamed");
+                    continue;
+                }
+
+                var bar = Enumerable.Range(0, armed.Length).FirstOrDefault(
+                    i => BitConverter.DoubleToInt64Bits(armed[i]) != BitConverter.DoubleToInt64Bits(streamed[i]), -1);
+                if (bar >= 0)
+                {
+                    failures.Add($"{label} bar {bar}: arm {armed[bar]:R}, state {streamed[bar]:R}");
+                }
+            }
+        }
+
+        comparedTypes.Should().BeEquivalentTo(FusableChainHeads.Types,
+            "the sweep skips a head no arm serves, since fusing that one substitutes nothing - but a member "
+            + "skipped is a member nothing here examined, so every one of them has to have been compared");
+        failures.Should().BeEmpty(
+            $"a fusable head must return the arm's own values, not merely close ones: {string.Join(" | ", failures)}");
     }
 
     /// <summary>The bars, an SMA over them, and an EMA over that.</summary>
