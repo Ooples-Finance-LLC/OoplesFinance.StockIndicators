@@ -1212,14 +1212,14 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _ema1;
     private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _tema;
-    private readonly StandardDeviationVolatilityState _stdDev;
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _wma;
     private readonly RollingWindowMax _highWindow;
     private readonly RollingWindowMin _lowWindow;
     private readonly RollingWindowMin _rbcMinWindow;
     private readonly RollingWindowSum _fastKSum;
     private StreamingInputResolver _input;
-    private double _tzValue;
 
     public VervoortSmoothedOscillatorState(int length1 = 18,
         int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
@@ -1242,7 +1242,8 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         _ema1 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _ema2 = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, resolvedSmoothLength);
         _tema = MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, resolvedSmoothLength);
-        _stdDev = new StandardDeviationVolatilityState(MovingAvgType.SimpleMovingAverage, resolvedLength1, _ => _tzValue);
+        // No moving-average type, and no selector: the smoothed series is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(resolvedLength1);
         _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, resolvedLength1);
         _highWindow = new RollingWindowMax(resolvedLength2);
         _lowWindow = new RollingWindowMin(resolvedLength2);
@@ -1299,9 +1300,9 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var ema2 = _ema2.Next(ema1, isFinal);
         var zlrb = (2 * ema1) - ema2;
         var tz = _tema.Next(zlrb, isFinal);
-        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close.
-        _tzValue = tz;
-        var hwidth = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Vervoort's band width is the deviation of TZ, as the batch computes it - not of the close. Passed
+        // to Next directly, so the series being measured is visible at the call rather than held in a field.
+        var hwidth = _stdDev.Next(tz, isFinal);
         var wmatz = _wma.Next(tz, isFinal);
         var zlrbpercb = hwidth != 0
             ? (tz + (_stdDevMult * hwidth) - wmatz) / (2 * _stdDevMult * hwidth * 100)

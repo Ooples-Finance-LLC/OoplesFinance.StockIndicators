@@ -546,8 +546,11 @@ public void Dispose()
 public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _ema;
-    private readonly StandardDeviationVolatilityState _bStdDev;
-    private readonly StandardDeviationVolatilityState _cStdDev;
+
+    // The deviation of each window about its own mean, matching the batch calculation; see #190. One measures
+    // the rises and the other the falls, and they must not be crossed.
+    private readonly RollingStandardDeviation _bStdDev;
+    private readonly RollingStandardDeviation _cStdDev;
     private readonly StreamingInputResolver _input;
     private double _bValue;
     private double _cValue;
@@ -561,8 +564,10 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
     {
         var resolved = Math.Max(1, length);
         _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _bStdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _bValue);
-        _cStdDev = new StandardDeviationVolatilityState(maType, resolved, _ => _cValue);
+        // No moving-average type, and no selector: RollingStandardDeviation is handed the value itself, so
+        // neither series has to be smuggled in through a closure over a field.
+        _bStdDev = new RollingStandardDeviation(resolved);
+        _cStdDev = new RollingStandardDeviation(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -589,8 +594,9 @@ public sealed class TopsAndBottomsFinderState : IStreamingIndicatorState, IDispo
         _bValue = ema > prevEma ? ema : 0;
         _cValue = ema < prevEma ? ema : 0;
 
-        var bStd = _bStdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var cStd = _cStdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        // Each deviation is fed the series it measures: the rises, and the falls.
+        var bStd = _bStdDev.Next(_bValue, isFinal);
+        var cStd = _cStdDev.Next(_cValue, isFinal);
 
         var prevUp = _hasPrev ? _prevUp : 0;
         var prevDn = _hasPrev ? _prevDn : 0;
@@ -786,18 +792,20 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
 {
     private readonly RsiState _rsi;
     private readonly IMovingAverageSmoother _rsiSignal;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly IMovingAverageSmoother _mabSmoother;
     private readonly IMovingAverageSmoother _mbbSmoother;
     private readonly StreamingInputResolver _input;
-    private double _rsiValue;
 
     public TradersDynamicIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7)
     {
         _rsi = new RsiState(maType, Math.Max(1, length1));
         _rsiSignal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, length2), _ => _rsiValue);
+        // No moving-average type, and no selector: the index is passed to Next directly.
+        _stdDev = new RollingStandardDeviation(Math.Max(1, length2));
         _mabSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _mbbSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -812,16 +820,16 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
         _stdDev.Reset();
         _mabSmoother.Reset();
         _mbbSmoother.Reset();
-        _rsiValue = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        _rsiValue = rsi;
         var rsiSignal = _rsiSignal.Next(rsi, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the relative strength index, which is the series this measures, matching the batch calculation.
+        var stdDev = _stdDev.Next(rsi, isFinal);
         var mab = _mabSmoother.Next(rsi, isFinal);
         var mbb = _mbbSmoother.Next(rsi, isFinal);
         var offs = 1.6185 * stdDev;
