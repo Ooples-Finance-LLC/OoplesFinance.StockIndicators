@@ -3486,7 +3486,17 @@ public static partial class Calculations
         var aboveSumWindow = new RollingSum();
 
         var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var stdDevList = CalculateStandardDeviationVolatility(stockData, maType, length1).ChainedValues;
+
+        // The deviation of the window about its own mean, not the mean squared residual from a moving average
+        // of it. Katsanos defines the stiffness indicator as the percentage of the last length2 closes lying
+        // above the average less a fifth of a standard deviation, so the bound is a band at 0.2 sigma and it is
+        // the windowed deviation that sigma names. CalculateStandardDeviationVolatility is a different quantity,
+        // about 55% wider, which lowered the bound and so overstated how many closes cleared it. See #190.
+        //
+        // This zeroes the deviation until the window fills, where the old quantity published a value from the
+        // first bar. Before bar length1 the bound is now the average itself, which is the honest answer: there
+        // is no length1-bar window to take a deviation over yet.
+        var stdDevList = GetStandardDeviationList(inputList, length1);
 
         for (var i = 0; i < stockData.Count; i++)
         {

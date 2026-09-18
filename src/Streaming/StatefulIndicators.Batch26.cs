@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
+using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -522,7 +523,11 @@ public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState,
     private readonly int _minLength;
     private readonly int _maxLength;
     private readonly IMovingAverageSmoother _sma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. The two have
+    // to move together or the engines put the four levels at different distances and disagree about when the
+    // length should change - a disagreement that then compounds, because each bar's length carries forward.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly StreamingInputResolver _input;
     private double _prevLength;
     private double _prevVlma;
@@ -534,7 +539,10 @@ public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState,
         _minLength = Math.Max(1, minLength);
         _maxLength = Math.Max(_minLength, maxLength);
         _sma = MovingAverageSmootherFactory.Create(maType, _maxLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, _maxLength);
+
+        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
+        // for a type to choose. maType still selects the average the levels are measured from, above.
+        _stdDev = new RollingStandardDeviation(_maxLength);
         _input = new StreamingInputResolver(InputName.Close, null);
         _prevLength = _maxLength;
     }
@@ -554,14 +562,13 @@ public sealed class VariableLengthMovingAverageState : IStreamingIndicatorState,
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var a = sma - (1.75 * stdDev);
-        var b = sma - (0.25 * stdDev);
-        var c = sma + (0.25 * stdDev);
-        var d = sma + (1.75 * stdDev);
+
+        // Fed the resolved input rather than the bar, so this measures the same series the average above does.
+        var stdDev = _stdDev.Next(value, isFinal);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
-        var length = MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-            _maxLength, _minLength);
+
+        // The same decision the batch calculation takes, from the same place. See #190.
+        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
         var sc = 2 / (length + 1);
         var prevVlma = _hasPrev ? _prevVlma : value;
         var vlma = (value * sc) + ((1 - sc) * prevVlma);

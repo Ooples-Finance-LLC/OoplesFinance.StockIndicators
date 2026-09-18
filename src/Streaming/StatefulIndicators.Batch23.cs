@@ -891,7 +891,11 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
 {
     private readonly int _length2;
     private readonly IMovingAverageSmoother _sma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. The two have
+    // to move together or the engines disagree about the bound, and a close counted as clearing it in one is
+    // not in the other.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly RollingWindowSum _aboveSum;
     private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
@@ -903,7 +907,10 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
         _length2 = Math.Max(1, length2);
         var resolved = Math.Max(1, length1);
         _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new StandardDeviationVolatilityState(maType, resolved);
+
+        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
+        // for a type to choose. maType still selects the average the bound is measured from, above.
+        _stdDev = new RollingStandardDeviation(resolved);
         _aboveSum = new RollingWindowSum(_length2);
         _signal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, smoothingLength));
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -923,7 +930,10 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
     {
         var value = _input.GetValue(bar);
         var sma = _sma.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+
+        // Fed the resolved input rather than the bar, so a composed reading measures the series it was
+        // composed on rather than resolving a close of its own. See #190.
+        var stdDev = _stdDev.Next(value, isFinal);
         var bound = sma - (0.2 * stdDev);
         var above = value > bound ? 1 : 0;
         var aboveSum = isFinal ? _aboveSum.Add(above, out _) : _aboveSum.Preview(above, out _);

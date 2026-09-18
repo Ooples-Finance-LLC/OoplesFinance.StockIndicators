@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
+using OoplesFinance.StockIndicators.Core;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -1584,7 +1585,12 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
     private readonly int _maxLength;
     private readonly double _acc;
     private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // This is the second streaming implementation of the variable-length average's length decision: the batch
+    // ultimate moving average reads that indicator's own Length output, while this recomputes it inline below.
+    // Both have to take the same sigma or the two engines choose different lengths for the same bar, which
+    // then compounds, because each bar's length carries forward into the next. See #190.
+    private readonly RollingStandardDeviation _stdDev;
     private readonly RollingCumulativeSum _posFlowSum;
     private readonly RollingCumulativeSum _negFlowSum;
     private readonly PooledRingBuffer<double> _values;
@@ -1600,7 +1606,9 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
         _maxLength = Math.Max(_minLength, maxLength);
         _acc = acc;
         _smaSmoother = MovingAverageSmootherFactory.Create(maType, _maxLength);
-        _stdDev = new StandardDeviationVolatilityState(maType, _maxLength);
+
+        // No maType, and _maxLength to match the variable-length average whose decision this repeats.
+        _stdDev = new RollingStandardDeviation(_maxLength);
         _posFlowSum = new RollingCumulativeSum();
         _negFlowSum = new RollingCumulativeSum();
         _values = new PooledRingBuffer<double>(_maxLength);
@@ -1626,14 +1634,15 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
     {
         var value = _input.GetValue(bar);
         var sma = _smaSmoother.Next(value, isFinal);
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
-        var a = sma - (1.75 * stdDev);
-        var b = sma - (0.25 * stdDev);
-        var c = sma + (0.25 * stdDev);
-        var d = sma + (1.75 * stdDev);
+
+        // Fed the resolved input rather than the bar, so this measures the same series the average above does.
+        var stdDev = _stdDev.Next(value, isFinal);
         var prevLength = _hasPrev ? _prevLength : _maxLength;
-        var length = MathHelper.MinOrMax(value >= b && value <= c ? prevLength + 1 : value < a || value > d ? prevLength - 1 : prevLength,
-            _maxLength, _minLength);
+
+        // The variable-length average's decision, taken from the one place that holds it rather than repeated
+        // here: the batch ultimate moving average reads that indicator's own Length output, so a copy here
+        // could disagree with it. See #190.
+        var length = MovingAverageCore.VariableLength(value, sma, stdDev, prevLength, _minLength, _maxLength);
         var len = Math.Max(1, (int)length);
         var typical = (bar.High + bar.Low + bar.Close) / 3d;
         var rawFlow = typical * bar.Volume;
@@ -1689,14 +1698,26 @@ public sealed class UltimateMovingAverageState : IStreamingIndicatorState, IDisp
 public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly UltimateMovingAverageState _uma;
-    private readonly StandardDeviationVolatilityState _stdDev;
+
+    // The deviation of the window about its own mean, matching the batch calculation; see #190. The band is
+    // the Bollinger construction, so the two engines have to take the same sigma or they draw bands of
+    // different widths over the same prices.
+    private readonly RollingStandardDeviation _stdDev;
+
+    // RollingStandardDeviation takes a value rather than a bar, where the state it replaces resolved its own
+    // input. Close is what the batch calculation's GetInputValuesList resolves, so the two agree.
+    private readonly StreamingInputResolver _input;
     private readonly double _stdDevMult;
 
     public UltimateMovingAverageBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int minLength = 5,
         int maxLength = 50, double stdDevMult = 2)
     {
         _uma = new UltimateMovingAverageState(maType, minLength, maxLength, 1);
-        _stdDev = new StandardDeviationVolatilityState(maType, Math.Max(1, minLength));
+
+        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
+        // for a type to choose.
+        _stdDev = new RollingStandardDeviation(Math.Max(1, minLength));
+        _input = new StreamingInputResolver(InputName.Close, null);
         _stdDevMult = stdDevMult;
     }
 
@@ -1711,7 +1732,7 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var uma = _uma.Update(bar, isFinal, includeOutputs: false).Value;
-        var stdDev = _stdDev.Update(bar, isFinal, includeOutputs: false).Value;
+        var stdDev = _stdDev.Next(_input.GetValue(bar), isFinal);
         var upper = uma + (_stdDevMult * stdDev);
         var lower = uma - (_stdDevMult * stdDev);
 
