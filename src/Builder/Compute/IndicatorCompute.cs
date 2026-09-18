@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
@@ -14402,6 +14402,11 @@ internal static partial class IndicatorCompute
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
+        // The primary series of CalculateSmoothedWilliamsAccumulationDistribution is the raw accumulation
+        // total; the moving average it takes of that total is published as the Signal series, so length and
+        // maType do not reach this output.
+        _ = length;
+        _ = maType;
         VolumeCore.WilliamsAD(high, low, close, buffer.WritableSpan);
         return buffer;
     }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 using OoplesFinance.StockIndicators.Core.Registry;
 
@@ -10174,20 +10174,31 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double wad = 0;
-        for (var i = 0; i < close.Length; i++)
+        if (close.Length == 0)
         {
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            return;
+        }
 
-            if (close[i] > prevClose)
+        // The first bar has no previous close, so it contributes nothing. Treating the missing previous close
+        // as zero made every close look like an advance and seeded the running total with the whole first
+        // close price. Each later bar is measured against the true range high and low - the previous close
+        // pulled up to this bar's high, or down to its low - not against the previous bar's own high and low,
+        // and an unchanged close contributes nothing rather than resetting the total.
+        output[0] = 0;
+        double wad = 0;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var trueRangeHigh = Math.Max(high[i], close[i - 1]);
+            var trueRangeLow = Math.Min(low[i], close[i - 1]);
+
+            if (close[i] > close[i - 1])
             {
-                wad += close[i] - prevLow;
+                wad += close[i] - trueRangeLow;
             }
-            else if (close[i] < prevClose)
+            else if (close[i] < close[i - 1])
             {
-                wad += close[i] - prevHigh;
+                wad += close[i] - trueRangeHigh;
             }
 
             output[i] = wad;
