@@ -229,8 +229,11 @@ value, and for `VolumeFlowIndicatorSpecOptions`, whose input name no calculation
 ### Removed
 
 - All v1.x `Calculate*` methods are still available (they will be deprecated in v3.0).
-- The Alpaca adapters have moved out of the `OoplesFinance.StockIndicators` package into a new
-  `OoplesFinance.StockIndicators.Trading` package.
+- `AlpacaBroker` and `AlpacaMarketDataProvider` have moved out of the
+  `OoplesFinance.StockIndicators` package into a new `OoplesFinance.StockIndicators.Trading` package.
+  They are the only two types that used the Alpaca SDK. `AutoTradingCatalog.Alpaca(...)` and
+  `AlpacaTradeAdapter` stay in the core package - they are named for Alpaca but use no part of the
+  SDK, so they need no new package reference.
 - `TrixResult` is gone. `IndicatorCatalog.Trix()` now returns a plain `SeriesHandle`.
 - `AroonOscillatorResult.Up`, `.Down` and `.Oscillator` are gone, as are
   `AlligatorIndexResult.Jaw` and `GatorOscillatorResult.Upper` / `.Lower`. The result types
