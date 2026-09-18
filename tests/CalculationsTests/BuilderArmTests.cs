@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
@@ -198,6 +198,136 @@ public sealed class BuilderArmTests : GlobalTestData
 
         compared.Should().BeGreaterThan(700, "every bound typed spec is compared");
         failures.Should().BeEmpty($"{compared} spec outputs compared: {string.Join(" | ", failures)}");
+    }
+
+    /// <summary>
+    /// How many bound arms are known to disagree with their batch indicator. A ratchet, not a target.
+    /// </summary>
+    /// <remarks>
+    /// Measured, not chosen: 594 of the 1680 (spec, parameter set) pairs driven through
+    /// <c>IndicatorCompute.ComputeArm</c> return something other than their batch indicator. That is close to
+    /// every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229 stopped serving them - the
+    /// Builder computes those specs with the batch indicator instead, so users get correct numbers today.
+    /// Named individually it would be 594 lines of list; pinned as a count it can only shrink, and the
+    /// assertions below are what actually make promotion safe. See issue #233.
+    /// </remarks>
+    private const int KnownDisagreeingArms = 594;
+
+    /// <summary>
+    /// The four arms issue #233 identified by name, each computing a different indicator entirely.
+    /// </summary>
+    /// <remarks>
+    /// <c>TrendCore.AutoLine</c> and <c>AutoLineWithDrift</c> are adaptive exponential averages where the
+    /// automatic line holds its level until price escapes a band; <c>UltimateMovingAverage</c> is a T3 of a T3
+    /// where the indicator is a money-flow weighted average; <c>VariableLengthMovingAverage</c> interpolates a
+    /// length from a normalised deviation where the indicator steps the length one bar at a time against four
+    /// levels. Held here to "not served", which stays true once someone fixes the arm.
+    /// </remarks>
+    private static readonly string[] ArmsNamedInIssue233 =
+    {
+        "AutoLineSpecOptions",
+        "AutoLineWithDriftSpecOptions",
+        "UltimateMovingAverageSpecOptions",
+        "VariableLengthMovingAverageSpecOptions",
+    };
+
+    /// <summary>
+    /// No arm the Builder serves computes a different indicator, and the set that does cannot grow.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="EveryTypedSpecComputesItsBatchIndicator"/> drives <c>TryComputeFast</c>, the served path. For
+    /// a spec outside <see cref="BuilderVerifiedArms"/> that call routes to <see cref="BuilderArmBinding"/> and
+    /// is then compared against <see cref="BuilderArmBinding"/> - the same batch indicator on both sides, so it
+    /// agrees by construction. That is right for what it guards, but it leaves an unserved arm compared to
+    /// nothing at all.
+    /// </para>
+    /// <para>
+    /// This drives <c>IndicatorCompute.ComputeArm</c>, the arm itself, unchecked. The property that matters is
+    /// not "every arm is correct" - 594 are not - but that <b>verification and correctness cannot come apart</b>:
+    /// adding an options type to <see cref="BuilderVerifiedArms"/> starts serving its arm immediately, and
+    /// before this test nothing on that path would have noticed the arm computed something else. Promote one of
+    /// the 594 and the first assertion below fails.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void NoServedArmComputesADifferentIndicator()
+    {
+        var tickers = StockTestData.ToList();
+        var disagreed = new SortedSet<string>(StringComparer.Ordinal);
+        var compared = 0;
+
+        foreach (var type in OptionTypes)
+        {
+            if (!BuilderArmBinding.TryGetTarget(type, out var target))
+            {
+                continue;
+            }
+
+            foreach (var alternate in new[] { false, true })
+            {
+                var options = Create(type, alternate);
+                if (options is null)
+                {
+                    break;
+                }
+
+                var spec = new IndicatorSpec(target.Name, options);
+
+                double[]? arm;
+                try
+                {
+                    arm = Run(IndicatorCompute.ComputeArm, tickers, spec);
+                }
+                catch
+                {
+                    // No runnable arm, so there is nothing to hold to anything. Whether an arm that throws
+                    // matters is decided by the served sweep, which is where it would be served.
+                    continue;
+                }
+
+                if (arm is null)
+                {
+                    // ComputeArm returns null for an options type with no arm at all.
+                    continue;
+                }
+
+                compared++;
+                try
+                {
+                    var expected = BuilderArmBinding.Compute(new StockData(tickers), spec, target);
+                    if (arm.Length != expected.Count || !Same(arm, expected.ToArray()))
+                    {
+                        disagreed.Add(type.Name);
+                    }
+                }
+                catch
+                {
+                    disagreed.Add(type.Name);
+                }
+            }
+        }
+
+        var servedAndWrong = disagreed.Where(name => BuilderVerifiedArms.Arms.Any(t => t.Name == name)).ToList();
+
+        using var scope = new AssertionScope();
+        compared.Should().BeGreaterThan(200, "every bound spec with an arm is driven through that arm");
+
+        // The promotion guard. A verified arm IS served, so a verified arm that computes something else is
+        // wrong numbers reaching callers - which is exactly what promoting one of the 594 would do.
+        servedAndWrong.Should().BeEmpty(
+            "an arm in BuilderVerifiedArms is served, so it must compute the indicator it is named for");
+
+        disagreed.Count.Should().BeLessThanOrEqualTo(KnownDisagreeingArms,
+            $"the set of arms computing something else can shrink but not grow; {disagreed.Count} of {compared} "
+            + "comparisons disagree");
+
+        foreach (var named in ArmsNamedInIssue233)
+        {
+            BuilderVerifiedArms.Arms.Should().NotContain(t => t.Name == named,
+                $"{named} computes a different indicator from the one it is named for (#233), so serving it "
+                + "would publish the wrong series");
+        }
     }
 
     [Fact]
