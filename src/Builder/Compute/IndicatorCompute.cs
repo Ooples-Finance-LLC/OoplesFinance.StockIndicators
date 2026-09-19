@@ -765,7 +765,7 @@ internal static partial class IndicatorCompute
                 shpma.MaType),
             SimplifiedLeastSquaresMovingAverageSpecOptions slsma => ComputeSimplifiedLeastSquaresMovingAverageFast(data, context, slsma.Length),
             SimplifiedWeightedMovingAverageSpecOptions simpwma => ComputeSimplifiedWeightedMovingAverageFast(data, context, simpwma.Length),
-            SvamaSpecOptions svama => ComputeSvamaFast(data, context, svama.Length),
+            SvamaSpecOptions => ComputeSvamaFast(data, context),
             ThreeHMASpecOptions thma => ComputeThreeHMAFast(data, context, thma.Length),
             TillsonIE2SpecOptions tie2 => ComputeTillsonIE2Fast(data, context, tie2.Length, tie2.MaType),
             TStepLeastSquaresMovingAverageSpecOptions tslsma => ComputeTStepLeastSquaresMovingAverageFast(data, context, tslsma.Length),
@@ -11621,12 +11621,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Svama using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSvamaFast(StockData data, ComputeContext context)
     {
+        // CalculateSvama weights each bar by where its volume sits between the running all-time high and low
+        // volume, and feeds that weight in as the smoothing factor of an exponential average of the chained
+        // series. The published series is the one driven by the high-volume weight. The routine this replaced
+        // used a windowed volume range, and the batch takes no length at all - its length parameter is unused.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.Svama(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double highestVolume = 0;
+        double lowestVolume = 0;
+        double prevCMax = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var volume = volumes[i];
+            highestVolume = i >= 1 ? Math.Max(volume, highestVolume) : volume;
+            lowestVolume = i >= 1 ? Math.Min(volume, lowestVolume) : volume;
+
+            var bMax = highestVolume != 0 ? volume / highestVolume : 0;
+            if (i == 0)
+            {
+                prevCMax = input[i];
+            }
+
+            prevCMax = (bMax * input[i]) + ((1 - bMax) * prevCMax);
+            output[i] = prevCMax;
+        }
+
         return buffer;
     }
 
@@ -11866,12 +11893,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DeMarker using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DeMarker(high, low, buffer.WritableSpan, length);
+        // CalculateDemarker averages the upward extension of the high and the downward extension of the low
+        // separately, then reports the upward share of the two as a percentage. OscillatorCore.DeMarker used a
+        // different smoothing and a different opening window, so it never agreed from the first bar.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        using var upMoves = context.Rent(count);
+        using var downMoves = context.Rent(count);
+        var dMax = upMoves.WritableSpan;
+        var dMin = downMoves.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var prevLow = i >= 1 ? lows[i - 1] : 0;
+            dMax[i] = highs[i] > prevHigh ? highs[i] - prevHigh : 0;
+            dMin[i] = lows[i] < prevLow ? prevLow - lows[i] : 0;
+        }
+
+        using var smoothedUp = context.Rent(count);
+        using var smoothedDown = context.Rent(count);
+        MovingAverage(data, maType, length, upMoves.Span, smoothedUp.WritableSpan);
+        MovingAverage(data, maType, length, downMoves.Span, smoothedDown.WritableSpan);
+        var maxMa = smoothedUp.Span;
+        var minMa = smoothedDown.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var total = maxMa[i] + minMa[i];
+            output[i] = total != 0 ? MathHelper.MinOrMax(maxMa[i] / total * 100, 100, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -15750,64 +15809,45 @@ internal static partial class IndicatorCompute
     /// Computes Information Ratio using zero-allocation fast path.
     /// InformationRatio = excessReturns / trackingError
     /// </summary>
-    internal static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var excessArray = pool.Rent(count);
-        var avgExcessArray = pool.Rent(count);
-        var trackingErrorArray = pool.Rent(count);
+        // CalculateInformationRatio measures the return over a whole length-bar window, not bar to bar, and
+        // subtracts the benchmark from the smoothed return rather than from each observation - so the tracking
+        // error in the denominator is the deviation of the raw windowed return. The routine this replaced did
+        // both differently and read the close instead of the chained series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        try
+        double barsPerYr = (double)(60 * 24 * 30 * 12) / (60 * 24);
+        var bench = MathHelper.Pow(1 + bmk, length / barsPerYr) - 1;
+
+        using var returns = context.Rent(count);
+        var ret = returns.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var excessSpan = excessArray.AsSpan(0, count);
-            var avgExcessSpan = avgExcessArray.AsSpan(0, count);
-            var trackingErrorSpan = trackingErrorArray.AsSpan(0, count);
-
-            // Calculate excess returns
-            var dailyBmk = bmk / 252;
-            excessSpan[0] = 0;
-            for (var i = 1; i < count; i++)
-            {
-                var prevClose = close[i - 1];
-                excessSpan[i] = prevClose != 0 ? (close[i] - prevClose) / prevClose - dailyBmk : 0;
-            }
-
-            ReadOnlySpan<double> excessReadOnly = excessSpan;
-
-            // Calculate average excess returns
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(excessReadOnly, avgExcessSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(excessReadOnly, avgExcessSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(excessReadOnly, avgExcessSpan, length);
-                    break;
-            }
-
-            // Calculate tracking error (stddev of excess returns)
-            VolatilityCore.StandardDeviation(excessReadOnly, trackingErrorSpan, length);
-
-            // Calculate Information Ratio
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                buffer.WritableSpan[i] = trackingErrorSpan[i] != 0 ? avgExcessSpan[i] / trackingErrorSpan[i] : 0;
-            }
-
-            return buffer;
+            var prevValue = i >= length ? input[i - length] : 0;
+            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
         }
-        finally
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, returns.Span, smoothed.WritableSpan);
+        var retMa = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            pool.Return(excessArray);
-            pool.Return(avgExcessArray);
-            pool.Return(trackingErrorArray);
+            output[i] = stdDev[i] != 0 ? (retMa[i] - bench) / stdDev[i] : 0;
         }
+
+        return buffer;
     }
 
     /// <summary>
@@ -19284,11 +19324,31 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
+        // CalculateVolatilitySwitchIndicator takes the standard deviation of the bar-to-bar change expressed
+        // against the midpoint of the two bars, then smooths that. It is not the deviation of the close, which
+        // is what this arm used to return and why it was three orders of magnitude too large.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var dailyReturns = context.Rent(count);
+        var dr = dailyReturns.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var rocSma = (input[i] + prevValue) / 2;
+            dr[i] = rocSma != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / rocSma : 0;
+        }
+
+        using var volatility = context.Rent(count);
+        VolatilityCore.StandardDeviation(dailyReturns.Span, volatility.WritableSpan, length);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, volatility.Span, buffer.WritableSpan);
         return buffer;
     }
 
