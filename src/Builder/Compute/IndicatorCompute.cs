@@ -1292,7 +1292,18 @@ internal static partial class IndicatorCompute
             JapaneseCorrelationCoefficientSpecOptions jcc => ComputeJapaneseCorrelationCoefficientFast(data, context, jcc.Length, jcc.MaType),
             JrcFractalDimensionSpecOptions jfd => ComputeJrcFractalDimensionFast(data, context, jfd.Length1, jfd.Length2, jfd.SmoothLength, jfd.MaType),
             KaseConvergenceDivergenceSpecOptions kcd => ComputeKaseConvergenceDivergenceFast(data, context, kcd.Length1, kcd.Length2, kcd.Length3, kcd.MaType),
-            KaseDevStopV2SpecOptions kds2 => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength, kds2.Length, kds2.StdDev1, kds2.StdDev2, kds2.StdDev3, kds2.StdDev4, kds2.MaType),
+            KaseDevStopV2SpecOptions kds2 => spec.OutputKey switch
+            {
+                null or "Dev1" => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength,
+                    kds2.Length, kds2.StdDev1, kds2.MaType),
+                "Dev2" => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength,
+                    kds2.Length, kds2.StdDev2, kds2.MaType),
+                "Dev3" => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength,
+                    kds2.Length, kds2.StdDev3, kds2.MaType),
+                "Dev4" => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength,
+                    kds2.Length, kds2.StdDev4, kds2.MaType),
+                _ => null
+            },
             KwanIndicatorSpecOptions kwi => ComputeKwanIndicatorFast(data, context, kwi.Length, kwi.SmoothLength, kwi.MaType),
             LBRPaintBarsSpecOptions lbr => ComputeLBRPaintBarsFast(data, context, lbr.Length, lbr.AtrMult, lbr.MaType),
 
@@ -1384,7 +1395,16 @@ internal static partial class IndicatorCompute
 
             // Batch 28 - Volume and Volatility Indicators
             TurboStochasticsSlowSpecOptions tss => ComputeTurboStochasticsSlowFast(data, context, tss.Length1, tss.Length2, tss.TurboLength, tss.MaType),
-            VolumeFlowIndicatorSpecOptions vfi => ComputeVolumeFlowIndicatorFast(data, context, vfi.Length1, vfi.Length2, vfi.SignalLength, vfi.SmoothLength, vfi.MaType),
+            VolumeFlowIndicatorSpecOptions vfi => spec.OutputKey switch
+            {
+                null or "Vfi" => ComputeVolumeFlowIndicatorFast(data, context, vfi.Length1, vfi.Length2,
+                    vfi.SignalLength, vfi.SmoothLength, vfi.Coef, vfi.Vcoef, vfi.MaType),
+                "Signal" => ComputeVolumeFlowIndicatorFast(data, context, vfi.Length1, vfi.Length2,
+                    vfi.SignalLength, vfi.SmoothLength, vfi.Coef, vfi.Vcoef, vfi.MaType, MacdSeries.Signal),
+                "Histogram" => ComputeVolumeFlowIndicatorFast(data, context, vfi.Length1, vfi.Length2,
+                    vfi.SignalLength, vfi.SmoothLength, vfi.Coef, vfi.Vcoef, vfi.MaType, MacdSeries.Histogram),
+                _ => null
+            },
             VolatilityQualityIndexSpecOptions => ComputeVolatilityQualityIndexFast(data, context),
             VolatilityBasedMomentumSpecOptions vbm => ComputeVolatilityBasedMomentumFast(data, context, vbm.Length1, vbm.Length2, vbm.MaType),
             VolatilitySwitchIndicatorSpecOptions vsi => ComputeVolatilitySwitchIndicatorFast(data, context, vsi.Length, vsi.MaType),
@@ -21845,78 +21865,59 @@ internal static partial class IndicatorCompute
     /// Computes Kase Dev Stop V2 using zero-allocation fast path.
     /// Returns the trailing stop level based on trend direction and volatility.
     /// </summary>
-    internal static ComputeBuffer ComputeKaseDevStopV2Fast(StockData data, ComputeContext context,
-        int fastLength = 10, int slowLength = 21, int length = 20,
-        double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6,
+    internal static ComputeBuffer ComputeKaseDevStopV2Fast(StockData data, ComputeContext context, int fastLength = 10,
+        int slowLength = 21, int length = 20, double stdDev = 0,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
+        // CalculateKaseDevStopV2 multiplies the trend-shifted price by the range band rather than stepping away
+        // from it: each published level is (price - trend) * (average range + a multiple of the deviation of
+        // that range), and the four keys differ only by that multiple. The range reaches two bars back through
+        // the chained series, not through the close, and the price is the high in an uptrend and the low in a
+        // downtrend.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+        var fastAverage = fast.Span;
+        var slowAverage = slow.Span;
+
+        using var ranges = context.Rent(count);
+        var rangeValues = ranges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousHigh = i >= 1 ? highs[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var previousValue = i >= 2 ? input[i - 2] : 0;
+            rangeValues[i] = Math.Max(Math.Max(highs[i], previousHigh), previousValue)
+                - Math.Min(Math.Min(lows[i], previousLow), previousValue);
+        }
+
+        using var rangeAverage = context.Rent(count);
+        MovingAverage(data, maType, length, ranges.Span, rangeAverage.WritableSpan);
+        var averages = rangeAverage.Span;
+
+        using var rangeDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(ranges.Span, rangeDeviation.WritableSpan, length);
+        var deviations = rangeDeviation.Span;
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        var pool = ArrayPool<double>.Shared;
-
-        var maFast = pool.Rent(count);
-        var maSlow = pool.Rent(count);
-        var rrange = pool.Rent(count);
-        var rangeAvg = pool.Rent(count);
-        var rangeStd = pool.Rent(count);
-
-        try
+        for (var i = 0; i < count; i++)
         {
-            var maFastSpan = maFast.AsSpan(0, count);
-            var maSlowSpan = maSlow.AsSpan(0, count);
-            var rrangeSpan = rrange.AsSpan(0, count);
-            var rangeAvgSpan = rangeAvg.AsSpan(0, count);
-            var rangeStdSpan = rangeStd.AsSpan(0, count);
-
-            maCore.Compute(close, maFastSpan, fastLength);
-            maCore.Compute(close, maSlowSpan, slowLength);
-
-            // Calculate range
-            for (int i = 0; i < count; i++)
-            {
-                double prevHigh = i >= 1 ? high[i - 1] : 0;
-                double prevLow = i >= 1 ? low[i - 1] : 0;
-                double prevClose = i >= 2 ? close[i - 2] : 0;
-
-                double mmax = Math.Max(Math.Max(high[i], prevHigh), prevClose);
-                double mmin = Math.Min(Math.Min(low[i], prevLow), prevClose);
-                rrangeSpan[i] = mmax - mmin;
-            }
-
-            maCore.Compute(rrangeSpan, rangeAvgSpan, length);
-            VolatilityCore.StandardDeviation(rrangeSpan, rangeStdSpan, length);
-
-            // Calculate stop levels
-            for (int i = 0; i < count; i++)
-            {
-                double trend = maFastSpan[i] > maSlowSpan[i] ? 1 : -1;
-                double price = trend > 0 ? high[i] : low[i];
-                double avg = rangeAvgSpan[i];
-                double std = rangeStdSpan[i];
-
-                double stop1 = price - (avg + (std * stdDev1)) * trend;
-                double stop2 = price - (avg + (std * stdDev2)) * trend;
-                double stop3 = price - (avg + (std * stdDev3)) * trend;
-                double stop4 = price - (avg + (std * stdDev4)) * trend;
-
-                // Return the most conservative stop (stop2 is typical)
-                output[i] = stop2;
-            }
-        }
-        finally
-        {
-            pool.Return(maFast);
-            pool.Return(maSlow);
-            pool.Return(rrange);
-            pool.Return(rangeAvg);
-            pool.Return(rangeStd);
+            double trend = fastAverage[i] > slowAverage[i] ? 1 : -1;
+            var price = trend == 1 ? highs[i] : lows[i];
+            output[i] = (price + (-1 * trend)) * (averages[i] + (stdDev * deviations[i]));
         }
 
         return buffer;
@@ -24173,12 +24174,71 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130, int length2 = 30, int signalLength = 5, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVolumeFlowIndicatorFast(StockData data, ComputeContext context, int length1 = 130,
+        int length2 = 30, int signalLength = 5, int smoothLength = 3, double coef = 0.2, double vcoef = 2.5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.PriceVolumeTrend(close, volume, buffer.WritableSpan);
+        // CalculateVolumeFlowIndicator works on the typical price, or on the chained series when one is
+        // chained. It compares each bar's typical price change against a cutoff set by the close, the deviation
+        // of the log returns over length2 and a coefficient, and counts the bar's volume - capped at a multiple
+        // of the PREVIOUS bar's average volume - with the sign of that change. The running sum over length1 is
+        // divided by the current average volume and then smoothed.
+        var (inputList, _, _, _, closeList, volumeList) =
+            CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var closes = SpanCompat.AsReadOnlySpan(closeList);
+        var volumes = SpanCompat.AsReadOnlySpan(volumeList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+
+        using var logReturns = context.Rent(count);
+        var inter = logReturns.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            inter[i] = currentValue > 0 && previousValue > 0 ? Math.Log(currentValue) - Math.Log(previousValue) : 0;
+        }
+
+        using var logDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(logReturns.Span, logDeviation.WritableSpan, length2);
+        var vinter = logDeviation.Span;
+
+        using var averageVolume = context.Rent(count);
+        MovingAverage(data, maType, length1, volumes, averageVolume.WritableSpan);
+        var vave = averageVolume.Span;
+
+        using var normalised = context.Rent(count);
+        var vcpVaveSum = normalised.WritableSpan;
+        var vcpTotal = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var previousAverage = i >= 1 ? vave[i - 1] : 0;
+            var cutoff = closes[i] * vinter[i] * coef;
+            var vc = Math.Min(volumes[i], previousAverage * vcoef);
+            var mf = i >= 1 ? input[i] - input[i - 1] : 0;
+
+            var vcp = mf > cutoff ? vc : mf < cutoff * -1 ? vc * -1 : mf > 0 ? vc : mf < 0 ? vc * -1 : 0;
+            vcpTotal.Add(vcp);
+            vcpVaveSum[i] = vave[i] != 0 ? vcpTotal.Sum(length1) / vave[i] : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, normalised.Span, buffer.WritableSpan);
+        if (series == MacdSeries.Line)
+        {
+            return buffer;
+        }
+
+        using var signal = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, signalLength, buffer.Span, signal.WritableSpan);
+        var signalLine = signal.Span;
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = series == MacdSeries.Signal ? signalLine[i] : output[i] - signalLine[i];
+        }
+
         return buffer;
     }
 
