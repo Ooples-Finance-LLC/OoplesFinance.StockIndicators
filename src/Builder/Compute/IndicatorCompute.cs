@@ -103,7 +103,7 @@ internal static partial class IndicatorCompute
             StochRsiSpecOptions srsi => ComputeStochasticRsiFast(data, context, srsi.RsiLength, maType: srsi.MaType,
                 stochLength: srsi.StochLength),
             AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
-            DpoSpecOptions dpo => ComputeDpoFast(data, context, dpo.Length),
+            DpoSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.SumLength),
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
@@ -403,7 +403,7 @@ internal static partial class IndicatorCompute
             // Batch 5 - Statistical indicators
             HighLowIndexSpecOptions hli => ComputeHighLowIndexFast(data, context, hli.Length),
             MarketFacilitationIndexSpecOptions mfidx => ComputeMarketFacilitationIndexFast(data, context, mfidx.Length),
-            TrendScoreSpecOptions ts => ComputeTrendScoreFast(data, context, ts.Length),
+            TrendScoreSpecOptions ts => ComputeChandeTrendScoreFast(data, context, endLength: ts.Length),
             MedianValueSpecOptions mv => ComputeMedianValueFast(data, context, mv.Length),
             LogReturnsSpecOptions lr => ComputeLogReturnsFast(data, context, lr.Length),
             SimpleReturnsSpecOptions sr => ComputeSimpleReturnsFast(data, context, sr.Length),
@@ -525,7 +525,7 @@ internal static partial class IndicatorCompute
             SupportAndResistanceOscillatorSpecOptions saro => ComputeSupportAndResistanceOscillatorFast(data, context, saro.Length),
             TradingMadeMoreSimplerOscillatorSpecOptions tmmso => ComputeTradingMadeMoreSimplerOscillatorFast(data, context, tmmso.Length),
             NthOrderDifferencingOscillatorSpecOptions nodo => ComputeNthOrderDifferencingOscillatorFast(data, context, nodo.Length),
-            OscOscillatorSpecOptions osco => ComputeOscOscillatorFast(data, context, osco.Length),
+            OscOscillatorSpecOptions osco => ComputeOscOscillatorFast(data, context, osco.Length, osco.MaType),
 
             // Batch 6 - Ehlers oscillators
             EhlersCenterOfGravityOscillatorSpecOptions ecogo => ComputeEhlersCenterOfGravityOscillatorFast(data, context, ecogo.Length),
@@ -668,7 +668,7 @@ internal static partial class IndicatorCompute
             // Batch 7 - Price/Statistical indicators
             FullTypicalPriceSpecOptions ftp => ComputeFullTypicalPriceFast(data, context, ftp.Length),
             InternalBarStrengthIndicatorSpecOptions ibs => ComputeInternalBarStrengthIndicatorFast(data, context, ibs.Length),
-            ZScoreSpecOptions zscore => ComputeZScoreFast(data, context, zscore.Length),
+            ZScoreSpecOptions zscore => ComputeZScoreFast(data, context, zscore.Length, zscore.MaType),
             FastZScoreSpecOptions fzscore => ComputeFastZScoreFast(data, context, fzscore.Length),
             KurtosisIndicatorSpecOptions kurtosis => ComputeKurtosisIndicatorFast(data, context, kurtosis.Length),
 
@@ -811,7 +811,8 @@ internal static partial class IndicatorCompute
             // so there is no pole count for it to choose.
             EhlersDeviationScaledSuperSmootherSpecOptions edsss => ComputeEhlersDeviationScaledSuperSmootherFast(data, context, edsss.Length, edsss.MaType),
             PpoMaSpecOptions ppoma => ComputePpoMaFast(data, context, ppoma.FastLength, ppoma.SlowLength),
-            PriceOscillatorSpecOptions posc => ComputePriceOscillatorFast(data, context, posc.ShortLength, posc.LongLength),
+            PriceOscillatorSpecOptions posc => ComputeAbsolutePriceOscillatorFast(data, context, posc.ShortLength,
+                posc.LongLength),
             ReverseEngineeringRsiSpecOptions rersi => ComputeReverseEngineeringRsiFast(data, context, rersi.Length, rersi.RsiLevel),
             ReverseMovingAverageConvergenceDivergenceSpecOptions rmacd => ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel),
             SimplePriceZoneSpecOptions spz => ComputeSimplePriceZoneFast(data, context, spz.Length),
@@ -962,7 +963,7 @@ internal static partial class IndicatorCompute
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
             PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
             PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context),
-            PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length),
+            PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
             PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length),
@@ -991,7 +992,8 @@ internal static partial class IndicatorCompute
             BearPowerIndicatorSpecOptions beari => ComputeBearPowerFast(data, context, beari.Length),
             MomentumOscillatorSpecOptions mosc => ComputeMomentumOscillatorFast(data, context, mosc.Length, mosc.SmoothLength),
             StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length),
-            StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length, stfo.SmoothLength1),
+            StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length,
+                stfo.SmoothLength1, stfo.MaType),
 
             // Multi-output: KeltnerChannels
             KeltnerChannelsSpecOptions kc => spec.OutputKey switch
@@ -1923,18 +1925,6 @@ internal static partial class IndicatorCompute
         }
         var buffer = context.Rent(count);
         OscillatorCore.AroonOscillator(high, low, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Detrended Price Oscillator using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeDpoFast(StockData data, ComputeContext context, int length = 20)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DetrendedPriceOscillator(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -3444,13 +3434,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pretty Good Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePrettyGoodOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePrettyGoodOscillatorFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PrettyGoodOscillator(high, low, close, buffer.WritableSpan, length);
+        // CalculatePrettyGoodOscillator measures how far the chained series sits from its own moving average
+        // in units of the average true range. OscillatorCore.PrettyGoodOscillator took the high, low and close
+        // and never saw the chained series or the moving average type at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var averages = context.Rent(count);
+        MovingAverage(data, maType, length, input, averages.WritableSpan);
+        var average = averages.Span;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = atr[i] != 0 ? (input[i] - average[i]) / atr[i] : 0;
+        }
+
         return buffer;
     }
 
@@ -5985,18 +5992,6 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Trend Score using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeTrendScoreFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.TrendScore(inputSpan, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
     /// Computes Rolling Median using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeMedianValueFast(StockData data, ComputeContext context, int length = 14)
@@ -7243,11 +7238,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Osc Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeOscOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeOscOscillatorFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.OscOscillator(close, buffer.WritableSpan, length / 2, length);
+        // CalculateOscOscillator subtracts the fast average from the slow one - that way round - over the
+        // chained series, the fast length being half the slow. OscillatorCore.OscOscillator read the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var fastAverages = context.Rent(count);
+        using var slowAverages = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(1, length / 2), input, fastAverages.WritableSpan);
+        MovingAverage(data, maType, length, input, slowAverages.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var fast = fastAverages.Span;
+        var slow = slowAverages.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = slow[i] - fast[i];
+        }
+
         return buffer;
     }
 
@@ -8592,11 +8605,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Z-Score using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ZScore(close, buffer.WritableSpan, length);
+        // CalculateZScore standardises the chained series against its own moving average and population
+        // standard deviation. OscillatorCore.ZScore read the close and offered no moving average type.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        using var averages = context.Rent(count);
+        MovingAverage(data, maType, length, input, averages.WritableSpan);
+        var average = averages.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, Math.Max(1, length));
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = stdDev[i] != 0 ? (input[i] - average[i]) / stdDev[i] : 0;
+        }
+
         return buffer;
     }
 
@@ -10173,18 +10205,6 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.PpoMa(inputSpan, buffer.WritableSpan, fastLength, slowLength);
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Price Oscillator using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputePriceOscillatorFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.PriceOscillator(inputSpan, buffer.WritableSpan, shortLength, longLength);
         return buffer;
     }
 
@@ -12476,32 +12496,21 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Fast Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14,
+        int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
+        // CalculateStochasticFastOscillator republishes the stochastic oscillator's FastD - the raw stochastic
+        // smoothed once - over the chained series. The arm this replaced rebuilt the price spans from the
+        // ticker list and smoothed a stochastic of the close, which is a different series on a different input.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, fastK.WritableSpan);
+
         var buffer = context.Rent(count);
-        var pool = ArrayPool<double>.Shared;
-        var kArray = pool.Rent(count);
-        try
-        {
-            var k = kArray.AsSpan(0, count);
-            OscillatorCore.StochasticK(high, low, close, k, length);
-            MovingAverageCore.ExponentialMovingAverage(k, buffer.WritableSpan, smoothLength);
-        }
-        finally
-        {
-            pool.Return(kArray);
-        }
+        MovingAverage(data, maType, smoothLength, fastK.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
