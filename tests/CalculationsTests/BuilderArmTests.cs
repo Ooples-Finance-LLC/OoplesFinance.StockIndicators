@@ -375,8 +375,14 @@ public sealed class BuilderArmTests : GlobalTestData
                         {
                             if (!IsClose(expected[i], arm[i]))
                             {
+                                // An infinite denominator makes the ratio NaN, which then poisons tailMax
+                                // through Math.Max and leaves the dump with no worst relative difference at
+                                // all. An arm that has run away to infinity where the batch has not is the
+                                // largest divergence there is, so record it as such.
                                 var denom = Math.Max(Math.Abs(expected[i]), Math.Abs(arm[i]));
-                                tailMax = Math.Max(tailMax, denom > 0 ? Math.Abs(expected[i] - arm[i]) / denom : 1);
+                                tailMax = double.IsInfinity(denom)
+                                    ? double.PositiveInfinity
+                                    : Math.Max(tailMax, denom > 0 ? Math.Abs(expected[i] - arm[i]) / denom : 1);
                             }
                         }
 
