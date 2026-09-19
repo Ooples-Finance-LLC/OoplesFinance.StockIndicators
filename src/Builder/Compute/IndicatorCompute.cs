@@ -783,7 +783,16 @@ internal static partial class IndicatorCompute
             ModularFilterSpecOptions modf => ComputeModularFilterFast(data, context, modf.Length, modf.Beta),
             DynamicallyAdjustableMovingAverageSpecOptions dama => ComputeDynamicallyAdjustableMovingAverageFast(data, context, dama.FastLength, dama.SlowLength),
             EquityMovingAverageSpecOptions eqma => ComputeEquityMovingAverageFast(data, context, eqma.Length, eqma.MaType),
-            MultiDepthZeroLagExponentialMovingAverageSpecOptions mdzlema => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, mdzlema.Length),
+            MultiDepthZeroLagExponentialMovingAverageSpecOptions mdzlema => spec.OutputKey switch
+            {
+                null or "Md2Pole" => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context,
+                    mdzlema.Length),
+                "Md1Pole" => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, mdzlema.Length,
+                    MultiDepthPole.OnePole),
+                "Md3Pole" => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, mdzlema.Length,
+                    MultiDepthPole.ThreePole),
+                _ => null
+            },
             PolynomialLeastSquaresMovingAverageSpecOptions plsma => ComputePolynomialLeastSquaresMovingAverageFast(data, context, plsma.Length),
             PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
             QuadraticLeastSquaresMovingAverageSpecOptions qlsma => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
@@ -6865,11 +6874,74 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Least Squares using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context,
+        int length = 500, double smooth = 1.5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AdaptiveLeastSquares(close, buffer.WritableSpan, length);
+        // CalculateAdaptiveLeastSquares fits a line through exponentially weighted moments of the bar index
+        // against the series, where the weight is set per bar by the true range relative to the highest true
+        // range of the window. It carries every moment recursively, so nothing here is a windowed regression,
+        // and the true range of the first bar is measured against that bar's own value rather than zero.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var trueRangeWindow = new RollingMinMax(length);
+        double previousX = 0, previousY = 0, previousMx = 0, previousMy = 0;
+        double previousMxx = 0, previousMyy = 0, previousMxy = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            double index = i;
+            var previousValue = i >= 1 ? input[i - 1] : currentValue;
+            var trueRange = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], previousValue);
+            trueRangeWindow.Add(trueRange);
+
+            var highest = trueRangeWindow.Max;
+            var alpha = highest != 0
+                ? MathHelper.MinOrMax(MathHelper.Pow(trueRange / highest, smooth), 0.99, 0.01)
+                : 0.01;
+
+            var x = (alpha * index) + ((1 - alpha) * (i >= 1 ? previousX : index));
+            var y = (alpha * currentValue) + ((1 - alpha) * (i >= 1 ? previousY : currentValue));
+            var dx = Math.Abs(index - x);
+            var dy = Math.Abs(currentValue - y);
+            var mx = (alpha * dx) + ((1 - alpha) * (i >= 1 ? previousMx : dx));
+            var my = (alpha * dy) + ((1 - alpha) * (i >= 1 ? previousMy : dy));
+            var xx = index * index;
+            var yy = currentValue * currentValue;
+            var xy = index * currentValue;
+            var mxx = (alpha * xx) + ((1 - alpha) * (i >= 1 ? previousMxx : xx));
+            var myy = (alpha * yy) + ((1 - alpha) * (i >= 1 ? previousMyy : yy));
+            var mxy = (alpha * xy) + ((1 - alpha) * (i >= 1 ? previousMxy : xy));
+
+            var alphaValue = (2 / alpha) + 1;
+            var a1 = alpha != 0 ? (MathHelper.Pow(alphaValue, 2) * mxy) - (alphaValue * mx * alphaValue * my) : 0;
+            var product = ((MathHelper.Pow(alphaValue, 2) * mxx) - MathHelper.Pow(alphaValue * mx, 2))
+                * ((MathHelper.Pow(alphaValue, 2) * myy) - MathHelper.Pow(alphaValue * my, 2));
+            var b1 = product >= 0 ? MathHelper.Sqrt(product) : 0;
+            var r = b1 != 0 ? a1 / b1 : 0;
+            var slope = mx != 0 ? r * (my / mx) : 0;
+            output[i] = (x * slope) + (y - (slope * x));
+
+            previousX = x;
+            previousY = y;
+            previousMx = mx;
+            previousMy = my;
+            previousMxx = mxx;
+            previousMyy = myy;
+            previousMxy = mxy;
+        }
+
         return buffer;
     }
 
@@ -14191,12 +14263,91 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Multi Depth Zero Lag Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Which of the Multi Depth Zero Lag Exponential Moving Average's three published depths an arm has been
+    /// asked for. Each depth is a different recursion - one, two and three poles - and the detrended
+    /// correction each adds back is divided by its own depth, so these are not interchangeable smoothings of
+    /// one series.
+    /// </summary>
+    internal enum MultiDepthPole
     {
+        OnePole,
+        TwoPole,
+        ThreePole
+    }
+
+    internal static ComputeBuffer ComputeMultiDepthZeroLagExponentialMovingAverageFast(StockData data,
+        ComputeContext context, int length = 50, MultiDepthPole pole = MultiDepthPole.TwoPole)
+    {
+        // CalculateMultiDepthZeroLagExponentialMovingAverage runs one, two and three pole filters over the
+        // series, runs the same filter again over what each one leaves behind, and adds that correction back
+        // divided by the depth. The two pole depth is the primary series. Each filter seeds its own history
+        // with the current value rather than zero, so none of them opens from the bottom of the chart.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.MultiDepthZeroLagExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var a1 = (double)2 / (length + 1);
+        var a2 = MathHelper.Exp(-MathHelper.Sqrt(2) * Math.PI / length);
+        var a3 = MathHelper.Exp(-Math.PI / length);
+        var b2 = 2 * a2 * Math.Cos(MathHelper.Sqrt(2) * Math.PI / length);
+        var b3 = 2 * a3 * Math.Cos(MathHelper.Sqrt(3) * Math.PI / length);
+        var c = MathHelper.Exp(-2 * Math.PI / length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double alpha1Previous = 0;
+        double alpha2Previous = 0, alpha2Prior = 0;
+        double alpha3Previous = 0, alpha3Prior = 0, alpha3Earliest = 0;
+        double beta1Previous = 0;
+        double beta2Previous = 0, beta2Prior = 0;
+        double beta3Previous = 0, beta3Prior = 0, beta3Earliest = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+
+            var alpha1 = (a1 * currentValue) + ((1 - a1) * (i >= 1 ? alpha1Previous : currentValue));
+            var alpha2 = (b2 * (i >= 1 ? alpha2Previous : currentValue))
+                - (a2 * a2 * (i >= 2 ? alpha2Prior : currentValue))
+                + ((1 - b2 + (a2 * a2)) * currentValue);
+            var alpha3 = ((b3 + c) * (i >= 1 ? alpha3Previous : currentValue))
+                - ((c + (b3 * c)) * (i >= 2 ? alpha3Prior : currentValue))
+                + (c * c * (i >= 3 ? alpha3Earliest : currentValue))
+                + ((1 - b3 + c) * (1 - c) * currentValue);
+
+            var beta1 = (a1 * (currentValue - alpha1)) + ((1 - a1) * beta1Previous);
+            var beta2 = (b2 * beta2Previous) - (a2 * a2 * beta2Prior)
+                + ((1 - b2 + (a2 * a2)) * (currentValue - alpha2));
+
+            // The batch reads the bar before last twice here rather than reading the previous bar once. That
+            // is what CalculateMultiDepthZeroLagExponentialMovingAverage publishes, so it is what the three
+            // pole depth has to reproduce; correcting it would move the batch, not the arm.
+            var beta3 = ((b3 + c) * beta3Prior) - ((c + (b3 * c)) * beta3Prior) + (c * c * beta3Earliest)
+                + ((1 - b3 + c) * (1 - c) * (currentValue - alpha3));
+
+            output[i] = pole switch
+            {
+                MultiDepthPole.OnePole => alpha1 + ((double)1 / 1 * beta1),
+                MultiDepthPole.ThreePole => alpha3 + ((double)1 / 3 * beta3),
+                _ => alpha2 + ((double)1 / 2 * beta2)
+            };
+
+            alpha1Previous = alpha1;
+            alpha2Prior = alpha2Previous;
+            alpha2Previous = alpha2;
+            alpha3Earliest = alpha3Prior;
+            alpha3Prior = alpha3Previous;
+            alpha3Previous = alpha3;
+            beta1Previous = beta1;
+            beta2Prior = beta2Previous;
+            beta2Previous = beta2;
+            beta3Earliest = beta3Prior;
+            beta3Prior = beta3Previous;
+            beta3Previous = beta3;
+        }
+
         return buffer;
     }
 
