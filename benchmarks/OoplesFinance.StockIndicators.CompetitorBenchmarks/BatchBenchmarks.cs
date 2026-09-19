@@ -300,4 +300,93 @@ public class BatchBenchmarks
     public TALib.Core.RetCode StochasticTaLib() =>
         Functions.Stoch<double>(_data.Highs, _data.Lows, _data.Closes, Range.All, _output, _output2, out _,
             StochasticK, StochasticD, TALib.Core.MAType.Sma, StochasticD, TALib.Core.MAType.Sma);
+
+    // The same builder, handed the columns the caller already holds instead of a StockData it has to copy
+    // them into. Every competitor receives its input pre-built in the GlobalSetup above; this is the arm that
+    // measures the same courtesy, and the difference between it and "Ooples v2 builder" is the adapter.
+    private IndicatorDataSource Columns() => IndicatorDataSource.FromColumns(
+        _data.Opens, _data.Highs, _data.Lows, _data.Closes, _data.Volumes, _data.Dates);
+
+    [BenchmarkCategory("Sma"), Benchmark(Description = "Ooples v2 columns")]
+    public int SmaOoplesColumns()
+    {
+        var handle = default(SeriesHandle);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators => handle = indicators.Sma(SmaLength))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(handle).AsSpan().Length;
+    }
+
+    [BenchmarkCategory("Ema"), Benchmark(Description = "Ooples v2 columns")]
+    public int EmaOoplesColumns()
+    {
+        var handle = default(SeriesHandle);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators => handle = indicators.Ema(EmaLength))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(handle).AsSpan().Length;
+    }
+
+    [BenchmarkCategory("Rsi"), Benchmark(Description = "Ooples v2 columns")]
+    public int RsiOoplesColumns()
+    {
+        var handle = default(SeriesHandle);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators => handle = indicators.Rsi(RsiLength))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(handle).AsSpan().Length;
+    }
+
+    [BenchmarkCategory("Atr"), Benchmark(Description = "Ooples v2 columns")]
+    public int AtrOoplesColumns()
+    {
+        var handle = default(SeriesHandle);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators => handle = indicators.Atr(AtrLength))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(handle).AsSpan().Length;
+    }
+    [BenchmarkCategory("BollingerBands"), Benchmark(Description = "Ooples v2 columns")]
+    public int BollingerOoplesColumns()
+    {
+        var bands = default(Builder.BollingerBandsResult);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators =>
+                bands = indicators.BollingerBands(BollingerLength, BollingerStdDev))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(bands.Upper).AsSpan().Length
+            + runtime.GetSeries(bands.Middle).AsSpan().Length
+            + runtime.GetSeries(bands.Lower).AsSpan().Length;
+    }
+
+    [BenchmarkCategory("Macd"), Benchmark(Description = "Ooples v2 columns")]
+    public int MacdOoplesColumns()
+    {
+        var macd = default(Builder.MacdResult);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators => macd = indicators.Macd(MacdFast, MacdSlow, MacdSignal))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(macd.Primary).AsSpan().Length
+            + runtime.GetSeries(macd.Signal).AsSpan().Length
+            + runtime.GetSeries(macd.Histogram).AsSpan().Length;
+    }
+
+    [BenchmarkCategory("Stochastic"), Benchmark(Description = "Ooples v2 columns")]
+    public int StochasticOoplesColumns()
+    {
+        var stochastic = default(StochasticResult);
+        using var runtime = new StockIndicatorBuilder(Columns())
+            .ConfigureIndicators(indicators =>
+                stochastic = indicators.Stochastic(StochasticK, StochasticD))
+            .Build();
+        runtime.Start();
+        return runtime.GetSeries(stochastic.K).AsSpan().Length
+            + runtime.GetSeries(stochastic.D).AsSpan().Length;
+    }
 }

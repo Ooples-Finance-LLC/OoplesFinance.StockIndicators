@@ -97,8 +97,12 @@ internal sealed class CompetitorData
     /// instance it is given, so a benchmark that reuses one is measuring a partly-populated object after the
     /// first iteration.
     /// </summary>
-    public StockData NewStockData() => new(
-        [.. Opens], [.. Highs], [.. Lows], [.. Closes], [.. Volumes], [.. Dates]);
+    /// <remarks>
+    /// The arrays go in as they are. StockData's column constructor copies each one into a List&lt;double&gt;
+    /// anyway, so spreading them into fresh arrays first bought nothing and cost 400,184 bytes a call at 10,000
+    /// bars - charged to this library's arms and to no competitor's.
+    /// </remarks>
+    public StockData NewStockData() => new(Opens, Highs, Lows, Closes, Volumes, Dates);
 
     /// <summary>The same series truncated to <paramref name="bars"/> bars, for warm-then-append measurements.</summary>
     public CompetitorData Take(int bars) => new(
