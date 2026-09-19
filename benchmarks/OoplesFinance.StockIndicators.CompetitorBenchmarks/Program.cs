@@ -16,4 +16,10 @@ if (args.Length > 0 && args[0].Equals("--verify", StringComparison.OrdinalIgnore
     return;
 }
 
+if (args.Length > 0 && args[0].Equals("--alloc", StringComparison.OrdinalIgnoreCase))
+{
+    AllocProbe.Run(Console.Out);
+    return;
+}
+
 BenchmarkSwitcher.FromAssembly(typeof(BatchBenchmarks).Assembly).Run(args);
