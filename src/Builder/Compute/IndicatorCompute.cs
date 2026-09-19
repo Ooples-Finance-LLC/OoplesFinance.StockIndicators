@@ -673,7 +673,7 @@ internal static partial class IndicatorCompute
             InternalBarStrengthIndicatorSpecOptions ibs => ComputeInternalBarStrengthIndicatorFast(data, context, ibs.Length),
             ZScoreSpecOptions zscore => ComputeZScoreFast(data, context, zscore.Length, zscore.MaType),
             FastZScoreSpecOptions fzscore => ComputeFastZScoreFast(data, context, fzscore.Length, fzscore.MaType),
-            KurtosisIndicatorSpecOptions kurtosis => ComputeKurtosisIndicatorFast(data, context, kurtosis.Length),
+            KurtosisIndicatorSpecOptions => ComputeKurtosisIndicatorFast(data, context),
 
             // Batch 7 - Demark indicators
             DemarkRangeExpansionIndexSpecOptions dmkrei => ComputeDemarkRangeExpansionIndexFast(data, context, dmkrei.Length),
@@ -1062,7 +1062,8 @@ internal static partial class IndicatorCompute
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
             GainLossMovingAverageSpecOptions glma => ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
-            ErgodicMeanDeviationIndicatorSpecOptions emdi => ComputeErgodicMeanDeviationIndicatorFast(data, context, emdi.Length1, emdi.Length2, emdi.Length3, emdi.SignalLength, emdi.MaType),
+            ErgodicMeanDeviationIndicatorSpecOptions emdi => ComputeErgodicMeanDeviationIndicatorFast(data, context, emdi.Length1, emdi.Length2,
+                emdi.Length3, emdi.MaType),
 
             // Batch 13 - Volatility Indicators with Core Methods
             MayerMultipleSpecOptions mm => ComputeMayerMultipleFast(data, context, mm.Length, mm.MaType),
@@ -9448,11 +9449,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kurtosis Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Kurtosis(close, buffer.WritableSpan, length);
+        // CalculateKurtosisIndicator publishes "Fk": the exponential average, over its fixed slow length, of the
+        // second difference of the chained series. Its four lengths are fixed by the batch call and the moving
+        // average type is hardcoded, so the arm takes no parameters - the spec's only option has no effect and
+        // the weighted pass over the result is the separate "Signal" series.
+        const int length1 = 3;
+        const int length2 = 1;
+        const int slowLength = 65;
+
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var firstDifference = context.Rent(count);
+        var diff = firstDifference.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var priorValue = i >= length1 ? input[i - length1] : 0;
+            diff[i] = CalculationsHelper.MinPastValues(i, length1, input[i] - priorValue);
+        }
+
+        using var secondDifference = context.Rent(count);
+        var k = secondDifference.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var priorDiff = i >= length2 ? diff[i - length2] : 0;
+            k[i] = CalculationsHelper.MinPastValues(i, length2, diff[i] - priorDiff);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, slowLength, secondDifference.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -14511,97 +14539,33 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Mean Deviation Indicator with signal line.
     /// </summary>
-    internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32,
+        int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var count = data.Count;
+        // CalculateErgodicMeanDeviationIndicator publishes "Emdi": the deviation of the chained series from its
+        // own moving average, smoothed twice more. The spec's signalLength feeds only the separate "Signal"
+        // series, so it is not a parameter of this arm.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(count);
-        var deviationArray = pool.Rent(count);
-        var deviationEma1Array = pool.Rent(count);
-        var emdiArray = pool.Rent(count);
-        try
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length1, input, average.WritableSpan);
+        var ma = average.Span;
+
+        using var deviation = context.Rent(count);
+        var dev = deviation.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var emaSpan = emaArray.AsSpan(0, count);
-            var deviationSpan = deviationArray.AsSpan(0, count);
-            var deviationEma1Span = deviationEma1Array.AsSpan(0, count);
-            var emdiSpan = emdiArray.AsSpan(0, count);
-
-            // Step 1: Compute EMA of input (length1)
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(inputSpan, emaSpan, length1);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(inputSpan, emaSpan, length1);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(inputSpan, emaSpan, length1);
-                    break;
-            }
-
-            // Step 2: Compute deviation from EMA
-            ReadOnlySpan<double> emaReadOnly = emaSpan;
-            OscillatorCore.DeviationFromMa(inputSpan, emaReadOnly, deviationSpan);
-            ReadOnlySpan<double> deviationReadOnly = deviationSpan;
-
-            // Step 3: First smoothing (length2)
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(deviationReadOnly, deviationEma1Span, length2);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(deviationReadOnly, deviationEma1Span, length2);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(deviationReadOnly, deviationEma1Span, length2);
-                    break;
-            }
-
-            // Step 4: Second smoothing (length3) = EMDI
-            ReadOnlySpan<double> deviationEma1ReadOnly = deviationEma1Span;
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(deviationEma1ReadOnly, emdiSpan, length3);
-                    break;
-            }
-
-            // Step 5: Signal line (signalLength)
-            ReadOnlySpan<double> emdiReadOnly = emdiSpan;
-            var buffer = context.Rent(count);
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(emdiReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-            }
-
-            return buffer;
+            dev[i] = input[i] - ma[i];
         }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(deviationArray);
-            pool.Return(deviationEma1Array);
-            pool.Return(emdiArray);
-        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length2, deviation.Span, smoothed.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length3, smoothed.Span, buffer.WritableSpan);
+        return buffer;
     }
 
     /// <summary>
@@ -16821,23 +16785,39 @@ internal static partial class IndicatorCompute
     /// Computes Inverse Fisher Fast Z Score using zero-allocation fast path.
     /// Returns the inverse fisher transformed value.
     /// </summary>
-    internal static ComputeBuffer ComputeInverseFisherFastZScoreFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInverseFisherFastZScoreFast(StockData data, ComputeContext context, int length = 50,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateInverseFisherFastZScore publishes the inverse Fisher transform of the fast z-score: the gap
+        // between the half length and full length linear regressions of the smoothed chained series, scaled by
+        // the standard deviation of that smoothed series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
 
-        switch (maType)
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var sma = average.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(average.Span, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var fullRegression = new RollingLeastSquares(length);
+        using var halfRegression = new RollingLeastSquares(length1);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var linreg1 = fullRegression.Next(sma[i], isFinal: true).Last;
+            var linreg2 = halfRegression.Next(sma[i], isFinal: true).Last;
+
+            var fz = stdDev[i] != 0 ? (linreg2 - linreg1) / stdDev[i] / 2 : 0;
+            var expValue = MathHelper.Exp(10 * fz);
+            output[i] = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
         }
 
         return buffer;
@@ -17316,38 +17296,83 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Market Mirror using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalMarketMirrorFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketMirrorFast(StockData data, ComputeContext context, int length = 40,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalMarketMirror publishes "Nmm": the moving average of the mean square root weighted
+        // change in the log of the chained series across the whole window. The two case switch this replaced was
+        // a plain moving average of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var logarithm = context.Rent(count);
+        var ln = logarithm.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            ln[i] = input[i] > 0 ? Math.Log(input[i]) * 1000 : 0;
         }
+
+        using var weightedAverage = context.Rent(count);
+        var oiAvg = weightedAverage.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0;
+            for (var j = 1; j <= length; j++)
+            {
+                var prevLn = i >= j ? ln[i - j] : 0;
+
+                sum += (ln[i] - prevLn) / MathHelper.Sqrt(j) * 100;
+            }
+
+            oiAvg[i] = sum / length;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, weightedAverage.Span, buffer.WritableSpan);
         return buffer;
     }
 
     /// <summary>
     /// Computes Natural Market River using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalMarketRiverFast(StockData data, ComputeContext context, int length = 40, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketRiverFast(StockData data, ComputeContext context, int length = 40,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalMarketRiver publishes "Nmr": the moving average of a square root weighted sum of the
+        // bar to bar changes in the log of the chained series. The two case switch this replaced was a plain
+        // moving average of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var logarithm = context.Rent(count);
+        var ln = logarithm.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            ln[i] = input[i] > 0 ? Math.Log(input[i]) * 1000 : 0;
         }
+
+        using var weightedSum = context.Rent(count);
+        var oiSum = weightedSum.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var currentLn = i >= j ? ln[i - j] : 0;
+                var prevLn = i >= j + 1 ? ln[i - (j + 1)] : 0;
+
+                sum += (prevLn - currentLn) * (MathHelper.Sqrt(j) - MathHelper.Sqrt(j + 1));
+            }
+
+            oiSum[i] = sum;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, weightedSum.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -18757,11 +18782,40 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSqueezeMomentumIndicatorFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Momentum(close, buffer.WritableSpan, length);
+        // CalculateSqueezeMomentumIndicator publishes "Smi": the linear regression of the chained series measured
+        // against the average of its moving average and the midpoint of the high/low range over the window.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var sma = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                highWindow.Add(highs[i]);
+                lowWindow.Add(lows[i]);
+
+                var midprice = (highWindow.Max + lowWindow.Min) / 2;
+                var diff = input[i] - ((midprice + sma[i]) / 2);
+                output[i] = regression.Next(diff, isFinal: true).Last;
+            }
+        }
+
         return buffer;
     }
 
