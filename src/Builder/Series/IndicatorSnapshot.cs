@@ -15,28 +15,6 @@ public sealed class IndicatorSnapshot
     /// <summary>
     /// Creates a new indicator snapshot.
     /// </summary>
-    public IndicatorSnapshot(
-        Dictionary<SeriesHandle, double[]> series,
-        Dictionary<IndicatorKey, SeriesHandle> keys,
-        Func<SeriesHandle, double[]?>? resolver = null)
-    {
-        // The arrays are not copied, only re-described: double[] converts to ReadOnlyMemory<double> for free.
-        _series = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(series.Count);
-        foreach (var pair in series)
-        {
-            _series[pair.Key] = pair.Value;
-        }
-
-        _keys = keys;
-        _resolver = resolver is null
-            ? null
-            : handle =>
-            {
-                var resolved = resolver(handle);
-                return resolved is null ? null : resolved;
-            };
-    }
-
     /// <summary>
     /// Creates a snapshot over series the runtime already holds as memory.
     /// </summary>
@@ -45,10 +23,10 @@ public sealed class IndicatorSnapshot
     /// it, so its currency is <see cref="ReadOnlyMemory{T}"/>. Taking <c>double[]</c> here would force that
     /// copy back, which is the whole cost this avoids.
     /// </remarks>
-    internal IndicatorSnapshot(
+    public IndicatorSnapshot(
         Dictionary<SeriesHandle, ReadOnlyMemory<double>> series,
         Dictionary<IndicatorKey, SeriesHandle> keys,
-        Func<SeriesHandle, ReadOnlyMemory<double>?>? resolver)
+        Func<SeriesHandle, ReadOnlyMemory<double>?>? resolver = null)
     {
         _series = series;
         _keys = keys;

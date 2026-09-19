@@ -66,14 +66,7 @@ internal static class BatchCompute
     /// <param name="customValues">Custom input values to use instead of close prices.</param>
     /// <param name="state">The stateful indicator to use.</param>
     /// <returns>Array of indicator values for each bar.</returns>
-    public static double[] ComputeAllWithCustomInput(StockData data, double[] customValues, IStreamingIndicatorState state) =>
-        ComputeAllWithCustomInput(data, customValues.AsSpan(), state);
-
-    /// <summary>
-    /// The same computation over a series the caller already holds, so a resolved series can be fed in without
-    /// being copied into an array first.
-    /// </summary>
-    internal static double[] ComputeAllWithCustomInput(StockData data, ReadOnlySpan<double> customValues,
+    public static double[] ComputeAllWithCustomInput(StockData data, ReadOnlySpan<double> customValues,
         IStreamingIndicatorState state)
     {
         var count = Math.Min(data.Count, customValues.Length);

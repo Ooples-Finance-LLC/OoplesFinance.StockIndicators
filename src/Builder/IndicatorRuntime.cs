@@ -47,7 +47,8 @@ public sealed class IndicatorRuntime : IDisposable
 
     // Object pooling for streaming hot-path allocations
     private Dictionary<SeriesHandle, double[]>? _streamingValues;
-    private Dictionary<SeriesHandle, double[]>? _snapshotPool;
+    // The snapshot's currency, so the reused per-handle buffers can be described to it without being copied.
+    private Dictionary<SeriesHandle, ReadOnlyMemory<double>>? _snapshotPool;
     private readonly object _poolLock = new();
 
     // Statistics
@@ -359,7 +360,7 @@ public sealed class IndicatorRuntime : IDisposable
 
         // Initialize pooled objects for hot-path reuse
         _streamingValues = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
-        _snapshotPool = new Dictionary<SeriesHandle, double[]>(_nodes.Count);
+        _snapshotPool = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(_nodes.Count);
 
         // Store session as field to prevent premature disposal (Start() is non-blocking)
         _streamingSession = StreamingSession.Create(stream, symbols, options: options);
@@ -472,7 +473,7 @@ public sealed class IndicatorRuntime : IDisposable
         }
     }
 
-    private double[]? ResolveStreamingSeries(Dictionary<SeriesHandle, double[]> snapshotSeries, SeriesHandle handle)
+    private ReadOnlyMemory<double>? ResolveStreamingSeries(Dictionary<SeriesHandle, ReadOnlyMemory<double>> snapshotSeries, SeriesHandle handle)
     {
         if (snapshotSeries.TryGetValue(handle, out var existing))
         {
