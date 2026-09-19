@@ -1324,7 +1324,7 @@ internal static partial class IndicatorCompute
             EhlersSignalToNoiseRatioV2SpecOptions esnrv2 => ComputeEhlersSignalToNoiseRatioV2Fast(data, context, esnrv2.Length, esnrv2.MaType),
 
             // Batch 27 - Trend and Volatility Indicators
-            TrendExhaustionIndicatorSpecOptions tei => ComputeTrendExhaustionIndicatorFast(data, context, tei.Length, tei.MaType),
+            TrendExhaustionIndicatorSpecOptions tei => ComputeTrendExhaustionIndicatorFast(data, context, tei.Length),
             TrendImpulseFilterSpecOptions tif => ComputeTrendImpulseFilterFast(data, context, tif.Length1, tif.Length2, tif.MaType),
             TrendDirectionForceIndexSpecOptions tdfi => ComputeTrendDirectionForceIndexFast(data, context, tdfi.Length1, tdfi.Length2, tdfi.MaType),
             TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType),
@@ -5840,11 +5840,45 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Breakout RSI using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14, int lbLength = 2)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.BreakoutRsi(close, buffer.WritableSpan, length);
+        // CalculateBreakoutRelativeStrengthIndex weighs the full typical price by where the bar closed within
+        // its own range and by the volume of the last lbLength bars, then runs the relative strength of that
+        // breakout power against its own previous value. OscillatorCore.BreakoutRsi read only the close, so it
+        // saw neither the range nor the volume the indicator is built from.
+        var count = data.Count;
+        var typical = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Ohlc4));
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var volumeSum = new RollingSum();
+        var positiveSum = new RollingSum();
+        var negativeSum = new RollingSum();
+        double previousPower = 0;
+        for (var i = 0; i < count; i++)
+        {
+            volumeSum.Add(volumes[i]);
+
+            var range = highs[i] - lows[i];
+            var strength = range != 0 ? (closes[i] - opens[i]) / range : 0;
+            var power = typical[i] * strength * volumeSum.Sum(lbLength);
+
+            positiveSum.Add(power > previousPower ? Math.Abs(power) : 0);
+            negativeSum.Add(power < previousPower ? Math.Abs(power) : 0);
+            previousPower = power;
+
+            var positive = positiveSum.Sum(length);
+            var negative = negativeSum.Sum(length);
+            var ratio = negative != 0 ? positive / negative : 0;
+            output[i] = negative == 0 ? 100 : positive == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ratio)), 100, 0);
+        }
+
         return buffer;
     }
 
@@ -12808,12 +12842,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parametric Corrective Linear Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 50,
+        double alpha = 1, double per = 35)
     {
+        // CalculateParametricCorrectiveLinearMovingAverage weights the value of length bars ago by how far the
+        // bar sits past a percentile of the window, correcting the weight by alpha where it falls negative, and
+        // divides the weighted sum by the sum of the weights. The second average it also builds, from the
+        // complementary percentile, feeds nothing this arm publishes, so per is the only percentile here.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ParametricCorrectiveLinearMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var weightSum = new RollingSum();
+        var weightedValueSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= length ? input[i - length] : 0;
+            var position = i + 1 - (per / 100 * length);
+            var weight = position >= 0 ? position : alpha * position;
+
+            weightSum.Add(weight);
+            weightedValueSum.Add(previousValue * weight);
+
+            var weights = weightSum.Sum(length);
+            output[i] = weights != 0 ? weightedValueSum.Sum(length) / weights : 0;
+        }
+
         return buffer;
     }
 
@@ -13149,12 +13206,50 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Polynomial Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
     {
+        // CalculatePolynomialLeastSquaresMovingAverage weights each bar of the window by the difference between
+        // two points of a quadratic plus its first three sine harmonics. MovingAverageCore.PolynomialLeastSquares-
+        // MovingAverage fitted something else entirely.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.PolynomialLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        // A weight depends only on its position in the window and on the length, so the batch recomputes the
+        // same three sines for every bar of every window. Lifting them out is the same arithmetic in the same
+        // order - the window is still accumulated from the current bar backwards - for a third of the work.
+        using var weights = context.Rent(length);
+        var w = weights.WritableSpan;
+        for (var j = 1; j <= length; j++)
+        {
+            var x1 = (double)j / length;
+            var x2 = (double)(j - 1) / length;
+
+            double b1 = 0, b2 = 0;
+            for (var k = 1; k <= 3; k++)
+            {
+                b1 += (double)1 / k * Math.Sin(x1 * k * Math.PI);
+                b2 += (double)1 / k * Math.Sin(x2 * k * Math.PI);
+            }
+
+            w[j - 1] = ((x1 * x1) + b1) - ((x2 * x2) + b2);
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0;
+            for (var j = 1; j <= length; j++)
+            {
+                var previousValue = i >= j - 1 ? input[i - (j - 1)] : 0;
+                sum += previousValue * w[j - 1];
+            }
+
+            output[i] = sum;
+        }
+
         return buffer;
     }
 
@@ -21818,11 +21913,41 @@ internal static partial class IndicatorCompute
 
     // Batch 27 - Trend and Volatility Indicators
 
-    internal static ComputeBuffer ComputeTrendExhaustionIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendExhaustionIndicatorFast(StockData data, ComputeContext context, int length = 10)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Momentum(close, buffer.WritableSpan, length);
+        // CalculateTrendExhaustionIndicator counts, from the first bar onwards, how often the series has risen
+        // and how often the high has broken the highest high of the previous window, and smooths the ratio of
+        // the two exponentially. The counts are running totals, not windowed ones. maType smooths only the
+        // "Signal" series, which this arm does not publish, so it is not a parameter of it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var smoothingConstant = (double)2 / (length + 1);
+        var highWindow = new RollingMinMax(Math.Max(length, 2));
+        double advances = 0;
+        double breakouts = 0;
+        double previousHighest = 0;
+        double previousValue = 0;
+        for (var i = 0; i < count; i++)
+        {
+            advances += input[i] > previousValue ? 1 : 0;
+            breakouts += highs[i] > previousHighest ? 1 : 0;
+
+            var ratio = advances != 0 ? breakouts / advances : 0;
+            var previous = i >= 1 ? output[i - 1] : 0;
+            output[i] = previous + (smoothingConstant * (ratio - previous));
+
+            // The highest high the next bar is measured against is the one ending on this bar.
+            highWindow.Add(highs[i]);
+            previousHighest = highWindow.Max;
+            previousValue = input[i];
+        }
+
         return buffer;
     }
 
