@@ -327,7 +327,7 @@ internal static partial class IndicatorCompute
             ForecastOscillatorSpecOptions => ComputeForecastOscillatorFast(data, context),
 
             // Batch 5 - Adaptive indicators
-            AsymmetricalRsiSpecOptions arsi => ComputeAsymmetricalRsiFast(data, context, arsi.UpLength, arsi.DownLength),
+            AsymmetricalRsiSpecOptions arsi => ComputeAsymmetricalRsiFast(data, context, arsi.UpLength),
             AdaptiveStochasticSpecOptions adstoch => ComputeAdaptiveStochasticFast(data, context, adstoch.MinLength, adstoch.MaxLength),
             // Both min and max length are declared obsolete because AdaptiveRelativeStrengthIndex has no
             // parameter they could set, so this spec asks for the same series the defaults give.
@@ -415,7 +415,7 @@ internal static partial class IndicatorCompute
             AtrPercentSpecOptions atrp => ComputeNormalizedAtrFast(data, context, atrp.Length),
 
             // Batch 5 - Trend/Activator indicators
-            RepulseSpecOptions rep => ComputeRepulseFast(data, context, rep.Length),
+            RepulseSpecOptions rep => ComputeRepulseFast(data, context, rep.Length, rep.MaType),
             GannHiLoActivatorSpecOptions ghla => ComputeGannHiLoActivatorFast(data, context, ghla.Length, ghla.MaType),
             HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length),
 
@@ -1262,7 +1262,7 @@ internal static partial class IndicatorCompute
             PringSpecialKSpecOptions psk => ComputePringSpecialKFast(data, context, psk.SmoothLength, psk.MaType),
             ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length),
             QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor, qwn.MaType),
-            RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length, rrsi.MaType),
+            RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length),
             ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
 
             // Batch 24 - Complex Oscillators and Ehlers Indicators
@@ -5078,14 +5078,54 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Repulse Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRepulseFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeRepulseFast(StockData data, ComputeContext context, int length = 5,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Repulse(open, high, low, close, buffer.WritableSpan, length);
+        // CalculateRepulse measures bull and bear power against the window's extremes and the previous open,
+        // smooths each over five times the length, and publishes their difference. Its Repulse key is that
+        // raw difference; the further average over length is the Signal series.
+        var count = data.Count;
+        var input = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+
+        using var bullPower = context.Rent(count);
+        using var bearPower = context.Rent(count);
+        var bull = bullPower.WritableSpan;
+        var bear = bearPower.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var currentClose = input[i];
+            var prevOpen = i >= 1 ? opens[i - 1] : 0;
+            bull[i] = currentClose != 0
+                ? 100 * ((3 * currentClose) - (2 * lowWindow.Min) - prevOpen) / currentClose
+                : 0;
+            bear[i] = currentClose != 0
+                ? 100 * (prevOpen + (2 * highWindow.Max) - (3 * currentClose)) / currentClose
+                : 0;
+        }
+
+        using var bullAverage = context.Rent(count);
+        using var bearAverage = context.Rent(count);
+        MovingAverage(data, maType, length * 5, bullPower.Span, bullAverage.WritableSpan);
+        MovingAverage(data, maType, length * 5, bearPower.Span, bearAverage.WritableSpan);
+        var bullEma = bullAverage.Span;
+        var bearEma = bearAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = bullEma[i] - bearEma[i];
+        }
+
         return buffer;
     }
 
@@ -5350,12 +5390,46 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Weighted RSI using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumeWeightedRsiFast(StockData data, ComputeContext context, int length = 10,
+        int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.VolumeWeightedRsi(close, volume, buffer.WritableSpan, length);
+        // CalculateVolumeWeightedRelativeStrengthIndex weights each bar's change by its volume, smooths the
+        // two sides separately, rescales the ratio from 0..100 to -100..100 and smooths that again. It is
+        // therefore signed, where VolumeCore.VolumeWeightedRsi published an unscaled 0..100 reading.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        using var maximum = context.Rent(count);
+        using var minimum = context.Rent(count);
+        var max = maximum.WritableSpan;
+        var min = minimum.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var weightedChange = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) * volumes[i];
+            max[i] = Math.Max(weightedChange, 0);
+            min[i] = -Math.Min(weightedChange, 0);
+        }
+
+        using var upside = context.Rent(count);
+        using var downside = context.Rent(count);
+        MovingAverage(data, maType, length, maximum.Span, upside.WritableSpan);
+        MovingAverage(data, maType, length, minimum.Span, downside.WritableSpan);
+        var up = upside.Span;
+        var dn = downside.Span;
+
+        using var scaled = context.Rent(count);
+        var rsiScaled = scaled.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var rsiRaw = dn[i] == 0 ? 100 : up[i] == 0 ? 0 : 100 - (100 / (1 + (up[i] / dn[i])));
+            rsiScaled[i] = (rsiRaw * 2) - 100;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, scaled.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -5644,11 +5718,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Asymmetrical RSI using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAsymmetricalRsiFast(StockData data, ComputeContext context, int upLength = 14, int downLength = 7)
+    internal static ComputeBuffer ComputeAsymmetricalRsiFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.AsymmetricalRsi(close, buffer.WritableSpan, upLength, downLength);
+        // CalculateAsymmetricalRelativeStrengthIndex is asymmetric because the two exponential sums share one
+        // length: however many of the last length bars rose sets the up weight, and the rest set the down
+        // weight, so the side that has been quiet moves faster. It takes a single length - downLength is
+        // already marked obsolete on the spec because the batch has no parameter it could set.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var upCountSum = new RollingSum();
+        double upSum = 0, downSum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var roc = prevValue != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / prevValue * 100 : 0;
+
+            upCountSum.Add(roc >= 0 ? 1 : 0);
+            var upCount = upCountSum.Sum(length);
+            var upAlpha = upCount != 0 ? 1 / upCount : 0;
+            var downCount = length - upCount;
+            var downAlpha = downCount != 0 ? 1 / downCount : 0;
+
+            upSum = (upAlpha * (roc > 0 ? roc : 0)) + ((1 - upAlpha) * upSum);
+            downSum = (downAlpha * (roc < 0 ? Math.Abs(roc) : 0)) + ((1 - downAlpha) * downSum);
+
+            var ars = downSum != 0 ? upSum / downSum : 0;
+            output[i] = downSum == 0 ? 100 : upSum == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ars)), 100, 0);
+        }
+
         return buffer;
     }
 
@@ -8294,13 +8396,51 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Wave Trend Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeWaveTrendOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWaveTrendOscillatorFast(StockData data, ComputeContext context, int length1 = 10,
+        int length2 = 21, int smoothLength = 4, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.WaveTrendOscillator(high, low, close, buffer.WritableSpan, length, 21);
+        // CalculateWaveTrendOscillator reads the full typical price - OHLC4, not the close and not the chained
+        // series, because the batch replaces its input with InputName.FullTypicalPrice. It is a commodity
+        // channel index over that series, taken against an exponential average rather than a simple one, then
+        // smoothed over length2. Its Wto key is that smoothed reading; the further average over smoothLength
+        // is the Signal series.
+        var count = data.Count;
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+
+        using var typicalPrice = context.Rent(count);
+        var ap = typicalPrice.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            ap[i] = (opens[i] + highs[i] + lows[i] + closes[i]) / 4;
+        }
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length1, typicalPrice.Span, average.WritableSpan);
+        var esa = average.Span;
+
+        using var absolute = context.Rent(count);
+        var absApEsa = absolute.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            absApEsa[i] = Math.Abs(ap[i] - esa[i]);
+        }
+
+        using var deviation = context.Rent(count);
+        MovingAverage(data, maType, length1, absolute.Span, deviation.WritableSpan);
+        var d = deviation.Span;
+
+        using var channelIndex = context.Rent(count);
+        var ci = channelIndex.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            ci[i] = d[i] != 0 ? (ap[i] - esa[i]) / (0.015 * d[i]) : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length2, channelIndex.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -20104,12 +20244,36 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        // Note: This is an RSI variant, uses RSI computation
-        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
+        // CalculateRapidRelativeStrengthIndex sums the raw gains and losses over the window rather than
+        // smoothing them, which is what makes it rapid. Its Rrsi key is that unsmoothed reading, so maType
+        // reaches only the Signal series and not this one.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var upChgSumWindow = new RollingSum();
+        var downChgSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var chg = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue);
+
+            upChgSumWindow.Add(i >= 1 && chg > 0 ? chg : 0);
+            downChgSumWindow.Add(i >= 1 && chg < 0 ? Math.Abs(chg) : 0);
+
+            var upChgSum = upChgSumWindow.Sum(length);
+            var downChgSum = downChgSumWindow.Sum(length);
+            var rs = downChgSum != 0 ? upChgSum / downChgSum : 0;
+
+            output[i] = downChgSum == 0 ? 100 : upChgSum == 0 ? 0
+                : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        }
+
         return buffer;
     }
 
