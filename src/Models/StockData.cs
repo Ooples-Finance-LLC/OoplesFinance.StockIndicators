@@ -8,6 +8,10 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
+#if NET8_0_OR_GREATER
+using System.Runtime.InteropServices;
+#endif
+
 namespace OoplesFinance.StockIndicators.Models;
 
 [Serializable]
@@ -47,7 +51,7 @@ public class StockData : IStockData
                 // Straight from the adopted column when there is one. Going through ClosePrices would build that
                 // column's list as well, so the closes would be copied twice to answer for them once.
                 _inputValues = _closeMemory.HasValue
-                    ? Materialize(_closeMemory.Value.Span)
+                    ? Materialize(_closeMemory.Value)
                     : new List<double>(ClosePrices);
             }
 
@@ -63,7 +67,7 @@ public class StockData : IStockData
         {
             if (_openPrices is null && _openMemory.HasValue)
             {
-                _openPrices = Materialize(_openMemory.Value.Span);
+                _openPrices = Materialize(_openMemory.Value);
             }
 
             EnsureColumns();
@@ -84,7 +88,7 @@ public class StockData : IStockData
         {
             if (_highPrices is null && _highMemory.HasValue)
             {
-                _highPrices = Materialize(_highMemory.Value.Span);
+                _highPrices = Materialize(_highMemory.Value);
             }
 
             EnsureColumns();
@@ -105,7 +109,7 @@ public class StockData : IStockData
         {
             if (_lowPrices is null && _lowMemory.HasValue)
             {
-                _lowPrices = Materialize(_lowMemory.Value.Span);
+                _lowPrices = Materialize(_lowMemory.Value);
             }
 
             EnsureColumns();
@@ -126,7 +130,7 @@ public class StockData : IStockData
         {
             if (_closePrices is null && _closeMemory.HasValue)
             {
-                _closePrices = Materialize(_closeMemory.Value.Span);
+                _closePrices = Materialize(_closeMemory.Value);
             }
 
             EnsureColumns();
@@ -147,7 +151,7 @@ public class StockData : IStockData
         {
             if (_volumes is null && _volumeMemory.HasValue)
             {
-                _volumes = Materialize(_volumeMemory.Value.Span);
+                _volumes = Materialize(_volumeMemory.Value);
             }
 
             EnsureColumns();
@@ -168,7 +172,7 @@ public class StockData : IStockData
         {
             if (_dates is null && _dateMemory.HasValue)
             {
-                _dates = Materialize(_dateMemory.Value.Span);
+                _dates = Materialize(_dateMemory.Value);
             }
 
             EnsureColumns();
@@ -642,15 +646,19 @@ public class StockData : IStockData
     /// Per column on purpose. Filling all six whenever one is touched costs 480,000 bytes at 10,000 bars to
     /// answer a question about 80,000 of them, which is most of what the adopting constructor just saved.
     /// </remarks>
-    private static List<T> Materialize<T>(ReadOnlySpan<T> source)
+    private static List<T> Materialize<T>(ReadOnlyMemory<T> source)
     {
+#if NET8_0_OR_GREATER
+        // Bulk copy, not a loop of Add. new List<T>(T[]) takes ICollection.CopyTo and moves the whole block;
+        // filling element by element instead made every arm that still reads a column as a list slower than
+        // the copying constructor it replaced - ATR and Stochastic measurably so.
         var list = new List<T>(source.Length);
-        for (var i = 0; i < source.Length; i++)
-        {
-            list.Add(source[i]);
-        }
-
+        CollectionsMarshal.SetCount(list, source.Length);
+        source.Span.CopyTo(CollectionsMarshal.AsSpan(list));
         return list;
+#else
+        return new List<T>(source.ToArray());
+#endif
     }
 
     private void EnsureRows()

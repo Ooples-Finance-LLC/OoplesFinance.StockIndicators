@@ -1913,20 +1913,13 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWilliamsRFast(StockData data, ComputeContext context, int length = 14)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-
-        // Extract OHLC data into spans
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
+        // The columns directly. Going through TickerDataList built the row view and then three arrays the size
+        // of the history to read it back, for values TickerData already holds as double - so the numbers are
+        // identical and ColumnSourceParityTests holds them to that.
+        var high = data.HighSpan;
+        var low = data.LowSpan;
+        var close = data.CloseSpan;
+        var count = close.Length;
 
         var buffer = context.Rent(count);
         OscillatorCore.WilliamsR(high, low, close, buffer.WritableSpan, length);
@@ -1981,20 +1974,13 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeStochasticKFast(StockData data, ComputeContext context, int length = 14)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-
-        // Extract OHLC data into spans
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
+        // The columns directly. Going through TickerDataList built the row view and then three arrays the size
+        // of the history to read it back, for values TickerData already holds as double - so the numbers are
+        // identical and ColumnSourceParityTests holds them to that.
+        var high = data.HighSpan;
+        var low = data.LowSpan;
+        var close = data.CloseSpan;
+        var count = close.Length;
 
         var buffer = context.Rent(count);
         OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length);
