@@ -1391,7 +1391,14 @@ internal static partial class IndicatorCompute
             TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType),
 
             // Batch 32 - Remaining Indicators (Part 1)
-            FunctionToCandlesSpecOptions ftc => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType),
+            FunctionToCandlesSpecOptions ftc => spec.OutputKey switch
+            {
+                null or "Close" => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType),
+                "Open" => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType, CandleSeries.Open),
+                "High" => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType, CandleSeries.High),
+                "Low" => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType, CandleSeries.Low),
+                _ => null
+            },
             PeakValleyEstimationSpecOptions pve => ComputePeakValleyEstimationFast(data, context, pve.Length, pve.SmoothLength, pve.MaType),
             PhaseChangeIndexSpecOptions pci => ComputePhaseChangeIndexFast(data, context, pci.Length),
             PseudoPolynomialChannelSpecOptions ppc => ComputePseudoPolynomialChannelFast(data, context, ppc.Length, ppc.Morph, ppc.MaType),
@@ -6727,14 +6734,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Filtered EMA using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAtrFilteredEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAtrFilteredEmaFast(StockData data, ComputeContext context, int length = 45)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AtrFilteredEma(close, high, low, buffer.WritableSpan, length);
-        return buffer;
+        // AtrFilteredEmaSpecOptions carries only a length, so the remaining parameters take the batch's own
+        // defaults. Both specs bind to CalculateAtrFilteredExponentialMovingAverage and must agree with it.
+        return ComputeAtrFilteredExponentialMovingAverageFast(data, context, length);
     }
 
     /// <summary>
@@ -15524,14 +15528,74 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ATR Filtered Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
+    internal static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(StockData data, ComputeContext context,
+        int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateAtrFilteredExponentialMovingAverage filters an exponential average by the standard
+        // deviation of the true range taken relative to price: the smoothing factor is scaled by the ratio of
+        // the lowest recent deviation to the current one, capped at min. The published Afp is that average.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.AtrFilteredExponentialMovingAverage(inputSpan, high, low, buffer.WritableSpan, length, atrLength, stdDevLength, lbLength, min);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        atrLength = Math.Max(atrLength, 1);
+        stdDevLength = Math.Max(stdDevLength, 1);
+        lbLength = Math.Max(lbLength, 1);
+
+        using var highBuffer = context.Rent(count);
+        using var lowBuffer = context.Rent(count);
+        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
+        var highs = highBuffer.Span;
+        var lows = lowBuffer.Span;
+
+        using var trueRanges = context.Rent(count);
+        var trueRange = trueRanges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var value = input[i];
+            var range = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], i >= 1 ? input[i - 1] : value);
+            trueRange[i] = value != 0 ? range / value : range;
+        }
+
+        using var averageRanges = context.Rent(count);
+        MovingAverage(data, maType, atrLength, trueRanges.Span, averageRanges.WritableSpan);
+        var atr = averageRanges.Span;
+
+        using var squares = context.Rent(count);
+        var square = squares.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            square[i] = MathHelper.Pow(atr[i], 2);
+        }
+
+        using var meanSquares = context.Rent(count);
+        MovingAverage(data, maType, stdDevLength, squares.Span, meanSquares.WritableSpan);
+        var meanSquare = meanSquares.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var rangeTotal = new RollingSum();
+        var deviationWindow = new RollingMinMax(lbLength);
+        double previousAverage = 0;
+        for (var i = 0; i < count; i++)
+        {
+            rangeTotal.Add(atr[i]);
+            var rangeSum = rangeTotal.Sum(stdDevLength);
+            var squaredMean = MathHelper.Pow(rangeSum, 2) / MathHelper.Pow(stdDevLength, 2);
+
+            var variance = meanSquare[i] - squaredMean;
+            var deviation = variance >= 0 ? MathHelper.Sqrt(variance) : 0;
+            deviationWindow.Add(deviation);
+
+            var lowestDeviation = deviationWindow.Min;
+            var factor = deviation != 0 ? lowestDeviation / deviation : 0;
+            var alpha = 2 * Math.Min(factor, min) / (length + 1);
+
+            output[i] = (alpha * input[i]) + ((1 - alpha) * previousAverage);
+            previousAverage = output[i];
+        }
+
         return buffer;
     }
 
@@ -24563,41 +24627,53 @@ internal static partial class IndicatorCompute
 
     // Batch 32 - Remaining Indicators (Part 1)
 
-    internal static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeFunctionToCandlesFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, CandleSeries series = CandleSeries.Close)
     {
-        // V1 Algorithm: RSI calculated on all OHLC prices, averaged
-        // 1. Calculate RSI on close, open, high, low prices
-        // 2. Return average of all 4 RSI values
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        int count = data.Count;
+        // CalculateFunctionToCandles publishes four relative strength indexes, one per candle series, and
+        // never publishes their average. The Close key is the index of the caller's own series; the High and
+        // Low are of the per-bar range that series makes, which is what CustomRange applies.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
         length = Math.Max(length, 1);
 
-        // Calculate RSI on each OHLC price
-        var rsiCloseBuffer = context.Rent(count);
-        var rsiOpenBuffer = context.Rent(count);
-        var rsiHighBuffer = context.Rent(count);
-        var rsiLowBuffer = context.Rent(count);
-        OscillatorCore.RelativeStrengthIndex(close, rsiCloseBuffer.WritableSpan, length);
-        OscillatorCore.RelativeStrengthIndex(open, rsiOpenBuffer.WritableSpan, length);
-        OscillatorCore.RelativeStrengthIndex(high, rsiHighBuffer.WritableSpan, length);
-        OscillatorCore.RelativeStrengthIndex(low, rsiLowBuffer.WritableSpan, length);
-
-        // Calculate average of all 4 RSI values
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var buffer = context.Rent(count);
+        switch (series)
         {
-            resultSpan[i] = (rsiCloseBuffer.Span[i] + rsiOpenBuffer.Span[i] + rsiHighBuffer.Span[i] + rsiLowBuffer.Span[i]) / 4.0;
+            case CandleSeries.Open:
+                RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(data.OpenPrices), length, maType,
+                    buffer.WritableSpan);
+                break;
+            case CandleSeries.High:
+            case CandleSeries.Low:
+                using (var highBuffer = context.Rent(count))
+                using (var lowBuffer = context.Rent(count))
+                {
+                    CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
+                    var ranged = series == CandleSeries.High ? highBuffer.Span : lowBuffer.Span;
+                    RelativeStrengthIndex(data, context, ranged, length, maType, buffer.WritableSpan);
+                }
+
+                break;
+            default:
+                RelativeStrengthIndex(data, context, input, length, maType, buffer.WritableSpan);
+                break;
         }
 
-        rsiCloseBuffer.Dispose();
-        rsiOpenBuffer.Dispose();
-        rsiHighBuffer.Dispose();
-        rsiLowBuffer.Dispose();
-        return result;
+        return buffer;
+    }
+
+    /// <summary>
+    /// Which of a candle's four series an arm has been asked for, where an indicator republishes one result
+    /// per series rather than combining them.
+    /// </summary>
+    internal enum CandleSeries
+    {
+        Close,
+        Open,
+        High,
+        Low
     }
 
     internal static ComputeBuffer ComputePeakValleyEstimationFast(StockData data, ComputeContext context, int length = 500,
