@@ -8146,9 +8146,32 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeQuickMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.QuickMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateQuickMovingAverage weights the window with a triangle whose peak sits a third of the way
+        // in, and it reaches one bar further back than the length. The core routine used a plain ramp.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var peak = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 3));
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double num = 0, denom = 0;
+            for (var j = 1; j <= length + 1; j++)
+            {
+                var mult = j <= peak ? (double)j / peak : (double)(length + 1 - j) / (length + 1 - peak);
+                var prevValue = i >= j - 1 ? input[i - (j - 1)] : 0;
+
+                num += prevValue * mult;
+                denom += mult;
+            }
+
+            output[i] = denom != 0 ? num / denom : 0;
+        }
+
         return buffer;
     }
 
@@ -8303,11 +8326,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadruple Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeQuadrupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeQuadrupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.QuadrupleExponentialMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateQuadrupleExponentialMovingAverage combines five successive averages with the binomial
+        // coefficients that cancel four orders of lag. The core routine used a different combination.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var first = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), first.WritableSpan);
+        using var second = context.Rent(count);
+        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+        using var third = context.Rent(count);
+        MovingAverage(data, maType, length, second.Span, third.WritableSpan);
+        using var fourth = context.Rent(count);
+        MovingAverage(data, maType, length, third.Span, fourth.WritableSpan);
+        using var fifth = context.Rent(count);
+        MovingAverage(data, maType, length, fourth.Span, fifth.WritableSpan);
+
+        var ema1 = first.Span;
+        var ema2 = second.Span;
+        var ema3 = third.Span;
+        var ema4 = fourth.Span;
+        var ema5 = fifth.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (5 * ema1[i]) - (10 * ema2[i]) + (10 * ema3[i]) - (5 * ema4[i]) + ema5[i];
+        }
+
         return buffer;
     }
 
@@ -10304,12 +10354,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Powered Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 100,
+        double factor = 3)
     {
+        // CalculatePoweredKaufmanAdaptiveMovingAverage raises Kaufman's efficiency ratio to a fixed power to
+        // get its smoothing factor, and seeds the recursion from the first value rather than from zero. The
+        // core routine used Kaufman's own fast and slow alphas instead.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.PoweredKaufmanAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var volatilityWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var priorValue = i >= length ? input[i - length] : 0;
+
+            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)));
+            var volatilitySum = volatilityWindow.Sum(length);
+            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
+            var er = volatilitySum != 0 ? momentum / volatilitySum : 0;
+
+            var per = MathHelper.Pow(er, factor);
+
+            var prevA = i >= 1 ? output[i - 1] : currentValue;
+            output[i] = (per * currentValue) + ((1 - per) * prevA);
+        }
+
         return buffer;
     }
 
@@ -16734,19 +16810,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Directional Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalDirectionalIndexFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalDirectionalIndexFast(StockData data, ComputeContext context, int length = 40,
+        int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalDirectionalIndex works on the natural logarithm of the chained series, weighting
+        // each lookback by the inverse square root of its distance and dividing by a running absolute sum
+        // that grows across the window. The core routine implemented none of that.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var logarithm = context.Rent(count);
+        var ln = logarithm.WritableSpan;
+
+        using var raw = context.Rent(count);
+        var rawNdx = raw.WritableSpan;
+
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            ln[i] = input[i] > 0 ? Math.Log(input[i]) * 1000 : 0;
+
+            double weightSum = 0, denomSum = 0, absSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevLn = i >= j + 1 ? ln[i - (j + 1)] : 0;
+                var currLn = i >= j ? ln[i - j] : 0;
+                absSum += Math.Abs(prevLn - currLn);
+                var frac = absSum != 0 ? (ln[i] - currLn) / absSum : 0;
+                var ratio = 1 / MathHelper.Sqrt(j + 1);
+                weightSum += frac * ratio;
+                denomSum += ratio;
+            }
+
+            rawNdx[i] = denomSum != 0 ? weightSum / denomSum * 100 : 0;
         }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, raw.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -16810,19 +16911,56 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Stochastic Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalStochasticIndicatorFast(StockData data, ComputeContext context, int length = 20, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalStochasticIndicatorFast(StockData data, ComputeContext context, int length = 20,
+        int smoothLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalStochasticIndicator averages the stochastic position of every bar in the window
+        // against the window's own high and low AS THEY STOOD at that bar, each weighted by the inverse
+        // square root of its distance, then smooths the result. The core routine took a single position.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var highest = context.Rent(count);
+        using var lowest = context.Rent(count);
+        var hh = highest.WritableSpan;
+        var ll = lowest.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+            hh[i] = highWindow.Max;
+            ll[i] = lowWindow.Min;
         }
+
+        using var raw = context.Rent(count);
+        var rawNst = raw.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double weightSum = 0, denomSum = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var high = i >= j ? hh[i - j] : 0;
+                var low = i >= j ? ll[i - j] : 0;
+                var c = i >= j ? input[i - j] : 0;
+                var range = high - low;
+                var frac = range != 0 ? (c - low) / range : 0;
+                var ratio = 1 / MathHelper.Sqrt(j + 1);
+                weightSum += frac * ratio;
+                denomSum += ratio;
+            }
+
+            rawNst[i] = denomSum != 0 ? (200 * weightSum / denomSum) - 100 : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, raw.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -18577,52 +18715,37 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // V1 Algorithm: Sign(close - sma) * price change, rolling sum
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        // CalculateRunningEquity is the profit a sign-of-the-average rule would have made over the window:
+        // each bar's change signed by whether the PREVIOUS bar sat above its moving average, summed over the
+        // window. The core routine did not trade the rule at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        // Compute SMA
-        var smaBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, smaBuffer.WritableSpan, length);
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var sma = average.Span;
 
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
 
-        // Rolling sum of (price change * prevX)
+        var window = new RollingSum();
         double prevX = 0;
-        double chgXSum = 0;
-
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
-            double currentValue = close[i];
-            double prevValue = i >= 1 ? close[i - 1] : 0;
-            double sma = smaBuffer.Span[i];
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
 
-            double x = Math.Sign(currentValue - sma);
-            double chgX = i >= 1 ? (currentValue - prevValue) * prevX : 0;
+            window.Add(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) * prevX);
+            output[i] = window.Sum(length);
 
-            // Add to rolling sum
-            chgXSum += chgX;
-
-            // Remove old value from rolling sum
-            if (i >= length)
-            {
-                int oldIdx = i - length;
-                double oldX = oldIdx >= 1 ? Math.Sign(close[oldIdx] - smaBuffer.Span[oldIdx]) : 0;
-                double oldPrevX = oldIdx >= 2 ? Math.Sign(close[oldIdx - 1] - smaBuffer.Span[oldIdx - 1]) : 0;
-                double oldChgX = oldIdx >= 1 ? (close[oldIdx] - close[oldIdx - 1]) * oldPrevX : 0;
-                chgXSum -= oldChgX;
-            }
-
-            resultSpan[i] = chgXSum;
-            prevX = x;
+            prevX = Math.Sign(currentValue - sma[i]);
         }
 
-        smaBuffer.Dispose();
-        return result;
+        return buffer;
     }
 
     // Batch 33 - Remaining Indicators (Part 2)
