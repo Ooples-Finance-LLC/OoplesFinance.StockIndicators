@@ -100,7 +100,8 @@ internal static partial class IndicatorCompute
             ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength),
             UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
             TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength),
-            StochRsiSpecOptions srsi => ComputeStochRsiFast(data, context, srsi.RsiLength, srsi.StochLength),
+            StochRsiSpecOptions srsi => ComputeStochasticRsiFast(data, context, srsi.RsiLength, maType: srsi.MaType,
+                stochLength: srsi.StochLength),
             AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
             DpoSpecOptions dpo => ComputeDpoFast(data, context, dpo.Length),
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
@@ -235,7 +236,7 @@ internal static partial class IndicatorCompute
 
             // Batch 4 - More oscillators
             DemarkerSpecOptions dmk => ComputeDemarkerFast(data, context, dmk.Length, dmk.MaType),
-            SmoothedRocSpecOptions sroc => ComputeSmoothedRocFast(data, context, sroc.Length),
+            SmoothedRocSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.Length, maType: sroc.MaType),
             DerivativeOscillatorSpecOptions dro => ComputeDerivativeOscillatorFast(data, context, dro.Length,
                 dro.MaType),
             FractalChaosOscillatorSpecOptions fco => ComputeFractalChaosOscillatorFast(data, context, fco.Length),
@@ -814,7 +815,8 @@ internal static partial class IndicatorCompute
             ReverseEngineeringRsiSpecOptions rersi => ComputeReverseEngineeringRsiFast(data, context, rersi.Length, rersi.RsiLevel),
             ReverseMovingAverageConvergenceDivergenceSpecOptions rmacd => ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel),
             SimplePriceZoneSpecOptions spz => ComputeSimplePriceZoneFast(data, context, spz.Length),
-            StochasticRsiOscillatorSpecOptions srsio => ComputeStochasticRsiOscillatorFast(data, context, srsio.RsiLength, srsio.StochLength),
+            StochasticRsiOscillatorSpecOptions srsio => ComputeStochasticRsiFast(data, context, srsio.RsiLength,
+                stochLength: srsio.StochLength),
             ElasticVolumeWeightedMovingAverageV2SpecOptions evwma2 => ComputeElasticVolumeWeightedMovingAverageV2Fast(data, context, evwma2.Length),
             WindowedVolumeWeightedMovingAverageSpecOptions wvwma => ComputeWindowedVolumeWeightedMovingAverageFast(data, context, wvwma.Length),
             AtrFilteredExponentialMovingAverageSpecOptions atrfema => ComputeAtrFilteredExponentialMovingAverageFast(data, context, atrfema.Length, atrfema.AtrLength, atrfema.StdDevLength, atrfema.LbLength, atrfema.Min),
@@ -911,7 +913,8 @@ internal static partial class IndicatorCompute
             DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length, dpo.MaType),
             PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength),
             SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
-            SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength, sroc.SmoothLength),
+            SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength,
+                sroc.SmoothLength, sroc.MaType),
             FloorPivotPointSpecOptions _ => ComputeFloorPivotPointFast(data, context),
             FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointS1Fast(data, context),
             FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointR1Fast(data, context),
@@ -975,7 +978,8 @@ internal static partial class IndicatorCompute
             FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length),
             EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.SignalLength),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
-            StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length, srsi2.SmoothLength1, srsi2.SmoothLength2),
+            StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length,
+                srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
             StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.SmoothLength1, smi.SmoothLength2),
 
             // Batch 7 - Additional oscillators and power indicators
@@ -986,7 +990,7 @@ internal static partial class IndicatorCompute
             BullPowerIndicatorSpecOptions bpi => ComputeBullPowerFast(data, context, bpi.Length),
             BearPowerIndicatorSpecOptions beari => ComputeBearPowerFast(data, context, beari.Length),
             MomentumOscillatorSpecOptions mosc => ComputeMomentumOscillatorFast(data, context, mosc.Length, mosc.SmoothLength),
-            StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length, stosc.SmoothLength1),
+            StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length),
             StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length, stfo.SmoothLength1),
 
             // Multi-output: KeltnerChannels
@@ -1900,18 +1904,6 @@ internal static partial class IndicatorCompute
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
         OscillatorCore.TrueStrengthIndex(inputSpan, buffer.WritableSpan, longLength, shortLength);
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Stochastic RSI using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeStochRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.StochasticRsi(inputSpan, buffer.WritableSpan, rsiLength, stochLength);
         return buffer;
     }
 
@@ -3228,12 +3220,30 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SwingIndex(open, high, low, close, buffer.WritableSpan, limitMove);
+        // CalculateSwingIndex runs Wilder's swing index over the chained series and the range that series is
+        // measured against, and has no value at the first bar because it needs the bar before it.
+        // OscillatorCore.SwingIndex read the close and published something at bar zero.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var count = inputList.Count;
+
+        using var highSeries = context.Rent(count);
+        using var lowSeries = context.Rent(count);
+        CustomRange(data, input, highSeries.WritableSpan, lowSeries.WritableSpan);
+        var highs = highSeries.Span;
+        var lows = lowSeries.Span;
+
+        var buffer = context.Rent(count);
+        var swingIndex = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            swingIndex[i] = i >= 1
+                ? WilderSwingIndex.Compute(opens[i], highs[i], lows[i], input[i], opens[i - 1], input[i - 1], limitMove)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -4198,17 +4208,6 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    /// <summary>
-    /// Computes Smoothed Rate of Change using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeSmoothedRocFast(StockData data, ComputeContext context, int length = 12)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SmoothedRateOfChange(close, buffer.WritableSpan, length, 3);
-        return buffer;
-    }
-
     #endregion
 
     #region Volatility Fast Path Methods (Additional)
@@ -5010,9 +5009,28 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeCenterOfLinearityFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.CenterOfLinearity(close, buffer.WritableSpan, length);
+        // CalculateCenterOfLinearity weights the distance between the bar a whole length ago and the bar just
+        // gone by the bar number itself, and sums that over the window - a running total whose weights grow
+        // with the series rather than resetting inside the window. OscillatorCore.CenterOfLinearity read the
+        // close and weighted by position within the window instead.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var col = buffer.WritableSpan;
+
+        var weightedSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var priorValue = i >= length ? input[i - length] : 0;
+
+            weightedSum.Add((i + 1) * (priorValue - previousValue));
+            col[i] = weightedSum.Sum(length);
+        }
+
         return buffer;
     }
 
@@ -6945,11 +6963,25 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Regression Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRegressionOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRegressionOscillatorFast(StockData data, ComputeContext context, int length = 63)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RegressionOscillator(close, buffer.WritableSpan, length);
+        // CalculateRegressionOscillator is how far the chained series stands above or below the linear
+        // regression fitted at the same bar, as a percentage of that fit. OscillatorCore.RegressionOscillator
+        // read the close and fitted a different window, so it agreed at no bar.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var rosc = buffer.WritableSpan;
+
+        using var regression = new RollingLeastSquares(length);
+        for (var i = 0; i < count; i++)
+        {
+            var linReg = regression.Next(input[i], isFinal: true).Last;
+            rosc[i] = linReg != 0 ? 100 * ((input[i] / linReg) - 1) : 0;
+        }
+
         return buffer;
     }
 
@@ -10192,18 +10224,6 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Stochastic RSI Oscillator using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeStochasticRsiOscillatorFast(StockData data, ComputeContext context, int rsiLength = 14, int stochLength = 14)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.StochasticRsiOscillator(inputSpan, buffer.WritableSpan, rsiLength, stochLength);
-        return buffer;
-    }
-
-    /// <summary>
     /// Computes Elastic Volume Weighted Moving Average V2 using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV2Fast(StockData data, ComputeContext context, int length = 14)
@@ -11483,12 +11503,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Rate of Change using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSmoothedRateOfChangeFast(StockData data, ComputeContext context, int rocLength = 12, int smoothLength = 3)
+    internal static ComputeBuffer ComputeSmoothedRateOfChangeFast(StockData data, ComputeContext context, int length = 21,
+        int smoothingLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateSmoothedRateOfChange smooths the chained series first and takes the rate of change of that
+        // average, not of price; where the older average is still zero the rate is reported as a flat hundred,
+        // which is why the batch opens at 100 and the two core-routine arms this replaced opened at zero.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.SmoothedRateOfChange(inputSpan, buffer.WritableSpan, rocLength, smoothLength);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, smoothingLength, SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
+        var ma = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var sroc = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousMa = i >= length ? ma[i - length] : 0;
+            sroc[i] = previousMa != 0 ? 100 * (ma[i] - previousMa) / previousMa : 100;
+        }
+
         return buffer;
     }
 
@@ -12265,12 +12301,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic RSI using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticRsiFast(StockData data, ComputeContext context, int rsiLength = 14, int smoothK = 3, int smoothD = 3)
+    internal static ComputeBuffer ComputeStochasticRsiFast(StockData data, ComputeContext context, int length = 14,
+        int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
+        int? stochLength = null)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.StochasticRelativeStrengthIndex(inputSpan, buffer.WritableSpan, rsiLength, rsiLength, smoothK, smoothD);
+        // CalculateStochasticRelativeStrengthIndex ranges the relative strength index rather than price, then
+        // publishes the first smoothing of that stochastic - FastD - as its primary series; the second
+        // smoothing is the Signal key, so smoothLength2 does not reach this output. The three specs bound to
+        // this indicator each ran a different core routine over the close, and none of them agreed with the
+        // batch or with one another.
+        _ = smoothLength2;
+
+        var count = data.Count;
+
+        using var relativeStrength = ComputeRsiFast(data, context, length, maType);
+
+        using var stochastic = context.Rent(count);
+        StochasticFastK(data, context, relativeStrength.Span, Math.Max(1, stochLength ?? length), stochastic.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength1, stochastic.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -12343,32 +12394,82 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    /// <summary>
+    /// Writes the high and low series that <paramref name="values"/> is measured against into
+    /// <paramref name="highs"/> and <paramref name="lows"/>, by the same per-bar rule
+    /// <see cref="CalculationsHelper.GetCustomRangeLists"/> applies.
+    /// </summary>
+    /// <remarks>
+    /// A chained series that sits inside its bar keeps that bar's own range. One on a scale of its own - an
+    /// oscillator running nought to a hundred, say - is given the range it made itself, between this bar and
+    /// the last. Measuring such a series against the price bars it never touched is what that rule exists to
+    /// prevent, and any arm that ranges a chained series has to follow it to agree with the batch.
+    /// </remarks>
+    private static void CustomRange(StockData data, ReadOnlySpan<double> values, Span<double> highs, Span<double> lows)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        var barHighs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var barLows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            var value = values[i];
+            var high = i < barHighs.Length ? barHighs[i] : value;
+            var low = i < barLows.Length ? barLows[i] : value;
+
+            if (CalculationsHelper.IsWithinBarRange(value, low, high))
+            {
+                highs[i] = high;
+                lows[i] = low;
+            }
+            else
+            {
+                var previousValue = i > 0 ? values[i - 1] : value;
+                highs[i] = Math.Max(previousValue, value);
+                lows[i] = Math.Min(previousValue, value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Writes the raw stochastic of <paramref name="values"/> over <paramref name="length"/> bars into
+    /// <paramref name="output"/>: where the series sits in the range it has covered, as a percentage.
+    /// </summary>
+    private static void StochasticFastK(StockData data, ComputeContext context, ReadOnlySpan<double> values, int length,
+        Span<double> output)
+    {
+        var count = values.Length;
+        length = Math.Max(length, 1);
+
+        using var highSeries = context.Rent(count);
+        using var lowSeries = context.Rent(count);
+        CustomRange(data, values, highSeries.WritableSpan, lowSeries.WritableSpan);
+        var highs = highSeries.Span;
+        var lows = lowSeries.Span;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var highestHigh = highWindow.Max;
+            var lowestLow = lowWindow.Min;
+            var range = highestHigh - lowestLow;
+            output[i] = range != 0 ? MathHelper.MinOrMax((values[i] - lowestLow) / range * 100, 100, 0) : 0;
         }
-        var buffer = context.Rent(count);
-        var pool = ArrayPool<double>.Shared;
-        var kArray = pool.Rent(count);
-        try
-        {
-            var k = kArray.AsSpan(0, count);
-            OscillatorCore.StochasticK(high, low, close, k, length);
-            MovingAverageCore.SimpleMovingAverage(k, buffer.WritableSpan, smoothLength);
-        }
-        finally
-        {
-            pool.Return(kArray);
-        }
+    }
+
+    internal static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    {
+        // CalculateStochasticOscillator publishes the raw stochastic as its primary series - the smoothed
+        // FastD and SlowD are separate keys - so the smoothing lengths never reach this output. The arm this
+        // replaced rebuilt the price spans from the ticker list, ignored the chained series and then smoothed
+        // on top, so it was the wrong series computed from the wrong input.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(inputList.Count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, buffer.WritableSpan);
+
         return buffer;
     }
 
