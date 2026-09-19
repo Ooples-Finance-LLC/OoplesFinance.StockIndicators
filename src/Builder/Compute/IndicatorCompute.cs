@@ -579,7 +579,7 @@ internal static partial class IndicatorCompute
             // Batch 6 - Kaufman/MACD oscillators
             KaufmanAdaptiveCorrelationOscillatorSpecOptions kaco => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length),
             StochasticMacdOscillatorSpecOptions smo => ComputeStochasticMacdOscillatorFast(data, context, smo.Length),
-            McClellanOscillatorSpecOptions mcco => ComputeMcClellanOscillatorFast(data, context, mcco.Length),
+            McClellanOscillatorSpecOptions mcco => ComputeMcClellanOscillatorFast(data, context, maType: mcco.MaType),
 
             // Batch 6 - Decision Point/Swenlin oscillators
             DecisionPointBreadthSwenlinTradingOscillatorSpecOptions dpbsto => ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(data, context, dpbsto.Length),
@@ -1207,7 +1207,13 @@ internal static partial class IndicatorCompute
 
             // Batch 18 - Strength and Zone Indicators
             AbsoluteStrengthMTFIndicatorSpecOptions asmtf => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength, asmtf.MaType),
-            AdaptivePriceZoneIndicatorSpecOptions apz => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType),
+            AdaptivePriceZoneIndicatorSpecOptions apz => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType),
+                "UpperBand" => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType, ChannelBand.Lower),
+                _ => null
+            },
             DynamicSupportAndResistanceSpecOptions dsar => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType),
@@ -1357,7 +1363,7 @@ internal static partial class IndicatorCompute
             SelfAdjustingRelativeStrengthIndexSpecOptions sarsi => ComputeSelfAdjustingRsiFast(data, context, sarsi.Length, sarsi.MaType),
             SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType),
             StatisticalVolatilitySpecOptions sv => ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2),
-            TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length2, tdi.Length3, tdi.Length4, tdi.MaType),
+            TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType),
 
             // Batch 32 - Remaining Indicators (Part 1)
             FunctionToCandlesSpecOptions ftc => ComputeFunctionToCandlesFast(data, context, ftc.Length, ftc.MaType),
@@ -9796,11 +9802,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes McClellan Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMcClellanOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMcClellanOscillatorFast(StockData data, ComputeContext context, int fastLength = 19,
+        int slowLength = 39, double mult = 1000, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.McClellanOscillator(close, buffer.WritableSpan, 19, 39);
+        // CalculateMcClellanOscillator counts advances and declines over the fast window, scales their net by
+        // mult to build the ratio adjusted net advances, and publishes the convergence divergence of that
+        // series - the fast moving average of it less the slow one - as "Mo". Its spec option Length is
+        // marked obsolete because no parameter of the batch call corresponds to it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        using var netAdvances = context.Rent(count);
+        var rana = netAdvances.WritableSpan;
+        var advancesSumWindow = new RollingSum();
+        var declinesSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            advancesSumWindow.Add(input[i] > prevValue ? 1d : 0d);
+            declinesSumWindow.Add(input[i] < prevValue ? 1d : 0d);
+
+            var advanceSum = advancesSumWindow.Sum(fastLength);
+            var declineSum = declinesSumWindow.Sum(fastLength);
+            rana[i] = advanceSum + declineSum != 0 ? mult * (advanceSum - declineSum) / (advanceSum + declineSum) : 0;
+        }
+
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, netAdvances.Span, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, netAdvances.Span, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = fast.Span[i] - slow.Span[i];
+        }
+
         return buffer;
     }
 
@@ -19278,23 +19317,49 @@ internal static partial class IndicatorCompute
     /// Computes Adaptive Price Zone Indicator using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateAdaptivePriceZoneIndicator smooths twice over the square root of the length, once on the
+        // chained series and once on the bar range, and steps the outer bands by pct of the second. Its middle
+        // band is the half sum of those two, which reduces to the double smoothed series itself.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = data.Count;
-        var buffer = context.Rent(count);
+        var nP = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(length)));
 
-        switch (maType)
+        using var firstPass = context.Rent(count);
+        MovingAverage(data, maType, nP, input, firstPass.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        MovingAverage(data, maType, nP, firstPass.Span, output);
+
+        if (band == ChannelBand.Middle)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            return buffer;
+        }
+
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        using var barRange = context.Rent(count);
+        var xHL = barRange.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            xHL[i] = highs[i] - lows[i];
+        }
+
+        using var rangeFirstPass = context.Rent(count);
+        MovingAverage(data, maType, nP, barRange.Span, rangeFirstPass.WritableSpan);
+
+        using var rangeSecondPass = context.Rent(count);
+        MovingAverage(data, maType, nP, rangeFirstPass.Span, rangeSecondPass.WritableSpan);
+
+        var multiplier = band == ChannelBand.Upper ? pct : -pct;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] += multiplier * rangeSecondPass.Span[i];
         }
 
         return buffer;
@@ -22450,25 +22515,23 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length2 = 34, int length3 = 2, int length4 = 7, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length3 = 2,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // V1 Algorithm: Traders Dynamic Index
-        // 1. Calculate RSI with length1 period
-        // 2. Calculate fast MA (mab) of RSI with length3 (primary output - TDI line)
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        // "Tdi", the primary series of CalculateTradersDynamicIndex, is the length3 moving average of the
+        // relative strength index of the chained series. Its length2 sets the deviation window and the signal
+        // line of that index, and its length4 the second average, so neither reaches this series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        // Calculate RSI
-        var rsiBuffer = context.Rent(count);
-        OscillatorCore.RelativeStrengthIndex(close, rsiBuffer.WritableSpan, length1);
+        using var relativeStrength = context.Rent(count);
+        RelativeStrengthIndex(data, context, input, length1, maType, relativeStrength.WritableSpan);
 
-        // Calculate fast MA of RSI (mab - the TDI primary output)
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(rsiBuffer.Span, result.WritableSpan, length3);
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length3, relativeStrength.Span, buffer.WritableSpan);
 
-        rsiBuffer.Dispose();
-        return result;
+        return buffer;
     }
 
     // Batch 32 - Remaining Indicators (Part 1)
