@@ -747,7 +747,7 @@ internal static partial class IndicatorCompute
             TrimeanSpecOptions trimean => ComputeTrimeanFast(data, context, trimean.Length),
             SkewnessSpecOptions skew => ComputeSkewnessFast(data, context, skew.Length),
             HampelFilterSpecOptions hampel => ComputeHampelFilterFast(data, context, hampel.Length, hampel.ScalingFactor),
-            ModularFilterSpecOptions modf => ComputeModularFilterFast(data, context, modf.Length, modf.Beta, modf.Z),
+            ModularFilterSpecOptions modf => ComputeModularFilterFast(data, context, modf.Length, modf.Beta),
             DynamicallyAdjustableMovingAverageSpecOptions dama => ComputeDynamicallyAdjustableMovingAverageFast(data, context, dama.FastLength, dama.SlowLength),
             EquityMovingAverageSpecOptions eqma => ComputeEquityMovingAverageFast(data, context, eqma.Length),
             MultiDepthZeroLagExponentialMovingAverageSpecOptions mdzlema => ComputeMultiDepthZeroLagExponentialMovingAverageFast(data, context, mdzlema.Length),
@@ -924,7 +924,8 @@ internal static partial class IndicatorCompute
             WilliamsFractalsSpecOptions wf => ComputeWilliamsFractalsFast(data, context, wf.Length),
             DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length, dpo.MaType),
             PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength, pfe.MaType),
-            SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
+            SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength,
+                stc.MaType),
             SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength,
                 sroc.SmoothLength, sroc.MaType),
             FloorPivotPointSpecOptions _ => ComputeFloorPivotPointFast(data, context),
@@ -3457,11 +3458,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length = 10)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.SchaffTrendCycle(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // The Stc spec binds its only length to the batch call's cycleLength, leaving the two moving average
+        // lengths at their defaults; the overload below is the indicator.
+        return ComputeSchaffTrendCycleFast(data, context, cycleLength: length);
     }
 
     /// <summary>
@@ -4570,11 +4569,40 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Jurik Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeJmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeJmaFast(StockData data, ComputeContext context, int length = 7, double phase = 50,
+        double power = 2)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.JurikMovingAverage(close, buffer.WritableSpan, length, 0);
+        // CalculateJurikMovingAverage runs three cascaded stages over the chained series: a smoothed value,
+        // the phase-weighted distance of the series from it, and a second-order correction that is summed
+        // into the average itself. The arm this replaces read the close and passed a phase of zero.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var phaseRatio = phase < -100 ? 0.5 : phase > 100 ? 2.5 : (phase / 100) + 1.5;
+        var ratio = 0.45 * (length - 1);
+        var beta = ratio / (ratio + 2);
+        var alpha = MathHelper.Pow(beta, power);
+
+        double e0 = 0;
+        double e1 = 0;
+        double e2 = 0;
+        double jma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+
+            e0 = ((1 - alpha) * currentValue) + (alpha * e0);
+            e1 = ((currentValue - e0) * (1 - beta)) + (beta * e1);
+            e2 = ((e0 + (phaseRatio * e1) - jma) * MathHelper.Pow(1 - alpha, 2)) + (MathHelper.Pow(alpha, 2) * e2);
+
+            jma = e2 + jma;
+            output[i] = jma;
+        }
+
         return buffer;
     }
 
@@ -5396,13 +5424,46 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int minLength = 5, int maxLength = 20)
+    internal static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int fastLength = 50,
+        int slowLength = 200, int length = 50)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.AdaptiveStochastic(high, low, close, buffer.WritableSpan, minLength, maxLength);
+        // CalculateAdaptiveStochastic ranges the linear regression of the chained series - fitted over the
+        // gap between the two lengths - against a blend of a fast and a slow window, weighted by Kaufman's
+        // efficiency ratio so the range tightens when the series trends. OscillatorCore.AdaptiveStochastic
+        // ranged the close against the bars' highs and lows with no regression and no efficiency ratio.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var regressed = context.Rent(count);
+        var src = regressed.WritableSpan;
+        using (var regression = new RollingLeastSquares(Math.Max(Math.Abs(slowLength - fastLength), 1)))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                src[i] = regression.Next(input[i], isFinal: true).Last;
+            }
+        }
+
+        using var efficiency = context.Rent(count);
+        EfficiencyRatio(input, length, efficiency.WritableSpan);
+        var er = efficiency.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var fastWindow = new RollingMinMax(Math.Max(fastLength, 2));
+        var slowWindow = new RollingMinMax(Math.Max(slowLength, 2));
+        for (var i = 0; i < count; i++)
+        {
+            fastWindow.Add(src[i]);
+            slowWindow.Add(src[i]);
+
+            var a = (er[i] * fastWindow.Max) + ((1 - er[i]) * slowWindow.Max);
+            var b = (er[i] * fastWindow.Min) + ((1 - er[i]) * slowWindow.Min);
+            output[i] = a - b != 0 ? MathHelper.MinOrMax((src[i] - b) / (a - b), 1, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -10367,18 +10428,6 @@ internal static partial class IndicatorCompute
     #region Batch 25 - Additional Moving Averages (Unwired Core Methods)
 
     /// <summary>
-    /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
     /// Computes Corrected Moving Average using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context,
@@ -11536,12 +11585,43 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modular Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8, double z = 0.5)
+    internal static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8)
     {
+        // CalculateModularFilter tracks two exponential envelopes - one that can only be pulled up by a new
+        // high and one that can only be pulled down by a new low - and blends them by which of the two the
+        // series last touched. Its z parameter reaches nothing in the batch body, so binding the spec's Z to
+        // it cannot change the result and the arm does not take it either.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ModularFilter(inputSpan, buffer.WritableSpan, length, beta, z);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var alpha = (double)2 / (length + 1);
+        double b2 = 0;
+        double c2 = 0;
+        double os2 = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevB2 = i >= 1 ? b2 : currentValue;
+            var prevC2 = i >= 1 ? c2 : currentValue;
+
+            var upperFilter = (alpha * currentValue) + ((1 - alpha) * prevB2);
+            b2 = currentValue > upperFilter ? currentValue : upperFilter;
+
+            var lowerFilter = (alpha * currentValue) + ((1 - alpha) * prevC2);
+            c2 = currentValue < lowerFilter ? currentValue : lowerFilter;
+
+            os2 = currentValue == b2 ? 1 : currentValue == c2 ? 0 : os2;
+
+            var upper2 = (beta * b2) + ((1 - beta) * c2);
+            var lower2 = (beta * c2) + ((1 - beta) * b2);
+            output[i] = (os2 * upper2) + ((1 - os2) * lower2);
+        }
+
         return buffer;
     }
 
@@ -12984,13 +13064,70 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context,
+        int length = 14, double gamma = 3)
     {
+        // CalculateAdaptiveAutonomousRecursiveMovingAverage bands the series by the running mean of its own
+        // distance from the average, scaled by gamma, and then smooths the banded value twice - each pass
+        // weighted by Kaufman's efficiency ratio, so the average follows a trending series closely and a
+        // noisy one barely at all. TrendCore.AdaptiveAutonomousRecursiveMovingAverage had no efficiency
+        // ratio in it at all.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        TrendCore.AdaptiveAutonomousRecursiveMovingAverage(inputSpan, buffer.WritableSpan, length, lambda);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var efficiency = context.Rent(count);
+        EfficiencyRatio(input, length, efficiency.WritableSpan);
+        var er = efficiency.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double absDiffSum = 0;
+        double ma1 = 0;
+        double ma2 = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevMa1 = i >= 1 ? ma1 : currentValue;
+            var prevMa2 = i >= 1 ? ma2 : currentValue;
+
+            absDiffSum += Math.Abs(currentValue - prevMa2);
+            var d = i != 0 ? absDiffSum / i * gamma : 0;
+            var c = currentValue > prevMa2 + d ? currentValue + d : currentValue < prevMa2 - d ? currentValue - d : prevMa2;
+
+            ma1 = (er[i] * c) + ((1 - er[i]) * prevMa1);
+            ma2 = (er[i] * ma1) + ((1 - er[i]) * prevMa2);
+            output[i] = ma2;
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Writes Kaufman's efficiency ratio of an arbitrary series, so that an indicator weighted by it can
+    /// reach it without publishing the adaptive moving average that owns it.
+    /// </summary>
+    /// <remarks>
+    /// The ratio is how much of the window's total bar-to-bar travel the series actually covered over it:
+    /// one for a straight line, near zero for a market that ends where it started. This is the "Er" output
+    /// of CalculateKaufmanAdaptiveMovingAverage, which neither the fast nor the slow length reaches.
+    /// </remarks>
+    private static void EfficiencyRatio(ReadOnlySpan<double> input, int length, Span<double> output)
+    {
+        length = Math.Max(length, 1);
+        var volatilitySumWindow = new RollingSum();
+        for (var i = 0; i < input.Length; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var priorValue = i >= length ? input[i - length] : 0;
+
+            volatilitySumWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue)));
+            var volatilitySum = volatilitySumWindow.Sum(length);
+            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, input[i] - priorValue));
+
+            output[i] = volatilitySum != 0 ? momentum / volatilitySum : 0;
+        }
     }
 
     #endregion
@@ -14220,12 +14357,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Schaff Trend Cycle using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength = 10, int fastLength = 23, int slowLength = 50)
+    internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength = 10,
+        int fastLength = 23, int slowLength = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateSchaffTrendCycle takes the stochastic of a macd over the MACD'S OWN range, not the bars'
+        // highs and lows: the cycle length sizes that range, while the two moving average lengths are fixed
+        // at the batch defaults because no spec property reaches them.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.SchaffTrendCycle(inputSpan, buffer.WritableSpan, cycleLength, fastLength, slowLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(fastLength, 1), input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, Math.Max(slowLength, 1), input, slowAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var convergence = context.Rent(count);
+        var macd = convergence.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            macd[i] = fastAverage.Span[i] - slowAverage.Span[i];
+        }
+
+        var macdWindow = new RollingMinMax(Math.Max(cycleLength, 2));
+        for (var i = 0; i < count; i++)
+        {
+            macdWindow.Add(macd[i]);
+            var macdRange = macdWindow.Max - macdWindow.Min;
+            output[i] = macdRange != 0 ? MathHelper.MinOrMax((macd[i] - macdWindow.Min) / macdRange * 100, 100, 0) : 0;
+        }
+
         return buffer;
     }
 
