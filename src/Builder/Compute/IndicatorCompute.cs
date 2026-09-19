@@ -453,9 +453,9 @@ internal static partial class IndicatorCompute
             ComparePriceMomentumOscillatorSpecOptions cpmo => ComputeComparePriceMomentumOscillatorFast(data, context, cpmo.Length),
             DailyAveragePriceDeltaSpecOptions dapd => ComputeDailyAveragePriceDeltaFast(data, context,
                 dapd.Length, dapd.MaType),
-            PriceCycleOscillatorSpecOptions pco => ComputePriceCycleOscillatorFast(data, context, pco.Length),
+            PriceCycleOscillatorSpecOptions pco => ComputePriceCycleOscillatorFast(data, context, pco.Length, pco.MaType),
             PriceVolumeOscillatorSpecOptions pvo2 => ComputePriceVolumeOscillatorFast(data, context, pvo2.Length),
-            PercentChangeOscillatorSpecOptions pchosc => ComputePercentChangeOscillatorFast(data, context, pchosc.Length),
+            PercentChangeOscillatorSpecOptions => ComputePercentChangeOscillatorFast(data, context),
             DecisionPointPriceMomentumOscillatorSpecOptions dppmo => ComputeDecisionPointPriceMomentumOscillatorFast(data, context, dppmo.Length),
 
             // Batch 6 - Demand/Volume oscillators
@@ -919,7 +919,7 @@ internal static partial class IndicatorCompute
             RateOfChangeSpecOptions roc => ComputeRateOfChangeFast(data, context, roc.Length),
             WilliamsFractalsSpecOptions wf => ComputeWilliamsFractalsFast(data, context, wf.Length),
             DetrendedPriceOscillatorSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length, dpo.MaType),
-            PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength),
+            PolarizedFractalEfficiencySpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length, pfe.SmoothLength, pfe.MaType),
             SchaffTrendCycleSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.CycleLength, stc.FastLength, stc.SlowLength),
             SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength,
                 sroc.SmoothLength, sroc.MaType),
@@ -3422,17 +3422,6 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Polarized Fractal Efficiency using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PolarizedFractalEfficiency(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
     /// Computes Schaff Trend Cycle using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length = 10)
@@ -4602,11 +4591,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNaturalMaFast(StockData data, ComputeContext context, int length = 40)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.NaturalMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateNaturalMovingAverage weights the current bar against the previous one by how much of the
+        // window's log movement happened recently: each step back contributes its absolute log change, weighted
+        // by the gap between consecutive square roots of its distance.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var logarithm = context.Rent(count);
+        var ln = logarithm.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            ln[i] = input[i] > 0 ? Math.Log(input[i]) * 1000 : 0;
+
+            double num = 0;
+            double denom = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var currentLn = i >= j ? ln[i - j] : 0;
+                var prevLn = i >= j + 1 ? ln[i - (j + 1)] : 0;
+                var oi = Math.Abs(currentLn - prevLn);
+
+                num += oi * (MathHelper.Sqrt(j + 1) - MathHelper.Sqrt(j));
+                denom += oi;
+            }
+
+            var ratio = denom != 0 ? num / denom : 0;
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            output[i] = (input[i] * ratio) + (prevValue * (1 - ratio));
+        }
+
         return buffer;
     }
 
@@ -7356,22 +7376,62 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percent Change Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PercentChangeOscillator(close, buffer.WritableSpan, length);
+        // CalculatePercentChangeOscillator publishes "Pcco": the running total of the percentage change in the
+        // chained series. Neither the length nor the moving average type reaches that series - they smooth a
+        // series the batch never publishes - so the arm takes no parameters.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevPcc = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = prevValue != 0 ? prevPcc + ((input[i] / prevValue) - 1) : 0;
+        }
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Price Cycle Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePriceCycleOscillatorFast(StockData data, ComputeContext context, int length = 22,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PriceCycleOscillator(close, buffer.WritableSpan, length);
+        // CalculatePriceCycleOscillator measures the average distance from the low up to the chained series as
+        // a percentage of the average true range, both taken over the same length and with the same type.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+
+        using var range = context.Rent(count);
+        var diff = range.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            diff[i] = input[i] - lows[i];
+        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, range.Span, smoothed.WritableSpan);
+        var diffSma = smoothed.Span;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = atr[i] != 0 ? diffSma[i] / atr[i] * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -7599,11 +7659,43 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trigonometric Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 200)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TrigonometricOscillator(close, buffer.WritableSpan, length);
+        // CalculateTrigonometricOscillator turns the direction of the linear regression of the chained series
+        // into an angle, unwraps it onto a continuous branch, fits that angle over the same window and takes its
+        // arctangent.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var angle = context.Rent(count);
+        var u = angle.WritableSpan;
+
+        var wb = Math.Asin(Math.Sign(1)) * 2;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            double prevS = 0;
+            for (var i = 0; i < count; i++)
+            {
+                var s = regression.Next(input[i], isFinal: true).Last;
+                var wa = Math.Asin(Math.Sign(s - prevS)) * 2;
+                prevS = s;
+
+                u[i] = wa + (2 * Math.PI * Math.Round((wa - wb) / (2 * Math.PI)));
+            }
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = Math.Atan(regression.Next(angle.Span[i], isFinal: true).Last);
+            }
+        }
+
         return buffer;
     }
 
@@ -13051,11 +13143,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Polarized Fractal Efficiency using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 5)
+    internal static ComputeBuffer ComputePolarizedFractalEfficiencyFast(StockData data, ComputeContext context, int length = 9,
+        int smoothLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PolarizedFractalEfficiency(closeSpan, buffer.WritableSpan, length, smoothLength);
+        // CalculatePolarizedFractalEfficiency compares the straight line distance covered over the window with
+        // the distance actually walked bar by bar, signs it by the direction of the move, and smooths the
+        // result. One arm now serves both the full spec and its Pfe alias.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var efficiency = context.Rent(count);
+        var fracEff = efficiency.WritableSpan;
+
+        var walked = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var priorValue = i >= length ? input[i - length] : 0;
+
+            var pfe = MathHelper.Sqrt(MathHelper.Pow(CalculationsHelper.MinPastValues(i, length, input[i] - priorValue), 2) + 100);
+            walked.Add(MathHelper.Sqrt(MathHelper.Pow(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue), 2) + 1));
+
+            var c2cSum = walked.Sum(length);
+            var efRatio = c2cSum != 0 ? pfe / c2cSum * 100 : 0;
+            fracEff[i] = i >= length && input[i] - priorValue > 0 ? efRatio : -efRatio;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, efficiency.Span, buffer.WritableSpan);
         return buffer;
     }
 
