@@ -82,7 +82,7 @@ internal static partial class IndicatorCompute
             WmaSpecOptions wma => ComputeWmaFast(data, context, wma.Length),
             DemaSpecOptions dema => ComputeDemaFast(data, context, dema.Length),
             TemaSpecOptions tema => ComputeTemaFast(data, context, tema.Length),
-            HmaSpecOptions hma => ComputeHmaFast(data, context, hma.Length),
+            HmaSpecOptions hma => ComputeHullMovingAverageFast(data, context, hma.Length),
             TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length, tma.MaType),
             WwmaSpecOptions wwma => ComputeWwmaFast(data, context, wwma.Length),
             LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length),
@@ -991,7 +991,7 @@ internal static partial class IndicatorCompute
             EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Divisor),
             EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length,
                 ezlema.MaType),
-            HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length),
+            HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length, hma2.MaType),
             KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
             KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2,
                 kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4, kst2.MaType),
@@ -1485,21 +1485,6 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(inputList.Count);
         MovingAverageCore.TripleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
-
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Hull Moving Average using zero-allocation fast path.
-    /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
-    /// </summary>
-    internal static ComputeBuffer ComputeHmaFast(StockData data, ComputeContext context, int length = 14)
-    {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.HullMovingAverage(inputSpan, buffer.WritableSpan, length);
 
         return buffer;
     }
@@ -3396,11 +3381,48 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Strength Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast(StockData data, ComputeContext context, int length = 10,
+        int maLength = 21, int signalLength = 34)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.AbsoluteStrengthIndex(close, buffer.WritableSpan, length);
+        // CalculateAbsoluteStrengthIndex keeps three running totals over the whole history - the gains as
+        // ratios, the unchanged bars as a fixed fraction of length, and the losses as inverse ratios - reads a
+        // strength off them, and publishes how far that strength sits from its own exponential average once a
+        // McNicholl double smoothing has been taken out.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var alpha = (double)2 / (signalLength + 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double gains = 0;
+        double unchanged = 0;
+        double losses = 0;
+        double strengthAverage = 0;
+        double firstSmoothing = 0;
+        double secondSmoothing = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+
+            gains = input[i] > previousValue && previousValue != 0 ? gains + ((input[i] / previousValue) - 1) : gains;
+            unchanged = input[i] == previousValue ? unchanged + ((double)1 / length) : unchanged;
+            losses = input[i] < previousValue && input[i] != 0 ? losses + ((previousValue / input[i]) - 1) : losses;
+
+            var down = (losses + unchanged) / 2;
+            var strength = down != 0 ? 1 - (1 / (1 + ((gains + unchanged) / 2 / down))) : 1;
+            strengthAverage = CalculationsHelper.CalculateEMA(strength, strengthAverage, maLength);
+
+            var oscillator = strength - strengthAverage;
+            firstSmoothing = (alpha * oscillator) + ((1 - alpha) * firstSmoothing);
+            secondSmoothing = (alpha * firstSmoothing) + ((1 - alpha) * secondSmoothing);
+
+            var smoothed = 1 - alpha != 0 ? (((2 - alpha) * firstSmoothing) - secondSmoothing) / (1 - alpha) : 0;
+            output[i] = oscillator - smoothed;
+        }
+
         return buffer;
     }
 
@@ -16795,12 +16817,36 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Hull Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // CalculateHullMovingAverage rounds its half-length and its square-root length and passes both through
+        // the [2, 530] clamp MinOrMax applies, then smooths twice the half-length average less the full-length
+        // one. Both specs bound to it ran MovingAverageCore.HullMovingAverage, which truncates those lengths
+        // rather than rounding them and can only ever use a weighted average, so neither matched - and the one
+        // that does carry a MaType was ignoring it.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.HullMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var halfLength = MathHelper.MinOrMax((int)Math.Round((double)length / 2));
+        var sqrtLength = MathHelper.MinOrMax((int)Math.Round(MathHelper.Sqrt(length)));
+
+        using var full = context.Rent(count);
+        using var half = context.Rent(count);
+        MovingAverage(data, maType, length, input, full.WritableSpan);
+        MovingAverage(data, maType, halfLength, input, half.WritableSpan);
+
+        using var weighted = context.Rent(count);
+        var total = weighted.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            total[i] = (2 * half.Span[i]) - full.Span[i];
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, sqrtLength, weighted.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -20373,24 +20419,61 @@ internal static partial class IndicatorCompute
     /// Computes JRC Fractal Dimension using zero-allocation fast path.
     /// Returns the fractal dimension value.
     /// </summary>
-    internal static ComputeBuffer ComputeJrcFractalDimensionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeJrcFractalDimensionFast(StockData data, ComputeContext context, int length1 = 20,
+        int length2 = 5, int smoothLength = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateJrcFractalDimension compares the range the market covered over one long window against the
+        // average of the ranges it covered over the short windows inside it, and reads the fractal dimension
+        // off that ratio on a log scale. The arm this replaces was a moving average of the close, and answered
+        // for only two of the moving average types besides.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
 
-        switch (maType)
+        var wind1 = MathHelper.MinOrMax((length2 - 1) * length1);
+        var wind2 = MathHelper.MinOrMax(length2 * length1);
+        var nLog = Math.Log(length2);
+
+        using var dimension = context.Rent(count);
+        using var ranges = context.Rent(count);
+        var fractalDimension = dimension.WritableSpan;
+        var smallRanges = ranges.WritableSpan;
+
+        var shortHigh = new RollingMinMax(length1);
+        var shortLow = new RollingMinMax(length1);
+        var longHigh = new RollingMinMax(wind2);
+        var longLow = new RollingMinMax(wind2);
+
+        double smallSum = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
+            shortHigh.Add(highs[i]);
+            shortLow.Add(lows[i]);
+            longHigh.Add(highs[i]);
+            longLow.Add(lows[i]);
+
+            var previousValue1 = i >= length1 ? input[i - length1] : 0;
+            var previousValue2 = i >= wind2 ? input[i - wind2] : 0;
+            var bigRange = Math.Max(previousValue2, longHigh.Max) - Math.Min(previousValue2, longLow.Min);
+
+            var previousSmallRange = i >= wind1 ? smallRanges[i - wind1] : 0;
+            var smallRange = Math.Max(previousValue1, shortHigh.Max) - Math.Min(previousValue1, shortLow.Min);
+            smallRanges[i] = smallRange;
+
+            // The opening bar seeds the running sum with its own range rather than with nothing.
+            var previousSmallSum = i >= 1 ? smallSum : smallRange;
+            smallSum = previousSmallSum + smallRange - previousSmallRange;
+
+            var average = wind1 != 0 ? smallSum / wind1 : 0;
+            var ratio = average != 0 ? bigRange / average : 0;
+            var scaled = ratio > 0 ? Math.Log(ratio) : 0;
+            fractalDimension[i] = nLog != 0 ? 2 - (scaled / nLog) : 0;
         }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, dimension.Span, buffer.WritableSpan);
 
         return buffer;
     }

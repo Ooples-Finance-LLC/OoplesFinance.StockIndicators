@@ -245,7 +245,6 @@ public sealed class BuilderArmTests : GlobalTestData
     /// </remarks>
     private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
     {
-        "AbsoluteStrengthIndexSpecOptions",
         "AbsoluteStrengthMTFIndicatorSpecOptions",
         "AdaptiveAutonomousRecursiveTrailingStopSpecOptions",
         "AdaptiveErgodicCandlestickOscillatorSpecOptions",
@@ -272,11 +271,8 @@ public sealed class BuilderArmTests : GlobalTestData
         "GuppyDistanceIndicatorSpecOptions",
         "GuppyMultipleMovingAverageSpecOptions",
         "HalfTrendSpecOptions",
-        "HmaSpecOptions",
-        "HullMovingAverageSpecOptions",
         "InsyncIndexSpecOptions",
         "JmaRsxCloneSpecOptions",
-        "JrcFractalDimensionSpecOptions",
         "KaseDevStopV2SpecOptions",
         "KasePeakOscillatorV2SpecOptions",
         "KaufmanAdaptiveCorrelationOscillatorSpecOptions",
