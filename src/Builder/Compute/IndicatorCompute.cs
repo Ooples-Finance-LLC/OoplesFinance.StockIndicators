@@ -510,7 +510,8 @@ internal static partial class IndicatorCompute
             KarobeinOscillatorSpecOptions kbo => ComputeKarobeinOscillatorFast(data, context, kbo.Length, kbo.MaType),
             GroverLlorensCycleOscillatorSpecOptions glco => ComputeGroverLlorensCycleOscillatorFast(data, context, glco.Length,
                 maType: glco.MaType),
-            LindaRaschke310OscillatorSpecOptions lr310 => ComputeLindaRaschke310OscillatorFast(data, context, lr310.FastLength),
+            LindaRaschke310OscillatorSpecOptions lr310 => ComputeLindaRaschke310OscillatorFast(data, context, lr310.FastLength,
+                lr310.SlowLength, lr310.MaType),
             MidpointOscillatorSpecOptions mpo => ComputeMidpointOscillatorFast(data, context, mpo.Length),
             MobilityOscillatorSpecOptions mobo => ComputeMobilityOscillatorFast(data, context, mobo.Length),
 
@@ -1016,7 +1017,8 @@ internal static partial class IndicatorCompute
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
             StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length,
                 srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
-            StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.SmoothLength1, smi.SmoothLength2),
+            StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.Length2,
+                smi.SmoothLength1, smi.MaType),
 
             // Batch 7 - Additional oscillators and power indicators
             CCTStochRSISpecOptions cctsr => ComputeCCTStochRelativeStrengthIndexFast(data, context, cctsr.Length2,
@@ -8292,12 +8294,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linda Raschke 3/10 Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int fastLength = 3,
+        int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // Length parameter maps to signal length; fast/slow use 3/10
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.LindaRaschke310Oscillator(close, buffer.WritableSpan, 3, 10, length);
+        // "LindaMacd", the primary series of CalculateLindaRaschke3_10Oscillator, is simply the fast moving
+        // average of the chained series less the slow one. Its smoothLength only builds the separate signal
+        // and histogram series, so it reaches nothing here; the arm had bound one length for both.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = fast.Span[i] - slow.Span[i];
+        }
+
         return buffer;
     }
 
@@ -10400,9 +10418,37 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWilliamsFractalUpFast(StockData data, ComputeContext context, int length = 2)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.WilliamsFractalUp(high, buffer.WritableSpan, length);
+        // CalculateWilliamsFractals marks the bar length back as an up fractal when the highs on either side
+        // of it are lower, with four further arms that tolerate runs of equal highs. The offsets - including
+        // the batch's prevHigh8, whose guard reads length + 8 while its index reads length + 6 - are
+        // reproduced exactly; an arm that invented its own window disagreed from the first signal on.
+        var count = data.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var prevHigh = i >= length - 2 ? highs[i - (length - 2)] : 0;
+            var prevHigh1 = i >= length - 1 ? highs[i - (length - 1)] : 0;
+            var prevHigh2 = i >= length ? highs[i - length] : 0;
+            var prevHigh3 = i >= length + 1 ? highs[i - (length + 1)] : 0;
+            var prevHigh4 = i >= length + 2 ? highs[i - (length + 2)] : 0;
+            var prevHigh5 = i >= length + 3 ? highs[i - (length + 3)] : 0;
+            var prevHigh6 = i >= length + 4 ? highs[i - (length + 4)] : 0;
+            var prevHigh7 = i >= length + 5 ? highs[i - (length + 5)] : 0;
+            var prevHigh8 = i >= length + 8 ? highs[i - (length + 6)] : 0;
+
+            output[i] = (prevHigh4 < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) ||
+                (prevHigh5 < prevHigh2 && prevHigh4 < prevHigh2 && prevHigh3 == prevHigh2 && prevHigh1 < prevHigh2) ||
+                (prevHigh6 < prevHigh2 && prevHigh5 < prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
+                prevHigh < prevHigh2) || (prevHigh7 < prevHigh2 && prevHigh6 < prevHigh2 && prevHigh5 == prevHigh2 && prevHigh4 == prevHigh2 &&
+                prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) || (prevHigh8 < prevHigh2 && prevHigh7 < prevHigh2 &&
+                prevHigh6 == prevHigh2 && prevHigh5 <= prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
+                prevHigh < prevHigh2) ? 1 : 0;
+        }
+
         return buffer;
     }
 
@@ -10411,9 +10457,35 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWilliamsFractalDownFast(StockData data, ComputeContext context, int length = 2)
     {
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.WilliamsFractalDown(low, buffer.WritableSpan, length);
+        // The down fractal of CalculateWilliamsFractals, mirrored from the up arm onto the lows: the bar
+        // length back is marked when the lows on either side of it are higher, with the same four tolerant
+        // arms and the same offsets, prevLow8 included.
+        var count = data.Count;
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var prevLow = i >= length - 2 ? lows[i - (length - 2)] : 0;
+            var prevLow1 = i >= length - 1 ? lows[i - (length - 1)] : 0;
+            var prevLow2 = i >= length ? lows[i - length] : 0;
+            var prevLow3 = i >= length + 1 ? lows[i - (length + 1)] : 0;
+            var prevLow4 = i >= length + 2 ? lows[i - (length + 2)] : 0;
+            var prevLow5 = i >= length + 3 ? lows[i - (length + 3)] : 0;
+            var prevLow6 = i >= length + 4 ? lows[i - (length + 4)] : 0;
+            var prevLow7 = i >= length + 5 ? lows[i - (length + 5)] : 0;
+            var prevLow8 = i >= length + 8 ? lows[i - (length + 6)] : 0;
+
+            output[i] = (prevLow4 > prevLow2 && prevLow3 > prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow5 > prevLow2 &&
+                prevLow4 > prevLow2 && prevLow3 == prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow6 > prevLow2 &&
+                prevLow5 > prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ||
+                (prevLow7 > prevLow2 && prevLow6 > prevLow2 && prevLow5 == prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 &&
+                prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow8 > prevLow2 && prevLow7 > prevLow2 && prevLow6 == prevLow2 &&
+                prevLow5 >= prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ? 1 : 0;
+        }
+
         return buffer;
     }
 
@@ -16784,21 +16856,55 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Momentum Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
+    internal static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 8,
+        int smoothLength1 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        // CalculateStochasticMomentumIndex measures the close against the midpoint of the length1 high-low
+        // range and divides it by half that range, each double-smoothed by length2 then smoothLength1. Its
+        // smoothLength2 only smooths the separate "Signal" series, so it reaches nothing here. The arm had
+        // the wrong parameters bound and never saw length2 or maType at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        using var distance = context.Rent(count);
+        using var range = context.Rent(count);
+        var d = distance.WritableSpan;
+        var hl = range.WritableSpan;
+
+        var highWindow = new RollingMinMax(length1);
+        var lowWindow = new RollingMinMax(length1);
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var highestHigh = highWindow.Max;
+            var lowestLow = lowWindow.Min;
+            d[i] = input[i] - ((highestHigh + lowestLow) / 2);
+            hl[i] = highestHigh - lowestLow;
         }
+
+        using var distanceAverage = context.Rent(count);
+        using var rangeAverage = context.Rent(count);
+        MovingAverage(data, maType, length2, distance.Span, distanceAverage.WritableSpan);
+        MovingAverage(data, maType, length2, range.Span, rangeAverage.WritableSpan);
+
+        using var smoothedDistance = context.Rent(count);
+        using var smoothedRange = context.Rent(count);
+        MovingAverage(data, maType, smoothLength1, distanceAverage.Span, smoothedDistance.WritableSpan);
+        MovingAverage(data, maType, smoothLength1, rangeAverage.Span, smoothedRange.WritableSpan);
+
         var buffer = context.Rent(count);
-        OscillatorCore.StochasticMomentumIndex(high, low, close, buffer.WritableSpan, length, smoothLength1, smoothLength2);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var hl2 = smoothedRange.Span[i] / 2;
+            output[i] = hl2 != 0 ? MathHelper.MinOrMax(100 * smoothedDistance.Span[i] / hl2, 100, -100) : 0;
+        }
+
         return buffer;
     }
 
