@@ -23193,39 +23193,293 @@ internal static partial class IndicatorCompute
         return filtBuffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context,
+        int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersAdaptiveCommodityChannelIndexV2(close, buffer.WritableSpan, length1, length2, length3);
+        // CalculateEhlersAdaptiveCommodityChannelIndexV2 measures the roofing filter against its own mean and
+        // root mean square over the dominant cycle, then passes that ratio through the same two pole filter
+        // the cycle was measured with. The published Eacci is that filtered series, not a moving average.
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
+        var filter = roofing.Span;
+
+        using var cycles = context.Rent(count);
+        EhlersDominantCycle(context, filter, length1, length2, length3, cycles.WritableSpan);
+        var domCycles = cycles.Span;
+
+        var a1 = MathHelper.Exp(-1.414 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var filterTotal = new RollingSum();
+        var deviationTotal = new RollingSum();
+        double previousRatio = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var domCyc = MathHelper.MinOrMax(domCycles[i], length1, length2);
+            var cycleLength = MathHelper.CeilingCycle(domCyc);
+
+            filterTotal.Add(filter[i]);
+            var average = filterTotal.Average(cycleLength);
+            deviationTotal.Add(MathHelper.Pow(filter[i] - average, 2));
+
+            var rms = MathHelper.Sqrt(deviationTotal.Average(cycleLength));
+            var denominator = 0.015 * rms;
+            var ratio = denominator != 0 ? (filter[i] - average) / denominator : 0;
+
+            var previous1 = i >= 1 ? output[i - 1] : 0;
+            var previous2 = i >= 2 ? output[i - 2] : 0;
+            output[i] = (c1 * ((ratio + previousRatio) / 2)) + (c2 * previous1) + (c3 * previous2);
+            previousRatio = ratio;
+        }
+
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context,
+        int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersAdaptiveRelativeStrengthIndexV2(close, buffer.WritableSpan, length1, length2, length3);
+        // CalculateEhlersAdaptiveRelativeStrengthIndexV2 sums the rises and falls of the roofing filter over
+        // half the dominant cycle and smooths the up share with the same two pole filter. The published Arsi
+        // is that filtered series; maType only reaches the signal line, which is a separate key.
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
+        var filter = roofing.Span;
+
+        using var cycles = context.Rent(count);
+        EhlersDominantCycle(context, filter, length1, length2, length3, cycles.WritableSpan);
+        var domCycles = cycles.Span;
+
+        var a1 = MathHelper.Exp(-1.414 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double previousUpChange = 0;
+        double previousDenominator = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var domCyc = MathHelper.MinOrMax(domCycles[i], length1, length2);
+            var halfCycle = MathHelper.CeilingCycle(domCyc / 2);
+
+            double upChange = 0;
+            double downChange = 0;
+            for (var j = 0; j < halfCycle; j++)
+            {
+                var current = i >= j ? filter[i - j] : 0;
+                var previous = i >= j + 1 ? filter[i - (j + 1)] : 0;
+                upChange += current > previous ? current - previous : 0;
+                downChange += current < previous ? previous - current : 0;
+            }
+
+            var denominator = upChange + downChange;
+            var previous1 = i >= 1 ? output[i - 1] : 0;
+            var previous2 = i >= 2 ? output[i - 2] : 0;
+            output[i] = denominator != 0 && previousDenominator != 0
+                ? (c1 * ((upChange / denominator) + (previousUpChange / previousDenominator)) / 2) + (c2 * previous1) +
+                    (c3 * previous2)
+                : 0;
+            previousUpChange = upChange;
+            previousDenominator = denominator;
+        }
+
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(StockData data, ComputeContext context,
+        int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FisherTransform(high, low, buffer.WritableSpan, length2);
+        // CalculateEhlersAdaptiveRsiFisherTransformV2 is the Fisher transform of the adaptive relative strength
+        // index, so it reuses that arm rather than repeating the dominant cycle pass.
+        var count = data.Count;
+
+        using var adaptive = ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(data, context, length1, length2, length3,
+            maType);
+        var arsi = adaptive.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var transformed = 2 * ((arsi[i] / 100) - 0.5);
+            var amplified = MathHelper.MinOrMax(1.5 * transformed, 0.999, -0.999);
+            output[i] = 0.5 * Math.Log((1 + amplified) / (1 - amplified));
+        }
+
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context,
+        int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length2);
+        // CalculateEhlersAdaptiveStochasticIndicatorV2 scales the roofing filter within its own range over the
+        // dominant cycle and passes that through the same two pole filter. The published Astoc is that
+        // filtered series; maType only reaches the signal line, which is a separate key.
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
+        var filter = roofing.Span;
+
+        using var cycles = context.Rent(count);
+        EhlersDominantCycle(context, filter, length1, length2, length3, cycles.WritableSpan);
+        var domCycles = cycles.Span;
+
+        var a1 = MathHelper.Exp(-1.414 * Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double previousStochastic = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var domCyc = MathHelper.MinOrMax(domCycles[i], length1, length2);
+            var window = MathHelper.CeilingCycle(domCyc);
+
+            var highest = filter[i];
+            var lowest = filter[i];
+            for (var j = 1; j < window && i >= j; j++)
+            {
+                var value = filter[i - j];
+                highest = Math.Max(highest, value);
+                lowest = Math.Min(lowest, value);
+            }
+
+            var stochastic = highest != lowest ? (filter[i] - lowest) / (highest - lowest) : 0;
+            var previous1 = i >= 1 ? output[i - 1] : 0;
+            var previous2 = i >= 2 ? output[i - 2] : 0;
+            output[i] = (c1 * ((stochastic + previousStochastic) / 2)) + (c2 * previous1) + (c3 * previous2);
+            previousStochastic = stochastic;
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Writes the dominant cycle of <paramref name="roofingFilter"/> into <paramref name="output"/>: the
+    /// autocorrelation of the filtered series at every lag, transformed by a discrete Fourier sum, and
+    /// resolved to the centre of gravity of the periods carrying at least half of the peak power.
+    /// </summary>
+    /// <remarks>
+    /// This is CalculateEhlersAutoCorrelationPeriodogram taken over CalculateEhlersAutoCorrelationIndicator.
+    /// The four adaptive V2 indicators all open with exactly that pair on the caller's own series, so they
+    /// share one pass of it here. The power array is carried across bars, which is what makes the r value
+    /// recursive, so it is cleared once and never re-rented inside the loop.
+    /// </remarks>
+    private static void EhlersDominantCycle(ComputeContext context, ReadOnlySpan<double> roofingFilter, int length1,
+        int length2, int length3, Span<double> output)
+    {
+        var count = roofingFilter.Length;
+        length3 = Math.Max(length3, 0);
+        var stride = length1 + 1;
+
+        using var correlation = context.Rent(count);
+        var corr = correlation.WritableSpan;
+
+        var xTotal = new RollingSum();
+        var yTotal = new RollingSum();
+        var xxTotal = new RollingSum();
+        var yyTotal = new RollingSum();
+        var xyTotal = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var x = roofingFilter[i];
+            var y = i >= length1 ? roofingFilter[i - length1] : 0;
+            xTotal.Add(x);
+            yTotal.Add(y);
+            xxTotal.Add(x * x);
+            yyTotal.Add(y * y);
+            xyTotal.Add(x * y);
+
+            var window = Math.Min(i + 1, length1);
+            var sx = xTotal.Sum(length1);
+            var sy = yTotal.Sum(length1);
+            var sxx = xxTotal.Sum(length1);
+            var syy = yyTotal.Sum(length1);
+            var sxy = xyTotal.Sum(length1);
+
+            var xVariance = (window * sxx) - (sx * sx);
+            var yVariance = (window * syy) - (sy * sy);
+            corr[i] = xVariance * yVariance > 0
+                ? 0.5 * ((((window * sxy) - (sx * sy)) / MathHelper.Sqrt(xVariance * yVariance)) + 1)
+                : 0;
+        }
+
+        using var cosineTable = context.Rent(stride * stride);
+        using var sineTable = context.Rent(stride * stride);
+        var cosines = cosineTable.WritableSpan;
+        var sines = sineTable.WritableSpan;
+        for (var j = length2; j <= length1; j++)
+        {
+            for (var k = length3; k <= length1; k++)
+            {
+                var angle = 2 * Math.PI * ((double)k / j);
+                cosines[(j * stride) + k] = Math.Cos(angle);
+                sines[(j * stride) + k] = Math.Sin(angle);
+            }
+        }
+
+        using var powerBuffer = context.Rent(stride);
+        var powers = powerBuffer.WritableSpan;
+        powers.Clear();
+
+        for (var i = 0; i < count; i++)
+        {
+            double maxPower = 0;
+            for (var j = length2; j <= length1; j++)
+            {
+                double cosPart = 0;
+                double sinPart = 0;
+                for (var k = length3; k <= length1; k++)
+                {
+                    var value = i >= k ? corr[i - k] : 0;
+                    cosPart += value * cosines[(j * stride) + k];
+                    sinPart += value * sines[(j * stride) + k];
+                }
+
+                var squareSum = (cosPart * cosPart) + (sinPart * sinPart);
+                var power = (0.2 * (squareSum * squareSum)) + (0.8 * powers[j]);
+                powers[j] = power;
+                maxPower = Math.Max(power, maxPower);
+            }
+
+            double weightedSum = 0;
+            double powerSum = 0;
+            for (var j = length2; j <= length1; j++)
+            {
+                var scaled = maxPower != 0 ? powers[j] / maxPower : 0;
+                if (scaled >= 0.5)
+                {
+                    weightedSum += j * scaled;
+                    powerSum += scaled;
+                }
+            }
+
+            output[i] = powerSum != 0 ? weightedSum / powerSum : 0;
+        }
     }
 
     internal static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
