@@ -276,7 +276,7 @@ internal static partial class IndicatorCompute
             // Batch 5 - Price/Range indicators
             AdrSpecOptions adr => ComputeAdrFast(data, context, adr.Length),
             BollingerBandsMiddleSpecOptions bbm => ComputeBollingerBandsFast(data, context, bbm.Length),
-            VpciSpecOptions vpci => ComputeVpciFast(data, context, vpci.Length),
+            VpciSpecOptions => ComputeVpciFast(data, context),
             KeltnerChannelMiddleSpecOptions kcm => ComputeKeltnerChannelMiddleFast(data, context, kcm.Length),
             TrendDetectionSpecOptions => ComputeTrendDetectionFast(data, context),
             PriceChannelMiddleSpecOptions pcm => ComputePriceChannelMiddleFast(data, context, pcm.Length),
@@ -456,7 +456,8 @@ internal static partial class IndicatorCompute
             PriceCycleOscillatorSpecOptions pco => ComputePriceCycleOscillatorFast(data, context, pco.Length, pco.MaType),
             PriceVolumeOscillatorSpecOptions pvo2 => ComputePriceVolumeOscillatorFast(data, context, pvo2.Length),
             PercentChangeOscillatorSpecOptions => ComputePercentChangeOscillatorFast(data, context),
-            DecisionPointPriceMomentumOscillatorSpecOptions dppmo => ComputeDecisionPointPriceMomentumOscillatorFast(data, context, dppmo.Length),
+            DecisionPointPriceMomentumOscillatorSpecOptions dppmo => ComputeDecisionPointPriceMomentumOscillatorFast(data, context,
+                (dppmo.Length * 2) + 7, dppmo.Length + 6),
 
             // Batch 6 - Demand/Volume oscillators
             // Length is declared obsolete because CalculateDemandOscillator has no parameter it could
@@ -972,7 +973,8 @@ internal static partial class IndicatorCompute
                 ezlema.MaType),
             HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length),
             KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
-            KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2, kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4),
+            KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2,
+                kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4, kst2.MaType),
             NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue),
             OnBalanceVolumeSpecOptions obv2 => ComputeOnBalanceVolumeFast(data, context),
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
@@ -1356,7 +1358,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             SupportResistanceSpecOptions sr2 => ComputeSupportResistanceFast(data, context, sr2.Length, sr2.MaType),
-            SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length, sre.MaType),
+            SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length),
             TechnicalRatingsSpecOptions tr => ComputeTechnicalRatingsFast(data, context, tr.AoLength1, tr.AoLength2, tr.RsiLength, tr.StochLength1, tr.StochLength2, tr.StochLength3, tr.MaType),
             TFSMboIndicatorSpecOptions tfsm => ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType),
             TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.MaType),
@@ -2874,19 +2876,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Price Confirmation Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVpciFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeVpciFast(StockData data, ComputeContext context, int fastLength = 5,
+        int slowLength = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
+        // CalculateVolumePriceConfirmationIndicator multiplies three readings of the chained series: how far
+        // its volume weighted average sits above its plain average over the long window, the ratio of the two
+        // over the short window, and the ratio of short to long average volume. The spec's own length smooths
+        // the signal line only, so it never reaches this series. VolumeCore.VolumePriceConfirmationIndicator
+        // read the raw close and took a single window.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        using var vwmaFast = context.Rent(count);
+        using var vwmaSlow = context.Rent(count);
+        MovingAverage(data, MovingAvgType.VolumeWeightedMovingAverage, fastLength, input, vwmaFast.WritableSpan);
+        MovingAverage(data, MovingAvgType.VolumeWeightedMovingAverage, slowLength, input, vwmaSlow.WritableSpan);
+
+        using var smaFast = context.Rent(count);
+        using var smaSlow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, smaFast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, smaSlow.WritableSpan);
+
+        using var volumeFast = context.Rent(count);
+        using var volumeSlow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, volumes, volumeFast.WritableSpan);
+        MovingAverage(data, maType, slowLength, volumes, volumeSlow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            var vpc = vwmaSlow.Span[i] - smaSlow.Span[i];
+            var vpr = smaFast.Span[i] != 0 ? vwmaFast.Span[i] / smaFast.Span[i] : 0;
+            var vm = volumeSlow.Span[i] != 0 ? volumeFast.Span[i] / volumeSlow.Span[i] : 0;
+            output[i] = vpc * vpr * vm;
         }
-        var buffer = context.Rent(count);
-        VolumeCore.VolumePriceConfirmationIndicator(close, volume, buffer.WritableSpan, length);
+
         return buffer;
     }
 
@@ -3159,12 +3186,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeKstFast(StockData data, ComputeContext context, int length = 10)
     {
-        _ = length;
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.KnowSureThing(inputSpan, buffer.WritableSpan);
-        return buffer;
+        // The Kst spec binds its one length to the first of the four smoothing windows and leaves the rest at
+        // their defaults, so it is the same indicator seen through fewer knobs.
+        return ComputeKnowSureThingFast(data, context, length1: length);
     }
 
     /// <summary>
@@ -4641,14 +4665,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Garman-Klass Volatility using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeGarmanKlassVolatilityFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeGarmanKlassVolatilityFast(StockData data, ComputeContext context, int length = 14)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.GarmanKlassVolatility(open, high, low, close, buffer.WritableSpan, length);
+        // CalculateGarmanKlassVolatility reads the bar's own high to low range against its open to chained
+        // close move, sums that over the window and scales it by how many bars have been seen - so the
+        // reading grows with the series rather than settling. The moving average only smooths the signal
+        // line, which this spec does not address.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var logSumWindow = new RollingSum();
+        var twoLogTwoLessOne = (2 * Math.Log(2)) - 1;
+        for (var i = 0; i < count; i++)
+        {
+            var logHl = lows[i] != 0 ? Math.Log(highs[i] / lows[i]) : 0;
+            var logCo = opens[i] != 0 ? Math.Log(input[i] / opens[i]) : 0;
+            logSumWindow.Add((0.5 * MathHelper.Pow(logHl, 2)) - (twoLogTwoLessOne * MathHelper.Pow(logCo, 2)));
+
+            var logSum = logSumWindow.Sum(length);
+            output[i] = length != 0 && logSum != 0 ? MathHelper.Sqrt((double)i / length * logSum) : 0;
+        }
+
         return buffer;
     }
 
@@ -9239,11 +9283,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Decision Point Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context,
+        int length1 = 35, int length2 = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DecisionPointPriceMomentumOscillator(close, buffer.WritableSpan, length > 0 ? length * 2 + 7 : 35, length > 0 ? length + 6 : 20);
+        // CalculateDecisionPointPriceMomentumOscillator smooths the chained series' bar-on-bar percentage
+        // change twice, the second pass over ten times the first, which is what makes it a momentum reading
+        // rather than a rate of change. The core this replaced read the raw close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var smoothingOuter = (double)2 / length1;
+        var smoothingInner = (double)2 / length2;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double pmol2 = 0;
+        double pmol = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var ival = prevValue != 0 ? input[i] / prevValue * 100 : 100;
+
+            pmol2 = ((ival - 100 - pmol2) * smoothingOuter) + pmol2;
+            pmol = (((10 * pmol2) - pmol) * smoothingInner) + pmol;
+            output[i] = pmol;
+        }
+
         return buffer;
     }
 
@@ -15547,13 +15614,40 @@ internal static partial class IndicatorCompute
     /// Computes Know Sure Thing using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeKnowSureThingFast(StockData data, ComputeContext context,
-        int roc1 = 10, int roc2 = 15, int roc3 = 20, int roc4 = 30,
-        int sma1 = 10, int sma2 = 10, int sma3 = 10, int sma4 = 15)
+        int rocLength1 = 10, int rocLength2 = 15, int rocLength3 = 20, int rocLength4 = 30,
+        int length1 = 10, int length2 = 10, int length3 = 10, int length4 = 15,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        double weight1 = 1, double weight2 = 2, double weight3 = 3, double weight4 = 4)
     {
+        // CalculateKnowSureThing smooths four rates of change of the chained series over four windows and adds
+        // them in a rising weighting, so the slowest window carries the most. Each rate of change is taken
+        // from the caller's own series rather than from the previous one's output.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.KnowSureThing(inputSpan, buffer.WritableSpan, roc1, roc2, roc3, roc4, sma1, sma2, sma3, sma4);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        output.Clear();
+
+        using var rateOfChange = context.Rent(count);
+        using var smoothed = context.Rent(count);
+        Span<int> rocLengths = stackalloc int[4] { rocLength1, rocLength2, rocLength3, rocLength4 };
+        Span<int> smoothLengths = stackalloc int[4] { length1, length2, length3, length4 };
+        Span<double> weights = stackalloc double[4] { weight1, weight2, weight3, weight4 };
+
+        for (var component = 0; component < 4; component++)
+        {
+            OscillatorCore.RateOfChange(input, rateOfChange.WritableSpan, rocLengths[component]);
+            MovingAverage(data, maType, smoothLengths[component], rateOfChange.Span, smoothed.WritableSpan);
+
+            var weight = weights[component];
+            for (var i = 0; i < count; i++)
+            {
+                output[i] += smoothed.Span[i] * weight;
+            }
+        }
+
         return buffer;
     }
 
@@ -21712,60 +21806,44 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100)
     {
-        // V1 Algorithm: Rolling correlation between current and previous close values, transformed to roughness
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
-        length = Math.Max(2, length);
+        // CalculateSurfaceRoughnessEstimator correlates the chained series with itself lagged one bar and maps
+        // that onto zero to one, so a series that repeats itself reads as smooth. The correlation runs over
+        // whatever part of the window has filled, not only once the window is full, and the published series
+        // is that reading itself - the moving average smooths the signal line the spec does not address.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        // Build arrays for current and previous values
-        var prevBuffer = context.Rent(count);
-        var prevSpan = prevBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-            prevSpan[i] = i >= 1 ? close[i - 1] : 0;
-
-        // Calculate rolling correlation and transform to roughness
-        var aBuffer = context.Rent(count);
-        var aSpan = aBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        using var previous = context.Rent(count);
+        var prev = previous.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            if (i < length - 1)
-            {
-                aSpan[i] = 0;
-                continue;
-            }
-
-            // Calculate Pearson correlation between close and prev over window
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-            for (int j = 0; j < length; j++)
-            {
-                double x = prevSpan[i - j];
-                double y = close[i - j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-                sumY2 += y * y;
-            }
-
-            double n = length;
-            double denom = Math.Sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-            double corr = denom != 0 ? (n * sumXY - sumX * sumY) / denom : 0;
-
-            // Transform correlation to roughness: a = 1 - ((corr + 1) / 2)
-            aSpan[i] = 1 - ((corr + 1) / 2);
+            prev[i] = i >= 1 ? input[i - 1] : 0;
         }
 
-        prevBuffer.Dispose();
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var window = Math.Min(length, i + 1);
+            double correlation = 0;
+            if (length > 1 && window > 1)
+            {
+                var start = i + 1 - window;
+                correlation = WindowCorrelation.Pearson(previous.Span.Slice(start, window), input.Slice(start, window));
+            }
 
-        // Smooth the roughness values with MA
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(aBuffer.Span, result.WritableSpan, length);
-        aBuffer.Dispose();
+            if (MathHelper.IsValueNullOrInfinity(correlation))
+            {
+                correlation = 0;
+            }
 
-        return result;
+            output[i] = 1 - ((correlation + 1) / 2);
+        }
+
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
