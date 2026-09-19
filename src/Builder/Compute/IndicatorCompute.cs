@@ -205,7 +205,12 @@ internal static partial class IndicatorCompute
 
             // Batch 3 - Complex oscillators
             ElliottWaveOscillatorSpecOptions ewo => ComputeElliottWaveOscillatorFast(data, context, ewo.FastLength, ewo.SlowLength),
-            GatorOscillatorSpecOptions gator => ComputeGatorOscillatorFast(data, context, gator.Length),
+            GatorOscillatorSpecOptions gator => spec.OutputKey switch
+            {
+                null or "Top" => ComputeGatorOscillatorFast(data, context, gator.Length),
+                "Bottom" => ComputeGatorOscillatorFast(data, context, gator.Length, jaw: GatorJaw.Bottom),
+                _ => null
+            },
 
             // Batch 3 - Ichimoku
             IchimokuTenkanSenSpecOptions its => ComputeIchimokuTenkanSenFast(data, context, its.Length),
@@ -447,7 +452,7 @@ internal static partial class IndicatorCompute
             FisherTransformStochasticOscillatorSpecOptions ftso => ComputeFisherTransformStochasticOscillatorFast(data, context, ftso.Length),
             StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length,
                 maType: sco.MaType),
-            FastSlowStochasticOscillatorSpecOptions fsso => ComputeFastSlowStochasticOscillatorFast(data, context, fsso.Length),
+            FastSlowStochasticOscillatorSpecOptions => ComputeFastSlowStochasticOscillatorFast(data, context),
             DiNapoliPreferredStochasticOscillatorSpecOptions dnpso => ComputeDiNapoliPreferredStochasticOscillatorFast(data, context, dnpso.Length),
             DMIStochasticSpecOptions dmis => ComputeDMIStochasticFast(data, context, dmis.Length, dmis.MaType),
             // Length is declared obsolete because CCTStochRelativeStrengthIndex has no parameter it could
@@ -5092,12 +5097,51 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Gator Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeGatorOscillatorFast(StockData data, ComputeContext context, int length = 13)
+    /// <summary>
+    /// Which of the gator oscillator's two published series an arm has been asked for. The top is the gap
+    /// between the alligator's jaw and teeth and the bottom is the negated gap between teeth and lips, so
+    /// they are not an upper and a lower band around anything.
+    /// </summary>
+    internal enum GatorJaw
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.GatorOscillator(high, low, buffer.WritableSpan, length);
+        Top,
+        Bottom
+    }
+
+    internal static ComputeBuffer ComputeGatorOscillatorFast(StockData data, ComputeContext context, int jawLength = 13,
+        int jawOffset = 8, int teethLength = 8, int teethOffset = 5, int lipsLength = 5, int lipsOffset = 3,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, GatorJaw jaw = GatorJaw.Top)
+    {
+        // CalculateGatorOscillator measures the alligator's own lines: the top is the absolute gap between
+        // jaw and teeth, the bottom the negated absolute gap between teeth and lips. Each line averages the
+        // median price and is displaced by its own offset, which AlligatorLine already does - the arm this
+        // replaced delegated to OscillatorCore.GatorOscillator on the raw high and low instead.
+        using var jawLine = AlligatorLine(data, context, jawLength, jawOffset, maType);
+        using var teethLine = AlligatorLine(data, context, teethLength, teethOffset, maType);
+        var jaws = jawLine.Span;
+        var teeth = teethLine.Span;
+
+        var count = data.Count;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        if (jaw == GatorJaw.Top)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = Math.Abs(jaws[i] - teeth[i]);
+            }
+
+            return buffer;
+        }
+
+        using var lipsLine = AlligatorLine(data, context, lipsLength, lipsOffset, maType);
+        var lips = lipsLine.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = -Math.Abs(teeth[i] - lips[i]);
+        }
+
         return buffer;
     }
 
@@ -7974,13 +8018,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length1 = 3,
+        int length2 = 6, int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FastSlowStochasticOscillator(high, low, close, buffer.WritableSpan, length / 2, length);
+        // CalculateFastandSlowStochasticOscillator adds five hundred times the smoothed fast and slow
+        // kurtosis oscillator to the smoothed raw stochastic, both taken over the caller's series - that is
+        // what the batch's CaptureInputSeries and RestoreInputSeries guard. The arm this replaced delegated
+        // to OscillatorCore.FastSlowStochasticOscillator. The spec's only option is [Obsolete] and sets
+        // nothing, and length4 only feeds the Signal key.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var kurtosis = ComputeFastAndSlowKurtosisFast(data, context, length1);
+        using var smoothedKurtosis = context.Rent(count);
+        MovingAverage(data, maType, length2, kurtosis.Span, smoothedKurtosis.WritableSpan);
+        var v4 = smoothedKurtosis.Span;
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, input, length3, fastK.WritableSpan);
+
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, length3, fastK.Span, slow.WritableSpan);
+        var slowK = slow.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (500 * v4[i]) + slowK[i];
+        }
+
         return buffer;
     }
 
@@ -8635,13 +8703,56 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kase Peak Oscillator V1 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 30,
+        int smoothLength = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.KasePeakOscillatorV1(high, low, close, buffer.WritableSpan, length > 1 ? length : 30);
+        // CalculateKasePeakOscillatorV1 measures the length-ago random walk of the high against the low and
+        // the reverse, both normalised by the average true range and scaled by the square root of the
+        // length, then publishes a banded version of the smoothed difference: above its mean plus 1.33
+        // standard deviations while rising, below its mean minus 1.33 while falling, floored at 2.08 and
+        // -1.92 respectively, and zero while the sign is in transition. The arm this replaced delegated to
+        // OscillatorCore.KasePeakOscillatorV1.
+        var count = data.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var sqrt = MathHelper.Sqrt(length);
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length);
+        var atr = averageTrueRange.Span;
+
+        using var difference = context.Rent(count);
+        var diff = difference.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevLow = i >= length ? lows[i - length] : 0;
+            var prevHigh = i >= length ? highs[i - length] : 0;
+            var rwh = atr[i] != 0 ? (highs[i] - prevLow) / atr[i] * sqrt : 0;
+            var rwl = atr[i] != 0 ? (prevHigh - lows[i]) / atr[i] * sqrt : 0;
+            diff[i] = rwh - rwl;
+        }
+
+        using var peak = context.Rent(count);
+        MovingAverage(data, MovingAvgType.WeightedMovingAverage, smoothLength, difference.Span, peak.WritableSpan);
+        var pk = peak.Span;
+
+        using var mean = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, peak.Span, mean.WritableSpan);
+        var mn = mean.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(peak.Span, deviation.WritableSpan, Math.Max(1, length));
+        var sd = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevPk = i >= 1 ? pk[i - 1] : 0;
+            var v1 = mn[i] + (1.33 * sd[i]) > 2.08 ? mn[i] + (1.33 * sd[i]) : 2.08;
+            var v2 = mn[i] - (1.33 * sd[i]) < -1.92 ? mn[i] - (1.33 * sd[i]) : -1.92;
+            output[i] = prevPk >= 0 && pk[i] > 0 ? v1 : prevPk <= 0 && pk[i] < 0 ? v2 : 0;
+        }
+
         return buffer;
     }
 
