@@ -526,7 +526,9 @@ internal static partial class IndicatorCompute
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
             EhlersHilbertOscillatorSpecOptions eho => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length),
             EhlersUniversalOscillatorSpecOptions euo => ComputeEhlersUniversalOscillatorFast(data, context, euo.Length),
-            EhlersRecursiveMedianOscillatorSpecOptions ermo => ComputeEhlersRecursiveMedianOscillatorFast(data, context, ermo.Length),
+            // The oscillator's three lengths are all fixed in the batch, so the spec's single Length has
+            // nothing to bind to and is marked as having no effect.
+            EhlersRecursiveMedianOscillatorSpecOptions ermo => ComputeEhlersRecursiveMedianOscillatorFast(data, context),
             EhlersStochasticCenterOfGravityOscillatorSpecOptions escogo => ComputeEhlersStochasticCenterOfGravityOscillatorFast(data, context, escogo.Length),
             EhlersFisherizedDeviationScaledOscillatorSpecOptions efdso => ComputeEhlersFisherizedDeviationScaledOscillatorFast(data, context, efdso.Length),
             EhlersAdaptiveCenterOfGravityOscillatorSpecOptions eacogo => ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(data, context, eacogo.Length),
@@ -762,7 +764,8 @@ internal static partial class IndicatorCompute
             EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
             EhlersMedianAverageAdaptiveFilterSpecOptions emaaf => ComputeEhlersMedianAverageAdaptiveFilterFast(data, context, emaaf.Length, emaaf.Threshold),
             EhlersMesaAdaptiveMovingAverageSpecOptions emama => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.Length, emama.FastLimit, emama.SlowLimit),
-            EhlersRecursiveMedianFilterSpecOptions ermf => ComputeEhlersRecursiveMedianFilterFast(data, context, ermf.Length, ermf.Alpha),
+            // Alpha is derived from the smoothing length inside the filter; the batch takes no alpha.
+            EhlersRecursiveMedianFilterSpecOptions ermf => ComputeEhlersRecursiveMedianFilterFast(data, context, ermf.Length),
             EhlersRoofingFilterSpecOptions eroof => ComputeEhlersRoofingFilterFast(data, context, eroof.HpLength, eroof.LpLength),
 
             // Batch 28
@@ -6914,11 +6917,43 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 12,
+        int length3 = 30)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersRecursiveMedianOscillator(close, buffer.WritableSpan, length > 2 ? length / 2 : 5, 3);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        var alpha1Arg = MathHelper.MinOrMax(2 * Math.PI / length2, 0.99, 0.01);
+        var alpha1ArgCos = Math.Cos(alpha1Arg);
+        var alpha2Arg = MathHelper.MinOrMax(1 / MathHelper.Sqrt(2) * 2 * Math.PI / length3, 0.99, 0.01);
+        var alpha2ArgCos = Math.Cos(alpha2Arg);
+        var alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
+        var alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
+
+        using var median = new RollingMedian(length1);
+        using var recursiveMedian = context.Rent(count);
+        var rm = recursiveMedian.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            median.Add(input[i]);
+
+            var previousRm1 = i >= 1 ? rm[i - 1] : 0;
+            var previousRm2 = i >= 2 ? rm[i - 2] : 0;
+            var previousRmo1 = i >= 1 ? output[i - 1] : 0;
+            var previousRmo2 = i >= 2 ? output[i - 2] : 0;
+
+            rm[i] = (alpha1 * median.Median) + ((1 - alpha1) * previousRm1);
+            output[i] = (MathHelper.Pow(1 - (alpha2 / 2), 2) * (rm[i] - (2 * previousRm1) + previousRm2)) +
+                (2 * (1 - alpha2) * previousRmo1) - (MathHelper.Pow(1 - alpha2, 2) * previousRmo2);
+        }
+
         return buffer;
     }
 
@@ -7798,11 +7833,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersFilter(close, buffer.WritableSpan, length);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double numerator = 0, coefficientSum = 0;
+            for (var j = 0; j <= length1 - 1; j++)
+            {
+                var currentPrice = i >= j ? input[i - j] : 0;
+                var previousPrice = i >= j + length2 ? input[i - (j + length2)] : 0;
+                var priceDiff = Math.Abs(currentPrice - previousPrice);
+
+                numerator += priceDiff * currentPrice;
+                coefficientSum += priceDiff;
+            }
+
+            output[i] = coefficientSum != 0 ? numerator / coefficientSum : 0;
+        }
+
         return buffer;
     }
 
@@ -8313,9 +8367,42 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data, ComputeContext context, int length = 14)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersDistanceCoefficientFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        // The squared distance of a bar from its own lookback window depends only on that bar, so it is
+        // computed once per bar and reused across the coefficient sums.
+        using var distances = context.Rent(count);
+        var distanceByBar = distances.WritableSpan;
+        for (var p = 0; p < count; p++)
+        {
+            double distance = 0;
+            for (var lookBack = 1; lookBack <= length - 1; lookBack++)
+            {
+                var back = p >= lookBack ? input[p - lookBack] : 0;
+                distance += MathHelper.Pow(input[p] - back, 2);
+            }
+
+            distanceByBar[p] = distance;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sourceSum = 0, coefficientSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var previousValue = i >= j ? input[i - j] : 0;
+                var distance = i >= j ? distanceByBar[i - j] : 0;
+
+                sourceSum += distance * previousValue;
+                coefficientSum += distance;
+            }
+
+            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : 0;
+        }
+
         return buffer;
     }
 
@@ -9272,12 +9359,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Recursive Median Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length = 5, double alpha = 0.5)
+    internal static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 12)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersRecursiveMedianFilter(inputSpan, buffer.WritableSpan, length, alpha);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        // Alpha is derived from length2, not supplied: the batch has no alpha parameter.
+        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / Math.Max(length2, 1), 0.99, 0.01);
+        var alphaArgCos = Math.Cos(alphaArg);
+        var alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
+
+        using var median = new RollingMedian(Math.Max(length1, 1));
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            median.Add(input[i]);
+
+            var previousFilter = i >= 1 ? output[i - 1] : 0;
+            output[i] = (alpha * median.Median) + ((1 - alpha) * previousFilter);
+        }
+
         return buffer;
     }
 
