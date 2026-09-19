@@ -1059,7 +1059,7 @@ internal static partial class IndicatorCompute
             EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length),
             EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3),
             ElderMarketThermometerSpecOptions => ComputeElderMarketThermometerFast(data, context),
-            EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.SignalLength, ervi.MaType),
+            EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.MaType),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
             GainLossMovingAverageSpecOptions glma => ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
@@ -1289,7 +1289,7 @@ internal static partial class IndicatorCompute
             TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType),
             TrendAnalysisIndicatorSpecOptions tai2 => ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType),
             TrenderSpecOptions tr => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType),
-            TurboStochasticsFastSpecOptions tsf => ComputeTurboStochasticsFastFast(data, context, tsf.Length1, tsf.Length2, tsf.TurboLength, tsf.MaType),
+            TurboStochasticsFastSpecOptions tsf => ComputeTurboStochasticsFastFast(data, context, tsf.Length1, tsf.Length2, tsf.TurboLength),
 
             // Batch 28 - Volume and Volatility Indicators
             TurboStochasticsSlowSpecOptions tss => ComputeTurboStochasticsSlowFast(data, context, tss.Length1, tss.Length2, tss.TurboLength, tss.MaType),
@@ -8296,11 +8296,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Decision Point Breadth Swenlin Trading Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDecisionPointBreadthSwenlinTradingOscillatorFast(StockData data, ComputeContext context, int length = 5,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DecisionPointBreadthSwenlinTradingOscillator(close, buffer.WritableSpan, Math.Max(1, length / 3), length * 7);
+        // CalculateDecisionPointBreadthSwenlinTradingOscillator reads each bar as a one-issue breadth vote -
+        // plus or minus a thousand, or zero when unchanged - and publishes that vote smoothed twice. The third
+        // average it computes is the unpublished signal.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var votes = context.Rent(count);
+        var iVal = votes.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            iVal[i] = input[i] > prevValue ? 1000 : input[i] < prevValue ? -1000 : 0;
+        }
+
+        using var smoothedOnce = context.Rent(count);
+        MovingAverage(data, maType, length, votes.Span, smoothedOnce.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, smoothedOnce.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -14645,70 +14664,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Relative Vigor Index with signal line.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var count = data.Count;
-        var openSpan = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateEhlersRelativeVigorIndex measures where the bar closed relative to where it opened as a
+        // fraction of that bar's range, then averages that fraction over the length. Its signalLength smooths
+        // the result again into a series this indicator does not publish.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
 
-        var pool = ArrayPool<double>.Shared;
-        var rviArray = pool.Rent(count);
-        var rviSmaArray = pool.Rent(count);
-        try
+        using var vigor = context.Rent(count);
+        var rvi = vigor.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var rviSpan = rviArray.AsSpan(0, count);
-            var rviSmaSpan = rviSmaArray.AsSpan(0, count);
-
-            // Compute raw RVI values
-            OscillatorCore.EhlersRelativeVigorIndex(openSpan, highSpan, lowSpan, closeSpan, rviSpan);
-            ReadOnlySpan<double> rviReadOnly = rviSpan;
-
-            // First MA smoothing (length)
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(rviReadOnly, rviSmaSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(rviReadOnly, rviSmaSpan, length);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(rviReadOnly, rviSmaSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(rviReadOnly, rviSmaSpan, length);
-                    break;
-            }
-
-            ReadOnlySpan<double> rviSmaReadOnly = rviSmaSpan;
-            var buffer = context.Rent(count);
-
-            // Second MA for signal line (signalLength)
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(rviSmaReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-            }
-
-            return buffer;
+            var range = highs[i] - lows[i];
+            rvi[i] = range != 0 ? (input[i] - opens[i]) / range : 0;
         }
-        finally
-        {
-            pool.Return(rviArray);
-            pool.Return(rviSmaArray);
-        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, vigor.Span, buffer.WritableSpan);
+
+        return buffer;
     }
 
     /// <summary>
@@ -18825,25 +18805,61 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10,
+        int turboLength = 2)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticK(high, low, close, buffer.WritableSpan, length1);
+        // CalculateTurboStochasticsFast fits a linear regression to the raw stochastic over a window the turbo
+        // length shortens or lengthens, clamped so it can never invert the window. The published Tsf is that
+        // fit of the K line; the D line it also computes is not published, and neither is its maType used.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, fastK.WritableSpan);
+        var stochastic = fastK.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        using (var regression = new RollingLeastSquares(Math.Max(length2 + turbo, 1)))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = regression.Next(stochastic[i], isFinal: true).Last;
+            }
+        }
+
         return buffer;
     }
 
     // Batch 28 - Volume and Volatility Indicators
 
-    internal static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10, int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTurboStochasticsSlowFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10,
+        int turboLength = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticD(high, low, close, buffer.WritableSpan, length1, length2);
+        // CalculateTurboStochasticsSlow differs from the fast form in what it fits: the slow K line, which is
+        // the raw stochastic smoothed once over length1, rather than the raw stochastic itself.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, fastK.WritableSpan);
+
+        using var slowK = context.Rent(count);
+        MovingAverage(data, maType, length1, fastK.Span, slowK.WritableSpan);
+        var smoothed = slowK.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        using (var regression = new RollingLeastSquares(Math.Max(length2 + turbo, 1)))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = regression.Next(smoothed[i], isFinal: true).Last;
+            }
+        }
+
         return buffer;
     }
 
