@@ -270,8 +270,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "JmaRsxCloneSpecOptions",
         "KaseDevStopV2SpecOptions",
         "KasePeakOscillatorV2SpecOptions",
-        "KaufmanAdaptiveCorrelationOscillatorSpecOptions",
-        "KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions",
         "MacZVwapIndicatorSpecOptions",
         "MobilityOscillatorSpecOptions",
         "MultiDepthZeroLagExponentialMovingAverageSpecOptions",

@@ -10075,12 +10075,78 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKaufmanAdaptiveCorrelationOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeKaufmanAdaptiveCorrelationOscillatorFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.KaufmanAdaptiveCorrelationOscillator(close, buffer.WritableSpan, length);
+        // CalculateKaufmanAdaptiveCorrelationOscillator is the Pearson correlation of the chained series with
+        // the bar index, with every moment taken through the adaptive average rather than a plain window.
+        // OscillatorCore.KaufmanAdaptiveCorrelationOscillator read the close and used neither the chained
+        // series nor that average.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var indexDeviation = context.Rent(count);
+        using var sourceDeviation = context.Rent(count);
+
+        var buffer = context.Rent(count);
+        KaufmanAdaptiveCorrelation(data, context, input, length, maType, indexDeviation.WritableSpan,
+            sourceDeviation.WritableSpan, buffer.WritableSpan);
+
         return buffer;
+    }
+
+    // The three series CalculateKaufmanAdaptiveCorrelationOscillator publishes - IndexSt, SrcSt and Kaco -
+    // in one pass, so the oscillator arm and the least squares average that reads all three cannot drift
+    // apart. Every moment is smoothed with the same adaptive average the batch uses.
+    private static void KaufmanAdaptiveCorrelation(StockData data, ComputeContext context, ReadOnlySpan<double> input,
+        int length, MovingAvgType maType, Span<double> indexDeviation, Span<double> sourceDeviation,
+        Span<double> correlation)
+    {
+        var count = input.Length;
+
+        using var indexes = context.Rent(count);
+        using var indexSource = context.Rent(count);
+        using var indexSquared = context.Rent(count);
+        using var sourceSquared = context.Rent(count);
+        var index = indexes.WritableSpan;
+        var indexSource1 = indexSource.WritableSpan;
+        var index2 = indexSquared.WritableSpan;
+        var source2 = sourceSquared.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            index[i] = i;
+            indexSource1[i] = i * input[i];
+            source2[i] = input[i] * input[i];
+            index2[i] = index[i] * index[i];
+        }
+
+        using var sourceAverage = context.Rent(count);
+        using var indexAverage = context.Rent(count);
+        using var indexSourceAverage = context.Rent(count);
+        using var indexSquaredAverage = context.Rent(count);
+        using var sourceSquaredAverage = context.Rent(count);
+        MovingAverage(data, maType, length, input, sourceAverage.WritableSpan);
+        MovingAverage(data, maType, length, indexes.Span, indexAverage.WritableSpan);
+        MovingAverage(data, maType, length, indexSource.Span, indexSourceAverage.WritableSpan);
+        MovingAverage(data, maType, length, indexSquared.Span, indexSquaredAverage.WritableSpan);
+        MovingAverage(data, maType, length, sourceSquared.Span, sourceSquaredAverage.WritableSpan);
+
+        for (var i = 0; i < count; i++)
+        {
+            var sourceMa = sourceAverage.Span[i];
+            var indexMa = indexAverage.Span[i];
+
+            var indexVariance = indexSquaredAverage.Span[i] - MathHelper.Pow(indexMa, 2);
+            indexDeviation[i] = indexVariance >= 0 ? MathHelper.Sqrt(indexVariance) : 0;
+
+            var sourceVariance = sourceSquaredAverage.Span[i] - MathHelper.Pow(sourceMa, 2);
+            sourceDeviation[i] = sourceVariance >= 0 ? MathHelper.Sqrt(sourceVariance) : 0;
+
+            var covariance = indexSourceAverage.Span[i] - (indexMa * sourceMa);
+            var scale = indexDeviation[i] * sourceDeviation[i];
+            correlation[i] = scale != 0 ? covariance / scale : 0;
+        }
     }
 
     /// <summary>
@@ -12953,12 +13019,47 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kaufman Adaptive Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(StockData data, ComputeContext context,
+        int length = 100, MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage)
     {
+        // CalculateKaufmanAdaptiveLeastSquaresMovingAverage is the least squares line through the chained
+        // series against the bar index, with the slope taken from the adaptive correlation oscillator's own
+        // three series rather than from a plain window. MovingAverageCore's entry point of the same name
+        // expresses none of that, so the arm shares the oscillator's pass instead.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.KaufmanAdaptiveLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var indexDeviation = context.Rent(count);
+        using var sourceDeviation = context.Rent(count);
+        using var correlation = context.Rent(count);
+        KaufmanAdaptiveCorrelation(data, context, input, length, maType, indexDeviation.WritableSpan,
+            sourceDeviation.WritableSpan, correlation.WritableSpan);
+
+        using var indexes = context.Rent(count);
+        var index = indexes.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            index[i] = i;
+        }
+
+        using var sourceAverage = context.Rent(count);
+        MovingAverage(data, maType, length, input, sourceAverage.WritableSpan);
+
+        using var indexAverage = context.Rent(count);
+        MovingAverage(data, maType, length, indexes.Span, indexAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var alpha = indexDeviation.Span[i] != 0
+                ? sourceDeviation.Span[i] / indexDeviation.Span[i] * correlation.Span[i]
+                : 0;
+            var beta = sourceAverage.Span[i] - (alpha * indexAverage.Span[i]);
+            output[i] = (alpha * i) + beta;
+        }
+
         return buffer;
     }
 
