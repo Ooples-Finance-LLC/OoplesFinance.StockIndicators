@@ -3518,10 +3518,28 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLsmaFast(StockData data, ComputeContext context, int length = 25)
     {
+        // CalculateLeastSquaresMovingAverage is three weighted averages less two simple ones, both taken over
+        // the chained series. MovingAverageCore.LeastSquaresMovingAverage fits a regression instead, which is
+        // a different line.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.LeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var weighted = context.Rent(count);
+        MovingAverage(data, MovingAvgType.WeightedMovingAverage, length, input, weighted.WritableSpan);
+        var wma = weighted.Span;
+
+        using var simple = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, input, simple.WritableSpan);
+        var sma = simple.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (3 * wma[i]) - (2 * sma[i]);
+        }
+
         return buffer;
     }
 
@@ -4423,11 +4441,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes EndPoint Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEndPointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEndPointMovingAverageFast(StockData data, ComputeContext context, int length = 11,
+        int offset = 4)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EndpointMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateEndPointMovingAverage weights the window linearly but shifts the ramp down by the offset,
+        // so the oldest bars carry negative weight. MovingAverageCore.EndpointMovingAverage read the close
+        // and knew nothing of the offset.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                double weight = length - j - offset;
+                var prevValue = i >= j ? input[i - j] : 0;
+
+                sum += prevValue * weight;
+                weightedSum += weight;
+            }
+
+            output[i] = weightedSum != 0 ? 1 / weightedSum * sum : 0;
+        }
+
         return buffer;
     }
 
@@ -5229,11 +5270,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Line with Drift using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 500)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AutoLineWithDrift(close, buffer.WritableSpan, length);
+        // CalculateAutoLineWithDrift holds a line inside a band of one windowed standard deviation either
+        // side of itself, jumping to the value when the value leaves the band and otherwise drifting by a
+        // fraction of how far the line has moved over the window. TrendCore.AutoLineWithDrift took the close
+        // and implemented something else.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var dev = stdDev[i];
+            var r = Math.Round(currentValue);
+
+            var prevA = i >= 1 ? output[i - 1] : r;
+            var priorA = i >= length + 1 ? output[i - (length + 1)] : r;
+            output[i] = currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue :
+                prevA + ((double)1 / (length * 2) * (prevA - priorA));
+        }
+
         return buffer;
     }
 
@@ -5698,9 +5763,30 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeParabolicWmaFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.ParabolicWeightedMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateParabolicWeightedMovingAverage weights each bar of the window by the square of its
+        // distance from the far end, over the chained series rather than the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var weight = MathHelper.Pow(length - j, 2);
+                var prevValue = i >= j ? input[i - j] : 0;
+
+                sum += prevValue * weight;
+                weightedSum += weight;
+            }
+
+            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+        }
+
         return buffer;
     }
 
@@ -9906,12 +9992,36 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Zero Low Lag Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 50,
+        double lag = 1.4)
     {
+        // CalculateZeroLowLagMovingAverage runs a lagged accumulator and publishes the windowed difference of
+        // that accumulator, not the accumulator itself. The core routine returned the wrong one of the two
+        // series and had no lag parameter.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ZeroLowLagMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var lbLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        using var accumulator = context.Rent(count);
+        var a = accumulator.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var priorB = i >= lbLength ? output[i - lbLength] : currentValue;
+            var priorA = i >= length ? a[i - length] : 0;
+
+            var prevA = i >= 1 ? a[i - 1] : 0;
+            a[i] = (lag * currentValue) + ((1 - lag) * priorB) + prevA;
+
+            output[i] = (a[i] - priorA) / length;
+        }
+
         return buffer;
     }
 
@@ -10132,12 +10242,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Right Sided Ricker Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 50,
+        double pctWidth = 60)
     {
+        // CalculateRightSidedRickerMovingAverage accumulates its Ricker weight across the window and
+        // multiplies each bar by the running total rather than by that bar's own weight, so the kernel is a
+        // cumulative one. Reproduce it exactly - the core routine used the textbook per-bar weight and the
+        // width the percentage names was not reachable at all.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.RightSidedRickerMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var width = pctWidth / 100 * length;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double w = 0, vw = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var prevV = i >= j ? input[i - j] : 0;
+                w += (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
+                vw += prevV * w;
+            }
+
+            output[i] = w != 0 ? vw / w : 0;
+        }
+
         return buffer;
     }
 
@@ -15877,26 +16010,30 @@ internal static partial class IndicatorCompute
     /// Computes Grover Llorens Activator using zero-allocation fast path.
     /// Returns the activator line.
     /// </summary>
-    internal static ComputeBuffer ComputeGroverLlorensActivatorFast(StockData data, ComputeContext context, int length = 100, double mult = 5, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeGroverLlorensActivatorFast(StockData data, ComputeContext context, int length = 100,
+        double mult = 5, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateGroverLlorensActivator is a trailing stop that steps towards the chained series by a
+        // multiple of the average true range, reversing side whenever the series crosses it. The switch this
+        // replaced returned a plain moving average of the close, which is not a stop at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        switch (maType)
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevTs = i >= 1 ? output[i - 1] : currentValue;
+            prevTs = prevTs == 0 ? prevValue : prevTs;
+
+            var diff = currentValue - prevTs;
+            output[i] = diff > 0 ? prevTs - (atr[i] * mult) : diff < 0 ? prevTs + (atr[i] * mult) : prevTs;
         }
 
         return buffer;
