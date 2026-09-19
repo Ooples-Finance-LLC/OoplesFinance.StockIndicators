@@ -758,7 +758,7 @@ internal static partial class IndicatorCompute
             SelfWeightedMovingAverageSpecOptions swma => ComputeSelfWeightedMovingAverageFast(data, context, swma.Length),
             SequentiallyFilteredMovingAverageSpecOptions sfma => ComputeSequentiallyFilteredMovingAverageFast(data, context, sfma.Length,
                 sfma.MaType),
-            SettingLessTrendStepFilteringSpecOptions sltsf => ComputeSettingLessTrendStepFilteringFast(data, context, sltsf.Length),
+            SettingLessTrendStepFilteringSpecOptions => ComputeSettingLessTrendStepFilteringFast(data, context),
             ShapeshiftingMovingAverageSpecOptions ssma => ComputeShapeshiftingMovingAverageFast(data, context, ssma.Length),
             SharpModifiedMovingAverageSpecOptions shpma => ComputeSharpModifiedMovingAverageFast(data, context, shpma.Length,
                 shpma.MaType),
@@ -1224,7 +1224,7 @@ internal static partial class IndicatorCompute
             MacZVwapIndicatorSpecOptions maczvwap => ComputeMacZVwapIndicatorFast(data, context, maczvwap.FastLength, maczvwap.SlowLength, maczvwap.SignalLength, maczvwap.Length1, maczvwap.Length2, maczvwap.Gamma, maczvwap.MaType),
             MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length, mti.MaType),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.LookbackLength, mgha.Length, mgha.MaType),
-            ModifiedPriceVolumeTrendSpecOptions mpvt => ComputeModifiedPriceVolumeTrendFast(data, context, mpvt.Length, mpvt.MaType),
+            ModifiedPriceVolumeTrendSpecOptions => ComputeModifiedPriceVolumeTrendFast(data, context),
             MultiVoteOnBalanceVolumeSpecOptions mvobv => ComputeMultiVoteOnBalanceVolumeFast(data, context, mvobv.Length, mvobv.MaType),
             NaturalDirectionalComboSpecOptions ndc => ComputeNaturalDirectionalComboFast(data, context, ndc.Length, ndc.SmoothLength, ndc.MaType),
             NaturalDirectionalIndexSpecOptions ndi => ComputeNaturalDirectionalIndexFast(data, context, ndi.Length, ndi.SmoothLength, ndi.MaType),
@@ -1235,12 +1235,12 @@ internal static partial class IndicatorCompute
             NaturalMarketComboSpecOptions nmc => ComputeNaturalMarketComboFast(data, context, nmc.Length, nmc.SmoothLength, nmc.MaType),
             NaturalStochasticIndicatorSpecOptions nsi => ComputeNaturalStochasticIndicatorFast(data, context, nsi.Length, nsi.SmoothLength, nsi.MaType),
             NegativeVolumeDisparityIndicatorSpecOptions nvdi => ComputeNegativeVolumeDisparityFast(data, context, nvdi.Length, nvdi.SignalLength, nvdi.Top, nvdi.Bottom, nvdi.MaType),
-            OceanIndicatorSpecOptions oi => ComputeOceanIndicatorFast(data, context, oi.Length, oi.MaType),
+            OceanIndicatorSpecOptions oi => ComputeOceanIndicatorFast(data, context, oi.Length),
             OCHistogramSpecOptions och => ComputeOCHistogramFast(data, context, och.Length, och.MaType),
             OnBalanceVolumeModifiedSpecOptions obvmod => ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType),
 
             // Batch 23 - Volume and Statistical Indicators
-            OnBalanceVolumeReflexSpecOptions obvr => ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length, obvr.SignalLength, obvr.MaType),
+            OnBalanceVolumeReflexSpecOptions obvr => ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length),
             PivotPointAverageSpecOptions ppa => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType),
             PriceVolumeRankSpecOptions pvr => ComputePriceVolumeRankFast(data, context, pvr.FastLength, pvr.SlowLength, pvr.MaType),
             PringSpecialKSpecOptions psk => ComputePringSpecialKFast(data, context, psk.SmoothLength, psk.MaType),
@@ -7212,13 +7212,33 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Midpoint Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMidpointOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMidpointOscillatorFast(StockData data, ComputeContext context, int length = 26)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.MidpointOscillator(high, low, close, buffer.WritableSpan, length);
+        // CalculateMidpointOscillator publishes where the chained value sits between the window's high and low
+        // as a percentage of that range, clamped either side. It is the raw reading: the moving average of it
+        // is the separate signal series, and no average type reaches this one.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var hh = highWindow.Max;
+            var ll = lowWindow.Min;
+            output[i] = hh - ll != 0 ? MathHelper.MinOrMax(100 * ((2 * input[i]) - hh - ll) / (hh - ll), 100, -100) : 0;
+        }
+
         return buffer;
     }
 
@@ -10736,12 +10756,36 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Setting Less Trend Step Filtering using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context)
     {
+        // CalculateSettingLessTrendStepFiltering takes no length at all - that is what settingless means. The
+        // step it holds inside is the running mean of its own past steps, scaled by how far the current value
+        // has pulled away from the line, so the band widens exactly as much as the series has been moving.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.SettingLessTrendStepFiltering(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double chgSum = 0;
+        double prevA = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevB = i >= 1 ? output[i - 1] : currentValue;
+
+            var distance = Math.Abs(currentValue - prevB);
+            var sc = distance + prevA != 0 ? distance / (distance + prevA) : 0;
+            var sltsf = (sc * currentValue) + ((1 - sc) * prevB);
+
+            chgSum += Math.Abs(sltsf - prevB);
+            var a = chgSum / (i + 1) * (1 + sc);
+            prevA = a;
+
+            output[i] = sltsf > prevB + a ? sltsf : sltsf < prevB - a ? sltsf : prevB;
+        }
+
         return buffer;
     }
 
@@ -17035,19 +17079,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context, int length = 23, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateModifiedPriceVolumeTrend accumulates the return on the chained series weighted by volume in
+        // fifty-thousand lots. Nothing about it is a moving average: the length and the average type reach only
+        // the separate signal series, so neither appears here.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var rv = volumes[i] / 50000;
+            var prevMpvt = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = prevValue != 0
+                ? prevMpvt + (rv * CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) / prevValue)
+                : 0;
         }
+
         return buffer;
     }
 
@@ -17280,19 +17336,32 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ocean Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeOceanIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeOceanIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateOceanIndicator publishes the change in the scaled logarithm of the chained series over the
+        // window, divided by the square root of the length so windows of different sizes stay comparable. The
+        // moving average of it is the separate signal series, so no average type reaches this one.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var logarithm = context.Rent(count);
+        var ln = logarithm.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var root = MathHelper.Sqrt(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var prevLn = i >= length ? ln[i - length] : 0;
+
+            ln[i] = currentValue > 0 ? Math.Log(currentValue) * 1000 : 0;
+            output[i] = (ln[i] - prevLn) / root * 100;
         }
+
         return buffer;
     }
 
@@ -17361,12 +17430,31 @@ internal static partial class IndicatorCompute
 
     // Batch 23 - Volume and Statistical Indicators (using registry pattern)
 
-    internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4, int signalLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeOnBalanceVolumeReflexFast(StockData data, ComputeContext context, int length = 4)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.OnBalanceVolume(close, volume, buffer.WritableSpan);
+        // CalculateOnBalanceVolumeReflex adds or subtracts volume according to where the chained value sits
+        // against its reading a window ago, not against the previous bar - that lookback is the whole
+        // difference from ordinary on balance volume, and VolumeCore.OnBalanceVolume does not have it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var priorValue = i >= length ? input[i - length] : 0;
+            var prevOvr = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = currentValue > priorValue ? prevOvr + volumes[i]
+                : currentValue < priorValue ? prevOvr - volumes[i]
+                : prevOvr;
+        }
+
         return buffer;
     }
 
