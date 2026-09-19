@@ -1238,7 +1238,8 @@ internal static partial class IndicatorCompute
             FXSniperIndicatorSpecOptions fxs => ComputeFXSniperFast(data, context, fxs.CciLength, fxs.T3Length, fxs.B, fxs.MaType),
             GroverLlorensActivatorSpecOptions gla => ComputeGroverLlorensActivatorFast(data, context, gla.Length, gla.Mult, gla.MaType),
             KaseIndicatorSpecOptions ki => ComputeKaseIndicatorFast(data, context, ki.Length, ki.MaType),
-            GuppyDistanceIndicatorSpecOptions gdi => ComputeGuppyDistanceFast(data, context, gdi.Length1, gdi.MaType),
+            GuppyDistanceIndicatorSpecOptions gdi => ComputeGuppyDistanceFast(data, context, gdi.Length1, gdi.Length2,
+                gdi.Length3, gdi.Length4, gdi.Length5, gdi.Length6, gdi.MaType),
             GuppyMultipleMovingAverageSpecOptions gmma => ComputeGuppyMultipleMaFast(data, context, gmma.Length1, gmma.MaType),
 
             // Batch 20 - Statistical and Correlation Indicators
@@ -1347,7 +1348,8 @@ internal static partial class IndicatorCompute
             ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
             ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
                 etsiv1.Length2, etsiv1.Length3, etsiv1.MaType),
-            ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length1, etsiv2.Length2, etsiv2.Length3, etsiv2.SignalLength, etsiv2.MaType),
+            ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length4,
+                etsiv2.Length5, etsiv2.Length6, etsiv2.MaType),
             SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
                 smie.SlowLength, smie.MaType),
             InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength, ii.SignalLength, ii.MaType),
@@ -20438,23 +20440,40 @@ internal static partial class IndicatorCompute
     /// Computes Guppy Distance Indicator using zero-allocation fast path.
     /// Returns the short-term EMA.
     /// </summary>
-    internal static ComputeBuffer ComputeGuppyDistanceFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeGuppyDistanceFast(StockData data, ComputeContext context, int length1 = 3, int length2 = 5,
+        int length3 = 8, int length4 = 10, int length5 = 12, int length6 = 15,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateGuppyDistanceIndicator publishes how far apart the six short averages of the ribbon sit:
+        // the sum of the absolute gaps between consecutive ones. The six long averages reach only the
+        // "SlowDistance" series, so the arm does not take their lengths. What this replaced returned a single
+        // moving average of the close, which is not a distance at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        switch (maType)
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        using var fourth = context.Rent(count);
+        using var fifth = context.Rent(count);
+        using var sixth = context.Rent(count);
+        MovingAverage(data, maType, length1, input, first.WritableSpan);
+        MovingAverage(data, maType, length2, input, second.WritableSpan);
+        MovingAverage(data, maType, length3, input, third.WritableSpan);
+        MovingAverage(data, maType, length4, input, fourth.WritableSpan);
+        MovingAverage(data, maType, length5, input, fifth.WritableSpan);
+        MovingAverage(data, maType, length6, input, sixth.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            output[i] = Math.Abs(first.Span[i] - second.Span[i])
+                + Math.Abs(second.Span[i] - third.Span[i])
+                + Math.Abs(third.Span[i] - fourth.Span[i])
+                + Math.Abs(fourth.Span[i] - fifth.Span[i])
+                + Math.Abs(fifth.Span[i] - sixth.Span[i]);
         }
 
         return buffer;
@@ -22974,11 +22993,53 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length1 = 21, int length2 = 9, int length3 = 9, int signalLength = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length4 = 17, int length5 = 6,
+        int length6 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TrueStrengthIndex(close, buffer.WritableSpan, length1, length2);
+        // CalculateErgodicTrueStrengthIndexV2 publishes "Etsi2": the bar-to-bar change and its absolute value
+        // each smoothed three times, over length4, length5 and length6, and divided one by the other. The
+        // lengths 1 to 3 build the separate "Etsi1" series, so the arm does not take them - the parameter
+        // names here are the batch's own so the two cannot be transposed. What this replaced returned the
+        // plain true strength index of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var changes = context.Rent(count);
+        using var absoluteChanges = context.Rent(count);
+        var change = changes.WritableSpan;
+        var absoluteChange = absoluteChanges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            change[i] = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
+            absoluteChange[i] = Math.Abs(change[i]);
+        }
+
+        using var changeFirst = context.Rent(count);
+        using var absoluteFirst = context.Rent(count);
+        MovingAverage(data, maType, length4, changes.Span, changeFirst.WritableSpan);
+        MovingAverage(data, maType, length4, absoluteChanges.Span, absoluteFirst.WritableSpan);
+
+        using var changeSecond = context.Rent(count);
+        using var absoluteSecond = context.Rent(count);
+        MovingAverage(data, maType, length5, changeFirst.Span, changeSecond.WritableSpan);
+        MovingAverage(data, maType, length5, absoluteFirst.Span, absoluteSecond.WritableSpan);
+
+        using var changeThird = context.Rent(count);
+        using var absoluteThird = context.Rent(count);
+        MovingAverage(data, maType, length6, changeSecond.Span, changeThird.WritableSpan);
+        MovingAverage(data, maType, length6, absoluteSecond.Span, absoluteThird.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var smoothedAbsolute = absoluteThird.Span[i];
+            output[i] = smoothedAbsolute != 0
+                ? MathHelper.MinOrMax(changeThird.Span[i] / smoothedAbsolute * 100, 100, -100)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -23600,11 +23661,45 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeRSINGIndicatorFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
+        // CalculateRSINGIndicator scales the length-bar price change by how heavy the bar's volume was against
+        // its average and by how wide the bar ranged against the deviation of that range. The arm this
+        // replaced returned a relative strength index of the close, which shares nothing with it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        using var volumeAverage = context.Rent(count);
+        MovingAverage(data, maType, length, volumes, volumeAverage.WritableSpan);
+
+        using var ranges = context.Rent(count);
+        var range = ranges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            range[i] = highs[i] - lows[i];
+        }
+
+        using var deviations = context.Rent(count);
+        VolatilityCore.StandardDeviation(ranges.Span, deviations.WritableSpan, Math.Max(1, length));
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var average = volumeAverage.Span[i];
+            var deviation = deviations.Span[i];
+            var volumeRatio = average != 0 ? volumes[i] / average : 0;
+            var rangeRatio = deviation != 0 ? ranges.Span[i] / deviation : 0;
+            var change = CalculationsHelper.MinPastValues(i, length, input[i] - (i >= length ? input[i - length] : 0));
+
+            output[i] = volumeRatio * rangeRatio * change;
+        }
+
         return buffer;
     }
 
