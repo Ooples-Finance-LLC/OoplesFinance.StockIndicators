@@ -477,8 +477,9 @@ internal static partial class IndicatorCompute
                 eppo.MaType),
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length),
             MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context, mppo.Length),
-            PercentagePriceOscillatorLeaderSpecOptions ppol => ComputePercentagePriceOscillatorLeaderFast(data, context, ppol.Length),
-            TFSMboPercentagePriceOscillatorSpecOptions tfsppo => ComputeTFSMboPercentagePriceOscillatorFast(data, context, tfsppo.Length),
+            PercentagePriceOscillatorLeaderSpecOptions => ComputePercentagePriceOscillatorLeaderFast(data, context),
+            TFSMboPercentagePriceOscillatorSpecOptions tfsppo => ComputeTFSMboPercentagePriceOscillatorFast(data, context,
+                maType: tfsppo.MaType),
 
             // Batch 6 - Kurtosis/Degree oscillators
             FastSlowKurtosisOscillatorSpecOptions fsko => ComputeFastSlowKurtosisOscillatorFast(data, context, fsko.Length),
@@ -518,7 +519,7 @@ internal static partial class IndicatorCompute
             PrimeNumberOscillatorSpecOptions pno => ComputePrimeNumberOscillatorFast(data, context, pno.Length),
             TrigonometricOscillatorSpecOptions trigo => ComputeTrigonometricOscillatorFast(data, context, trigo.Length),
             UltimateTraderOscillatorSpecOptions uto => ComputeUltimateTraderOscillatorFast(data, context, uto.Length),
-            SmoothedDeltaRatioOscillatorSpecOptions sdro => ComputeSmoothedDeltaRatioOscillatorFast(data, context, sdro.Length),
+            SmoothedDeltaRatioOscillatorSpecOptions sdro => ComputeSmoothedDeltaRatioOscillatorFast(data, context, sdro.Length, sdro.MaType),
             RobustWeightingOscillatorSpecOptions rwo => ComputeRobustWeightingOscillatorFast(data, context, rwo.Length),
 
             // Batch 6 - Detector/Pivot oscillators
@@ -754,7 +755,7 @@ internal static partial class IndicatorCompute
             PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
             QuadraticLeastSquaresMovingAverageSpecOptions qlsma => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
             QuadraticMovingAverageSpecOptions qma => ComputeQuadraticMovingAverageFast(data, context, qma.Length),
-            QuadraticRegressionSpecOptions qreg => ComputeQuadraticRegressionFast(data, context, qreg.Length),
+            QuadraticRegressionSpecOptions qreg => ComputeQuadraticRegressionFast(data, context, qreg.Length, qreg.MaType),
             R2AdaptiveRegressionSpecOptions r2ar => ComputeR2AdaptiveRegressionFast(data, context, r2ar.Length),
             RetentionAccelerationFilterSpecOptions raf => ComputeRetentionAccelerationFilterFast(data, context, raf.Length),
             RightSidedRickerMovingAverageSpecOptions rsrma => ComputeRightSidedRickerMovingAverageFast(data, context, rsrma.Length),
@@ -8019,11 +8020,45 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Smoothed Delta Ratio Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SmoothedDeltaRatioOscillator(close, buffer.WritableSpan, length, 3);
+        // CalculateSmoothedDeltaRatioOscillator measures how much of the series' movement over the window the
+        // moving average kept: the average's change across the window divided by the smoothed absolute change
+        // of the series itself, clamped to the unit interval.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var sma = average.Span;
+
+        using var absoluteChange = context.Rent(count);
+        using var averageChange = context.Rent(count);
+        var absChg = absoluteChange.WritableSpan;
+        var b = averageChange.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= length ? input[i - length] : 0;
+            var prevSma = i >= length ? sma[i - length] : 0;
+
+            absChg[i] = Math.Abs(CalculationsHelper.MinPastValues(i, length, input[i] - prevValue));
+            b[i] = CalculationsHelper.MinPastValues(i, length, sma[i] - prevSma);
+        }
+
+        using var smoothedChange = context.Rent(count);
+        MovingAverage(data, maType, length, absoluteChange.Span, smoothedChange.WritableSpan);
+        var a = smoothedChange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = a[i] != 0 ? MathHelper.MinOrMax(b[i] / a[i], 1, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -8518,11 +8553,52 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Quadratic Convergence Divergence Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(StockData data, ComputeContext context,
+        int length = 50, int signalLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.LinearQuadraticConvergenceDivergenceOscillator(close, buffer.WritableSpan, length);
+        // CalculateLinearQuadraticConvergenceDivergenceOscillator publishes its HISTOGRAM as "Lqcdo": the
+        // quadratic regression less the linear one is the convergence line, and the histogram takes its
+        // signal average off that line twice over, once to make the oscillator and once again to make the
+        // histogram. Both regressions read the caller's series rather than each other's output, which is
+        // what the batch's CaptureInputSeries and RestoreInputSeries pair is there to guarantee.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var linear = context.Rent(count);
+        var linreg = linear.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                linreg[i] = regression.Next(input[i], isFinal: true).Last;
+            }
+        }
+
+        using var quadratic = context.Rent(count);
+        QuadraticRegression(data, context, input, length, maType, quadratic.WritableSpan);
+        var quadreg = quadratic.Span;
+
+        using var convergence = context.Rent(count);
+        var lqcd = convergence.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            lqcd[i] = quadreg[i] - linreg[i];
+        }
+
+        using var signalLine = context.Rent(count);
+        MovingAverage(data, maType, signalLength, convergence.Span, signalLine.WritableSpan);
+        var sign = signalLine.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var oscillator = convergence.Span[i] - sign[i];
+            output[i] = oscillator - sign[i];
+        }
+
         return buffer;
     }
 
@@ -8566,11 +8642,50 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Price Oscillator Leader using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePercentagePriceOscillatorLeaderFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePercentagePriceOscillatorLeaderFast(StockData data, ComputeContext context,
+        int fastLength = 12, int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PercentagePriceOscillatorLeader(close, buffer.WritableSpan, 12, 26);
+        // CalculatePercentagePriceOscillatorLeader divides the leading MACD by its own slow leg. Each leg
+        // leads its moving average by adding back the average of the series' distance from it, which is what
+        // makes this a leader rather than an ordinary percentage price oscillator. The signal length reaches
+        // only the "Signal" and "Histogram" outputs, so it has no part in the primary series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
+        var fastMa = fastAverage.Span;
+        var slowMa = slowAverage.Span;
+
+        using var fastDistance = context.Rent(count);
+        using var slowDistance = context.Rent(count);
+        var fastDiff = fastDistance.WritableSpan;
+        var slowDiff = slowDistance.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            fastDiff[i] = input[i] - fastMa[i];
+            slowDiff[i] = input[i] - slowMa[i];
+        }
+
+        using var fastDistanceAverage = context.Rent(count);
+        using var slowDistanceAverage = context.Rent(count);
+        MovingAverage(data, maType, fastLength, fastDistance.Span, fastDistanceAverage.WritableSpan);
+        MovingAverage(data, maType, slowLength, slowDistance.Span, slowDistanceAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var i1 = fastMa[i] + fastDistanceAverage.Span[i];
+            var i2 = slowMa[i] + slowDistanceAverage.Span[i];
+            output[i] = i2 != 0 ? (i1 - i2) / i2 * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -8709,11 +8824,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TFS MBO Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context,
+        int fastLength = 25, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TFSMboPercentagePriceOscillator(close, buffer.WritableSpan, length > 0 ? length + 11 : 25, length > 0 ? length * 14 : 200);
+        // CalculateTFSMboPercentagePriceOscillator divides the gap between two moving averages of the chained
+        // series by the slower of them. Its fast and slow lengths are fixed at the batch defaults - the spec's
+        // obsolete Length reaches neither, which is what makes it a no-effect option - and the arm this
+        // replaces derived both of them from it, so every length but the fallback produced a different pair.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(fastLength, 1), input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, Math.Max(slowLength, 1), input, slowAverage.WritableSpan);
+        var mob1 = fastAverage.Span;
+        var mob2 = slowAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = mob2[i] != 0 ? (mob1[i] - mob2[i]) / mob2[i] * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -11572,13 +11707,91 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Regression using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.QuadraticRegression(inputSpan, buffer.WritableSpan, length);
+        QuadraticRegression(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
         return buffer;
+    }
+
+    /// <summary>
+    /// Fits the quadratic of CalculateQuadraticRegression to an arbitrary series, so that an indicator built
+    /// on that fit can reach it without publishing it first.
+    /// </summary>
+    /// <remarks>
+    /// The regression is solved from running sums of the bar index and its square taken over the trailing
+    /// window, but the covariances divide by the requested length rather than by how many bars the window
+    /// actually holds, and the three coefficients are centred on moving averages of the same length. Both are
+    /// reproduced here exactly: they are what the published series is.
+    /// </remarks>
+    private static void QuadraticRegression(StockData data, ComputeContext context, ReadOnlySpan<double> input,
+        int length, MovingAvgType maType, Span<double> output)
+    {
+        var count = input.Length;
+        length = Math.Max(length, 1);
+
+        using var firstPower = context.Rent(count);
+        using var secondPower = context.Rent(count);
+        var x1s = firstPower.WritableSpan;
+        var x2s = secondPower.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double x1 = i;
+            x1s[i] = x1;
+            x2s[i] = MathHelper.Pow(x1, 2);
+        }
+
+        using var firstPowerAverage = context.Rent(count);
+        using var secondPowerAverage = context.Rent(count);
+        using var seriesAverage = context.Rent(count);
+        MovingAverage(data, maType, length, firstPower.Span, firstPowerAverage.WritableSpan);
+        MovingAverage(data, maType, length, secondPower.Span, secondPowerAverage.WritableSpan);
+        MovingAverage(data, maType, length, input, seriesAverage.WritableSpan);
+        var max1 = firstPowerAverage.Span;
+        var max2 = secondPowerAverage.Span;
+        var may = seriesAverage.Span;
+
+        var ySumWindow = new RollingSum();
+        var x1SumWindow = new RollingSum();
+        var x2SumWindow = new RollingSum();
+        var x1x2SumWindow = new RollingSum();
+        var yx1SumWindow = new RollingSum();
+        var yx2SumWindow = new RollingSum();
+        var x2PowSumWindow = new RollingSum();
+
+        for (var i = 0; i < count; i++)
+        {
+            var y = input[i];
+            var x1 = x1s[i];
+            var x2 = x2s[i];
+
+            ySumWindow.Add(y);
+            x1SumWindow.Add(x1);
+            x2SumWindow.Add(x2);
+            x1x2SumWindow.Add(x1 * x2);
+            yx1SumWindow.Add(y * x1);
+            yx2SumWindow.Add(y * x2);
+            x2PowSumWindow.Add(MathHelper.Pow(x2, 2));
+
+            var ySum = ySumWindow.Sum(length);
+            var x1Sum = x1SumWindow.Sum(length);
+            var x2Sum = x2SumWindow.Sum(length);
+
+            var s11 = x2Sum - (MathHelper.Pow(x1Sum, 2) / length);
+            var s12 = x1x2SumWindow.Sum(length) - (x1Sum * x2Sum / length);
+            var s22 = x2PowSumWindow.Sum(length) - (MathHelper.Pow(x2Sum, 2) / length);
+            var sy1 = yx1SumWindow.Sum(length) - (ySum * x1Sum / length);
+            var sy2 = yx2SumWindow.Sum(length) - (ySum * x2Sum / length);
+
+            var bot = (s22 * s11) - MathHelper.Pow(s12, 2);
+            var b2 = bot != 0 ? ((sy1 * s22) - (sy2 * s12)) / bot : 0;
+            var b3 = bot != 0 ? ((sy2 * s11) - (sy1 * s12)) / bot : 0;
+            var b1 = may[i] - (b2 * max1[i]) - (b3 * max2[i]);
+
+            output[i] = b1 + (b2 * x1) + (b3 * x2);
+        }
     }
 
     /// <summary>
