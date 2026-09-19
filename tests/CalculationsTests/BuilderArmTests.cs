@@ -250,7 +250,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "EhlersSmoothedAdaptiveMomentumSpecOptions",
         "GuppyMultipleMovingAverageSpecOptions",
         "InsyncIndexSpecOptions",
-        "JmaRsxCloneSpecOptions",
         "KasePeakOscillatorV2SpecOptions",
         "OneLCLeastSquaresMovingAverageSpecOptions",
         "PivotPointAverageSpecOptions",
@@ -259,7 +258,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "TechnicalRatingsSpecOptions",
         "ThreeHmaSpecOptions",
         "VaradiOscillatorSpecOptions",
-        "VervoortSmoothedOscillatorSpecOptions",
         "_1LCLeastSquaresMovingAverageSpecOptions",
         "_3HMASpecOptions",
     };

@@ -585,7 +585,13 @@ internal static partial class IndicatorCompute
             EhlersAdaptiveCenterOfGravityOscillatorSpecOptions eacogo => ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(data, context, eacogo.Length),
 
             // Batch 6 - Vervoort oscillators
-            VervoortSmoothedOscillatorSpecOptions vso => ComputeVervoortSmoothedOscillatorFast(data, context, vso.Length),
+            VervoortSmoothedOscillatorSpecOptions => spec.OutputKey switch
+            {
+                null or "Vso" => ComputeVervoortSmoothedOscillatorFast(data, context),
+                "Sk" => ComputeVervoortSmoothedOscillatorFast(data, context,
+                    series: VervoortSmoothedSeries.Stochastic),
+                _ => null
+            },
             VervoortHeikenAshiCandlestickOscillatorSpecOptions vhaco => ComputeVervoortHeikenAshiCandlestickOscillatorFast(data, context, vhaco.Length),
             VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions vhaltco => ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(data, context, vhaltco.Length),
 
@@ -10670,11 +10676,112 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vervoort Smoothed Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVervoortSmoothedOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Which of the Vervoort smoothed oscillator's two published series an arm has been asked for: the
+    /// position of the zero-lag rainbow within its own band, or the smoothed stochastic of the rainbow.
+    /// </summary>
+    internal enum VervoortSmoothedSeries
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.VervoortSmoothedOscillator(close, buffer.WritableSpan, length);
+        Oscillator,
+        Stochastic
+    }
+
+    internal static ComputeBuffer ComputeVervoortSmoothedOscillatorFast(StockData data, ComputeContext context,
+        int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2,
+        VervoortSmoothedSeries series = VervoortSmoothedSeries.Oscillator)
+    {
+        // CalculateVervoortSmoothedOscillator builds a rainbow from ten successive simple averages of the
+        // close, weighted 5-4-3-2 then 1 apiece, zero-lags it through a pair of exponential averages, smooths
+        // that with a triple exponential average, and reports where the result sits inside a band of
+        // stdDevMult deviations about its own weighted average. The stochastic leg takes its numerator from
+        // the lowest LOW of the window and its denominator from the lowest rainbow-close midpoint, which is a
+        // mismatch in the batch that is reproduced here rather than corrected.
+        var (inputList, highList, lowList, _, closeList, _) =
+            CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
+        var closes = SpanCompat.AsReadOnlySpan(closeList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        smoothLength = Math.Max(smoothLength, 1);
+
+        using var stageA = context.Rent(count);
+        using var stageB = context.Rent(count);
+        using var rainbowBuffer = context.Rent(count);
+        var rainbow = rainbowBuffer.WritableSpan;
+        rainbow.Clear();
+
+        Span<int> weights = stackalloc int[10] { 5, 4, 3, 2, 1, 1, 1, 1, 1, 1 };
+        var intoA = true;
+        ReadOnlySpan<double> source = closes;
+        for (var stage = 0; stage < weights.Length; stage++)
+        {
+            var destination = intoA ? stageA.WritableSpan : stageB.WritableSpan;
+            MovingAverage(data, MovingAvgType.SimpleMovingAverage, length3, source, destination);
+            for (var i = 0; i < count; i++)
+            {
+                rainbow[i] += weights[stage] * destination[i];
+            }
+
+            source = intoA ? stageA.Span : stageB.Span;
+            intoA = !intoA;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            rainbow[i] /= 20;
+        }
+
+        using var ema1 = context.Rent(count);
+        using var ema2 = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, smoothLength, rainbowBuffer.Span, ema1.WritableSpan);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, smoothLength, ema1.Span, ema2.WritableSpan);
+
+        using var zeroLagRainbow = context.Rent(count);
+        var zlrb = zeroLagRainbow.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            zlrb[i] = (2 * ema1.Span[i]) - ema2.Span[i];
+        }
+
+        using var smoothedRainbow = context.Rent(count);
+        MovingAverage(data, MovingAvgType.TripleExponentialMovingAverage, smoothLength, zeroLagRainbow.Span,
+            smoothedRainbow.WritableSpan);
+        var tz = smoothedRainbow.Span;
+
+        using var halfWidth = context.Rent(count);
+        using var weightedSmoothed = context.Rent(count);
+        VolatilityCore.StandardDeviation(tz, halfWidth.WritableSpan, length1);
+        MovingAverage(data, MovingAvgType.WeightedMovingAverage, length1, tz, weightedSmoothed.WritableSpan);
+        var hwidth = halfWidth.Span;
+        var wmatz = weightedSmoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length2);
+        var lowWindow = new RollingMinMax(length2);
+        var midpointWindow = new RollingMinMax(length2);
+        var fastKSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var rbc = (rainbow[i] + input[i]) / 2;
+            midpointWindow.Add(rbc);
+            var den = highWindow.Max - midpointWindow.Min;
+            var fastK = den != 0 ? MathHelper.MinOrMax(100 * (rbc - lowWindow.Min) / den, 100, 0) : 0;
+            fastKSum.Add(fastK);
+
+            output[i] = series == VervoortSmoothedSeries.Stochastic
+                ? fastKSum.Average(smoothLength)
+                : hwidth[i] != 0 ? (tz[i] + (stdDevMult * hwidth[i]) - wmatz[i]) / (2 * stdDevMult * hwidth[i] * 100) : 0;
+        }
+
         return buffer;
     }
 
@@ -18170,10 +18277,75 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeJmaRsxCloneFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateJmaRsxClone runs three pairs of exponential filters over the bar-to-bar change and three
+        // more over its absolute value, each pair combined 1.5 : -0.5 into the next stage, and reports the
+        // ratio of the two chains rescaled to 0..100 - but only once its f88 / f90 warm-up counter allows it.
+        // The batch declares an f88 list and never adds to it, so the previous bar's f88 reads as zero on
+        // every bar, which pins f90 at 1 and f88 at 5 and leaves the `f88 < f90` gate permanently shut: the
+        // published series is a constant 50. That is reproduced here, not corrected - the batch is authority -
+        // and the dead carry is written as the literal zero the batch actually evaluates.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.JmaRsxClone(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var f18 = (double)3 / (length + 2);
+        var f20 = 1 - f18;
+
+        var f8 = 0d;
+        var f28 = 0d;
+        var f30 = 0d;
+        var f38 = 0d;
+        var f40 = 0d;
+        var f48 = 0d;
+        var f50 = 0d;
+        var f58 = 0d;
+        var f60 = 0d;
+        var f68 = 0d;
+        var f70 = 0d;
+        var f78 = 0d;
+        var f80 = 0d;
+        var f90 = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            var f10 = f8;
+            f8 = 100 * input[i];
+            var v8 = f8 - f10;
+
+            f28 = (f20 * f28) + (f18 * v8);
+            f30 = (f18 * f28) + (f20 * f30);
+            var vC = (f28 * 1.5) - (f30 * 0.5);
+            f38 = (f20 * f38) + (f18 * vC);
+            f40 = (f18 * f38) + (f20 * f40);
+            var v10 = (f38 * 1.5) - (f40 * 0.5);
+            f48 = (f20 * f48) + (f18 * v10);
+            f50 = (f18 * f48) + (f20 * f50);
+            var v14 = (f48 * 1.5) - (f50 * 0.5);
+
+            f58 = (f20 * f58) + (f18 * Math.Abs(v8));
+            f60 = (f18 * f58) + (f20 * f60);
+            var v18 = (f58 * 1.5) - (f60 * 0.5);
+            f68 = (f20 * f68) + (f18 * v18);
+            f70 = (f18 * f68) + (f20 * f70);
+            var v1C = (f68 * 1.5) - (f70 * 0.5);
+            f78 = (f20 * f78) + (f18 * v1C);
+            f80 = (f18 * f78) + (f20 * f80);
+            var v20 = (f78 * 1.5) - (f80 * 0.5);
+
+            const double previousF88 = 0;
+            var previousF90 = f90;
+            f90 = previousF90 == 0 ? 1 : previousF88 <= previousF90 ? previousF88 + 1 : previousF90 + 1;
+            var f88 = previousF90 == 0 && length - 1 >= 5 ? length - 1 : 5;
+            var f0 = f88 >= f90 && f8 != f10 ? 1 : 0;
+            var comparand = f88 == f90 && f0 == 0 ? 0 : f90;
+
+            var raw = f88 < comparand && v20 > 0 ? MathHelper.MinOrMax(((v14 / v20) + 1) * 50, 100, 0) : 50;
+            output[i] = raw > 100 ? 100 : raw < 0 ? 0 : raw;
+        }
+
         return buffer;
     }
 
