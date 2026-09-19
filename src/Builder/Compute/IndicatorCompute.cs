@@ -5972,11 +5972,43 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Autonomous Recursive MA using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14,
+        int momLength = 7, double gamma = 3)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AutonomousRecursiveMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateAutonomousRecursiveMovingAverage holds its previous output unless the current value has
+        // moved further than gamma times the running mean absolute distance between the momLength-ago value
+        // and that output, and then averages the result twice. Note the batch gates the prior value on length
+        // while indexing it by momLength; the arm reproduces that exactly.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var cSumWindow = new RollingSum();
+        var ma1SumWindow = new RollingSum();
+        double absDiffSum = 0;
+        double prevMad = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (i == 0)
+            {
+                prevMad = input[i];
+            }
+
+            var priorValue = i >= length ? input[i - momLength] : 0;
+            absDiffSum += Math.Abs(priorValue - prevMad);
+
+            var d = i != 0 ? absDiffSum / i * gamma : 0;
+            var c = input[i] > prevMad + d ? input[i] + d : input[i] < prevMad - d ? input[i] - d : prevMad;
+            cSumWindow.Add(c);
+
+            ma1SumWindow.Add(cSumWindow.Average(length));
+            prevMad = ma1SumWindow.Average(length);
+            output[i] = prevMad;
+        }
+
         return buffer;
     }
 
@@ -10141,10 +10173,42 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateDynamicallyAdjustableFilter tracks a doubled source - the value plus its distance from the
+        // previous output - and steps towards it by a factor that grows with how far the filter has fallen
+        // behind relative to the standard deviation of that source scaled by the length. Both averages are
+        // taken over the partial window while it fills, which is what RollingSum.Average does.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.DynamicallyAdjustableFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var srcSumWindow = new RollingSum();
+        var srcDevSumWindow = new RollingSum();
+        double prevOut = 0;
+        double prevK = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (i == 0)
+            {
+                prevOut = input[i];
+            }
+
+            var src = input[i] + (input[i] - prevOut);
+            srcSumWindow.Add(src);
+
+            var outVal = prevOut + (prevK * (src - prevOut));
+            output[i] = outVal;
+
+            srcDevSumWindow.Add(MathHelper.Pow(src - srcSumWindow.Average(length), 2));
+            var srcStdDev = MathHelper.Sqrt(srcDevSumWindow.Average(length));
+            var gap = Math.Abs(src - outVal);
+            prevK = src - outVal != 0 ? gap / (gap + (srcStdDev * length)) : 0;
+            prevOut = outVal;
+        }
+
         return buffer;
     }
 
@@ -12939,10 +13003,35 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLiquidRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.LiquidRelativeStrengthIndex(close, volume, buffer.WritableSpan, length);
+        // CalculateLiquidRelativeStrengthIndex is not a Wilder relative strength index at all: it smooths the
+        // product of the price change and the volume change - numerator only when both rise - against the
+        // product of their magnitudes, each through an exponential average seeded at zero. The routine this
+        // replaced started at 100 on the first bar, where the batch starts at zero.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var k = (double)1 / length;
+        double numEma = 0;
+        double denEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
+            var a = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue);
+            var b = CalculationsHelper.MinPastValues(i, 1, volumes[i] - prevVolume);
+
+            numEma = (Math.Max(a, 0) * Math.Max(b, 0) * k) + (numEma * (1 - k));
+            denEma = (Math.Abs(a) * Math.Abs(b) * k) + (denEma * (1 - k));
+
+            output[i] = denEma != 0 ? MathHelper.MinOrMax(100 * numEma / denEma, 100, 0) : 0;
+        }
+
         return buffer;
     }
 
