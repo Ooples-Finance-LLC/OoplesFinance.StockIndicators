@@ -246,10 +246,8 @@ public sealed class BuilderArmTests : GlobalTestData
     private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
     {
         "EhlersChebyshevLowPassFilterSpecOptions",
-        "EhlersSmoothedAdaptiveMomentumSpecOptions",
         "InsyncIndexSpecOptions",
         "PivotPointAverageSpecOptions",
-        "StandardDevationSpecOptions",
         "TechnicalRatingsSpecOptions",
     };
 

@@ -1446,7 +1446,14 @@ internal static partial class IndicatorCompute
             EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1,
                 errsi.Length2, errsi.Mult, errsi.MaType),
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
-            EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1, esam.Length2, esam.MaType),
+            EhlersSmoothedAdaptiveMomentumSpecOptions esam => spec.OutputKey switch
+            {
+                null or "Esam" => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1,
+                    esam.Length2, esam.MaType),
+                "Signal" => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1, esam.Length2,
+                    esam.MaType, MacdSeries.Signal),
+                _ => null
+            },
             EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
             EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.Delta, ete.MaType),
             EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
@@ -1544,7 +1551,12 @@ internal static partial class IndicatorCompute
 
             // Batch 33 - Remaining Indicators (Part 2)
             SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length),
-            StandardDevationSpecOptions sd => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
+            StandardDevationSpecOptions sd => spec.OutputKey switch
+            {
+                null or "Std" => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
+                "Signal" => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType, MacdSeries.Signal),
+                _ => null
+            },
             StationaryExtrapolatedLevelsSpecOptions sel => spec.OutputKey switch
             {
                 null or "Deviation" => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType),
@@ -25051,12 +25063,58 @@ internal static partial class IndicatorCompute
         return EhlersWindowFilter(data, context, length, maType);
     }
 
-    internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context,
+        int length1 = 5, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersSmoothedAdaptiveMomentum(close, buffer.WritableSpan, length1, length2);
-        return buffer;
+        // CalculateEhlersSmoothedAdaptiveMomentum differences the chained series over the dominant cycle
+        // period measured by the adaptive cyber cycle - not over a fixed length - and runs that difference
+        // through a four-tap recursive filter tuned by length2. OscillatorCore.EhlersSmoothedAdaptiveMomentum
+        // took the close and never measured a period, so the lag was wrong on every bar. The period comes
+        // from the same EhlersAdaptiveCyberCycle helper the batch reaches through its "Period" output.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 2);
+
+        var a1 = MathHelper.Exp(-Math.PI / length2);
+        var b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / length2);
+        var c1 = MathHelper.Pow(a1, 2);
+        var coef2 = b1 + c1;
+        var coef3 = -1 * (c1 + (b1 * c1));
+        var coef4 = c1 * c1;
+        var coef1 = 1 - coef2 - coef3 - coef4;
+
+        using var adaptiveCycle = context.Rent(count);
+        using var periods = context.Rent(count);
+        EhlersAdaptiveCyberCycle(context, input, length1, 0.07, adaptiveCycle.WritableSpan, periods.WritableSpan);
+        var period = periods.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevF3One = i >= 1 ? output[i - 1] : 0;
+            var prevF3Two = i >= 2 ? output[i - 2] : 0;
+            var prevF3Three = i >= 3 ? output[i - 3] : 0;
+
+            var pr = (int)Math.Ceiling(Math.Abs(period[i] - 1));
+            var prevValue = i >= pr ? input[i - pr] : 0;
+            var v1 = i >= pr ? input[i] - prevValue : 0;
+
+            output[i] = (coef1 * v1) + (coef2 * prevF3One) + (coef3 * prevF3Two) + (coef4 * prevF3Three);
+        }
+
+        if (series != MacdSeries.Signal)
+        {
+            return buffer;
+        }
+
+        using var raw = buffer;
+        var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length2, raw.Span, smoothed.WritableSpan);
+        return smoothed;
     }
 
     internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 23, int length2 = 50, double bw = 1.4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
@@ -27086,12 +27144,58 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
-        return buffer;
+        // CalculateStandardDevation measures the chained series, not the close, and only its simple-average
+        // form is a population deviation. With any other average the batch takes a moving average of x^2 and
+        // subtracts the square of a plain window sum scaled by length^2 - the two halves are not the same
+        // mean, so it is not a deviation at all - but that is what it publishes, so that is what this
+        // reproduces. The signal series is the same average applied again to the result.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var deviation = context.Rent(count);
+        var dev = deviation.WritableSpan;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            VolatilityCore.StandardDeviation(input, dev, length);
+        }
+        else
+        {
+            using var squares = context.Rent(count);
+            using var squareAverages = context.Rent(count);
+            var pow = squares.WritableSpan;
+
+            var window = new RollingSum();
+            for (var i = 0; i < count; i++)
+            {
+                pow[i] = MathHelper.Pow(input[i], 2);
+                window.Add(input[i]);
+                dev[i] = MathHelper.Pow(window.Sum(length), 2);
+            }
+
+            MovingAverage(data, maType, length, squares.Span, squareAverages.WritableSpan);
+            var powAverage = squareAverages.Span;
+            var lengthSquared = MathHelper.Pow(length, 2);
+            for (var i = 0; i < count; i++)
+            {
+                var difference = powAverage[i] - (dev[i] / lengthSquared);
+                dev[i] = difference >= 0 ? MathHelper.Sqrt(difference) : 0;
+            }
+        }
+
+        if (series != MacdSeries.Signal)
+        {
+            return deviation;
+        }
+
+        using var raw = deviation;
+        var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, raw.Span, smoothed.WritableSpan);
+        return smoothed;
     }
 
     /// <summary>
