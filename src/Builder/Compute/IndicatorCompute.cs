@@ -1361,7 +1361,7 @@ internal static partial class IndicatorCompute
             UniChannelSpecOptions uc => ComputeUniChannelFast(data, context, uc.Length, uc.UbFac, uc.LbFac, uc.Type1, uc.MaType),
             VixTradingSystemSpecOptions vts => ComputeVixTradingSystemFast(data, context, vts.Length, vts.MaxCount, vts.MinCount, vts.MaType),
             WilsonRelativePriceChannelSpecOptions wrpc => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength, wrpc.MaType),
-            WoodieCommodityChannelIndexSpecOptions wcci => ComputeWoodieCommodityChannelIndexFast(data, context, wcci.FastLength, wcci.SlowLength, wcci.MaType),
+            WoodieCommodityChannelIndexSpecOptions wcci => ComputeWoodieCommodityChannelIndexFast(data, context, wcci.FastLength, wcci.MaType),
 
             _ => null
         };
@@ -1680,25 +1680,39 @@ internal static partial class IndicatorCompute
     /// Computes Commodity Channel Index using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeCciFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeCciFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
+        // CalculateCommodityChannelIndex measures the typical price against its own moving average in units of
+        // the mean absolute deviation of that same window, and it reads the caller's chained series in place of
+        // the typical price whenever one is chained. The constant is fixed by the batch call.
+        const double constant = 0.015;
 
-        // Extract OHLC data into spans
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        var (inputList, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var tpSma = average.Span;
+
+        using var absoluteDeviation = context.Rent(count);
+        var devDiff = absoluteDeviation.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            devDiff[i] = Math.Abs(input[i] - tpSma[i]);
         }
 
+        using var meanDeviation = context.Rent(count);
+        MovingAverage(data, maType, length, absoluteDeviation.Span, meanDeviation.WritableSpan);
+        var tpMeanDev = meanDeviation.Span;
+
         var buffer = context.Rent(count);
-        OscillatorCore.CommodityChannelIndex(high, low, close, buffer.WritableSpan, length);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = tpMeanDev[i] != 0 ? (input[i] - tpSma[i]) / (constant * tpMeanDev[i]) : 0;
+        }
 
         return buffer;
     }
@@ -2915,20 +2929,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Channel Middle using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceChannelMiddleFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelMiddleFast(StockData data, ComputeContext context, int length = 21,
+        double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-        }
-        var buffer = context.Rent(count);
-        TrendCore.PriceChannelMiddle(high, low, buffer.WritableSpan, length);
-        return buffer;
+        return ComputePriceChannelFast(data, context, length, pct, maType, ChannelBand.Middle);
     }
 
     #endregion
@@ -13202,23 +13206,19 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Channel Upper using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceChannelUpperFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelUpperFast(StockData data, ComputeContext context, int length = 21,
+        double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.PriceChannelUpper(highSpan, buffer.WritableSpan, length);
-        return buffer;
+        return ComputePriceChannelFast(data, context, length, pct, maType, ChannelBand.Upper);
     }
 
     /// <summary>
     /// Computes Price Channel Lower using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceChannelLowerFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputePriceChannelLowerFast(StockData data, ComputeContext context, int length = 21,
+        double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.PriceChannelLower(lowSpan, buffer.WritableSpan, length);
-        return buffer;
+        return ComputePriceChannelFast(data, context, length, pct, maType, ChannelBand.Lower);
     }
 
     /// <summary>
@@ -15290,92 +15290,65 @@ internal static partial class IndicatorCompute
     /// Computes Random Walk Index using zero-allocation fast path.
     /// RWI measures trend strength using ATR-normalized price movement.
     /// </summary>
-    internal static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRandomWalkIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateRandomWalkIndex publishes "RwiHigh": how far the high has travelled above the low of length
+        // bars ago, measured in average true ranges scaled by the square root of the length. The batch has no
+        // warmup guard, so the early bars compare against a zero prior low rather than returning zero, and its
+        // average true range takes the type it was given rather than always being a simple one.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(count);
+        length = Math.Max(length, 1);
 
-        try
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+        var sqrt = MathHelper.Sqrt(length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var atrSpan = atrArray.AsSpan(0, count);
+            var prevLow = i >= length ? lows[i - length] : 0;
+            var bottom = atr[i] * sqrt;
 
-            // Calculate ATR
-            VolatilityCore.AverageTrueRange(high, low, close, atrSpan, length);
-
-            var sqrt = Math.Sqrt(length);
-
-            // Calculate RWI High (returns this by default)
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                if (i < length)
-                {
-                    buffer.WritableSpan[i] = 0;
-                    continue;
-                }
-
-                var currentAtr = atrSpan[i];
-                var currentHigh = high[i];
-                var prevLow = low[i - length];
-                var bottom = currentAtr * sqrt;
-
-                buffer.WritableSpan[i] = bottom != 0 ? (currentHigh - prevLow) / bottom : 0;
-            }
-
-            return buffer;
+            output[i] = bottom != 0 ? (highs[i] - prevLow) / bottom : 0;
         }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+
+        return buffer;
     }
 
     /// <summary>
     /// Computes Price Channel using zero-allocation fast path.
     /// Price Channel = MA +/- percentage bands.
     /// </summary>
-    internal static ComputeBuffer ComputePriceChannelFast(StockData data, ComputeContext context, int length = 21, double pct = 0.06, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputePriceChannelFast(StockData data, ComputeContext context, int length = 21, double pct = 0.06,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var maArray = pool.Rent(count);
+        // CalculatePriceChannel steps its outer channels a fixed percentage either side of the moving average
+        // of the chained series, which makes the middle channel that average exactly. One arm now serves all
+        // three published channels, and the switch it replaced fell back to an exponential average of the close
+        // for every moving average type but two.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
 
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
+
+        if (band == ChannelBand.Middle)
         {
-            var maSpan = maArray.AsSpan(0, count);
-
-            // Calculate MA
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
-                    break;
-            }
-
-            // Return middle band (MA)
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                buffer.WritableSpan[i] = maSpan[i];
-            }
-
             return buffer;
         }
-        finally
+
+        var multiplier = band == ChannelBand.Upper ? 1 + pct : 1 - pct;
+        for (var i = 0; i < count; i++)
         {
-            pool.Return(maArray);
+            output[i] *= multiplier;
         }
+
+        return buffer;
     }
 
     /// <summary>
@@ -20057,14 +20030,13 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.CommodityChannelIndex(high, low, close, buffer.WritableSpan, fastLength);
-        return buffer;
+        // CalculateWoodieCommodityChannelIndex publishes "FastCci", which is simply the commodity channel index
+        // over the fast length. The slow length reaches only the separate "SlowCci" and "Histogram" series, so
+        // it is not a parameter of this arm.
+        return ComputeCciFast(data, context, fastLength, maType);
     }
 
     #endregion
