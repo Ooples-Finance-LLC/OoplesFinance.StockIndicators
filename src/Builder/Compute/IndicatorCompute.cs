@@ -7004,11 +7004,66 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVolatilityStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.VolatilityStop(high, low, close, buffer.WritableSpan, length, multiplier);
+        // CalculateVolatilityStop trails a stop a fixed number of average true ranges away from the series,
+        // ratcheting it in the direction of the trend and flipping sides the bar the series crosses it. The
+        // average is Welles Wilder's, and the first bar seeds the stop at the series itself.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var trueRanges = context.Rent(count);
+        var trueRange = trueRanges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            // The opening bar has no previous close, so its true range is simply its own span.
+            var previousClose = i >= 1 ? closes[i - 1] : closes[i];
+            trueRange[i] = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], previousClose);
+        }
+
+        using var averageRange = context.Rent(count);
+        MovingAverageCore.WellesWilderMovingAverage(trueRanges.Span, averageRange.WritableSpan, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var trendIsUp = true;
+        for (var i = 0; i < count; i++)
+        {
+            if (i == 0)
+            {
+                output[i] = input[i];
+                continue;
+            }
+
+            var previousStop = output[i - 1];
+            var band = averageRange.Span[i] * multiplier;
+            if (trendIsUp)
+            {
+                if (input[i] < previousStop)
+                {
+                    trendIsUp = false;
+                    output[i] = input[i] + band;
+                }
+                else
+                {
+                    output[i] = Math.Max(previousStop, input[i] - band);
+                }
+            }
+            else if (input[i] > previousStop)
+            {
+                trendIsUp = true;
+                output[i] = input[i] - band;
+            }
+            else
+            {
+                output[i] = Math.Min(previousStop, input[i] + band);
+            }
+        }
+
         return buffer;
     }
 
@@ -10260,9 +10315,45 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMassThrustOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.MassThrustOscillator(close, buffer.WritableSpan, length > 0 ? length - 4 : 10);
+        // CalculateMassThrustOscillator weighs the advancing side of the window against the declining side,
+        // each scaled by the volume that arrived on its bars. The moving average type reaches only the signal
+        // line, never the published "Mto" series, so the arm does not take one.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var advances = new RollingSum();
+        var declines = new RollingSum();
+        var advanceVolumes = new RollingSum();
+        var declineVolumes = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+
+            advances.Add(i >= 1 && currentValue > previousValue
+                ? CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue)
+                : 0);
+            declines.Add(i >= 1 && currentValue < previousValue
+                ? CalculationsHelper.MinPastValues(i, 1, previousValue - currentValue)
+                : 0);
+
+            var advanceSum = advances.Sum(length);
+            var declineSum = declines.Sum(length);
+
+            advanceVolumes.Add(currentValue > previousValue && advanceSum != 0 ? volumes[i] / advanceSum : 0);
+            declineVolumes.Add(currentValue < previousValue && declineSum != 0 ? volumes[i] / declineSum : 0);
+
+            var advanceWeight = advanceSum * advanceVolumes.Sum(length);
+            var declineWeight = declineSum * declineVolumes.Sum(length);
+            var bottom = advanceWeight + declineWeight;
+            output[i] = bottom != 0 ? 100 * (advanceWeight - declineWeight) / bottom : 0;
+        }
+
         return buffer;
     }
 
@@ -20151,23 +20242,46 @@ internal static partial class IndicatorCompute
     /// Computes FX Sniper Indicator using zero-allocation fast path.
     /// Returns the smoothed CCI-based value.
     /// </summary>
-    internal static ComputeBuffer ComputeFXSniperFast(StockData data, ComputeContext context, int cciLength = 14, int t3Length = 5, double b = 0.618, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFXSniperFast(StockData data, ComputeContext context, int cciLength = 14, int t3Length = 5,
+        double b = MathHelper.InversePhi, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateFXSniperIndicator runs Tim Tillson's T3 over the commodity channel index: six exponential
+        // passes recombined by the four coefficients b builds. The arm reuses the verified commodity channel
+        // index rather than re-deriving it.
         var count = data.Count;
-        var buffer = context.Rent(count);
 
-        switch (maType)
+        var b2 = b * b;
+        var b3 = b2 * b;
+        var c1 = -b3;
+        var c2 = 3 * (b2 + b3);
+        var c3 = -3 * ((2 * b2) + b + b3);
+        var c4 = 1 + (3 * b) + b3 + (3 * b2);
+        var nr = 1 + (0.5 * (t3Length - 1));
+        var w1 = 2 / (nr + 1);
+        var w2 = 1 - w1;
+
+        using var channelIndex = ComputeCciFast(data, context, cciLength, maType);
+        var cci = channelIndex.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double e1 = 0;
+        double e2 = 0;
+        double e3 = 0;
+        double e4 = 0;
+        double e5 = 0;
+        double e6 = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, cciLength);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, cciLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, cciLength);
-                break;
+            e1 = (w1 * cci[i]) + (w2 * e1);
+            e2 = (w1 * e1) + (w2 * e2);
+            e3 = (w1 * e2) + (w2 * e3);
+            e4 = (w1 * e3) + (w2 * e4);
+            e5 = (w1 * e4) + (w2 * e5);
+            e6 = (w1 * e5) + (w2 * e6);
+
+            output[i] = (c1 * e6) + (c2 * e5) + (c3 * e4) + (c4 * e3);
         }
 
         return buffer;
@@ -22884,11 +22998,62 @@ internal static partial class IndicatorCompute
 
     // Batch 31 - Relative and Statistical Indicators
 
-    internal static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeRecursiveRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RelativeStrengthIndex(close, buffer.WritableSpan, length);
+        // CalculateRecursiveRelativeStrengthIndex smooths the length-bar change, takes Wilders' relative
+        // strength index of that, and then recurses: each bar's average blends the index with the published
+        // value a full length back, and the series published is the running mean of the recursed index.
+        //
+        // The batch wraps that in `for (var j = 1; j <= length; j++)`, but the loop accumulates nothing -
+        // avg, gain, loss, avgRsi and b are each recomputed from j and history alone, so only the final pass
+        // j = length survives. There k is 1 and a is rsi, which is what this arm writes. The prevGain and
+        // prevLoss the batch reads carry weight (1 - k), which is zero on that pass, so they cannot matter.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var changes = context.Rent(count);
+        var change = changes.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            change[i] = CalculationsHelper.MinPastValues(i, length, input[i] - (i >= length ? input[i - length] : 0));
+        }
+
+        using var smoothedChange = context.Rent(count);
+        MovingAverage(data, maType, length, changes.Span, smoothedChange.WritableSpan);
+        var source = smoothedChange.Span;
+
+        using var strength = context.Rent(count);
+        RelativeStrengthIndex(data, context, source, length, MovingAvgType.WildersSmoothingMethod, strength.WritableSpan);
+        var rsi = strength.Span;
+
+        using var averages = context.Rent(count);
+        var average = averages.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var recursed = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            // The opening length bars have no value a length back, so they seed from the smoothed change.
+            var previousValue = i >= length ? output[i - length] : source[i];
+            var previousAverage = i >= length ? average[i - length] : 0;
+
+            average[i] = (rsi[i] + previousValue) / 2;
+            var averageChange = average[i] - previousAverage;
+            var gain = averageChange > 0 ? averageChange : 0;
+            var loss = averageChange < 0 ? Math.Abs(averageChange) : 0;
+
+            var rs = loss != 0 ? gain / loss : 0;
+            var recursedRsi = loss == 0 ? 100 : gain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 1, 0);
+
+            output[i] = i >= length ? recursed.Average(length) : recursedRsi;
+            recursed.Add(recursedRsi);
+        }
+
         return buffer;
     }
 
