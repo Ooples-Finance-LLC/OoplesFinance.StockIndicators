@@ -1108,7 +1108,15 @@ internal static partial class IndicatorCompute
             // Batch 18 - Strength and Zone Indicators
             AbsoluteStrengthMTFIndicatorSpecOptions asmtf => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength, asmtf.MaType),
             AdaptivePriceZoneIndicatorSpecOptions apz => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType),
-            DynamicSupportAndResistanceSpecOptions dsar => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType),
+            DynamicSupportAndResistanceSpecOptions dsar => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType),
+                "Support" => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType,
+                    SupportResistanceBand.Support),
+                "Resistance" => ComputeDynamicSupportAndResistanceFast(data, context, dsar.Length, dsar.MaType,
+                    SupportResistanceBand.Resistance),
+                _ => null
+            },
             ApirineSlowRelativeStrengthIndexSpecOptions asrsi => ComputeApirineSlowRsiFast(data, context, asrsi.Length, asrsi.SmoothLength, asrsi.MaType),
             ElderSafeZoneStopsSpecOptions eszs => ComputeElderSafeZoneStopsFast(data, context, eszs.Length, eszs.Mult, eszs.MaType),
             EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.SignalLength, ei.MaType),
@@ -1126,7 +1134,15 @@ internal static partial class IndicatorCompute
             GuppyMultipleMovingAverageSpecOptions gmma => ComputeGuppyMultipleMaFast(data, context, gmma.Length1, gmma.MaType),
 
             // Batch 20 - Statistical and Correlation Indicators
-            HirashimaSugitaRSSpecOptions hsrs => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType),
+            HirashimaSugitaRSSpecOptions hsrs => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType),
+                "UpperBand1" => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType, 1),
+                "UpperBand2" => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType, 2),
+                "LowerBand1" => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType, -1),
+                "LowerBand2" => ComputeHirashimaSugitaRSFast(data, context, hsrs.Length, hsrs.MaType, -2),
+                _ => null
+            },
             InverseFisherFastZScoreSpecOptions iffz => ComputeInverseFisherFastZScoreFast(data, context, iffz.Length, iffz.MaType),
             InverseFisherZScoreSpecOptions ifz => ComputeInverseFisherZScoreFast(data, context, ifz.Length, ifz.MaType),
             JapaneseCorrelationCoefficientSpecOptions jcc => ComputeJapaneseCorrelationCoefficientFast(data, context, jcc.Length, jcc.MaType),
@@ -1251,7 +1267,17 @@ internal static partial class IndicatorCompute
             // Batch 33 - Remaining Indicators (Part 2)
             SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length, ss.MaType),
             StandardDevationSpecOptions sd => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
-            StationaryExtrapolatedLevelsSpecOptions sel => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType),
+            StationaryExtrapolatedLevelsSpecOptions sel => spec.OutputKey switch
+            {
+                null or "Deviation" => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType),
+                "UpperBand" => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType,
+                    ExtrapolatedLevelSeries.Upper),
+                "MiddleBand" => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType,
+                    ExtrapolatedLevelSeries.Middle),
+                "LowerBand" => ComputeStationaryExtrapolatedLevelsFast(data, context, sel.Length, sel.MaType,
+                    ExtrapolatedLevelSeries.Lower),
+                _ => null
+            },
             SupportResistanceSpecOptions sr2 => ComputeSupportResistanceFast(data, context, sr2.Length, sr2.MaType),
             SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length, sre.MaType),
             TechnicalRatingsSpecOptions tr => ComputeTechnicalRatingsFast(data, context, tr.AoLength1, tr.AoLength2, tr.RsiLength, tr.StochLength1, tr.StochLength2, tr.StochLength3, tr.MaType),
@@ -14393,26 +14419,52 @@ internal static partial class IndicatorCompute
     /// Computes Dynamic Support and Resistance using zero-allocation fast path.
     /// Returns the Wilder smoothed close.
     /// </summary>
-    internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    /// <summary>
+    /// Which of a support and resistance indicator's three published series an arm has been asked for. These
+    /// are not bands around an average, so they do not fit <see cref="ChannelBand"/>: the support is measured
+    /// down from the highest high and the resistance up from the lowest low, and they can cross.
+    /// </summary>
+    internal enum SupportResistanceBand
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        Support,
+        Middle,
+        Resistance
+    }
 
-        switch (maType)
+    internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, SupportResistanceBand band = SupportResistanceBand.Middle)
+    {
+        // CalculateDynamicSupportAndResistance measures the support down from the highest high of the window
+        // and the resistance up from its lowest low, each by the average true range scaled by the square root
+        // of the length. The middle is their average. None of it is a moving average of the close.
+        var count = data.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        length = Math.Max(length, 1);
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+        var mult = MathHelper.Sqrt(length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var offset = atr[i] * mult;
+            var support = highWindow.Max - offset;
+            var resistance = lowWindow.Min + offset;
+            output[i] = band switch
+            {
+                SupportResistanceBand.Support => support,
+                SupportResistanceBand.Resistance => resistance,
+                _ => (support + resistance) / 2
+            };
         }
 
         return buffer;
@@ -14788,26 +14840,62 @@ internal static partial class IndicatorCompute
     /// Computes Hirashima Sugita RS using zero-allocation fast path.
     /// Returns the smoothed value.
     /// </summary>
-    internal static ComputeBuffer ComputeHirashimaSugitaRSFast(StockData data, ComputeContext context, int length = 1000, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeHirashimaSugitaRSFast(StockData data, ComputeContext context, int length = 1000,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int bandOffset = 0)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateHirashimaSugitaRS builds its basis by correcting an exponential average of the chained
+        // series twice: once by the linear regression of the residual from that average, and again by the
+        // change in the regression of what is left over. The bands are that basis stepped by whole multiples
+        // of the moving average of the absolute first residual, which is what bandOffset counts.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var exponential = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length, input, exponential.WritableSpan);
+        var ema = exponential.Span;
+
+        using var firstResidual = context.Rent(count);
+        using var absoluteFirstResidual = context.Rent(count);
+        var d1 = firstResidual.WritableSpan;
+        var absD1 = absoluteFirstResidual.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            d1[i] = input[i] - ema[i];
+            absD1[i] = Math.Abs(d1[i]);
+        }
+
+        using var smoothedResidual = context.Rent(count);
+        MovingAverage(data, maType, length, absoluteFirstResidual.Span, smoothedResidual.WritableSpan);
+        var wma = smoothedResidual.Span;
+
+        using var firstFit = context.Rent(count);
+        var s1 = firstFit.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                s1[i] = regression.Next(firstResidual.Span[i], isFinal: true).Last;
+            }
+        }
+
+        using var secondFit = context.Rent(count);
+        var s2 = secondFit.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                s2[i] = regression.Next(input[i] - (ema[i] + s1[i]), isFinal: true).Last;
+            }
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var basis = ema[i] + s1[i] + (s2[i] - (i >= 1 ? s2[i - 1] : 0));
+            output[i] = basis + (bandOffset * wma[i]);
         }
 
         return buffer;
@@ -17042,49 +17130,93 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    /// <summary>
+    /// Which of the stationary extrapolated levels an arm has been asked for. The deviation is not a band at
+    /// all - it is how far price sits from its own average - so it does not fit <see cref="ChannelBand"/>,
+    /// and it is the series the streaming state publishes first.
+    /// </summary>
+    internal enum ExtrapolatedLevelSeries
     {
-        // V1 Algorithm: Extrapolated levels from deviations
-        // 1. Calculate SMA of input
-        // 2. y = currentValue - sma (deviation from MA)
-        // 3. ext = (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        Deviation,
+        Upper,
+        Middle,
+        Lower
+    }
+
+    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsFast(StockData data, ComputeContext context, int length = 200,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ExtrapolatedLevelSeries series = ExtrapolatedLevelSeries.Deviation)
+    {
+        // CalculateStationaryExtrapolatedLevels measures how far each bar sits from the moving average of the
+        // chained series, then extrapolates that deviation from the two readings a window and two windows
+        // back. The bands are the running extremes of that extrapolation taken twice over; the deviation is a
+        // different quantity, and it is the one the streaming state publishes first. This read the close and
+        // the registry average directly, so it matched neither.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
         length = Math.Max(length, 1);
 
-        // Calculate SMA
-        var smaBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(close, smaBuffer.WritableSpan, length);
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var ma = average.Span;
 
-        // Calculate y (deviation) values
-        var yBuffer = context.Rent(count);
-        var ySpan = yBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var deviations = context.Rent(count);
+        var y = deviations.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            ySpan[i] = close[i] - smaBuffer.Span[i];
+            y[i] = input[i] - ma[i];
         }
 
-        // Calculate extrapolated values
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        for (int i = 0; i < count; i++)
+        if (series == ExtrapolatedLevelSeries.Deviation)
         {
-            double x = i;
-            double priorX = i >= length ? (i - length) : 0;
-            double priorX2 = i >= length * 2 ? (i - (length * 2)) : 0;
-            double priorY = i >= length ? ySpan[i - length] : 0;
-            double priorY2 = i >= length * 2 ? ySpan[i - (length * 2)] : 0;
-
-            double ext = (priorX2 - priorX) != 0 && (priorY2 - priorY) != 0
-                ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
-                : 0;
-            resultSpan[i] = ext;
+            return deviations;
         }
 
-        smaBuffer.Dispose();
-        yBuffer.Dispose();
-        return result;
+        using (deviations)
+        {
+            using var extrapolation = context.Rent(count);
+            var ext = extrapolation.WritableSpan;
+            var deviation = deviations.Span;
+            for (var i = 0; i < count; i++)
+            {
+                // The bar index is its own series in the batch, so a reading that is not yet a window old
+                // extrapolates from zero rather than from a bar that does not exist.
+                double x = i;
+                var priorX = i >= length ? i - length : 0;
+                var priorX2 = i >= length * 2 ? i - (length * 2) : 0;
+                var priorY = i >= length ? deviation[i - length] : 0;
+                var priorY2 = i >= length * 2 ? deviation[i - (length * 2)] : 0;
+
+                ext[i] = priorX2 - priorX != 0 && priorY2 - priorY != 0
+                    ? (priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY))) / 2
+                    : 0;
+            }
+
+            var buffer = context.Rent(count);
+            var output = buffer.WritableSpan;
+
+            // The bands are the running extremes of the extrapolation taken twice: the inner window never
+            // runs shorter than two bars, while the outer pair take the length as given, which is why both
+            // publish a partial-window extreme from the first bar.
+            var window = new RollingMinMax(Math.Max(length, 2));
+            var highWindow = new RollingMinMax(length);
+            var lowWindow = new RollingMinMax(length);
+            for (var i = 0; i < count; i++)
+            {
+                window.Add(ext[i]);
+                highWindow.Add(window.Max);
+                lowWindow.Add(window.Min);
+
+                output[i] = series switch
+                {
+                    ExtrapolatedLevelSeries.Upper => highWindow.Max,
+                    ExtrapolatedLevelSeries.Lower => lowWindow.Min,
+                    _ => (highWindow.Max + lowWindow.Min) / 2
+                };
+            }
+
+            return buffer;
+        }
     }
 
     internal static ComputeBuffer ComputeSupportResistanceFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
