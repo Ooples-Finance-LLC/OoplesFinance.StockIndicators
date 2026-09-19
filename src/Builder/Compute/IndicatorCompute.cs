@@ -1055,12 +1055,30 @@ internal static partial class IndicatorCompute
 
             // Batch 17 - More Band and Channel Indicators
             VolumeAdaptiveBandsSpecOptions vab => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType),
-            TrendTraderBandsSpecOptions ttb => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType),
+            TrendTraderBandsSpecOptions ttb => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType),
+                "UpperBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType, ChannelBand.Lower),
+                _ => null
+            },
             ScalpersChannelSpecOptions sc => ComputeScalpersChannelFast(data, context, sc.Length1, sc.Length2, sc.MaType),
             HurstCycleChannelSpecOptions hcc => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult, hcc.SlowMult, hcc.MaType),
-            PriceCurveChannelSpecOptions pcc => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType),
+            PriceCurveChannelSpecOptions pcc => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType),
+                "UpperBand" => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType, ChannelBand.Lower),
+                _ => null
+            },
             PriceHeadleyAccelerationBandsSpecOptions phab => ComputePriceHeadleyAccelerationBandsFast(data, context, phab.Length, phab.Factor, phab.MaType),
-            PriceLineChannelSpecOptions plc => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType),
+            PriceLineChannelSpecOptions plc => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType),
+                "UpperBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
+                _ => null
+            },
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType),
 
             // Batch 18 - Strength and Zone Indicators
@@ -13904,26 +13922,60 @@ internal static partial class IndicatorCompute
     /// Computes Trend Trader Bands using zero-allocation fast path.
     /// Returns the middle band (WMA).
     /// </summary>
-    internal static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3, double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3,
+        double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateTrendTraderBands smooths a trailing stop that flips between the previous bar's highest less
+        // a multiple of the average true range and its lowest plus the same, holding its last value while
+        // price sits between them. The outer bands are that line stepped by a fixed amount.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        using var stops = context.Rent(count);
+        var stop = stops.WritableSpan;
+
+        var window = new RollingMinMax(Math.Max(length, 2));
+        double previousStop = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            // The batch reads the previous bar's extremes, so the window is read before this bar joins it.
+            var previousHighest = i >= 1 ? window.Max : 0;
+            var previousLowest = i >= 1 ? window.Min : 0;
+            window.Add(input[i]);
+
+            var atrMult = (i >= 1 ? atr[i - 1] : 0) * mult;
+            var highLimit = previousHighest - atrMult;
+            var lowLimit = previousLowest + atrMult;
+            var currentValue = input[i];
+
+            if (currentValue > highLimit && currentValue > lowLimit)
+            {
+                previousStop = highLimit;
+            }
+            else if (currentValue < lowLimit && currentValue < highLimit)
+            {
+                previousStop = lowLimit;
+            }
+
+            stop[i] = previousStop;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, stops.Span, buffer.WritableSpan);
+
+        if (band != ChannelBand.Middle)
+        {
+            var step = band == ChannelBand.Upper ? bandStep : -bandStep;
+            var output = buffer.WritableSpan;
+            for (var i = 0; i < count; i++)
+            {
+                output[i] += step;
+            }
         }
 
         return buffer;
@@ -13988,26 +14040,76 @@ internal static partial class IndicatorCompute
     /// Computes Price Curve Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    internal static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    /// <summary>
+    /// Which of a channel's three bands an arm has been asked for. A channel computes all three together, so
+    /// the band is chosen on the way out rather than by three arms that would each repeat the walk.
+    /// </summary>
+    internal enum ChannelBand
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        Upper,
+        Middle,
+        Lower
+    }
 
-        switch (maType)
+    internal static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, ChannelBand band = ChannelBand.Middle)
+    {
+        // CalculatePriceCurveChannel walks two envelopes of the chained series. Each steps towards price by a
+        // fraction of the average true range that grows with the bars since that band last turned, and neither
+        // is allowed past price itself. The middle band is their average; a moving average of the close, which
+        // is what this computed, is none of the three.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        using var upperBand = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        var a = upperBand.WritableSpan;
+        var b = lowerBand.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var lastRise = -1;
+        var lastFall = -1;
+        double previousSize = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var previousA1 = i >= 1 ? a[i - 1] : currentValue;
+            var previousB1 = i >= 1 ? b[i - 1] : currentValue;
+            var previousA2 = i >= 2 ? a[i - 2] : 0;
+            var previousB2 = i >= 2 ? b[i - 2] : 0;
+
+            var fallbackSize = i >= 1 ? previousSize : atr[i] / length;
+            var size = previousA1 - previousA2 > 0 || previousB1 - previousB2 < 0 ? atr[i] : fallbackSize;
+            previousSize = size;
+
+            if (previousA1 > previousA2)
+            {
+                lastRise = i;
+            }
+
+            if (previousB1 < previousB2)
+            {
+                lastFall = i;
+            }
+
+            // The bars since the band last turned, counted the way the batch counts them: a band that has
+            // never turned has been still for the whole series so far.
+            var drift = size / MathHelper.Pow(length, 2);
+            a[i] = Math.Max(Math.Max(currentValue, previousA1) - (drift * (i - lastRise + 1)), currentValue);
+            b[i] = Math.Min(Math.Min(currentValue, previousB1) + (drift * (i - lastFall + 1)), currentValue);
+            output[i] = band switch
+            {
+                ChannelBand.Upper => a[i],
+                ChannelBand.Lower => b[i],
+                _ => (a[i] + b[i]) / 2
+            };
         }
 
         return buffer;
@@ -14043,26 +14145,53 @@ internal static partial class IndicatorCompute
     /// Computes Price Line Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    internal static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculatePriceLineChannel is the curve channel's straight-line sibling: each envelope steps towards
+        // price by the same fraction of the average true range every bar, and each keeps its own size, taken
+        // when that band last turned. The third size the batch keeps reaches no band and is not kept here.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        using var upperBand = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        var a = upperBand.WritableSpan;
+        var b = lowerBand.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double previousSizeA = 0;
+        double previousSizeB = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var previousA1 = i >= 1 ? a[i - 1] : currentValue;
+            var previousB1 = i >= 1 ? b[i - 1] : currentValue;
+            var previousA2 = i >= 2 ? a[i - 2] : 0;
+            var previousB2 = i >= 2 ? b[i - 2] : 0;
+
+            var fallbackSizeA = i >= 1 ? previousSizeA : atr[i] / length;
+            var fallbackSizeB = i >= 1 ? previousSizeB : atr[i] / length;
+            var sizeA = previousA1 - previousA2 > 0 ? atr[i] : fallbackSizeA;
+            var sizeB = previousB1 - previousB2 < 0 ? atr[i] : fallbackSizeB;
+            previousSizeA = sizeA;
+            previousSizeB = sizeB;
+
+            a[i] = Math.Max(Math.Max(currentValue, previousA1) - (sizeA / length), currentValue);
+            b[i] = Math.Min(Math.Min(currentValue, previousB1) + (sizeB / length), currentValue);
+            output[i] = band switch
+            {
+                ChannelBand.Upper => a[i],
+                ChannelBand.Lower => b[i],
+                _ => (a[i] + b[i]) / 2
+            };
         }
 
         return buffer;
