@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
@@ -71,7 +71,7 @@ internal static partial class IndicatorCompute
             StochasticSpecOptions stoch => spec.OutputKey switch
             {
                 null or "FastK" => ComputeStochasticKFast(data, context, stoch.KLength),
-                "FastD" => ComputeStochasticDFast(data, context, stoch.KLength, stoch.DLength),
+                "FastD" => ComputeStochasticDFast(data, context, stoch.KLength, stoch.DLength, stoch.MaType),
                 _ => null
             },
 
@@ -3455,13 +3455,19 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic D using zero-allocation fast path with configurable K and D lengths.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int kLength, int dLength)
+    internal static ComputeBuffer ComputeStochasticDFast(StockData data, ComputeContext context, int kLength, int dLength,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateStochasticOscillator publishes FastD as the moving average of its raw FastK over
+        // smoothLength1, of whichever type the caller asked for. This arm averaged with a hardcoded simple
+        // average, so it agreed with the batch only while that type was the default one; an exponential
+        // average seeds from the first bar where a simple one is still filling its window, so the two parted
+        // company on bar 0. The K it smooths is the same arm the FastK key serves, so the two keys cannot
+        // drift apart.
+        using var fastK = ComputeStochasticKFast(data, context, kLength);
+
         var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticD(high, low, close, buffer.WritableSpan, kLength, dLength);
+        MovingAverage(data, maType, dLength, fastK.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -8139,15 +8145,23 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Compare Price Momentum Oscillator using zero-allocation fast path.
+    /// Refuses the Compare Price Momentum Oscillator, which one series cannot produce.
     /// </summary>
+    /// <remarks>
+    /// CalculateComparePriceMomentumOscillator is PMO(stock) - PMO(market): it takes a second StockData and
+    /// subtracts that series' oscillator. A one-series arm has nothing to subtract, and this one used to hand
+    /// back a plain single-series PMO under the compare indicator's name - a different indicator, served
+    /// silently. The multi-series path is the one that computes this: IndicatorCatalog's overload passes both
+    /// handles through MultiStockIndicatorOptions, and SeriesEvaluator computes it from
+    /// ComparePriceMomentumOscillatorState. Refusing here keeps the wrong series from reaching a caller if the
+    /// obsolete one-series options type is ever served.
+    /// </remarks>
     internal static ComputeBuffer ComputeComparePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 35)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.ComparePriceMomentumOscillator(inputSpan, buffer.WritableSpan, length, 10, 10);
-        return buffer;
+        throw new CalculationException(
+            "ComparePriceMomentumOscillator compares a stock against a market series, so it cannot be computed "
+            + "from one series. Use IndicatorCatalog.ComparePriceMomentumOscillator, which takes the market "
+            + "series as a handle.");
     }
 
     /// <summary>
@@ -24685,28 +24699,30 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // V1 Algorithm: Quasi White Noise
-        // 1. Calculate ConnorsRSI with parameters (noiseLength, noiseLength, length)
-        // 2. Transform: whiteNoise = (connorsRsi - 50) * (1 / divisor)
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        // CalculateQuasiWhiteNoise centres the Connors relative strength index on zero and scales it by the
+        // divisor. Its WhiteNoise key is that series alone, so the moving average, deviation and variance the
+        // batch also publishes do not reach this output. The batch passes noiseLength as BOTH of Connors'
+        // relative strength lengths and passes length as its rank window, so the arguments are not in the
+        // order the parameter names suggest.
+        //
+        // This arm used to call OscillatorCore.ConnorsRelativeStrengthIndex, which ranks a different window
+        // with a different denominator and read input[i - j - 1] unguarded, so it threw rather than
+        // answering. ComputeConnorsRsiFast is the arm that agrees with the batch.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
 
-        // Calculate ConnorsRSI
-        var crsiBuffer = context.Rent(count);
-        OscillatorCore.ConnorsRelativeStrengthIndex(close, crsiBuffer.WritableSpan, noiseLength, noiseLength, length);
+        using var connors = ComputeConnorsRsiFast(data, context, noiseLength, noiseLength, length, maType);
 
-        // Transform to white noise: (connorsRsi - 50) * (1 / divisor)
-        var result = context.Rent(count);
-        var crsiSpan = crsiBuffer.Span;
-        var resultSpan = result.WritableSpan;
-        double invDivisor = 1.0 / divisor;
-        for (int i = 0; i < count; i++)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var connorsSpan = connors.Span;
+        var scale = 1 / divisor;
+        for (var i = 0; i < count; i++)
         {
-            resultSpan[i] = (crsiSpan[i] - 50) * invDivisor;
+            output[i] = (connorsSpan[i] - 50) * scale;
         }
 
-        crsiBuffer.Dispose();
-        return result;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeRapidRsiFast(StockData data, ComputeContext context, int length = 14)

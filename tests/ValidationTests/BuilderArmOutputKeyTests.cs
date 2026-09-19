@@ -219,13 +219,14 @@ public sealed class BuilderArmOutputKeyTests : GlobalTestData
     /// </remarks>
     private static IEnumerable<(Type OptionsType, BuilderArmTarget Target, string OutputKey)> UnpublishedKeys()
     {
+        // Every bound options type, not only the unverified ones. BuilderArmBinding.Compute does not consult
+        // BuilderVerifiedArms, so neither does this sample. Tying it to that set made it shrink as arms were
+        // promoted, until one arm short of the whole table it held a single type - and that type was the one
+        // comparison indicator, which cannot be computed from one series at all, so the sample had stopped
+        // exercising the refusal it exists to hold. The reachable path is still the unverified one, through
+        // IndicatorCompute.TryComputeFast; the method under test is the same either way.
         foreach (var (optionsType, target) in BuilderArmTargets.Targets.OrderBy(t => t.Key.Name, StringComparer.Ordinal))
         {
-            if (BuilderVerifiedArms.Arms.Contains(optionsType))
-            {
-                continue;
-            }
-
             var absent = $"NotPublishedBy{target.Name}";
             if (!GeneratedIndicatorOutputs.KeysFor(target.Name).Contains(absent))
             {
