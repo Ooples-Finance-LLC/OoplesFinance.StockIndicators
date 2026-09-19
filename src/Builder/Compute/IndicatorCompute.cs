@@ -530,7 +530,12 @@ internal static partial class IndicatorCompute
             EhlersCenterOfGravityOscillatorSpecOptions ecogo => ComputeEhlersCenterOfGravityOscillatorFast(data, context, ecogo.Length),
             EhlersDecyclerOscillatorV1SpecOptions edov1 => ComputeEhlersDecyclerOscillatorV1Fast(data, context, edov1.Length),
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
-            EhlersHilbertOscillatorSpecOptions eho => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length),
+            EhlersHilbertOscillatorSpecOptions eho => spec.OutputKey switch
+            {
+                null or "IQ" => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length),
+                "I3" => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length, EhlersHilbertOutput.InPhase),
+                _ => null
+            },
             EhlersUniversalOscillatorSpecOptions euo => ComputeEhlersUniversalOscillatorFast(data, context, euo.Length),
             // The oscillator's three lengths are all fixed in the batch, so the spec's single Length has
             // nothing to bind to and is marked as having no effect.
@@ -699,7 +704,11 @@ internal static partial class IndicatorCompute
             FallingRisingFilterSpecOptions frf => ComputeFallingRisingFilterFast(data, context, frf.Length),
             FareySequenceWeightedMovingAverageSpecOptions fswma => ComputeFareySequenceWeightedMovingAverageFast(data, context, fswma.Length),
             FisherLeastSquaresMovingAverageSpecOptions flsma => ComputeFisherLeastSquaresMovingAverageFast(data, context, flsma.Length),
-            FollowingAdaptiveMovingAverageSpecOptions fama => ComputeFollowingAdaptiveMovingAverageFast(data, context, fama.Length),
+            FollowingAdaptiveMovingAverageSpecOptions fama => spec.OutputKey switch
+            {
+                null or "Fama" => ComputeFollowingAdaptiveMovingAverageFast(data, context),
+                _ => null
+            },
             GeneralFilterEstimatorSpecOptions gfe => ComputeGeneralFilterEstimatorFast(data, context, gfe.Length),
             HendersonWeightedMovingAverageSpecOptions hwma => ComputeHendersonWeightedMovingAverageFast(data, context, hwma.Length),
             HullEstimateSpecOptions hest => ComputeHullEstimateFast(data, context, hest.Length),
@@ -772,7 +781,25 @@ internal static partial class IndicatorCompute
             EhlersChebyshevLowPassFilterSpecOptions eclpf => ComputeEhlersChebyshevLowPassFilterFast(data, context, eclpf.Length, eclpf.Ripple),
             EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
             EhlersMedianAverageAdaptiveFilterSpecOptions emaaf => ComputeEhlersMedianAverageAdaptiveFilterFast(data, context, emaaf.Length, emaaf.Threshold),
-            EhlersMesaAdaptiveMovingAverageSpecOptions emama => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.Length, emama.FastLimit, emama.SlowLimit),
+            EhlersMesaAdaptiveMovingAverageSpecOptions emama => spec.OutputKey switch
+            {
+                null or "Mama" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit),
+                "Fama" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.Fama),
+                "I1" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.InPhase),
+                "Q1" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.Quadrature),
+                "SmoothPeriod" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.SmoothPeriod),
+                "Smooth" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.Smooth),
+                "Real" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.Real),
+                "Imag" => ComputeEhlersMesaAdaptiveMovingAverageFast(data, context, emama.FastLimit, emama.SlowLimit,
+                    EhlersMamaOutput.Imaginary),
+                _ => null
+            },
             // Alpha is derived from the smoothing length inside the filter; the batch takes no alpha.
             EhlersRecursiveMedianFilterSpecOptions ermf => ComputeEhlersRecursiveMedianFilterFast(data, context, ermf.Length),
             EhlersRoofingFilterSpecOptions eroof => ComputeEhlersRoofingFilterFast(data, context, eroof.HpLength, eroof.LpLength),
@@ -866,7 +893,13 @@ internal static partial class IndicatorCompute
             EhlersImpulseReactionSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length1, eir.Length2, eir.Q),
             EhlersReverseEmaIndicatorV1SpecOptions erema => ComputeEhlersReverseEmaIndicatorV1Fast(data, context, erema.Alpha),
             EhlersSquelchIndicatorSpecOptions esqe => ComputeEhlersSquelchIndicatorFast(data, context, esqe.Length1, esqe.Length2, esqe.Length3),
-            EhlersReverseEmaIndicatorV2SpecOptions eremav2 => ComputeEhlersReverseEmaIndicatorV2Fast(data, context, eremav2.TrendAlpha, eremav2.CycleAlpha),
+            EhlersReverseEmaIndicatorV2SpecOptions eremav2 => spec.OutputKey switch
+            {
+                null or "EremaCycle" => ComputeEhlersReverseEmaIndicatorV2Fast(data, context, eremav2.TrendAlpha, eremav2.CycleAlpha),
+                "EremaTrend" => ComputeEhlersReverseEmaIndicatorV2Fast(data, context, eremav2.TrendAlpha, eremav2.CycleAlpha,
+                    EhlersReverseEmaWave.Trend),
+                _ => null
+            },
             EhlersStochasticCyberCycleSpecOptions escc => ComputeEhlersStochasticCyberCycleFast(data, context, escc.Length, escc.Alpha),
             EhlersCenterofGravityOscillatorSpecOptions ecog => ComputeEhlersCenterofGravityOscillatorFast(data, context, ecog.Length),
             EhlersReflexIndicatorSpecOptions eri => ComputeEhlersReflexIndicatorFast(data, context, eri.Length),
@@ -1087,7 +1120,26 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             ScalpersChannelSpecOptions sc => ComputeScalpersChannelFast(data, context, sc.Length1, sc.Length2, sc.MaType),
-            HurstCycleChannelSpecOptions hcc => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult, hcc.SlowMult, hcc.MaType),
+            HurstCycleChannelSpecOptions hcc => spec.OutputKey switch
+            {
+                null or "FastMiddleBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType),
+                "FastUpperBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.FastUpperBand),
+                "FastLowerBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.FastLowerBand),
+                "SlowUpperBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.SlowUpperBand),
+                "SlowMiddleBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.SlowMiddleBand),
+                "SlowLowerBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.SlowLowerBand),
+                "OMed" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.OMed),
+                "OShort" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
+                    hcc.SlowMult, hcc.MaType, HurstCycleSeries.OShort),
+                _ => null
+            },
             PriceCurveChannelSpecOptions pcc => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputePriceCurveChannelFast(data, context, pcc.Length, pcc.MaType),
@@ -7089,11 +7141,67 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Hilbert Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersHilbertOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Which of the Hilbert oscillator's two series an arm has been asked for. Both are sums of the same
+    /// quadrature component over a window taken from the measured cycle, so one walk produces both.
+    /// </summary>
+    internal enum EhlersHilbertOutput
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersHilbertOscillator(close, buffer.WritableSpan, length);
+        Quadrature,
+        InPhase
+    }
+
+    internal static ComputeBuffer ComputeEhlersHilbertOscillatorFast(StockData data, ComputeContext context, int length = 7,
+        EhlersHilbertOutput output = EhlersHilbertOutput.Quadrature)
+    {
+        // CalculateEhlersHilbertOscillator measures the dominant cycle with the mother of adaptive moving
+        // averages, takes the quadrature component of its smoothed series, and sums that component back over
+        // half a cycle for I3 and a quarter of one for IQ. The length reaches only the signals, which is why
+        // neither series moves with it. OscillatorCore computed something else entirely from the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        _ = length;
+
+        using var smoothed = context.Rent(count);
+        using var periods = context.Rent(count);
+        using var quadratures = context.Rent(count);
+        var smooth = smoothed.WritableSpan;
+        var smoothPeriod = periods.WritableSpan;
+        var q3 = quadratures.WritableSpan;
+
+        using (var engine = new Streaming.EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var snapshot = engine.Next(input[i], isFinal: true);
+                smooth[i] = snapshot.Smooth;
+                smoothPeriod[i] = snapshot.SmoothPeriod;
+            }
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            var previousSmooth = i >= 2 ? smooth[i - 2] : 0;
+            q3[i] = 0.5 * (smooth[i] - previousSmooth) * ((0.1759 * smoothPeriod[i]) + 0.4607);
+        }
+
+        var buffer = context.Rent(count);
+        var values = buffer.WritableSpan;
+        var divisor = output == EhlersHilbertOutput.InPhase ? 2 : 4;
+        var scale = output == EhlersHilbertOutput.InPhase ? 1.57 : 1.25;
+        for (var i = 0; i < count; i++)
+        {
+            var window = (int)Math.Ceiling(smoothPeriod[i] / divisor);
+            double sum = 0;
+            for (var j = 0; j <= window - 1; j++)
+            {
+                sum += i >= j ? q3[i - j] : 0;
+            }
+
+            values[i] = window != 0 ? scale * sum / window : sum;
+        }
+
         return buffer;
     }
 
@@ -8742,13 +8850,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Following Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFollowingAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFollowingAdaptiveMovingAverageFast(StockData data, ComputeContext context,
+        double fastAlpha = 0.5, double slowAlpha = 0.05)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.FollowingAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // The following adaptive moving average is the mother's second series: the same adaptive smoothing
+        // applied again at half the rate, which is what the batch publishes as Fama.
+        return ComputeEhlersMotherOfAdaptiveMovingAveragesFast(data, context, fastAlpha, slowAlpha, EhlersMamaOutput.Fama);
     }
 
     /// <summary>
@@ -9584,13 +9691,68 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Mesa Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersMesaAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, double fastLimit = 0.5, double slowLimit = 0.05)
+    /// <summary>
+    /// Which of the mother of adaptive moving averages' eight series an arm has been asked for. One walk
+    /// produces all of them, so the series is chosen on the way out.
+    /// </summary>
+    internal enum EhlersMamaOutput
+    {
+        Mama,
+        Fama,
+        InPhase,
+        Quadrature,
+        SmoothPeriod,
+        Smooth,
+        Real,
+        Imaginary
+    }
+
+    /// <summary>
+    /// One series of the mother of adaptive moving averages, walked through the same engine the streaming
+    /// state uses so all three engines answer alike.
+    /// </summary>
+    /// <remarks>
+    /// CalculateEhlersMotherOfAdaptiveMovingAverages measures the dominant cycle with a Hilbert transform and
+    /// adapts its smoothing to the rate the cycle's phase turns. It takes no length - only the fast and slow
+    /// bounds on that smoothing - which is why the two specs bound to it mark their length as having no
+    /// effect. MovingAverageCore had a length-driven average in its place that matched neither series.
+    /// </remarks>
+    internal static ComputeBuffer ComputeEhlersMotherOfAdaptiveMovingAveragesFast(StockData data, ComputeContext context,
+        double fastAlpha = 0.5, double slowAlpha = 0.05, EhlersMamaOutput output = EhlersMamaOutput.Mama)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersMesaAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length, fastLimit, slowLimit);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var values = buffer.WritableSpan;
+
+        using var engine = new Streaming.EhlersMotherOfAdaptiveMovingAveragesEngine(fastAlpha, slowAlpha);
+        for (var i = 0; i < count; i++)
+        {
+            var snapshot = engine.Next(input[i], isFinal: true);
+            values[i] = output switch
+            {
+                EhlersMamaOutput.Fama => snapshot.Fama,
+                EhlersMamaOutput.InPhase => snapshot.I1,
+                EhlersMamaOutput.Quadrature => snapshot.Q1,
+                EhlersMamaOutput.SmoothPeriod => snapshot.SmoothPeriod,
+                EhlersMamaOutput.Smooth => snapshot.Smooth,
+                EhlersMamaOutput.Real => snapshot.Real,
+                EhlersMamaOutput.Imaginary => snapshot.Imag,
+                _ => snapshot.Mama
+            };
+        }
+
         return buffer;
+    }
+
+    internal static ComputeBuffer ComputeEhlersMesaAdaptiveMovingAverageFast(StockData data, ComputeContext context,
+        double fastLimit = 0.5, double slowLimit = 0.05, EhlersMamaOutput output = EhlersMamaOutput.Mama)
+    {
+        // The MESA adaptive moving average is the mother's own series: the batch publishes it as Mama and
+        // carries it as the indicator's values.
+        return ComputeEhlersMotherOfAdaptiveMovingAveragesFast(data, context, fastLimit, slowLimit, output);
     }
 
     /// <summary>
@@ -10898,13 +11060,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Reverse EMA Indicator V2 using fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast(StockData data, ComputeContext context, double trendAlpha = 0.05, double cycleAlpha = 0.3)
+    /// <summary>
+    /// Which of the reverse exponential moving average indicator's two waves an arm has been asked for. The
+    /// cycle wave is drawn from the trend wave rather than from price, so it is the second of two passes.
+    /// </summary>
+    internal enum EhlersReverseEmaWave
     {
+        Cycle,
+        Trend
+    }
+
+    internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast(StockData data, ComputeContext context,
+        double trendAlpha = 0.05, double cycleAlpha = 0.3, EhlersReverseEmaWave wave = EhlersReverseEmaWave.Cycle)
+    {
+        // CalculateEhlersReverseExponentialMovingAverageIndicatorV2 runs the V1 indicator at the trend
+        // constant and then runs it again at the cycle constant over what that published, because the first
+        // pass chains its values onto the bars the second pass reads. The streaming state walks the same two
+        // passes in the same order. The core this called is a third calculation that is neither wave.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersReverseEmaIndicatorV2(inputSpan, buffer.WritableSpan, trendAlpha, cycleAlpha);
-        return buffer;
+        var count = inputList.Count;
+
+        var trend = context.Rent(count);
+        OscillatorCore.EhlersReverseEmaIndicatorV1(SpanCompat.AsReadOnlySpan(inputList), trend.WritableSpan,
+            MathHelper.MinOrMax(trendAlpha, 0.99, 0.01));
+
+        if (wave == EhlersReverseEmaWave.Trend)
+        {
+            return trend;
+        }
+
+        using (trend)
+        {
+            var cycle = context.Rent(count);
+            OscillatorCore.EhlersReverseEmaIndicatorV1(trend.Span, cycle.WritableSpan,
+                MathHelper.MinOrMax(cycleAlpha, 0.99, 0.01));
+            return cycle;
+        }
     }
 
     /// <summary>
@@ -14137,26 +14328,83 @@ internal static partial class IndicatorCompute
     /// Computes Hurst Cycle Channel using zero-allocation fast path.
     /// Returns the middle line (Wilder smoothed).
     /// </summary>
-    internal static ComputeBuffer ComputeHurstCycleChannelFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    /// <summary>
+    /// Which of the Hurst cycle channel's eight series an arm has been asked for. Two envelopes and the two
+    /// oscillators drawn from them all fall out of one walk, so the series is chosen on the way out.
+    /// </summary>
+    internal enum HurstCycleSeries
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        FastMiddleBand,
+        FastUpperBand,
+        FastLowerBand,
+        SlowMiddleBand,
+        SlowUpperBand,
+        SlowLowerBand,
+        OMed,
+        OShort
+    }
 
-        switch (maType)
+    internal static ComputeBuffer ComputeHurstCycleChannelFast(StockData data, ComputeContext context, int fastLength = 10,
+        int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
+        HurstCycleSeries series = HurstCycleSeries.FastMiddleBand)
+    {
+        // CalculateHurstCycleChannel halves each length into a cycle, centres an envelope on the moving
+        // average of the chained series as it stood half a cycle ago, and offsets it by a multiple of the
+        // average true range over the same cycle. The two oscillators place the fast centre and price itself
+        // within the slow envelope. The switch this replaced was a moving average of the close, which is none
+        // of the eight.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        // Each cycle is clamped the way the batch clamps it: never shorter than two bars, never longer than
+        // 530, which is what MinOrMax does for a length.
+        var fastCycle = MathHelper.MinOrMax((int)Math.Ceiling((double)fastLength / 2));
+        var slowCycle = MathHelper.MinOrMax((int)Math.Ceiling((double)slowLength / 2));
+        var fastLag = MathHelper.MinOrMax((int)Math.Ceiling((double)fastCycle / 2));
+        var slowLag = MathHelper.MinOrMax((int)Math.Ceiling((double)slowCycle / 2));
+
+        using var fastRange = ComputeAtrFast(data, context, fastCycle, maType);
+        using var slowRange = ComputeAtrFast(data, context, slowCycle, maType);
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, fastCycle, input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, slowCycle, input, slowAverage.WritableSpan);
+
+        var fastAtr = fastRange.Span;
+        var slowAtr = slowRange.Span;
+        var fastMa = fastAverage.Span;
+        var slowMa = slowAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WildersSmoothingMethod:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
-            default:
-                MovingAverageCore.WellesWilderMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
+            var currentValue = input[i];
+            var fastCentre = i >= fastLag ? fastMa[i - fastLag] : currentValue;
+            var slowCentre = i >= slowLag ? slowMa[i - slowLag] : currentValue;
+            var fastOffset = fastMult * fastAtr[i];
+            var slowOffset = slowMult * slowAtr[i];
+
+            var fastUpper = fastCentre + fastOffset;
+            var fastLower = fastCentre - fastOffset;
+            var slowUpper = slowCentre + slowOffset;
+            var slowLower = slowCentre - slowOffset;
+            var fastMiddle = (fastUpper + fastLower) / 2;
+            var slowMiddle = (slowUpper + slowLower) / 2;
+            var slowRangeWidth = slowUpper - slowLower;
+
+            output[i] = series switch
+            {
+                HurstCycleSeries.FastUpperBand => fastUpper,
+                HurstCycleSeries.FastLowerBand => fastLower,
+                HurstCycleSeries.SlowUpperBand => slowUpper,
+                HurstCycleSeries.SlowLowerBand => slowLower,
+                HurstCycleSeries.SlowMiddleBand => slowMiddle,
+                HurstCycleSeries.OMed => slowRangeWidth != 0 ? (fastMiddle - slowLower) / slowRangeWidth : 0,
+                HurstCycleSeries.OShort => slowRangeWidth != 0 ? (currentValue - slowLower) / slowRangeWidth : 0,
+                _ => fastMiddle
+            };
         }
 
         return buffer;
