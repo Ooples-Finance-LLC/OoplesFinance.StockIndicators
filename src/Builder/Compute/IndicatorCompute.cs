@@ -196,7 +196,8 @@ internal static partial class IndicatorCompute
             VortexNegativeSpecOptions vn => ComputeVortexNegativeFast(data, context, vn.Length),
             TrendIntensityIndexSpecOptions tii => ComputeTrendIntensityIndexFast(data, context, tii.Length, tii.MaType),
             AbsoluteStrengthIndexSpecOptions asi => ComputeAbsoluteStrengthIndexFast(data, context, asi.Length),
-            RelativeMomentumIndexSpecOptions rmi => ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum),
+            RelativeMomentumIndexSpecOptions rmi => ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum,
+                rmi.MaType),
             IntradayMomentumIndexSpecOptions imi => ComputeIntradayMomentumIndexFast(data, context, imi.Length),
 
             // Batch 3 - Volume weighted MAs
@@ -3410,12 +3411,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Momentum Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRelativeMomentumIndexFast(StockData data, ComputeContext context, int length = 14, int momentum = 4)
+    internal static ComputeBuffer ComputeRelativeMomentumIndexFast(StockData data, ComputeContext context, int length1 = 14, int length2 = 3,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        // CalculateRelativeMomentumIndex is an RSI over the change across length2 bars rather than one: the
+        // gains and losses are averaged over length1 by maType, which the arm never received.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.RelativeMomentumIndex(inputSpan, buffer.WritableSpan, length, momentum);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        using var gains = context.Rent(count);
+        using var losses = context.Rent(count);
+        var gain = gains.WritableSpan;
+        var loss = losses.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= length2 ? input[i - length2] : 0;
+            var priceChg = CalculationsHelper.MinPastValues(i, length2, input[i] - prevValue);
+
+            loss[i] = i >= length2 && priceChg < 0 ? Math.Abs(priceChg) : 0;
+            gain[i] = i >= length2 && priceChg > 0 ? priceChg : 0;
+        }
+
+        using var averageGain = context.Rent(count);
+        using var averageLoss = context.Rent(count);
+        MovingAverage(data, maType, length1, gains.Span, averageGain.WritableSpan);
+        MovingAverage(data, maType, length1, losses.Span, averageLoss.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var avgGain = averageGain.Span[i];
+            var avgLoss = averageLoss.Span[i];
+            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
+
+            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        }
+
         return buffer;
     }
 
@@ -8721,15 +8754,20 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kase Peak Oscillator V1 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 30,
-        int smoothLength = 3)
+    /// <summary>
+    /// Which of the two series CalculateKasePeakOscillatorV1 publishes an arm has been asked for. "Pk" is the
+    /// weighted average of the random walk difference; "Kpo" is the banded oscillator built on top of it, and
+    /// CalculateKaseConvergenceDivergence chains from the former rather than the latter.
+    /// </summary>
+    internal enum KasePeakSeries
     {
-        // CalculateKasePeakOscillatorV1 measures the length-ago random walk of the high against the low and
-        // the reverse, both normalised by the average true range and scaled by the square root of the
-        // length, then publishes a banded version of the smoothed difference: above its mean plus 1.33
-        // standard deviations while rising, below its mean minus 1.33 while falling, floored at 2.08 and
-        // -1.92 respectively, and zero while the sign is in transition. The arm this replaced delegated to
-        // OscillatorCore.KasePeakOscillatorV1.
+        Kpo,
+        Pk
+    }
+
+    internal static ComputeBuffer ComputeKasePeakOscillatorV1Fast(StockData data, ComputeContext context, int length = 30,
+        int smoothLength = 3, KasePeakSeries series = KasePeakSeries.Kpo)
+    {
         var count = data.Count;
         var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -8749,8 +8787,14 @@ internal static partial class IndicatorCompute
             diff[i] = rwh - rwl;
         }
 
-        using var peak = context.Rent(count);
-        MovingAverage(data, MovingAvgType.WeightedMovingAverage, smoothLength, difference.Span, peak.WritableSpan);
+        var weighted = context.Rent(count);
+        MovingAverage(data, MovingAvgType.WeightedMovingAverage, smoothLength, difference.Span, weighted.WritableSpan);
+        if (series == KasePeakSeries.Pk)
+        {
+            return weighted;
+        }
+
+        using var peak = weighted;
         var pk = peak.Span;
 
         using var mean = context.Rent(count);
@@ -14874,10 +14918,57 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePercentageTrendFast(StockData data, ComputeContext context, int length = 20, double pct = 0.15)
     {
+        // CalculatePercentageTrend walks the whole window afresh on every bar, restarting its period count
+        // whenever the trend line is crossed and stepping the line to a percentage below the running high or
+        // above the running low. The two inner scans differ in where they start, and both are reproduced as
+        // written - including the second start at i - length, which is what makes the line settle.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.PercentageTrend(inputSpan, buffer.WritableSpan, length, pct);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var period = 0;
+            var trend = input[i];
+            for (var j = 1; j <= length; j++)
+            {
+                var prevC = i >= j - 1 ? input[i - (j - 1)] : 0;
+                var currC = i >= j ? input[i - j] : 0;
+                period = (prevC <= trend && currC > trend) || (prevC >= trend && currC < trend) ? 0 : period;
+
+                double highest1 = currC, lowest1 = currC;
+                for (var k = j - period; k <= j; k++)
+                {
+                    var c = i >= j - k ? input[i - (j - k)] : 0;
+                    highest1 = Math.Max(highest1, c);
+                    lowest1 = Math.Min(lowest1, c);
+                }
+
+                double highest2 = currC, lowest2 = currC;
+                for (var k = i - length; k <= j; k++)
+                {
+                    var c = i >= j - k ? input[i - (j - k)] : 0;
+                    highest2 = Math.Max(highest2, c);
+                    lowest2 = Math.Min(lowest2, c);
+                }
+
+                if (period < length)
+                {
+                    period += 1;
+                    trend = currC > trend ? highest1 * (1 - pct) : lowest1 * (1 + pct);
+                }
+                else
+                {
+                    trend = currC > trend ? highest2 * (1 - pct) : lowest2 * (1 + pct);
+                }
+            }
+
+            output[i] = trend;
+        }
+
         return buffer;
     }
 
@@ -19910,23 +20001,23 @@ internal static partial class IndicatorCompute
     /// Computes Kase Convergence Divergence using zero-allocation fast path.
     /// Returns the convergence/divergence value.
     /// </summary>
-    internal static ComputeBuffer ComputeKaseConvergenceDivergenceFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 3, int length3 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeKaseConvergenceDivergenceFast(StockData data, ComputeContext context, int length1 = 30,
+        int length2 = 3, int length3 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateKaseConvergenceDivergence chains from the "Pk" series of the Kase peak oscillator - the
+        // weighted average of the random walk difference, not the banded oscillator that arm returns by
+        // default - and subtracts its own moving average from it.
         var count = data.Count;
-        var buffer = context.Rent(count);
 
-        switch (maType)
+        using var peak = ComputeKasePeakOscillatorV1Fast(data, context, length1, length2, KasePeakSeries.Pk);
+        using var signal = context.Rent(count);
+        MovingAverage(data, maType, length3, peak.Span, signal.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
+            output[i] = peak.Span[i] - signal.Span[i];
         }
 
         return buffer;
