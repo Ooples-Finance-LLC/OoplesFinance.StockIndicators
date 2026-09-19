@@ -996,8 +996,10 @@ internal static partial class IndicatorCompute
             VariableIndexDynamicAverageSpecOptions vida => ComputeVariableIndexDynamicAverageFast(data, context, vida.Length),
 
             // Batch 12 - New Core Methods for Previously Unimplemented Indicators
-            EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length, esdi.SignalLength, esdi.MaType),
-            EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3, esci.SignalLength, esci.MaType),
+            // SignalLength and MaType smooth the oscillator into the Signal line only, so neither can
+            // change the bound series. Length2 is not used by the clip indicator's batch at all.
+            EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length),
+            EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3),
             ElderMarketThermometerSpecOptions emt => ComputeElderMarketThermometerFast(data, context, emt.Length, emt.MaType),
             EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.SignalLength, ervi.MaType),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
@@ -1129,7 +1131,7 @@ internal static partial class IndicatorCompute
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
             EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1, esam.Length2, esam.MaType),
             EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
-            EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.MaType),
+            EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.Delta, ete.MaType),
             EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
 
             // Batch 26 - Ehlers V2 and Universal Trading Filter
@@ -10003,11 +10005,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersReflexFast(StockData data, ComputeContext context, int length = 20)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersReflex(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // Both specs name IndicatorName.EhlersReflexIndicator, so they share one arm. The core this
+        // one used applied the slope per lag and with the opposite sign, which the batch does not.
+        return ComputeEhlersReflexIndicatorFast(data, context, length);
     }
 
     /// <summary>
@@ -11994,114 +11994,68 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Simple Deriv Indicator using zero-allocation fast path.
     /// Returns the smoothed z3 oscillator (signal line).
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2, int signalLength = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2)
     {
+        // The batch publishes the raw z3 sum of the last four derivatives; its moving average of that
+        // series only ever reaches the Signal line.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
 
-        // Get pooled buffers
-        var pool = ArrayPool<double>.Shared;
-        var z3Array = pool.Rent(count);
+        using var derivatives = context.Rent(count);
+        var deriv = derivatives.WritableSpan;
 
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var z3Span = z3Array.AsSpan(0, count);
-
-            // Compute z3 (raw oscillator)
-            OscillatorCore.EhlersSimpleDerivIndicator(inputSpan, z3Span, length);
-
-            // Create output buffer and apply smoothing
-            var buffer = context.Rent(count);
-            var z3ReadOnly = (ReadOnlySpan<double>)z3Span;
-
-            // Apply moving average for signal line
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.DoubleExponentialMovingAverage:
-                    MovingAverageCore.DoubleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.TripleExponentialMovingAverage:
-                    MovingAverageCore.TripleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                default:
-                    // Fallback to EMA for unsupported types
-                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-            }
-
-            return buffer;
+            var previousValue = i >= length ? input[i - length] : 0;
+            deriv[i] = CalculationsHelper.MinPastValues(i, length, input[i] - previousValue);
+            output[i] = deriv[i] + (i >= 1 ? deriv[i - 1] : 0) + (i >= 2 ? deriv[i - 2] : 0) + (i >= 3 ? deriv[i - 3] : 0);
         }
-        finally
-        {
-            pool.Return(z3Array);
-        }
+
+        return buffer;
     }
 
     /// <summary>
     /// Computes Ehlers Simple Clip Indicator using zero-allocation fast path.
-    /// Returns the smoothed z3 oscillator (signal line).
+    /// Returns the raw z3 oscillator, which is the series the batch publishes.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50, int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50)
     {
+        // The batch publishes the raw z3 sum of the last four clipped derivatives; its moving average
+        // of that series only ever reaches the Signal line.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length3 = Math.Max(length3, 1);
 
-        // Get pooled buffers
-        var pool = ArrayPool<double>.Shared;
-        var z3Array = pool.Rent(count);
+        using var derivatives = context.Rent(count);
+        using var clips = context.Rent(count);
+        var deriv = derivatives.WritableSpan;
+        var clip = clips.WritableSpan;
 
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var z3Span = z3Array.AsSpan(0, count);
+            var previousValue = i >= length1 ? input[i - length1] : 0;
+            deriv[i] = CalculationsHelper.MinPastValues(i, length1, input[i] - previousValue);
 
-            // Compute z3 (raw oscillator with clipped derivatives)
-            OscillatorCore.EhlersSimpleClipIndicator(inputSpan, z3Span, length1, length3);
-
-            // Create output buffer and apply smoothing
-            var buffer = context.Rent(count);
-            var z3ReadOnly = (ReadOnlySpan<double>)z3Span;
-
-            // Apply moving average for signal line
-            switch (maType)
+            double rms = 0;
+            for (var j = 0; j < length3; j++)
             {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.DoubleExponentialMovingAverage:
-                    MovingAverageCore.DoubleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                case MovingAvgType.TripleExponentialMovingAverage:
-                    MovingAverageCore.TripleExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
-                default:
-                    // Fallback to EMA for unsupported types
-                    MovingAverageCore.ExponentialMovingAverage(z3ReadOnly, buffer.WritableSpan, signalLength);
-                    break;
+                var previousDeriv = i >= j ? deriv[i - j] : 0;
+                rms += MathHelper.Pow(previousDeriv, 2);
             }
 
-            return buffer;
+            clip[i] = rms != 0 ? MathHelper.MinOrMax(2 * deriv[i] / MathHelper.Sqrt(rms / length3), 1, -1) : 0;
+            output[i] = clip[i] + (i >= 1 ? clip[i - 1] : 0) + (i >= 2 ? clip[i - 2] : 0) + (i >= 3 ? clip[i - 3] : 0);
         }
-        finally
-        {
-            pool.Return(z3Array);
-        }
+
+        return buffer;
     }
 
     /// <summary>
@@ -15666,48 +15620,33 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double delta = 0.1)
+    internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // V1 Algorithm: Bandpass filter followed by MA smoothing
-        // 1. Compute bandpass filter coefficients from length and delta
-        // 2. Calculate recursive bandpass: bp = 0.5*(1-alpha)*(value-prevValue2) + beta*(1+alpha)*prevBp1 - alpha*prevBp2
-        // 3. Apply MA over 2*length to get trend (primary output)
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
         length = Math.Max(length, 1);
 
-        // Calculate bandpass filter coefficients
-        double twoPiOverLen = 2.0 * Math.PI / length;
-        double fourPiDeltaOverLen = 4.0 * Math.PI * delta / length;
-        double beta = Math.Cos(Math.Min(Math.Max(twoPiOverLen, 0.01), 0.99));
-        double gamma = 1.0 / Math.Cos(Math.Min(Math.Max(fourPiDeltaOverLen, 0.01), 0.99));
-        double alpha = Math.Min(Math.Max(gamma - Math.Sqrt((gamma * gamma) - 1), 0.01), 0.99);
+        var beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / length, 0.99, 0.01));
+        var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
 
-        // Calculate bandpass filter
-        var bpBuffer = context.Rent(count);
-        var bpSpan = bpBuffer.WritableSpan;
-        double halfOneMinusAlpha = 0.5 * (1 - alpha);
-        double betaOnePlusAlpha = beta * (1 + alpha);
-
-        for (int i = 0; i < count; i++)
+        using var bandPass = context.Rent(count);
+        var bp = bandPass.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            double currentValue = close[i];
-            double prevValue = i >= 2 ? close[i - 2] : 0;
-            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
-            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
+            var previousValue = i >= 2 ? input[i - 2] : 0;
+            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
+            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
 
-            // Bandpass formula with MinPastValues logic (use 0 for early bars)
-            double valueDiff = i >= 2 ? (currentValue - prevValue) : 0;
-            bpSpan[i] = (halfOneMinusAlpha * valueDiff) + (betaOnePlusAlpha * prevBp1) - (alpha * prevBp2);
+            bp[i] = (0.5 * (1 - alpha) * CalculationsHelper.MinPastValues(i, 2, input[i] - previousValue)) +
+                (beta * (1 + alpha) * previousBp1) - (alpha * previousBp2);
         }
 
-        // Apply MA over 2*length to get trend (primary output)
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(bpBuffer.Span, result.WritableSpan, length * 2);
-
-        bpBuffer.Dispose();
-        return result;
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length * 2, bandPass.Span, buffer.WritableSpan);
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
