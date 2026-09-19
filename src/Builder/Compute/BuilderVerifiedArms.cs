@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder.Specs;
+﻿using OoplesFinance.StockIndicators.Builder.Specs;
 
 namespace OoplesFinance.StockIndicators.Builder.Compute;
 
@@ -21,6 +21,10 @@ internal static class BuilderVerifiedArms
     public static readonly HashSet<Type> Arms = new()
     {
         typeof(AbsolutePriceOscillatorSpecOptions),
+        typeof(AutoLineSpecOptions),
+        typeof(AutoLineWithDriftSpecOptions),
+        typeof(UltimateMovingAverageSpecOptions),
+        typeof(VariableLengthMovingAverageSpecOptions),
         typeof(AccumulationDistributionLineSpecOptions),
         typeof(AdlSpecOptions),
         typeof(ApoSpecOptions),
