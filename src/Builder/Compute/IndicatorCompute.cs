@@ -2635,10 +2635,37 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeHistoricalVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
+        // CalculateHistoricalVolatility is the annualised standard deviation of the log return of the chained
+        // series. It publishes nothing before bar length, because the first bar has no prior close and its log
+        // return is a fabricated zero that would dilute any window still holding it. The moving average the
+        // batch takes feeds only its signal, so maType cannot reach this series.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        VolatilityCore.HistoricalVolatility(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var annualSqrt = MathHelper.Sqrt(365);
+
+        using var logReturn = context.Rent(count);
+        var logReturns = logReturn.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var ratio = prevValue != 0 ? input[i] / prevValue : 0;
+            logReturns[i] = ratio > 0 ? Math.Log(ratio) : 0;
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(logReturn.Span, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = i >= length ? 100 * stdDev[i] * annualSqrt : 0;
+        }
+
         return buffer;
     }
 
@@ -3681,11 +3708,50 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Volatility Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRelativeVolatilityIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRelativeVolatilityIndexFast(StockData data, ComputeContext context, int length = 10,
+        int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RelativeVolatilityIndex(close, buffer.WritableSpan, length);
+        // CalculateRelativeVolatilityIndexV1 is the relative strength index with the windowed standard
+        // deviation of the chained series in place of the price change: the deviation is booked as upside on a
+        // rising bar and downside on a falling one, each side is smoothed over smoothLength, and the ratio is
+        // scaled to 0..100. OscillatorCore.RelativeVolatilityIndex took the close and used one length for both.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        using var upside = context.Rent(count);
+        using var downside = context.Rent(count);
+        var up = upside.WritableSpan;
+        var down = downside.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            up[i] = input[i] > prevValue ? stdDev[i] : 0;
+            down[i] = input[i] < prevValue ? stdDev[i] : 0;
+        }
+
+        using var upAverage = context.Rent(count);
+        using var downAverage = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, upside.Span, upAverage.WritableSpan);
+        MovingAverage(data, maType, smoothLength, downside.Span, downAverage.WritableSpan);
+        var avgUpSpan = upAverage.Span;
+        var avgDownSpan = downAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var avgUp = avgUpSpan[i];
+            var avgDown = avgDownSpan[i];
+            var rs = avgDown != 0 ? avgUp / avgDown : 0;
+            output[i] = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        }
+
         return buffer;
     }
 
@@ -4630,10 +4696,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRviVolatilityFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.RelativeVolatilityIndex(close, buffer.WritableSpan, length, 10);
-        return buffer;
+        // RviVolatilitySpecOptions is an alias of RelativeVolatilityIndexSpecOptions - both bind
+        // IndicatorName.RelativeVolatilityIndexV1 and both carry only a length - so it delegates rather than
+        // keeping a second implementation that can drift away from the first.
+        return ComputeRelativeVolatilityIndexFast(data, context, length);
     }
 
     /// <summary>
@@ -6454,11 +6520,40 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTrendPersistenceRateFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeTrendPersistenceRateFast(StockData data, ComputeContext context, int length = 20,
+        int smoothLength = 5, double mult = 0.01, double threshold = 1,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TrendPersistenceRate(close, buffer.WritableSpan, length);
+        // CalculateTrendPersistenceRate counts how many of the last length bars the moving average of the
+        // chained series advanced by more than threshold against how many it fell by as much, and scales the
+        // net to 0..100. The slope it counts is the one between the two bars BEFORE the current one, so the
+        // current bar's average never enters its own reading.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, input, average.WritableSpan);
+        var ma = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var risingSumWindow = new RollingSum();
+        var fallingSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevMa1 = i >= 1 ? ma[i - 1] : 0;
+            var prevMa2 = i >= 2 ? ma[i - 2] : 0;
+            var diff = (prevMa1 - prevMa2) / mult;
+
+            risingSumWindow.Add(diff > threshold ? 1 : 0);
+            fallingSumWindow.Add(diff < -threshold ? 1 : 0);
+
+            output[i] = length != 0
+                ? Math.Abs(100 * (risingSumWindow.Sum(length) - fallingSumWindow.Sum(length)) / length)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -13077,10 +13172,34 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWellRoundedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateWellRoundedMovingAverage runs two integrators over the previous bar's residuals - one from
+        // the output itself, one from an exponential average of the output - and publishes an almost
+        // unsmoothed exponential average of their sum, since CalculateEMA at length 1 clamps its weight to
+        // 0.99. MovingAverageCore.WellRoundedMovingAverage implemented a different average entirely.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.WellRoundedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var alpha = (double)2 / (length + 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double a = 0, b = 0, y = 0, yEma = 0, previousSrcY = 0, previousSrcEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            a += alpha * previousSrcY;
+            b += alpha * previousSrcEma;
+
+            y = CalculationsHelper.CalculateEMA(a + b, y, 1);
+            yEma = CalculationsHelper.CalculateEMA(y, yEma, length);
+
+            previousSrcY = input[i] - y;
+            previousSrcEma = input[i] - yEma;
+            output[i] = y;
+        }
+
         return buffer;
     }
 
@@ -16952,67 +17071,40 @@ internal static partial class IndicatorCompute
     /// Computes Stiffness Indicator using zero-allocation fast path.
     /// Measures how many closes are above MA - 0.2*StdDev over a period.
     /// </summary>
-    internal static ComputeBuffer ComputeStiffnessIndicatorFast(StockData data, ComputeContext context, int length1 = 100, int length2 = 60, int smoothingLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeStiffnessIndicatorFast(StockData data, ComputeContext context, int length1 = 100,
+        int length2 = 60, int smoothingLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var maArray = pool.Rent(count);
-        var stdDevArray = pool.Rent(count);
-        var stiffnessArray = pool.Rent(count);
+        // CalculateStiffnessIndicator is the percentage of the last length2 closes of the chained series lying
+        // above its moving average less a fifth of the windowed standard deviation. The final smoothing is
+        // always exponential, whatever maType asks for, and maType reaches only the first average - the switch
+        // this replaced honoured two types in both places and silently fell back to a simple average for the
+        // rest.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
 
-        try
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length1, input, average.WritableSpan);
+        var sma = average.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length1);
+        var stdDev = deviation.Span;
+
+        using var stiffValue = context.Rent(count);
+        var stiff = stiffValue.WritableSpan;
+        var aboveSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
         {
-            var maSpan = maArray.AsSpan(0, count);
-            var stdDevSpan = stdDevArray.AsSpan(0, count);
-            var stiffnessSpan = stiffnessArray.AsSpan(0, count);
-
-            // Calculate MA of close prices
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length1);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length1);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length1);
-                    break;
-            }
-
-            // Calculate standard deviation
-            VolatilityCore.StandardDeviation(close, stdDevSpan, length1);
-
-            // Calculate raw stiffness
-            ReadOnlySpan<double> maReadOnly = maSpan;
-            ReadOnlySpan<double> stdDevReadOnly = stdDevSpan;
-            VolatilityCore.StiffnessIndicator(close, maReadOnly, stdDevReadOnly, stiffnessSpan, length2);
-
-            // Smooth with moving average
-            ReadOnlySpan<double> stiffnessReadOnly = stiffnessSpan;
-            var buffer = context.Rent(count);
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(stiffnessReadOnly, buffer.WritableSpan, smoothingLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(stiffnessReadOnly, buffer.WritableSpan, smoothingLength);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(stiffnessReadOnly, buffer.WritableSpan, smoothingLength);
-                    break;
-            }
-
-            return buffer;
+            var bound = sma[i] - (0.2 * stdDev[i]);
+            aboveSumWindow.Add(input[i] > bound ? 1 : 0);
+            stiff[i] = length2 != 0 ? aboveSumWindow.Sum(length2) * 100 / length2 : 0;
         }
-        finally
-        {
-            pool.Return(maArray);
-            pool.Return(stdDevArray);
-            pool.Return(stiffnessArray);
-        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, smoothingLength, stiffValue.Span, buffer.WritableSpan);
+        return buffer;
     }
 
     /// <summary>
