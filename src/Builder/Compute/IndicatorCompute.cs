@@ -1527,7 +1527,9 @@ internal static partial class IndicatorCompute
                 etsiv2.Length5, etsiv2.Length6, etsiv2.MaType),
             SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
                 smie.SlowLength, smie.MaType),
-            InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength, ii.SignalLength, ii.MaType),
+            InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength,
+                ii.MfiLength, ii.BbLength, ii.CciLength, ii.DpoLength, ii.RocLength, ii.RsiLength, ii.StochLength,
+                ii.StochKLength, ii.StochDLength, ii.SmaLength, ii.StdDevMult, ii.Divisor),
             SqueezeMomentumIndicatorSpecOptions smi => ComputeSqueezeMomentumIndicatorFast(data, context, smi.Length, smi.MaType),
             StochasticConnorsRelativeStrengthIndexSpecOptions scrsi => ComputeStochasticConnorsRsiFast(data, context, scrsi.Length1, scrsi.Length2, scrsi.Length3, scrsi.SmoothLength1, scrsi.SmoothLength2, scrsi.MaType),
 
@@ -26498,14 +26500,119 @@ internal static partial class IndicatorCompute
         return ComputeTrueStrengthIndexFast(data, context, fastLength, slowLength, maType);
     }
 
-    internal static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12,
+        int slowLength = 26, int mfiLength = 20, int bbLength = 20, int cciLength = 14, int dpoLength = 18,
+        int rocLength = 10, int rsiLength = 14, int stochLength = 14, int stochKLength = 1, int stochDLength = 3,
+        int smaLength = 10, double stdDevMult = 2, double divisor = 10000)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.InsyncIndex(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength, signalLength);
+        // CalculateInsyncIndex scores eleven conditions across nine other indicators and sums them onto 50.
+        // Every component is one of this file's own arms, and the batch restores the caller's series before
+        // each sub-indicator so all of them measure that same series. OscillatorCore.InsyncIndex took the raw
+        // price spans and read none of the lengths past signalLength, so nine of the eleven scores were
+        // measured against something else entirely.
+        //
+        // The batch declares a maType it never reads, so no average type reaches any component: each
+        // sub-indicator takes its own default and the four windows below are plain means. The two detrended
+        // scores are the only ones that are not read on the bar they are computed - they enter the sum
+        // smaLength bars later - so they are the only ones that need a buffer.
+        //
+        // The batch's signalLength and emoLength are not arm parameters: the first reaches only the signal
+        // line of the convergence divergence, the second only the signal line of the ease of movement, and
+        // this index reads neither of those series.
+        var count = data.Count;
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+
+        using var relativeStrength = ComputeRsiFast(data, context, rsiLength);
+        using var commodityChannel = ComputeCciFast(data, context, cciLength);
+        using var moneyFlow = ComputeMoneyFlowIndexFast(data, context, mfiLength);
+        using var macdLine = ComputeMacdLineFast(data, context, fastLength, slowLength);
+        using var percentB = ComputeBollingerBandsPercentBFast(data, context, bbLength, stdDevMult);
+        using var detrended = ComputeDetrendedPriceOscillatorFast(data, context, dpoLength);
+        using var rateOfChange = ComputeRateOfChangeFast(data, context, rocLength);
+        using var easeOfMovement = ComputeEaseOfMovementFast(data, context, divisor);
+
+        // CalculateStochasticOscillator publishes FastD as its raw stochastic smoothed once and SlowD as that
+        // smoothed again, both by the simple average its own signature defaults to.
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), stochLength, fastK.WritableSpan);
+        using var fastDValues = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, stochKLength, fastK.Span, fastDValues.WritableSpan);
+        using var slowDValues = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, stochDLength, fastDValues.Span, slowDValues.WritableSpan);
+
+        using var buyScores = context.Rent(count);
+        using var sellScores = context.Rent(count);
+        var detrendedBuy = buyScores.WritableSpan;
+        var detrendedSell = sellScores.WritableSpan;
+
+        var rsi = relativeStrength.Span;
+        var cci = commodityChannel.Span;
+        var mfi = moneyFlow.Span;
+        var macd = macdLine.Span;
+        var percent = percentB.Span;
+        var dpo = detrended.Span;
+        var roc = rateOfChange.Span;
+        var emv = easeOfMovement.Span;
+        var fastD = fastDValues.Span;
+        var slowD = slowDValues.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var easeWindow = new RollingSum();
+        var macdWindow = new RollingSum();
+        var detrendedWindow = new RollingSum();
+        var changeWindow = new RollingSum();
+
+        for (var i = 0; i < count; i++)
+        {
+            var percentBand = percent[i];
+            double bolinsll = percentBand < 0.05 ? -5 : percentBand > 0.95 ? 5 : 0;
+
+            var channel = cci[i];
+            double cciins = channel > 100 ? 5 : channel < -100 ? -5 : 0;
+
+            var ease = emv[i];
+            easeWindow.Add(ease);
+            var easeAverage = easeWindow.Average(smaLength);
+            double emvinsb = ease - easeAverage < 0 ? easeAverage < 0 ? -5 : 0 : easeAverage > 0 ? 5 : 0;
+
+            var convergence = macd[i];
+            macdWindow.Add(convergence);
+            var macdAverage = macdWindow.Average(smaLength);
+            double macdinsb = convergence - macdAverage < 0 ? macdAverage < 0 ? -5 : 0 : macdAverage > 0 ? 5 : 0;
+
+            var flow = mfi[i];
+            double mfiins = flow > 80 ? 5 : flow < 20 ? -5 : 0;
+
+            var detrendedValue = dpo[i];
+            detrendedWindow.Add(detrendedValue);
+            var detrendedAverage = detrendedWindow.Average(smaLength);
+            var detrendedDelta = detrendedValue - detrendedAverage;
+            detrendedBuy[i] = detrendedDelta < 0 ? detrendedAverage < 0 ? -5 : 0 : detrendedAverage > 0 ? 5 : 0;
+            detrendedSell[i] = detrendedDelta > 0 ? detrendedAverage > 0 ? 5 : 0 : detrendedAverage < 0 ? -5 : 0;
+
+            var change = roc[i];
+            changeWindow.Add(change);
+            var changeAverage = changeWindow.Average(smaLength);
+            double rocinsb = change - changeAverage < 0 ? changeAverage < 0 ? -5 : 0 : changeAverage > 0 ? 5 : 0;
+
+            var strength = rsi[i];
+            double rsiins = strength > 70 ? 5 : strength < 30 ? -5 : 0;
+
+            var slow = slowD[i];
+            double stopdins = slow > 80 ? 5 : slow < 20 ? -5 : 0;
+
+            var fast = fastD[i];
+            double stopkins = fast > 80 ? 5 : fast < 20 ? -5 : 0;
+
+            var prevSell = i >= smaLength ? detrendedSell[i - smaLength] : 0;
+            var prevBuy = i >= smaLength ? detrendedBuy[i - smaLength] : 0;
+
+            output[i] = 50 + cciins + bolinsll + rsiins + stopkins + stopdins + mfiins + emvinsb + rocinsb +
+                prevSell + prevBuy + macdinsb;
+        }
+
         return buffer;
     }
 

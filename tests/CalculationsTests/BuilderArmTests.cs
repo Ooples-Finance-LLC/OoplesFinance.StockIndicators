@@ -245,7 +245,6 @@ public sealed class BuilderArmTests : GlobalTestData
     /// </remarks>
     private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
     {
-        "InsyncIndexSpecOptions",
         "PivotPointAverageSpecOptions",
         "TechnicalRatingsSpecOptions",
     };
