@@ -99,7 +99,7 @@ internal static partial class IndicatorCompute
             PpoSpecOptions ppo => ComputePpoFast(data, context, ppo.FastLength, ppo.SlowLength),
             ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength),
             UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
-            TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength),
+            TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType),
             StochRsiSpecOptions srsi => ComputeStochasticRsiFast(data, context, srsi.RsiLength, maType: srsi.MaType,
                 stochLength: srsi.StochLength),
             AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
@@ -438,7 +438,8 @@ internal static partial class IndicatorCompute
             BilateralStochasticOscillatorSpecOptions bso => ComputeBilateralStochasticOscillatorFast(data, context, bso.Length,
                 bso.MaType),
             FisherTransformStochasticOscillatorSpecOptions ftso => ComputeFisherTransformStochasticOscillatorFast(data, context, ftso.Length),
-            StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length),
+            StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length,
+                maType: sco.MaType),
             FastSlowStochasticOscillatorSpecOptions fsso => ComputeFastSlowStochasticOscillatorFast(data, context, fsso.Length),
             DiNapoliPreferredStochasticOscillatorSpecOptions dnpso => ComputeDiNapoliPreferredStochasticOscillatorFast(data, context, dnpso.Length),
             DMIStochasticSpecOptions dmis => ComputeDMIStochasticFast(data, context, dmis.Length, dmis.MaType),
@@ -990,7 +991,8 @@ internal static partial class IndicatorCompute
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
             RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length),
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length, tma2.MaType),
-            TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2),
+            TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2,
+                tsi2.MaType),
 
             // Batch 6 - Additional Oscillators with Core methods
             ChandeQuickStickSpecOptions cqs => ComputeChandeQuickStickFast(data, context, cqs.Length, cqs.MaType),
@@ -1320,7 +1322,8 @@ internal static partial class IndicatorCompute
             ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
             ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1, etsiv1.Length2, etsiv1.Length3, etsiv1.SignalLength, etsiv1.MaType),
             ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length1, etsiv2.Length2, etsiv2.Length3, etsiv2.SignalLength, etsiv2.MaType),
-            SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength, smie.SlowLength, smie.SignalLength, smie.MaType),
+            SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
+                smie.SlowLength, smie.MaType),
             InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength, ii.SignalLength, ii.MaType),
             SqueezeMomentumIndicatorSpecOptions smi => ComputeSqueezeMomentumIndicatorFast(data, context, smi.Length, smi.MaType),
             StochasticConnorsRelativeStrengthIndexSpecOptions scrsi => ComputeStochasticConnorsRsiFast(data, context, scrsi.Length1, scrsi.Length2, scrsi.Length3, scrsi.SmoothLength1, scrsi.SmoothLength2, scrsi.MaType),
@@ -1949,13 +1952,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Strength Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTsiFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
+    internal static ComputeBuffer ComputeTsiFast(StockData data, ComputeContext context, int longLength = 25,
+        int shortLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.TrueStrengthIndex(inputSpan, buffer.WritableSpan, longLength, shortLength);
-        return buffer;
+        // TsiSpecOptions is an alias of TrueStrengthIndexSpecOptions - both bind
+        // IndicatorName.TrueStrengthIndex, and its LongLength and ShortLength are that batch's length1 and
+        // length2 - so it delegates rather than keeping a second implementation that can drift away.
+        return ComputeTrueStrengthIndexFast(data, context, longLength, shortLength, maType);
     }
 
     /// <summary>
@@ -8690,13 +8693,47 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Custom Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticCustomOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStochasticCustomOscillatorFast(StockData data, ComputeContext context, int length1 = 7,
+        int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticCustomOscillator(high, low, close, buffer.WritableSpan, length, 3, 3);
+        // CalculateStochasticCustomOscillator smooths the numerator and the denominator of the raw stochastic
+        // separately before dividing, which is not the same as smoothing the ratio. Its Sco key is that
+        // reading; the further average over length3 is the Signal series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        using var numerator = context.Rent(count);
+        using var denominator = context.Rent(count);
+        var num = numerator.WritableSpan;
+        var denom = denominator.WritableSpan;
+
+        var highWindow = new RollingMinMax(length1);
+        var lowWindow = new RollingMinMax(length1);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+            num[i] = input[i] - lowWindow.Min;
+            denom[i] = highWindow.Max - lowWindow.Min;
+        }
+
+        using var numeratorAverage = context.Rent(count);
+        using var denominatorAverage = context.Rent(count);
+        MovingAverage(data, maType, length2, numerator.Span, numeratorAverage.WritableSpan);
+        MovingAverage(data, maType, length2, denominator.Span, denominatorAverage.WritableSpan);
+        var numSma = numeratorAverage.Span;
+        var denomSma = denominatorAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = denomSma[i] != 0 ? MathHelper.MinOrMax(numSma[i] / denomSma[i] * 100, 100, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -16224,12 +16261,49 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes True Strength Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTrueStrengthIndexFast(StockData data, ComputeContext context, int longLength = 25, int shortLength = 13)
+    internal static ComputeBuffer ComputeTrueStrengthIndexFast(StockData data, ComputeContext context, int length1 = 25,
+        int length2 = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateTrueStrengthIndex double-smooths the bar-to-bar change and its absolute value over length1
+        // then length2, and publishes their ratio scaled to -100..100. Its Tsi key is that ratio; the further
+        // average over signalLength is the Signal series, so signalLength cannot reach this one.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.TrueStrengthIndex(inputSpan, buffer.WritableSpan, longLength, shortLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var change = context.Rent(count);
+        using var absoluteChange = context.Rent(count);
+        var pc = change.WritableSpan;
+        var absPc = absoluteChange.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            pc[i] = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue);
+            absPc[i] = Math.Abs(pc[i]);
+        }
+
+        using var firstSmoothing = context.Rent(count);
+        using var secondSmoothing = context.Rent(count);
+        MovingAverage(data, maType, length1, change.Span, firstSmoothing.WritableSpan);
+        MovingAverage(data, maType, length2, firstSmoothing.Span, secondSmoothing.WritableSpan);
+
+        using var absoluteFirstSmoothing = context.Rent(count);
+        using var absoluteSecondSmoothing = context.Rent(count);
+        MovingAverage(data, maType, length1, absoluteChange.Span, absoluteFirstSmoothing.WritableSpan);
+        MovingAverage(data, maType, length2, absoluteFirstSmoothing.Span, absoluteSecondSmoothing.WritableSpan);
+
+        var smooth2Pc = secondSmoothing.Span;
+        var absSmooth2Pc = absoluteSecondSmoothing.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = absSmooth2Pc[i] != 0
+                ? MathHelper.MinOrMax(100 * smooth2Pc[i] / absSmooth2Pc[i], 100, -100)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -21415,14 +21489,15 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5, int slowLength = 20, int signalLength = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSMIErgodicIndicatorFast(StockData data, ComputeContext context, int fastLength = 5,
+        int slowLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DoubleSmoothedStochastic(high, low, close, buffer.WritableSpan, slowLength, fastLength);
-        return buffer;
+        // Blau's ergodic SMI is the same double-smoothed momentum ratio as the true strength index, smoothed
+        // over fastLength and then slowLength, so it delegates rather than repeating the arithmetic. It is a
+        // momentum ratio and not a stochastic at all, which is where
+        // OscillatorCore.DoubleSmoothedStochastic went wrong. Its Smi key is the unsmoothed ratio, so
+        // signalLength reaches only the Signal series.
+        return ComputeTrueStrengthIndexFast(data, context, fastLength, slowLength, maType);
     }
 
     internal static ComputeBuffer ComputeInsyncIndexFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
