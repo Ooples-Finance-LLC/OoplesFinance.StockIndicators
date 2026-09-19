@@ -83,7 +83,7 @@ internal static partial class IndicatorCompute
             DemaSpecOptions dema => ComputeDemaFast(data, context, dema.Length),
             TemaSpecOptions tema => ComputeTemaFast(data, context, tema.Length),
             HmaSpecOptions hma => ComputeHmaFast(data, context, hma.Length),
-            TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length),
+            TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length, tma.MaType),
             WwmaSpecOptions wwma => ComputeWwmaFast(data, context, wwma.Length),
             LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length),
             KamaSpecOptions kama => ComputeKamaFast(data, context, kama.Length),
@@ -970,13 +970,13 @@ internal static partial class IndicatorCompute
             OnBalanceVolumeSpecOptions obv2 => ComputeOnBalanceVolumeFast(data, context),
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
             PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
-            PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context),
+            PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue),
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
             PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
             RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length),
-            TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length),
+            TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length, tma2.MaType),
             TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2),
 
             // Batch 6 - Additional Oscillators with Core methods
@@ -984,7 +984,7 @@ internal static partial class IndicatorCompute
             // Length1 and MaType only smooth the Signal and Histogram lines CalculateDeltaMovingAverage
             // publishes beside the delta, and this spec is bound to the delta itself.
             DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length2),
-            FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length),
+            FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType),
             EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.SignalLength),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
             StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length,
@@ -995,7 +995,8 @@ internal static partial class IndicatorCompute
             CCTStochRSISpecOptions cctsr => ComputeCCTStochRelativeStrengthIndexFast(data, context, cctsr.Length2,
                 cctsr.Length3, cctsr.Length5, cctsr.MaType),
             InertiaIndicatorSpecOptions inertia => ComputeInertiaFast(data, context, inertia.Length, maType: inertia.MaType),
-            PremierStochasticOscillatorSpecOptions pso => ComputePremierStochasticFast(data, context, pso.Length, pso.SmoothLength),
+            PremierStochasticOscillatorSpecOptions pso => ComputePremierStochasticFast(data, context, pso.Length, pso.SmoothLength,
+                pso.MaType),
             BullPowerIndicatorSpecOptions bpi => ComputeBullPowerFast(data, context, bpi.Length),
             BearPowerIndicatorSpecOptions beari => ComputeBearPowerFast(data, context, beari.Length),
             MomentumOscillatorSpecOptions mosc => ComputeMomentumOscillatorFast(data, context, mosc.Length),
@@ -1057,7 +1058,7 @@ internal static partial class IndicatorCompute
             // change the bound series. Length2 is not used by the clip indicator's batch at all.
             EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length),
             EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3),
-            ElderMarketThermometerSpecOptions emt => ComputeElderMarketThermometerFast(data, context, emt.Length, emt.MaType),
+            ElderMarketThermometerSpecOptions => ComputeElderMarketThermometerFast(data, context),
             EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.SignalLength, ervi.MaType),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, d2l.FastLength, d2l.SlowLength, d2l.MaType),
@@ -1463,13 +1464,20 @@ internal static partial class IndicatorCompute
     /// Computes Triangular Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeTmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTmaFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateTriangularMovingAverage runs the chosen average twice over the chained series - the second
+        // pass over the output of the first - which is what gives the combined weights their triangular shape.
+        // The arm this replaced honoured only one pass and only one average type.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.TriangularMovingAverage(inputSpan, buffer.WritableSpan, length);
+        using var firstPass = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), firstPass.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, firstPass.Span, buffer.WritableSpan);
 
         return buffer;
     }
@@ -4733,19 +4741,6 @@ internal static partial class IndicatorCompute
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
         var buffer = context.Rent(data.Count);
         OscillatorCore.RahulMohindarOscillator(close, buffer.WritableSpan, length);
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Premier Stochastic Oscillator using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8)
-    {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PremierStochastic(high, low, close, buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -13878,19 +13873,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Positive Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
+        // CalculatePositiveVolumeIndex compounds the percent change of the chained series on every bar whose
+        // volume rose, and holds its previous level otherwise. Its length and maType feed only the unpublished
+        // signal average. The arm this replaced took the raw close from the ticker list and ignored chaining.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            var prevClose = i >= 1 ? input[i - 1] : 0;
+            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
+            var prevPvi = i >= 1 ? output[i - 1] : initialValue;
+            var pctChg = CalculationsHelper.CalculatePercentChange(input[i], prevClose);
+
+            output[i] = volumes[i] <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
         }
-        var buffer = context.Rent(count);
-        VolumeCore.PositiveVolumeIndex(close, volume, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -13928,13 +13932,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Triangular Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTriangularMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTriangularMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.TriangularMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // TriangularMovingAverageSpecOptions and TmaSpecOptions are the same indicator under two names.
+        return ComputeTmaFast(data, context, length, maType);
     }
 
     /// <summary>
@@ -14005,12 +14007,26 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Folded RSI using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFoldedRsiFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFoldedRsiFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.FoldedRelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
+        // CalculateFoldedRelativeStrengthIndex folds the relative strength index about its 50 midline - so
+        // overbought and oversold both read as strength - and publishes the running sum of that folded series
+        // over the window, not its average.
+        var count = (data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues).Count;
+
+        using var relativeStrength = ComputeRsiFast(data, context, length, maType);
+        var rsi = relativeStrength.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var absRsiSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            absRsiSum.Add(2 * Math.Abs(rsi[i] - 50));
+            output[i] = absRsiSum.Sum(length);
+        }
+
         return buffer;
     }
 
@@ -14098,21 +14114,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Premier Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25)
+    internal static ComputeBuffer ComputePremierStochasticFast(StockData data, ComputeContext context, int length = 8, int smoothLength = 25,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        // CalculatePremierStochasticOscillator rescales the raw stochastic about its midline, smooths that
+        // twice over the square root of smoothLength, and maps the result through the hyperbolic tangent so it
+        // is bounded to [-1, 1]. The arm this replaced used neither the chained series nor either smoothing.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        var len = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(smoothLength)));
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, fastK.WritableSpan);
+
+        using var normalized = context.Rent(count);
+        var nsk = normalized.WritableSpan;
+        var stochastic = fastK.Span;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            nsk[i] = 0.1 * (stochastic[i] - 50);
         }
+
+        using var firstPass = context.Rent(count);
+        MovingAverage(data, maType, len, normalized.Span, firstPass.WritableSpan);
+
+        using var secondPass = context.Rent(count);
+        MovingAverage(data, maType, len, firstPass.Span, secondPass.WritableSpan);
+        var ss = secondPass.Span;
+
         var buffer = context.Rent(count);
-        OscillatorCore.PremierStochastic(high, low, close, buffer.WritableSpan, length, smoothLength);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var expss = MathHelper.Exp(ss[i]);
+            output[i] = expss + 1 != 0 ? MathHelper.MinOrMax((expss - 1) / (expss + 1), 1, -1) : 0;
+        }
+
         return buffer;
     }
 
@@ -14226,12 +14263,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stochastic Fast Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14,
-        int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateStochasticFastOscillator republishes the stochastic oscillator's FastD - the raw stochastic
-        // smoothed once - over the chained series. The arm this replaced rebuilt the price spans from the
-        // ticker list and smoothed a stochastic of the close, which is a different series on a different input.
+        // CalculateStochasticFastOscillator publishes the stochastic FastD - the raw FastK smoothed once by
+        // smoothLength - as its primary series. The arm this replaced rebuilt the price spans from the ticker
+        // list, ignoring the chained series, and always smoothed exponentially whatever the type asked for.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
 
@@ -14702,51 +14739,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Market Thermometer with signal line.
     /// </summary>
-    internal static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context, int length = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context)
     {
+        // CalculateElderMarketThermometer publishes the raw thermometer: zero on an inside bar, and otherwise
+        // whichever of the two range extensions was the larger. Its length and maType average that series into
+        // an unpublished signal only, so the arm takes neither.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
 
-        var pool = ArrayPool<double>.Shared;
-        var emtArray = pool.Rent(count);
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var emtSpan = emtArray.AsSpan(0, count);
-            OscillatorCore.ElderMarketThermometer(highSpan, lowSpan, emtSpan);
-            ReadOnlySpan<double> emtReadOnly = emtSpan;
+            var currentHigh = highs[i];
+            var currentLow = lows[i];
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var prevLow = i >= 1 ? lows[i - 1] : 0;
 
-            var buffer = context.Rent(count);
-
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.DoubleExponentialMovingAverage:
-                    MovingAverageCore.DoubleExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.TripleExponentialMovingAverage:
-                    MovingAverageCore.TripleExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-                default:
-                    // Fallback to EMA for unsupported types
-                    MovingAverageCore.ExponentialMovingAverage(emtReadOnly, buffer.WritableSpan, length);
-                    break;
-            }
-
-            return buffer;
+            output[i] = currentHigh < prevHigh && currentLow > prevLow ? 0
+                : currentHigh - prevHigh > prevLow - currentLow ? Math.Abs(currentHigh - prevHigh)
+                : Math.Abs(prevLow - currentLow);
         }
-        finally
-        {
-            pool.Return(emtArray);
-        }
+
+        return buffer;
     }
 
     /// <summary>
