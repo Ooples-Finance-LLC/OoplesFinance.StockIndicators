@@ -435,7 +435,7 @@ internal static partial class IndicatorCompute
             // Batch 5 - Trend/Activator indicators
             RepulseSpecOptions rep => ComputeRepulseFast(data, context, rep.Length, rep.MaType),
             GannHiLoActivatorSpecOptions ghla => ComputeGannHiLoActivatorFast(data, context, ghla.Length, ghla.MaType),
-            HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length),
+            HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length, ht.MaType),
 
             // Batch 6 - Chande oscillators
             // Length is declared obsolete because ChandeMomentumOscillatorAbsoluteAverage has no parameter
@@ -927,7 +927,14 @@ internal static partial class IndicatorCompute
             TurboScalerSpecOptions ts => ComputeTurboScalerFast(data, context, ts.Length, ts.MaType),
             TTMScalperIndicatorSpecOptions _ => ComputeTTMScalperIndicatorFast(data, context),
             StrengthOfMovementSpecOptions som => ComputeStrengthOfMovementFast(data, context, som.Length1, som.Length2, som.MaType),
-            ValueChartIndicatorSpecOptions vci => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.NumAtrs),
+            ValueChartIndicatorSpecOptions vci => spec.OutputKey switch
+            {
+                null or "vClose" => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.MaType),
+                "vOpen" => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.MaType, CandleSeries.Open),
+                "vHigh" => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.MaType, CandleSeries.High),
+                "vLow" => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.MaType, CandleSeries.Low),
+                _ => null
+            },
             SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length, sgi.MaType),
             TFSTetherLineIndicatorSpecOptions tfs => ComputeTFSTetherLineIndicatorFast(data, context, tfs.Length),
             EhlersSimpleCycleIndicatorSpecOptions esci => ComputeEhlersSimpleCycleIndicatorFast(data, context, esci.Alpha),
@@ -5621,13 +5628,94 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes HalfTrend indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeHalfTrendFast(StockData data, ComputeContext context, int length = 2)
+    internal static ComputeBuffer ComputeHalfTrendFast(StockData data, ComputeContext context, int length = 2,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.HalfTrend(high, low, close, buffer.WritableSpan, length);
+        // CalculateHalfTrend flips direction only from inside its own `prevNextTrend == 1` branch, and
+        // nextTrend starts at zero, so in the batch the flip never fires and the published series reduces to a
+        // running maximum of the previous bar's low. The whole state machine is reproduced here rather than
+        // collapsed to that maximum: the batch is the authority, and writing what it actually evaluates keeps
+        // the arm honest if the batch's seeding is ever corrected. The batch's average true range reaches only
+        // its arrow markers, which are signals rather than published series, so it is not computed here.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        using var highAverage = context.Rent(count);
+        using var lowAverage = context.Rent(count);
+        MovingAverage(data, maType, length, highs, highAverage.WritableSpan);
+        MovingAverage(data, maType, length, lows, lowAverage.WritableSpan);
+        var highMas = highAverage.Span;
+        var lowMas = lowAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        var previousTrend = 0d;
+        var previousNextTrend = 0d;
+        var previousUp = 0d;
+        var previousDown = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var previousHigh = i >= 1 ? highs[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var maxLow = i >= 1 ? previousLow : lowest;
+            var minHigh = i >= 1 ? previousHigh : highest;
+
+            var trend = 0d;
+            var nextTrend = 0d;
+            if (previousNextTrend == 1)
+            {
+                maxLow = Math.Max(lowest, maxLow);
+                if (highMas[i] < maxLow && input[i] < (previousLow != 0 ? previousLow : lowest))
+                {
+                    trend = 1;
+                    nextTrend = 0;
+                    minHigh = highest;
+                }
+                else
+                {
+                    minHigh = Math.Min(highest, minHigh);
+                    if (lowMas[i] > minHigh && input[i] > (previousHigh != 0 ? previousHigh : highest))
+                    {
+                        trend = 0;
+                        nextTrend = 1;
+                        maxLow = lowest;
+                    }
+                }
+            }
+
+            var up = 0d;
+            var down = 0d;
+            if (trend == 0)
+            {
+                up = previousTrend != 0 ? previousDown : Math.Max(maxLow, previousUp);
+            }
+            else
+            {
+                down = previousTrend != 1 ? previousUp : Math.Min(minHigh, previousDown);
+            }
+
+            output[i] = trend == 0 ? up : down;
+            previousTrend = trend;
+            previousNextTrend = nextTrend;
+            previousUp = up;
+            previousDown = down;
+        }
+
         return buffer;
     }
 
@@ -17144,14 +17232,61 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Value Chart Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5, int numAtrs = 8)
+    internal static ComputeBuffer ComputeValueChartIndicatorFast(StockData data, ComputeContext context, int length = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, CandleSeries series = CandleSeries.Close)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ValueChartIndicator(open, high, low, close, buffer.WritableSpan, length, numAtrs);
+        // CalculateValueChartIndicator expresses each of the bar's four prices as a distance from the moving
+        // average of the median price, scaled by the mean high-to-low range of the last five windows. The
+        // window length is MathHelper.MinOrMax(ceil(length / 5)), which clamps to at least 2 - so the batch's
+        // `varp == 1` fallbacks onto the close-to-close change can never fire and are not reproduced.
+        var (inputList, highList, lowList, openList, closeList, _) =
+            CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
+        var opens = SpanCompat.AsReadOnlySpan(openList);
+        var closes = SpanCompat.AsReadOnlySpan(closeList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var varp = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 5));
+
+        using var ranges = context.Rent(count);
+        var range = ranges.WritableSpan;
+        var highWindow = new RollingMinMax(varp);
+        var lowWindow = new RollingMinMax(varp);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+            range[i] = highWindow.Max - lowWindow.Min;
+        }
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var mba = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var total = 0d;
+            for (var back = 0; back < 5; back++)
+            {
+                total += i >= back ? range[i - back] : 0;
+            }
+
+            var lRange = total / 5 * 0.2;
+            var price = series switch
+            {
+                CandleSeries.Open => opens[i],
+                CandleSeries.High => highs[i],
+                CandleSeries.Low => lows[i],
+                _ => closes[i]
+            };
+            output[i] = lRange != 0 ? (price - mba[i]) / lRange : 0;
+        }
+
         return buffer;
     }
 
