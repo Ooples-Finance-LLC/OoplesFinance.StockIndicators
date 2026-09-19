@@ -247,24 +247,6 @@ public sealed class BuilderArmTests : GlobalTestData
     {
     };
 
-    /// <summary>
-    /// The four arms issue #233 identified by name, each computing a different indicator entirely.
-    /// </summary>
-    /// <remarks>
-    /// <c>TrendCore.AutoLine</c> and <c>AutoLineWithDrift</c> are adaptive exponential averages where the
-    /// automatic line holds its level until price escapes a band; <c>UltimateMovingAverage</c> is a T3 of a T3
-    /// where the indicator is a money-flow weighted average; <c>VariableLengthMovingAverage</c> interpolates a
-    /// length from a normalised deviation where the indicator steps the length one bar at a time against four
-    /// levels. Held here to "not served", which stays true once someone fixes the arm.
-    /// </remarks>
-    private static readonly string[] ArmsNamedInIssue233 =
-    {
-        "AutoLineSpecOptions",
-        "AutoLineWithDriftSpecOptions",
-        "UltimateMovingAverageSpecOptions",
-        "VariableLengthMovingAverageSpecOptions",
-    };
-
     /// <summary>Keeps the first divergence recorded for a type, so the default parameter set is reported.</summary>
     private static void Record(Dictionary<string, string> divergence, string name, string detail)
     {
@@ -300,8 +282,16 @@ public sealed class BuilderArmTests : GlobalTestData
     /// not "every arm is correct" - hundreds are not - but that <b>verification and agreement cannot come
     /// apart</b>:
     /// adding an options type to <see cref="BuilderVerifiedArms"/> starts serving its arm immediately, and
-    /// before this test nothing on that path would have noticed the arm computed something else. Promote one of
-    /// the listed types and the first assertion below fails.
+    /// before this test nothing on that path would have noticed the arm computed something else. Promote an arm
+    /// that computes something else and the servedAndWrong assertion below fails.
+    /// </para>
+    /// <para>
+    /// This used to carry a second, narrower guard holding the four arms issue #233 named - AutoLine,
+    /// AutoLineWithDrift, UltimateMovingAverage and VariableLengthMovingAverage - out of
+    /// <see cref="BuilderVerifiedArms"/> by name. All four have since been repaired to compute the
+    /// indicator they are named for and are now served, so that guard's reason had stopped being true
+    /// while it went on blocking the repair from reaching callers. What it protected is what
+    /// servedAndWrong protects, for every verified arm rather than four named ones.
     /// </para>
     /// </remarks>
     [Fact]
@@ -438,13 +428,6 @@ public sealed class BuilderArmTests : GlobalTestData
             + $"Where each one parts company: {Describe(divergence, unexpected)}");
         ArmsDisagreeingWithTheirBoundCall.Except(disagreed).Should().BeEmpty(
             "an arm repaired to compute its batch indicator leaves the list, so the list shrinks visibly");
-
-        foreach (var named in ArmsNamedInIssue233)
-        {
-            BuilderVerifiedArms.Arms.Should().NotContain(t => t.Name == named,
-                $"{named} computes a different indicator from the one it is named for (#233), so serving it "
-                + "would publish the wrong series");
-        }
     }
 
     [Fact]
