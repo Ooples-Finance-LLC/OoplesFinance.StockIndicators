@@ -472,7 +472,7 @@ internal static partial class IndicatorCompute
             FastSlowRsiOscillatorSpecOptions => ComputeFastSlowRsiOscillatorFast(data, context),
 
             // Batch 6 - DiNapoli/Ergodic oscillators
-            DiNapoliPercentagePriceOscillatorSpecOptions dnppo => ComputeDiNapoliPercentagePriceOscillatorFast(data, context, dnppo.Length),
+            DiNapoliPercentagePriceOscillatorSpecOptions => ComputeDiNapoliPercentagePriceOscillatorFast(data, context),
             ErgodicPercentagePriceOscillatorSpecOptions eppo => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length),
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length),
             MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context, mppo.Length),
@@ -6083,11 +6083,29 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputePriceOscillatorPercentFast(StockData data, ComputeContext context, int shortLength = 10, int longLength = 20)
+    internal static ComputeBuffer ComputePriceOscillatorPercentFast(StockData data, ComputeContext context, int fastLength = 12,
+        int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PriceOscillatorPercent(close, buffer.WritableSpan, shortLength, longLength);
+        // CalculatePercentagePriceOscillator publishes the spread between two moving averages of the chained
+        // series as a percentage of the slow one. The signal length only feeds the Signal and Histogram
+        // series, so it does not reach the published value.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fast = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var slowEma = slow.Span[i];
+            output[i] = slowEma != 0 ? 100 * (fast.Span[i] - slowEma) / slowEma : 0;
+        }
+
         return buffer;
     }
 
@@ -7158,13 +7176,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DiNapoli Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, double lc = 17.5185,
+        double sc = 8.3896)
     {
-        // Length parameter is unused - DiNapoli uses fixed periods (3, 7)
-        _ = length;
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DiNapoliPercentagePriceOscillator(close, buffer.WritableSpan, 3, 7);
+        // CalculateDiNapoliPercentagePriceOscillator divides the DiNapoli MACD - the difference of two
+        // exponential averages at the short and long constants - by the long average, as a percentage. Its
+        // periods are the DiNapoli constants, not the 3 and 7 the core routine this replaced used. The
+        // signal smoothing constant only feeds the Signal and Histogram series, so it stays out of the arm.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var scAlpha = 2 / (1 + sc);
+        var lcAlpha = 2 / (1 + lc);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double fs = 0, ss = 0;
+        for (var i = 0; i < count; i++)
+        {
+            fs += scAlpha * (input[i] - fs);
+            ss += lcAlpha * (input[i] - ss);
+            output[i] = ss != 0 ? 100 * (fs - ss) / ss : 0;
+        }
+
         return buffer;
     }
 
@@ -13940,12 +13976,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Absolute Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 20)
+    internal static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10,
+        int slowLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateAbsolutePriceOscillator is the difference between two moving averages of the chained
+        // series at the batch default type. The core routine this replaced seeded its averages differently.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.AbsolutePriceOscillator(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fast = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = fast.Span[i] - slow.Span[i];
+        }
+
         return buffer;
     }
 
