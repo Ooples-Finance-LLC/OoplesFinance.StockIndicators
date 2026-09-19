@@ -1420,7 +1420,22 @@ internal static partial class IndicatorCompute
 
             // Batch 23 - Volume and Statistical Indicators
             OnBalanceVolumeReflexSpecOptions obvr => ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length),
-            PivotPointAverageSpecOptions ppa => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType),
+            PivotPointAverageSpecOptions ppa => spec.OutputKey switch
+            {
+                null or "Pivot1" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Pivot1),
+                "Signal1" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Average1),
+                "Pivot2" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Pivot2),
+                "Signal2" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Average2),
+                "Pivot3" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Pivot3),
+                "Signal3" => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType,
+                    ppa.InputLength, PivotPointAverageSeries.Average3),
+                _ => null
+            },
             PriceVolumeRankSpecOptions => ComputePriceVolumeRankFast(data, context),
             PringSpecialKSpecOptions psk => spec.OutputKey switch
             {
@@ -24433,13 +24448,76 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    /// <summary>
+    /// Which of the pivot point average indicator's six published series an arm has been asked for. The three
+    /// pivots differ in what they average - the previous period's close, the current period's open, or both -
+    /// and each has its own moving average alongside it.
+    /// </summary>
+    internal enum PivotPointAverageSeries
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.PivotPoint(high, low, close, buffer.WritableSpan);
+        Pivot1,
+        Average1,
+        Pivot2,
+        Average2,
+        Pivot3,
+        Average3
+    }
+
+    internal static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, InputLength inputLength = InputLength.Day,
+        PivotPointAverageSeries series = PivotPointAverageSeries.Pivot1)
+    {
+        // CalculatePivotPointAverage works on PERIODS, not bars: it aggregates the bars into the requested
+        // input length, takes each pivot from the preceding period, averages those, and only then projects
+        // the result back onto the bar grid. TrendCore.PivotPoint took the raw bars and so answered a
+        // different indicator entirely, differing from bar 0.
+        //
+        // The period aggregation and the bar map come from the same helpers the batch uses. They are keyed by
+        // date and cannot be pooled - a period is a dictionary lookup, not a window - but every calculation
+        // downstream of them runs in rented buffers.
+        var (periodClose, periodHigh, periodLow, periodOpen, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
+        var periodCount = periodClose.Count;
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        using var pivots = context.Rent(periodCount);
+        var pivot = pivots.WritableSpan;
+        for (var i = 0; i < periodCount; i++)
+        {
+            var currentOpen = periodOpen[i];
+            var prevHigh = i >= 1 ? periodHigh[i - 1] : 0;
+            var prevLow = i >= 1 ? periodLow[i - 1] : 0;
+            var prevClose = i >= 1 ? periodClose[i - 1] : 0;
+
+            pivot[i] = series switch
+            {
+                PivotPointAverageSeries.Pivot2 or PivotPointAverageSeries.Average2 =>
+                    (prevHigh + prevLow + prevClose + currentOpen) / 4,
+                PivotPointAverageSeries.Pivot3 or PivotPointAverageSeries.Average3 =>
+                    (prevHigh + prevLow + currentOpen) / 3,
+                _ => (prevHigh + prevLow + prevClose) / 3
+            };
+        }
+
+        using var averages = context.Rent(periodCount);
+        var isAverage = series is PivotPointAverageSeries.Average1 or PivotPointAverageSeries.Average2
+            or PivotPointAverageSeries.Average3;
+        if (isAverage)
+        {
+            MovingAverage(data, maType, length, pivots.Span, averages.WritableSpan);
+        }
+
+        var periodValues = isAverage ? averages.Span : pivots.Span;
+        var barGroupIndexes = CalculationsHelper.GetInputLengthGroupIndexes(data, inputLength);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var ordinal = i < barGroupIndexes.Count ? barGroupIndexes[i] : -1;
+            output[i] = ordinal >= 0 && ordinal < periodCount ? periodValues[ordinal] : 0;
+        }
+
         return buffer;
     }
 
