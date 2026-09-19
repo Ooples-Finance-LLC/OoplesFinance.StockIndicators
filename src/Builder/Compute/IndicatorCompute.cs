@@ -791,7 +791,8 @@ internal static partial class IndicatorCompute
             SvamaSpecOptions => ComputeSvamaFast(data, context),
             ThreeHMASpecOptions thma => ComputeThreeHMAFast(data, context, thma.Length),
             TillsonIE2SpecOptions tie2 => ComputeTillsonIE2Fast(data, context, tie2.Length, tie2.MaType),
-            TStepLeastSquaresMovingAverageSpecOptions tslsma => ComputeTStepLeastSquaresMovingAverageFast(data, context, tslsma.Length),
+            TStepLeastSquaresMovingAverageSpecOptions tslsma => ComputeTStepLeastSquaresMovingAverageFast(data, context,
+                tslsma.Length, tslsma.MaType),
             VariableAdaptiveMovingAverageSpecOptions vama => ComputeVariableAdaptiveMovingAverageFast(data, context, vama.Length,
                 vama.MaType),
             VariableLengthMovingAverageSpecOptions vlma => ComputeVariableLengthMovingAverageFast(data, context,
@@ -14576,12 +14577,69 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes T-Step Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeTStepLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateTStepLeastSquaresMovingAverage tracks the chained series with a stepped baseline whose
+        // threshold is the running mean absolute deviation from it, widened by one minus the Kaufman
+        // efficiency ratio, then fits the series onto that baseline by the rolling correlation of the two.
+        // MovingAverageCore.TStepLeastSquaresMovingAverage had no baseline and no correlation at all. The
+        // batch's sc smoothing feeds a local it never publishes, so there is nothing here for it to set.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.TStepLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var efficiency = context.Rent(count);
+        EfficiencyRatio(input, length, efficiency.WritableSpan);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+
+        using var baseline = context.Rent(count);
+        using var correlations = context.Rent(count);
+        var stepped = baseline.WritableSpan;
+        var fit = correlations.WritableSpan;
+
+        var correlation = new RollingCorrelation();
+        double changeTotal = 0;
+        var changeCount = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var previousBaseline = i >= 1 ? stepped[i - 1] : currentValue;
+
+            changeTotal += Math.Abs(currentValue - previousBaseline);
+            changeCount++;
+            var threshold = changeTotal / changeCount * (1 + (1 - efficiency.Span[i]));
+
+            stepped[i] = currentValue > previousBaseline + threshold || currentValue < previousBaseline - threshold
+                ? currentValue
+                : previousBaseline;
+
+            correlation.Add(stepped[i], currentValue);
+            var r = correlation.R(length);
+            fit[i] = MathHelper.IsValueNullOrInfinity(r) ? 0 : r;
+        }
+
+        using var baselineDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(baseline.Span, baselineDeviation.WritableSpan, length);
+
+        using var baselineAverage = context.Rent(count);
+        MovingAverage(data, maType, length, baseline.Span, baselineAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var slope = baselineDeviation.Span[i] != 0 ? fit[i] * deviation.Span[i] / baselineDeviation.Span[i] : 0;
+            var intercept = average.Span[i] - (slope * baselineAverage.Span[i]);
+            output[i] = (slope * stepped[i]) + intercept;
+        }
+
         return buffer;
     }
 
@@ -20903,23 +20961,57 @@ internal static partial class IndicatorCompute
     /// Computes Freedom of Movement using zero-allocation fast path.
     /// Returns the smoothed movement value.
     /// </summary>
-    internal static ComputeBuffer ComputeFreedomOfMovementFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFreedomOfMovementFast(StockData data, ComputeContext context, int length = 60,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateFreedomOfMovement rescales the bar's relative volume and its absolute relative price move
+        // onto a one to ten scale over the window, divides the one by the other, and publishes how many
+        // standard deviations that ratio sits from its own average. The switch this replaced published a
+        // moving average of the close, which is not this indicator at any setting.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var relativeVolume = ComputeRelativeVolumeIndicatorFast(data, context, length, maType);
+        var relVol = relativeVolume.Span;
+
+        using var ratios = context.Rent(count);
+        using var averages = context.Rent(count);
+        var ratio = ratios.WritableSpan;
+        var ratioAverage = averages.WritableSpan;
+
+        var moveWindow = new RollingMinMax(length);
+        var volumeWindow = new RollingMinMax(length);
+        var ratioTotal = new RollingSum();
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var move = previousValue != 0
+                ? Math.Abs(CalculationsHelper.MinPastValues(i, 1, input[i] - previousValue) / previousValue)
+                : 0;
+
+            moveWindow.Add(move);
+            volumeWindow.Add(relVol[i]);
+
+            var moveRange = moveWindow.Max - moveWindow.Min;
+            var scaledMove = moveRange != 0 ? (1 + ((move - moveWindow.Min) * (10 - 1))) / moveRange : 0;
+            var volumeRange = volumeWindow.Max - volumeWindow.Min;
+            var scaledVolume = volumeRange != 0 ? (1 + ((relVol[i] - volumeWindow.Min) * (10 - 1))) / volumeRange : 0;
+
+            ratio[i] = scaledMove != 0 ? scaledVolume / scaledMove : 0;
+            ratioTotal.Add(ratio[i]);
+            ratioAverage[i] = ratioTotal.Average(length);
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(ratios.Span, deviation.WritableSpan, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = deviation.Span[i] != 0 ? (ratio[i] - ratioAverage[i]) / deviation.Span[i] : 0;
         }
 
         return buffer;
