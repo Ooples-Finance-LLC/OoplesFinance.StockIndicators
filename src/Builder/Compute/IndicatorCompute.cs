@@ -189,7 +189,12 @@ internal static partial class IndicatorCompute
             ElderForceIndexSpecOptions efi => ComputeElderForceIndexFast(data, context, efi.Length),
             RelativeVolatilityIndexSpecOptions rvi => ComputeRelativeVolatilityIndexFast(data, context, rvi.Length),
             QstickSpecOptions qstick => ComputeQstickFast(data, context, qstick.Length),
-            SpecialKSpecOptions spk => ComputeSpecialKFast(data, context, spk.Length),
+            SpecialKSpecOptions => spec.OutputKey switch
+            {
+                null or "PringSpecialK" => ComputeSpecialKFast(data, context),
+                "Signal" => ComputeSpecialKFast(data, context, MacdSeries.Signal),
+                _ => null
+            },
 
             // Batch 3 - Vortex and Trend Intensity
             VortexPositiveSpecOptions vp => ComputeVortexPositiveFast(data, context, vp.Length),
@@ -784,7 +789,8 @@ internal static partial class IndicatorCompute
             QuadraticLeastSquaresMovingAverageSpecOptions qlsma => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
             QuadraticMovingAverageSpecOptions qma => ComputeQuadraticMovingAverageFast(data, context, qma.Length),
             QuadraticRegressionSpecOptions qreg => ComputeQuadraticRegressionFast(data, context, qreg.Length, qreg.MaType),
-            R2AdaptiveRegressionSpecOptions r2ar => ComputeR2AdaptiveRegressionFast(data, context, r2ar.Length),
+            R2AdaptiveRegressionSpecOptions r2ar => ComputeR2AdaptiveRegressionFast(data, context, r2ar.Length,
+                r2ar.MaType),
             RetentionAccelerationFilterSpecOptions raf => ComputeRetentionAccelerationFilterFast(data, context, raf.Length),
             RightSidedRickerMovingAverageSpecOptions rsrma => ComputeRightSidedRickerMovingAverageFast(data, context, rsrma.Length),
             SelfWeightedMovingAverageSpecOptions swma => ComputeSelfWeightedMovingAverageFast(data, context, swma.Length),
@@ -1352,7 +1358,18 @@ internal static partial class IndicatorCompute
             OnBalanceVolumeReflexSpecOptions obvr => ComputeOnBalanceVolumeReflexFast(data, context, obvr.Length),
             PivotPointAverageSpecOptions ppa => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType),
             PriceVolumeRankSpecOptions => ComputePriceVolumeRankFast(data, context),
-            PringSpecialKSpecOptions psk => ComputePringSpecialKFast(data, context, psk.SmoothLength, psk.MaType),
+            PringSpecialKSpecOptions psk => spec.OutputKey switch
+            {
+                null or "PringSpecialK" => ComputePringSpecialKFast(data, context, psk.Length1, psk.Length2,
+                    psk.Length3, psk.Length4, psk.Length5, psk.Length6, psk.Length7, psk.Length8, psk.Length9,
+                    psk.Length10, psk.Length11, psk.Length12, psk.Length13, psk.Length14, psk.SmoothLength,
+                    psk.MaType),
+                "Signal" => ComputePringSpecialKFast(data, context, psk.Length1, psk.Length2, psk.Length3,
+                    psk.Length4, psk.Length5, psk.Length6, psk.Length7, psk.Length8, psk.Length9, psk.Length10,
+                    psk.Length11, psk.Length12, psk.Length13, psk.Length14, psk.SmoothLength, psk.MaType,
+                    MacdSeries.Signal),
+                _ => null
+            },
             ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length),
             QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor, qwn.MaType),
             RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length),
@@ -3954,15 +3971,9 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Special K using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSpecialKFast(StockData data, ComputeContext context, int length = 14)
-    {
-        _ = length; // Special K uses fixed parameters
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.SpecialK(inputSpan, buffer.WritableSpan);
-        return buffer;
-    }
+    internal static ComputeBuffer ComputeSpecialKFast(StockData data, ComputeContext context,
+        MacdSeries series = MacdSeries.Line)
+        => ComputePringSpecialKFast(data, context, series: series);
 
     /// <summary>
     /// Computes Arnaud Legoux Moving Average using zero-allocation fast path.
@@ -14408,12 +14419,76 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes R2 Adaptive Regression using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeR2AdaptiveRegressionFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateR2AdaptiveRegression blends three estimates of the series by how well each explains it: the
+        // linear regression line, a line fitted to the indicator's OWN previous output, and that previous
+        // output itself, weighted by the squared correlations of the first two and whatever is left over. The
+        // second line's slope is the price window's deviation times the correlation, over the deviation of the
+        // previous output - both halves of one ratio measured the same way, which is what issue #223 settled.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.R2AdaptiveRegression(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var linear = context.Rent(count);
+        var linreg = linear.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                linreg[i] = regression.Next(input[i], isFinal: true).Last;
+            }
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var sma = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var x2Correlation = new RollingCorrelation();
+        var y1Correlation = new RollingCorrelation();
+        var y2Correlation = new RollingCorrelation();
+        var x2Total = new RollingSum();
+        var x2PowTotal = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var y1 = linear.Span[i];
+            y1Correlation.Add(y1, currentValue);
+
+            var x2 = i >= 1 ? output[i - 1] : currentValue;
+            x2Total.Add(x2);
+            x2Correlation.Add(x2, currentValue);
+
+            var r2x2 = x2Correlation.R(length);
+            r2x2 = MathHelper.IsValueNullOrInfinity(r2x2) ? 0 : r2x2;
+            var x2Average = x2Total.Average(length);
+            x2PowTotal.Add(MathHelper.Pow(x2 - x2Average, 2));
+
+            var x2PowAverage = x2PowTotal.Average(length);
+            var x2StdDev = x2PowAverage >= 0 ? MathHelper.Sqrt(x2PowAverage) : 0;
+            var a = x2StdDev != 0 ? stdDev[i] * r2x2 / x2StdDev : 0;
+            var b = sma[i] - (a * x2Average);
+
+            var y2 = (a * x2) + b;
+            y2Correlation.Add(y2, currentValue);
+
+            var ry1 = Math.Pow(y1Correlation.R(length), 2);
+            ry1 = MathHelper.IsValueNullOrInfinity(ry1) ? 0 : ry1;
+            var ry2 = Math.Pow(y2Correlation.R(length), 2);
+            ry2 = MathHelper.IsValueNullOrInfinity(ry2) ? 0 : ry2;
+
+            output[i] = (ry1 * y1) + (ry2 * y2) + ((1 - (ry1 + ry2)) * x2);
+        }
+
         return buffer;
     }
 
@@ -22885,11 +22960,64 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int smoothLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputePringSpecialKFast(StockData data, ComputeContext context, int length1 = 10,
+        int length2 = 15, int length3 = 20, int length4 = 30, int length5 = 40, int length6 = 50, int length7 = 65,
+        int length8 = 75, int length9 = 100, int length10 = 130, int length11 = 195, int length12 = 265,
+        int length13 = 390, int length14 = 530, int smoothLength = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SpecialK(close, buffer.WritableSpan);
+        // CalculatePringSpecialK sums twelve smoothed rates of change spanning short, intermediate and long
+        // cycles, each weighted 1, 2, 3 or 4 in that repeating order. The rate of change and the average that
+        // smooths it use DIFFERENT lengths, and three of the long legs share one smoothing length, so the
+        // pairing below is the batch's own and not a pattern. Every leg reads the caller's series, which is
+        // why the batch restores the input between its twelve calls.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        Span<int> rocLengths = stackalloc int[12] { length1, length2, length3, length4, length5, length7,
+            length8, length9, length11, length12, length13, length14 };
+        Span<int> smoothLengths = stackalloc int[12] { length1, length1, length1, length2, length6, length7,
+            length8, length9, length10, length10, length10, length11 };
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        output.Clear();
+
+        using var rateOfChange = context.Rent(count);
+        using var smoothed = context.Rent(count);
+        for (var leg = 0; leg < rocLengths.Length; leg++)
+        {
+            var rocLength = Math.Max(rocLengths[leg], 1);
+            var roc = rateOfChange.WritableSpan;
+            for (var i = 0; i < count; i++)
+            {
+                var previousValue = i >= rocLength ? input[i - rocLength] : 0;
+                roc[i] = i >= rocLength && previousValue != 0 ? (input[i] - previousValue) / previousValue * 100 : 0;
+            }
+
+            MovingAverage(data, maType, smoothLengths[leg], rateOfChange.Span, smoothed.WritableSpan);
+            var weight = (leg % 4) + 1;
+            var weighted = smoothed.Span;
+            for (var i = 0; i < count; i++)
+            {
+                output[i] += weight * weighted[i];
+            }
+        }
+
+        if (series == MacdSeries.Line)
+        {
+            return buffer;
+        }
+
+        using var signal = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, buffer.Span, signal.WritableSpan);
+        var signalLine = signal.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = series == MacdSeries.Signal ? signalLine[i] : output[i] - signalLine[i];
+        }
+
         return buffer;
     }
 
