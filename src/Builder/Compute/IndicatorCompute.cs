@@ -1584,7 +1584,16 @@ internal static partial class IndicatorCompute
             },
             SupportResistanceSpecOptions sr2 => ComputeSupportResistanceFast(data, context, sr2.Length, sr2.MaType),
             SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length),
-            TechnicalRatingsSpecOptions tr => ComputeTechnicalRatingsFast(data, context, tr.AoLength1, tr.AoLength2, tr.RsiLength, tr.StochLength1, tr.StochLength2, tr.StochLength3, tr.MaType),
+            TechnicalRatingsSpecOptions tr => spec.OutputKey switch
+            {
+                null or "Tr" => ComputeTechnicalRatingsFast(data, context, tr.MaType, tr.AoLength1, tr.AoLength2,
+                    tr.RsiLength, tr.StochLength1, tr.StochLength2),
+                "Or" => ComputeTechnicalRatingsFast(data, context, tr.MaType, tr.AoLength1, tr.AoLength2,
+                    tr.RsiLength, tr.StochLength1, tr.StochLength2, series: TechnicalRatingSeries.Oscillator),
+                "Mr" => ComputeTechnicalRatingsFast(data, context, tr.MaType, tr.AoLength1, tr.AoLength2,
+                    tr.RsiLength, tr.StochLength1, tr.StochLength2, series: TechnicalRatingSeries.MovingAverages),
+                _ => null
+            },
             TFSMboIndicatorSpecOptions tfsm => ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType),
             TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.MaType),
 
@@ -12237,12 +12246,16 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ichimoku Senkou Span A using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeIchimokuSenkouSpanAFast(StockData data, ComputeContext context, int length = 26)
+    internal static ComputeBuffer ComputeIchimokuSenkouSpanAFast(StockData data, ComputeContext context, int length = 26,
+        int tenkanLength = 9)
     {
+        // Senkou Span A averages the Tenkan-sen and the Kijun-sen, so it needs both lengths. The conversion
+        // line length was hardcoded here, which is right for the bound call and wrong for any caller that
+        // passes a different one - CalculateTechnicalRatings does.
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
-        TrendCore.IchimokuSenkouSpanA(high, low, buffer.WritableSpan, 9, length);
+        TrendCore.IchimokuSenkouSpanA(high, low, buffer.WritableSpan, tenkanLength, length);
         return buffer;
     }
 
@@ -27569,15 +27582,210 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context, int aoLength1 = 55, int aoLength2 = 34, int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int stochLength3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    /// <summary>
+    /// Which of the three ratings a technical ratings arm has been asked for. The batch publishes all three
+    /// from one pass: the moving average rating, the oscillator rating, and their average as the total.
+    /// </summary>
+    internal enum TechnicalRatingSeries
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        OscillatorCore.TechnicalRatings(high, low, close, volume, buffer.WritableSpan, aoLength1, aoLength2, rsiLength, stochLength1, stochLength2, stochLength3, maCore: maCore);
+        Total,
+        Oscillator,
+        MovingAverages
+    }
+
+    internal static ComputeBuffer ComputeTechnicalRatingsFast(StockData data, ComputeContext context,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int aoLength1 = 55, int aoLength2 = 34,
+        int rsiLength = 14, int stochLength1 = 14, int stochLength2 = 3, int ultOscLength1 = 7,
+        int ultOscLength2 = 14, int ultOscLength3 = 28, int ichiLength1 = 9, int ichiLength2 = 26,
+        int ichiLength3 = 52, int vwmaLength = 20, int cciLength = 20, int adxLength = 14, int momLength = 10,
+        int macdLength1 = 12, int macdLength2 = 26, int macdLength3 = 9, int bullBearLength = 13,
+        int williamRLength = 14, int maLength1 = 10, int maLength2 = 20, int maLength3 = 30, int maLength4 = 50,
+        int maLength5 = 100, int maLength6 = 200, int hullMaLength = 9,
+        TechnicalRatingSeries series = TechnicalRatingSeries.Total)
+    {
+        // CalculateTechnicalRatings scores nine moving average conditions and eleven oscillator conditions at
+        // every bar, each contributing 1, -1 or 0, and divides each group by its own count. The total is the
+        // average of the two. Every component below is an indicator this file already computes, so the arm is
+        // the scoring pass over their outputs rather than a re-derivation of any of them.
+        //
+        // The batch stochLength3 only reaches the stochastic SlowD series, which no condition reads, so it is
+        // not a parameter here - the same reason ComputeMomentumOscillatorFast takes no smoothing length.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var rsiBuffer = ComputeRsiFast(data, context, rsiLength);
+        using var aoBuffer = ComputeAwesomeOscillatorFast(data, context, aoLength1,
+            MovingAvgType.SimpleMovingAverage, aoLength2);
+        using var macdBuffer = ComputeMacdLineFast(data, context, macdLength1, macdLength2);
+        using var macdSignalBuffer = ComputeMacdSignalFast(data, context, macdLength1, macdLength2, macdLength3);
+        using var uoBuffer = ComputeUltimateOscillatorFast(data, context, ultOscLength1, ultOscLength2, ultOscLength3);
+        using var tenkanBuffer = ComputeIchimokuTenkanSenFast(data, context, ichiLength1);
+        using var kijunBuffer = ComputeIchimokuKijunSenFast(data, context, ichiLength2);
+        using var senkouABuffer = ComputeIchimokuSenkouSpanAFast(data, context, ichiLength2, ichiLength1);
+        using var senkouBBuffer = ComputeIchimokuSenkouSpanBFast(data, context, ichiLength3);
+        using var adxBuffer = ComputeAdxFast(data, context, adxLength);
+        var (plusBuffer, minusBuffer) = DirectionalIndicators(data, context, adxLength,
+            MovingAvgType.WildersSmoothingMethod);
+        using var diPlusBuffer = plusBuffer;
+        using var diMinusBuffer = minusBuffer;
+        using var cciBuffer = ComputeCciFast(data, context, cciLength);
+        using var bullPowerBuffer = ComputeElderRayBullPowerFast(data, context, bullBearLength);
+        using var bearPowerBuffer = ComputeElderRayBearPowerFast(data, context, bullBearLength);
+        using var hullMaBuffer = ComputeHullMovingAverageFast(data, context, hullMaLength);
+        using var williamsBuffer = ComputeWilliamsRFast(data, context, williamRLength);
+        using var vwmaBuffer = ComputeVolumeWeightedMovingAverageFast(data, context, vwmaLength);
+        using var momentumBuffer = ComputeMomentumOscillatorFast(data, context, momLength);
+
+        using var stoKBuffer = context.Rent(count);
+        StochasticFastK(data, context, input, stochLength1, stoKBuffer.WritableSpan);
+        using var stoDBuffer = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, stochLength2, stoKBuffer.Span,
+            stoDBuffer.WritableSpan);
+
+        // The stochastic of the relative strength index over its own range, exactly as the batch computes it
+        // inline. Chaining the stochastic indicator instead would measure the index against the bars.
+        var rsi = rsiBuffer.Span;
+        using var stoRsiKBuffer = context.Rent(count);
+        var stoRsiK = stoRsiKBuffer.WritableSpan;
+        var rsiWindow = new RollingMinMax(Math.Max(stochLength1, 2));
+        for (var i = 0; i < count; i++)
+        {
+            rsiWindow.Add(rsi[i]);
+            var rsiRange = rsiWindow.Max - rsiWindow.Min;
+            stoRsiK[i] = rsiRange != 0 ? MathHelper.MinOrMax((rsi[i] - rsiWindow.Min) / rsiRange * 100, 100, 0) : 0;
+        }
+        using var stoRsiDBuffer = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, stochLength2, stoRsiKBuffer.Span,
+            stoRsiDBuffer.WritableSpan);
+
+        using var ma10Buffer = context.Rent(count);
+        using var ma20Buffer = context.Rent(count);
+        using var ma30Buffer = context.Rent(count);
+        using var ma50Buffer = context.Rent(count);
+        using var ma100Buffer = context.Rent(count);
+        using var ma200Buffer = context.Rent(count);
+        MovingAverage(data, maType, maLength1, input, ma10Buffer.WritableSpan);
+        MovingAverage(data, maType, maLength2, input, ma20Buffer.WritableSpan);
+        MovingAverage(data, maType, maLength3, input, ma30Buffer.WritableSpan);
+        MovingAverage(data, maType, maLength4, input, ma50Buffer.WritableSpan);
+        MovingAverage(data, maType, maLength5, input, ma100Buffer.WritableSpan);
+        MovingAverage(data, maType, maLength6, input, ma200Buffer.WritableSpan);
+
+        var ao = aoBuffer.Span;
+        var macd = macdBuffer.Span;
+        var macdSignal = macdSignalBuffer.Span;
+        var uo = uoBuffer.Span;
+        var tenkan = tenkanBuffer.Span;
+        var kijun = kijunBuffer.Span;
+        var senkouA = senkouABuffer.Span;
+        var senkouB = senkouBBuffer.Span;
+        var adx = adxBuffer.Span;
+        var diPlus = diPlusBuffer.Span;
+        var diMinus = diMinusBuffer.Span;
+        var cci = cciBuffer.Span;
+        var bullPower = bullPowerBuffer.Span;
+        var bearPower = bearPowerBuffer.Span;
+        var hullMa = hullMaBuffer.Span;
+        var williams = williamsBuffer.Span;
+        var vwma = vwmaBuffer.Span;
+        var momentum = momentumBuffer.Span;
+        var stoK = stoKBuffer.Span;
+        var stoD = stoDBuffer.Span;
+        var stoRsiD = stoRsiDBuffer.Span;
+        var ma10 = ma10Buffer.Span;
+        var ma20 = ma20Buffer.Span;
+        var ma30 = ma30Buffer.Span;
+        var ma50 = ma50Buffer.Span;
+        var ma100 = ma100Buffer.Span;
+        var ma200 = ma200Buffer.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var conLine = tenkan[i];
+            var baseLine = kijun[i];
+            var leadLine1 = senkouA[i];
+            var leadLine2 = senkouB[i];
+
+            double maRating = 0;
+            maRating += currentValue > ma10[i] ? 1 : currentValue < ma10[i] ? -1 : 0;
+            maRating += currentValue > ma20[i] ? 1 : currentValue < ma20[i] ? -1 : 0;
+            maRating += currentValue > ma30[i] ? 1 : currentValue < ma30[i] ? -1 : 0;
+            maRating += currentValue > ma50[i] ? 1 : currentValue < ma50[i] ? -1 : 0;
+            maRating += currentValue > ma100[i] ? 1 : currentValue < ma100[i] ? -1 : 0;
+            maRating += currentValue > ma200[i] ? 1 : currentValue < ma200[i] ? -1 : 0;
+            maRating += currentValue > hullMa[i] ? 1 : currentValue < hullMa[i] ? -1 : 0;
+            maRating += currentValue > vwma[i] ? 1 : currentValue < vwma[i] ? -1 : 0;
+            maRating += leadLine1 > leadLine2 && currentValue > leadLine1 && currentValue < baseLine &&
+                prevValue < conLine && currentValue > conLine ? 1 : leadLine2 > leadLine1 &&
+                currentValue < leadLine2 && currentValue > baseLine && prevValue > conLine &&
+                currentValue < conLine ? -1 : 0;
+            maRating /= 9;
+
+            if (series == TechnicalRatingSeries.MovingAverages)
+            {
+                output[i] = maRating;
+                continue;
+            }
+
+            var rsiValue = rsi[i];
+            var prevRsi = i >= 1 ? rsi[i - 1] : 0;
+            var kSto = stoK[i];
+            var prevKSto = i >= 1 ? stoK[i - 1] : 0;
+            var dSto = stoD[i];
+            var prevDSto = i >= 1 ? stoD[i - 1] : 0;
+            var cciValue = cci[i];
+            var prevCci = i >= 1 ? cci[i - 1] : 0;
+            var adxPlus = diPlus[i];
+            var prevAdxPlus = i >= 1 ? diPlus[i - 1] : 0;
+            var adxMinus = diMinus[i];
+            var prevAdxMinus = i >= 1 ? diMinus[i - 1] : 0;
+            var aoValue = ao[i];
+            var prevAo1 = i >= 1 ? ao[i - 1] : 0;
+            var prevAo2 = i >= 2 ? ao[i - 2] : 0;
+            var mom = momentum[i];
+            var prevMom = i >= 1 ? momentum[i - 1] : 0;
+            var kStoRsi = stoRsiK[i];
+            var prevKStoRsi = i >= 1 ? stoRsiK[i - 1] : 0;
+            var dStoRsi = stoRsiD[i];
+            var prevDStoRsi = i >= 1 ? stoRsiD[i - 1] : 0;
+            var wr = williams[i];
+            var prevWr = i >= 1 ? williams[i - 1] : 0;
+            var bull = bullPower[i];
+            var prevBull = i >= 1 ? bullPower[i - 1] : 0;
+            var bear = bearPower[i];
+            var prevBear = i >= 1 ? bearPower[i - 1] : 0;
+            var upTrend = currentValue > ma50[i];
+            var dnTrend = currentValue < ma50[i];
+
+            double oscRating = 0;
+            oscRating += rsiValue < 30 && prevRsi < rsiValue ? 1 : rsiValue > 70 && prevRsi > rsiValue ? -1 : 0;
+            oscRating += kSto < 20 && dSto < 20 && kSto > dSto && prevKSto < prevDSto ? 1 : kSto > 80 &&
+                dSto > 80 && kSto < dSto && prevKSto > prevDSto ? -1 : 0;
+            oscRating += cciValue < -100 && cciValue > prevCci ? 1 : cciValue > 100 && cciValue < prevCci ? -1 : 0;
+            oscRating += adx[i] > 20 && prevAdxPlus < prevAdxMinus && adxPlus > adxMinus ? 1 : adx[i] > 20 &&
+                prevAdxPlus > prevAdxMinus && adxPlus < adxMinus ? -1 : 0;
+            oscRating += (aoValue > 0 && prevAo1 < 0) || (aoValue > 0 && prevAo1 > 0 && aoValue > prevAo1 &&
+                prevAo2 > prevAo1) ? 1 : (aoValue < 0 && prevAo1 > 0) || (aoValue < 0 && prevAo1 < 0 &&
+                aoValue < prevAo1 && prevAo2 < prevAo1) ? -1 : 0;
+            oscRating += mom > prevMom ? 1 : mom < prevMom ? -1 : 0;
+            oscRating += macd[i] > macdSignal[i] ? 1 : macd[i] < macdSignal[i] ? -1 : 0;
+            oscRating += dnTrend && kStoRsi < 20 && dStoRsi < 20 && kStoRsi > dStoRsi &&
+                prevKStoRsi < prevDStoRsi ? 1 : upTrend && kStoRsi > 80 && dStoRsi > 80 && kStoRsi < dStoRsi &&
+                prevKStoRsi > prevDStoRsi ? -1 : 0;
+            oscRating += wr < -80 && wr > prevWr ? 1 : wr > -20 && wr < prevWr ? -1 : 0;
+            oscRating += upTrend && bear < 0 && bear > prevBear ? 1 : dnTrend && bull > 0 &&
+                bull < prevBull ? -1 : 0;
+            oscRating += uo[i] > 70 ? 1 : uo[i] < 30 ? -1 : 0;
+            oscRating /= 11;
+
+            output[i] = series == TechnicalRatingSeries.Oscillator ? oscRating : (maRating + oscRating) / 2;
+        }
+
         return buffer;
     }
 
