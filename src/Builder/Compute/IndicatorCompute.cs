@@ -757,7 +757,7 @@ internal static partial class IndicatorCompute
             MovingAverageV3SpecOptions mav3 => ComputeMovingAverageV3Fast(data, context, mav3.Length, maType: mav3.MaType),
             OneLCLeastSquaresMovingAverageSpecOptions olclsma => ComputeOneLCLeastSquaresMovingAverageFast(data, context, olclsma.Length),
             OptimalWeightedMovingAverageSpecOptions owma => ComputeOptimalWeightedMovingAverageFast(data, context, owma.Length),
-            OvershootReductionMovingAverageSpecOptions orma => ComputeOvershootReductionMovingAverageFast(data, context, orma.Length),
+            OvershootReductionMovingAverageSpecOptions orma => ComputeOvershootReductionMovingAverageFast(data, context, orma.Length, orma.MaType),
             ParametricCorrectiveLinearMovingAverageSpecOptions pclma => ComputeParametricCorrectiveLinearMovingAverageFast(data, context, pclma.Length),
             ParametricKalmanFilterSpecOptions pkf => ComputeParametricKalmanFilterFast(data, context, pkf.Length),
 
@@ -993,7 +993,8 @@ internal static partial class IndicatorCompute
             EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length,
                 ezlema.MaType),
             HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length, hma2.MaType),
-            KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
+            KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength,
+                kvo2.SlowLength, kvo2.SignalLength, kvo2.MaType),
             KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2,
                 kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4, kst2.MaType),
             NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue),
@@ -2932,22 +2933,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeKlingerVolumeFast(StockData data, ComputeContext context, int length = 34)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.KlingerVolumeOscillator(high, low, close, volume, buffer.WritableSpan, length);
-        return buffer;
+        // The Kvo series itself, with the batch's own defaults for the other two lengths.
+        return ComputeKlingerVolumeOscillatorFast(data, context, length);
     }
 
     /// <summary>
@@ -13252,12 +13239,66 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Overshoot Reduction Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateOvershootReductionMovingAverage offsets the moving average of the chained series by the
+        // standardised bar index scaled by its correlation with that series, by the deviation of the window,
+        // and by how large the last correction was against the largest recent one.
+        // MovingAverageCore.OvershootReductionMovingAverage is a different construction and reads none of it.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.OvershootReductionMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        var halfLength = (int)Math.Ceiling((double)length / 2);
+
+        using var indexes = context.Rent(count);
+        var index = indexes.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            index[i] = i;
+        }
+
+        using var indexAverage = context.Rent(count);
+        MovingAverage(data, maType, length, indexes.Span, indexAverage.WritableSpan);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+
+        using var indexDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(indexes.Span, indexDeviation.WritableSpan, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var correlation = new RollingCorrelation();
+        var corrections = new RollingSum();
+        var smoothedCorrections = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            correlation.Add(index[i], currentValue);
+            var corr = correlation.R(length);
+            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
+
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var previousResult = i >= 1 && output[i - 1] != 0 ? output[i - 1] : previousValue;
+            var slope = indexDeviation.Span[i] != 0 && corr != 0
+                ? (index[i] - indexAverage.Span[i]) / indexDeviation.Span[i] * corr
+                : 0;
+
+            var correction = Math.Abs(previousResult - currentValue);
+            corrections.Add(correction);
+            smoothedCorrections.Add(corrections.Average(halfLength));
+
+            var highest = smoothedCorrections.Max;
+            var scale = highest != 0 ? correction / highest : 0;
+            output[i] = average.Span[i] + (slope * (deviation.Span[i] * scale));
+        }
+
         return buffer;
     }
 
@@ -14722,15 +14763,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Klinger Signal using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKlingerSignalFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55, int signalLength = 13)
+    internal static ComputeBuffer ComputeKlingerSignalFast(StockData data, ComputeContext context, int fastLength = 34,
+        int slowLength = 55, int signalLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.KlingerSignal(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength, signalLength);
-        return buffer;
+        // The KvoSignal series: the same oscillator, smoothed once more.
+        return ComputeKlingerVolumeOscillatorFast(data, context, fastLength, slowLength, signalLength, maType,
+            KlingerSeries.Signal);
     }
 
     /// <summary>
@@ -17338,24 +17376,86 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Klinger Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKlingerVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 34, int slowLength = 55)
+    internal static ComputeBuffer ComputeKlingerVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 34,
+        int slowLength = 55, int signalLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        KlingerSeries series = KlingerSeries.Oscillator)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
+        // CalculateKlingerVolumeOscillator builds a volume force from the bar's trend, its range and the
+        // cumulative range carried while the trend holds, then takes the difference of two averages of it.
+        // This is the one implementation of all three of its published series; the VolumeCore and
+        // OscillatorCore entry points the three arms used before each expressed only part of it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+
+        using var volumeForce = context.Rent(count);
+        var vf = volumeForce.WritableSpan;
+        double trend = 0, previousDailyMeasurement = 0, previousCumulativeMeasurement = 0;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            var momentum = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
+            var previousTrend = trend;
+            trend = momentum > 0 ? 1 : momentum < 0 ? -1 : previousTrend;
+
+            var dailyMeasurement = highs[i] - lows[i];
+            var cumulativeMeasurement = trend == previousTrend
+                ? previousCumulativeMeasurement + dailyMeasurement
+                : previousDailyMeasurement + dailyMeasurement;
+
+            var ratio = cumulativeMeasurement != 0
+                ? Math.Abs((2 * (dailyMeasurement / cumulativeMeasurement)) - 1)
+                : -1;
+            vf[i] = volumes[i] * ratio * trend * 100;
+
+            previousDailyMeasurement = dailyMeasurement;
+            previousCumulativeMeasurement = cumulativeMeasurement;
         }
+
         var buffer = context.Rent(count);
-        VolumeCore.KlingerVolumeOscillator(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength);
+        var output = buffer.WritableSpan;
+
+        using (var fast = context.Rent(count))
+        {
+            using var slow = context.Rent(count);
+            MovingAverage(data, maType, fastLength, volumeForce.Span, fast.WritableSpan);
+            MovingAverage(data, maType, slowLength, volumeForce.Span, slow.WritableSpan);
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = fast.Span[i] - slow.Span[i];
+            }
+        }
+
+        if (series == KlingerSeries.Oscillator)
+        {
+            return buffer;
+        }
+
+        using var oscillator = context.Rent(count);
+        output.CopyTo(oscillator.WritableSpan);
+        MovingAverage(data, maType, signalLength, oscillator.Span, output);
+
+        if (series == KlingerSeries.Histogram)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = oscillator.Span[i] - output[i];
+            }
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Which of the Klinger volume oscillator's three published series an arm has been asked for.
+    /// </summary>
+    internal enum KlingerSeries
+    {
+        Oscillator,
+        Signal,
+        Histogram
     }
 
     /// <summary>
