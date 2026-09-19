@@ -798,7 +798,8 @@ internal static partial class IndicatorCompute
                 vlma.Length, vlma.Length * 2, vlma.MaType),
             VerticalHorizontalMovingAverageSpecOptions vhma => ComputeVerticalHorizontalMovingAverageFast(data, context, vhma.Length),
             VolatilityMovingAverageSpecOptions volma => ComputeVolatilityMovingAverageFast(data, context, volma.Length),
-            VolatilityWaveMovingAverageSpecOptions vwma => ComputeVolatilityWaveMovingAverageFast(data, context, vwma.Length),
+            VolatilityWaveMovingAverageSpecOptions vwma => ComputeVolatilityWaveMovingAverageFast(data, context, vwma.Length,
+                maType: vwma.MaType),
             WellRoundedMovingAverageSpecOptions wrma => ComputeWellRoundedMovingAverageFast(data, context, wrma.Length),
             WildersSummationMethodSpecOptions wsm => ComputeWildersSummationMethodFast(data, context, wsm.Length),
             ZeroLagTripleExponentialMovingAverageSpecOptions zltema => ComputeZeroLagTripleExponentialMovingAverageFast(data, context, zltema.Length),
@@ -1294,7 +1295,8 @@ internal static partial class IndicatorCompute
             ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
 
             // Batch 24 - Complex Oscillators and Ehlers Indicators
-            AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context, aeco.SmoothLength, aeco.SignalLength, aeco.MaType),
+            AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context,
+                aeco.SmoothLength, aeco.StochLength),
             ConfluenceIndicatorSpecOptions ci2 => ComputeConfluenceIndicatorFast(data, context, ci2.Length, ci2.MaType),
             ConstanceBrownCompositeIndexSpecOptions cbci => ComputeConstanceBrownCompositeIndexFast(data, context,
                 cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType),
@@ -11191,11 +11193,56 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Adaptive Laguerre Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length1 = 14,
+        int length2 = 5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersAdaptiveLaguerreFilter(close, buffer.WritableSpan, length);
+        // CalculateEhlersAdaptiveLaguerreFilter runs a four-stage Laguerre filter whose coefficient is not
+        // fixed: each bar ranks how far the series strayed from the filter against the window's own extremes
+        // and takes the median of those ranks as the coefficient.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var deviationWindow = new RollingMinMax(length1);
+        using var ranks = new RollingMedian(length2);
+
+        double l0 = 0;
+        double l1 = 0;
+        double l2 = 0;
+        double l3 = 0;
+        double alpha = (double)2 / (length1 + 1);
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+
+            // The opening bar has no filter yet, so every stage starts from the series itself.
+            var previousL0 = i >= 1 ? l0 : currentValue;
+            var previousL1 = i >= 1 ? l1 : currentValue;
+            var previousL2 = i >= 1 ? l2 : currentValue;
+            var previousL3 = i >= 1 ? l3 : currentValue;
+            var previousFilter = i >= 1 ? output[i - 1] : currentValue;
+
+            var deviation = Math.Abs(currentValue - previousFilter);
+            deviationWindow.Add(deviation);
+
+            var highest = deviationWindow.Max;
+            var lowest = deviationWindow.Min;
+            var rank = highest - lowest != 0 ? (deviation - lowest) / (highest - lowest) : 0;
+            ranks.Add(rank);
+
+            alpha = rank != 0 ? ranks.Median : alpha;
+
+            l0 = (alpha * currentValue) + ((1 - alpha) * previousL0);
+            l1 = (-1 * (1 - alpha) * l0) + previousL0 + ((1 - alpha) * previousL1);
+            l2 = (-1 * (1 - alpha) * l1) + previousL1 + ((1 - alpha) * previousL2);
+            l3 = (-1 * (1 - alpha) * l2) + previousL2 + ((1 - alpha) * previousL3);
+
+            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
+        }
+
         return buffer;
     }
 
@@ -14262,12 +14309,54 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volatility Wave Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolatilityWaveMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        double kf = 2.5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // CalculateVolatilityWaveMovingAverage sets each bar's weighting exponent from the deviation of the
+        // window taken as a percentage of price, weights the window by (length - j) raised to it, then removes
+        // the lag by doubling one short average of that and subtracting a second taken over it.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.VolatilityWaveMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var shortLength = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(length)));
+
+        using var deviations = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviations.WritableSpan, Math.Max(1, length));
+
+        using var weighted = context.Rent(count);
+        var weightedAverage = weighted.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var deviationPercent = currentValue != 0 ? deviations.Span[i] / currentValue * 100 : 0;
+            var exponent = deviationPercent >= 0 ? MathHelper.MinOrMax(MathHelper.Sqrt(deviationPercent) * kf, 4, 1) : 1;
+
+            double sum = 0;
+            double weightSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var weight = MathHelper.Pow(length - j, exponent);
+                var previousValue = i >= j ? input[i - j] : 0;
+
+                sum += previousValue * weight;
+                weightSum += weight;
+            }
+
+            weightedAverage[i] = weightSum != 0 ? sum / weightSum : 0;
+        }
+
+        using var firstPass = context.Rent(count);
+        using var secondPass = context.Rent(count);
+        MovingAverage(data, maType, shortLength, weighted.Span, firstPass.WritableSpan);
+        MovingAverage(data, maType, shortLength, firstPass.Span, secondPass.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (2 * firstPass.Span[i]) - secondPass.Span[i];
+        }
+
         return buffer;
     }
 
@@ -21780,12 +21869,53 @@ internal static partial class IndicatorCompute
 
     // Batch 24 - Complex Oscillators and Ehlers Indicators
 
-    internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int smoothLength = 5, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context,
+        int smoothLength = 5, int stochLength = 14)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ErgodicCandlestickOscillator(open, close, buffer.WritableSpan, smoothLength, signalLength);
+        // CalculateAdaptiveErgodicCandlestickOscillator smooths the body and the range of each candle twice,
+        // at a rate the stochastic's distance from its midpoint sets bar by bar, and publishes their ratio.
+        // The signal length and the average type only reach the separate "Signal" series, so the arm takes
+        // neither. The stochastic is the verified arm rather than a second derivation.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var close = SpanCompat.AsReadOnlySpan(inputList);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+
+        var rate = (double)2 / (smoothLength + 1);
+        double settleBars = (stochLength + smoothLength) * 2;
+
+        using var stochastic = ComputeStochasticOscillatorFast(data, context, stochLength);
+        var stoch = stochastic.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double body = 0;
+        double range = 0;
+        double smoothedBody = 0;
+        double smoothedRange = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var vigour = Math.Abs(stoch[i] - 50) / 50;
+            var currentBody = close[i] - opens[i];
+            var currentRange = highs[i] - lows[i];
+
+            var previousBody = body;
+            var previousRange = range;
+            var previousSmoothedBody = smoothedBody;
+            var previousSmoothedRange = smoothedRange;
+
+            // Until the filter has settled it simply tracks the candle, which is what the batch's i < ce says.
+            body = i < settleBars ? currentBody : previousBody + (rate * vigour * (currentBody - previousBody));
+            range = i < settleBars ? currentRange : previousRange + (rate * vigour * (currentRange - previousRange));
+            smoothedBody = i < settleBars ? body : previousSmoothedBody + (rate * vigour * (body - previousSmoothedBody));
+            smoothedRange = i < settleBars ? range : previousSmoothedRange + (rate * vigour * (range - previousSmoothedRange));
+
+            output[i] = smoothedRange != 0 ? smoothedBody / smoothedRange * 100 : 0;
+        }
+
         return buffer;
     }
 
