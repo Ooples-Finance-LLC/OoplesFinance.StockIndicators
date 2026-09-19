@@ -880,7 +880,8 @@ internal static partial class IndicatorCompute
             ShinoharaIntensityRatioBSpecOptions sirb => ComputeShinoharaIntensityRatioBFast(data, context, sirb.Length),
             RangeActionVerificationIndexSpecOptions ravi => ComputeRangeActionVerificationIndexFast(data, context, ravi.FastLength, ravi.SlowLength),
             WilliamsAccumulationDistributionSpecOptions _ => ComputeWilliamsAccumulationDistributionFast(data, context),
-            TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2),
+            TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2,
+                tpi.MaType),
             TurboTriggerSpecOptions tt => ComputeTurboTriggerFast(data, context, tt.Length, tt.PctMultiplier),
             TurboScalerSpecOptions ts => ComputeTurboScalerFast(data, context, ts.Length, ts.PctMultiplier),
             TTMScalperIndicatorSpecOptions _ => ComputeTTMScalperIndicatorFast(data, context),
@@ -14626,16 +14627,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Total Power Indicator (bull power output) using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTotalPowerIndicatorFast(StockData data, ComputeContext context, int length1 = 45, int length2 = 10)
+    internal static ComputeBuffer ComputeTotalPowerIndicatorFast(StockData data, ComputeContext context, int length1 = 45,
+        int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var bullBuffer = context.Rent(data.Count);
-        var bearBuffer = context.Rent(data.Count);
-        OscillatorCore.TotalPowerIndicator(close, high, low, bullBuffer.WritableSpan, bearBuffer.WritableSpan, length1, length2);
-        bearBuffer.Dispose();
-        return bullBuffer;
+        // CalculateTotalPowerIndicator counts how many of the last length1 bars the elder ray bull power was
+        // positive against how many its bear power was negative, and scales the gap between the two counts to
+        // 0..100. Elder ray measures the high and the low against a moving average of the chained series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length2, input, average.WritableSpan);
+        var ema = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var bullCountSumWindow = new RollingSum();
+        var bearCountSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            bullCountSumWindow.Add(highs[i] - ema[i] > 0 ? 1 : 0);
+            bearCountSumWindow.Add(lows[i] - ema[i] < 0 ? 1 : 0);
+
+            var bullCountSum = bullCountSumWindow.Sum(length1);
+            var bearCountSum = bearCountSumWindow.Sum(length1);
+            output[i] = length1 != 0 ? 100 * Math.Abs(bullCountSum - bearCountSum) / length1 : 0;
+        }
+
+        return buffer;
     }
 
     /// <summary>
@@ -15582,13 +15605,48 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Trailing Stop using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
+    internal static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 100,
+        double factor = 3)
     {
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AdaptiveTrailingStop(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, multiplier);
+        // CalculateAdaptiveTrailingStop drives an upper and a lower envelope toward the chained series at the
+        // rate of the powered Kaufman efficiency ratio - the Per series of
+        // CalculatePoweredKaufmanAdaptiveMovingAverage - holds each at its last turn, and publishes whichever
+        // side the price is not on. MovingAverageCore.AdaptiveTrailingStop stepped a fixed multiple of range
+        // off the close, which is a different indicator.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var volatilityWindow = new RollingSum();
+        double a = 0, b = 0, up = 0, dn = 0, os = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var priorValue = i >= length ? input[i - length] : 0;
+
+            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)));
+            var volatilitySum = volatilityWindow.Sum(length);
+            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
+            var efficiencyRatio = volatilitySum != 0 ? momentum / volatilitySum : 0;
+            var per = MathHelper.Pow(efficiencyRatio, factor);
+
+            var prevA = i >= 1 ? a : currentValue;
+            var prevB = i >= 1 ? b : currentValue;
+            a = Math.Max(currentValue, prevA) - (Math.Abs(currentValue - prevA) * per);
+            b = Math.Min(currentValue, prevB) + (Math.Abs(currentValue - prevB) * per);
+
+            up = a > prevA ? a : a < prevA && b < prevB ? a : up;
+            dn = b < prevB ? b : b > prevB && a > prevA ? b : dn;
+            os = up > currentValue ? 1 : dn > currentValue ? 0 : os;
+
+            output[i] = (os * dn) + ((1 - os) * up);
+        }
+
         return buffer;
     }
 
@@ -21296,56 +21354,41 @@ internal static partial class IndicatorCompute
 
     // Batch 29 - Ergodic and Momentum Indicators
 
-    internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context, int length = 32, int smoothLength = 5, double pointValue = 1, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context,
+        int length = 32, int smoothLength = 5, double pointValue = 1,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // V1 Algorithm: CSI = k * adxR * tr / length, normalized by price
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        int count = data.Count;
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
+        // CalculateErgodicCommoditySelectionIndex scales the average of the current and previous ADX by the
+        // true range and divides by the price, so the reading is comparable across instruments. Its Ecsi key
+        // is that raw series - the average over smoothLength is the Signal - and smoothLength enters only
+        // through k. The first bar takes the current close as its previous close, so its true range is the
+        // bar's own range rather than an inflated gap.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
 
-        double k = 100 * (pointValue / Math.Sqrt(length) / (150 + smoothLength));
+        var k = 100 * (pointValue / MathHelper.Sqrt(length) / (150 + smoothLength));
 
-        // Step 1: Calculate ADX
-        var adxBuffer = context.Rent(count);
-        OscillatorCore.AverageDirectionalIndex(high, low, close, adxBuffer.WritableSpan, length);
-        var adxSpan = adxBuffer.Span;
+        using var directional = ComputeAdxFast(data, context, length, maType);
+        var adx = directional.Span;
 
-        // Step 2: Calculate CSI values
-        var csiBuffer = context.Rent(count);
-        var csiSpan = csiBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            double currentHigh = high[i];
-            double currentLow = low[i];
-            double currentClose = close[i];
-            double prevClose = i >= 1 ? close[i - 1] : 0;
-            double adx = adxSpan[i];
-            double prevAdx = i >= 1 ? adxSpan[i - 1] : 0;
-            double adxR = (adx + prevAdx) * 0.5;
-
-            // True Range calculation
-            double highLow = currentHigh - currentLow;
-            double highClose = Math.Abs(currentHigh - prevClose);
-            double lowClose = Math.Abs(currentLow - prevClose);
-            double tr = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-            double csi = (length + tr) > 0 ? k * adxR * tr / length : 0;
-            double ergodicCsi = currentClose > 0 ? csi / currentClose : 0;
-            csiSpan[i] = ergodicCsi;
+            var prevAdx = i >= 1 ? adx[i - 1] : 0;
+            var adxR = (adx[i] + prevAdx) * 0.5;
+            var prevValue = i >= 1 ? input[i - 1] : input[i];
+            var trueRange = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevValue);
+            var csi = length + trueRange > 0 ? k * adxR * trueRange / length : 0;
+            output[i] = input[i] > 0 ? csi / input[i] : 0;
         }
 
-        adxBuffer.Dispose();
-
-        // Step 3: Smooth the CSI values
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(csiBuffer.Span, result.WritableSpan, smoothLength);
-        csiBuffer.Dispose();
-
-        return result;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
