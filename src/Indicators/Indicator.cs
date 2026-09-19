@@ -147,10 +147,18 @@ public abstract class Indicator : IIndicator
     /// <see cref="IComposedIndicatorState"/> when the indicator declared components.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Called once per run, never shared between runs, so a state is free to hold whatever it needs without
     /// worrying about another run's bars arriving in it.
+    /// </para>
+    /// <para>
+    /// Virtual rather than abstract, and returning <see langword="null"/> by default, because a generated
+    /// indicator is not its own arithmetic: it names a batch indicator through <see cref="IBuiltInIndicator"/>
+    /// and the compute layer supplies the calculation. Exactly one of the two has to be true of any
+    /// indicator, which is what <c>RequireComputable</c> checks.
+    /// </para>
     /// </remarks>
-    protected internal abstract object CreateState();
+    protected internal virtual object? CreateState() => null;
 }
 
 /// <summary>
@@ -234,7 +242,11 @@ public abstract class MultiOutputIndicator : IMultiOutputIndicator
     /// Creates the arithmetic. Return an <see cref="IMultiOutputState"/>, or an
     /// <see cref="IComposedMultiOutputState"/> when the indicator declared components.
     /// </summary>
-    protected internal abstract object CreateState();
+    /// <remarks>
+    /// Virtual for the same reason as <see cref="Indicator.CreateState"/>: a generated indicator routes to the
+    /// compute layer instead of carrying its own arithmetic.
+    /// </remarks>
+    protected internal virtual object? CreateState() => null;
 }
 
 /// <summary>
