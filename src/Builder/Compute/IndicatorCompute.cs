@@ -619,7 +619,8 @@ internal static partial class IndicatorCompute
             EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length,
                 maType: eift.MaType),
             EhlersCyberCycleSpecOptions ecc => ComputeEhlersCyberCycleFast(data, context, ecc.Length),
-            EhlersStochasticSpecOptions esto => ComputeEhlersStochasticFast(data, context, esto.Length),
+            EhlersStochasticSpecOptions esto => ComputeEhlersStochasticFast(data, context, length2: esto.Length,
+                maType: esto.MaType),
             EhlersAdaptiveLaguerreFilterSpecOptions ealf => ComputeEhlersAdaptiveLaguerreFilterFast(data, context, ealf.Length),
 
             // Batch 7 - Trend/Filter indicators
@@ -1053,7 +1054,8 @@ internal static partial class IndicatorCompute
             EhlersHannWindowIndicatorSpecOptions ehnwi => ComputeEhlersHannWindowFast(data, context, ehnwi.Length, ehnwi.MaType),
             EhlersTriangleWindowIndicatorSpecOptions etwi => ComputeEhlersTriangleWindowFast(data, context, etwi.Length, etwi.MaType),
             EhlersImpulseResponseSpecOptions eir => ComputeEhlersImpulseResponseFast(data, context, eir.Length, eir.Bw, eir.MaType),
-            EhlersModifiedStochasticIndicatorSpecOptions emsi => ComputeEhlersModifiedStochasticFast(data, context, emsi.Length1, emsi.Length2, emsi.Length3),
+            EhlersModifiedStochasticIndicatorSpecOptions emsi => ComputeEhlersModifiedStochasticFast(data, context,
+                emsi.Length1, emsi.Length2, emsi.Length3, emsi.MaType),
 
             // Batch 11 - Additional Moving Averages with Core methods
             VariableIndexDynamicAverageSpecOptions vida => ComputeVariableIndexDynamicAverageFast(data, context, vida.Length),
@@ -8531,11 +8533,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Stochastic Center of Gravity Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 8)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersStochasticCenterOfGravityOscillator(close, buffer.WritableSpan, length);
+        // CalculateEhlersStochasticCenterOfGravityOscillator stochasticises the centre of gravity oscillator
+        // over its own window, smooths that with a four bar weighted average rescaled about zero, and
+        // publishes the trigger built from the PREVIOUS bar's smoothed value, not the current one.
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        using var centerOfGravity = ComputeEhlersCenterofGravityOscillatorFast(data, context, length);
+        var cg = centerOfGravity.Span;
+
+        using var stochastic = context.Rent(count);
+        var v1 = stochastic.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var window = new RollingMinMax(Math.Max(length, 2));
+        var prevV2 = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(cg[i]);
+            var range = window.Max - window.Min;
+            v1[i] = range != 0 ? (cg[i] - window.Min) / range : 0;
+
+            output[i] = MathHelper.MinOrMax(0.96 * (prevV2 + 0.02), 1, 0);
+
+            var weighted = ((4 * v1[i]) + (3 * (i >= 1 ? v1[i - 1] : 0)) + (2 * (i >= 2 ? v1[i - 2] : 0)) +
+                (i >= 3 ? v1[i - 3] : 0)) / 10;
+            prevV2 = 2 * (weighted - 0.5);
+        }
+
         return buffer;
     }
 
@@ -8553,12 +8582,105 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Adaptive Center of Gravity Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersAdaptiveCenterOfGravityOscillator(close, buffer.WritableSpan, length);
+        // CalculateEhlersAdaptiveCenterOfGravityOscillator takes the centre of gravity of the chained series
+        // over half the measured dominant cycle, so its window changes bar by bar. The arm this replaces used
+        // a fixed window over the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var adaptiveCycle = context.Rent(count);
+        using var periods = context.Rent(count);
+        EhlersAdaptiveCyberCycle(context, input, length, 0.07, adaptiveCycle.WritableSpan, periods.WritableSpan);
+        var period = periods.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var intPeriod = (int)Math.Ceiling(period[i] / 2);
+
+            double num = 0, denom = 0;
+            for (var j = 0; j <= intPeriod - 1; j++)
+            {
+                var prevPrice = i >= j ? input[i - j] : 0;
+                num += (1 + j) * prevPrice;
+                denom += prevPrice;
+            }
+
+            // The centring term is integer division in the batch, so half of an odd period truncates. Keep it.
+            output[i] = denom != 0 ? (-num / denom) + ((intPeriod + 1) / 2) : 0;
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers' adaptive cyber cycle and the dominant cycle period it measures, so that indicators
+    /// built on either series can reach it without materialising a second indicator's output dictionary.
+    /// </summary>
+    private static void EhlersAdaptiveCyberCycle(ComputeContext context, ReadOnlySpan<double> input, int length,
+        double alpha, Span<double> adaptiveCycle, Span<double> period)
+    {
+        var count = input.Length;
+        length = Math.Max(length, 1);
+
+        using var smoothed = context.Rent(count);
+        using var cycles = context.Rent(count);
+        var smooth = smoothed.WritableSpan;
+        var cycle = cycles.WritableSpan;
+        using var deltaPhaseMedian = new RollingMedian(length);
+
+        double prevIp = 0, prevP = 0, prevQ1 = 0, prevI1 = 0, prevAc1 = 0, prevAc2 = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var prevValue2 = i >= 2 ? input[i - 2] : 0;
+            var prevValue3 = i >= 3 ? input[i - 3] : 0;
+            var prevSmooth = i >= 1 ? smooth[i - 1] : 0;
+            var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
+            var prevCycle = i >= 1 ? cycle[i - 1] : 0;
+            var prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
+            var prevCycle3 = i >= 3 ? cycle[i - 3] : 0;
+            var prevCycle4 = i >= 4 ? cycle[i - 4] : 0;
+            var prevCycle6 = i >= 6 ? cycle[i - 6] : 0;
+
+            smooth[i] = (currentValue + (2 * prevValue) + (2 * prevValue2) + prevValue3) / 6;
+            cycle[i] = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
+                (MathHelper.Pow(1 - (0.5 * alpha), 2) * (smooth[i] - (2 * prevSmooth) + prevSmooth2)) +
+                (2 * (1 - alpha) * prevCycle) - (MathHelper.Pow(1 - alpha, 2) * prevCycle2);
+
+            var q1 = ((0.0962 * cycle[i]) + (0.5769 * prevCycle2) - (0.5769 * prevCycle4) - (0.0962 * prevCycle6)) *
+                (0.5 + (0.08 * prevIp));
+            var i1 = prevCycle3;
+
+            var deltaPhase = MathHelper.MinOrMax(q1 != 0 && prevQ1 != 0 ?
+                ((i1 / q1) - (prevI1 / prevQ1)) / (1 + (i1 * prevI1 / (q1 * prevQ1))) : 0, 1.1, 0.1);
+            deltaPhaseMedian.Add(deltaPhase);
+
+            var medianDelta = deltaPhaseMedian.Median;
+            var dominantCycle = medianDelta != 0 ? (6.28318 / medianDelta) + 0.5 : 15;
+
+            var ip = (0.33 * dominantCycle) + (0.67 * prevIp);
+            var p = (0.15 * ip) + (0.85 * prevP);
+            period[i] = p;
+
+            var a1 = 2 / (p + 1);
+            var ac = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
+                (MathHelper.Pow(1 - (0.5 * a1), 2) * (smooth[i] - (2 * prevSmooth) + prevSmooth2)) +
+                (2 * (1 - a1) * prevAc1) - (MathHelper.Pow(1 - a1, 2) * prevAc2);
+            adaptiveCycle[i] = ac;
+
+            prevIp = ip;
+            prevP = p;
+            prevQ1 = q1;
+            prevI1 = i1;
+            prevAc2 = prevAc1;
+            prevAc1 = ac;
+        }
     }
 
     #endregion
@@ -9604,11 +9726,36 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length1 = 48,
+        int length2 = 20, int length3 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersStochastic(close, buffer.WritableSpan, length);
+        // CalculateEhlersStochastic takes the stochastic of the roofing filter over its own range, averages
+        // each reading with the one before it, and smooths that with the same moving average the roofing
+        // filter uses. MovingAverageCore.EhlersStochastic measured the close against its own window instead,
+        // which is a different indicator entirely.
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        using var roofing = EhlersRoofingFilterV1Core(data, context, length1, length3, maType);
+        var rf = roofing.Span;
+
+        using var argument = context.Rent(count);
+        var arg = argument.WritableSpan;
+        var window = new RollingMinMax(Math.Max(length2, 2));
+        var prevStoch = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(rf[i]);
+            var range = window.Max - window.Min;
+            var stoch = range != 0 ? MathHelper.MinOrMax((rf[i] - window.Min) / range, 1, 0) : 0;
+            arg[i] = (stoch + prevStoch) / 2;
+            prevStoch = stoch;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length2, argument.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -15709,22 +15856,41 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Modified Stochastic Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersModifiedStochasticFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 20)
+    internal static ComputeBuffer ComputeEhlersModifiedStochasticFast(StockData data, ComputeContext context, int length1 = 48,
+        int length2 = 10, int length3 = 20, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        // CalculateEhlersModifiedStochasticIndicator stochasticises the roofing filter over length3 and then
+        // runs the two-bar average of that through a two pole super smoother whose coefficients come from
+        // length1. The arm this replaces measured the close against its own window and ignored the filter.
+        var count = data.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / length1);
+        var c2 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99));
+        var c3 = -1 * a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        using var roofing = EhlersRoofingFilterV1Core(data, context, length1, length2, maType);
+        var rf = roofing.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var window = new RollingMinMax(Math.Max(length3, 2));
+        var prevStoc = 0d;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            window.Add(rf[i]);
+            var range = window.Max - window.Min;
+            var stoc = range != 0 ? (rf[i] - window.Min) / range * 100 : 0;
+            var prevModStoc1 = i >= 1 ? output[i - 1] : 0;
+            var prevModStoc2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevModStoc1) + (c3 * prevModStoc2);
+            prevStoc = stoc;
         }
-        var buffer = context.Rent(count);
-        // Use EhlersStochastic as a close approximation
-        MovingAverageCore.EhlersStochastic(close, buffer.WritableSpan, length3);
+
         return buffer;
     }
 
