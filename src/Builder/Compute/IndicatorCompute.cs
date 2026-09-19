@@ -256,7 +256,7 @@ internal static partial class IndicatorCompute
             NaturalMaSpecOptions nma => ComputeNaturalMaFast(data, context, nma.Length),
 
             // Batch 4 - Volume indicators
-            TradeVolumeIndexSpecOptions tvi => ComputeTradeVolumeIndexFast(data, context, tvi.Length),
+            TradeVolumeIndexSpecOptions => ComputeTradeVolumeIndexFast(data, context),
             VolumeOscillatorSpecOptions vo => ComputeVolumeOscillatorFast(data, context, vo.Length),
             VolumeZoneOscillatorSpecOptions vzo => ComputeVolumeZoneOscillatorFast(data, context, vzo.Length),
             NetVolumeSpecOptions nv => ComputeNetVolumeFast(data, context, nv.Length),
@@ -876,7 +876,7 @@ internal static partial class IndicatorCompute
             TTMScalperIndicatorSpecOptions _ => ComputeTTMScalperIndicatorFast(data, context),
             StrengthOfMovementSpecOptions som => ComputeStrengthOfMovementFast(data, context, som.Length1, som.Length2),
             ValueChartIndicatorSpecOptions vci => ComputeValueChartIndicatorFast(data, context, vci.Length, vci.NumAtrs),
-            SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length),
+            SellGravitationIndexSpecOptions sgi => ComputeSellGravitationIndexFast(data, context, sgi.Length, sgi.MaType),
             TFSTetherLineIndicatorSpecOptions tfs => ComputeTFSTetherLineIndicatorFast(data, context, tfs.Length),
             EhlersSimpleCycleIndicatorSpecOptions esci => ComputeEhlersSimpleCycleIndicatorFast(data, context, esci.Alpha),
             EhlersFisherTransformSpecOptions eft => ComputeEhlersFisherTransformFast(data, context, eft.Length),
@@ -974,7 +974,7 @@ internal static partial class IndicatorCompute
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
             PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
-            PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length),
+            PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
             RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length),
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length),
             TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2),
@@ -1233,7 +1233,7 @@ internal static partial class IndicatorCompute
             // Batch 22 - Market and Volume Indicators
             NaturalMarketMirrorSpecOptions nmm => ComputeNaturalMarketMirrorFast(data, context, nmm.Length, nmm.MaType),
             NaturalMarketRiverSpecOptions nmr => ComputeNaturalMarketRiverFast(data, context, nmr.Length, nmr.MaType),
-            NaturalMarketComboSpecOptions nmc => ComputeNaturalMarketComboFast(data, context, nmc.Length, nmc.SmoothLength, nmc.MaType),
+            NaturalMarketComboSpecOptions nmc => ComputeNaturalMarketComboFast(data, context, nmc.Length, nmc.MaType),
             NaturalStochasticIndicatorSpecOptions nsi => ComputeNaturalStochasticIndicatorFast(data, context, nsi.Length, nsi.SmoothLength, nsi.MaType),
             NegativeVolumeDisparityIndicatorSpecOptions nvdi => ComputeNegativeVolumeDisparityFast(data, context, nvdi.Length, nvdi.SignalLength, nvdi.Top, nvdi.Bottom, nvdi.MaType),
             OceanIndicatorSpecOptions oi => ComputeOceanIndicatorFast(data, context, oi.Length),
@@ -3443,11 +3443,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Zone Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceZoneOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePriceZoneOscillatorFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PriceZoneOscillator(close, buffer.WritableSpan, length);
+        // CalculatePriceZoneOscillator publishes "Pzo": the moving average of the chained series signed by the
+        // direction of each bar, expressed as a percentage of the plain moving average of that series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        var vma = average.Span;
+
+        using var directional = context.Rent(count);
+        var dvol = directional.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            dvol[i] = Math.Sign(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue)) * input[i];
+        }
+
+        using var directionalAverage = context.Rent(count);
+        MovingAverage(data, maType, length, directional.Span, directionalAverage.WritableSpan);
+        var dvma = directionalAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = vma[i] != 0 ? MathHelper.MinOrMax(100 * dvma[i] / vma[i], 100, -100) : 0;
+        }
+
         return buffer;
     }
 
@@ -3948,13 +3975,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trade Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context)
     {
-        _ = length; // TVI uses minTickValue, not length
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.TradeVolumeIndex(close, volume, buffer.WritableSpan, 0.5);
+        // CalculateTradeVolumeIndex publishes "Tvi": volume accumulated in the direction of any price move
+        // larger than the minimum tick. Neither the length nor the moving average type reaches that series, and
+        // the minimum tick is fixed by the batch call, so the arm takes no parameters.
+        const double minTickValue = 0.5;
+
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var priceChange = input[i] - prevValue;
+            var prevTvi = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = priceChange > minTickValue ? prevTvi + volumes[i]
+                : priceChange < -minTickValue ? prevTvi - volumes[i] : prevTvi;
+        }
+
         return buffer;
     }
 
@@ -7972,11 +8016,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Difference of Squares Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRelativeDifferenceOfSquaresOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRelativeDifferenceOfSquaresOscillatorFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RelativeDifferenceOfSquaresOscillator(close, buffer.WritableSpan, length);
+        // CalculateRelativeDifferenceOfSquaresOscillator publishes "Rdos": the squared count of advances less
+        // the squared count of declines, over the squared total of advances, declines and unchanged bars.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var advances = new RollingSum();
+        var declines = new RollingSum();
+        var unchanged = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+
+            advances.Add(input[i] > prevValue ? 1 : 0);
+            declines.Add(input[i] < prevValue ? 1 : 0);
+            unchanged.Add(input[i] == prevValue ? 1 : 0);
+
+            var aSum = advances.Sum(length);
+            var dSum = declines.Sum(length);
+            var nSum = unchanged.Sum(length);
+            output[i] = aSum > 0 || dSum > 0 || nSum > 0
+                ? (MathHelper.Pow(aSum, 2) - MathHelper.Pow(dSum, 2)) / MathHelper.Pow(aSum + nSum + dSum, 2) : 0;
+        }
+
         return buffer;
     }
 
@@ -12402,13 +12470,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sell Gravitation Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeSellGravitationIndexFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SellGravitationIndex(close, high, low, buffer.WritableSpan, length);
+        // CalculateSellGravitationIndex publishes "Sgi": the moving average of the body of each bar as a
+        // fraction of its range, measured against the chained series rather than the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var count = inputList.Count;
+
+        using var ratio = context.Rent(count);
+        var v3 = ratio.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var range = highs[i] - lows[i];
+            v3[i] = range != 0 ? (input[i] - opens[i]) / range : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, ratio.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -17379,19 +17462,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Market Combo using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalMarketComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeNaturalMarketComboFast(StockData data, ComputeContext context, int length = 40,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalMarketCombo publishes "Nmc": the signed square root of the combination of the river
+        // and the mirror, both taken over the caller's own series. The spec's smoothLength smooths a series the
+        // batch never publishes, so it is not a parameter of this arm.
+        using var river = ComputeNaturalMarketRiverFast(data, context, length, maType);
+        using var mirror = ComputeNaturalMarketMirrorFast(data, context, length, maType);
+        var nmr = river.Span;
+        var nmm = mirror.Span;
+        var count = nmr.Length;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var v3 = Math.Sign(nmm[i]) != Math.Sign(nmr[i]) ? nmm[i] * nmr[i]
+                : ((Math.Abs(nmm[i]) * nmr[i]) + (Math.Abs(nmr[i]) * nmm[i])) / 2;
+            output[i] = Math.Sign(v3) * MathHelper.Sqrt(Math.Abs(v3));
         }
+
         return buffer;
     }
 
@@ -18501,11 +18592,20 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21, int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendAnalysisIndicatorFast(StockData data, ComputeContext context, int length1 = 21,
+        int length2 = 4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.LinearRegressionSlope(close, buffer.WritableSpan, length1);
+        // CalculateTrendAnalysisIndicator publishes "Tai": the standard deviation, over the short length, of the
+        // long moving average of the chained series. The regression slope this replaced measured something else
+        // entirely, and over the wrong length.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(inputList), slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        VolatilityCore.StandardDeviation(slow.Span, buffer.WritableSpan, length2);
         return buffer;
     }
 
