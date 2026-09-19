@@ -554,7 +554,8 @@ internal static partial class IndicatorCompute
             // Batch 6 - Convergence/Divergence oscillators
             RelativeDifferenceOfSquaresOscillatorSpecOptions rdoso => ComputeRelativeDifferenceOfSquaresOscillatorFast(data, context, rdoso.Length),
             LinearQuadraticConvergenceDivergenceOscillatorSpecOptions lqcdo => ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(data, context, lqcdo.Length),
-            StationaryExtrapolatedLevelsOscillatorSpecOptions selo => ComputeStationaryExtrapolatedLevelsOscillatorFast(data, context, selo.Length),
+            StationaryExtrapolatedLevelsOscillatorSpecOptions selo => ComputeStationaryExtrapolatedLevelsOscillatorFast(data, context,
+                selo.Length, selo.MaType),
 
             // Batch 6 - Kaufman/MACD oscillators
             KaufmanAdaptiveCorrelationOscillatorSpecOptions kaco => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length),
@@ -1189,7 +1190,7 @@ internal static partial class IndicatorCompute
             },
             ApirineSlowRelativeStrengthIndexSpecOptions asrsi => ComputeApirineSlowRsiFast(data, context, asrsi.Length, asrsi.SmoothLength, asrsi.MaType),
             ElderSafeZoneStopsSpecOptions eszs => ComputeElderSafeZoneStopsFast(data, context, eszs.Length, eszs.Mult, eszs.MaType),
-            EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.SignalLength, ei.MaType),
+            EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType),
             FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio),
             FearAndGreedIndicatorSpecOptions fgi => ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.SmoothLength, fgi.MaType),
 
@@ -8419,11 +8420,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Stationary Extrapolated Levels Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeStationaryExtrapolatedLevelsOscillatorFast(StockData data, ComputeContext context, int length = 200,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StationaryExtrapolatedLevelsOscillator(close, buffer.WritableSpan, length);
+        // CalculateStationaryExtrapolatedLevelsOscillator detrends the series by its moving average, then
+        // extrapolates that residual forward from the values one and two windows back, and publishes the raw
+        // stochastic of the extrapolation over twice the length. The extrapolation, not the close, is the
+        // series the stochastic is taken of.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, input, smoothed.WritableSpan);
+        var sma = smoothed.Span;
+
+        using var residual = context.Rent(count);
+        using var extrapolated = context.Rent(count);
+        var y = residual.WritableSpan;
+        var ext = extrapolated.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            y[i] = input[i] - sma[i];
+
+            var prevY = i >= length ? y[i - length] : 0;
+            var prevY2 = i >= length * 2 ? y[i - (length * 2)] : 0;
+            ext[i] = ((2 * prevY) - prevY2) / 2;
+        }
+
+        var buffer = context.Rent(count);
+        StochasticFastK(data, context, extrapolated.Span, length * 2, buffer.WritableSpan);
         return buffer;
     }
 
@@ -17232,23 +17259,37 @@ internal static partial class IndicatorCompute
     /// Computes Enhanced Index using zero-allocation fast path.
     /// Returns the smoothed index value.
     /// </summary>
-    internal static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14, int signalLength = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEnhancedIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateEnhancedIndex places the chained series against its own half-length moving average and
+        // scales that gap by the high-to-low range of the window. It is not a moving average of the close,
+        // and the signal length only reaches the separate Signal series, so this arm does not take one.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, smaLength, input, smoothed.WritableSpan);
+        var sma = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var dnm = highWindow.Max - lowWindow.Min;
+            output[i] = dnm != 0 ? 2 * (input[i] - sma[i]) / dnm : 0;
         }
 
         return buffer;
@@ -19316,11 +19357,32 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeTrendAnalysisIndexFast(StockData data, ComputeContext context, int length1 = 28, int length2 = 5,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.LinearRegressionSlope(close, buffer.WritableSpan, length1);
+        // CalculateTrendAnalysisIndex measures how far the moving average has travelled over the short window,
+        // as a percentage of the current value - not the slope of a regression through the close, which is
+        // what this arm used to return. The moving average of the result is the separate Signal series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length1, 1), input, smoothed.WritableSpan);
+        var sma = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(Math.Max(length2, 2));
+        var lowWindow = new RollingMinMax(Math.Max(length2, 2));
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(sma[i]);
+            lowWindow.Add(sma[i]);
+            output[i] = input[i] != 0 ? (highWindow.Max - lowWindow.Min) * 100 / input[i] : 0;
+        }
+
         return buffer;
     }
 
