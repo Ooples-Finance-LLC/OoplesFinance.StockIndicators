@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder.Specs;
+﻿using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 
 // The table still names specs that are obsolete, so that a caller holding one keeps computing until the spec
@@ -80,7 +80,7 @@ internal static class BuilderArmTargets
         [typeof(BollingerBandsFibonacciRatiosSpecOptions)] = new(IndicatorName.BollingerBandsFibonacciRatios, "MiddleBand"),
         [typeof(BollingerBandsMiddleSpecOptions)] = new(IndicatorName.BollingerBands, "MiddleBand"),
         [typeof(BollingerBandsPercentBSpecOptions)] = new(IndicatorName.BollingerBandsPercentB, null, new BuilderArgument("Multiplier", "stdDevMult")),
-        [typeof(BollingerBandsSpecOptions)] = new(IndicatorName.BollingerBands, "UpperBand"),
+        [typeof(BollingerBandsSpecOptions)] = new(IndicatorName.BollingerBands, "MiddleBand"),
         [typeof(BollingerBandsWidthSpecOptions)] = new(IndicatorName.BollingerBandsWidth),
         [typeof(BollingerBandsWithAtrPctSpecOptions)] = new(IndicatorName.BollingerBandsWithAtrPct, "MiddleBand"),
         [typeof(BreakoutRsiSpecOptions)] = new(IndicatorName.BreakoutRelativeStrengthIndex),
@@ -380,7 +380,7 @@ internal static class BuilderArmTargets
         [typeof(HarmonicMeanMovingAverageSpecOptions)] = new(IndicatorName.HarmonicMeanMovingAverage),
         [typeof(HendersonWeightedMovingAverageSpecOptions)] = new(IndicatorName.HendersonWeightedMovingAverage),
         [typeof(HighestHighSpecOptions)] = new(IndicatorName.HighestHigh),
-        [typeof(HighLowBandsSpecOptions)] = new(IndicatorName.HighLowBands, "UpperBand"),
+        [typeof(HighLowBandsSpecOptions)] = new(IndicatorName.HighLowBands, "MiddleBand"),
         [typeof(HighLowIndexSpecOptions)] = new(IndicatorName.HighLowIndex),
         [typeof(HighLowMovingAverageSpecOptions)] = new(IndicatorName.HighLowMovingAverage, "MiddleBand"),
         [typeof(HirashimaSugitaRSSpecOptions)] = new(IndicatorName.HirashimaSugitaRS, "UpperBand1"),
