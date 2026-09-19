@@ -343,7 +343,7 @@ internal static partial class IndicatorCompute
             // beside the accumulator, and this spec is bound to the accumulator itself.
             ConditionalAccumulatorSpecOptions => ComputeConditionalAccumulatorFast(data, context),
             AhrensMovingAverageSpecOptions ahma => ComputeAhrensMovingAverageFast(data, context, ahma.Length),
-            AlphaDecreasingEmaSpecOptions adema => ComputeAlphaDecreasingEmaFast(data, context, adema.Length),
+            AlphaDecreasingEmaSpecOptions => ComputeAlphaDecreasingEmaFast(data, context),
             AdaptiveEmaSpecOptions aema => ComputeAdaptiveEmaFast(data, context, aema.Length),
             AutonomousRecursiveMaSpecOptions arma => ComputeAutonomousRecursiveMaFast(data, context, arma.Length),
             AdaptiveLeastSquaresSpecOptions als => ComputeAdaptiveLeastSquaresFast(data, context, als.Length),
@@ -3502,13 +3502,61 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fractal Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFramaFast(StockData data, ComputeContext context, int length = 16)
+    internal static ComputeBuffer ComputeFramaFast(StockData data, ComputeContext context, int length = 20)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.FractalAdaptiveMovingAverage(high, low, close, buffer.WritableSpan, length);
+        // CalculateEhlersFractalAdaptiveMovingAverage measures the high-low range over the window, over half of
+        // it, and over the half window that ended half a window ago. The ratio between those three is a fractal
+        // dimension, and the chained series is smoothed by an alpha that falls away as that dimension rises.
+        // MovingAverageCore.FractalAdaptiveMovingAverage warms up differently and reads the close, so it
+        // matched neither the first bar nor the rest.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        // The half period is clamped the way the batch clamps any length: never shorter than two bars.
+        var halfP = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        // The half-window extremes are read a second time half a window back, so they are kept rather than
+        // streamed; the full-window pair are only ever read at the current bar.
+        using var halfHighs = context.Rent(count);
+        using var halfLows = context.Rent(count);
+        var highest2 = halfHighs.WritableSpan;
+        var lowest2 = halfLows.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var filter = buffer.WritableSpan;
+
+        var fullHighWindow = new RollingMinMax(length);
+        var fullLowWindow = new RollingMinMax(length);
+        var halfHighWindow = new RollingMinMax(halfP);
+        var halfLowWindow = new RollingMinMax(halfP);
+
+        double previousFilter = 0;
+        for (var i = 0; i < count; i++)
+        {
+            fullHighWindow.Add(highs[i]);
+            fullLowWindow.Add(lows[i]);
+            halfHighWindow.Add(highs[i]);
+            halfLowWindow.Add(lows[i]);
+            highest2[i] = halfHighWindow.Max;
+            lowest2[i] = halfLowWindow.Min;
+
+            var currentValue = input[i];
+            var prevFilter = i >= 1 ? previousFilter : currentValue;
+            var lagIndex = Math.Max(i - halfP, 0);
+            var n3 = (fullHighWindow.Max - fullLowWindow.Min) / length;
+            var n1 = (highest2[i] - lowest2[i]) / halfP;
+            var n2 = (highest2[lagIndex] - lowest2[lagIndex]) / halfP;
+            var dm = n1 > 0 && n2 > 0 && n3 > 0 ? (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2) : 0;
+
+            var alpha = MathHelper.MinOrMax(MathHelper.Exp(-4.6 * (dm - 1)), 1, 0.01);
+            previousFilter = (alpha * currentValue) + ((1 - alpha) * prevFilter);
+            filter[i] = previousFilter;
+        }
+
         return buffer;
     }
 
@@ -3563,12 +3611,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Regularized EMA using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRegularizedEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeRegularizedEmaFast(StockData data, ComputeContext context, int length = 14,
+        double lambda = 0.5)
     {
+        // CalculateRegularizedExponentialMovingAverage pulls an exponential average towards the straight line
+        // carried on from its own last two values, with lambda setting how hard it is pulled.
+        // MovingAverageCore.RegularizedEma seeds its first bar with the input rather than starting from
+        // nothing, so the two series never meet.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.RegularizedEma(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var rema = buffer.WritableSpan;
+
+        var alpha = (double)2 / (length + 1);
+        for (var i = 0; i < count; i++)
+        {
+            var previousRema1 = i >= 1 ? rema[i - 1] : 0;
+            var previousRema2 = i >= 2 ? rema[i - 2] : 0;
+            rema[i] = (previousRema1 + (alpha * (input[i] - previousRema1)) + (lambda * ((2 * previousRema1) - previousRema2)))
+                / (lambda + 1);
+        }
+
         return buffer;
     }
 
@@ -4296,9 +4362,24 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSuperSmootherFast(StockData data, ComputeContext context, int length = 10)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.SuperSmoother(close, buffer.WritableSpan, length);
+        // CalculateEhlersSuperSmootherFilter runs its two-pole recursion from the very first bar with no
+        // history at all, so the opening bars are filtered rather than copied through.
+        // MovingAverageCore.SuperSmoother seeds the first two bars with the input instead, and it read the
+        // close rather than the chained series, so neither the warm-up nor the input matched. Walking the
+        // streaming engine keeps all three engines on one answer by construction.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var filt = buffer.WritableSpan;
+
+        var engine = new Streaming.EhlersSuperSmootherFilterEngine(length);
+        for (var i = 0; i < count; i++)
+        {
+            filt[i] = engine.Next(input[i], isFinal: true);
+        }
+
         return buffer;
     }
 
@@ -5350,11 +5431,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alpha Decreasing EMA using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AlphaDecreasingEma(close, buffer.WritableSpan, length);
+        // CalculateAlphaDecreasingExponentialMovingAverage takes no length at all: its smoothing constant is
+        // two over the bar number, which starts at two and decays for the whole series. That is why the spec
+        // marks its length as having no effect, and why it is no longer passed here.
+        // MovingAverageCore.AlphaDecreasingEma is a length-driven average of the close, a different series
+        // from its first bar on.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var ema = buffer.WritableSpan;
+
+        double previousEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var alpha = (double)2 / (i + 1);
+            previousEma = (alpha * input[i]) + ((1 - alpha) * previousEma);
+            ema[i] = previousEma;
+        }
+
         return buffer;
     }
 
@@ -9091,10 +9189,40 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeOptimalWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateOptimalWeightedMovingAverage raises each bar's distance from the present to the correlation
+        // between price and the average's own previous value, so the weighting tightens onto recent bars as the
+        // average tracks price and flattens when it does not. MovingAverageCore.OptimalWeightedMovingAverage
+        // uses fixed weights and agrees with none of it. RollingWindowCorrelation is the pooled form of the
+        // batch's RollingCorrelation, so the arm stays allocation free.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.OptimalWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var owma = buffer.WritableSpan;
+
+        using var correlation = new Streaming.RollingWindowCorrelation(length);
+        double previousOwma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var corr = correlation.Add(input[i], previousOwma, out _);
+            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
+
+            double sum = 0, weightedSum = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var weight = MathHelper.Pow(length - j, corr);
+                var previousValue = i >= j ? input[i - j] : 0;
+
+                sum += previousValue * weight;
+                weightedSum += weight;
+            }
+
+            previousOwma = weightedSum != 0 ? sum / weightedSum : 0;
+            owma[i] = previousOwma;
+        }
+
         return buffer;
     }
 
@@ -10002,13 +10130,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Windowed Volume Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeWindowedVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeWindowedVolumeWeightedMovingAverageFast(StockData data, ComputeContext context,
+        int length = 100)
     {
+        // CalculateWindowedVolumeWeightedMovingAverage weights each bar's volume by a Bartlett window taken
+        // over the bar number rather than over the position within the window, then divides the running sum of
+        // value times that weight by the running sum of the weight alone. The batch computes Blackman and
+        // Hanning windows alongside it but publishes only the Bartlett one, so that is the series walked here.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.WindowedVolumeWeightedMovingAverage(inputSpan, volume, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var wvwma = buffer.WritableSpan;
+
+        var weightSum = new RollingSum();
+        var weightedValueSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var bartlett = 1 - (2 * Math.Abs(i - ((double)length / 2)) / length);
+            var weight = bartlett * volumes[i];
+            weightSum.Add(weight);
+            weightedValueSum.Add(input[i] * weight);
+
+            var totalWeight = weightSum.Sum(length);
+            wvwma[i] = totalWeight != 0 ? weightedValueSum.Sum(length) / totalWeight : 0;
+        }
+
         return buffer;
     }
 
