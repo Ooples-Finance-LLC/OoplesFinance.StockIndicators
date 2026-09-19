@@ -289,7 +289,7 @@ internal static partial class IndicatorCompute
             PriceChannelMiddleSpecOptions pcm => ComputePriceChannelMiddleFast(data, context, pcm.Length),
             SwingIndexSpecOptions swi => ComputeSwingIndexFast(data, context, swi.LimitMove),
             AccumulativeSwingIndexSpecOptions asi => ComputeAccumulativeSwingIndexFast(data, context, asi.LimitMove),
-            ZigZagSpecOptions zz => ComputeZigZagFast(data, context, zz.Length),
+            ZigZagSpecOptions => ComputeZigZagFast(data, context),
             PivotPointSpecOptions pp => ComputePivotPointFast(data, context, pp.Length),
             RangeSpecOptions rng => ComputeRangeFast(data, context, rng.Length),
             PriceMomentumSpecOptions pmom => ComputePriceMomentumFast(data, context, pmom.Length),
@@ -499,7 +499,15 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Kurtosis/Degree oscillators
             FastSlowKurtosisOscillatorSpecOptions fsko => ComputeFastSlowKurtosisOscillatorFast(data, context, fsko.Length),
-            FastSlowDegreeOscillatorSpecOptions fsdo => ComputeFastSlowDegreeOscillatorFast(data, context, fsdo.Length),
+            FastSlowDegreeOscillatorSpecOptions fsdo => spec.OutputKey switch
+            {
+                null or "Fsdo" => ComputeFastSlowDegreeOscillatorFast(data, context, fsdo.Length, maType: fsdo.MaType),
+                "Signal" => ComputeFastSlowDegreeOscillatorFast(data, context, fsdo.Length, maType: fsdo.MaType,
+                    series: MacdSeries.Signal),
+                "Histogram" => ComputeFastSlowDegreeOscillatorFast(data, context, fsdo.Length, maType: fsdo.MaType,
+                    series: MacdSeries.Histogram),
+                _ => null
+            },
 
             // Batch 6 - Gann oscillators
             GOscillatorSpecOptions gosc => ComputeGOscillatorFast(data, context, gosc.Length),
@@ -4174,12 +4182,77 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes ZigZag using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeZigZagFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeZigZagFast(StockData data, ComputeContext context, double deviation = 5)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.ZigZag(high, low, buffer.WritableSpan, length);
+        // CalculateZigZag walks pivot to pivot and back-fills whole legs: once a reversal clears the deviation
+        // percentage every bar from the last pivot to this one is rewritten as a straight line between the two,
+        // so this is not a per-bar transform and has no streaming form. Every bar starts at the midpoint of the
+        // first bar's range, which is what the bars after the final pivot keep. The highs and lows are range
+        // adjusted, so the walk follows a chained series when one is chained.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        if (count == 0)
+        {
+            return buffer;
+        }
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        var deviationPercent = deviation / 100;
+        var lastPivotIndex = 0;
+        var lastPivotValue = (highs[0] + lows[0]) / 2;
+        var lastPivotIsHigh = true;
+        output.Fill(lastPivotValue);
+
+        for (var i = 1; i < count; i++)
+        {
+            if (lastPivotIsHigh)
+            {
+                if (lows[i] < lastPivotValue * (1 - deviationPercent))
+                {
+                    for (var j = lastPivotIndex; j <= i; j++)
+                    {
+                        output[j] = lastPivotValue
+                            + ((lows[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
+                    }
+
+                    lastPivotIndex = i;
+                    lastPivotValue = lows[i];
+                    lastPivotIsHigh = false;
+                }
+                else if (highs[i] > lastPivotValue)
+                {
+                    lastPivotValue = highs[i];
+                    lastPivotIndex = i;
+                }
+            }
+            else if (highs[i] > lastPivotValue * (1 + deviationPercent))
+            {
+                for (var j = lastPivotIndex; j <= i; j++)
+                {
+                    output[j] = lastPivotValue
+                        + ((highs[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
+                }
+
+                lastPivotIndex = i;
+                lastPivotValue = highs[i];
+                lastPivotIsHigh = true;
+            }
+            else if (lows[i] < lastPivotValue)
+            {
+                lastPivotValue = lows[i];
+                lastPivotIndex = i;
+            }
+        }
+
         return buffer;
     }
 
@@ -9494,11 +9567,64 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast Slow Degree Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowDegreeOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowDegreeOscillatorFast(StockData data, ComputeContext context,
+        int length = 100, int fastLength = 3, int slowLength = 2, int signalLength = 14,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FastSlowDegreeOscillator(close, buffer.WritableSpan, length / 2, length);
+        // CalculateFastSlowDegreeOscillator weights the PREVIOUS bar's value by the difference between two
+        // polynomial-plus-sine terms, one evaluated at (i + 1) / length and one at i / length, and sums that
+        // weighted value over length. The fast and slow legs differ only in how many bars of the sine term are
+        // summed. It is a whole-history construction - every term depends on the absolute bar index, not on a
+        // window - so nothing here is a moving average of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var fastF1bTotal = new RollingSum();
+        var fastF2bTotal = new RollingSum();
+        var fastWeightedTotal = new RollingSum();
+        var slowF1bTotal = new RollingSum();
+        var slowF2bTotal = new RollingSum();
+        var slowWeightedTotal = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+
+            var fastF1x = length != 0 ? (double)(i + 1) / length : 0;
+            fastF1bTotal.Add((double)1 / (i + 1) * Math.Sin(fastF1x * (i + 1) * Math.PI));
+            var fastF1pol = (fastF1x * fastF1x) + fastF1bTotal.Sum(fastLength);
+            var fastF2x = length != 0 ? (double)i / length : 0;
+            fastF2bTotal.Add((double)1 / (i + 1) * Math.Sin(fastF2x * (i + 1) * Math.PI));
+            var fastF2pol = (fastF2x * fastF2x) + fastF2bTotal.Sum(fastLength);
+            fastWeightedTotal.Add(previousValue * (fastF1pol - fastF2pol));
+
+            var slowF1x = length != 0 ? (double)(i + 1) / length : 0;
+            slowF1bTotal.Add((double)1 / (i + 1) * Math.Sin(slowF1x * (i + 1) * Math.PI));
+            var slowF1pol = (slowF1x * slowF1x) + slowF1bTotal.Sum(slowLength);
+            var slowF2x = length != 0 ? (double)i / length : 0;
+            slowF2bTotal.Add((double)1 / (i + 1) * Math.Sin(slowF2x * (i + 1) * Math.PI));
+            var slowF2pol = (slowF2x * slowF2x) + slowF2bTotal.Sum(slowLength);
+            slowWeightedTotal.Add(previousValue * (slowF1pol - slowF2pol));
+
+            output[i] = fastWeightedTotal.Sum(length) - slowWeightedTotal.Sum(length);
+        }
+
+        if (series == MacdSeries.Line)
+        {
+            return buffer;
+        }
+
+        using var signal = context.Rent(count);
+        MovingAverage(data, maType, signalLength, buffer.Span, signal.WritableSpan);
+        var signalLine = signal.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = series == MacdSeries.Signal ? signalLine[i] : output[i] - signalLine[i];
+        }
+
         return buffer;
     }
 

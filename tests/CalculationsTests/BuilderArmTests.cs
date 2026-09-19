@@ -250,7 +250,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "EhlersMedianAverageAdaptiveFilterSpecOptions",
         "EhlersMesaPredictIndicatorV2SpecOptions",
         "EhlersSmoothedAdaptiveMomentumSpecOptions",
-        "FastSlowDegreeOscillatorSpecOptions",
         "GuppyMultipleMovingAverageSpecOptions",
         "HalfTrendSpecOptions",
         "InsyncIndexSpecOptions",
@@ -274,7 +273,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "VervoortHeikenAshiCandlestickOscillatorSpecOptions",
         "VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions",
         "VervoortSmoothedOscillatorSpecOptions",
-        "ZigZagSpecOptions",
         "_1LCLeastSquaresMovingAverageSpecOptions",
         "_3HMASpecOptions",
     };
