@@ -316,7 +316,8 @@ internal static partial class IndicatorCompute
             ChandeMomentumOscillatorAbsoluteSpecOptions cmoa => ComputeChandeMomentumOscillatorAbsoluteFast(data, context, cmoa.Length),
 
             // Batch 5 - Oscillators
-            ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context, eco.Length),
+            ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context,
+                length2: eco.Length, maType: eco.MaType),
             BayesianOscillatorSpecOptions bayes => ComputeBayesianOscillatorFast(data, context, bayes.Length, bayes.MaType),
             AnchoredMomentumSpecOptions amom => ComputeAnchoredMomentumFast(data, context, amom.Length, amom.MaType),
             ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length,
@@ -471,7 +472,7 @@ internal static partial class IndicatorCompute
             TFSVolumeOscillatorSpecOptions tfsvo => ComputeTFSVolumeOscillatorFast(data, context, tfsvo.Length),
 
             // Batch 6 - RSI variants
-            DoubleSmoothedRelativeStrengthIndexSpecOptions dsrsi => ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context, dsrsi.Length),
+            DoubleSmoothedRelativeStrengthIndexSpecOptions => ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context),
             FastSlowRsiOscillatorSpecOptions => ComputeFastSlowRsiOscillatorFast(data, context),
 
             // Batch 6 - DiNapoli/Ergodic oscillators
@@ -1000,7 +1001,7 @@ internal static partial class IndicatorCompute
             // publishes beside the delta, and this spec is bound to the delta itself.
             DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length2),
             FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType),
-            EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.SignalLength),
+            EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2, crsi2.Length3),
             StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length,
                 srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
@@ -1242,7 +1243,8 @@ internal static partial class IndicatorCompute
                 macz.Length, macz.Mult, macz.MaType),
             MacZVwapIndicatorSpecOptions maczvwap => ComputeMacZVwapIndicatorFast(data, context, maczvwap.FastLength, maczvwap.SlowLength, maczvwap.SignalLength, maczvwap.Length1, maczvwap.Length2, maczvwap.Gamma, maczvwap.MaType),
             MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length, mti.MaType),
-            ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.LookbackLength, mgha.Length, mgha.MaType),
+            ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.Length,
+                maType: mgha.MaType),
             ModifiedPriceVolumeTrendSpecOptions => ComputeModifiedPriceVolumeTrendFast(data, context),
             MultiVoteOnBalanceVolumeSpecOptions => ComputeMultiVoteOnBalanceVolumeFast(data, context),
             NaturalDirectionalComboSpecOptions ndc => ComputeNaturalDirectionalComboFast(data, context, ndc.Length, ndc.SmoothLength, ndc.MaType),
@@ -1320,7 +1322,8 @@ internal static partial class IndicatorCompute
             // Batch 29 - Ergodic and Momentum Indicators
             ErgodicCommoditySelectionIndexSpecOptions ecsi => ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType),
             ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
-            ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1, etsiv1.Length2, etsiv1.Length3, etsiv1.SignalLength, etsiv1.MaType),
+            ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
+                etsiv1.Length2, etsiv1.Length3, etsiv1.MaType),
             ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length1, etsiv2.Length2, etsiv2.Length3, etsiv2.SignalLength, etsiv2.MaType),
             SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
                 smie.SlowLength, smie.MaType),
@@ -4560,12 +4563,48 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int length1 = 32,
+        int length2 = 12, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ErgodicCandlestickOscillator(open, close, buffer.WritableSpan, 5, length);
+        // CalculateErgodicCandlestickOscillator double-smooths the candle body and the candle range by
+        // length1 then length2 and publishes the body as a percentage of the range. The arm this replaced
+        // delegated to OscillatorCore.ErgodicCandlestickOscillator with a hard-wired first length of 5 and
+        // no moving average type. The spec's only length binds to length2; length1 keeps its batch default.
+        var count = data.Count;
+        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+
+        using var body = context.Rent(count);
+        using var range = context.Rent(count);
+        var xco = body.WritableSpan;
+        var xhl = range.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            xco[i] = closes[i] - opens[i];
+            xhl[i] = highs[i] - lows[i];
+        }
+
+        using var bodyFirst = context.Rent(count);
+        using var bodySecond = context.Rent(count);
+        MovingAverage(data, maType, length1, body.Span, bodyFirst.WritableSpan);
+        MovingAverage(data, maType, length2, bodyFirst.Span, bodySecond.WritableSpan);
+
+        using var rangeFirst = context.Rent(count);
+        using var rangeSecond = context.Rent(count);
+        MovingAverage(data, maType, length1, range.Span, rangeFirst.WritableSpan);
+        MovingAverage(data, maType, length2, rangeFirst.Span, rangeSecond.WritableSpan);
+
+        var xcoEma2 = bodySecond.Span;
+        var xhlEma2 = rangeSecond.Span;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = xhlEma2[i] != 0 ? 100 * xcoEma2[i] / xhlEma2[i] : 0;
+        }
+
         return buffer;
     }
 
@@ -7409,12 +7448,51 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Relative Strength Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDoubleSmoothedRelativeStrengthIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDoubleSmoothedRelativeStrengthIndexFast(StockData data, ComputeContext context, int length1 = 2,
+        int length2 = 5, int length3 = 25, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateDoubleSmoothedRelativeStrengthIndex measures how far the chained series sits above the
+        // lowest low and below the highest high of a length1 window, double-smooths each leg by length2 then
+        // length3, and turns the ratio into an RSI. The arm this replaced delegated to
+        // OscillatorCore.DoubleSmoothedRelativeStrengthIndex, a different derivation. The spec's only option
+        // is [Obsolete] and sets nothing, so every length keeps its batch default.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.DoubleSmoothedRelativeStrengthIndex(inputSpan, buffer.WritableSpan, length, 5);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var aboveLow = context.Rent(count);
+        using var belowHigh = context.Rent(count);
+        var srcLc = aboveLow.WritableSpan;
+        var hcSrc = belowHigh.WritableSpan;
+
+        var window = new RollingMinMax(Math.Max(length1, 2));
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(input[i]);
+            srcLc[i] = input[i] - window.Min;
+            hcSrc[i] = window.Max - input[i];
+        }
+
+        using var topFirst = context.Rent(count);
+        using var topSecond = context.Rent(count);
+        MovingAverage(data, maType, length2, aboveLow.Span, topFirst.WritableSpan);
+        MovingAverage(data, maType, length3, topFirst.Span, topSecond.WritableSpan);
+
+        using var botFirst = context.Rent(count);
+        using var botSecond = context.Rent(count);
+        MovingAverage(data, maType, length2, belowHigh.Span, botFirst.WritableSpan);
+        MovingAverage(data, maType, length3, botFirst.Span, botSecond.WritableSpan);
+
+        var top = topSecond.Span;
+        var bot = botSecond.Span;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var rs = bot[i] != 0 ? MathHelper.MinOrMax(top[i] / bot[i], 1, 0) : 0;
+            output[i] = bot[i] == 0 ? 100 : top[i] == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        }
+
         return buffer;
     }
 
@@ -16389,21 +16467,55 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Enhanced Williams %R using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
+    internal static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        // CalculateEnhancedWilliamsR weighs how far price and volume each sit from their own half-length
+        // average, scaled by their respective ranges, and combines them with an acceleration factor derived
+        // from the length. The arm this replaced called OscillatorCore.EnhancedWilliamsR on the raw high,
+        // low and close and never looked at volume at all. signalLength only feeds the Signal key.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var af = length < 10 ? 0.25 : ((double)length / 32) - 0.0625;
+        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        using var priceAverage = context.Rent(count);
+        using var volumeAverage = context.Rent(count);
+        MovingAverage(data, maType, smaLength, input, priceAverage.WritableSpan);
+        MovingAverage(data, maType, smaLength, volumes, volumeAverage.WritableSpan);
+        var srcSma = priceAverage.Span;
+        var volSma = volumeAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var priceWindow = new RollingMinMax(Math.Max(length, 2));
+        var volumeWindow = new RollingMinMax(Math.Max(length, 2));
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            priceWindow.Add(input[i]);
+            volumeWindow.Add(volumes[i]);
+
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var srcRange = priceWindow.Max - priceWindow.Min;
+            var volRange = volumeWindow.Max - volumeWindow.Min;
+
+            var volWr = volRange != 0 ? 2 * ((volumes[i] - volSma[i]) / volRange) : 0;
+            var srcWr = srcRange != 0 ? 2 * ((currentValue - srcSma[i]) / srcRange) : 0;
+            var srcSwr = srcRange != 0
+                ? 2 * (CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) / srcRange)
+                : 0;
+
+            output[i] = ((volWr > 0 && srcWr > 0 && currentValue > prevValue) ||
+                (volWr > 0 && srcWr < 0 && currentValue < prevValue)) && srcSwr + af != 0
+                ? ((50 * (srcWr * (srcSwr + af) * volWr)) + srcSwr + af) / (srcSwr + af)
+                : 25 * ((srcWr * (volWr + 1)) + 2);
         }
-        var buffer = context.Rent(count);
-        OscillatorCore.EnhancedWilliamsR(high, low, close, buffer.WritableSpan, length, smoothLength);
+
         return buffer;
     }
 
@@ -19762,19 +19874,54 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Gann Hilo Activator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeModifiedGannHiloActivatorFast(StockData data, ComputeContext context, int lookbackLength = 3, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeModifiedGannHiloActivatorFast(StockData data, ComputeContext context, int length = 50,
+        double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateModifiedGannHiloActivator extends the candle body out to the window's highest high and
+        // lowest low by a multiple, averages each extension, and then flips between the two averages as the
+        // close crosses them. The arm this replaced published a plain moving average of the close, and its
+        // switch handled only two moving average types. lookbackLength is [Obsolete] and sets nothing.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+
+        using var upperExtension = context.Rent(count);
+        using var lowerExtension = context.Rent(count);
+        var c = upperExtension.WritableSpan;
+        var d = lowerExtension.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+
+            var max = Math.Max(input[i], opens[i]);
+            var min = Math.Min(input[i], opens[i]);
+            c[i] = max + ((highWindow.Max - max) * mult);
+            d[i] = min - ((min - lowWindow.Min) * mult);
         }
+
+        using var upperAverage = context.Rent(count);
+        using var lowerAverage = context.Rent(count);
+        MovingAverage(data, maType, length, upperExtension.Span, upperAverage.WritableSpan);
+        MovingAverage(data, maType, length, lowerExtension.Span, lowerAverage.WritableSpan);
+        var e = upperAverage.Span;
+        var f = lowerAverage.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double g = 0;
+        for (var i = 0; i < count; i++)
+        {
+            g = input[i] > e[i] ? 1 : input[i] > f[i] ? 0 : g;
+            output[i] = (g * f[i]) + ((1 - g) * e[i]);
+        }
+
         return buffer;
     }
 
@@ -21473,11 +21620,50 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeErgodicTsiV1Fast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeErgodicTsiV1Fast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8,
+        int length3 = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TrueStrengthIndex(close, buffer.WritableSpan, length2, length1);
+        // CalculateErgodicTrueStrengthIndexV1 smooths the price change and its absolute value three times -
+        // by length1, then length2, then length3 - and publishes the ratio of the two. The arm this replaced
+        // called OscillatorCore.TrueStrengthIndex, which smooths twice and takes the close rather than the
+        // chained series. signalLength only ever fed the Signal key, so it is not a parameter here.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var change = context.Rent(count);
+        using var absoluteChange = context.Rent(count);
+        var priceDiff = change.WritableSpan;
+        var absPriceDiff = absoluteChange.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            priceDiff[i] = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
+            absPriceDiff[i] = Math.Abs(priceDiff[i]);
+        }
+
+        using var firstSmoothing = context.Rent(count);
+        using var secondSmoothing = context.Rent(count);
+        using var thirdSmoothing = context.Rent(count);
+        MovingAverage(data, maType, length1, change.Span, firstSmoothing.WritableSpan);
+        MovingAverage(data, maType, length2, firstSmoothing.Span, secondSmoothing.WritableSpan);
+        MovingAverage(data, maType, length3, secondSmoothing.Span, thirdSmoothing.WritableSpan);
+
+        using var absFirstSmoothing = context.Rent(count);
+        using var absSecondSmoothing = context.Rent(count);
+        using var absThirdSmoothing = context.Rent(count);
+        MovingAverage(data, maType, length1, absoluteChange.Span, absFirstSmoothing.WritableSpan);
+        MovingAverage(data, maType, length2, absFirstSmoothing.Span, absSecondSmoothing.WritableSpan);
+        MovingAverage(data, maType, length3, absSecondSmoothing.Span, absThirdSmoothing.WritableSpan);
+
+        var diffEma3 = thirdSmoothing.Span;
+        var absDiffEma3 = absThirdSmoothing.Span;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = absDiffEma3[i] != 0 ? MathHelper.MinOrMax(100 * diffEma3[i] / absDiffEma3[i], 100, -100) : 0;
+        }
+
         return buffer;
     }
 
