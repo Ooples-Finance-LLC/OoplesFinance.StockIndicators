@@ -390,7 +390,13 @@ internal static partial class IndicatorCompute
             NormalizedMacdSpecOptions nmacd => ComputeNormalizedMacdFast(data, context, nmacd.FastLength, nmacd.SlowLength),
             RelativeVigorIndexSignalSpecOptions rvis => ComputeRelativeVigorIndexSignalFast(data, context, rvis.Length, rvis.SignalLength),
             VolumeMomentumOscillatorSpecOptions vmo => ComputeVolumeMomentumOscillatorFast(data, context, vmo.ShortLength, vmo.LongLength),
-            TrendContinuationFactorSpecOptions tcf => ComputeTrendContinuationFactorFast(data, context, tcf.Length),
+            TrendContinuationFactorSpecOptions tcf => spec.OutputKey switch
+            {
+                null or "TcfPlus" => ComputeTrendContinuationFactorFast(data, context, tcf.Length),
+                "TcfMinus" => ComputeTrendContinuationFactorFast(data, context, tcf.Length,
+                    TrendContinuationLeg.Minus),
+                _ => null
+            },
             TrendPersistenceRateSpecOptions tpr => ComputeTrendPersistenceRateFast(data, context, tpr.Length),
             InertiaSpecOptions inertia => ComputeInertiaFast(data, context, inertia.SmoothLength, inertia.RviLength),
 
@@ -1242,7 +1248,7 @@ internal static partial class IndicatorCompute
             MacZIndicatorSpecOptions macz => ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength,
                 macz.Length, macz.Mult, macz.MaType),
             MacZVwapIndicatorSpecOptions maczvwap => ComputeMacZVwapIndicatorFast(data, context, maczvwap.FastLength, maczvwap.SlowLength, maczvwap.SignalLength, maczvwap.Length1, maczvwap.Length2, maczvwap.Gamma, maczvwap.MaType),
-            MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length, mti.MaType),
+            MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.Length,
                 maType: mgha.MaType),
             ModifiedPriceVolumeTrendSpecOptions => ComputeModifiedPriceVolumeTrendFast(data, context),
@@ -5308,14 +5314,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 10)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        TrendCore.MassThrust(close, volume, buffer.WritableSpan, length);
-        return buffer;
-    }
+    internal static ComputeBuffer ComputeMassThrustFast(StockData data, ComputeContext context, int length = 14)
+        // MassThrust is an alias of MassThrustIndicator - BuilderArmTargets binds both specs to
+        // IndicatorName.MassThrustIndicator - so it delegates rather than keeping a second derivation that
+        // could drift. It had been calling TrendCore.MassThrust, a different algorithm.
+        => ComputeMassThrustIndicatorFast(data, context, length);
 
     #endregion
 
@@ -6658,11 +6661,46 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTrendContinuationFactorFast(StockData data, ComputeContext context, int length = 35)
+    /// <summary>
+    /// Which of the trend continuation factor's two published legs an arm has been asked for. The plus leg
+    /// accumulates rises against the running fall, the minus leg falls against the running rise, and neither
+    /// is a band around the other.
+    /// </summary>
+    internal enum TrendContinuationLeg
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TrendContinuationFactor(close, buffer.WritableSpan, length);
+        Plus,
+        Minus
+    }
+
+    internal static ComputeBuffer ComputeTrendContinuationFactorFast(StockData data, ComputeContext context, int length = 35,
+        TrendContinuationLeg leg = TrendContinuationLeg.Plus)
+    {
+        // CalculateTrendContinuationFactor carries a running total of consecutive rises and of consecutive
+        // falls, each reset to zero the moment its direction fails to appear, then sums the gap between each
+        // bar's move and the opposite running total over the window. The arm this replaced delegated to
+        // OscillatorCore.TrendContinuationFactor and read the close rather than the chained series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var diffSum = new RollingSum();
+        double cfPlus = 0, cfMinus = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var priceChg = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
+            var chgPlus = priceChg > 0 ? priceChg : 0;
+            var chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
+
+            cfPlus = chgPlus == 0 ? 0 : chgPlus + cfPlus;
+            cfMinus = chgMinus == 0 ? 0 : chgMinus + cfMinus;
+
+            diffSum.Add(leg == TrendContinuationLeg.Plus ? chgPlus - cfMinus : chgMinus - cfPlus);
+            output[i] = diffSum.Sum(length);
+        }
+
         return buffer;
     }
 
@@ -19201,23 +19239,43 @@ internal static partial class IndicatorCompute
     /// Computes Finite Volume Elements using zero-allocation fast path.
     /// Returns the smoothed FVE value.
     /// </summary>
-    internal static ComputeBuffer ComputeFiniteVolumeElementsFast(StockData data, ComputeContext context, int length = 22, double factor = 0.3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeFiniteVolumeElementsFast(StockData data, ComputeContext context, int length = 22,
+        double factor = 0.3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateFiniteVolumeElements accumulates volume signed by where the close sits relative to the
+        // median price and by the change in the typical price, but only once that displacement clears factor
+        // percent of the close. Each contribution is normalised by the moving average of volume and by the
+        // length. The arm this replaced published a moving average of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
 
-        switch (maType)
+        var medianPrice = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hl2));
+        var typicalPrice = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hlc3));
+
+        using var smoothedVolume = context.Rent(count);
+        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
+        var volumeSma = smoothedVolume.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double fve = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var close = input[i];
+            var prevTypicalPrice = i >= 1 ? typicalPrice[i - 1] : 0;
+            var nmf = close - medianPrice[i] + typicalPrice[i] - prevTypicalPrice;
+            var threshold = factor * close / 100;
+            var nvlm = nmf > threshold ? volumes[i] : nmf < -threshold ? -volumes[i] : 0;
+
+            if (volumeSma[i] != 0 && length != 0)
+            {
+                fve += nvlm / volumeSma[i] / length * 100;
+            }
+
+            output[i] = fve;
         }
 
         return buffer;
@@ -19888,19 +19946,45 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mass Thrust Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMassThrustIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMassThrustIndicatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateMassThrustIndicator sums the advances and declines of the chained series over the window,
+        // divides each bar's volume by the matching sum, sums those ratios over the same window and takes
+        // the difference of the two products, scaled down by a million. The arm this replaced published a
+        // plain moving average of the close. maType only smooths the Signal key.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var advSumWindow = new RollingSum();
+        var decSumWindow = new RollingSum();
+        var advVolSumWindow = new RollingSum();
+        var decVolSumWindow = new RollingSum();
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+
+            advSumWindow.Add(i >= 1 && currentValue > prevValue
+                ? CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)
+                : 0);
+            decSumWindow.Add(i >= 1 && currentValue < prevValue
+                ? CalculationsHelper.MinPastValues(i, 1, prevValue - currentValue)
+                : 0);
+
+            var advSum = advSumWindow.Sum(length);
+            var decSum = decSumWindow.Sum(length);
+
+            advVolSumWindow.Add(currentValue > prevValue && advSum != 0 ? volumes[i] / advSum : 0);
+            decVolSumWindow.Add(currentValue < prevValue && decSum != 0 ? volumes[i] / decSum : 0);
+
+            output[i] = ((advSum * advVolSumWindow.Sum(length)) - (decSum * decVolSumWindow.Sum(length))) / 1000000;
         }
+
         return buffer;
     }
 
