@@ -535,7 +535,7 @@ internal static partial class IndicatorCompute
             VaradiOscillatorSpecOptions varosc => ComputeVaradiOscillatorFast(data, context, varosc.Length),
             PrimeNumberOscillatorSpecOptions pno => ComputePrimeNumberOscillatorFast(data, context, pno.Length),
             TrigonometricOscillatorSpecOptions trigo => ComputeTrigonometricOscillatorFast(data, context, trigo.Length),
-            UltimateTraderOscillatorSpecOptions uto => ComputeUltimateTraderOscillatorFast(data, context, uto.Length),
+            UltimateTraderOscillatorSpecOptions uto => ComputeUltimateTraderOscillatorFast(data, context, uto.Length, uto.MaType),
             SmoothedDeltaRatioOscillatorSpecOptions sdro => ComputeSmoothedDeltaRatioOscillatorFast(data, context, sdro.Length, sdro.MaType),
             RobustWeightingOscillatorSpecOptions rwo => ComputeRobustWeightingOscillatorFast(data, context, rwo.Length, rwo.MaType),
 
@@ -1220,7 +1220,14 @@ internal static partial class IndicatorCompute
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType),
 
             // Batch 18 - Strength and Zone Indicators
-            AbsoluteStrengthMTFIndicatorSpecOptions asmtf => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength, asmtf.MaType),
+            AbsoluteStrengthMTFIndicatorSpecOptions asmtf => spec.OutputKey switch
+            {
+                null or "Bulls" => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength,
+                    asmtf.MaType),
+                "Bears" => ComputeAbsoluteStrengthMTFFast(data, context, asmtf.Length, asmtf.SmoothLength, asmtf.MaType,
+                    BullBearSeries.Bears),
+                _ => null
+            },
             AdaptivePriceZoneIndicatorSpecOptions apz => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeAdaptivePriceZoneFast(data, context, apz.Length, apz.Pct, apz.MaType),
@@ -9302,13 +9309,78 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ultimate Trader Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeUltimateTraderOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeUltimateTraderOscillatorFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int lbLength = 5, int smoothLength = 4, int rangeLength = 2)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.UltimateTraderOscillator(high, low, close, buffer.WritableSpan, length / 2, length, length * 2);
+        // CalculateUltimateTraderOscillator scores each bar on six measures - its body, its close within the
+        // bar, its close within the rangeLength window, its change over that window, and the signed
+        // stochastics of its true range and its volume - then publishes the smoothed ratio of the bullish
+        // half of those scores to the bearish half. Its length parameter reaches none of that; the windows
+        // are lbLength, smoothLength and rangeLength. OscillatorCore.UltimateTraderOscillator took three
+        // lengths derived from one and measured something else entirely.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        using var trueRanges = context.Rent(count);
+        var trueRange = trueRanges.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            trueRange[i] = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], i >= 1 ? input[i - 1] : input[i]);
+        }
+
+        // The batch swaps each series onto the stock data before ranging it, so both stochastics follow the
+        // per-bar rule for a series on a scale of its own rather than the price bars' highs and lows.
+        using var trueRangeStochastic = context.Rent(count);
+        using var volumeStochastic = context.Rent(count);
+        StochasticFastK(data, context, trueRanges.Span, lbLength, trueRangeStochastic.WritableSpan);
+        StochasticFastK(data, context, volumes, lbLength, volumeStochastic.WritableSpan);
+        var trSto = trueRangeStochastic.Span;
+        var vSto = volumeStochastic.Span;
+
+        using var ratios = context.Rent(count);
+        var index = ratios.WritableSpan;
+
+        var rangeHighs = new RollingMinMax(rangeLength);
+        var rangeLows = new RollingMinMax(rangeLength);
+        for (var i = 0; i < count; i++)
+        {
+            rangeHighs.Add(highs[i]);
+            rangeLows.Add(lows[i]);
+
+            var close = input[i];
+            var barRange = highs[i] - lows[i];
+            var change = close - (i >= 1 ? input[i - 1] : 0);
+            double sign = Math.Sign(change);
+            var lowest = rangeLows.Min;
+            var span = rangeHighs.Max - lowest;
+
+            var k1 = barRange != 0 ? (close - opens[i]) / barRange * 100 : 0;
+            var k2 = barRange == 0 ? 0 : ((close - lows[i]) / barRange * 100 * 2) - 100;
+            var k3 = change == 0 || span == 0 ? 0 : ((close - lowest) / span * 100 * 2) - 100;
+            var k4 = span != 0 ? change / span * 100 : 0;
+            var k5 = sign * trSto[i];
+            var k6 = sign * vSto[i];
+
+            var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5)
+                + Math.Max(0, k6);
+            var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4)
+                + Math.Min(0, k5) + Math.Min(0, k6));
+
+            var ratio = bearScore != 0 ? bullScore / bearScore : 0;
+            index[i] = (2 * (100 - (100 / (1 + ratio)))) - 100;
+        }
+
+        using var averaged = context.Rent(count);
+        MovingAverage(data, maType, lbLength, ratios.Span, averaged.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, averaged.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -20554,27 +20626,54 @@ internal static partial class IndicatorCompute
     /// Computes Absolute Strength MTF Indicator using zero-allocation fast path.
     /// Returns the smoothed bulls-bears value.
     /// </summary>
-    internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast(StockData data, ComputeContext context, int length = 50, int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast(StockData data, ComputeContext context, int length = 50,
+        int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        BullBearSeries series = BullBearSeries.Bulls)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateAbsoluteStrengthMTFIndicator averages the chained series and the same series lagged one
+        // bar, and splits the difference between the two averages into its positive half (the bulls) and its
+        // negative half (the bears), each smoothed over smoothLength. The switch this replaced published a
+        // moving average of the close. The batch's other four strength series reach no published key.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        // Calculate MA of close as proxy for strength
-        switch (maType)
+        using var lagged = context.Rent(count);
+        var previous = lagged.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            previous[i] = i >= 1 ? input[i - 1] : 0;
         }
 
+        using var currentAverage = context.Rent(count);
+        using var laggedAverage = context.Rent(count);
+        MovingAverage(data, maType, length, input, currentAverage.WritableSpan);
+        MovingAverage(data, maType, length, lagged.Span, laggedAverage.WritableSpan);
+
+        using var strength = context.Rent(count);
+        var raw = strength.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var difference = currentAverage.Span[i] - laggedAverage.Span[i];
+            raw[i] = series == BullBearSeries.Bears
+                ? 0.5 * (Math.Abs(difference) - difference)
+                : 0.5 * (Math.Abs(difference) + difference);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, strength.Span, buffer.WritableSpan);
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Which half of an absolute strength reading an arm has been asked for: the rising half or the falling
+    /// half. They are not bands around an average, so they do not fit <see cref="ChannelBand"/>.
+    /// </summary>
+    internal enum BullBearSeries
+    {
+        Bulls,
+        Bears
     }
 
     /// <summary>
