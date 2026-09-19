@@ -289,7 +289,7 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Volume indicators
             MfiCoreSpecOptions mfic => ComputeMfiCoreFast(data, context, mfic.Length),
-            TwiggsMoneyFlowSpecOptions tmf => ComputeTwiggsMoneyFlowFast(data, context, tmf.Length),
+            TwiggsMoneyFlowSpecOptions tmf => ComputeTwiggsMoneyFlowFast(data, context, tmf.Length, tmf.MaType),
             DemandIndexSpecOptions dmidx => ComputeDemandIndexFast(data, context, dmidx.Length),
             WilliamsADSpecOptions wad => ComputeWilliamsADFast(data, context, wad.Length),
             CumulativeVolumeIndexSpecOptions cvi => ComputeCumulativeVolumeIndexFast(data, context, cvi.Length),
@@ -969,7 +969,7 @@ internal static partial class IndicatorCompute
             HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length),
             KlingerVolumeOscillatorSpecOptions kvo2 => ComputeKlingerVolumeOscillatorFast(data, context, kvo2.FastLength, kvo2.SlowLength),
             KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2, kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4),
-            NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context),
+            NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue),
             OnBalanceVolumeSpecOptions obv2 => ComputeOnBalanceVolumeFast(data, context),
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
             PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
@@ -1230,7 +1230,7 @@ internal static partial class IndicatorCompute
             MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length, mti.MaType),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.LookbackLength, mgha.Length, mgha.MaType),
             ModifiedPriceVolumeTrendSpecOptions => ComputeModifiedPriceVolumeTrendFast(data, context),
-            MultiVoteOnBalanceVolumeSpecOptions mvobv => ComputeMultiVoteOnBalanceVolumeFast(data, context, mvobv.Length, mvobv.MaType),
+            MultiVoteOnBalanceVolumeSpecOptions => ComputeMultiVoteOnBalanceVolumeFast(data, context),
             NaturalDirectionalComboSpecOptions ndc => ComputeNaturalDirectionalComboFast(data, context, ndc.Length, ndc.SmoothLength, ndc.MaType),
             NaturalDirectionalIndexSpecOptions ndi => ComputeNaturalDirectionalIndexFast(data, context, ndi.Length, ndi.SmoothLength, ndi.MaType),
 
@@ -4077,14 +4077,49 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Twiggs Money Flow using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTwiggsMoneyFlowFast(StockData data, ComputeContext context, int length = 21)
+    internal static ComputeBuffer ComputeTwiggsMoneyFlowFast(StockData data, ComputeContext context, int length = 21,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.TwiggsMoneyFlow(high, low, close, volume, buffer.WritableSpan, length);
+        // CalculateTwiggsMoneyFlow accumulates volume over the true range measured against the PREVIOUS
+        // bar's price - trh is the higher of this bar's high and that price, trl the lower of this bar's low
+        // and it - then divides the moving average of that accumulation by the moving average of volume.
+        // VolumeCore.TwiggsMoneyFlow read the close rather than the chained series and smoothed neither leg
+        // with the requested average type.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var accumulation = context.Rent(count);
+        var ad = accumulation.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var price = input[i];
+            var prevPrice = i >= 1 ? input[i - 1] : 0;
+            var trh = Math.Max(highs[i], prevPrice);
+            var trl = Math.Min(lows[i], prevPrice);
+            var range = trh - trl;
+            ad[i] = range != 0 && volumes[i] != 0 ? (price - trl - (trh - price)) / range * volumes[i] : 0;
+        }
+
+        using var smoothedAccumulation = context.Rent(count);
+        MovingAverage(data, maType, length, accumulation.Span, smoothedAccumulation.WritableSpan);
+        var smoothAd = smoothedAccumulation.Span;
+
+        using var smoothedVolume = context.Rent(count);
+        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
+        var volumeAverage = smoothedVolume.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = volumeAverage[i] != 0 ? MathHelper.MinOrMax(smoothAd[i] / volumeAverage[i], 1, -1) : 0;
+        }
+
         return buffer;
     }
 
@@ -11816,10 +11851,38 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSimplifiedWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateSimplifiedWeightedMovingAverage builds its average from two running totals rather than a
+        // window: cml is the cumulative sum of the series, and the weighted average is
+        // ((length * cml) - prevSum) / (length * (length + 1) / 2) where prevSum is the PREVIOUS bar's
+        // windowed sum of those cumulative sums. MovingAverageCore.SimplifiedWeightedMovingAverage computes
+        // an ordinary weighted average instead, which is a different series from the first bar onwards.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.SimplifiedWeightedMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var cumulativeSums = context.Rent(count);
+        var cmlSums = cumulativeSums.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var divisor = length * (double)(length + 1) / 2;
+        double cml = 0;
+        double cmlSumTotal = 0;
+        double prevSum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            cml += input[i];
+
+            var prevCmlSum = i >= length ? cmlSums[i - length] : 0;
+            cmlSumTotal += cml;
+            cmlSums[i] = cmlSumTotal;
+
+            output[i] = ((length * cml) - prevSum) / divisor;
+            prevSum = cmlSumTotal - prevCmlSum;
+        }
+
         return buffer;
     }
 
@@ -14532,19 +14595,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
+        // CalculateNegativeVolumeIndex seeds the running index at initialValue and compounds the period's
+        // rate of change onto it only on bars where volume fell. VolumeCore.NegativeVolumeIndex hard-coded
+        // the seed at 1000 and read the close instead of the chained series, so an indicator built with any
+        // other starting value diverged from the first bar. The moving average of this series is the
+        // separate "NviSignal" output, so neither length nor maType belongs on the primary path.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            var prevClose = i >= 1 ? input[i - 1] : 0;
+            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
+            var prevNvi = i >= 1 ? output[i - 1] : initialValue;
+            var pctChg = CalculationsHelper.CalculatePercentChange(input[i], prevClose);
+
+            output[i] = volumes[i] >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
         }
-        var buffer = context.Rent(count);
-        VolumeCore.NegativeVolumeIndex(close, volume, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -18154,19 +18228,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Multi Vote On Balance Volume using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMultiVoteOnBalanceVolumeFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeMultiVoteOnBalanceVolumeFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateMultiVoteOnBalanceVolume takes one vote each from the high, the low and the chained
+        // series - plus one for a rise, minus one for a fall - and accumulates volume in millions scaled by
+        // that total. The arm this replaces returned a moving average of the close, which is not this
+        // indicator at all. The average of the accumulation is published under the separate "Signal" key,
+        // so the primary path takes neither a length nor a moving average type.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double mvo = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var prevClose = i >= 1 ? input[i - 1] : 0;
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var prevLow = i >= 1 ? lows[i - 1] : 0;
+
+            double highVote = highs[i] > prevHigh ? 1 : highs[i] < prevHigh ? -1 : 0;
+            double lowVote = lows[i] > prevLow ? 1 : lows[i] < prevLow ? -1 : 0;
+            double closeVote = input[i] > prevClose ? 1 : input[i] < prevClose ? -1 : 0;
+
+            mvo += volumes[i] / 1000000 * (highVote + lowVote + closeVote);
+            output[i] = mvo;
         }
+
         return buffer;
     }
 
