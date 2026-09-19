@@ -154,7 +154,7 @@ internal static partial class IndicatorCompute
             // Batch 3 - Moving Averages
             SmmaSpecOptions smma => ComputeSmmaFast(data, context, smma.Length),
             McGinleyDynamicSpecOptions mgd => ComputeMcGinleyDynamicFast(data, context, mgd.Length),
-            T3SpecOptions t3 => ComputeT3Fast(data, context, t3.Length),
+            T3SpecOptions t3 => ComputeT3Fast(data, context, t3.Length, t3.MaType),
             VidyaSpecOptions vidya => ComputeVidyaFast(data, context, vidya.Length),
             VmaSpecOptions vma => ComputeVmaFast(data, context, vma.Length),
             AlmaSpecOptions alma => ComputeAlmaFast(data, context, alma.Length),
@@ -1038,7 +1038,7 @@ internal static partial class IndicatorCompute
 
             // Batch 9 - More oscillators and indicators
             SpearmanIndicatorSpecOptions spi => ComputeEhlersSpearmanRankFast(data, context, spi.Length),
-            TillsonT3MovingAverageSpecOptions tt3 => ComputeTillsonT3Fast(data, context, tt3.Length, tt3.VFactor),
+            TillsonT3MovingAverageSpecOptions tt3 => ComputeTillsonT3Fast(data, context, tt3.Length, tt3.VFactor, tt3.MaType),
             UltimateMovingAverageBandsSpecOptions umab => ComputeUltimateMovingAverageFast(data, context, umab.MaxLength),
 
             // Batch 10 - Ehlers Window indicators
@@ -3145,13 +3145,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes T3 Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeT3Fast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeT3Fast(StockData data, ComputeContext context, int length = 5,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.T3MovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // T3SpecOptions is an alias of TillsonT3MovingAverage that fixes the volume factor at the batch
+        // default, so the arm delegates rather than duplicating the cascade.
+        return ComputeTillsonT3Fast(data, context, length, 0.7, maType);
     }
 
     /// <summary>
@@ -3242,10 +3241,35 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeIntradayMomentumIndexFast(StockData data, ComputeContext context, int length = 14)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.IntradayMomentumIndex(open, close, buffer.WritableSpan, length);
+        // CalculateChandeIntradayMomentumIndex accumulates the open-to-close gain or loss, resetting whichever
+        // side the bar did not take, sums each over the window and reports the upward share. The core routine
+        // this replaced summed the raw bar differences without the running accumulation.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var gainsSumWindow = new RollingSum();
+        var lossesSumWindow = new RollingSum();
+        double prevGains = 0, prevLosses = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var gains = input[i] > opens[i] ? prevGains + (input[i] - opens[i]) : 0;
+            gainsSumWindow.Add(gains);
+            prevGains = gains;
+
+            var losses = input[i] < opens[i] ? prevLosses + (opens[i] - input[i]) : 0;
+            lossesSumWindow.Add(losses);
+            prevLosses = losses;
+
+            var upt = gainsSumWindow.Sum(length);
+            var dnt = lossesSumWindow.Sum(length);
+            output[i] = upt + dnt != 0 ? MathHelper.MinOrMax(100 * upt / (upt + dnt), 100, 0) : 0;
+        }
+
         return buffer;
     }
 
@@ -9551,10 +9575,36 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDetrendedSyntheticPriceFast(StockData data, ComputeContext context, int length = 14)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DetrendedSyntheticPrice(high, low, buffer.WritableSpan, length);
+        // CalculateDetrendedSyntheticPrice averages the two-bar high and the two-bar low, then subtracts an
+        // exponential average at half the smoothing constant from one at the full constant. Both averages are
+        // seeded with the first price rather than zero, which is where the core routine this replaced drifted.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = data.Count;
+        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double prevEma1 = 0, prevEma2 = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var prevLow = i >= 1 ? lows[i - 1] : 0;
+            var price = (Math.Max(highs[i], prevHigh) + Math.Min(lows[i], prevLow)) / 2;
+            if (i == 0)
+            {
+                prevEma1 = price;
+                prevEma2 = price;
+            }
+
+            var ema1 = (alpha * price) + ((1 - alpha) * prevEma1);
+            var ema2 = (alpha / 2 * price) + ((1 - (alpha / 2)) * prevEma2);
+            output[i] = ema1 - ema2;
+            prevEma1 = ema1;
+            prevEma2 = ema2;
+        }
+
         return buffer;
     }
 
@@ -10960,10 +11010,34 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeHampelFilterFast(StockData data, ComputeContext context, int length = 14, double scalingFactor = 3)
     {
+        // CalculateHampelFilter replaces a value with the window median whenever it sits further from that
+        // median than the scaled median absolute deviation, then smooths the result exponentially. The
+        // published series is that smoothed one, which the core routine this replaced never produced.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.HampelFilter(inputSpan, buffer.WritableSpan, length, scalingFactor);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        var alpha = (double)2 / (length + 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var sampleMedianWindow = new RollingMedian(length);
+        using var absDiffMedianWindow = new RollingMedian(length);
+        double prevHfEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            sampleMedianWindow.Add(input[i]);
+            var sampleMedian = sampleMedianWindow.Median;
+            var absDiff = Math.Abs(input[i] - sampleMedian);
+
+            absDiffMedianWindow.Add(absDiff);
+            var hf = absDiff <= scalingFactor * absDiffMedianWindow.Median ? input[i] : sampleMedian;
+
+            prevHfEma = (alpha * hf) + ((1 - alpha) * prevHfEma);
+            output[i] = prevHfEma;
+        }
+
         return buffer;
     }
 
@@ -14583,12 +14657,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Tillson T3 Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTillsonT3Fast(StockData data, ComputeContext context, int length = 5, double vFactor = 0.7)
+    internal static ComputeBuffer ComputeTillsonT3Fast(StockData data, ComputeContext context, int length = 5, double vFactor = 0.7,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateTillsonT3MovingAverage cascades six moving average passes over the chained series and
+        // combines the third through sixth by the volume factor coefficients. The core routine this replaced
+        // seeded its cascade differently and ignored the moving average type entirely.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.T3MovingAverage(inputSpan, buffer.WritableSpan, length, vFactor);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var c1 = -vFactor * vFactor * vFactor;
+        var c2 = (3 * vFactor * vFactor) + (3 * vFactor * vFactor * vFactor);
+        var c3 = (-6 * vFactor * vFactor) - (3 * vFactor) - (3 * vFactor * vFactor * vFactor);
+        var c4 = 1 + (3 * vFactor) + (vFactor * vFactor * vFactor) + (3 * vFactor * vFactor);
+
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        using var fourth = context.Rent(count);
+        using var fifth = context.Rent(count);
+        using var sixth = context.Rent(count);
+
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), first.WritableSpan);
+        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+        MovingAverage(data, maType, length, second.Span, third.WritableSpan);
+        MovingAverage(data, maType, length, third.Span, fourth.WritableSpan);
+        MovingAverage(data, maType, length, fourth.Span, fifth.WritableSpan);
+        MovingAverage(data, maType, length, fifth.Span, sixth.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (c1 * sixth.Span[i]) + (c2 * fifth.Span[i]) + (c3 * fourth.Span[i]) + (c4 * third.Span[i]);
+        }
+
         return buffer;
     }
 
