@@ -710,7 +710,8 @@ internal static partial class IndicatorCompute
             EhlersModifiedOptimumEllipticFilterSpecOptions emoef => ComputeEhlersModifiedOptimumEllipticFilterFast(data, context, emoef.Length),
             EhlersNoiseEliminationTechnologySpecOptions enet => ComputeEhlersNoiseEliminationTechnologyFast(data, context, enet.Length),
             EhlersOptimumEllipticFilterSpecOptions => ComputeEhlersOptimumEllipticFilterFast(data, context),
-            EhlersVariableIndexDynamicAverageSpecOptions evidao => ComputeEhlersVariableIndexDynamicAverageFast(data, context, evidao.Length),
+            EhlersVariableIndexDynamicAverageSpecOptions evidao => ComputeEhlersVariableIndexDynamicAverageFast(data, context,
+                maType: evidao.MaType),
             FallingRisingFilterSpecOptions frf => ComputeFallingRisingFilterFast(data, context, frf.Length),
             FareySequenceWeightedMovingAverageSpecOptions fswma => ComputeFareySequenceWeightedMovingAverageFast(data, context, fswma.Length),
             FisherLeastSquaresMovingAverageSpecOptions flsma => ComputeFisherLeastSquaresMovingAverageFast(data, context, flsma.Length),
@@ -1229,10 +1230,11 @@ internal static partial class IndicatorCompute
             KaseConvergenceDivergenceSpecOptions kcd => ComputeKaseConvergenceDivergenceFast(data, context, kcd.Length1, kcd.Length2, kcd.Length3, kcd.MaType),
             KaseDevStopV2SpecOptions kds2 => ComputeKaseDevStopV2Fast(data, context, kds2.FastLength, kds2.SlowLength, kds2.Length, kds2.StdDev1, kds2.StdDev2, kds2.StdDev3, kds2.StdDev4, kds2.MaType),
             KwanIndicatorSpecOptions kwi => ComputeKwanIndicatorFast(data, context, kwi.Length, kwi.SmoothLength, kwi.MaType),
-            LBRPaintBarsSpecOptions lbr => ComputeLBRPaintBarsFast(data, context, lbr.Length, lbr.LbLength, lbr.AtrMult, lbr.MaType),
+            LBRPaintBarsSpecOptions lbr => ComputeLBRPaintBarsFast(data, context, lbr.Length, lbr.AtrMult, lbr.MaType),
 
             // Batch 21 - MACD-like and Directional Indicators
-            MacZIndicatorSpecOptions macz => ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength, macz.SignalLength, macz.Length, macz.Gamma, macz.Mult, macz.MaType),
+            MacZIndicatorSpecOptions macz => ComputeMacZIndicatorFast(data, context, macz.FastLength, macz.SlowLength,
+                macz.Length, macz.Mult, macz.MaType),
             MacZVwapIndicatorSpecOptions maczvwap => ComputeMacZVwapIndicatorFast(data, context, maczvwap.FastLength, maczvwap.SlowLength, maczvwap.SignalLength, maczvwap.Length1, maczvwap.Length2, maczvwap.Gamma, maczvwap.MaType),
             MassThrustIndicatorSpecOptions mti => ComputeMassThrustIndicatorFast(data, context, mti.Length, mti.MaType),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.LookbackLength, mgha.Length, mgha.MaType),
@@ -11297,12 +11299,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Variable Index Dynamic Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersVariableIndexDynamicAverageFast(StockData data, ComputeContext context,
+        int fastLength = 9, int slowLength = 30, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // CalculateEhlersVariableIndexDynamicAverage sets its smoothing factor from how far the chained series
+        // sits from its fast average against how far it sits from its slow one, both measured as a root mean
+        // square, so the average speeds up when the short term spread widens. The spec's own length is marked
+        // obsolete because this indicator has no single window for it to set.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersVariableIndexDynamicAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var fastPowerSum = new RollingSum();
+        var slowPowerSum = new RollingSum();
+        double vidya = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            fastPowerSum.Add(MathHelper.Pow(currentValue - fastAverage.Span[i], 2));
+            slowPowerSum.Add(MathHelper.Pow(currentValue - slowAverage.Span[i], 2));
+
+            var fastMean = fastPowerSum.Average(fastLength);
+            var fastRms = fastMean > 0 ? MathHelper.Sqrt(fastMean) : 0;
+            var slowMean = slowPowerSum.Average(slowLength);
+            var slowRms = slowMean > 0 ? MathHelper.Sqrt(slowMean) : 0;
+
+            var kk = slowRms != 0 ? MathHelper.MinOrMax(0.2 * fastRms / slowRms, 0.99, 0.01) : 0;
+            vidya = (kk * currentValue) + ((1 - kk) * vidya);
+            output[i] = vidya;
+        }
+
         return buffer;
     }
 
@@ -19204,23 +19238,22 @@ internal static partial class IndicatorCompute
     /// Computes LBR Paint Bars using zero-allocation fast path.
     /// Returns the paint bar value.
     /// </summary>
-    internal static ComputeBuffer ComputeLBRPaintBarsFast(StockData data, ComputeContext context, int length = 9, int lbLength = 16, double atrMult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeLBRPaintBarsFast(StockData data, ComputeContext context, int length = 9,
+        double atrMult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // The spec addresses this indicator's Aatr series - the width its two bands are pulled in by, which is
+        // just the average true range scaled. The lookback window sets where the bands sit, not how wide they
+        // are, so it never reaches this series. The switch this replaced returned a moving average of the
+        // close, which is neither.
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+        var count = atr.Length;
 
-        switch (maType)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            output[i] = atrMult * atr[i];
         }
 
         return buffer;
@@ -19229,19 +19262,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes MacZ Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMacZIndicatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 25, int signalLength = 9, int length = 25, double gamma = 0.02, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMacZIndicatorFast(StockData data, ComputeContext context, int fastLength = 12,
+        int slowLength = 25, int length = 25, double mult = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateMacZIndicator adds the chained series' z score against its Wilders average to its own macd
+        // divided by the same deviation, so both terms are in units of deviation. The signal length smooths
+        // the signal line and gamma reaches nothing, so neither belongs here. The switch this replaced
+        // returned a moving average of the raw close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, Math.Max(1, length));
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        using var wildersAverage = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
+        MovingAverage(data, MovingAvgType.WildersSmoothingMethod, length, input, wildersAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, fastLength);
-                break;
+            var stdev = deviation.Span[i];
+            var zscore = stdev != 0 ? (input[i] - wildersAverage.Span[i]) / stdev : 0;
+            var macd = fastAverage.Span[i] - slowAverage.Span[i];
+            output[i] = stdev != 0 ? (zscore * mult) + (mult * macd / stdev) : zscore;
         }
+
         return buffer;
     }
 
@@ -20434,61 +20485,37 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
+    internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
     {
-        // V1 Algorithm: Triple delay line detrender
-        // 1. tmp1 = value + 0.088 * prevTmp1_6
-        // 2. tmp2 = tmp1 - prevTmp1_6 + 1.2 * prevTmp2_6 - 0.7 * prevTmp2_12
-        // 3. detrender = prevTmp2_12 - 2 * prevTmp2_6 + tmp2
-        // 4. Apply MA twice (MA then MA of result) for output
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        // CalculateEhlersTripleDelayLineDetrender runs the chained series through three six-bar delay lines
+        // and publishes one smoothing of the detrended result; the second smoothing is the signal line. This
+        // read the raw close and could not follow a chain.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
         length = Math.Max(length, 1);
 
-        // Calculate tmp1 delay line
-        var tmp1Buffer = context.Rent(count);
-        var tmp1Span = tmp1Buffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        using var firstLine = context.Rent(count);
+        using var secondLine = context.Rent(count);
+        using var detrended = context.Rent(count);
+        var tmp1 = firstLine.WritableSpan;
+        var tmp2 = secondLine.WritableSpan;
+        var detrender = detrended.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            double prevTmp1_6 = i >= 6 ? tmp1Span[i - 6] : 0;
-            tmp1Span[i] = close[i] + (0.088 * prevTmp1_6);
+            var prevTmp1By6 = i >= 6 ? tmp1[i - 6] : 0;
+            var prevTmp2By6 = i >= 6 ? tmp2[i - 6] : 0;
+            var prevTmp2By12 = i >= 12 ? tmp2[i - 12] : 0;
+
+            tmp1[i] = input[i] + (0.088 * prevTmp1By6);
+            tmp2[i] = tmp1[i] - prevTmp1By6 + (1.2 * prevTmp2By6) - (0.7 * prevTmp2By12);
+            detrender[i] = prevTmp2By12 - (2 * prevTmp2By6) + tmp2[i];
         }
 
-        // Calculate tmp2 delay line
-        var tmp2Buffer = context.Rent(count);
-        var tmp2Span = tmp2Buffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            double prevTmp1_6 = i >= 6 ? tmp1Span[i - 6] : 0;
-            double prevTmp2_6 = i >= 6 ? tmp2Span[i - 6] : 0;
-            double prevTmp2_12 = i >= 12 ? tmp2Span[i - 12] : 0;
-            tmp2Span[i] = tmp1Span[i] - prevTmp1_6 + (1.2 * prevTmp2_6) - (0.7 * prevTmp2_12);
-        }
-
-        // Calculate detrender
-        var detrenderBuffer = context.Rent(count);
-        var detrenderSpan = detrenderBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            double prevTmp2_6 = i >= 6 ? tmp2Span[i - 6] : 0;
-            double prevTmp2_12 = i >= 12 ? tmp2Span[i - 12] : 0;
-            detrenderSpan[i] = prevTmp2_12 - (2 * prevTmp2_6) + tmp2Span[i];
-        }
-
-        // First MA pass on detrender
-        var tdldBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(detrenderBuffer.Span, tdldBuffer.WritableSpan, length);
-
-        // Second MA pass for signal (primary output)
-        var result = context.Rent(count);
-        maCore.Compute(tdldBuffer.Span, result.WritableSpan, length);
-
-        tmp1Buffer.Dispose();
-        tmp2Buffer.Dispose();
-        detrenderBuffer.Dispose();
-        tdldBuffer.Dispose();
-        return result;
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, detrended.Span, buffer.WritableSpan);
+        return buffer;
     }
 
     // Batch 26 - Ehlers V2 and Universal Trading Filter
