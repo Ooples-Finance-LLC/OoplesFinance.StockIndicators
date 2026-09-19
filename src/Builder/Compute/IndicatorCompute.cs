@@ -172,7 +172,7 @@ internal static partial class IndicatorCompute
             MacdHistogramSpecOptions macdh => ComputeMacdHistogramFast(data, context, macdh.FastLength, macdh.SlowLength, macdh.SignalLength),
 
             // Batch 3 - Trend indicators
-            ParabolicSarSpecOptions psar => ComputeParabolicSarFast(data, context, psar.Length),
+            ParabolicSarSpecOptions => ComputeParabolicSarFast(data, context),
             SuperTrendSpecOptions st => ComputeSuperTrendFast(data, context, st.Length, st.MaType),
             ChandelierExitLongSpecOptions cel => ComputeChandelierExitLongFast(data, context, cel.Length, cel.MaType),
             ChandelierExitShortSpecOptions ces => ComputeChandelierExitShortFast(data, context, ces.Length, ces.MaType),
@@ -2505,20 +2505,93 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Parabolic SAR using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeParabolicSarFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeParabolicSarFast(StockData data, ComputeContext context, double start = 0.02,
+        double increment = 0.02, double maximum = 0.2)
     {
-        _ = length;
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
+        // CalculateParabolicSAR carries no state between bars: each bar decides its own direction from whether
+        // the series rose, seeds the stop from the previous bar's opposite extreme, flips it if the bar has
+        // already passed through it, and bounds it by the extreme two bars back. What it publishes is the NEXT
+        // bar's stop - the current one advanced by the acceleration factor - not the stop it just computed.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
+            var currentValue = input[i];
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var currentHigh = highs[i];
+            var currentLow = lows[i];
+            var previousHigh = i >= 1 ? highs[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var priorHigh = i >= 2 ? highs[i - 2] : 0;
+            var priorLow = i >= 2 ? lows[i - 2] : 0;
+
+            var accelerationFactor = start;
+            bool uptrend;
+            double extremePoint, previousStop;
+            if (currentValue > previousValue)
+            {
+                uptrend = true;
+                extremePoint = currentHigh;
+                previousStop = previousLow;
+            }
+            else
+            {
+                uptrend = false;
+                extremePoint = currentLow;
+                previousStop = previousHigh;
+            }
+
+            var stop = previousStop + (start * (extremePoint - previousStop));
+            if (uptrend && stop > currentLow)
+            {
+                uptrend = false;
+                stop = Math.Max(extremePoint, currentHigh);
+                extremePoint = currentLow;
+                accelerationFactor = start;
+            }
+            else if (!uptrend && stop < currentHigh)
+            {
+                uptrend = true;
+                stop = Math.Min(extremePoint, currentLow);
+                extremePoint = currentHigh;
+                accelerationFactor = start;
+            }
+
+            if (uptrend)
+            {
+                if (currentHigh > extremePoint)
+                {
+                    extremePoint = currentHigh;
+                    accelerationFactor = Math.Min(accelerationFactor + increment, maximum);
+                }
+
+                stop = Math.Min(stop, i > 1 ? priorLow : previousLow);
+            }
+            else
+            {
+                if (currentLow < extremePoint)
+                {
+                    extremePoint = currentLow;
+                    accelerationFactor = Math.Min(accelerationFactor + increment, maximum);
+                }
+
+                stop = Math.Max(stop, i > 1 ? priorHigh : previousHigh);
+            }
+
+            output[i] = stop + (accelerationFactor * (extremePoint - stop));
         }
-        var buffer = context.Rent(count);
-        TrendCore.ParabolicSar(high, low, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -15604,12 +15677,108 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Median Average Adaptive Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context, int length = 39, double threshold = 0.002)
+    private static double SelectFromSortedWindow(double[] sorted, int size, int rank)
     {
+        // OrderStatisticTree.SelectByRank returns 0 for an empty tree and clamps the rank to the tree's size,
+        // so a rank past the end resolves to the largest value rather than throwing.
+        if (size <= 0 || rank <= 0)
+        {
+            return 0;
+        }
+
+        return sorted[Math.Min(rank, size) - 1];
+    }
+
+    private static double MedianOfSortedWindow(double[] sorted, int size, int count)
+    {
+        if (count <= 0)
+        {
+            return 0;
+        }
+
+        if ((count & 1) == 1)
+        {
+            return SelectFromSortedWindow(sorted, size, (count + 1) / 2);
+        }
+
+        var left = SelectFromSortedWindow(sorted, size, count / 2);
+        var right = SelectFromSortedWindow(sorted, size, (count / 2) + 1);
+        return (left + right) / 2;
+    }
+
+    internal static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context,
+        int length = 39, double threshold = 0.002)
+    {
+        // CalculateEhlersMedianAverageAdaptiveFilter shrinks its averaging length two bars at a time until the
+        // median of the smoothed window and an exponential average of the same length agree to within the
+        // threshold. The batch holds the window in an OrderStatisticTree and, on each shrink, drops the two
+        // OLDEST entries, so the tree always contains exactly smth[windowStart + removedOffset .. i] - which
+        // means sorting that slice into a pooled scratch buffer reproduces its ranks. The removed pairs are
+        // put back at the end of the bar, so the shrinking is local to one bar and need not be undone here.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersMedianAverageAdaptiveFilter(inputSpan, buffer.WritableSpan, length, threshold);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var smoothed = context.Rent(count);
+        var smth = smoothed.WritableSpan;
+
+        var pool = ArrayPool<double>.Shared;
+        var scratch = pool.Rent(length);
+        try
+        {
+            var previousValue2 = 0d;
+            var previousFilter = 0d;
+            for (var i = 0; i < count; i++)
+            {
+                var previousPrice1 = i >= 1 ? input[i - 1] : 0;
+                var previousPrice2 = i >= 2 ? input[i - 2] : 0;
+                var previousPrice3 = i >= 3 ? input[i - 3] : 0;
+                var currentSmth = (input[i] + (2 * previousPrice1) + (2 * previousPrice2) + previousPrice3) / 6;
+                smth[i] = currentSmth;
+
+                var available = Math.Min(length, i + 1);
+                var windowStart = i + 1 - available;
+                var removedOffset = 0;
+                var len = length;
+                var value3 = 0.2;
+                var value2 = 0d;
+                while (value3 > threshold && len > 0)
+                {
+                    var size = available - removedOffset;
+                    if (size > 0)
+                    {
+                        smoothed.Span.Slice(windowStart + removedOffset, size).CopyTo(scratch.AsSpan(0, size));
+                        Array.Sort(scratch, 0, size);
+                    }
+
+                    var alpha = (double)2 / (len + 1);
+                    var value1 = MedianOfSortedWindow(scratch, size, Math.Min(len, available));
+                    value2 = (alpha * currentSmth) + ((1 - alpha) * previousValue2);
+                    value3 = value1 != 0 ? Math.Abs(value1 - value2) / value1 : value3;
+                    len -= 2;
+
+                    if (value3 > threshold && len > 0 && len < available)
+                    {
+                        removedOffset += 2;
+                    }
+                }
+
+                previousValue2 = value2;
+                len = len < 3 ? 3 : len;
+                var finalAlpha = (double)2 / (len + 1);
+                previousFilter = (finalAlpha * currentSmth) + ((1 - finalAlpha) * previousFilter);
+                output[i] = previousFilter;
+            }
+        }
+        finally
+        {
+            pool.Return(scratch);
+        }
+
         return buffer;
     }
 
