@@ -527,7 +527,13 @@ internal static partial class IndicatorCompute
             LindaRaschke310OscillatorSpecOptions lr310 => ComputeLindaRaschke310OscillatorFast(data, context, lr310.FastLength,
                 lr310.SlowLength, lr310.MaType),
             MidpointOscillatorSpecOptions mpo => ComputeMidpointOscillatorFast(data, context, mpo.Length),
-            MobilityOscillatorSpecOptions mobo => ComputeMobilityOscillatorFast(data, context, mobo.Length),
+            MobilityOscillatorSpecOptions mobo => spec.OutputKey switch
+            {
+                null or "Mo" => ComputeMobilityOscillatorFast(data, context, length2: mobo.Length, maType: mobo.MaType),
+                "Signal" => ComputeMobilityOscillatorFast(data, context, length2: mobo.Length, maType: mobo.MaType,
+                    series: MacdSeries.Signal),
+                _ => null
+            },
 
             // Batch 6 - Projection/Regression oscillators
             ProjectionOscillatorSpecOptions projo => ComputeProjectionOscillatorFast(data, context, projo.Length),
@@ -795,7 +801,13 @@ internal static partial class IndicatorCompute
             },
             PolynomialLeastSquaresMovingAverageSpecOptions plsma => ComputePolynomialLeastSquaresMovingAverageFast(data, context, plsma.Length),
             PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
-            QuadraticLeastSquaresMovingAverageSpecOptions qlsma => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
+            QuadraticLeastSquaresMovingAverageSpecOptions qlsma => spec.OutputKey switch
+            {
+                null or "Qlma" => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
+                "Forecast" => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length,
+                    series: QuadraticFitSeries.Forecast),
+                _ => null
+            },
             QuadraticMovingAverageSpecOptions qma => ComputeQuadraticMovingAverageFast(data, context, qma.Length),
             QuadraticRegressionSpecOptions qreg => ComputeQuadraticRegressionFast(data, context, qreg.Length, qreg.MaType),
             R2AdaptiveRegressionSpecOptions r2ar => ComputeR2AdaptiveRegressionFast(data, context, r2ar.Length,
@@ -9085,14 +9097,116 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mobility Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMobilityOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMobilityOscillatorFast(StockData data, ComputeContext context, int length1 = 10,
+        int length2 = 14, int signalLength = 7, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
+        MacdSeries series = MacdSeries.Line)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.MobilityOscillator(high, low, close, buffer.WritableSpan, length);
-        return buffer;
+        // CalculateMobilityOscillator sweeps length1 price bands across the length2 window, estimates the
+        // probability density of each band from the bars behind it, and reports how far the price that closed
+        // length2 bars ago sits below the densest band. The published series is that raw oscillator smoothed
+        // once, and its signal is the same smoothing applied again. Note that imx never leaves 1: the batch
+        // assigns it only on the first band and never tracks the argument of the maximum, so pmo is always the
+        // midpoint of the lowest band. That is reproduced here rather than corrected - the batch is authority.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
+        var highs = highRange.Span;
+        var lows = lowRange.Span;
+
+        using var raw = context.Rent(count);
+        var mo = raw.WritableSpan;
+
+        var highWindow = new RollingMinMax(length2);
+        var lowWindow = new RollingMinMax(length2);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
+            var hMax = highWindow.Max;
+            var lMin = lowWindow.Min;
+            var prevC = i >= length2 ? input[i - length2] : 0;
+            var rx = (hMax - lMin) / length1;
+
+            var imx = 1;
+            var pdfmx = 0d;
+            var pdfc = 0d;
+            for (var j = 1; j <= length1; j++)
+            {
+                var bu = lMin + (j * rx);
+                var bl = bu - rx;
+                var hMax1 = i >= j ? highs[i - j] : 0;
+                var lMin1 = i >= j ? lows[i - j] : 0;
+                for (var k = 2; k < length2; k++)
+                {
+                    hMax1 = Math.Max(i >= j + k ? highs[i - (j + k)] : 0, hMax1);
+                    lMin1 = Math.Min(i >= j + k ? lows[i - (j + k)] : 0, lMin1);
+                }
+
+                var rx1 = (hMax1 - lMin1) / length1;
+                var bl1 = lMin1 + ((j - 1) * rx1);
+                var bu1 = lMin1 + (j * rx1);
+
+                var pdf = 0d;
+                for (var k = 1; k <= length2; k++)
+                {
+                    var high = i >= j + k ? highs[i - (j + k)] : 0;
+                    var low = i >= j + k ? lows[i - (j + k)] : 0;
+                    if (high <= bu1)
+                    {
+                        pdf += 1;
+                    }
+
+                    if (high <= bu1 || low >= bu1)
+                    {
+                        if (high <= bl1)
+                        {
+                            pdf -= 1;
+                        }
+
+                        if (high <= bl || low >= bl1)
+                        {
+                            continue;
+                        }
+
+                        pdf -= high - low != 0 ? (bl1 - low) / (high - low) : 0;
+                    }
+                    else
+                    {
+                        pdf += high - low != 0 ? (bu1 - low) / (high - low) : 0;
+                    }
+                }
+
+                pdf /= length2;
+                pdfmx = j == 1 ? pdf : pdfmx;
+                imx = j == 1 ? j : imx;
+                pdfmx = Math.Max(pdf, pdfmx);
+                pdfc = j == 1 ? pdf : pdfc;
+                pdfc = prevC > bl && prevC <= bu ? pdf : pdfc;
+            }
+
+            var pmo = lMin + ((imx - 0.5) * rx);
+            var oscillator = pdfmx != 0 ? 100 * (1 - (pdfc / pdfmx)) : 0;
+            oscillator = prevC < pmo ? -oscillator : oscillator;
+            mo[i] = -oscillator;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, signalLength, raw.Span, buffer.WritableSpan);
+        if (series == MacdSeries.Line)
+        {
+            return buffer;
+        }
+
+        using var line = buffer;
+        var signalBuffer = context.Rent(count);
+        MovingAverage(data, maType, signalLength, line.Span, signalBuffer.WritableSpan);
+        return signalBuffer;
     }
 
     /// <summary>
@@ -14603,12 +14717,96 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Quadratic Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    /// <summary>
+    /// Which of a quadratic least squares fit's two published series an arm has been asked for: the fit
+    /// evaluated at the current bar, or the same parabola extrapolated forward by the forecast length.
+    /// </summary>
+    internal enum QuadraticFitSeries
     {
+        Value,
+        Forecast
+    }
+
+    internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast(StockData data, ComputeContext context,
+        int length = 50, int forecastLength = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        QuadraticFitSeries series = QuadraticFitSeries.Value)
+    {
+        // CalculateQuadraticLeastSquaresMovingAverage solves the normal equations for a parabola in the bar
+        // index over a rolling window: the covariances come from moving averages of n, n^2, n^3, n*value and
+        // n^2*value, and the two variances from the deviation of n and n^2 about their own window means, which
+        // is what GetStandardDeviationList computes. The forecast series is the same parabola evaluated
+        // forecastLength bars ahead.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.QuadraticLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var indices = context.Rent(count);
+        using var squares = context.Rent(count);
+        using var cubes = context.Rent(count);
+        using var squareValues = context.Rent(count);
+        using var indexValues = context.Rent(count);
+        var n = indices.WritableSpan;
+        var n2 = squares.WritableSpan;
+        var nn2 = cubes.WritableSpan;
+        var n2v = squareValues.WritableSpan;
+        var nv = indexValues.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double index = i;
+            n[i] = index;
+            n2[i] = MathHelper.Pow(index, 2);
+            nn2[i] = index * n2[i];
+            n2v[i] = n2[i] * input[i];
+            nv[i] = index * input[i];
+        }
+
+        using var average = context.Rent(count);
+        using var indexAverage = context.Rent(count);
+        using var squareAverage = context.Rent(count);
+        using var cubeAverage = context.Rent(count);
+        using var squareValueAverage = context.Rent(count);
+        using var indexValueAverage = context.Rent(count);
+        MovingAverage(data, maType, length, input, average.WritableSpan);
+        MovingAverage(data, maType, length, indices.Span, indexAverage.WritableSpan);
+        MovingAverage(data, maType, length, squares.Span, squareAverage.WritableSpan);
+        MovingAverage(data, maType, length, cubes.Span, cubeAverage.WritableSpan);
+        MovingAverage(data, maType, length, squareValues.Span, squareValueAverage.WritableSpan);
+        MovingAverage(data, maType, length, indexValues.Span, indexValueAverage.WritableSpan);
+        var sma = average.Span;
+        var nSma = indexAverage.Span;
+        var n2Sma = squareAverage.Span;
+        var nn2Sma = cubeAverage.Span;
+        var n2vSma = squareValueAverage.Span;
+        var nvSma = indexValueAverage.Span;
+
+        using var indexDeviation = context.Rent(count);
+        using var squareDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(indices.Span, indexDeviation.WritableSpan, length);
+        VolatilityCore.StandardDeviation(squares.Span, squareDeviation.WritableSpan, length);
+        var nDev = indexDeviation.Span;
+        var n2Dev = squareDeviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var nVariance = nDev[i] * nDev[i];
+            var n2Variance = n2Dev[i] * n2Dev[i];
+            var nn2Cov = nn2Sma[i] - (nSma[i] * n2Sma[i]);
+            var n2vCov = n2vSma[i] - (n2Sma[i] * sma[i]);
+            var nvCov = nvSma[i] - (nSma[i] * sma[i]);
+
+            var norm = (n2Variance * nVariance) - MathHelper.Pow(nn2Cov, 2);
+            var a = norm != 0 ? ((n2vCov * nVariance) - (nvCov * nn2Cov)) / norm : 0;
+            var b = norm != 0 ? ((nvCov * n2Variance) - (n2vCov * nn2Cov)) / norm : 0;
+            var c = sma[i] - (a * n2Sma[i]) - (b * nSma[i]);
+
+            output[i] = series == QuadraticFitSeries.Forecast
+                ? (a * MathHelper.Pow(i + forecastLength, 2)) + (b * (i + forecastLength)) + c
+                : (a * n2[i]) + (b * i) + c;
+        }
+
         return buffer;
     }
 
