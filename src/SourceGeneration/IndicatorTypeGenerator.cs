@@ -69,10 +69,20 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Collect();
 
-        var combined = optionsTypes.Combine(armTargets).Combine(categories);
+        // The batch methods carry the defaults a v1 caller has always seen, so the typed surface agrees
+        // with what the library actually defaults to rather than inventing its own numbers.
+        var batchDefaults = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is MethodDeclarationSyntax m
+                    && m.Identifier.Text.StartsWith("Calculate", StringComparison.Ordinal),
+                transform: static (ctx, _) => ReadBatchDefaults((MethodDeclarationSyntax)ctx.Node))
+            .Where(static x => x is not null)
+            .Collect();
+
+        var combined = optionsTypes.Combine(armTargets).Combine(categories).Combine(batchDefaults);
 
         context.RegisterSourceOutput(combined, static (spc, source) =>
-            Emit(source.Left.Left, source.Left.Right, source.Right, spc));
+            Emit(source.Left.Left.Left, source.Left.Left.Right, source.Left.Right, source.Right, spc));
     }
 
     private static bool IsOptionsType(SyntaxNode node) =>
@@ -205,9 +215,29 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 }
             }
 
+            // BuilderArgument("Length", "fastLength") says the options property Length is the batch
+            // method's fastLength parameter. Without it the default for a renamed argument is looked
+            // up under a name the batch method does not have, and silently not found.
+            var renames = ImmutableArray.CreateBuilder<(string Property, string Parameter)>();
+            if (assignment.Right is BaseObjectCreationExpressionSyntax withArgs
+                && withArgs.ArgumentList is not null)
+            {
+                foreach (var argument in withArgs.ArgumentList.Arguments)
+                {
+                    if (argument.Expression is BaseObjectCreationExpressionSyntax nested
+                        && nested.ArgumentList is not null
+                        && nested.ArgumentList.Arguments.Count == 2
+                        && nested.ArgumentList.Arguments[0].Expression is LiteralExpressionSyntax propertyLiteral
+                        && nested.ArgumentList.Arguments[1].Expression is LiteralExpressionSyntax parameterLiteral)
+                    {
+                        renames.Add((propertyLiteral.Token.ValueText, parameterLiteral.Token.ValueText));
+                    }
+                }
+            }
+
             if (indicatorName is not null)
             {
-                readings.Add(new ArmTargetReading(optionsType, indicatorName, outputKey));
+                readings.Add(new ArmTargetReading(optionsType, indicatorName, outputKey, renames.ToImmutable()));
             }
         }
 
@@ -245,10 +275,28 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         return readings.Count > 0 ? readings.ToImmutable() : null;
     }
 
+    /// <summary>Reads the defaults off a batch calculation, keyed by the method name.</summary>
+    private static BatchReading? ReadBatchDefaults(MethodDeclarationSyntax method)
+    {
+        var defaults = ImmutableArray.CreateBuilder<(string Name, string Default)>();
+        foreach (var parameter in method.ParameterList.Parameters)
+        {
+            if (parameter.Default is not null)
+            {
+                defaults.Add((parameter.Identifier.Text, parameter.Default.Value.ToString()));
+            }
+        }
+
+        return defaults.Count > 0
+            ? new BatchReading(method.Identifier.Text, defaults.ToImmutable())
+            : null;
+    }
+
     private static void Emit(
         ImmutableArray<OptionsReading?> optionsTypes,
         ImmutableArray<ImmutableArray<ArmTargetReading>?> armTargets,
         ImmutableArray<ImmutableArray<CategoryReading>?> categories,
+        ImmutableArray<BatchReading?> batchReadings,
         SourceProductionContext context)
     {
         var targets = new Dictionary<string, ArmTargetReading>(StringComparer.Ordinal);
@@ -276,6 +324,28 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             foreach (var reading in batch)
             {
                 categoryOf[reading.IndicatorName] = reading.Category;
+            }
+        }
+
+        var batchOf = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
+        foreach (var reading in batchReadings)
+        {
+            if (reading is null)
+            {
+                continue;
+            }
+
+            // Several overloads can share a name; the one declaring the most defaults is the fullest.
+            if (!batchOf.TryGetValue(reading.MethodName, out var existing)
+                || reading.Defaults.Length > existing.Count)
+            {
+                var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var (name, value) in reading.Defaults)
+                {
+                    map[name] = value;
+                }
+
+                batchOf[reading.MethodName] = map;
             }
         }
 
@@ -318,8 +388,11 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             builder.AppendLine("public sealed class " + typeName + " : Indicator, " + string.Join(", ", interfaces));
             builder.AppendLine("{");
 
-            var signature = string.Join(", ", options.Parameters.Select(p =>
-                p.Type + " " + p.Name + (p.Default is null ? string.Empty : " = " + p.Default)));
+            batchOf.TryGetValue("Calculate" + target.IndicatorName, out var batchDefaults);
+            var resolved = ResolveDefaults(options.Parameters, target, batchDefaults);
+
+            var signature = string.Join(", ", options.Parameters.Select((p, i) =>
+                p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i])));
 
             builder.AppendLine("    /// <summary>Creates " + Escape(typeName) + ".</summary>");
             builder.AppendLine("    public " + typeName + "(" + signature + ")");
@@ -367,6 +440,72 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         }
 
         context.AddSource("Indicators.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
+    }
+
+    /// <summary>
+    /// The default for each parameter: the batch method''s, then the options type''s own, then none.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The batch method is preferred because its default is what a v1 caller has always got, so the typed
+    /// surface agrees with the library rather than with a number the options type happened to repeat.
+    /// </para>
+    /// <para>
+    /// C# requires optional parameters to be last, so a default on an earlier parameter is dropped when any
+    /// later one has none. Emitting them unconditionally is a compile error in the generated file, which is
+    /// a bad place to discover it.
+    /// </para>
+    /// </remarks>
+    private static string?[] ResolveDefaults(
+        List<ParameterReading> parameters,
+        ArmTargetReading target,
+        Dictionary<string, string>? batchDefaults)
+    {
+        var resolved = new string?[parameters.Count];
+
+        for (var i = 0; i < parameters.Count; i++)
+        {
+            var parameter = parameters[i];
+            string? value = null;
+
+            if (batchDefaults is not null)
+            {
+                var batchName = parameter.Name;
+                foreach (var rename in target.Renames)
+                {
+                    if (string.Equals(rename.Property, parameter.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        batchName = rename.Parameter;
+                        break;
+                    }
+                }
+
+                batchDefaults.TryGetValue(batchName, out value);
+            }
+
+            // A batch method often declares int? length = null where the options type takes a plain int.
+            // Copying that across is CS1750 in the generated file, so the null is simply not a default here.
+            if (value == "null" && !parameter.Type.EndsWith("?", StringComparison.Ordinal))
+            {
+                value = null;
+            }
+
+            resolved[i] = value ?? parameter.Default;
+        }
+
+        // Keep only the trailing run.
+        var cutoff = parameters.Count;
+        while (cutoff > 0 && resolved[cutoff - 1] is not null)
+        {
+            cutoff--;
+        }
+
+        for (var i = 0; i < cutoff; i++)
+        {
+            resolved[i] = null;
+        }
+
+        return resolved;
     }
 
     private static string CategoryInterface(string category) => category switch
@@ -417,18 +556,35 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
     private sealed class ArmTargetReading
     {
-        public ArmTargetReading(string optionsType, string indicatorName, string? outputKey)
+        public ArmTargetReading(string optionsType, string indicatorName, string? outputKey,
+            ImmutableArray<(string Property, string Parameter)> renames)
         {
             OptionsType = optionsType;
             IndicatorName = indicatorName;
             OutputKey = outputKey;
+            Renames = renames;
         }
+
+        public ImmutableArray<(string Property, string Parameter)> Renames { get; }
 
         public string OptionsType { get; }
 
         public string IndicatorName { get; }
 
         public string? OutputKey { get; }
+    }
+
+    private sealed class BatchReading
+    {
+        public BatchReading(string methodName, ImmutableArray<(string Name, string Default)> defaults)
+        {
+            MethodName = methodName;
+            Defaults = defaults;
+        }
+
+        public string MethodName { get; }
+
+        public ImmutableArray<(string Name, string Default)> Defaults { get; }
     }
 
     private sealed class CategoryReading
