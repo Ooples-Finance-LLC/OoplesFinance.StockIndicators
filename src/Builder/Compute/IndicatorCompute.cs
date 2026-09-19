@@ -756,7 +756,8 @@ internal static partial class IndicatorCompute
             RetentionAccelerationFilterSpecOptions raf => ComputeRetentionAccelerationFilterFast(data, context, raf.Length),
             RightSidedRickerMovingAverageSpecOptions rsrma => ComputeRightSidedRickerMovingAverageFast(data, context, rsrma.Length),
             SelfWeightedMovingAverageSpecOptions swma => ComputeSelfWeightedMovingAverageFast(data, context, swma.Length),
-            SequentiallyFilteredMovingAverageSpecOptions sfma => ComputeSequentiallyFilteredMovingAverageFast(data, context, sfma.Length),
+            SequentiallyFilteredMovingAverageSpecOptions sfma => ComputeSequentiallyFilteredMovingAverageFast(data, context, sfma.Length,
+                sfma.MaType),
             SettingLessTrendStepFilteringSpecOptions sltsf => ComputeSettingLessTrendStepFilteringFast(data, context, sltsf.Length),
             ShapeshiftingMovingAverageSpecOptions ssma => ComputeShapeshiftingMovingAverageFast(data, context, ssma.Length),
             SharpModifiedMovingAverageSpecOptions shpma => ComputeSharpModifiedMovingAverageFast(data, context, shpma.Length,
@@ -2530,10 +2531,32 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeUlcerIndexFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateUlcerIndex averages the squared percentage drawdown from the window's own high over however
+        // many bars have been seen, not over the full length, so the opening bars are the root mean square of
+        // what is actually there. VolatilityCore.UlcerIndex divided by the length throughout, which understated
+        // every bar before the window filled.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        VolatilityCore.UlcerIndex(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var squaredDrawdown = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            highWindow.Add(currentValue);
+            var maxValue = highWindow.Max;
+
+            squaredDrawdown.Add(maxValue != 0 ? MathHelper.Pow((currentValue - maxValue) / maxValue * 100, 2) : 0);
+
+            var squaredAvg = squaredDrawdown.Average(length);
+            output[i] = squaredAvg >= 0 ? MathHelper.Sqrt(squaredAvg) : 0;
+        }
+
         return buffer;
     }
 
@@ -5278,11 +5301,32 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Line using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeAutoLineFast(StockData data, ComputeContext context, int length = 500)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AutoLine(close, buffer.WritableSpan, length);
+        // CalculateAutoLine holds its line until the chained value escapes a band one windowed deviation either
+        // side of it, then snaps the line to that value. TrendCore.AutoLine read the close and measured a
+        // different band.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var dev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevX = i >= 1 ? output[i - 1] : currentValue;
+
+            output[i] = currentValue > prevX + dev[i] ? currentValue
+                : currentValue < prevX - dev[i] ? currentValue
+                : prevX;
+        }
+
         return buffer;
     }
 
@@ -8964,9 +9008,37 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSimpleCycleFast(StockData data, ComputeContext context, int length = 50)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SimpleCycle(close, buffer.WritableSpan, length);
+        // CalculateSimpleCycle feeds the cycle back into its own source: the source is the chained value plus
+        // the previous cycle, and the cycle is the windowed change in that source blended with how far the
+        // previous cycle sits above its own exponential average. OscillatorCore.SimpleCycle read the close and
+        // carried neither feedback term.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var a = (double)1 / length;
+
+        using var source = context.Rent(count);
+        var src = source.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double prevCEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevC = i >= 1 ? output[i - 1] : 0;
+            var priorSrc = i >= length ? src[i - length] : 0;
+
+            src[i] = input[i] + prevC;
+
+            var cEma = CalculationsHelper.CalculateEMA(prevC, prevCEma, length);
+            prevCEma = cEma;
+
+            var b = prevC - cEma;
+            output[i] = (a * (src[i] - priorSrc)) + ((1 - a) * b);
+        }
+
         return buffer;
     }
 
@@ -9656,10 +9728,35 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeFallingRisingFilterFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateFallingRisingFilter tracks the chained series by correcting its estimate with the previous
+        // error twice over: once at the fixed exponential rate, and once at a rate that jumps to one whenever
+        // the current value breaks out of the range of the preceding window. The published series is that
+        // estimate, which starts at zero because the first correction has no error to work from.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.FallingRisingFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var alpha = (double)2 / (length + 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var window = new RollingMinMax(length);
+        double prevError = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevA = i >= 1 ? output[i - 1] : 0;
+
+            window.Add(i >= 1 ? input[i - 1] : 0);
+
+            var beta = currentValue > window.Max || currentValue < window.Min ? 1 : alpha;
+            output[i] = prevA + (alpha * prevError) + (beta * prevError);
+
+            prevError = currentValue - output[i];
+        }
+
         return buffer;
     }
 
@@ -9792,10 +9889,32 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeIIRLeastSquaresEstimateFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateIIRLeastSquaresEstimate carries its own estimate forward and corrects it by the chained
+        // value less the exponential average of that estimate taken over half the length, both scaled by the
+        // same rate. The estimate is seeded from the first chained value rather than from zero.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.IIRLeastSquaresEstimate(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var a = (double)4 / (length + 2);
+        var halfLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double prevSEma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevS = i >= 1 ? output[i - 1] : currentValue;
+
+            var sEma = CalculationsHelper.CalculateEMA(prevS, prevSEma, halfLength);
+            prevSEma = sEma;
+
+            output[i] = (a * currentValue) + prevS - (a * sEma);
+        }
+
         return buffer;
     }
 
@@ -10513,12 +10632,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Sequentially Filtered Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(StockData data, ComputeContext context, int length = 50,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateSequentiallyFilteredMovingAverage only lets its output move to the moving average on the
+        // bars where that average has been going the same way for the whole window; on every other bar it
+        // holds. MovingAverageCore.SequentiallyFilteredMovingAverage filtered on something else and never saw
+        // the requested average type at all.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.SequentiallyFilteredMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), average.WritableSpan);
+        var sma = average.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var signSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var prevSma = i >= 1 ? sma[i - 1] : 0;
+            signSum.Add(Math.Sign(sma[i] - prevSma));
+
+            double alpha = Math.Abs(signSum.Sum(length)) == length ? 1 : 0;
+            var prevSfma = i >= 1 ? output[i - 1] : sma[i];
+            output[i] = (alpha * sma[i]) + ((1 - alpha) * prevSfma);
+        }
+
         return buffer;
     }
 
@@ -16791,19 +16933,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Natural Directional Combo using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNaturalDirectionalComboFast(StockData data, ComputeContext context, int length = 40, int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeNaturalDirectionalComboFast(StockData data, ComputeContext context, int length = 40,
+        int smoothLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        switch (maType)
+        // CalculateNaturalDirectionalCombo multiplies the natural directional index by the natural stochastic
+        // indicator, both read off the caller's own series with the same two lengths, and takes the signed
+        // square root of that. Where the two agree on direction the product is replaced by the average of each
+        // one scaled by the other's magnitude, which keeps the sign the pair already share.
+        var count = data.Count;
+
+        using var directional = ComputeNaturalDirectionalIndexFast(data, context, length, smoothLength, maType);
+        using var stochastic = ComputeNaturalStochasticIndicatorFast(data, context, length, smoothLength, maType);
+        var ndxSpan = directional.Span;
+        var nstSpan = stochastic.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var ndx = ndxSpan[i];
+            var nst = nstSpan[i];
+            var v3 = Math.Sign(ndx) != Math.Sign(nst) ? ndx * nst : ((Math.Abs(ndx) * nst) + (Math.Abs(nst) * ndx)) / 2;
+
+            output[i] = Math.Sign(v3) * MathHelper.Sqrt(Math.Abs(v3));
         }
+
         return buffer;
     }
 
