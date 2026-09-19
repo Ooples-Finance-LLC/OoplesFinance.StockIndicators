@@ -976,7 +976,7 @@ internal static partial class IndicatorCompute
                 bbatr.AtrLength, bbatr.Length, bbatr.MaType, bbatr.StdDevMult),
             ChandeMomentumOscillatorSignalSpecOptions cmos => ComputeChandeMomentumOscillatorSignalFast(data, context,
                 cmos.Length, cmos.SignalLength, cmos.MaType),
-            EhlersRoofingFilterV1SpecOptions erf1 => ComputeEhlersRoofingFilterV1Fast(data, context, erf1.Length2, erf1.Length1),
+            EhlersRoofingFilterV1SpecOptions erf1 => ComputeEhlersRoofingFilterV1Fast(data, context, erf1.Length1, erf1.Length2, erf1.MaType),
 
             // Batch 9 - More oscillators and indicators
             SpearmanIndicatorSpecOptions spi => ComputeEhlersSpearmanRankFast(data, context, spi.Length),
@@ -9387,13 +9387,63 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Roofing Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRoofingFilterFast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    /// <summary>
+    /// Computes the Ehlers high pass filter V1, the two-pole high pass the roofing filter is built on.
+    /// </summary>
+    private static ComputeBuffer EhlersHighPassFilterV1(StockData data, ComputeContext context, int length, double mult)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / (mult * length * MathHelper.Sqrt(2)), 0.99, 0.01);
+        var alphaCos = Math.Cos(alphaArg);
+        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        var pow1 = MathHelper.Pow(1 - (alpha / 2), 2);
+        var pow2 = MathHelper.Pow(1 - alpha, 2);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue1 = i >= 1 ? input[i - 1] : 0;
+            var previousValue2 = i >= 2 ? input[i - 2] : 0;
+            var previousHp1 = i >= 1 ? output[i - 1] : 0;
+            var previousHp2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (pow1 * (input[i] - (2 * previousValue1) + previousValue2)) + (2 * (1 - alpha) * previousHp1) -
+                (pow2 * previousHp2);
+        }
+
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes the Ehlers roofing filter V1: a smoothed two-bar average of the high pass filter.
+    /// </summary>
+    private static ComputeBuffer EhlersRoofingFilterV1Core(StockData data, ComputeContext context, int length1, int length2, MovingAvgType maType)
+    {
+        var count = data.Count;
+        using var highPass = EhlersHighPassFilterV1(data, context, length1, 1);
+        var hp = highPass.Span;
+
+        using var averaged = context.Rent(count);
+        var arg = averaged.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            arg[i] = (hp[i] + (i >= 1 ? hp[i - 1] : 0)) / 2;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length2, 1), averaged.Span, buffer.WritableSpan);
+        return buffer;
+    }
+
+    internal static ComputeBuffer ComputeEhlersRoofingFilterFast(StockData data, ComputeContext context, int hpLength = 48, int lpLength = 10,
+        MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
+    {
+        return EhlersRoofingFilterV1Core(data, context, hpLength, lpLength, maType);
     }
 
     #endregion
@@ -10373,9 +10423,39 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersBandPassFilterV1Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersBandPassFilterV1(inputSpan, buffer.WritableSpan, length, bw);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var twoPiPrd1 = MathHelper.MinOrMax(0.25 * bw * 2 * Math.PI / length, 0.99, 0.01);
+        var beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
+        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(2 * Math.PI * bw / length, 0.99, 0.01));
+        var alpha1 = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
+        var alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
+
+        using var highPass = context.Rent(count);
+        using var bandPass = context.Rent(count);
+        var hp = highPass.WritableSpan;
+        var bp = bandPass.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double peak = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var previousHp1 = i >= 1 ? hp[i - 1] : 0;
+            var previousHp2 = i >= 2 ? hp[i - 2] : 0;
+            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
+            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
+
+            hp[i] = ((1 + (alpha2 / 2)) * CalculationsHelper.MinPastValues(i, 1, input[i] - previousValue)) + ((1 - alpha2) * previousHp1);
+            bp[i] = i > 2 ? (0.5 * (1 - alpha1) * (hp[i] - previousHp2)) + (beta * (1 + alpha1) * previousBp1) - (alpha1 * previousBp2) : 0;
+
+            peak = Math.Max(0.991 * peak, Math.Abs(bp[i]));
+            output[i] = peak != 0 ? bp[i] / peak : 0;
+        }
+
         return buffer;
     }
 
@@ -11761,13 +11841,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Roofing Filter V1 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRoofingFilterV1Fast(StockData data, ComputeContext context, int hpLength = 10, int lpLength = 48)
+    internal static ComputeBuffer ComputeEhlersRoofingFilterV1Fast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10,
+        MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersRoofingFilter(inputSpan, buffer.WritableSpan, hpLength, lpLength);
-        return buffer;
+        return EhlersRoofingFilterV1Core(data, context, length1, length2, maType);
     }
 
     /// <summary>
