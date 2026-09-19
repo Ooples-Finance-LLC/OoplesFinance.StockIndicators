@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using OoplesFinance.StockIndicators.Core.Registry;
 
@@ -208,8 +208,12 @@ internal static class OscillatorCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            var range = highestHigh - lowestLow;
-            output[i] = range != 0 ? 100 * (close[i] - lowestLow) / range : 0;
+            // Divided before it is scaled, and clamped, exactly as CalculateStochasticOscillator writes it.
+            // Scaling first is the same value in exact arithmetic and a different one in doubles: the two
+            // parted company in the last two bits, which an equality comparison of the published series sees.
+            output[i] = highestHigh - lowestLow != 0
+                ? MathHelper.MinOrMax((close[i] - lowestLow) / (highestHigh - lowestLow) * 100, 100, 0)
+                : 0;
         }
     }
 
@@ -2884,38 +2888,42 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Need at least 5 bars for fractal detection
-        if (high.Length < 5)
-        {
-            output.Clear();
-            return;
-        }
+        // CalculateFractalChaosOscillator does not test for fractals itself - it chains
+        // CalculateFractalChaosBands and reports when one of that indicator's bands MOVED. A band holds its
+        // last value until a Williams fractal completes, so the oscillator prints 1 the bar the upper band
+        // re-anchors, -1 the bar the lower band re-anchors, and 0 otherwise, including on a fractal that
+        // re-anchors a band to the price it already held. Upper is tested first, so a bar that moves both
+        // bands prints 1. See #202 for the five-bar window the bands use.
+        var upperBand = 0d;
+        var lowerBand = 0d;
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < 2 || i >= high.Length - 2)
-            {
-                output[i] = 0;
-                continue;
-            }
+            var prevUpperBand = upperBand;
+            var prevLowerBand = lowerBand;
 
-            // Bullish fractal: low[i-2] is the lowest of 5 bars
-            bool bullish = low[i - 2] < low[i - 4] && low[i - 2] < low[i - 3] &&
-                          low[i - 2] < low[i - 1] && low[i - 2] < low[i];
-
-            // Bearish fractal: high[i-2] is the highest of 5 bars
-            bool bearish = high[i - 2] > high[i - 4] && high[i - 2] > high[i - 3] &&
-                          high[i - 2] > high[i - 1] && high[i - 2] > high[i];
-
+            // Nothing is judged until five real bars exist, matching the bands: missing history reads as 0
+            // there, and 0 is below any positive price, so an earlier test would confirm a fractal whose
+            // left-hand neighbour never happened.
             if (i >= 4)
             {
-                bullish = low[i - 2] < low[i - 4] && low[i - 2] < low[i - 3] &&
-                         low[i - 2] < low[i - 1] && low[i - 2] < low[i];
-                bearish = high[i - 2] > high[i - 4] && high[i - 2] > high[i - 3] &&
-                         high[i - 2] > high[i - 1] && high[i - 2] > high[i];
+                var pivotHigh = high[i - 2];
+                var pivotLow = low[i - 2];
+
+                if (high[i - 1] < pivotHigh && high[i] < pivotHigh &&
+                    high[i - 3] < pivotHigh && high[i - 4] < pivotHigh)
+                {
+                    upperBand = pivotHigh;
+                }
+
+                if (low[i - 1] > pivotLow && low[i] > pivotLow &&
+                    low[i - 3] > pivotLow && low[i - 4] > pivotLow)
+                {
+                    lowerBand = pivotLow;
+                }
             }
 
-            output[i] = bullish ? 1 : (bearish ? -1 : 0);
+            output[i] = upperBand != prevUpperBand ? 1 : lowerBand != prevLowerBand ? -1 : 0;
         }
     }
 
@@ -12162,6 +12170,11 @@ internal static class OscillatorCore
     internal static void ConnorsRelativeStrengthIndex(ReadOnlySpan<double> input, Span<double> output,
         int rsiLength = 3, int streakLength = 2, int rankLength = 100)
     {
+        // This ranks the rate of change over a growing window against a growing denominator.
+        // CalculateConnorsRelativeStrengthIndex ranks it over a fixed length3 window against a fixed length3
+        // denominator, and seeds the streak from a zero previous value rather than from no streak at all, so
+        // the two do not agree. IndicatorCompute.ComputeConnorsRsiFast is the batch-faithful one; prefer it.
+
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
@@ -12229,7 +12242,9 @@ internal static class OscillatorCore
 
                 for (var j = 1; j <= lookback; j++)
                 {
-                    var prevRoc = input[i - j - 1] != 0 && i - j > 0
+                    // The bounds test has to come first: && evaluates left to right, so reading the element
+                    // before checking that it exists threw on every bar inside the rank window.
+                    var prevRoc = i - j > 0 && input[i - j - 1] != 0
                         ? (input[i - j] - input[i - j - 1]) / input[i - j - 1] * 100
                         : 0;
                     if (prevRoc < currentRoc) count++;
