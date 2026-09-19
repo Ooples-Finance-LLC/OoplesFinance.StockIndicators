@@ -777,7 +777,7 @@ internal static class BuilderArmTargets
         [typeof(UberTrendIndicatorSpecOptions)] = new(IndicatorName.UberTrendIndicator),
         [typeof(UhlMaCrossoverSystemSpecOptions)] = new(IndicatorName.UhlMaCrossoverSystem, "Cts"),
         [typeof(UlcerIndexSpecOptions)] = new(IndicatorName.UlcerIndex),
-        [typeof(UltimateMovingAverageBandsSpecOptions)] = new(IndicatorName.UltimateMovingAverageBands, "UpperBand"),
+        [typeof(UltimateMovingAverageBandsSpecOptions)] = new(IndicatorName.UltimateMovingAverageBands, "MiddleBand"),
         [typeof(UltimateMovingAverageSpecOptions)] = new(IndicatorName.UltimateMovingAverage),
         [typeof(UltimateOscillatorSpecOptions)] = new(IndicatorName.UltimateOscillator),
         [typeof(UltimateTraderOscillatorSpecOptions)] = new(IndicatorName.UltimateTraderOscillator),
