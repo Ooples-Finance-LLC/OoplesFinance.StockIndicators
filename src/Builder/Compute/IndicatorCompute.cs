@@ -119,7 +119,7 @@ internal static partial class IndicatorCompute
             PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length),
             PvtSpecOptions pvt => ComputePvtFast(data, context, pvt.Length),
             ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength),
-            EmvSpecOptions emv => ComputeEmvFast(data, context, emv.Length),
+            EmvSpecOptions => ComputeEmvFast(data, context),
             KvoSpecOptions kvo => ComputeKlingerVolumeFast(data, context, kvo.Length),
             MfiSpecOptions mfi => ComputeMoneyFlowIndexFast(data, context, mfi.Length),
 
@@ -1358,7 +1358,7 @@ internal static partial class IndicatorCompute
             SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length, sre.MaType),
             TechnicalRatingsSpecOptions tr => ComputeTechnicalRatingsFast(data, context, tr.AoLength1, tr.AoLength2, tr.RsiLength, tr.StochLength1, tr.StochLength2, tr.StochLength3, tr.MaType),
             TFSMboIndicatorSpecOptions tfsm => ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType),
-            TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.SmoothLength, tri.MaType),
+            TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.MaType),
 
             // Batch 34 - Remaining Indicators (Part 3)
             TimeAndMoneyChannelSpecOptions tmc => ComputeTimeAndMoneyChannelFast(data, context, tmc.Length1, tmc.Length2, tmc.MaType),
@@ -2222,21 +2222,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ease of Movement using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEmvFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEmvFast(StockData data, ComputeContext context, double divisor = 1000000)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var volume = new double[count];
+        // CalculateEaseOfMovement publishes the RAW measure under "Eom" - its length only smooths the signal
+        // series, which is not published, so this arm takes no length. The move is the change in the half
+        // range from one bar to the next, taken against the volume carried per point of that range.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = data.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double prevHalfRange = 0, prevMidpointMove = 0;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            volume[i] = (double)tickerList[i].Volume;
+            var range = highs[i] - lows[i];
+            var halfRange = range * 0.5;
+            var boxRatio = range != 0 ? volumes[i] / range : 0;
+            var midpointMove = halfRange - prevHalfRange;
+
+            output[i] = boxRatio != 0 ? divisor * ((midpointMove - prevMidpointMove) / boxRatio) : 0;
+            prevHalfRange = halfRange;
+            prevMidpointMove = midpointMove;
         }
-        var buffer = context.Rent(count);
-        VolumeCore.EaseOfMovement(high, low, volume, buffer.WritableSpan, length);
+
         return buffer;
     }
 
@@ -3059,11 +3069,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePmoFast(StockData data, ComputeContext context, int length = 35)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.PriceMomentumOscillator(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // PmoSpecOptions binds its single length to the batch's first smoothing factor, so this is the same
+        // oscillator with the second length left at its default.
+        return ComputePriceMomentumOscillatorFast(data, context, length);
     }
 
     /// <summary>
@@ -4951,9 +4959,21 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLinRegInterceptFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.LinearRegressionIntercept(close, buffer.WritableSpan, length);
+        // CalculateLinearRegression reports the intercept at bar 0 of the whole series, not at the first bar
+        // of the window, so the fitted intercept is carried back by the slope over the bars the window holds.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        using var regression = new RollingLeastSquares(length);
+        for (var i = 0; i < count; i++)
+        {
+            var fit = regression.Next(input[i], isFinal: true);
+            output[i] = fit.Intercept - (fit.Slope * (i - fit.Count + 1));
+        }
+
         return buffer;
     }
 
@@ -14989,11 +15009,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLinearRegressionInterceptFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        TrendCore.LinearRegressionIntercept(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        // LinearRegressionInterceptSpecOptions is an alias of LinRegInterceptSpecOptions - both name the same
+        // "Intercept" series of the same indicator, so they must not be computed two different ways.
+        return ComputeLinRegInterceptFast(data, context, length);
     }
 
     #endregion
@@ -15313,12 +15331,32 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int firstLength = 35, int secondLength = 20)
+    internal static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length1 = 35,
+        int length2 = 20)
     {
+        // CalculatePriceMomentumOscillator smooths the one bar rate of change with a custom 2/length factor
+        // rather than a moving average, multiplies that by ten and smooths it a second time the same way. The
+        // published series is the raw oscillator; its signal average is a separate key.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.PriceMomentumOscillator(inputSpan, buffer.WritableSpan, firstLength, secondLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var sc1 = 2 / (double)length1;
+        var sc2 = 2 / (double)length2;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double rocMa = 0, pmo = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            var roc = prevValue != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / prevValue * 100 : 0;
+
+            rocMa += (roc - rocMa) * sc1;
+            pmo += ((rocMa * 10) - pmo) * sc2;
+            output[i] = pmo;
+        }
+
         return buffer;
     }
 
@@ -21400,12 +21438,38 @@ internal static partial class IndicatorCompute
         return mobBuffer;
     }
 
-    internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Range(high, low, buffer.WritableSpan);
+        // CalculateTheRangeIndicator divides the true range by the day's gain whenever the series rose, takes
+        // the stochastic of that over the window and smooths it with the SAME length - the batch never reads
+        // its smoothLength, so this arm does not take one. OscillatorCore.Range was just the high minus low.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+
+        using var stochastic = context.Rent(count);
+        var stoch = stochastic.WritableSpan;
+        var window = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            // The first bar has no previous close, so the true range is measured against its own close.
+            var prevValue = i >= 1 ? input[i - 1] : input[i];
+            var tr = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevValue);
+
+            var v1 = i >= 1 && input[i] > prevValue ? tr / CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) : tr;
+            window.Add(v1);
+
+            var v2 = window.Min;
+            var v3 = window.Max;
+            stoch[i] = v3 - v2 != 0 ? MathHelper.MinOrMax(100 * (v1 - v2) / (v3 - v2), 100, 0) :
+                MathHelper.MinOrMax(100 * (v1 - v2), 100, 0);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, stochastic.Span, buffer.WritableSpan);
         return buffer;
     }
 
