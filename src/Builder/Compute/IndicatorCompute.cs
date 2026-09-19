@@ -193,7 +193,7 @@ internal static partial class IndicatorCompute
             // Batch 3 - Vortex and Trend Intensity
             VortexPositiveSpecOptions vp => ComputeVortexPositiveFast(data, context, vp.Length),
             VortexNegativeSpecOptions vn => ComputeVortexNegativeFast(data, context, vn.Length),
-            TrendIntensityIndexSpecOptions tii => ComputeTrendIntensityIndexFast(data, context, tii.Length),
+            TrendIntensityIndexSpecOptions tii => ComputeTrendIntensityIndexFast(data, context, tii.Length, tii.MaType),
             AbsoluteStrengthIndexSpecOptions asi => ComputeAbsoluteStrengthIndexFast(data, context, asi.Length),
             RelativeMomentumIndexSpecOptions rmi => ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum),
             IntradayMomentumIndexSpecOptions imi => ComputeIntradayMomentumIndexFast(data, context, imi.Length),
@@ -521,7 +521,7 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Detector/Pivot oscillators
             PivotDetectorOscillatorSpecOptions pdo => ComputePivotDetectorOscillatorFast(data, context, pdo.MaType),
-            TickLineMomentumOscillatorSpecOptions tlmo => ComputeTickLineMomentumOscillatorFast(data, context, tlmo.Length),
+            TickLineMomentumOscillatorSpecOptions tlmo => ComputeTickLineMomentumOscillatorFast(data, context, tlmo.Length, tlmo.MaType),
             SupportAndResistanceOscillatorSpecOptions saro => ComputeSupportAndResistanceOscillatorFast(data, context, saro.Length),
             TradingMadeMoreSimplerOscillatorSpecOptions tmmso => ComputeTradingMadeMoreSimplerOscillatorFast(data, context, tmmso.Length),
             NthOrderDifferencingOscillatorSpecOptions nodo => ComputeNthOrderDifferencingOscillatorFast(data, context, nodo.Length),
@@ -1068,7 +1068,7 @@ internal static partial class IndicatorCompute
 
             // Batch 13 - Volatility Indicators with Core Methods
             MayerMultipleSpecOptions mm => ComputeMayerMultipleFast(data, context, mm.Length, mm.MaType),
-            GopalakrishnanRangeIndexSpecOptions gri => ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length, gri.MaType),
+            GopalakrishnanRangeIndexSpecOptions gri => ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length),
             HighLowMovingAverageSpecOptions hlma => ComputeHighLowMovingAverageFast(data, context, hlma.Length, hlma.MaType),
             StiffnessIndicatorSpecOptions sti => ComputeStiffnessIndicatorFast(data, context, sti.Length1, sti.Length2, sti.SmoothingLength, sti.MaType),
             MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length, mmi.MaType),
@@ -3871,11 +3871,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trend Intensity Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTrendIntensityIndexFast(StockData data, ComputeContext context, int length = 30)
+    internal static ComputeBuffer ComputeTrendIntensityIndexFast(StockData data, ComputeContext context, int fastLength = 30,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int slowLength = 60)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.TrendIntensityIndex(close, buffer.WritableSpan, length);
+        // CalculateTrendIntensityIndex splits the chained series into how far it sits above and below its
+        // slow moving average, sums each over the fast window, and reports the upward share as a percentage.
+        // The TrendCore routine this replaced read the close and used one length for both.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, slowLength, input, smoothed.WritableSpan);
+        var sma = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var deviationUpSum = new RollingSum();
+        var deviationDownSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            deviationUpSum.Add(input[i] > sma[i] ? input[i] - sma[i] : 0);
+            deviationDownSum.Add(input[i] < sma[i] ? sma[i] - input[i] : 0);
+
+            var sdPlus = deviationUpSum.Sum(fastLength);
+            var sdMinus = deviationDownSum.Sum(fastLength);
+            output[i] = sdPlus + sdMinus != 0 ? sdPlus / (sdPlus + sdMinus) * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -5738,11 +5764,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Calmar Ratio using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 252)
+    internal static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 30)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.CalmarRatio(close, buffer.WritableSpan, length);
+        // CalculateCalmarRatio divides the annualised return over the window by the deepest drawdown seen in
+        // it, where the drawdown is measured against the rolling highest value of the chained series. The
+        // VolatilityCore routine this replaced read the close and computed a different ratio entirely.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        const double barMin = 60 * 24;
+        const double minPerYr = 60 * 24 * 30 * 12;
+        const double barsPerYr = minPerYr / barMin;
+        var power = barsPerYr / (length * 15);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(Math.Max(length, 2));
+        var drawdownWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            highWindow.Add(input[i]);
+            var maxDn = highWindow.Max;
+            drawdownWindow.Add(maxDn != 0 ? (input[i] - maxDn) / maxDn : 0);
+
+            var prevValue = i >= length ? input[i - length] : 0;
+            var ret = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
+            var annualReturn = 1 + ret >= 0 ? MathHelper.Pow(1 + ret, power) - 1 : 0;
+            var maxDd = drawdownWindow.Min;
+            output[i] = maxDd != 0 ? annualReturn / Math.Abs(maxDd) : 0;
+        }
+
         return buffer;
     }
 
@@ -7837,11 +7891,44 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Tick Line Momentum Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTickLineMomentumOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTickLineMomentumOscillatorFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TickLineMomentumOscillator(close, buffer.WritableSpan, length);
+        // CalculateTickLineMomentumOscillator accumulates plus or minus one for each bar that closes above or
+        // below the previous moving average, takes the rate of change of that running total over the smooth
+        // window, and smooths it once more. The core routine this replaced skipped both later steps.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, input, smoothed.WritableSpan);
+        var ma = smoothed.Span;
+
+        using var cumulative = context.Rent(count);
+        var cumoSum = cumulative.WritableSpan;
+        double running = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var prevMa = i >= 1 ? ma[i - 1] : 0;
+            running += input[i] > prevMa ? 1 : input[i] < prevMa ? -1 : 0;
+            cumoSum[i] = running;
+        }
+
+        using var rateOfChange = context.Rent(count);
+        var roc = rateOfChange.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= smoothLength ? cumoSum[i - smoothLength] : 0;
+            roc[i] = prevValue != 0
+                ? CalculationsHelper.MinPastValues(i, smoothLength, cumoSum[i] - prevValue) / prevValue * 100
+                : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, rateOfChange.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -8680,11 +8767,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Pentuple Exponential Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePentupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePentupleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.PentupleExponentialMovingAverage(close, buffer.WritableSpan, length);
+        // CalculatePentupleExponentialMovingAverage chains eight moving average passes over the chained
+        // series and combines them by the binomial weights 8, -28, 56, -70, 56, -28, 8, -1. The core routine
+        // this replaced read the close and used a shorter cascade.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        using var fourth = context.Rent(count);
+        using var fifth = context.Rent(count);
+        using var sixth = context.Rent(count);
+        using var seventh = context.Rent(count);
+        using var eighth = context.Rent(count);
+
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), first.WritableSpan);
+        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+        MovingAverage(data, maType, length, second.Span, third.WritableSpan);
+        MovingAverage(data, maType, length, third.Span, fourth.WritableSpan);
+        MovingAverage(data, maType, length, fourth.Span, fifth.WritableSpan);
+        MovingAverage(data, maType, length, fifth.Span, sixth.WritableSpan);
+        MovingAverage(data, maType, length, sixth.Span, seventh.WritableSpan);
+        MovingAverage(data, maType, length, seventh.Span, eighth.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (8 * first.Span[i]) - (28 * second.Span[i]) + (56 * third.Span[i]) - (70 * fourth.Span[i]) +
+                (56 * fifth.Span[i]) - (28 * sixth.Span[i]) + (8 * seventh.Span[i]) - eighth.Span[i];
+        }
+
         return buffer;
     }
 
@@ -14905,46 +15023,33 @@ internal static partial class IndicatorCompute
     /// Computes Gopalakrishnan Range Index using zero-allocation fast path.
     /// GAPO = log(highestHigh - lowestLow) / log(length), then smoothed with MA.
     /// </summary>
-    internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        // CalculateGopalakrishnanRangeIndex publishes the raw index: the log of the window range over the log
+        // of the length. Its moving average is the separate Signal series, so no moving average type reaches
+        // the published value and the arm no longer smooths what the batch leaves raw.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var gapoArray = pool.Rent(count);
+        length = Math.Max(length, 1);
+        var lengthLog = Math.Log(length);
 
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length);
+        var lowWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            var gapoSpan = gapoArray.AsSpan(0, count);
+            highWindow.Add(highs[i]);
+            lowWindow.Add(lows[i]);
 
-            // Calculate raw GAPO values
-            VolatilityCore.GopalakrishnanRangeIndex(high, low, gapoSpan, length);
-
-            // Smooth with moving average
-            ReadOnlySpan<double> gapoReadOnly = gapoSpan;
-            var buffer = context.Rent(count);
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(gapoReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(gapoReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(gapoReadOnly, buffer.WritableSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.WeightedMovingAverage(gapoReadOnly, buffer.WritableSpan, length);
-                    break;
-            }
-
-            return buffer;
+            var range = highWindow.Max - lowWindow.Min;
+            var rangeLog = range > 0 ? Math.Log(range) : 0;
+            output[i] = rangeLog / lengthLog;
         }
-        finally
-        {
-            pool.Return(gapoArray);
-        }
+
+        return buffer;
     }
 
     /// <summary>
@@ -15154,64 +15259,46 @@ internal static partial class IndicatorCompute
     /// Computes Sharpe Ratio using zero-allocation fast path.
     /// SharpeRatio = (returns - benchmark) / standardDeviation
     /// </summary>
-    internal static ComputeBuffer ComputeSharpeRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSharpeRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var returnsArray = pool.Rent(count);
-        var avgReturnsArray = pool.Rent(count);
-        var stdDevArray = pool.Rent(count);
+        // CalculateSharpeRatio takes the return of the chained series over the whole window, less the
+        // benchmark compounded across that window, and divides its moving average by its standard deviation.
+        // The arm this replaced measured bar-to-bar returns against a daily benchmark, which is neither.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        try
+        const double barMin = 60 * 24;
+        const double minPerYr = 60 * 24 * 30 * 12;
+        const double barsPerYr = minPerYr / barMin;
+        var bench = MathHelper.Pow(1 + bmk, length / barsPerYr) - 1;
+
+        using var returns = context.Rent(count);
+        var ret = returns.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var returnsSpan = returnsArray.AsSpan(0, count);
-            var avgReturnsSpan = avgReturnsArray.AsSpan(0, count);
-            var stdDevSpan = stdDevArray.AsSpan(0, count);
-
-            // Calculate returns
-            returnsSpan[0] = 0;
-            for (var i = 1; i < count; i++)
-            {
-                var prevClose = close[i - 1];
-                returnsSpan[i] = prevClose != 0 ? (close[i] - prevClose) / prevClose : 0;
-            }
-
-            ReadOnlySpan<double> returnsReadOnly = returnsSpan;
-
-            // Calculate average returns
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-            }
-
-            // Calculate standard deviation of returns
-            VolatilityCore.StandardDeviation(returnsReadOnly, stdDevSpan, length);
-
-            // Calculate Sharpe Ratio
-            var dailyBmk = bmk / 252; // Annualized to daily
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                buffer.WritableSpan[i] = stdDevSpan[i] != 0 ? (avgReturnsSpan[i] - dailyBmk) / stdDevSpan[i] : 0;
-            }
-
-            return buffer;
+            var prevValue = i >= length ? input[i - length] : 0;
+            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 - bench : 0;
         }
-        finally
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, returns.Span, smoothed.WritableSpan);
+        var average = smoothed.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            pool.Return(returnsArray);
-            pool.Return(avgReturnsArray);
-            pool.Return(stdDevArray);
+            output[i] = stdDev[i] != 0 ? average[i] / stdDev[i] : 0;
         }
+
+        return buffer;
     }
 
     /// <summary>
