@@ -1120,7 +1120,13 @@ internal static partial class IndicatorCompute
             EhlersRoofingFilterV1SpecOptions erf1 => ComputeEhlersRoofingFilterV1Fast(data, context, erf1.Length1, erf1.Length2, erf1.MaType),
 
             // Batch 9 - More oscillators and indicators
-            SpearmanIndicatorSpecOptions spi => ComputeEhlersSpearmanRankFast(data, context, spi.Length),
+            SpearmanIndicatorSpecOptions spi => spec.OutputKey switch
+            {
+                null or "Si" => ComputeSpearmanIndicatorFast(data, context, spi.Length, spi.SignalLength, spi.MaType),
+                "Signal" => ComputeSpearmanIndicatorFast(data, context, spi.Length, spi.SignalLength, spi.MaType,
+                    MacdSeries.Signal),
+                _ => null
+            },
             TillsonT3MovingAverageSpecOptions tt3 => ComputeTillsonT3Fast(data, context, tt3.Length, tt3.VFactor, tt3.MaType),
             UltimateMovingAverageBandsSpecOptions umab => spec.OutputKey switch
             {
@@ -1323,7 +1329,19 @@ internal static partial class IndicatorCompute
             KaseIndicatorSpecOptions ki => ComputeKaseIndicatorFast(data, context, ki.Length, ki.MaType),
             GuppyDistanceIndicatorSpecOptions gdi => ComputeGuppyDistanceFast(data, context, gdi.Length1, gdi.Length2,
                 gdi.Length3, gdi.Length4, gdi.Length5, gdi.Length6, gdi.MaType),
-            GuppyMultipleMovingAverageSpecOptions gmma => ComputeGuppyMultipleMaFast(data, context, gmma.Length1, gmma.MaType),
+            GuppyMultipleMovingAverageSpecOptions gmma => spec.OutputKey switch
+            {
+                null or "SuperGmmaOsc" => ComputeGuppyMultipleMaFast(data, context, gmma.Length1, gmma.Length2, gmma.Length3, gmma.Length5, gmma.Length7, gmma.Length9,
+                    gmma.Length10, gmma.Length11, gmma.Length12, gmma.Length13, gmma.Length14, gmma.Length15,
+                    gmma.Length16, gmma.Length18, gmma.Length19, gmma.Length21, gmma.Length22, gmma.Length23,
+                    gmma.Length25, gmma.Length26, maType: gmma.MaType),
+                "SuperGmmaSignal" => ComputeGuppyMultipleMaFast(data, context, gmma.Length1, gmma.Length2, gmma.Length3, gmma.Length5, gmma.Length7, gmma.Length9,
+                    gmma.Length10, gmma.Length11, gmma.Length12, gmma.Length13, gmma.Length14, gmma.Length15,
+                    gmma.Length16, gmma.Length18, gmma.Length19, gmma.Length21, gmma.Length22, gmma.Length23,
+                    gmma.Length25, gmma.Length26, maType: gmma.MaType,
+                    series: MacdSeries.Signal),
+                _ => null
+            },
 
             // Batch 20 - Statistical and Correlation Indicators
             HirashimaSugitaRSSpecOptions hsrs => spec.OutputKey switch
@@ -22893,23 +22911,195 @@ internal static partial class IndicatorCompute
     /// Computes Guppy Multiple Moving Average using zero-allocation fast path.
     /// Returns the short-term EMA.
     /// </summary>
-    internal static ComputeBuffer ComputeGuppyMultipleMaFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSpearmanIndicatorFast(StockData data, ComputeContext context, int length = 10,
+        int signalLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        MacdSeries series = MacdSeries.Line)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateSpearmanIndicator correlates each window value's rank against the rank of the value that
+        // sits at the same position in the sorted window - Spearman between time order and value order - with
+        // tied values sharing their runs' average rank. It is not ComputeEhlersSpearmanRankFast, which this
+        // arm was bound to. The batch substitutes the Y sums for the X sums throughout, which is exact because
+        // both series are the same multiset of ranks, so the denominator is squared and square-rooted back.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(1, length);
 
-        switch (maType)
+        using var correlation = context.Rent(count);
+        var coefCorr = correlation.WritableSpan;
+        var pool = ArrayPool<double>.Shared;
+        var windowArray = pool.Rent(length);
+        var sortedArray = pool.Rent(length);
+        var rankArray = pool.Rent(length);
+        try
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var window = windowArray.AsSpan(0, length);
+            var rankY = rankArray.AsSpan(0, length);
+            var windowCount = 0;
+            var windowStart = 0;
+            for (var i = 0; i < count; i++)
+            {
+                if (windowCount == length)
+                {
+                    window[windowStart] = input[i];
+                    windowStart = (windowStart + 1) % length;
+                }
+                else
+                {
+                    window[(windowStart + windowCount) % length] = input[i];
+                    windowCount++;
+                }
+
+                if (windowCount <= 1)
+                {
+                    coefCorr[i] = 0;
+                    continue;
+                }
+
+                for (var j = 0; j < windowCount; j++)
+                {
+                    sortedArray[j] = window[j];
+                }
+
+                Array.Sort(sortedArray, 0, windowCount);
+
+                double sumY = 0;
+                double sumY2 = 0;
+                var rank = 1;
+                for (var j = 0; j < windowCount;)
+                {
+                    var value = sortedArray[j];
+                    var end = j + 1;
+                    while (end < windowCount && sortedArray[end] == value)
+                    {
+                        end++;
+                    }
+
+                    var span = end - j;
+                    var averageRank = (rank + (rank + span - 1)) / 2.0;
+                    sumY += averageRank * span;
+                    sumY2 += averageRank * averageRank * span;
+                    for (var k = j; k < end; k++)
+                    {
+                        rankY[k] = averageRank;
+                    }
+
+                    rank += span;
+                    j = end;
+                }
+
+                double sumXy = 0;
+                for (var j = 0; j < windowCount; j++)
+                {
+                    // equal values share one averaged rank, so any matching sorted position serves as the
+                    // lookup the batch does through its value-to-rank dictionary
+                    var index = Array.BinarySearch(sortedArray, 0, windowCount, window[(windowStart + j) % length]);
+                    if (index >= 0)
+                    {
+                        sumXy += rankY[index] * rankY[j];
+                    }
+                }
+
+                var n = (double)windowCount;
+                var numerator = (n * sumXy) - (sumY * sumY);
+                var half = (n * sumY2) - (sumY * sumY);
+                var denominator = Math.Sqrt(half * half);
+                var value2 = denominator != 0 ? numerator / denominator : 0;
+                coefCorr[i] = (MathHelper.IsValueNullOrInfinity(value2) ? 0 : value2) * 100;
+            }
+        }
+        finally
+        {
+            pool.Return(windowArray);
+            pool.Return(sortedArray);
+            pool.Return(rankArray);
+        }
+
+        var buffer = context.Rent(count);
+        if (series == MacdSeries.Signal)
+        {
+            MovingAverage(data, maType, Math.Max(1, signalLength), correlation.Span, buffer.WritableSpan);
+            return buffer;
+        }
+
+        correlation.Span.CopyTo(buffer.WritableSpan);
+        return buffer;
+    }
+
+    internal static ComputeBuffer ComputeGuppyMultipleMaFast(StockData data, ComputeContext context, int length1 = 3,
+        int length2 = 5, int length3 = 7, int length5 = 9, int length7 = 11, int length9 = 13, int length10 = 15,
+        int length11 = 17, int length12 = 19, int length13 = 21, int length14 = 23, int length15 = 25, int length16 = 28,
+        int length18 = 31, int length19 = 34, int length21 = 37, int length22 = 40, int length23 = 43, int length25 = 46,
+        int length26 = 49, int smoothLength = 1, int signalLength = 13,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, MacdSeries series = MacdSeries.Line)
+    {
+        // CalculateGuppyMultipleMovingAverage averages eleven short moving averages into a fast ribbon and
+        // sixteen long ones into a slow ribbon, then publishes the fast ribbon's percentage distance from the
+        // slow one. The batch skips eight of its own length parameters - 4, 6, 8, 17, 20, 24, 27 and 31 are
+        // never read - so they are not parameters here either.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        Span<int> fastLengths = stackalloc int[11]
+        {
+            length1, length2, length3, length5, length7, length9, length10, length11, length12, length13, length14
+        };
+
+        // GuppyMultipleMovingAverageSpecOptions stops at Length27, so the batch's length28, length29, length30,
+        // length32, length33, length34 and length35 can only ever take their declared defaults.
+        Span<int> slowLengths = stackalloc int[16]
+        {
+            length15, length16, length18, length19, length21, length22, length23, length25, length26,
+            52, 55, 58, 61, 64, 67, 70
+        };
+
+        using var fastRibbon = context.Rent(count);
+        using var slowRibbon = context.Rent(count);
+        using var scratch = context.Rent(count);
+        var fast = fastRibbon.WritableSpan;
+        var slow = slowRibbon.WritableSpan;
+        fast.Clear();
+        slow.Clear();
+
+        for (var j = 0; j < fastLengths.Length; j++)
+        {
+            MovingAverage(data, maType, Math.Max(1, fastLengths[j]), input, scratch.WritableSpan);
+            var averaged = scratch.Span;
+            for (var i = 0; i < count; i++)
+            {
+                fast[i] += averaged[i];
+            }
+        }
+
+        for (var j = 0; j < slowLengths.Length; j++)
+        {
+            MovingAverage(data, maType, Math.Max(1, slowLengths[j]), input, scratch.WritableSpan);
+            var averaged = scratch.Span;
+            for (var i = 0; i < count; i++)
+            {
+                slow[i] += averaged[i];
+            }
+        }
+
+        using var raw = context.Rent(count);
+        var oscillatorRaw = raw.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var rawSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var superGmmaFast = fast[i] / 11;
+            var superGmmaSlow = slow[i] / 16;
+            oscillatorRaw[i] = superGmmaSlow != 0 ? (superGmmaFast - superGmmaSlow) / superGmmaSlow * 100 : 0;
+            rawSum.Add(oscillatorRaw[i]);
+            output[i] = rawSum.Average(Math.Max(1, smoothLength));
+        }
+
+        if (series == MacdSeries.Signal)
+        {
+            // the signal is an average of the RAW oscillator, not of the smoothed one this arm just wrote
+            MovingAverage(data, maType, Math.Max(1, signalLength), raw.Span, output);
         }
 
         return buffer;
