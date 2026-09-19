@@ -2928,6 +2928,7 @@ internal static class OscillatorCore
             // price read from the same array, so the comparison asks whether the band was re-anchored to a
             // DIFFERENT price. A tolerance band would report a move that the batch calls no move, and a
             // fractal that re-anchors a band to the price it already held prints 0 in both.
+#pragma warning disable S1244 // Floating point numbers should not be tested for equality
             if (upperBand != prevUpperBand)
             {
                 output[i] = 1;
@@ -2940,6 +2941,7 @@ internal static class OscillatorCore
             {
                 output[i] = 0;
             }
+#pragma warning restore S1244
         }
     }
 
