@@ -357,7 +357,13 @@ internal static partial class IndicatorCompute
             RogersSatchellVolatilitySpecOptions rsv => ComputeRogersSatchellVolatilityFast(data, context, rsv.Length),
             YangZhangVolatilitySpecOptions yzv => ComputeYangZhangVolatilityFast(data, context, yzv.Length),
             DownsideDeviationSpecOptions dd => ComputeDownsideDeviationFast(data, context, dd.Length),
-            StandardDeviationChannelSpecOptions sdch => ComputeStandardDeviationChannelFast(data, context, sdch.Length),
+            StandardDeviationChannelSpecOptions sdch => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeStandardDeviationChannelFast(data, context, sdch.Length),
+                "UpperBand" => ComputeStandardDeviationChannelFast(data, context, sdch.Length, 2, ChannelBand.Upper),
+                "LowerBand" => ComputeStandardDeviationChannelFast(data, context, sdch.Length, 2, ChannelBand.Lower),
+                _ => null
+            },
             VolatilityRatioSpecOptions vr => ComputeVolatilityRatioFast(data, context, vr.Length),
 
             // Batch 5 - Bands/Channels
@@ -1032,8 +1038,20 @@ internal static partial class IndicatorCompute
             MovingAverageChannelSpecOptions mac => ComputeMovingAverageChannelFast(data, context, mac.Length, mac.MaType),
             MovingAverageEnvelopeSpecOptions mae => ComputeMovingAverageEnvelopeFast(data, context, mae.Length, mae.Pct, mae.MaType),
             MovingAverageSupportResistanceSpecOptions masr => ComputeMovingAverageSupportResistanceFast(data, context, masr.Length, masr.MaType),
-            VariableMovingAverageBandsSpecOptions vmab => ComputeVariableMovingAverageBandsFast(data, context, vmab.Length, vmab.Mult, vmab.MaType),
-            NarrowSidewaysChannelSpecOptions nsc => ComputeNarrowSidewaysChannelFast(data, context, nsc.Length, nsc.Pct, nsc.MaType),
+            VariableMovingAverageBandsSpecOptions vmab => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeVariableMovingAverageBandsFast(data, context, vmab.Length, vmab.Mult, vmab.MaType),
+                "UpperBand" => ComputeVariableMovingAverageBandsFast(data, context, vmab.Length, vmab.Mult, vmab.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeVariableMovingAverageBandsFast(data, context, vmab.Length, vmab.Mult, vmab.MaType, ChannelBand.Lower),
+                _ => null
+            },
+            NarrowSidewaysChannelSpecOptions nsc => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeNarrowSidewaysChannelFast(data, context, nsc.Length, nsc.MaType),
+                "UpperBand" => ComputeNarrowSidewaysChannelFast(data, context, nsc.Length, nsc.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeNarrowSidewaysChannelFast(data, context, nsc.Length, nsc.MaType, ChannelBand.Lower),
+                _ => null
+            },
 
             // Batch 16 - More Band and Channel Indicators
             HighLowBandsSpecOptions hlb => spec.OutputKey switch
@@ -1045,7 +1063,13 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputeHighLowBandsFast(data, context, hlb.Length, -hlb.PctShift, hlb.MaType),
                 _ => null
             },
-            AutoDispersionBandsSpecOptions adb => ComputeAutoDispersionBandsFast(data, context, adb.Length, adb.SmoothLength, adb.MaType),
+            AutoDispersionBandsSpecOptions adb => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeAutoDispersionBandsFast(data, context, adb.Length, adb.SmoothLength, adb.MaType),
+                "UpperBand" => ComputeAutoDispersionBandsFast(data, context, adb.Length, adb.SmoothLength, adb.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeAutoDispersionBandsFast(data, context, adb.Length, adb.SmoothLength, adb.MaType, ChannelBand.Lower),
+                _ => null
+            },
             BollingerBandsFibonacciRatiosSpecOptions bbfr => ComputeBollingerBandsFibonacciRatiosFast(data, context, bbfr.Length, bbfr.FibRatio1, bbfr.FibRatio2, bbfr.FibRatio3, bbfr.MaType),
             BollingerBandsWithAtrPctSpecOptions bbatrp => ComputeBollingerBandsWithAtrPctFast(data, context, bbatrp.Length, bbatrp.BbLength, bbatrp.StdDevMult, bbatrp.MaType),
             KirshenbaumBandsSpecOptions kb => ComputeKirshenbaumBandsFast(data, context, kb.Length1, kb.Length2, kb.StdDevFactor, kb.MaType),
@@ -5426,11 +5450,44 @@ internal static partial class IndicatorCompute
 
     #region Volatility - Additional Batch 3
 
-    internal static ComputeBuffer ComputeStandardDeviationChannelFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeStandardDeviationChannelFast(StockData data, ComputeContext context, int length = 20,
+        double stdDevMult = 2, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardDeviationChannel(close, buffer.WritableSpan, length);
+        // CalculateStandardDeviationChannel centres its channel on the linear regression of the chained
+        // series - the fitted value at the current bar, taken through the same RollingLeastSquares the batch
+        // uses so the opening window is fitted identically - and offsets the outer bands by a multiple of the
+        // population standard deviation of that window. VolatilityCore.StandardDeviationChannel took the
+        // close and measured something else entirely.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = regression.Next(input[i], isFinal: true).Last;
+            }
+        }
+
+        if (band == ChannelBand.Middle)
+        {
+            return buffer;
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+        var multiplier = band == ChannelBand.Upper ? stdDevMult : -stdDevMult;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] += multiplier * stdDev[i];
+        }
+
         return buffer;
     }
 
@@ -13620,24 +13677,31 @@ internal static partial class IndicatorCompute
     /// Computes Variable Moving Average Bands using zero-allocation fast path.
     /// Returns the middle band (VMA).
     /// </summary>
-    internal static ComputeBuffer ComputeVariableMovingAverageBandsFast(StockData data, ComputeContext context, int length = 6, double mult = 1.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVariableMovingAverageBandsFast(StockData data, ComputeContext context, int length = 6,
+        double mult = 1.5, MovingAvgType maType = MovingAvgType.VariableMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateVariableMovingAverageBands centres on the moving average of the chained series and steps
+        // the outer bands by a multiple of the average true range. The switch this replaced fell back to a
+        // simple average of the close for every type but two, including the variable average it is named for.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        // Calculate MA (simplified - uses SMA/EMA as proxy for VMA)
-        switch (maType)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
+
+        if (band == ChannelBand.Middle)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            return buffer;
+        }
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+        var multiplier = band == ChannelBand.Upper ? mult : -mult;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] += multiplier * atr[i];
         }
 
         return buffer;
@@ -13647,27 +13711,23 @@ internal static partial class IndicatorCompute
     /// Computes Narrow Sideways Channel using zero-allocation fast path.
     /// Returns the middle band (MA).
     /// </summary>
-    internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(StockData data, ComputeContext context, int length = 20, double pct = 0.03, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateNarrowSidewaysChannel republishes Bollinger Bands at three standard deviations and nothing
+        // else, so the arm is that band rather than a moving average of the close. The channel has no
+        // percentage of its own, which is why the spec's Pct is marked as having no effect.
+        const double stdDevMult = 3;
 
-        // Calculate MA
-        switch (maType)
+        if (band == ChannelBand.Middle)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+            var middle = context.Rent(inputList.Count);
+            MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), middle.WritableSpan);
+            return middle;
         }
 
-        return buffer;
+        return BollingerBand(data, context, length, band == ChannelBand.Upper ? stdDevMult : -stdDevMult, maType);
     }
 
     /// <summary>
@@ -13704,27 +13764,67 @@ internal static partial class IndicatorCompute
     /// Computes Auto Dispersion Bands using zero-allocation fast path.
     /// Returns the middle band (WMA of close).
     /// </summary>
-    internal static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90, int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90,
+        int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateAutoDispersionBands disperses each bar by the root mean square of the change over the
+        // window, takes the running extreme of each envelope and smooths it twice - once over the window and
+        // again over the smoothing length. The middle band is the average of the two, not a moving average of
+        // the close, which is what this computed.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
 
-        // Calculate MA of close
-        switch (maType)
+        using var aMaxima = context.Rent(count);
+        using var bMinima = context.Rent(count);
+        var aMax = aMaxima.WritableSpan;
+        var bMin = bMinima.WritableSpan;
+
+        var changeSquaredSum = new RollingSum();
+        var aWindow = new RollingMinMax(length);
+        var bWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentValue = input[i];
+            var previousValue = i >= length ? input[i - length] : 0;
+            var change = CalculationsHelper.MinPastValues(i, length, currentValue - previousValue);
+            changeSquaredSum.Add(change * change);
+
+            var meanSquare = changeSquaredSum.Average(length);
+            var dispersion = meanSquare >= 0 ? MathHelper.Sqrt(meanSquare) : 0;
+
+            aWindow.Add(currentValue + dispersion);
+            bWindow.Add(currentValue - dispersion);
+            aMax[i] = aWindow.Max;
+            bMin[i] = bWindow.Min;
+        }
+
+        using var upperSmoothed = context.Rent(count);
+        using var upperBand = context.Rent(count);
+        MovingAverage(data, maType, length, aMaxima.Span, upperSmoothed.WritableSpan);
+        MovingAverage(data, maType, smoothLength, upperSmoothed.Span, upperBand.WritableSpan);
+
+        if (band == ChannelBand.Upper)
+        {
+            var upperOnly = context.Rent(count);
+            upperBand.Span.CopyTo(upperOnly.WritableSpan);
+            return upperOnly;
+        }
+
+        using var lowerSmoothed = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        MovingAverage(data, maType, length, bMinima.Span, lowerSmoothed.WritableSpan);
+        MovingAverage(data, maType, smoothLength, lowerSmoothed.Span, lowerBand.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var upper = upperBand.Span;
+        var lower = lowerBand.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = band == ChannelBand.Lower ? lower[i] : (upper[i] + lower[i]) / 2;
         }
 
         return buffer;
