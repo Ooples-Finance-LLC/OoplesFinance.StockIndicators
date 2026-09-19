@@ -1173,7 +1173,13 @@ internal static partial class IndicatorCompute
             VervoortVolatilityBandsSpecOptions vvb => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2, vvb.DevMult, vvb.LowBandMult, vvb.MaType),
 
             // Batch 17 - More Band and Channel Indicators
-            VolumeAdaptiveBandsSpecOptions vab => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType),
+            VolumeAdaptiveBandsSpecOptions vab => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType),
+                "UpperBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType, ChannelBand.Lower),
+                _ => null
+            },
             TrendTraderBandsSpecOptions ttb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType),
@@ -15706,21 +15712,35 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context,
         int length = 14, double gamma = 3)
     {
-        // CalculateAdaptiveAutonomousRecursiveMovingAverage bands the series by the running mean of its own
-        // distance from the average, scaled by gamma, and then smooths the banded value twice - each pass
-        // weighted by Kaufman's efficiency ratio, so the average follows a trending series closely and a
-        // noisy one barely at all. TrendCore.AdaptiveAutonomousRecursiveMovingAverage had no efficiency
-        // ratio in it at all.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        using var deviations = context.Rent(count);
+        AdaptiveAutonomousRecursiveMovingAverage(context, SpanCompat.AsReadOnlySpan(inputList), length, gamma,
+            buffer.WritableSpan, deviations.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Writes the adaptive autonomous recursive moving average into <paramref name="average"/> and the band
+    /// width it was built from into <paramref name="deviation"/>, which are the Aarma and D series
+    /// CalculateAdaptiveAutonomousRecursiveMovingAverage publishes.
+    /// </summary>
+    /// <remarks>
+    /// The average bands the series by the running mean of its own distance from the average, scaled by
+    /// gamma, and then smooths the banded value twice - each pass weighted by Kaufman's efficiency ratio, so
+    /// the average follows a trending series closely and a noisy one barely at all. The trailing stop built
+    /// on it needs both series, so the two are filled in one pass rather than measured twice.
+    /// </remarks>
+    private static void AdaptiveAutonomousRecursiveMovingAverage(ComputeContext context, ReadOnlySpan<double> input,
+        int length, double gamma, Span<double> average, Span<double> deviation)
+    {
+        var count = input.Length;
 
         using var efficiency = context.Rent(count);
         EfficiencyRatio(input, length, efficiency.WritableSpan);
         var er = efficiency.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
 
         double absDiffSum = 0;
         double ma1 = 0;
@@ -15733,14 +15753,13 @@ internal static partial class IndicatorCompute
 
             absDiffSum += Math.Abs(currentValue - prevMa2);
             var d = i != 0 ? absDiffSum / i * gamma : 0;
-            var c = currentValue > prevMa2 + d ? currentValue + d : currentValue < prevMa2 - d ? currentValue - d : prevMa2;
+            deviation[i] = d;
 
+            var c = currentValue > prevMa2 + d ? currentValue + d : currentValue < prevMa2 - d ? currentValue - d : prevMa2;
             ma1 = (er[i] * c) + ((1 - er[i]) * prevMa1);
             ma2 = (er[i] * ma1) + ((1 - er[i]) * prevMa2);
-            output[i] = ma2;
+            average[i] = ma2;
         }
-
-        return buffer;
     }
 
     /// <summary>
@@ -17401,13 +17420,41 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Autonomous Recursive Trailing Stop using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context, int length = 14, double lambda = 1)
+    internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context,
+        int length = 14, double gamma = 3)
     {
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.AdaptiveAutonomousRecursiveTrailingStop(closeSpan, highSpan, lowSpan, buffer.WritableSpan, length, lambda);
+        // CalculateAdaptiveAutonomousRecursiveTrailingStop bands the adaptive autonomous recursive moving
+        // average by that indicator's own D series and flips side when the price closes beyond the previous
+        // band. The published Ts is whichever band the current side names, not an average of the two.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var averages = context.Rent(count);
+        using var deviations = context.Rent(count);
+        AdaptiveAutonomousRecursiveMovingAverage(context, input, length, gamma, averages.WritableSpan,
+            deviations.WritableSpan);
+        var average = averages.Span;
+        var deviation = deviations.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double previousUpper = 0;
+        double previousLower = 0;
+        double side = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var upper = average[i] + deviation[i];
+            var lower = average[i] - deviation[i];
+
+            side = input[i] > previousUpper ? 1 : input[i] < previousLower ? 0 : side;
+            output[i] = (side * lower) + ((1 - side) * upper);
+
+            previousUpper = upper;
+            previousLower = lower;
+        }
+
         return buffer;
     }
 
@@ -20283,23 +20330,58 @@ internal static partial class IndicatorCompute
     /// Computes Volume Adaptive Bands using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateVolumeAdaptiveBands accumulates the series divided by the moving average of volume, once
+        // with that average and once with its negative, and smooths each accumulation into a band. The middle
+        // band is their average, and none of the three is a moving average of the price.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var volumeAverages = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), volumeAverages.WritableSpan);
+        var volumeAverage = volumeAverages.Span;
+
+        using var raisedValues = context.Rent(count);
+        using var loweredValues = context.Rent(count);
+        var raised = raisedValues.WritableSpan;
+        var lowered = loweredValues.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var a = Math.Max(volumeAverage[i], 1);
+            var b = a * -1;
+
+            var previousRaised = i >= 1 ? raised[i - 1] : input[i];
+            var previousLowered = i >= 1 ? lowered[i - 1] : input[i];
+            raised[i] = (previousRaised + (input[i] * a)) / a;
+            lowered[i] = (previousLowered + (input[i] * b)) / b;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        if (band == ChannelBand.Upper)
+        {
+            MovingAverage(data, maType, length, raisedValues.Span, output);
+            return buffer;
+        }
+
+        if (band == ChannelBand.Lower)
+        {
+            MovingAverage(data, maType, length, loweredValues.Span, output);
+            return buffer;
+        }
+
+        using var upperBand = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        MovingAverage(data, maType, length, raisedValues.Span, upperBand.WritableSpan);
+        MovingAverage(data, maType, length, loweredValues.Span, lowerBand.WritableSpan);
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (upperBand.Span[i] + lowerBand.Span[i]) / 2;
         }
 
         return buffer;

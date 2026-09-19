@@ -245,7 +245,6 @@ public sealed class BuilderArmTests : GlobalTestData
     /// </remarks>
     private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
     {
-        "AdaptiveAutonomousRecursiveTrailingStopSpecOptions",
         "AdaptiveLeastSquaresSpecOptions",
         "EhlersChebyshevLowPassFilterSpecOptions",
         "EhlersMedianAverageAdaptiveFilterSpecOptions",
@@ -279,7 +278,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions",
         "VervoortSmoothedOscillatorSpecOptions",
         "VervoortVolatilityBandsSpecOptions",
-        "VolumeAdaptiveBandsSpecOptions",
         "VolumeFlowIndicatorSpecOptions",
         "WilsonRelativePriceChannelSpecOptions",
         "ZigZagSpecOptions",
