@@ -595,7 +595,10 @@ internal static partial class IndicatorCompute
             EhlersLaguerreRsiSpecOptions elrsi => ComputeEhlersLaguerreRsiFast(data, context, elrsi.Length),
             EhlersZeroLagEmaSpecOptions ezle => ComputeEhlersZeroLagEmaFast(data, context, ezle.Length),
             EhlersFramaSpecOptions eframa => ComputeEhlersFramaFast(data, context, eframa.Length),
-            EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length),
+            // MaType drives both the relative strength index and the smoothing of its rescaled output,
+            // so it does reach the bound series and is forwarded. Length2 is fixed by the batch.
+            EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length,
+                maType: eift.MaType),
             EhlersCyberCycleSpecOptions ecc => ComputeEhlersCyberCycleFast(data, context, ecc.Length),
             EhlersStochasticSpecOptions esto => ComputeEhlersStochasticFast(data, context, esto.Length),
             EhlersAdaptiveLaguerreFilterSpecOptions ealf => ComputeEhlersAdaptiveLaguerreFilterFast(data, context, ealf.Length),
@@ -6886,11 +6889,37 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Decycler Oscillator V1 using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV1Fast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV1Fast(StockData data, ComputeContext context, int fastLength = 100,
+        double fastMult = 1.2)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersDecyclerOscillatorV1(close, buffer.WritableSpan, length, length * 2);
+        // The bound key is FastEdo, so only the fast oscillator is published; the slow length and its
+        // multiplier reach the SlowEdo line alone. The decycler is the input less its own high pass,
+        // and the oscillator is the high pass of that decycler scaled by price.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        fastLength = Math.Max(fastLength, 1);
+
+        using var highPass = EhlersHighPassFilterV1(context, input, fastLength, 1);
+        var hp = highPass.Span;
+
+        using var decycler = context.Rent(count);
+        var dec = decycler.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            dec[i] = input[i] - hp[i];
+        }
+
+        using var filtered = EhlersHighPassFilterV1(context, decycler.Span, fastLength, 0.5);
+        var filt = filtered.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = input[i] != 0 ? 100 * fastMult * filt[i] / input[i] : 0;
+        }
+
         return buffer;
     }
 
@@ -7529,11 +7558,35 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Inverse Fisher Transform using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length1 = 5,
+        int length2 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersInverseFisherTransform(close, buffer.WritableSpan, length);
+        // The batch transforms a smoothed, rescaled relative strength index, not the raw price series.
+        var count = data.Count;
+
+        using var rsi = ComputeRsiFast(data, context, Math.Max(length1, 1), maType);
+        var rsiValues = rsi.Span;
+
+        using var rescaled = context.Rent(count);
+        var v1 = rescaled.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            v1[i] = 0.1 * (rsiValues[i] - 50);
+        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length2, 1), rescaled.Span, smoothed.WritableSpan);
+        var v2 = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var top = MathHelper.Exp(2 * v2[i]) - 1;
+            var bottom = MathHelper.Exp(2 * v2[i]) + 1;
+            output[i] = bottom != 0 ? MathHelper.MinOrMax(top / bottom, 1, -1) : 0;
+        }
+
         return buffer;
     }
 
@@ -9395,8 +9448,15 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer EhlersHighPassFilterV1(StockData data, ComputeContext context, int length, double mult)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
+        return EhlersHighPassFilterV1(context, SpanCompat.AsReadOnlySpan(inputList), length, mult);
+    }
+
+    /// <summary>
+    /// Computes the Ehlers high pass filter V1 over an arbitrary series.
+    /// </summary>
+    private static ComputeBuffer EhlersHighPassFilterV1(ComputeContext context, ReadOnlySpan<double> input, int length, double mult)
+    {
+        var count = input.Length;
         length = Math.Max(length, 1);
 
         var alphaArg = MathHelper.MinOrMax(2 * Math.PI / (mult * length * MathHelper.Sqrt(2)), 0.99, 0.01);
@@ -10015,10 +10075,35 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
+        // The batch correlates price against a descending ramp (y = -j). The core this arm used ran the
+        // ramp ascending, which flips the sign of every published value.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersCorrelationTrendIndicator(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var x = i >= j ? input[i - j] : 0;
+                double y = -j;
+
+                sx += x;
+                sy += y;
+                sxx += MathHelper.Pow(x, 2);
+                sxy += x * y;
+                syy += MathHelper.Pow(y, 2);
+            }
+
+            var varianceX = (length * sxx) - (sx * sx);
+            var varianceY = (length * syy) - (sy * sy);
+            output[i] = varianceX > 0 && varianceY > 0 ? ((length * sxy) - (sx * sy)) / MathHelper.Sqrt(varianceX * varianceY) : 0;
+        }
+
         return buffer;
     }
 
