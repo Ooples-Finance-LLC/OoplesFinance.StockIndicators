@@ -2923,7 +2923,23 @@ internal static class OscillatorCore
                 }
             }
 
-            output[i] = upperBand != prevUpperBand ? 1 : lowerBand != prevLowerBand ? -1 : 0;
+            // Exact inequality is the test the batch makes, and it is the right one here: both sides are
+            // the same double, either carried over untouched from the previous bar or overwritten with a
+            // price read from the same array, so the comparison asks whether the band was re-anchored to a
+            // DIFFERENT price. A tolerance band would report a move that the batch calls no move, and a
+            // fractal that re-anchors a band to the price it already held prints 0 in both.
+            if (upperBand != prevUpperBand)
+            {
+                output[i] = 1;
+            }
+            else if (lowerBand != prevLowerBand)
+            {
+                output[i] = -1;
+            }
+            else
+            {
+                output[i] = 0;
+            }
         }
     }
 
