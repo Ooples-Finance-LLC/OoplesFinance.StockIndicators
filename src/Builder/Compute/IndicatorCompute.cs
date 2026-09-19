@@ -1170,7 +1170,16 @@ internal static partial class IndicatorCompute
             KirshenbaumBandsSpecOptions kb => ComputeKirshenbaumBandsFast(data, context, kb.Length1, kb.Length2, kb.StdDevFactor, kb.MaType),
             SmoothedVolatilityBandsSpecOptions svb => ComputeSmoothedVolatilityBandsFast(data, context, svb.Length1, svb.Length2, svb.Deviation, svb.BandAdjust, svb.MaType),
             StollerAverageRangeChannelsSpecOptions starc => ComputeStollerAverageRangeChannelsFast(data, context, starc.Length, starc.AtrMult, starc.MaType),
-            VervoortVolatilityBandsSpecOptions vvb => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2, vvb.DevMult, vvb.LowBandMult, vvb.MaType),
+            VervoortVolatilityBandsSpecOptions vvb => spec.OutputKey switch
+            {
+                null or "MiddleBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
+                    vvb.DevMult, vvb.LowBandMult, vvb.MaType),
+                "UpperBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
+                    vvb.DevMult, vvb.LowBandMult, vvb.MaType, ChannelBand.Upper),
+                "LowerBand" => ComputeVervoortVolatilityBandsFast(data, context, vvb.Length1, vvb.Length2,
+                    vvb.DevMult, vvb.LowBandMult, vvb.MaType, ChannelBand.Lower),
+                _ => null
+            },
 
             // Batch 17 - More Band and Channel Indicators
             VolumeAdaptiveBandsSpecOptions vab => spec.OutputKey switch
@@ -1441,7 +1450,18 @@ internal static partial class IndicatorCompute
             UltimateVolatilityIndicatorSpecOptions uvi => ComputeUltimateVolatilityIndicatorFast(data, context, uvi.Length, uvi.MaType),
             UniChannelSpecOptions uc => ComputeUniChannelFast(data, context, uc.Length, uc.UbFac, uc.LbFac, uc.Type1, uc.MaType),
             VixTradingSystemSpecOptions vts => ComputeVixTradingSystemFast(data, context, vts.Length, vts.MaxCount, vts.MinCount, vts.MaType),
-            WilsonRelativePriceChannelSpecOptions wrpc => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength, wrpc.MaType),
+            WilsonRelativePriceChannelSpecOptions wrpc => spec.OutputKey switch
+            {
+                null or "S1" => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength,
+                    wrpc.MaType, wrpc.Oversold),
+                "S2" => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength,
+                    wrpc.MaType, wrpc.LowerNeutralZone),
+                "U1" => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength,
+                    wrpc.MaType, wrpc.Overbought),
+                "U2" => ComputeWilsonRelativePriceChannelFast(data, context, wrpc.Length, wrpc.SmoothLength,
+                    wrpc.MaType, wrpc.UpperNeutralZone),
+                _ => null
+            },
             WoodieCommodityChannelIndexSpecOptions wcci => ComputeWoodieCommodityChannelIndexFast(data, context, wcci.FastLength, wcci.MaType),
 
             _ => null
@@ -20303,24 +20323,67 @@ internal static partial class IndicatorCompute
     /// Computes Vervoort Volatility Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8, int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeVervoortVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 8,
+        int length2 = 13, double devMult = 3.55, double lowBandMult = 0.9,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateVervoortVolatilityBands measures the bar's reach - from the previous low when the series
+        // rose, from the current low when it fell - and offsets the twice averaged series by a multiple of
+        // that reach, by a smaller multiple below than above. The midline is a plain average of the once
+        // averaged series, which is not the same as averaging it twice.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
 
-        // Calculate MA
-        switch (maType)
+        using var highBuffer = context.Rent(count);
+        using var lowBuffer = context.Rent(count);
+        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
+        var lows = lowBuffer.Span;
+
+        using var medianAverages = context.Rent(count);
+        MovingAverage(data, maType, length1, input, medianAverages.WritableSpan);
+        var medianAverage = medianAverages.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var medianTotal = new RollingSum();
+        var reachTotal = new RollingSum();
+        using var deviations = context.Rent(count);
+        var deviation = deviations.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
+            medianTotal.Add(medianAverage[i]);
+
+            var currentValue = input[i];
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var reach = currentValue >= previousValue ? currentValue - previousLow : previousValue - lows[i];
+            reachTotal.Add(reach);
+
+            deviation[i] = devMult * reachTotal.Average(length2);
+            output[i] = medianTotal.Average(length1);
+        }
+
+        if (band == ChannelBand.Middle)
+        {
+            return buffer;
+        }
+
+        using var smoothedMedians = context.Rent(count);
+        MovingAverage(data, maType, length1, medianAverages.Span, smoothedMedians.WritableSpan);
+        var smoothedMedian = smoothedMedians.Span;
+
+        using var smoothedDeviations = context.Rent(count);
+        MovingAverage(data, maType, length1, deviations.Span, smoothedDeviations.WritableSpan);
+        var smoothedDeviation = smoothedDeviations.Span;
+
+        var multiplier = band == ChannelBand.Upper ? 1 : -lowBandMult;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = smoothedMedian[i] + (multiplier * smoothedDeviation[i]);
         }
 
         return buffer;
@@ -25656,55 +25719,42 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34, int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeWilsonRelativePriceChannelFast(StockData data, ComputeContext context, int length = 34,
+        int smoothLength = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, double threshold = 30)
     {
-        // V1 Algorithm: RSI-based price channel with overbought/oversold zones
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
-        length = Math.Max(1, length);
-        smoothLength = Math.Max(1, smoothLength);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
+        // CalculateWilsonRelativePriceChannel publishes four channels, one per relative strength threshold,
+        // and each is the series pulled back by the smoothed distance of its index from that threshold as a
+        // percentage. The four differ only by the threshold, which is what the spec's overbought, oversold
+        // and neutral zone options set - and which this arm previously ignored.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        smoothLength = Math.Max(smoothLength, 1);
 
-        const double overbought = 70;
-        const double oversold = 30;
+        using var indexes = context.Rent(count);
+        RelativeStrengthIndex(data, context, input, length, maType, indexes.WritableSpan);
+        var index = indexes.Span;
 
-        // Step 1: Calculate RSI
-        var rsiBuffer = context.Rent(count);
-        OscillatorCore.RelativeStrengthIndex(close, rsiBuffer.WritableSpan, length);
-        var rsiSpan = rsiBuffer.Span;
-
-        // Step 2: Calculate differences from overbought/oversold levels
-        var rsiOverboughtBuffer = context.Rent(count);
-        var rsiOversoldBuffer = context.Rent(count);
-        for (int i = 0; i < count; i++)
+        using var distances = context.Rent(count);
+        var distance = distances.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            rsiOverboughtBuffer.WritableSpan[i] = rsiSpan[i] - overbought;
-            rsiOversoldBuffer.WritableSpan[i] = rsiSpan[i] - oversold;
+            distance[i] = index[i] - threshold;
         }
 
-        // Step 3: Smooth the differences
-        var obSmoothBuffer = context.Rent(count);
-        var osSmoothBuffer = context.Rent(count);
-        maCore.Compute(rsiOverboughtBuffer.Span, obSmoothBuffer.WritableSpan, smoothLength);
-        maCore.Compute(rsiOversoldBuffer.Span, osSmoothBuffer.WritableSpan, smoothLength);
+        using var smoothedDistances = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, distances.Span, smoothedDistances.WritableSpan);
+        var smoothedDistance = smoothedDistances.Span;
 
-        // Step 4: Calculate channel values (returning s1 - oversold channel line)
-        var result = context.Rent(count);
-        for (int i = 0; i < count; i++)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            double currentClose = close[i];
-            double os = osSmoothBuffer.Span[i];
-            // s1 = close - (close * smoothedOversold / 100)
-            result.WritableSpan[i] = currentClose - (currentClose * os / 100);
+            output[i] = input[i] - (input[i] * smoothedDistance[i] / 100);
         }
 
-        rsiBuffer.Dispose();
-        rsiOverboughtBuffer.Dispose();
-        rsiOversoldBuffer.Dispose();
-        obSmoothBuffer.Dispose();
-        osSmoothBuffer.Dispose();
-
-        return result;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeWoodieCommodityChannelIndexFast(StockData data, ComputeContext context, int fastLength = 6,
