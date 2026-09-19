@@ -855,7 +855,19 @@ internal static partial class IndicatorCompute
             VolumeWeightedMovingAverageSpecOptions vwma27 => ComputeVolumeWeightedMovingAverageFast(data, context, vwma27.Length,
                 vwma27.MaType),
             KlingerSignalSpecOptions ksig => ComputeKlingerSignalFast(data, context, ksig.FastLength, ksig.SlowLength, ksig.SignalLength),
-            EhlersChebyshevLowPassFilterSpecOptions eclpf => ComputeEhlersChebyshevLowPassFilterFast(data, context, eclpf.Length, eclpf.Ripple),
+            EhlersChebyshevLowPassFilterSpecOptions => spec.OutputKey switch
+            {
+                null or "Eclpf-2" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Minus2),
+                "Eclpf-1" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Minus1),
+                "Eclpf0" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Zero),
+                "Eclpf1" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.One),
+                "Eclpf2" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Two),
+                "Eclpf3" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Three),
+                "Eclpf4" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Four),
+                "Eclpf5" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Five),
+                "Eclpf6" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Six),
+                _ => null
+            },
             EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
             EhlersMedianAverageAdaptiveFilterSpecOptions emaaf => ComputeEhlersMedianAverageAdaptiveFilterFast(data, context, emaaf.Length, emaaf.Threshold),
             EhlersMesaAdaptiveMovingAverageSpecOptions emama => spec.OutputKey switch
@@ -16438,12 +16450,83 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Chebyshev Low Pass Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context, int length = 14, double ripple = 0.5)
+    /// <summary>
+    /// Which of the nine fixed Chebyshev low-pass waves an arm has been asked for. They are a family of
+    /// hard-coded biquad pairs, not bands around an average and not a depth that can be interpolated, so the
+    /// names follow the published keys "Eclpf-2" through "Eclpf6" rather than any band or pole vocabulary.
+    /// </summary>
+    internal enum ChebyshevWave
     {
+        Minus2,
+        Minus1,
+        Zero,
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six
+    }
+
+    internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context,
+        ChebyshevWave wave = ChebyshevWave.Minus2)
+    {
+        // CalculateEhlersChebyshevLowPassFilter takes no parameters at all - its spec's Length and Ripple are
+        // both marked as having no effect - and publishes nine independent waves, each a fixed two-pole
+        // section feeding a fixed two-pole resonator. MovingAverageCore.EhlersChebyshevLowPassFilter designed
+        // a filter from a length and a ripple instead, which is a different filter on every bar.
+        //
+        // Each row below is one wave: the input gain, the lead coefficient inside it, the two input poles,
+        // the zero applied to the previous section output, and the two feedback poles of the resonator. Only
+        // the requested wave is run, so the recursion needs four scalars and no per-series buffers.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersChebyshevLowPassFilter(inputSpan, buffer.WritableSpan, length, ripple);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        Span<double> coefficients = stackalloc double[63]
+        {
+            0.080778, 1.907, 0.293, 0.063, 0.513, 0.451, 0.481,
+            0.021394, 1.777, 0.731, 0.166, 0.977, 1.008, 0.561,
+            0.0095822, 1.572, 1.026, 0.282, 0.356, 1.329, 0.644,
+            0.00461, 1.192, 1.281, 0.426, -0.384, 1.565, 0.729,
+            0.0026947, 0.681, 1.46, 0.543, -0.966, 1.703, 0.793,
+            0.0017362, 0.012, 1.606, 0.65, -1.408, 1.801, 0.848,
+            0.0013738, -0.669, 1.716, 0.74, -1.685, 1.866, 0.89,
+            0.0010794, -1.226, 1.8, 0.811, -1.842, 1.91, 0.922,
+            0.001705, -1.659, 1.873, 0.878, -1.957, 1.946, 0.951
+        };
+
+        var row = (int)wave * 7;
+        var gain = coefficients[row];
+        var lead = coefficients[row + 1];
+        var inputPole1 = coefficients[row + 2];
+        var inputPole2 = coefficients[row + 3];
+        var zero = coefficients[row + 4];
+        var feedback1 = coefficients[row + 5];
+        var feedback2 = coefficients[row + 6];
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double prevSection1 = 0, prevSection2 = 0, prevWave1 = 0, prevWave2 = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var prevValue1 = i >= 1 ? input[i - 1] : 0;
+            var prevValue2 = i >= 2 ? input[i - 2] : 0;
+
+            var section = (gain * (currentValue + (lead * prevValue1) + prevValue2)) + (inputPole1 * prevSection1) -
+                (inputPole2 * prevSection2);
+            var filtered = section + (zero * prevSection1) + prevSection2 + (feedback1 * prevWave1) -
+                (feedback2 * prevWave2);
+            output[i] = filtered;
+
+            prevSection2 = prevSection1;
+            prevSection1 = section;
+            prevWave2 = prevWave1;
+            prevWave1 = filtered;
+        }
+
         return buffer;
     }
 
