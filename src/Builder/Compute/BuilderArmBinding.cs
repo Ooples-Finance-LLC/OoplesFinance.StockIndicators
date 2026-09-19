@@ -74,9 +74,24 @@ internal static class BuilderArmBinding
         args[0] = bars;
         for (var i = 1; i < parameters.Length; i++)
         {
-            args[i] = map[i] is { } source
-                ? Convert(source.Read(spec.Options), parameters[i].ParameterType)
-                : parameters[i].DefaultValue;
+            if (map[i] is { } source)
+            {
+                args[i] = Convert(source.Read(spec.Options), parameters[i].ParameterType);
+                continue;
+            }
+
+            // A parameter the options do not map and the method does not default cannot be supplied from one
+            // series. DefaultValue answers DBNull for it, which reflection rejects with a message about DBNull
+            // and the parameter's type - an account of how the call was assembled rather than of what the
+            // caller asked for. A comparison indicator takes its second series that way, so it reaches this.
+            if (!parameters[i].HasDefaultValue)
+            {
+                throw new CalculationException(
+                    $"{target.Name} cannot be computed from one series: its '{parameters[i].Name}' argument is "
+                    + $"not supplied by {spec.Options.GetType().Name} and has no default.");
+            }
+
+            args[i] = parameters[i].DefaultValue;
         }
 
         var result = method.Invoke(null, args) as StockData ?? bars;
