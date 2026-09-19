@@ -259,8 +259,6 @@ public sealed class BuilderArmTests : GlobalTestData
         "TechnicalRatingsSpecOptions",
         "ThreeHmaSpecOptions",
         "VaradiOscillatorSpecOptions",
-        "VervoortHeikenAshiCandlestickOscillatorSpecOptions",
-        "VervoortHeikenAshiLongTermCandlestickOscillatorSpecOptions",
         "VervoortSmoothedOscillatorSpecOptions",
         "_1LCLeastSquaresMovingAverageSpecOptions",
         "_3HMASpecOptions",

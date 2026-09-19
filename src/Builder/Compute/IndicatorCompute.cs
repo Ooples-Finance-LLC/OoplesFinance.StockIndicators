@@ -11049,28 +11049,200 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vervoort Heiken Ashi Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVervoortHeikenAshiCandlestickOscillatorFast(StockData data,
+        ComputeContext context, int length = 34,
+        MovingAvgType maType = MovingAvgType.ZeroLagTripleExponentialMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.VervoortHeikenAshiCandlestickOscillator(high, low, close, open, buffer.WritableSpan, length);
+        // CalculateVervoortHeikenAshiCandlestickOscillator compares a zero-lag projection of the smoothed
+        // Heiken Ashi close against the same projection of the median price, and latches at +1 when a down run
+        // ends while an up run is live, at -1 in the mirror case, holding its previous value otherwise. The
+        // short-candle test here is a fixed 0.35 of the bar's range, not a configurable factor.
+        var (inputList, highList, lowList, openList, closeList, _) =
+            CalculationsHelper.GetInputValuesList(InputName.FullTypicalPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
+        var opens = SpanCompat.AsReadOnlySpan(openList);
+        var closes = SpanCompat.AsReadOnlySpan(closeList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var heikenAshiOpen = context.Rent(count);
+        using var heikenAshiClose = context.Rent(count);
+        using var median = context.Rent(count);
+        HeikenAshiCandleSeries(input, highs, lows, heikenAshiOpen.WritableSpan, heikenAshiClose.WritableSpan,
+            median.WritableSpan);
+        var hao = heikenAshiOpen.Span;
+        var hac = heikenAshiClose.Span;
+
+        using var closeOnce = context.Rent(count);
+        using var closeTwice = context.Rent(count);
+        using var medianOnce = context.Rent(count);
+        using var medianTwice = context.Rent(count);
+        MovingAverage(data, maType, length, hac, closeOnce.WritableSpan);
+        MovingAverage(data, maType, length, closeOnce.Span, closeTwice.WritableSpan);
+        MovingAverage(data, maType, length, median.Span, medianOnce.WritableSpan);
+        MovingAverage(data, maType, length, medianOnce.Span, medianTwice.WritableSpan);
+        var tma1 = closeOnce.Span;
+        var tma2 = closeTwice.Span;
+        var tma12 = medianOnce.Span;
+        var tma22 = medianTwice.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var previousDownKeeping = false;
+        var previousDownKeepAll = false;
+        var previousDownTrend = false;
+        var previousUpKeeping = false;
+        var previousUpKeepAll = false;
+        var previousUpTrend = false;
+        var previousHaco = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            var previousHac = i >= 1 ? hac[i - 1] : 0;
+            var previousHao = i >= 1 ? hao[i - 1] : 0;
+            var previousHigh = i >= 1 ? highs[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var previousClose = i >= 1 ? closes[i - 1] : 0;
+
+            var zlHeikenAshi = tma1[i] + (tma1[i] - tma2[i]);
+            var zlClose = tma12[i] + (tma12[i] - tma22[i]);
+            var zlDiff = zlClose - zlHeikenAshi;
+            var shortCandle = Math.Abs(closes[i] - opens[i]) < (highs[i] - lows[i]) * 0.35;
+
+            var downKeeping = (hac[i] < hao[i] && previousHac < previousHao) || zlDiff < 0;
+            var downKeepAll = (downKeeping || previousDownKeeping) &&
+                (closes[i] < opens[i] || closes[i] < previousClose);
+            var downTrend = downKeepAll || (previousDownKeepAll && shortCandle && lows[i] <= previousHigh);
+
+            var upKeeping = (hac[i] >= hao[i] && previousHac >= previousHao) || zlDiff >= 0;
+            var upKeepAll = (upKeeping || previousUpKeeping) &&
+                (closes[i] >= opens[i] || closes[i] >= previousClose);
+            var upTrend = upKeepAll || (previousUpKeepAll && shortCandle && highs[i] >= previousLow);
+
+            var upw = !downTrend && previousDownTrend && upTrend;
+            var dnw = !upTrend && previousUpTrend && downTrend;
+            previousHaco = upw ? 1 : dnw ? -1 : previousHaco;
+            output[i] = previousHaco;
+
+            previousDownKeeping = downKeeping;
+            previousDownKeepAll = downKeepAll;
+            previousDownTrend = downTrend;
+            previousUpKeeping = upKeeping;
+            previousUpKeepAll = upKeepAll;
+            previousUpTrend = upTrend;
+        }
+
         return buffer;
     }
 
     /// <summary>
     /// Computes Vervoort Heiken Ashi Long Term Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    private static void HeikenAshiCandleSeries(ReadOnlySpan<double> input, ReadOnlySpan<double> highs,
+        ReadOnlySpan<double> lows, Span<double> haOpen, Span<double> haClose, Span<double> medianPrice)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.VervoortHeikenAshiLongTermCandlestickOscillator(high, low, close, open, buffer.WritableSpan, length > 0 ? length * 4 : 55);
+        // Both Vervoort oscillators build the same three series first: a Heiken Ashi open that averages the
+        // PREVIOUS bar's price with the previous Heiken Ashi open, a Heiken Ashi close that averages the bar's
+        // price, that open and the bar's range clipped to it, and the plain median price.
+        var previousHaOpen = 0d;
+        for (var i = 0; i < input.Length; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+            var open = (previousValue + previousHaOpen) / 2;
+            haOpen[i] = open;
+            haClose[i] = (input[i] + open + Math.Max(highs[i], open) + Math.Min(lows[i], open)) / 4;
+            medianPrice[i] = (highs[i] + lows[i]) / 2;
+            previousHaOpen = open;
+        }
+    }
+
+    internal static ComputeBuffer ComputeVervoortHeikenAshiLongTermCandlestickOscillatorFast(StockData data,
+        ComputeContext context, int length = 55, double factor = 1.1,
+        MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage)
+    {
+        // CalculateVervoortHeikenAshiLongTermCandlestickOscillator latches at +1 when a down run ends while an
+        // up run is live, at -1 in the mirror case, and holds its previous value otherwise. The two runs are
+        // deliberately asymmetric in the batch - the up run keeps on `keepAll1 || (prevKeepAll1 && keep13)`
+        // while the down run requires `(keepAll2 || prevKeepAll2) && keep23` - and that asymmetry is kept.
+        var (inputList, highList, lowList, openList, closeList, _) =
+            CalculationsHelper.GetInputValuesList(InputName.FullTypicalPrice, data);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
+        var opens = SpanCompat.AsReadOnlySpan(openList);
+        var closes = SpanCompat.AsReadOnlySpan(closeList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var heikenAshiOpen = context.Rent(count);
+        using var heikenAshiClose = context.Rent(count);
+        using var median = context.Rent(count);
+        HeikenAshiCandleSeries(input, highs, lows, heikenAshiOpen.WritableSpan, heikenAshiClose.WritableSpan,
+            median.WritableSpan);
+        var hao = heikenAshiOpen.Span;
+        var hac = heikenAshiClose.Span;
+
+        using var smoothedClose = context.Rent(count);
+        using var smoothedMedian = context.Rent(count);
+        using var smoothedCloseAgain = context.Rent(count);
+        using var smoothedMedianAgain = context.Rent(count);
+        MovingAverage(data, maType, length, hac, smoothedClose.WritableSpan);
+        MovingAverage(data, maType, length, median.Span, smoothedMedian.WritableSpan);
+        MovingAverage(data, maType, length, smoothedClose.Span, smoothedCloseAgain.WritableSpan);
+        MovingAverage(data, maType, length, smoothedMedian.Span, smoothedMedianAgain.WritableSpan);
+        var tac = smoothedClose.Span;
+        var thl2 = smoothedMedian.Span;
+        var tacTema = smoothedCloseAgain.Span;
+        var thl2Tema = smoothedMedianAgain.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var previousKeepN1 = false;
+        var previousKeepAll1 = false;
+        var previousKeepN2 = false;
+        var previousKeepAll2 = false;
+        var previousUpTrend = false;
+        var previousDownTrend = false;
+        var previousHaco = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            var previousHac = i >= 1 ? hac[i - 1] : 0;
+            var previousHao = i >= 1 ? hao[i - 1] : 0;
+            var previousHigh = i >= 1 ? highs[i - 1] : 0;
+            var previousLow = i >= 1 ? lows[i - 1] : 0;
+            var previousClose = i >= 1 ? closes[i - 1] : 0;
+
+            var hacSmooth = (2 * tac[i]) - tacTema[i];
+            var hl2Smooth = (2 * thl2[i]) - thl2Tema[i];
+            var shortCandle = Math.Abs(closes[i] - opens[i]) < (highs[i] - lows[i]) * factor;
+
+            var keepN1 = (hac[i] >= hao[i] && previousHac >= previousHao) || closes[i] >= hac[i] ||
+                highs[i] > previousHigh || lows[i] > previousLow || hl2Smooth >= hacSmooth;
+            var keepAll1 = keepN1 || (previousKeepN1 && (closes[i] >= opens[i] || closes[i] >= previousClose));
+            var keep13 = shortCandle && highs[i] >= previousLow;
+            var upTrend = keepAll1 || (previousKeepAll1 && keep13);
+
+            var keepN2 = (hac[i] < hao[i] && previousHac < previousHao) || hl2Smooth < hacSmooth;
+            var keepAll2 = keepN2 || (previousKeepN2 && (closes[i] < opens[i] || closes[i] < previousClose));
+            var keep23 = shortCandle && lows[i] <= previousHigh;
+            var downTrend = (keepAll2 || previousKeepAll2) && keep23;
+
+            var upw = !downTrend && previousDownTrend && upTrend;
+            var dnw = !upTrend && previousUpTrend && downTrend;
+            previousHaco = upw ? 1 : dnw ? -1 : previousHaco;
+            output[i] = previousHaco;
+
+            previousKeepN1 = keepN1;
+            previousKeepAll1 = keepAll1;
+            previousKeepN2 = keepN2;
+            previousKeepAll2 = keepAll2;
+            previousUpTrend = upTrend;
+            previousDownTrend = downTrend;
+        }
+
         return buffer;
     }
 
