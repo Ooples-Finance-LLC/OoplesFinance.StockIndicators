@@ -6,11 +6,11 @@ namespace OoplesFinance.StockIndicators.Builder;
 /// </summary>
 public sealed class IndicatorSnapshot
 {
-    private readonly Dictionary<SeriesHandle, double[]> _series;
+    private readonly Dictionary<SeriesHandle, ReadOnlyMemory<double>> _series;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
-    private readonly Func<SeriesHandle, double[]?>? _resolver;
+    private readonly Func<SeriesHandle, ReadOnlyMemory<double>?>? _resolver;
     private readonly object _cacheLock = new();
-    private Dictionary<SeriesHandle, double[]>? _lazyCache;
+    private Dictionary<SeriesHandle, ReadOnlyMemory<double>>? _lazyCache;
 
     /// <summary>
     /// Creates a new indicator snapshot.
@@ -19,6 +19,36 @@ public sealed class IndicatorSnapshot
         Dictionary<SeriesHandle, double[]> series,
         Dictionary<IndicatorKey, SeriesHandle> keys,
         Func<SeriesHandle, double[]?>? resolver = null)
+    {
+        // The arrays are not copied, only re-described: double[] converts to ReadOnlyMemory<double> for free.
+        _series = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>(series.Count);
+        foreach (var pair in series)
+        {
+            _series[pair.Key] = pair.Value;
+        }
+
+        _keys = keys;
+        _resolver = resolver is null
+            ? null
+            : handle =>
+            {
+                var resolved = resolver(handle);
+                return resolved is null ? null : resolved;
+            };
+    }
+
+    /// <summary>
+    /// Creates a snapshot over series the runtime already holds as memory.
+    /// </summary>
+    /// <remarks>
+    /// The batch evaluator hands out the pooled buffer an indicator was computed into rather than a copy of
+    /// it, so its currency is <see cref="ReadOnlyMemory{T}"/>. Taking <c>double[]</c> here would force that
+    /// copy back, which is the whole cost this avoids.
+    /// </remarks>
+    internal IndicatorSnapshot(
+        Dictionary<SeriesHandle, ReadOnlyMemory<double>> series,
+        Dictionary<IndicatorKey, SeriesHandle> keys,
+        Func<SeriesHandle, ReadOnlyMemory<double>?>? resolver)
     {
         _series = series;
         _keys = keys;
@@ -51,15 +81,15 @@ public sealed class IndicatorSnapshot
         if (_resolver != null)
         {
             var resolved = _resolver(handle);
-            if (resolved != null)
+            if (resolved.HasValue)
             {
                 // Store in separate lazy cache to maintain immutability of _series
                 lock (_cacheLock)
                 {
-                    _lazyCache ??= new Dictionary<SeriesHandle, double[]>();
-                    _lazyCache[handle] = resolved;
+                    _lazyCache ??= new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
+                    _lazyCache[handle] = resolved.Value;
                 }
-                values = resolved;
+                values = resolved.Value;
                 return true;
             }
         }

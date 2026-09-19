@@ -14,7 +14,7 @@ internal sealed class SeriesEvaluator
     private readonly Dictionary<SeriesKey, StockData> _dataByKey;
     private readonly StockData _defaultData;
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
-    private readonly Dictionary<SeriesHandle, double[]> _cache;
+    private readonly Dictionary<SeriesHandle, ReadOnlyMemory<double>> _cache;
     private readonly ComputeContext? _computeContext;
 
     // Cached base input to avoid repeated ToArray() calls
@@ -52,7 +52,7 @@ internal sealed class SeriesEvaluator
         _defaultData = data;
         _dataByKey = new Dictionary<SeriesKey, StockData>();
         _nodes = nodes;
-        _cache = new Dictionary<SeriesHandle, double[]>();
+        _cache = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
         _computeContext = computeContext;
     }
 
@@ -72,7 +72,7 @@ internal sealed class SeriesEvaluator
         _dataByKey = dataByKey;
         _defaultData = defaultData;
         _nodes = nodes;
-        _cache = new Dictionary<SeriesHandle, double[]>();
+        _cache = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
         _computeContext = computeContext;
     }
 
@@ -96,10 +96,10 @@ internal sealed class SeriesEvaluator
     /// </remarks>
     public int FusedChainHits => _fusedChainHits;
 
-    public Dictionary<SeriesHandle, double[]> Evaluate(IReadOnlyCollection<SeriesHandle> handles)
+    public Dictionary<SeriesHandle, ReadOnlyMemory<double>> Evaluate(IReadOnlyCollection<SeriesHandle> handles)
     {
         _requested = new HashSet<SeriesHandle>(handles);
-        var result = new Dictionary<SeriesHandle, double[]>();
+        var result = new Dictionary<SeriesHandle, ReadOnlyMemory<double>>();
         foreach (var handle in handles)
         {
             _visitingSet.Clear();
@@ -109,14 +109,14 @@ internal sealed class SeriesEvaluator
         return result;
     }
 
-    public double[] Evaluate(SeriesHandle handle)
+    public ReadOnlyMemory<double> Evaluate(SeriesHandle handle)
     {
         _requested = new HashSet<SeriesHandle> { handle };
         _visitingSet.Clear();
         return Resolve(handle);
     }
 
-    private double[] Resolve(SeriesHandle handle)
+    private ReadOnlyMemory<double> Resolve(SeriesHandle handle)
     {
         if (_cache.TryGetValue(handle, out var cached))
         {
@@ -133,7 +133,7 @@ internal sealed class SeriesEvaluator
             throw new InvalidOperationException("Unknown series handle.");
         }
 
-        double[] resolved;
+        ReadOnlyMemory<double> resolved;
         switch (node.Kind)
         {
             case SeriesNodeKind.Base:
@@ -157,7 +157,7 @@ internal sealed class SeriesEvaluator
         return resolved;
     }
 
-    private double[] ResolveIndicator(SeriesNode node)
+    private ReadOnlyMemory<double> ResolveIndicator(SeriesNode node)
     {
         if (!node.Input.HasValue || node.Spec == null)
         {
@@ -177,10 +177,13 @@ internal sealed class SeriesEvaluator
                 if (fastResult.HasValue)
                 {
                     _fastPathHits++;
-                    // Fast path returns ComputeBuffer, need to copy to double[] for cache
-                    // This is still more efficient because we avoid intermediate allocations
-                    using var buffer = fastResult.Value;
-                    return buffer.ToArray();
+
+                    // Deliberately not disposed, and deliberately not copied. The rented array becomes the
+                    // cached series: copying it out cost a full pass and another array the size of the whole
+                    // history - 80,024 bytes at 10,000 bars, a third of everything a run allocated. The
+                    // ComputeContext still holds it and returns it to the pool when the runtime that owns the
+                    // context is disposed, which is exactly when the series stops being readable anyway.
+                    return fastResult.Value.Memory;
                 }
             }
 
@@ -199,7 +202,7 @@ internal sealed class SeriesEvaluator
         }
 
         var input = Resolve(node.Input.Value);
-        return ComputeWithV2CustomInput(baseData, input, node.Spec);
+        return ComputeWithV2CustomInput(baseData, input.Span, node.Spec);
     }
 
     /// <summary>
@@ -383,7 +386,7 @@ internal sealed class SeriesEvaluator
     /// <summary>
     /// Computes an indicator with custom input values using V2-native StatefulIndicators.
     /// </summary>
-    private static double[] ComputeWithV2CustomInput(StockData data, double[] customInput, IndicatorSpec spec)
+    private static double[] ComputeWithV2CustomInput(StockData data, ReadOnlySpan<double> customInput, IndicatorSpec spec)
     {
         var state = StatefulIndicatorFactory.Create(spec);
         return BatchCompute.ComputeAllWithCustomInput(data, customInput, state);
@@ -410,8 +413,8 @@ internal sealed class SeriesEvaluator
             throw new InvalidOperationException("Formula node missing operands or function.");
         }
 
-        var left = Resolve(node.Left.Value);
-        var right = Resolve(node.Right.Value);
+        var left = Resolve(node.Left.Value).Span;
+        var right = Resolve(node.Right.Value).Span;
         var count = Math.Max(left.Length, right.Length);
         var values = new double[count];
         for (var i = 0; i < count; i++)
@@ -439,7 +442,7 @@ internal sealed class SeriesEvaluator
 
         // Create market StockData from the resolved market prices
         // For multi-stock indicators, we need to create a StockData with the market prices as close prices
-        var marketData = CreateMarketDataFromPrices(stockData, marketPrices);
+        var marketData = CreateMarketDataFromPrices(stockData, marketPrices.Span);
 
         // Apply the multi-stock indicator using V2-native implementation
         _standardPathHits++;
@@ -449,7 +452,7 @@ internal sealed class SeriesEvaluator
     /// <summary>
     /// Creates a StockData object from market prices, using the stock data structure as a template.
     /// </summary>
-    private static StockData CreateMarketDataFromPrices(StockData templateData, double[] marketPrices)
+    private static StockData CreateMarketDataFromPrices(StockData templateData, ReadOnlySpan<double> marketPrices)
     {
         // Create ticker data with the market prices as close prices
         var tickerList = new List<TickerData>();

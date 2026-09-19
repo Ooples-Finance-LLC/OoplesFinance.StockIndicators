@@ -1646,10 +1646,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSmaFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var inputList = data.ChainedSpanOrInput;
+        var inputSpan = inputList;
 
-        var buffer = context.Rent(inputList.Count);
+        var buffer = context.Rent(inputList.Length);
         MovingAverageCore.SimpleMovingAverage(inputSpan, buffer.WritableSpan, length);
 
         return buffer;
@@ -1661,10 +1661,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEmaFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var inputList = data.ChainedSpanOrInput;
+        var inputSpan = inputList;
 
-        var buffer = context.Rent(inputList.Count);
+        var buffer = context.Rent(inputList.Length);
         MovingAverageCore.ExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
 
         return buffer;
@@ -1808,9 +1808,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRsiFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(inputList.Count);
-        RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
+        var inputList = data.ChainedSpanOrInput;
+        var buffer = context.Rent(inputList.Length);
+        RelativeStrengthIndex(data, context, inputList, length, maType, buffer.WritableSpan);
         return buffer;
     }
 
@@ -3177,9 +3177,9 @@ internal static partial class IndicatorCompute
     {
         // The middle band is the moving average of the chained series, taken through the same helper the batch
         // reaches GetMovingAverageList for; the registry average this used runs the opening window differently.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(inputList.Count);
-        MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan);
+        var inputList = data.ChainedSpanOrInput;
+        var buffer = context.Rent(inputList.Length);
+        MovingAverage(data, maType, Math.Max(length, 1), inputList, buffer.WritableSpan);
         return buffer;
     }
 
@@ -3668,9 +3668,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMacdLineFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
+        var inputList = data.ChainedSpanOrInput;
+        var inputSpan = inputList;
+        var buffer = context.Rent(inputList.Length);
         OscillatorCore.MacdLine(inputSpan, buffer.WritableSpan, fastLength, slowLength);
         return buffer;
     }
@@ -3680,9 +3680,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMacdSignalFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
+        var inputList = data.ChainedSpanOrInput;
+        var inputSpan = inputList;
+        var buffer = context.Rent(inputList.Length);
         OscillatorCore.MacdSignal(inputSpan, buffer.WritableSpan, fastLength, slowLength, signalLength);
         return buffer;
     }
@@ -3692,9 +3692,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMacdHistogramFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
+        var inputList = data.ChainedSpanOrInput;
+        var inputSpan = inputList;
+        var buffer = context.Rent(inputList.Length);
         OscillatorCore.MacdHistogram(inputSpan, buffer.WritableSpan, fastLength, slowLength, signalLength);
         return buffer;
     }
