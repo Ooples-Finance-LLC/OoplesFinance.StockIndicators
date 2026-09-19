@@ -31,9 +31,12 @@ public static partial class Calculations
         for (var i = 0; i < inputList.Count; i++)
         {
             var currentClose = inputList[i];
-            var prevHigh = i >= 1 ? highList[i] : 0;
-            var prevLow = i >= 1 ? lowList[i] : 0;
-            var prevClose = i >= 1 ? inputList[i] : 0;
+            // The preceding period, as the bar alignment note below and every other pivot point in this
+            // folder already assume. Reading the period's own high, low and close made the levels of a
+            // period depend on how that period turned out, which is not known when the period opens.
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
             var range = prevHigh - prevLow;
             var pivot = (prevHigh + prevLow + prevClose) / 3;

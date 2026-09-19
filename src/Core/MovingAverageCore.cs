@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 using OoplesFinance.StockIndicators.Helpers;
@@ -362,7 +362,11 @@ internal static class MovingAverageCore
                 vSum -= volume[i - length];
             }
 
-            output[i] = vSum != 0 ? pvSum / vSum : 0;
+            // CalculateVolumeWeightedMovingAverage divides by a simple moving average of volume, which is
+            // zero until its window fills, so the whole ratio is zero through the run-in. Dividing the
+            // partial sums by each other here published a volume-weighted price over a window that had not
+            // arrived yet, and the two only met from the length'th bar onwards.
+            output[i] = i >= length - 1 && vSum != 0 ? pvSum / vSum : 0;
         }
     }
 
@@ -715,16 +719,14 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what CalculateArnaudLegouxMovingAverage does, so the run-in is damped rather
+                // than blank. The weights above are already normalised, so no divisor appears here.
                 double alma = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    alma += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    alma += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = alma;
             }
@@ -895,16 +897,13 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what the batch indicator does, so the run-in is damped rather than blank.
                 double sum = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    sum += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    sum += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = sum / weightSum;
             }
@@ -943,16 +942,13 @@ internal static class MovingAverageCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
+                // Bars before the series starts count as zero and the divisor stays the full weight sum,
+                // which is what the batch indicator does, so the run-in is damped rather than blank.
                 double sum = 0;
                 for (var j = 0; j < length; j++)
                 {
-                    sum += weights[j] * input[i - length + 1 + j];
+                    var index = i - length + 1 + j;
+                    sum += index >= 0 ? weights[j] * input[index] : 0;
                 }
                 output[i] = sum / weightSum;
             }
@@ -975,6 +971,8 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateGeometricMovingAverage returns nothing until the window fills, so the run-in stays blank
+            // here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -1195,17 +1193,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = (j + 1) * (j + 1) * (j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1547,17 +1542,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = (j + 1) * (j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1584,17 +1576,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = length * length - (length - 1 - j) * (length - 1 - j);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1712,17 +1701,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0;
             for (var j = 0; j < length; j++)
             {
+                var index = i - length + 1 + j;
                 var weight = Math.Sqrt(j + 1);
-                sum += input[i - length + 1 + j] * weight;
+                sum += index >= 0 ? input[index] * weight : 0;
             }
             output[i] = sum / weightSum;
         }
@@ -1741,23 +1727,22 @@ internal static class MovingAverageCore
 
         // Spencer 15-point weights (symmetric)
         var weights = new double[] { -3, -6, -5, 3, 21, 46, 67, 74, 67, 46, 21, 3, -5, -6, -3 };
-        double weightSum = 320; // Sum of absolute weights
+        const double weightSum = 320; // Sum of the weights
 
-        var halfLen = 7; // (15 - 1) / 2
-
+        // Trailing, not centred. Spencer's graduation formula is classically applied about the middle of
+        // the window, but a centred window reads bars the caller has not seen yet, so the streaming state
+        // could never reproduce it and the batch indicator does not try to: both weight bar i-j. Bars
+        // before the series starts count as zero and the divisor stays the full weight sum, which is what
+        // CalculateSpencer15PointMovingAverage does, so the run-in is damped rather than undefined.
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < halfLen || i >= input.Length - halfLen)
+            double sum = 0;
+            for (var j = 0; j < weights.Length; j++)
             {
-                output[i] = input[i]; // Use input for edges
-                continue;
+                var prevValue = i >= j ? input[i - j] : 0;
+                sum += prevValue * weights[j];
             }
 
-            double sum = 0;
-            for (var j = 0; j < 15; j++)
-            {
-                sum += input[i - halfLen + j] * weights[j];
-            }
             output[i] = sum / weightSum;
         }
     }
@@ -1775,23 +1760,19 @@ internal static class MovingAverageCore
 
         // Spencer 21-point weights (symmetric)
         var weights = new double[] { -1, -3, -5, -5, -2, 6, 18, 33, 47, 57, 60, 57, 47, 33, 18, 6, -2, -5, -5, -3, -1 };
-        double weightSum = 350; // Sum of weights
+        const double weightSum = 350; // Sum of the weights
 
-        var halfLen = 10; // (21 - 1) / 2
-
+        // Trailing, for the reason given on the 15-point form: a centred window is not causal, so neither
+        // the streaming state nor CalculateSpencer21PointMovingAverage computes one.
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < halfLen || i >= input.Length - halfLen)
+            double sum = 0;
+            for (var j = 0; j < weights.Length; j++)
             {
-                output[i] = input[i]; // Use input for edges
-                continue;
+                var prevValue = i >= j ? input[i - j] : 0;
+                sum += prevValue * weights[j];
             }
 
-            double sum = 0;
-            for (var j = 0; j < 21; j++)
-            {
-                sum += input[i - halfLen + j] * weights[j];
-            }
             output[i] = sum / weightSum;
         }
     }
@@ -2698,11 +2679,13 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length && i >= j; j++)
+            for (var j = 0; j < length; j++)
             {
                 var weight = Math.Pow(length - j, 3);
-                sum += input[i - j] * weight;
+                sum += i >= j ? input[i - j] * weight : 0;
                 weightedSum += weight;
             }
             output[i] = weightedSum != 0 ? sum / weightedSum : 0;
@@ -2758,12 +2741,14 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double wSum = 0, wvSum = 0;
-            for (var j = 1; j <= length && i >= j - 1; j++)
+            for (var j = 1; j <= length; j++)
             {
                 var ratio = (double)j / length;
                 var w = Math.Sin(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ratio))) / j;
-                wvSum += w * input[i - (j - 1)];
+                wvSum += i >= j - 1 ? w * input[i - (j - 1)] : 0;
                 wSum += w;
             }
             output[i] = wSum != 0 ? wvSum / wSum : 0;
@@ -2826,11 +2811,13 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // Bars before the series starts count as zero and the divisor stays the full weight sum,
+            // which is what the batch indicator does, so the run-in is damped rather than blank.
             double sum = 0, weightSum = 0;
-            for (var j = 0; j < length && i >= j; j++)
+            for (var j = 0; j < length; j++)
             {
                 var weight = fibs[length - 1 - j];
-                sum += input[i - j] * weight;
+                sum += i >= j ? input[i - j] * weight : 0;
                 weightSum += weight;
             }
             output[i] = weightSum != 0 ? sum / weightSum : 0;
@@ -4251,6 +4238,15 @@ internal static class MovingAverageCore
 
         // Linear regression line is the same as LSMA
         LinearRegression(input, output, length);
+
+        // CalculateLinearRegressionLine builds its slope from a correlation and a standard deviation, both
+        // of which are zero until their window fills, so it reports nothing through the run-in.
+        // LinearRegression fits through the bars it has, which is right for that indicator but not this one.
+        var blank = Math.Min(length - 1, input.Length);
+        for (var i = 0; i < blank; i++)
+        {
+            output[i] = 0;
+        }
     }
 
     /// <summary>
@@ -4726,11 +4722,15 @@ internal static class MovingAverageCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateEhlersGaussianFilter reads a filter output that does not exist yet as zero, so the
+            // filter starts from nothing and climbs towards the price over its first bars. Seeding the
+            // history with the arriving price instead started it already settled, and the two only met
+            // once the poles had damped the difference away.
             var currentValue = input[i];
-            var prev1 = i >= 1 ? output[i - 1] : currentValue;
-            var prev2 = i >= 2 ? output[i - 2] : currentValue;
-            var prev3 = i >= 3 ? output[i - 3] : currentValue;
-            var prev4 = i >= 4 ? output[i - 4] : currentValue;
+            var prev1 = i >= 1 ? output[i - 1] : 0;
+            var prev2 = i >= 2 ? output[i - 2] : 0;
+            var prev3 = i >= 3 ? output[i - 3] : 0;
+            var prev4 = i >= 4 ? output[i - 4] : 0;
 
             double result;
             if (poles == 1)
@@ -6710,6 +6710,16 @@ internal static class MovingAverageCore
             // Calculate standard deviations manually for each point
             for (var i = 0; i < input.Length; i++)
             {
+                // CalculateLightLeastSquaresMovingAverage draws its spread from GetStandardDeviationList,
+                // which is zero until its window fills, so the correction and the base average are both zero
+                // through the run-in. The shorter of the two averages fills first, and measuring it against
+                // a partial spread here published a value from the halfway bar that the indicator never has.
+                if (i < length - 1)
+                {
+                    output[i] = 0;
+                    continue;
+                }
+
                 var n = Math.Min(i + 1, length);
 
                 // StdDev of input

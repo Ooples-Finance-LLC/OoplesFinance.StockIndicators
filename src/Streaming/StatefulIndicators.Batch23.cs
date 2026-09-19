@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -142,8 +142,6 @@ public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIn
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private double _prevClose;
-    private double _prevHigh;
-    private double _prevLow;
     private double _prevWad;
     private bool _hasPrev;
 
@@ -160,8 +158,6 @@ public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIn
     {
         _signalSmoother.Reset();
         _prevClose = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
         _prevWad = 0;
         _hasPrev = false;
     }
@@ -169,19 +165,30 @@ public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIn
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var close = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevWad = _hasPrev ? _prevWad : 0;
-        var wad = close > prevClose ? prevWad + close - prevLow :
-            close < prevClose ? prevWad + close - prevHigh : 0;
+
+        // The first bar has no previous close, so it contributes nothing and the total starts at zero.
+        // Treating a missing previous close as zero made that bar look like an advance and seeded the total
+        // with the whole close price. Every later bar is measured against the true range high and low - the
+        // previous close pulled up to this bar's high, or down to its low - not against the previous bar's own
+        // high and low, and an unchanged close leaves the total alone instead of discarding it.
+        double wad;
+        if (!_hasPrev)
+        {
+            wad = 0;
+        }
+        else
+        {
+            var trueRangeHigh = Math.Max(bar.High, _prevClose);
+            var trueRangeLow = Math.Min(bar.Low, _prevClose);
+            wad = close > _prevClose ? _prevWad + close - trueRangeLow :
+                close < _prevClose ? _prevWad + close - trueRangeHigh : _prevWad;
+        }
+
         var signal = _signalSmoother.Next(wad, isFinal);
 
         if (isFinal)
         {
             _prevClose = close;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
             _prevWad = wad;
             _hasPrev = true;
         }

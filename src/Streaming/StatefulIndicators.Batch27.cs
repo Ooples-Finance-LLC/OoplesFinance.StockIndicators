@@ -1041,8 +1041,6 @@ public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
 public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorState
 {
     private double _prevClose;
-    private double _prevHigh;
-    private double _prevLow;
     private double _prevWad;
     private bool _hasPrev;
 
@@ -1051,8 +1049,6 @@ public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorS
     public void Reset()
     {
         _prevClose = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
         _prevWad = 0;
         _hasPrev = false;
     }
@@ -1060,16 +1056,26 @@ public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorS
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var close = bar.Close;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var wad = close > prevClose ? _prevWad + close - prevLow : close < prevClose ? _prevWad + close - prevHigh : 0;
+
+        // The bar's contribution is measured against the true range high and low, and an unchanged close
+        // contributes nothing without discarding the total. See CalculateWilliamsAccumulationDistribution.
+        double wad;
+        if (!_hasPrev)
+        {
+            wad = 0;
+        }
+        else
+        {
+            var trueRangeHigh = Math.Max(bar.High, _prevClose);
+            var trueRangeLow = Math.Min(bar.Low, _prevClose);
+            wad = close > _prevClose ? _prevWad + close - trueRangeLow
+                : close < _prevClose ? _prevWad + close - trueRangeHigh
+                : _prevWad;
+        }
 
         if (isFinal)
         {
             _prevClose = close;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
             _prevWad = wad;
             _hasPrev = true;
         }

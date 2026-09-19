@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -166,16 +166,13 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -349,27 +346,26 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateLinearRegression fits through the bars there are until the window fills, see
+        // RollingLeastSquares, so the slope is measured from the second bar rather than from the length'th.
+        // A single bar has no slope, which the zero denominator below already reports as zero.
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            var count = Math.Min(length, i + 1);
 
             double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
+            for (var j = 0; j < count; j++)
             {
                 var x = j;
-                var y = input[i - length + 1 + j];
+                var y = input[i - count + 1 + j];
                 sumX += x;
                 sumY += y;
                 sumXY += x * y;
                 sumX2 += x * x;
             }
 
-            var denominator = (length * sumX2) - (sumX * sumX);
-            output[i] = denominator != 0 ? ((length * sumXY) - (sumX * sumY)) / denominator : 0;
+            var denominator = (count * sumX2) - (sumX * sumX);
+            output[i] = denominator != 0 ? ((count * sumXY) - (sumX * sumY)) / denominator : 0;
         }
     }
 
@@ -623,14 +619,11 @@ internal static class TrendCore
 
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var highestHigh = double.MinValue;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     if (high[j] > highestHigh) highestHigh = high[j];
                 }
@@ -664,14 +657,11 @@ internal static class TrendCore
 
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var lowestLow = double.MaxValue;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     if (low[j] < lowestLow) lowestLow = low[j];
                 }
@@ -739,16 +729,19 @@ internal static class TrendCore
     /// <summary>
     /// Computes Average Price.
     /// </summary>
-    internal static void AveragePrice(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
+    internal static void AveragePrice(ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output)
     {
         if (output.Length < close.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The mean of the open and the close, which is what CalculateAveragePrice and
+        // DerivedSeriesKind.AveragePrice both compute. This used to average all four prices, but that is a
+        // different series the library already has a name for: FullTypicalPrice, and DerivedSeriesKind.Ohlc4.
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + high[i] + low[i] + close[i]) / 4;
+            output[i] = (open[i] + close[i]) / 2;
         }
     }
 
@@ -819,15 +812,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highest = double.MinValue;
             var lowest = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (close[j] > highest) highest = close[j];
                 if (close[j] < lowest) lowest = close[j];
@@ -849,15 +839,12 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1023,20 +1010,17 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
+            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
+            // full window, and it measures the first bar against a previous low and high of zero, so bar
+            // zero carries its own high and low instead of nothing.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
                 double vmPlus = 0;
                 double sumTr = 0;
 
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmPlus += Math.Abs(high[j] - low[j - 1]);
+                    vmPlus += Math.Abs(high[j] - (j > 0 ? low[j - 1] : 0));
                     sumTr += tr[j];
                 }
 
@@ -1067,20 +1051,17 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
+            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
+            // full window, and it measures the first bar against a previous low and high of zero, so bar
+            // zero carries its own high and low instead of nothing.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
                 double vmMinus = 0;
                 double sumTr = 0;
 
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmMinus += Math.Abs(low[j] - high[j - 1]);
+                    vmMinus += Math.Abs(low[j] - (j > 0 ? high[j - 1] : 0));
                     sumTr += tr[j];
                 }
 
@@ -1201,16 +1182,13 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double highestHigh = double.MinValue;
             double lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1678,22 +1656,17 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // GetMaxAndMinValuesList, which CalculateIchimokuCloud reads its extremes from, measures over however
+        // many bars have arrived, so the span has a midpoint from the first bar rather than none.
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             var highest = double.MinValue;
             var lowest = double.MaxValue;
 
-            for (var j = 0; j < length; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
-                var idx = i - j;
-                if (high[idx] > highest) highest = high[idx];
-                if (low[idx] < lowest) lowest = low[idx];
+                if (high[j] > highest) highest = high[j];
+                if (low[j] < lowest) lowest = low[j];
             }
 
             output[i] = (highest + lowest) / 2;
@@ -1996,9 +1969,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -2016,9 +1992,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
             output[i] = (pivot * 2) - prevHigh;
@@ -2037,9 +2016,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
             output[i] = (pivot * 2) - prevLow;
@@ -2058,9 +2040,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -2069,20 +2054,24 @@ internal static class TrendCore
     /// <summary>
     /// Computes Woodie Pivot Point.
     /// </summary>
-    internal static void WoodiePivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output)
+    internal static void WoodiePivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < open.Length)
+        if (output.Length < close.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < open.Length; i++)
+        for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var currentOpen = open[i];
+            // CalculateWoodiePivotPoints and WoodiePivotPointsState both double the preceding bar's close,
+            // not the arriving bar's open. Both readings of the Woodie pivot are published elsewhere, and
+            // this library reports the closing one; taking the open here made this the only engine that
+            // did not.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
-            output[i] = (prevHigh + prevLow + (currentOpen * 2)) / 4;
+            output[i] = (prevHigh + prevLow + (prevClose * 2)) / 4;
         }
     }
 
@@ -2098,9 +2087,12 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             output[i] = (prevHigh + prevLow + prevClose) / 3;
         }
@@ -2118,10 +2110,13 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevHigh = i >= 1 ? high[i - 1] : high[i];
-            var prevLow = i >= 1 ? low[i - 1] : low[i];
-            var prevOpen = i >= 1 ? open[i - 1] : open[i];
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
+            // the first bar rather than falling back to the arriving bar's own high, low and close, which
+            // would be this bar's pivot drawn from this bar.
+            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            var prevLow = i >= 1 ? low[i - 1] : 0;
+            var prevOpen = i >= 1 ? open[i - 1] : 0;
+            var prevClose = i >= 1 ? close[i - 1] : 0;
 
             double x;
             if (prevClose < prevOpen)

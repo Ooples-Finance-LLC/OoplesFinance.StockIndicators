@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 namespace OoplesFinance.StockIndicators.Core;
@@ -115,6 +115,8 @@ internal static class VolatilityCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateStandardDeviationVolatility returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -265,21 +267,18 @@ internal static class VolatilityCore
             // Calculate rolling standard deviation of log returns and annualize
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sum += logReturns[j];
                 }
                 var mean = sum / length;
 
                 double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     var diff = logReturns[j] - mean;
                     variance += diff * diff;
@@ -356,22 +355,19 @@ internal static class VolatilityCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest close in period
             var highest = double.MinValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (close[j] > highest) highest = close[j];
             }
 
             // Calculate sum of squared percentage drawdowns
             double sumSqDd = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var pctDrawdown = highest != 0 ? 100 * (close[j] - highest) / highest : 0;
                 sumSqDd += pctDrawdown * pctDrawdown;
@@ -422,6 +418,8 @@ internal static class VolatilityCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateVariance returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -468,15 +466,12 @@ internal static class VolatilityCore
 
             for (var i = 0; i < input.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 // Calculate mean
                 double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sum += input[j];
                 }
@@ -652,17 +647,14 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // GetMaxAndMinValuesList, which CalculateDonchianChannelWidth reads its extremes from, measures over
+        // however many bars have arrived, so the channel has a width from the first bar rather than none.
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var hh = high[i - length + 1];
-            var ll = low[i - length + 1];
-            for (var j = i - length + 2; j <= i; j++)
+            var start = Math.Max(0, i - length + 1);
+            var hh = high[start];
+            var ll = low[start];
+            for (var j = start + 1; j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];
@@ -710,14 +702,11 @@ internal static class VolatilityCore
 
             for (var i = 0; i < high.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sum += ratio[j];
                 }
@@ -786,6 +775,8 @@ internal static class VolatilityCore
 
         for (var i = 0; i < high.Length; i++)
         {
+            // CalculateParkinsonVolatility returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -817,14 +808,11 @@ internal static class VolatilityCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var logHL = low[j] != 0 ? Math.Log(high[j] / low[j]) : 0;
                 var logCO = open[j] != 0 ? Math.Log(close[j] / open[j]) : 0;
@@ -852,6 +840,8 @@ internal static class VolatilityCore
 
         for (var i = 0; i < close.Length; i++)
         {
+            // CalculateRogersSatchellVolatility returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -974,21 +964,19 @@ internal static class VolatilityCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator measures over what has arrived rather than
+            // returning nothing, so the run-in shortens the window instead of blanking it.
+            var start = Math.Max(0, i - length + 1);
 
             // Calculate annualized return
-            var startPrice = close[i - length + 1];
+            var startPrice = close[start];
             var totalReturn = startPrice > 0 ? (close[i] - startPrice) / startPrice : 0;
             var annualizedReturn = totalReturn; // Assume length is already 252 trading days
 
             // Calculate maximum drawdown
             double maxDrawdown = 0;
-            double peak = close[i - length + 1];
-            for (var j = i - length + 1; j <= i; j++)
+            double peak = close[start];
+            for (var j = start; j <= i; j++)
             {
                 peak = Math.Max(peak, close[j]);
                 var drawdown = peak > 0 ? (peak - close[j]) / peak : 0;
@@ -1334,6 +1322,8 @@ internal static class VolatilityCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateBollingerBandsPercentB returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -1384,14 +1374,11 @@ internal static class VolatilityCore
         // Calculate ATR-based middle band (SMA of close for now)
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += close[j];
             }
@@ -1441,15 +1428,12 @@ internal static class VolatilityCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1524,15 +1508,12 @@ internal static class VolatilityCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length2 - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var bound = ma[i] - (0.2 * stdDev[i]);
             int count = 0;
-            for (var j = i - length2 + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length2 + 1); j <= i; j++)
             {
                 if (close[j] > bound) count++;
             }

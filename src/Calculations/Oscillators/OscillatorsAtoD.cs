@@ -1212,8 +1212,13 @@ public static partial class Calculations
         List<double> rocTotalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second rate of change read
+        // the first one's output instead of the price it was meant to measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var roc11List = CalculateRateOfChange(stockData, fastLength).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var roc14List = CalculateRateOfChange(stockData, slowLength).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1265,8 +1270,13 @@ public static partial class Calculations
         List<double> bearSlopeList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var rsiSmaList = GetMovingAverageList(stockData, maType, smoothLength, rsi2List);
 
         for (var i = 0; i < stockData.Count; i++)

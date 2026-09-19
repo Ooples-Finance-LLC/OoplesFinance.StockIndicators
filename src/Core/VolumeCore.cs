@@ -93,7 +93,9 @@ internal static class VolumeCore
                 volSum -= volume[i - length];
             }
 
-            output[i] = i >= length - 1 && volSum != 0 ? mfvSum / volSum : 0;
+            // CalculateChaikinMoneyFlow divides one rolling sum by another over however many bars have
+            // arrived, so the flow has a reading from the first bar rather than none.
+            output[i] = volSum != 0 ? mfvSum / volSum : 0;
         }
     }
 
@@ -449,31 +451,37 @@ internal static class VolumeCore
                 rawMoneyFlow[i] = typicalPrice[i] * volume[i];
             }
 
+            // CalculateMoneyFlowIndex totals its flows with RollingSum.Sum(length), which adds up however
+            // many bars have arrived, so the index reads from the first bar rather than the length'th.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
                 double posFlow = 0;
                 double negFlow = 0;
 
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    if (j > 0 && typicalPrice[j] > typicalPrice[j - 1])
+                    if (j == 0)
+                    {
+                        continue;
+                    }
+
+                    // An unchanged typical price is neither inflow nor outflow there; routing it into the
+                    // negative side here made a flat bar read as selling pressure.
+                    if (typicalPrice[j] > typicalPrice[j - 1])
                     {
                         posFlow += rawMoneyFlow[j];
                     }
-                    else if (j > 0)
+                    else if (typicalPrice[j] < typicalPrice[j - 1])
                     {
                         negFlow += rawMoneyFlow[j];
                     }
                 }
 
                 var mfRatio = negFlow != 0 ? posFlow / negFlow : 0;
-                output[i] = 100 - (100 / (1 + mfRatio));
+
+                // No outflow at all is a full reading of 100, which is how the indicator reports the
+                // opening bar before either side has anything in it.
+                output[i] = negFlow == 0 ? 100 : posFlow == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + mfRatio))));
             }
         }
         finally

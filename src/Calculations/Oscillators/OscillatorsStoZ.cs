@@ -904,12 +904,28 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var close = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-
             var prevWad = GetLastOrDefault(wadList);
-            var wad = close > prevClose ? prevWad + close - prevLow : close < prevClose ? prevWad + close - prevHigh : 0;
+
+            // Williams' accumulation/distribution is a running total of one bar's contribution, and that
+            // contribution is measured against the true range high and low - the previous close pulled up to
+            // the bar's high, or down to its low - not against the previous bar's own high and low. An
+            // unchanged close contributes nothing; it does not discard the total accumulated so far. The
+            // first bar has no previous close, so it contributes nothing either.
+            double wad;
+            if (i == 0)
+            {
+                wad = 0;
+            }
+            else
+            {
+                var prevClose = inputList[i - 1];
+                var trueRangeHigh = Math.Max(highList[i], prevClose);
+                var trueRangeLow = Math.Min(lowList[i], prevClose);
+                wad = close > prevClose ? prevWad + close - trueRangeLow
+                    : close < prevClose ? prevWad + close - trueRangeHigh
+                    : prevWad;
+            }
+
             wadList.Add(wad);
 
             var signal = GetCompareSignal(wad, prevWad);

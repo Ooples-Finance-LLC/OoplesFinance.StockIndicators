@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 using OoplesFinance.StockIndicators.Core.Registry;
 
@@ -28,44 +28,28 @@ internal static class OscillatorCore
             return;
         }
 
+        // CalculateRelativeStrengthIndex smooths its gains and losses with WellesWilderMovingAverage from
+        // the first bar, with no simple average to seed it and no blank run-in. Seeding the two averages
+        // from a simple mean over the first fourteen changes, and publishing nothing until then, put this
+        // arm on a different curve from the indicator for the whole series rather than just its opening.
         var k = 1.0 / length;
         double avgGain = 0;
         double avgLoss = 0;
-        double prevValue = input[0];
-        output[0] = 0;
 
-        for (var i = 1; i < input.Length; i++)
+        for (var i = 0; i < input.Length; i++)
         {
-            var currentValue = input[i];
-            var change = currentValue - prevValue;
-            prevValue = currentValue;
-
+            var change = i >= 1 ? input[i] - input[i - 1] : 0;
             var gain = change > 0 ? change : 0;
             var loss = change < 0 ? -change : 0;
 
-            if (i <= length)
-            {
-                // Initial period: simple average
-                avgGain += gain;
-                avgLoss += loss;
+            avgGain = (gain * k) + (avgGain * (1 - k));
+            avgLoss = (loss * k) + (avgLoss * (1 - k));
 
-                if (i == length)
-                {
-                    avgGain /= length;
-                    avgLoss /= length;
-                }
+            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
-                output[i] = 0;
-            }
-            else
-            {
-                // After initial period: Wilder's smoothing
-                avgGain = (gain * k) + (avgGain * (1 - k));
-                avgLoss = (loss * k) + (avgLoss * (1 - k));
-
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                output[i] = avgLoss == 0 ? 100 : 100 - (100 / (1 + rs));
-            }
+            // No losses at all is a full reading, no gains at all is an empty one, which is how the
+            // indicator reports an opening bar that has neither.
+            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
         }
     }
 
@@ -132,16 +116,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low in the period
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -174,15 +155,13 @@ internal static class OscillatorCore
             // Typical Price
             var tp = (high[i] + low[i] + close[i]) / 3;
 
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate SMA of TP
             double tpSum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 tpSum += (high[j] + low[j] + close[j]) / 3;
             }
@@ -190,7 +169,7 @@ internal static class OscillatorCore
 
             // Calculate Mean Deviation
             double meanDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 meanDev += Math.Abs((high[j] + low[j] + close[j]) / 3 - smaTP);
             }
@@ -217,16 +196,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low in the period
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -271,49 +247,11 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double positiveFlow = 0;
-        double negativeFlow = 0;
-        double prevTypicalPrice = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var typicalPrice = (high[i] + low[i] + close[i]) / 3;
-            var rawMoneyFlow = typicalPrice * volume[i];
-
-            if (i == 0)
-            {
-                prevTypicalPrice = typicalPrice;
-                output[i] = 0;
-                continue;
-            }
-
-            if (typicalPrice > prevTypicalPrice)
-            {
-                positiveFlow += rawMoneyFlow;
-            }
-            else if (typicalPrice < prevTypicalPrice)
-            {
-                negativeFlow += rawMoneyFlow;
-            }
-
-            if (i >= length)
-            {
-                // Remove oldest values (approximation since we don't track history)
-                // For accurate MFI, we'd need to track the last 'length' money flows
-            }
-
-            if (i >= length - 1)
-            {
-                var moneyRatio = negativeFlow != 0 ? positiveFlow / negativeFlow : 0;
-                output[i] = 100 - (100 / (1 + moneyRatio));
-            }
-            else
-            {
-                output[i] = 0;
-            }
-
-            prevTypicalPrice = typicalPrice;
-        }
+        // This was a second money flow index that never dropped a bar out of its window, as the comment
+        // it carried admitted, so every reading past the length'th bar totalled the whole series rather
+        // than the last fourteen bars. VolumeCore holds the one that matches CalculateMoneyFlowIndex,
+        // and both fast arms are bound to that same indicator.
+        VolumeCore.MoneyFlowIndex(high, low, close, volume, output, length);
     }
 
     /// <summary>
@@ -432,15 +370,12 @@ internal static class OscillatorCore
                 sumDown -= oldDown;
             }
 
-            if (i >= length)
-            {
-                var sumTotal = sumUp + sumDown;
-                output[i] = sumTotal != 0 ? 100 * (sumUp - sumDown) / sumTotal : 0;
-            }
-            else
-            {
-                output[i] = 0;
-            }
+            // CalculateChandeMomentumOscillator sums its rises and falls with RollingSum.Sum(length),
+            // which adds up however many changes have arrived rather than waiting for a full window, so
+            // the oscillator reads from the second bar. Blanking the run-in here published nothing over
+            // the first thirteen bars where the indicator already had an answer.
+            var sumTotal = sumUp + sumDown;
+            output[i] = sumTotal != 0 ? 100 * (sumUp - sumDown) / sumTotal : 0;
         }
     }
 
@@ -1001,27 +936,21 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
+        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
+        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
+        // every bar before the window filled and agree on every bar after it.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             double vmPlus = 0;
             double trSum = 0;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                trSum += tr;
-
-                if (j > 0)
-                {
-                    vmPlus += Math.Abs(high[j] - low[j - 1]);
-                }
+                var prevLow = j > 0 ? low[j - 1] : 0;
+                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
+                vmPlus += Math.Abs(high[j] - prevLow);
             }
 
             output[i] = trSum != 0 ? vmPlus / trSum : 0;
@@ -1038,27 +967,21 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a full
+        // window, and it measures the first bar against a previous low and high of zero, so bar zero carries
+        // its own high and low instead of nothing. Blanking the run-in here made the two part company on
+        // every bar before the window filled and agree on every bar after it.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             double vmMinus = 0;
             double trSum = 0;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                trSum += tr;
-
-                if (j > 0)
-                {
-                    vmMinus += Math.Abs(low[j] - high[j - 1]);
-                }
+                var prevHigh = j > 0 ? high[j - 1] : 0;
+                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
+                vmMinus += Math.Abs(low[j] - prevHigh);
             }
 
             output[i] = trSum != 0 ? vmMinus / trSum : 0;
@@ -1246,16 +1169,13 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Find highest high and lowest low
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > highestHigh) highestHigh = high[j];
                 if (low[j] < lowestLow) lowestLow = low[j];
@@ -1509,20 +1429,17 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateChoppinessIndex sums true range and takes its extremes over however many bars have
+        // arrived, so the run-in is measured rather than blank. On the first bar the range and the sum are
+        // the same span, which makes the logarithm zero of its own accord.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
             // Sum of ATR
             double atrSum = 0;
             var highestHigh = double.MinValue;
             var lowestLow = double.MaxValue;
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var prevClose = j > 0 ? close[j - 1] : close[j];
                 var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
@@ -3315,15 +3232,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             double highest = double.MinValue;
             double lowest = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 highest = Math.Max(highest, close[j]);
                 lowest = Math.Min(lowest, close[j]);
@@ -4417,23 +4331,25 @@ internal static class OscillatorCore
     {
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var max = input[i];
             var min = input[i];
 
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (input[j] > max) max = input[j];
                 if (input[j] < min) min = input[j];
             }
 
             var range = max - min;
-            output[i] = range != 0 ? (input[i] - min) / range * 100 : 50;
+
+            // CalculateDoubleStochasticOscillator reports zero when the window it is measuring against is
+            // flat, not the midpoint. On the opening bar, where the inner stochastic has a single value
+            // and therefore no range at all, a midpoint of fifty stayed in the smoothing average for
+            // three bars.
+            output[i] = range != 0 ? (input[i] - min) / range * 100 : 0;
         }
     }
 
@@ -4582,14 +4498,11 @@ internal static class OscillatorCore
             // Sum over period and calculate oscillator
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double sumDemand = 0, sumSupply = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sumDemand += demand[j];
                     sumSupply += supply[j];
@@ -5219,15 +5132,12 @@ internal static class OscillatorCore
     {
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate mean
             var sum = 0.0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -5236,7 +5146,7 @@ internal static class OscillatorCore
             // Calculate variance and fourth moment
             var variance = 0.0;
             var m4 = 0.0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var diff = input[j] - mean;
                 var diff2 = diff * diff;
@@ -5375,15 +5285,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var hh = high[i];
             var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];
@@ -5398,39 +5305,53 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Gann Swing Oscillator.
     /// </summary>
-    internal static void GannSwingOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 2)
+    internal static void GannSwingOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 5)
     {
         if (output.Length < high.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        length = Math.Max(1, length);
+
+        // CalculateGannSwingOscillator turns when the rolling extreme of the last few bars breaks the one
+        // before it and that one had already broken its own predecessor - two consecutive extremes moving
+        // the same way, not a single bar beating the running high. This tracked the latter, and it ignored
+        // the length entirely, so it swung on bars the indicator never counted as a swing.
         double swing = 0;
-        double prevHigh = 0, prevLow = 0;
+        double prevHighest1 = 0, prevHighest2 = 0;
+        double prevLowest1 = 0, prevLowest2 = 0;
 
         for (var i = 0; i < high.Length; i++)
         {
-            if (i == 0)
+            // GetMaxAndMinValuesList measures over however many bars have arrived, so the extremes are
+            // there from the first bar.
+            var start = Math.Max(0, i - length + 1);
+            var highest = high[start];
+            var lowest = low[start];
+
+            for (var j = start + 1; j <= i; j++)
             {
-                prevHigh = high[i];
-                prevLow = low[i];
-                output[i] = 0;
-                continue;
+                if (high[j] > highest)
+                {
+                    highest = high[j];
+                }
+
+                if (low[j] < lowest)
+                {
+                    lowest = low[j];
+                }
             }
 
-            // Check for higher high or lower low
-            if (high[i] > prevHigh)
-            {
-                swing = 1; // Bullish swing
-                prevHigh = high[i];
-            }
-            else if (low[i] < prevLow)
-            {
-                swing = -1; // Bearish swing
-                prevLow = low[i];
-            }
-
+            swing = prevHighest2 > prevHighest1 && highest > prevHighest1 ? 1
+                : prevLowest2 < prevLowest1 && lowest < prevLowest1 ? -1
+                : swing;
             output[i] = swing;
+
+            prevHighest2 = prevHighest1;
+            prevHighest1 = highest;
+            prevLowest2 = prevLowest1;
+            prevLowest1 = lowest;
         }
     }
 
@@ -5782,15 +5703,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             var hh = high[i];
             var ll = low[i];
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 if (high[j] > hh) hh = high[j];
                 if (low[j] < ll) ll = low[j];
@@ -5872,14 +5790,11 @@ internal static class OscillatorCore
             // Calculate mobility as rolling sum normalized
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var sum = 0.0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     sum += range[j];
                 }
@@ -6177,14 +6092,11 @@ internal static class OscillatorCore
             // Normalize to -100 to 100
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 var totalVolume = 0.0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     totalVolume += volume[j];
                 }
@@ -6986,7 +6898,14 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Support and Resistance Oscillator.
     /// </summary>
-    internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
+    /// <remarks>
+    /// The share of the bar's true range spent above the open and below the close, clamped to [0, 1]. There
+    /// is no lookback: the indicator reads one bar plus the previous close, which is why it takes no length.
+    /// This used to scale a 14-bar stochastic position onto -100..+100 - a different oscillator entirely,
+    /// and one neither <c>CalculateSupportAndResistanceOscillator</c> nor
+    /// <c>SupportAndResistanceOscillatorState</c> computes.
+    /// </remarks>
+    internal static void SupportAndResistanceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
         if (output.Length < close.Length)
         {
@@ -6995,32 +6914,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var highestHigh = high[i];
-                var lowestLow = low[i];
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (high[j] > highestHigh) highestHigh = high[j];
-                    if (low[j] < lowestLow) lowestLow = low[j];
-                }
-
-                var range = highestHigh - lowestLow;
-                if (range != 0)
-                {
-                    // Position relative to support/resistance levels
-                    var position = (close[i] - lowestLow) / range;
-                    output[i] = (position - 0.5) * 200; // -100 to +100
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
+            // The first bar has no previous close, so its true range is simply high - low.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
+            var trueRange = CalculationsHelper.CalculateTrueRange(high[i], low[i], prevClose);
+            output[i] = trueRange != 0
+                ? MathHelper.MinOrMax((high[i] - open[i] + (close[i] - low[i])) / (2 * trueRange), 1, 0)
+                : 0;
         }
     }
 
@@ -7075,41 +6974,25 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var currentArray = pool.Rent(close.Length);
-        var prevArray = pool.Rent(close.Length);
-
-        try
+        // CalculateNthOrderDifferencingOscillator subtracts one binomially weighted sum of earlier bars
+        // from the arriving value, reading a bar that has not arrived as zero rather than blanking the
+        // result. Differencing the series in place instead, and blanking each pass, agreed only once
+        // both lookbacks had filled: before that the earlier passes had been zeroed, not merely zero.
+        for (var i = 0; i < close.Length; i++)
         {
-            var current = currentArray.AsSpan(0, close.Length);
-            var prev = prevArray.AsSpan(0, close.Length);
+            double sum = 0;
+            double weight = 1;
 
-            // Start with close prices
-            close.CopyTo(current);
-
-            // Apply differencing n times
-            for (var n = 0; n < order; n++)
+            for (var j = 0; j <= order; j++)
             {
-                current.CopyTo(prev);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    if (i < length)
-                    {
-                        current[i] = 0;
-                    }
-                    else
-                    {
-                        current[i] = prev[i] - prev[i - length];
-                    }
-                }
+                var lookback = length * (j + 1);
+                var prevValue = i >= lookback ? close[i - lookback] : 0;
+                double sign = Math.Sign(((j + 1) % 2) - 0.5);
+                weight *= (order - j) / (double)(j + 1);
+                sum += prevValue * weight * sign;
             }
 
-            current.CopyTo(output);
-        }
-        finally
-        {
-            pool.Return(currentArray);
-            pool.Return(prevArray);
+            output[i] = close[i] - sum;
         }
     }
 
@@ -7169,25 +7052,23 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // CalculateEhlersCenterofGravityOscillator reads a bar that has not arrived as zero and keeps
+        // the full set of weights, so the centre of gravity of a partly filled window is measured rather
+        // than blanked. Those leading zeros contribute to neither sum, which leaves the opening bars
+        // weighted towards the newest price.
         for (var i = 0; i < close.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var num = 0.0;
-                var denom = 0.0;
-                for (var j = 0; j < length; j++)
-                {
-                    var price = close[i - j];
-                    num += (j + 1) * price;
-                    denom += price;
-                }
+            var num = 0.0;
+            var denom = 0.0;
 
-                output[i] = denom != 0 ? -num / denom + (length + 1) / 2.0 : 0;
+            for (var j = 0; j < length; j++)
+            {
+                var price = i >= j ? close[i - j] : 0;
+                num += (j + 1) * price;
+                denom += price;
             }
+
+            output[i] = denom != 0 ? (-num / denom) + ((length + 1) / 2.0) : 0;
         }
     }
 
@@ -8819,6 +8700,9 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateZScore divides a deviation from a simple moving average by a standard deviation, and
+            // both of those blank their run-in, so a zero denominator makes the score itself zero until the
+            // window fills. A shortened window here measured a spread against a mean drawn from fewer bars.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -8827,7 +8711,7 @@ internal static class OscillatorCore
 
             // Calculate SMA
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -8835,7 +8719,7 @@ internal static class OscillatorCore
 
             // Calculate standard deviation
             double sumSquaredDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var dev = input[j] - sma;
                 sumSquaredDev += dev * dev;
@@ -8899,6 +8783,8 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
+            // CalculateSkewness returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -8946,15 +8832,12 @@ internal static class OscillatorCore
 
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
+            // Before the window fills, the batch indicator averages what has arrived rather than returning
+            // nothing, so the run-in shortens the window instead of blanking it.
 
             // Calculate mean
             double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 sum += input[j];
             }
@@ -8963,7 +8846,7 @@ internal static class OscillatorCore
             // Calculate variance and fourth moment
             double sumSquaredDev = 0;
             double sumFourthDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
+            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
                 var dev = input[j] - mean;
                 var devSq = dev * dev;
@@ -9043,6 +8926,8 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
+            // CalculateTypicalPriceVolatility returns nothing until the window fills, so the run-in
+            // stays blank here too.
             if (i < length - 1)
             {
                 output[i] = 0;
@@ -9116,14 +9001,11 @@ internal static class OscillatorCore
             // Calculate rolling sums and REI
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double s1Sum = 0, s2Sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     s1Sum += s1[j];
                     s2Sum += s2[j];
@@ -9175,14 +9057,11 @@ internal static class OscillatorCore
             // Calculate rolling sums and pressure ratio
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
+                // Before the window fills, the batch indicator averages what has arrived rather than returning
+                // nothing, so the run-in shortens the window instead of blanking it.
 
                 double bpSum = 0, spSum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     bpSum += bp[j];
                     spSum += sp[j];
@@ -9228,17 +9107,14 @@ internal static class OscillatorCore
                 sp[i] = delta < 0 ? ratio * volume[i] : 0;
             }
 
-            // Calculate rolling sums and pressure ratio
+            // Calculate rolling sums and pressure ratio. CalculateDemarkPressureRatioV2 totals its two
+            // pressures with RollingSum.Sum(length), which adds up however many bars have arrived, so the
+            // ratio is measured from the first bar and only falls back to the neutral fifty when there is
+            // no pressure on either side.
             for (var i = 0; i < close.Length; i++)
             {
-                if (i < length - 1)
-                {
-                    output[i] = 50;  // Default neutral value
-                    continue;
-                }
-
                 double bpSum = 0, spSum = 0;
-                for (var j = i - length + 1; j <= i; j++)
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
                     bpSum += bp[j];
                     spSum += sp[j];
@@ -9535,7 +9411,10 @@ internal static class OscillatorCore
         {
             var currentHigh = high[i];
             var currentLow = low[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
+            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
+            // opening true range the plain high-low span. Falling back to zero instead made it the whole
+            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
             var prevLow = i >= 1 ? low[i - 1] : 0;
 
             var vmPlus = Math.Abs(currentHigh - prevLow);
@@ -9568,7 +9447,10 @@ internal static class OscillatorCore
         {
             var currentHigh = high[i];
             var currentLow = low[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
+            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
+            // opening true range the plain high-low span. Falling back to zero instead made it the whole
+            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
+            var prevClose = i >= 1 ? close[i - 1] : close[i];
             var prevHigh = i >= 1 ? high[i - 1] : 0;
 
             var vmMinus = Math.Abs(currentLow - prevHigh);
@@ -9853,8 +9735,11 @@ internal static class OscillatorCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            var prevValue = i >= length1 ? close[i - length1] : 0;
-            var mom = close[i] - prevValue;
+            // CalculateTrendDetectionIndex passes its momentum through MinPastValues, which reports zero
+            // until the lookback has arrived rather than measuring the price against a previous value of
+            // zero. Taking the whole price as the momentum put an outlier the size of the price itself
+            // into both rolling sums, and the longer of the two carried it for fifty-nine bars.
+            var mom = i >= length1 ? close[i] - close[i - length1] : 0;
             momSum.Add(mom);
             momAbsSum.Add(Math.Abs(mom));
 
@@ -10187,20 +10072,31 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double wad = 0;
-        for (var i = 0; i < close.Length; i++)
+        if (close.Length == 0)
         {
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
+            return;
+        }
 
-            if (close[i] > prevClose)
+        // The first bar has no previous close, so it contributes nothing. Treating the missing previous close
+        // as zero made every close look like an advance and seeded the running total with the whole first
+        // close price. Each later bar is measured against the true range high and low - the previous close
+        // pulled up to this bar's high, or down to its low - not against the previous bar's own high and low,
+        // and an unchanged close contributes nothing rather than resetting the total.
+        output[0] = 0;
+        double wad = 0;
+
+        for (var i = 1; i < close.Length; i++)
+        {
+            var trueRangeHigh = Math.Max(high[i], close[i - 1]);
+            var trueRangeLow = Math.Min(low[i], close[i - 1]);
+
+            if (close[i] > close[i - 1])
             {
-                wad += close[i] - prevLow;
+                wad += close[i] - trueRangeLow;
             }
-            else if (close[i] < prevClose)
+            else if (close[i] < close[i - 1])
             {
-                wad += close[i] - prevHigh;
+                wad += close[i] - trueRangeHigh;
             }
 
             output[i] = wad;

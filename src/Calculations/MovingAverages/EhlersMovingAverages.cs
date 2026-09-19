@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -1501,7 +1501,7 @@ public static partial class Calculations
     /// length.
     /// </para>
     /// </remarks>
-    private static (double C1, double C2, double C3) DeviationScaledSuperSmootherCoefficients(double scaledFilt, int length1)
+    internal static (double C1, double C2, double C3) DeviationScaledSuperSmootherCoefficients(double scaledFilt, int length1)
     {
         var scaledAbs = Math.Abs(scaledFilt);
         scaledAbs = scaledAbs != 0 ? scaledAbs : 1;

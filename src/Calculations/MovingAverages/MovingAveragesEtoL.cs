@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -424,8 +424,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -609,8 +614,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        // Every Calculate method leaves its result on the chained series, so the second component read
+        // the first one's output instead of the input both of them measure.
+        var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
         var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1284,8 +1294,12 @@ public static partial class Calculations
             double sum = 0, weightedSum = 0;
             for (var j = 0; j <= length - 1; j++)
             {
+                // Binet's formula for the (length - j)th Fibonacci number, so the newest bar carries the
+                // largest weight. The alternating term is raised to that same index: keying it to j instead
+                // flipped its sign for every odd length, which left the weights a shade off the Fibonacci
+                // numbers they stand for.
                 var pow = Pow(phi, length - j);
-                var weight = (pow - (Pow(-1, j) / pow)) / Sqrt(5);
+                var weight = (pow - (Pow(-1, length - j) / pow)) / Sqrt(5);
                 var prevValue = i >= j ? inputList[i - j] : 0;
 
                 sum += prevValue * weight;

@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
@@ -198,6 +198,253 @@ public sealed class BuilderArmTests : GlobalTestData
 
         compared.Should().BeGreaterThan(700, "every bound typed spec is compared");
         failures.Should().BeEmpty($"{compared} spec outputs compared: {string.Join(" | ", failures)}");
+    }
+
+    /// <summary>
+    /// Every bound arm whose result differs from the batch call its spec is bound to.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Measured, not chosen. Driving <c>IndicatorCompute.ComputeArm</c> over every bound spec at two parameter
+    /// sets, each option type named here returns something other than <see cref="BuilderArmBinding"/> does for
+    /// the same spec, at one or both of those sets. A type is listed once however many of its parameter sets
+    /// disagree. That is close to every arm outside <see cref="BuilderVerifiedArms"/>, which is why #229
+    /// stopped serving them: the Builder computes those specs with their batch indicator, so callers get
+    /// correct numbers today.
+    /// </para>
+    /// <para>
+    /// "Disagrees with its bound call" is the claim, and it is deliberately weaker than "computes a different
+    /// indicator". Two causes reach this list. One is a genuinely different formula:
+    /// <c>AutoLineSpecOptions</c> maps its <c>Length</c> straight onto <c>CalculateAutoLine(length)</c>, so its
+    /// arm was compared like for like and still disagreed. The other is parameterisation:
+    /// <c>UltimateMovingAverageSpecOptions.Length</c> is <c>[Obsolete]</c> because the indicator has no
+    /// parameter it could set, <c>MapArguments</c> skips obsolete properties, so the bound call ran at
+    /// <c>minLength: 5, maxLength: 50</c> while the arm ran at the option's length. Both make an arm unsafe to
+    /// verify; only the first means the arm implements the wrong maths.
+    /// </para>
+    /// <para>
+    /// An <c>[Obsolete]</c> option does not decide which of the two a given arm is, and reading the attribute
+    /// instead of the arm is how the first batch was mis-sorted. <c>AveragePriceSpecOptions.Length</c> is
+    /// obsolete and its arm did ignore it, yet the arm still disagreed, because it averaged all four prices
+    /// where the indicator averages the open and the close. Only the arm's own body says whether it reads the
+    /// option, so each one has to be opened. None has an unmapped non-obsolete option;
+    /// <see cref="EveryOptionReachesTheBatchIndicator"/> already forbids that.
+    /// </para>
+    /// <para>
+    /// Every entry here is a repair, never a removal. A <c>Compute*Fast</c> arm is the zero-allocation batch
+    /// path - it rents a pooled buffer and writes through spans - so deleting one because it disagrees trades
+    /// a wrong fast path for no fast path, and every indicator is meant to have one. An arm leaves this list
+    /// by computing what its bound call computes; then it can be verified, and then it is served.
+    /// </para>
+    /// <para>
+    /// Named one by one rather than counted, so the list shrinks visibly as arms are repaired and so a reader
+    /// can tell at a glance whether a given spec's arm is trustworthy. Both directions are asserted - an arm
+    /// that starts disagreeing must be added, and an arm that is fixed must be removed - so the list cannot go
+    /// stale in either direction. See issue #233.
+    /// </para>
+    /// </remarks>
+    private static readonly HashSet<string> ArmsDisagreeingWithTheirBoundCall = new(StringComparer.Ordinal)
+    {
+    };
+
+    /// <summary>
+    /// The four arms issue #233 identified by name, each computing a different indicator entirely.
+    /// </summary>
+    /// <remarks>
+    /// <c>TrendCore.AutoLine</c> and <c>AutoLineWithDrift</c> are adaptive exponential averages where the
+    /// automatic line holds its level until price escapes a band; <c>UltimateMovingAverage</c> is a T3 of a T3
+    /// where the indicator is a money-flow weighted average; <c>VariableLengthMovingAverage</c> interpolates a
+    /// length from a normalised deviation where the indicator steps the length one bar at a time against four
+    /// levels. Held here to "not served", which stays true once someone fixes the arm.
+    /// </remarks>
+    private static readonly string[] ArmsNamedInIssue233 =
+    {
+        "AutoLineSpecOptions",
+        "AutoLineWithDriftSpecOptions",
+        "UltimateMovingAverageSpecOptions",
+        "VariableLengthMovingAverageSpecOptions",
+    };
+
+    /// <summary>Keeps the first divergence recorded for a type, so the default parameter set is reported.</summary>
+    private static void Record(Dictionary<string, string> divergence, string name, string detail)
+    {
+        if (!divergence.ContainsKey(name))
+        {
+            divergence[name] = detail;
+        }
+    }
+
+    /// <summary>The recorded divergence for each named type, or a note that none was captured.</summary>
+    private static string Describe(Dictionary<string, string> divergence, IEnumerable<string> names)
+    {
+        var described = names
+            .Select(name => divergence.TryGetValue(name, out var detail) ? $"{name} -> {detail}" : $"{name} -> no divergence captured")
+            .ToList();
+
+        return described.Count == 0 ? "nothing to describe" : string.Join(" | ", described);
+    }
+
+    /// <summary>
+    /// No arm the Builder serves computes a different indicator, and the set that does cannot grow.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="EveryTypedSpecComputesItsBatchIndicator"/> drives <c>TryComputeFast</c>, the served path. For
+    /// a spec outside <see cref="BuilderVerifiedArms"/> that call routes to <see cref="BuilderArmBinding"/> and
+    /// is then compared against <see cref="BuilderArmBinding"/> - the same batch indicator on both sides, so it
+    /// agrees by construction. That is right for what it guards, but it leaves an unserved arm compared to
+    /// nothing at all.
+    /// </para>
+    /// <para>
+    /// This drives <c>IndicatorCompute.ComputeArm</c>, the arm itself, unchecked. The property that matters is
+    /// not "every arm is correct" - hundreds are not - but that <b>verification and agreement cannot come
+    /// apart</b>:
+    /// adding an options type to <see cref="BuilderVerifiedArms"/> starts serving its arm immediately, and
+    /// before this test nothing on that path would have noticed the arm computed something else. Promote one of
+    /// the listed types and the first assertion below fails.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void NoServedArmDisagreesWithItsBoundCall()
+    {
+        var tickers = StockTestData.ToList();
+        var disagreed = new SortedSet<string>(StringComparer.Ordinal);
+
+        // Where each one first parts company with its bound call. Detection alone leaves the next author
+        // reading two implementations side by side to find out why; the bar index and the two values say
+        // which one to look at and from where, which is the difference between a list and a work queue.
+        var divergence = new Dictionary<string, string>(StringComparer.Ordinal);
+        var stats = new Dictionary<string, string>(StringComparer.Ordinal);
+        var compared = 0;
+
+        foreach (var type in OptionTypes)
+        {
+            if (!BuilderArmBinding.TryGetTarget(type, out var target))
+            {
+                continue;
+            }
+
+            foreach (var alternate in new[] { false, true })
+            {
+                var options = Create(type, alternate);
+                if (options is null)
+                {
+                    break;
+                }
+
+                var spec = new IndicatorSpec(target.Name, options);
+
+                double[]? arm;
+                try
+                {
+                    arm = Run(IndicatorCompute.ComputeArm, tickers, spec);
+                }
+                catch
+                {
+                    // No runnable arm, so there is nothing to hold to anything. Whether an arm that throws
+                    // matters is decided by the served sweep, which is where it would be served.
+                    continue;
+                }
+
+                if (arm is null)
+                {
+                    // ComputeArm returns null for an options type with no arm at all.
+                    continue;
+                }
+
+                compared++;
+                var label = alternate ? "alternate parameters" : "default parameters";
+                try
+                {
+                    var expected = BuilderArmBinding.Compute(new StockData(tickers), spec, target);
+                    if (arm.Length != expected.Count)
+                    {
+                        disagreed.Add(type.Name);
+                        Record(divergence, type.Name,
+                            $"{label}: arm produced {arm.Length} values, {target.Name} produced {expected.Count}");
+                        continue;
+                    }
+
+                    var bar = Enumerable.Range(0, arm.Length).FirstOrDefault(i => !IsClose(expected[i], arm[i]), -1);
+                    if (bar >= 0 && !stats.ContainsKey(type.Name))
+                    {
+                        var diffs = Enumerable.Range(0, arm.Length).Where(i => !IsClose(expected[i], arm[i])).ToList();
+                        var tailStart = Math.Min(60, arm.Length);
+                        double tailMax = 0;
+                        for (var i = tailStart; i < arm.Length; i++)
+                        {
+                            if (!IsClose(expected[i], arm[i]))
+                            {
+                                // An infinite denominator makes the ratio NaN, which then poisons tailMax
+                                // through Math.Max and leaves the dump with no worst relative difference at
+                                // all. An arm that has run away to infinity where the batch has not is the
+                                // largest divergence there is, so record it as such.
+                                var denom = Math.Max(Math.Abs(expected[i]), Math.Abs(arm[i]));
+                                tailMax = double.IsInfinity(denom)
+                                    ? double.PositiveInfinity
+                                    : Math.Max(tailMax, denom > 0 ? Math.Abs(expected[i] - arm[i]) / denom : 1);
+                            }
+                        }
+
+                        stats[type.Name] = $"{arm.Length}	{diffs.Count}	{diffs[0]}	{diffs[^1]}	{tailMax:R}";
+                    }
+
+                    if (bar >= 0)
+                    {
+                        disagreed.Add(type.Name);
+                        Record(divergence, type.Name,
+                            $"{label}: first differs at bar {bar} - arm {arm[bar]:R}, {target.Name} {expected[bar]:R}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var inner = ex.InnerException ?? ex;
+                    disagreed.Add(type.Name);
+                    Record(divergence, type.Name, $"{label}: {inner.GetType().Name} {inner.Message}");
+                }
+            }
+        }
+
+        // The assertion message can only carry the arms that changed, which is the right size for a
+        // failure but the wrong size for planning: with hundreds of arms still to repair, the question is
+        // which of them share a cause. Set ARM_DIVERGENCE_DUMP to a path and the whole set is written as
+        // tab-separated name, length, differing bars, first, last, worst relative difference from bar 60
+        // onwards, and the sentence above - enough to tell a run-in convention apart from different
+        // arithmetic without opening a single file. Unset, which is how CI runs, this does nothing.
+        var dumpPath = Environment.GetEnvironmentVariable("ARM_DIVERGENCE_DUMP");
+        if (!string.IsNullOrWhiteSpace(dumpPath))
+        {
+            File.WriteAllLines(dumpPath, disagreed.Select(name =>
+                string.Join("	",
+                    name,
+                    stats.TryGetValue(name, out var stat) ? stat : "			",
+                    divergence.TryGetValue(name, out var detail) ? detail : "no divergence captured")));
+        }
+
+        var servedAndWrong = disagreed.Where(name => BuilderVerifiedArms.Arms.Any(t => t.Name == name)).ToList();
+        var unexpected = disagreed.Except(ArmsDisagreeingWithTheirBoundCall).ToList();
+
+        using var scope = new AssertionScope();
+        compared.Should().BeGreaterThan(200, "every bound spec with an arm is driven through that arm");
+
+        // The promotion guard. A verified arm IS served, so a verified arm that computes something else is
+        // wrong numbers reaching callers - which is exactly what promoting a listed type would do.
+        servedAndWrong.Should().BeEmpty(
+            "an arm in BuilderVerifiedArms is served, so it must compute the indicator it is named for. "
+            + $"Where each one parts company: {Describe(divergence, servedAndWrong)}");
+
+        unexpected.Should().BeEmpty(
+            "an arm that has started disagreeing with its bound call is a blocker for ever verifying it. "
+            + $"Where each one parts company: {Describe(divergence, unexpected)}");
+        ArmsDisagreeingWithTheirBoundCall.Except(disagreed).Should().BeEmpty(
+            "an arm repaired to compute its batch indicator leaves the list, so the list shrinks visibly");
+
+        foreach (var named in ArmsNamedInIssue233)
+        {
+            BuilderVerifiedArms.Arms.Should().NotContain(t => t.Name == named,
+                $"{named} computes a different indicator from the one it is named for (#233), so serving it "
+                + "would publish the wrong series");
+        }
     }
 
     [Fact]
