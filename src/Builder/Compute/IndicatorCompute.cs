@@ -492,7 +492,8 @@ internal static partial class IndicatorCompute
             // Batch 6 - Special oscillators
             FireflyOscillatorSpecOptions ffo => ComputeFireflyOscillatorFast(data, context, ffo.Length),
             KarobeinOscillatorSpecOptions kbo => ComputeKarobeinOscillatorFast(data, context, kbo.Length),
-            GroverLlorensCycleOscillatorSpecOptions glco => ComputeGroverLlorensCycleOscillatorFast(data, context, glco.Length),
+            GroverLlorensCycleOscillatorSpecOptions glco => ComputeGroverLlorensCycleOscillatorFast(data, context, glco.Length,
+                maType: glco.MaType),
             LindaRaschke310OscillatorSpecOptions lr310 => ComputeLindaRaschke310OscillatorFast(data, context, lr310.FastLength),
             MidpointOscillatorSpecOptions mpo => ComputeMidpointOscillatorFast(data, context, mpo.Length),
             MobilityOscillatorSpecOptions mobo => ComputeMobilityOscillatorFast(data, context, mobo.Length),
@@ -1556,61 +1557,56 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var buffer = context.Rent(count);
+        var buffer = context.Rent(inputList.Count);
+        RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Writes the relative strength index of an arbitrary series, so that an arm whose batch call feeds a
+    /// derived series into CalculateRelativeStrengthIndex can reach the same answer without materialising a
+    /// StockData for it. Mirrors <see cref="ComputeRsiFast"/>, which is now a thin wrapper over this.
+    /// </summary>
+    private static void RelativeStrengthIndex(StockData data, ComputeContext context, ReadOnlySpan<double> input, int length,
+        MovingAvgType maType, Span<double> output)
+    {
+        var count = input.Length;
 
         if (maType == MovingAvgType.WildersSmoothingMethod)
         {
-            OscillatorCore.RelativeStrengthIndex(inputSpan, buffer.WritableSpan, length);
-            return buffer;
+            OscillatorCore.RelativeStrengthIndex(input, output, length);
+            return;
         }
 
         // CalculateRelativeStrengthIndex smooths its gains and losses with whichever average it was given, and
         // only Wilders has a closed form in the core. Every other average goes through the same dispatch the
         // batch helper uses, so the two read the same series rather than agreeing only at Wilders.
-        var pool = ArrayPool<double>.Shared;
-        var gainArray = pool.Rent(count);
-        var lossArray = pool.Rent(count);
-        var avgGainArray = pool.Rent(count);
-        var avgLossArray = pool.Rent(count);
-
-        try
+        using var gainSeries = context.Rent(count);
+        using var lossSeries = context.Rent(count);
+        var gains = gainSeries.WritableSpan;
+        var losses = lossSeries.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var gains = gainArray.AsSpan(0, count);
-            var losses = lossArray.AsSpan(0, count);
-
-            for (var i = 0; i < count; i++)
-            {
-                var change = i >= 1 ? inputSpan[i] - inputSpan[i - 1] : 0;
-                gains[i] = change > 0 ? change : 0;
-                losses[i] = change < 0 ? -change : 0;
-            }
-
-            var avgGains = avgGainArray.AsSpan(0, count);
-            var avgLosses = avgLossArray.AsSpan(0, count);
-            MovingAverage(data, maType, length, gains, avgGains);
-            MovingAverage(data, maType, length, losses, avgLosses);
-
-            var output = buffer.WritableSpan;
-            for (var i = 0; i < count; i++)
-            {
-                var avgGain = avgGains[i];
-                var avgLoss = avgLosses[i];
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-
-                output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0
-                    : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
-            }
-
-            return buffer;
+            var change = i >= 1 ? input[i] - input[i - 1] : 0;
+            gains[i] = change > 0 ? change : 0;
+            losses[i] = change < 0 ? -change : 0;
         }
-        finally
+
+        using var averageGain = context.Rent(count);
+        using var averageLoss = context.Rent(count);
+        MovingAverage(data, maType, length, gainSeries.Span, averageGain.WritableSpan);
+        MovingAverage(data, maType, length, lossSeries.Span, averageLoss.WritableSpan);
+
+        var avgGains = averageGain.Span;
+        var avgLosses = averageLoss.Span;
+        for (var i = 0; i < count; i++)
         {
-            pool.Return(gainArray);
-            pool.Return(lossArray);
-            pool.Return(avgGainArray);
-            pool.Return(avgLossArray);
+            var avgGain = avgGains[i];
+            var avgLoss = avgLosses[i];
+            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
+
+            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0
+                : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
         }
     }
 
@@ -7470,11 +7466,40 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Grover Llorens Cycle Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGroverLlorensCycleOscillatorFast(StockData data, ComputeContext context, int length = 100,
+        int smoothLength = 20, double mult = 10, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.GroverLlorensCycleOscillator(close, buffer.WritableSpan, length);
+        // CalculateGroverLlorensCycleOscillator runs a trailing stop that steps AGAINST the direction of the
+        // move by a multiple of the average true range, takes the distance from it, smooths that, and then
+        // publishes the relative strength index of the smoothed distance over the smoothing length. The
+        // published series is that index, not the oscillator it is taken of.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        using var oscillator = context.Rent(count);
+        var osc = oscillator.WritableSpan;
+        double ts = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (i == 0)
+            {
+                ts = input[i];
+            }
+
+            var diff = input[i] - ts;
+            ts = diff > 0 ? ts - (atr[i] * mult) : diff < 0 ? ts + (atr[i] * mult) : ts;
+            osc[i] = input[i] - ts;
+        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, oscillator.Span, smoothed.WritableSpan);
+
+        var buffer = context.Rent(count);
+        RelativeStrengthIndex(data, context, smoothed.Span, smoothLength, maType, buffer.WritableSpan);
         return buffer;
     }
 
@@ -8100,13 +8125,47 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trading Made More Simpler Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(StockData data, ComputeContext context, int length1 = 14,
+        int length2 = 8, int smoothLength = 3, double threshold = 50, double limit = 0,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TradingMadeMoreSimplerOscillator(high, low, close, buffer.WritableSpan, length);
+        // CalculateTradingMadeMoreSimplerOscillator agrees a direction between a relative strength index and
+        // two smoothed stochastics of different lengths, all taken of the caller's own series - the batch
+        // restores that series between each sub-call - and publishes the shorter-window stochastic signed by
+        // that agreement, or zero when the three disagree.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var strengthIndex = context.Rent(count);
+        RelativeStrengthIndex(data, context, input, length1, maType, strengthIndex.WritableSpan);
+        var rsi = strengthIndex.Span;
+
+        using var shortFastK = context.Rent(count);
+        using var longFastK = context.Rent(count);
+        StochasticFastK(data, context, input, length2, shortFastK.WritableSpan);
+        StochasticFastK(data, context, input, length1, longFastK.WritableSpan);
+
+        using var shortFastD = context.Rent(count);
+        using var longFastD = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, shortFastK.Span, shortFastD.WritableSpan);
+        MovingAverage(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);
+        var stoch1 = shortFastD.Span;
+        var stoch2 = longFastD.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var bufRsi = rsi[i] - threshold;
+            var bufStoch1 = stoch1[i] - threshold;
+            var bufStoch2 = stoch2[i] - threshold;
+
+            var bufHistUp = bufRsi > limit && bufStoch1 > limit && bufStoch2 > limit ? bufStoch2 : 0;
+            var bufHistDn = bufRsi < limit && bufStoch1 < limit && bufStoch2 < limit ? bufStoch2 : 0;
+            output[i] = bufHistUp - bufHistDn;
+        }
+
         return buffer;
     }
 
@@ -14912,9 +14971,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStochasticFastFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateStochasticFastOscillator publishes the stochastic FastD - the raw FastK smoothed once by
-        // smoothLength - as its primary series. The arm this replaced rebuilt the price spans from the ticker
-        // list, ignoring the chained series, and always smoothed exponentially whatever the type asked for.
+        // CalculateStochasticFastOscillator publishes the FastD of CalculateStochasticOscillator - the raw
+        // stochastic of the chained series smoothed once by the first smoothing length. The routine this
+        // replaced rebuilt the price spans from the ticker list instead of reading the chained series.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
 
@@ -14923,7 +14982,6 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         MovingAverage(data, maType, smoothLength, fastK.Span, buffer.WritableSpan);
-
         return buffer;
     }
 
