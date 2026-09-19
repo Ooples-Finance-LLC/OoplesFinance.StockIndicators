@@ -8145,15 +8145,23 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Compare Price Momentum Oscillator using zero-allocation fast path.
+    /// Refuses the Compare Price Momentum Oscillator, which one series cannot produce.
     /// </summary>
+    /// <remarks>
+    /// CalculateComparePriceMomentumOscillator is PMO(stock) - PMO(market): it takes a second StockData and
+    /// subtracts that series' oscillator. A one-series arm has nothing to subtract, and this one used to hand
+    /// back a plain single-series PMO under the compare indicator's name - a different indicator, served
+    /// silently. The multi-series path is the one that computes this: IndicatorCatalog's overload passes both
+    /// handles through MultiStockIndicatorOptions, and SeriesEvaluator computes it from
+    /// ComparePriceMomentumOscillatorState. Refusing here keeps the wrong series from reaching a caller if the
+    /// obsolete one-series options type is ever served.
+    /// </remarks>
     internal static ComputeBuffer ComputeComparePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length = 35)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.ComparePriceMomentumOscillator(inputSpan, buffer.WritableSpan, length, 10, 10);
-        return buffer;
+        throw new CalculationException(
+            "ComparePriceMomentumOscillator compares a stock against a market series, so it cannot be computed "
+            + "from one series. Use IndicatorCatalog.ComparePriceMomentumOscillator, which takes the market "
+            + "series as a handle.");
     }
 
     /// <summary>

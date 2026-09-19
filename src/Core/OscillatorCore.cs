@@ -4413,8 +4413,16 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Compare Price Momentum Oscillator.
+    /// Computes a single-series Price Momentum Oscillator. Despite the name this is NOT the compare indicator.
     /// </summary>
+    /// <remarks>
+    /// The name is a mistake this routine was written under. CalculateComparePriceMomentumOscillator subtracts
+    /// a second series' PMO from the first's; this reads one series, so it can only be the PMO half. It is the
+    /// same shape as <see cref="PriceMomentumOscillator"/> with different default lengths and a signal line, and
+    /// it has no callers: ComputeComparePriceMomentumOscillatorFast refuses instead, and the compare indicator
+    /// is served from ComparePriceMomentumOscillatorState through MultiStockIndicatorOptions. Anything that
+    /// wires this up as the compare indicator is publishing a different indicator under that name.
+    /// </remarks>
     internal static void ComparePriceMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int firstLength = 35, int secondLength = 10, int signalLength = 10)
     {
         if (output.Length < input.Length)
