@@ -473,7 +473,8 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - DiNapoli/Ergodic oscillators
             DiNapoliPercentagePriceOscillatorSpecOptions => ComputeDiNapoliPercentagePriceOscillatorFast(data, context),
-            ErgodicPercentagePriceOscillatorSpecOptions eppo => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length),
+            ErgodicPercentagePriceOscillatorSpecOptions eppo => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length,
+                eppo.MaType),
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length),
             MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context, mppo.Length),
             PercentagePriceOscillatorLeaderSpecOptions ppol => ComputePercentagePriceOscillatorLeaderFast(data, context, ppol.Length),
@@ -7235,12 +7236,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ergodic Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeErgodicPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeErgodicPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length2 = 5,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32)
     {
-        // Length parameter maps to short length; others use defaults
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ErgodicPercentagePriceOscillator(close, buffer.WritableSpan, length, 20, 5);
+        // CalculateErgodicPercentagePriceOscillator divides the spread between the long and the short moving
+        // average of the chained series by the short one. The spec binds its length to the short average, so
+        // the long one keeps the batch default; the third length only feeds the Signal series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, length1, input, slow.WritableSpan);
+        using var fast = context.Rent(count);
+        MovingAverage(data, maType, length2, input, fast.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var ema2 = fast.Span[i];
+            output[i] = ema2 != 0 ? (slow.Span[i] - ema2) / ema2 * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -7434,11 +7452,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Impulse Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeImpulsePercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeImpulsePercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 34,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ImpulsePercentagePriceOscillator(close, buffer.WritableSpan, 12, 26, length);
+        // CalculateImpulsePercentagePriceOscillator smooths the typical price with a zero lag exponential
+        // average and reports how far it has broken out of the Wilders channel drawn from the smoothed high
+        // and low, as a percentage of whichever side it broke. The core routine this replaced read the close
+        // and used the classic twelve and twenty-six periods instead.
+        var (inputList, highList, lowList, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        var count = inputList.Count;
+
+        using var middle = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ZeroLagExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(inputList),
+            middle.WritableSpan);
+        using var upper = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(highList), upper.WritableSpan);
+        using var lower = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(lowList), lower.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var mi = middle.Span[i];
+            var hi = upper.Span[i];
+            var lo = lower.Span[i];
+            output[i] = mi > hi && hi != 0 ? (mi - hi) / hi * 100 : mi < lo && lo != 0 ? (mi - lo) / lo * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -7490,12 +7531,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mirrored Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeMirroredPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeMirroredPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // Length parameter maps to long length
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.MirroredPercentagePriceOscillator(close, buffer.WritableSpan, length / 2, length);
+        // CalculateMirroredPercentagePriceOscillator compares the moving average of the chained series with
+        // the moving average of the opens, as a percentage of the latter. The mirrored series and the signal
+        // are published under their own keys, so neither reaches the arm.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var openAverage = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), openAverage.WritableSpan);
+        using var closeAverage = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), closeAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var mao = openAverage.Span[i];
+            output[i] = mao != 0 ? (closeAverage.Span[i] - mao) / mao * 100 : 0;
+        }
+
         return buffer;
     }
 
