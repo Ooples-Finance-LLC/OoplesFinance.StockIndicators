@@ -1320,7 +1320,8 @@ internal static partial class IndicatorCompute
             // MaType smooths the phase into the Signal line only; the bound series is the raw phase.
             EhlersPhaseCalculationSpecOptions epc => ComputeEhlersPhaseCalculationFast(data, context, epc.Length),
             EhlersRestoringPullIndicatorSpecOptions erpi => ComputeEhlersRestoringPullIndicatorFast(data, context, erpi.MinLength, erpi.MaxLength, erpi.Length1, erpi.Length2, erpi.MaType),
-            EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1, errsi.MaType),
+            EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1,
+                errsi.Length2, errsi.Mult, errsi.MaType),
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
             EhlersSmoothedAdaptiveMomentumSpecOptions esam => ComputeEhlersSmoothedAdaptiveMomentumFast(data, context, esam.Length1, esam.Length2, esam.MaType),
             EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
@@ -5244,11 +5245,48 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rahul Mohindar Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length2 = 10,
+        int length1 = 2, int length3 = 30, int length4 = 81)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RahulMohindarOscillator(close, buffer.WritableSpan, length);
+        // CalculateRahulMohindarOscillator measures the chained value against the average of ten successive
+        // short simple averages of itself, scaled by the range of the window, and publishes the long
+        // exponential average of that swing as its primary series. OscillatorCore.RahulMohindarOscillator
+        // read the close and took a single length. length3 smooths the two swing series the batch also
+        // publishes, neither of which reaches this arm's target.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var stage = context.Rent(count);
+        using var scratch = context.Rent(count);
+        using var total = context.Rent(count);
+        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length1, input, stage.WritableSpan);
+        stage.Span.CopyTo(total.WritableSpan);
+
+        var totals = total.WritableSpan;
+        for (var pass = 1; pass < 10; pass++)
+        {
+            MovingAverage(data, MovingAvgType.SimpleMovingAverage, length1, stage.Span, scratch.WritableSpan);
+            scratch.Span.CopyTo(stage.WritableSpan);
+            for (var i = 0; i < count; i++)
+            {
+                totals[i] += stage.Span[i];
+            }
+        }
+
+        using var swing = context.Rent(count);
+        var swingTrade = swing.WritableSpan;
+        var window = new RollingMinMax(length2);
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(input[i]);
+            var range = window.Max - window.Min;
+            swingTrade[i] = range != 0 ? 100 * (input[i] - (totals[i] / 10)) / range : 0;
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length4, swing.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
@@ -22636,74 +22674,58 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
+    internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10,
+        int length2 = 8, double mult = 1, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
-        // V1 Algorithm: Rocket RSI with smoothed momentum
-        // 1. Calculate mom = currentValue - prevValue (length1-1 bars ago)
-        // 2. arg = (mom + prevMom) / 2
-        // 3. Apply MA to arg
-        // 4. Calculate momentum of smoothed values
-        // 5. Sum up/down changes over length1
-        // 6. Calculate RSI-like ratio and apply log transform
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
-        length1 = Math.Max(1, length1);
-        int length2 = 8; // Fixed per V1
-        double mult = 1.0;
+        // CalculateEhlersRocketRelativeStrengthIndex smooths the two bar average of the length1 momentum, then
+        // takes the Fisher transform of the up and down changes of that smoothed series summed over length1.
+        // Both sums run from the first bar, which the hand rolled window here started one bar late, and the
+        // logarithm is taken as the batch takes it rather than being clamped away.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
 
-        // Step 1: Calculate mom and arg
-        var argBuffer = context.Rent(count);
-        var argSpan = argBuffer.WritableSpan;
-        double prevMom = 0;
-        for (int i = 0; i < count; i++)
+        using var arguments = context.Rent(count);
+        var arg = arguments.WritableSpan;
+        double previousMomentum = 0;
+        for (var i = 0; i < count; i++)
         {
-            double currentValue = close[i];
-            double prevValue = i >= length1 - 1 ? close[i - (length1 - 1)] : 0;
-            double mom = i >= length1 - 1 ? currentValue - prevValue : 0;
-            argSpan[i] = (mom + prevMom) / 2;
-            prevMom = mom;
+            var previousValue = i >= length1 - 1 ? input[i - (length1 - 1)] : 0;
+            var momentum = CalculationsHelper.MinPastValues(i, length1 - 1, input[i] - previousValue);
+            arg[i] = (momentum + previousMomentum) / 2;
+            previousMomentum = momentum;
         }
 
-        // Step 2: Apply MA to arg
-        var ssf2PoleBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(argBuffer.Span, ssf2PoleBuffer.WritableSpan, length2);
-        argBuffer.Dispose();
-        var ssf2PoleSpan = ssf2PoleBuffer.Span;
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length2, arguments.Span, smoothed.WritableSpan);
+        var filtered = smoothed.Span;
 
-        // Step 3-6: Calculate Rocket RSI
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        double prevTmp = 0;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
 
-        for (int i = 0; i < count; i++)
+        var upChanges = new RollingSum();
+        var downChanges = new RollingSum();
+        double previousRatio = 0;
+        for (var i = 0; i < count; i++)
         {
-            double ssf2Pole = ssf2PoleSpan[i];
-            double prevSsf2Pole = i >= 1 ? ssf2PoleSpan[i - 1] : 0;
-            double ssf2PoleMom = ssf2Pole - prevSsf2Pole;
+            var momentum = filtered[i] - (i >= 1 ? filtered[i - 1] : 0);
+            upChanges.Add(momentum > 0 ? momentum : 0);
+            downChanges.Add(momentum < 0 ? Math.Abs(momentum) : 0);
 
-            // Sum up/down changes over length1
-            double upSum = 0, downSum = 0;
-            for (int j = 0; j < length1 && i - j >= 1; j++)
-            {
-                double curVal = ssf2PoleSpan[i - j];
-                double prevVal = ssf2PoleSpan[i - j - 1];
-                double chg = curVal - prevVal;
-                if (chg > 0) upSum += chg;
-                else downSum += Math.Abs(chg);
-            }
+            var upSum = upChanges.Sum(length1);
+            var downSum = downChanges.Sum(length1);
+            var ratio = upSum + downSum != 0
+                ? MathHelper.MinOrMax((upSum - downSum) / (upSum + downSum), 0.999, -0.999)
+                : previousRatio;
+            previousRatio = ratio;
 
-            double denom = upSum + downSum;
-            double tmp = denom != 0 ? Math.Max(-0.999, Math.Min(0.999, (upSum - downSum) / denom)) : prevTmp;
-            prevTmp = tmp;
-
-            double tempLog = (1 - tmp) != 0 ? (1 + tmp) / (1 - tmp) : 0;
-            double logVal = tempLog > 0 ? Math.Log(tempLog) : 0;
-            resultSpan[i] = 0.5 * logVal * mult;
+            var transformed = 1 - ratio != 0 ? (1 + ratio) / (1 - ratio) : 0;
+            output[i] = 0.5 * Math.Log(transformed) * mult;
         }
 
-        ssf2PoleBuffer.Dispose();
-        return result;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
