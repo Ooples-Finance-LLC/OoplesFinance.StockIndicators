@@ -780,7 +780,7 @@ internal static partial class IndicatorCompute
             McNichollMovingAverageSpecOptions mcnma => ComputeMcNichollMovingAverageFast(data, context, mcnma.Length, mcnma.MaType),
             MovingAverageAdaptiveQSpecOptions maaq => ComputeMovingAverageAdaptiveQFast(data, context, maaq.Length),
             MovingAverageV3SpecOptions mav3 => ComputeMovingAverageV3Fast(data, context, mav3.Length, maType: mav3.MaType),
-            OneLCLeastSquaresMovingAverageSpecOptions olclsma => ComputeOneLCLeastSquaresMovingAverageFast(data, context, olclsma.Length),
+            OneLCLeastSquaresMovingAverageSpecOptions olclsma => ComputeOneLCLeastSquaresMovingAverageFast(data, context, olclsma.Length, olclsma.MaType),
             OptimalWeightedMovingAverageSpecOptions owma => ComputeOptimalWeightedMovingAverageFast(data, context, owma.Length),
             OvershootReductionMovingAverageSpecOptions orma => ComputeOvershootReductionMovingAverageFast(data, context, orma.Length, orma.MaType),
             ParametricCorrectiveLinearMovingAverageSpecOptions pclma => ComputeParametricCorrectiveLinearMovingAverageFast(data, context, pclma.Length),
@@ -1013,7 +1013,7 @@ internal static partial class IndicatorCompute
             PriceChannelLowerSpecOptions pcl => ComputePriceChannelLowerFast(data, context, pcl.Length),
             DonchianChannelUpperSpecOptions dcu => ComputeDonchianChannelUpperFast(data, context, dcu.Length),
             DonchianChannelLowerSpecOptions dcl => ComputeDonchianChannelLowerFast(data, context, dcl.Length),
-            ThreeHmaSpecOptions thma => ComputeThreeHmaFast(data, context, thma.Length),
+            ThreeHmaSpecOptions thma => ComputeThreeHmaFast(data, context, thma.Length, thma.MaType),
             AdaptiveAutonomousRecursiveTrailingStopSpecOptions aarts => ComputeAdaptiveAutonomousRecursiveTrailingStopFast(data, context, aarts.Length, aarts.Lambda),
             AdaptiveTrailingStopSpecOptions ats => ComputeAdaptiveTrailingStopFast(data, context, ats.Length, ats.Multiplier),
             AverageTrueRangeTrailingStopsSpecOptions atrts => ComputeAverageTrueRangeTrailingStopsFast(data, context,
@@ -1110,8 +1110,8 @@ internal static partial class IndicatorCompute
             },
 
             // Batch 8 - Moving Averages with existing Core methods
-            _1LCLeastSquaresMovingAverageSpecOptions olc => ComputeOneLCLeastSquaresFast(data, context, olc.Length),
-            _3HMASpecOptions thma2 => ComputeThreeHmaFast(data, context, thma2.Length),
+            _1LCLeastSquaresMovingAverageSpecOptions olc => ComputeOneLCLeastSquaresFast(data, context, olc.Length, olc.MaType),
+            _3HMASpecOptions thma2 => ComputeThreeHmaFast(data, context, thma2.Length, thma2.MaType),
             AdaptiveRelativeStrengthIndexSpecOptions arsi => ComputeAdaptiveRsiFast(data, context, arsi.Length, arsi.MaType),
             BollingerBandsAvgTrueRangeSpecOptions bbatr => ComputeBollingerBandsAvgTrueRangeFast(data, context,
                 bbatr.AtrLength, bbatr.Length, bbatr.MaType, bbatr.StdDevMult),
@@ -1457,7 +1457,18 @@ internal static partial class IndicatorCompute
             EhlersAdaptiveRelativeStrengthIndexV2SpecOptions earsiv2 => ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(data, context, earsiv2.Length1, earsiv2.Length2, earsiv2.Length3, earsiv2.MaType),
             EhlersAdaptiveRsiFisherTransformV2SpecOptions earftv2 => ComputeEhlersAdaptiveRsiFisherTransformV2Fast(data, context, earftv2.Length1, earftv2.Length2, earftv2.Length3, earftv2.MaType),
             EhlersAdaptiveStochasticIndicatorV2SpecOptions easiv2 => ComputeEhlersAdaptiveStochasticIndicatorV2Fast(data, context, easiv2.Length1, easiv2.Length2, easiv2.Length3, easiv2.MaType),
-            EhlersMesaPredictIndicatorV2SpecOptions empiv2 => ComputeEhlersMesaPredictIndicatorV2Fast(data, context, empiv2.Length1, empiv2.Length2, empiv2.Length3, empiv2.Length4, empiv2.MaType),
+            EhlersMesaPredictIndicatorV2SpecOptions empiv2 => spec.OutputKey switch
+            {
+                // BuilderArmBinding falls back to CustomValuesList, not the first published key, when the
+                // target names no output key - and this indicator's custom values are the prediction.
+                null or "Predict" => ComputeEhlersMesaPredictIndicatorV2Fast(data, context, empiv2.Length1, empiv2.Length2,
+                    empiv2.Length3, empiv2.Length4, empiv2.MaType, MesaPredictSeries.Predict),
+                "Ssf" => ComputeEhlersMesaPredictIndicatorV2Fast(data, context, empiv2.Length1, empiv2.Length2,
+                    empiv2.Length3, empiv2.Length4, empiv2.MaType),
+                "Extrap" => ComputeEhlersMesaPredictIndicatorV2Fast(data, context, empiv2.Length1, empiv2.Length2,
+                    empiv2.Length3, empiv2.Length4, empiv2.MaType, MesaPredictSeries.Extrapolate),
+                _ => null
+            },
             EhlersSignalToNoiseRatioV1SpecOptions esnrv1 => ComputeEhlersSignalToNoiseRatioV1Fast(data, context, esnrv1.Length, esnrv1.MaType),
             EhlersSignalToNoiseRatioV2SpecOptions esnrv2 => ComputeEhlersSignalToNoiseRatioV2Fast(data, context, esnrv2.Length, esnrv2.MaType),
 
@@ -14496,12 +14507,58 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes One LC Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // Calculate1LCLeastSquaresMovingAverage offsets a moving average by the correlation between bar index
+        // and price, scaled by the price's own standard deviation and a fixed 1.7. It is a one-pass stand-in
+        // for a least squares line, not the regression MovingAverageCore.OneLCLeastSquaresMovingAverage ran,
+        // and it takes its average from the spec's MaType, which the dispatch was not passing.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(1, length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        MovingAverage(data, maType, length, input, output);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var pool = ArrayPool<double>.Shared;
+        var indexArray = pool.Rent(length);
+        try
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var n = Math.Min(length, i + 1);
+                double correlation = 0;
+                if (length > 1 && n > 1)
+                {
+                    var start = i + 1 - n;
+                    for (var j = 0; j < n; j++)
+                    {
+                        indexArray[j] = start + j;
+                    }
+
+                    correlation = WindowCorrelation.Pearson(new ReadOnlySpan<double>(indexArray, 0, n), input.Slice(start, n));
+                }
+
+                if (MathHelper.IsValueNullOrInfinity(correlation))
+                {
+                    correlation = 0;
+                }
+
+                output[i] += correlation * stdDev[i] * 1.7;
+            }
+        }
+        finally
+        {
+            pool.Return(indexArray);
+        }
+
         return buffer;
     }
 
@@ -18809,12 +18866,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Three HMA (3HMA) using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50)
+    internal static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // Calculate3HMA halves the length, then takes a third and a half of that half, and smooths the
+        // combination 3*wma(p1) - wma(p2) - wma(p) once more over p. Every one of those four lengths goes
+        // through MathHelper.MinOrMax, which clamps to [2, 530], so short lengths do not collapse to 1.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ThreeHma(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var p = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+        var p1 = MathHelper.MinOrMax((int)Math.Ceiling((double)p / 3));
+        var p2 = MathHelper.MinOrMax((int)Math.Ceiling((double)p / 2));
+
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        MovingAverage(data, maType, p1, input, first.WritableSpan);
+        MovingAverage(data, maType, p2, input, second.WritableSpan);
+        MovingAverage(data, maType, p, input, third.WritableSpan);
+
+        using var combined = context.Rent(count);
+        var mid = combined.WritableSpan;
+        var wma1 = first.Span;
+        var wma2 = second.Span;
+        var wma3 = third.Span;
+        for (var i = 0; i < count; i++)
+        {
+            mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, p, combined.Span, buffer.WritableSpan);
         return buffer;
     }
 
@@ -20073,13 +20157,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes 1LC Least Squares Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeOneLCLeastSquaresFast(StockData data, ComputeContext context, int length = 32)
+    internal static ComputeBuffer ComputeOneLCLeastSquaresFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.OneLCLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeOneLCLeastSquaresMovingAverageFast(data, context, length, maType);
     }
 
     /// <summary>
@@ -25403,12 +25484,119 @@ internal static partial class IndicatorCompute
         }
     }
 
-    internal static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context, int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    /// <summary>
+    /// Which of the Mesa predict indicator's three published series an arm has been asked for: the smoothed
+    /// filter it starts from, the autoregressive prediction, or the straight-line extrapolation of the same
+    /// window that the prediction is measured against.
+    /// </summary>
+    internal enum MesaPredictSeries
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersMesaPredictIndicatorV2(close, buffer.WritableSpan, length1, length2, length3, length4);
-        return buffer;
+        Filter,
+        Predict,
+        Extrapolate
+    }
+
+    internal static ComputeBuffer ComputeEhlersMesaPredictIndicatorV2Fast(StockData data, ComputeContext context,
+        int length1 = 5, int length2 = 135, int length3 = 12, int length4 = 4,
+        MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, MesaPredictSeries series = MesaPredictSeries.Filter)
+    {
+        // CalculateEhlersMesaPredictIndicatorV2 high-pass filters the series, super-smooths it, then runs a
+        // five-tap autoregression forward over the last length1 filter values. OscillatorCore's routine, which
+        // this arm was bound to, took the raw close and produced something else from bar 0 onwards.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length1 = Math.Max(length1, 1);
+        length2 = Math.Max(length2, 1);
+        length3 = Math.Max(length3, 1);
+        length4 = Math.Max(length4, 1);
+        length4 = Math.Min(length4, length1);
+
+        Span<double> coefficients = stackalloc double[5] { 4.525, -8.45, 8.145, -4.045, 0.825 };
+
+        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-1.414 * Math.PI / length2, -0.01, -0.99));
+        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(1.414 * Math.PI / length2, 0.99, 0.01));
+        var c2 = b1;
+        var c3 = -a1 * a1;
+        var c1 = (1 + c2 - c3) / 4;
+
+        var a = MathHelper.Exp(MathHelper.MinOrMax(-1.414 * Math.PI / length3, -0.01, -0.99));
+        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(1.414 * Math.PI / length3, 0.99, 0.01));
+        var coef2 = b;
+        var coef3 = -a * a;
+        var coef1 = 1 - coef2 - coef3;
+
+        using var superSmoothed = context.Rent(count);
+        var ssf = superSmoothed.WritableSpan;
+        using var highPassed = context.Rent(count);
+        var hp = highPassed.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue1 = i >= 1 ? input[i - 1] : 0;
+            var previousValue2 = i >= 2 ? input[i - 2] : 0;
+            var previousHp1 = i >= 1 ? hp[i - 1] : 0;
+            var previousHp2 = i >= 2 ? hp[i - 2] : 0;
+            var previousSsf1 = i >= 1 ? ssf[i - 1] : 0;
+            var previousSsf2 = i >= 2 ? ssf[i - 2] : 0;
+
+            hp[i] = i < 4 ? 0 : (c1 * (input[i] - (2 * previousValue1) + previousValue2)) + (c2 * previousHp1) + (c3 * previousHp2);
+            ssf[i] = i < 3 ? hp[i] : (coef1 * ((hp[i] + previousHp1) / 2)) + (coef2 * previousSsf1) + (coef3 * previousSsf2);
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length3, superSmoothed.Span, buffer.WritableSpan);
+        if (series == MesaPredictSeries.Filter)
+        {
+            return buffer;
+        }
+
+        using var filtered = buffer;
+        var filt = filtered.Span;
+        var result = context.Rent(count);
+        var output = result.WritableSpan;
+
+        var bufferLength = Math.Max((2 * length1) + 2, length1 + length4 + 2);
+        var pool = ArrayPool<double>.Shared;
+        var scratch = pool.Rent(bufferLength);
+        try
+        {
+            for (var i = 0; i < count; i++)
+            {
+                Array.Clear(scratch, 0, bufferLength);
+                for (var j = 1; j <= length1; j++)
+                {
+                    scratch[j] = i >= length1 - j ? filt[i - (length1 - j)] : 0;
+                }
+
+                if (series == MesaPredictSeries.Predict)
+                {
+                    for (var j = 1; j <= length1; j++)
+                    {
+                        // the k == 1 term reads the slot being written while it is still zero, so the batch's
+                        // five-tap recursion behaves as a four-tap one over lags 1 through 4
+                        for (var k = 1; k <= 5; k++)
+                        {
+                            scratch[length1 + j] += coefficients[k - 1] * scratch[length1 + j - (k - 1)];
+                        }
+                    }
+                }
+                else
+                {
+                    for (var j = 0; j <= length1; j++)
+                    {
+                        scratch[length1 + j + 1] = (2 * scratch[length1 + j]) - scratch[length1 + j - 1];
+                    }
+                }
+
+                output[i] = scratch[length1 + length4];
+            }
+        }
+        finally
+        {
+            pool.Return(scratch);
+        }
+
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
