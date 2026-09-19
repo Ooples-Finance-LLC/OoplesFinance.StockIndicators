@@ -26,6 +26,16 @@ public class StockData : IStockData
     private bool _columnsInitialized;
     private bool _rowsInitialized;
 
+    // The columns as the caller handed them over, when they were handed over rather than copied in. Every
+    // List<double> above is then built only if something asks for one, which the compute layer never does: it
+    // reads the spans below. See the adopting constructor for why that matters.
+    private ReadOnlyMemory<double>? _openMemory;
+    private ReadOnlyMemory<double>? _highMemory;
+    private ReadOnlyMemory<double>? _lowMemory;
+    private ReadOnlyMemory<double>? _closeMemory;
+    private ReadOnlyMemory<double>? _volumeMemory;
+    private ReadOnlyMemory<DateTime>? _dateMemory;
+
     public IndicatorName IndicatorName { get; set; }
 
     public List<double> InputValues
@@ -53,6 +63,8 @@ public class StockData : IStockData
         set
         {
             _openPrices = value ?? new List<double>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _openMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -67,6 +79,8 @@ public class StockData : IStockData
         set
         {
             _highPrices = value ?? new List<double>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _highMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -81,6 +95,8 @@ public class StockData : IStockData
         set
         {
             _lowPrices = value ?? new List<double>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _lowMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -95,6 +111,8 @@ public class StockData : IStockData
         set
         {
             _closePrices = value ?? new List<double>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _closeMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -109,6 +127,8 @@ public class StockData : IStockData
         set
         {
             _volumes = value ?? new List<double>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _volumeMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -123,6 +143,8 @@ public class StockData : IStockData
         set
         {
             _dates = value ?? new List<DateTime>();
+            // The caller has replaced this column, so the view it was handed over as no longer describes it.
+            _dateMemory = null;
             _columnsInitialized = true;
         }
     }
@@ -161,6 +183,60 @@ public class StockData : IStockData
     /// compute on the close instead of their own components.
     /// </remarks>
     internal List<double> ChainedValues { get; private set; } = new List<double>();
+
+    /// <summary>
+    /// The series the compute layer reads, as a span over whatever is backing it.
+    /// </summary>
+    /// <remarks>
+    /// This is the one accessor the fast arms use. It resolves to the chained series when a chain has
+    /// published one, to the caller's input when one was set, and otherwise to the close column - without
+    /// building a <see cref="List{T}"/> for any of them when the columns were handed over rather than copied
+    /// in. Reading <see cref="InputValues"/> instead would materialise a copy of the closes on first touch,
+    /// which is the copy this whole path exists to avoid.
+    /// </remarks>
+    internal ReadOnlySpan<double> ChainedSpanOrInput =>
+        ChainedValues.Count > 0 ? Compatibility.SpanCompat.AsReadOnlySpan(ChainedValues) : InputSpan;
+
+    /// <summary>The caller's input series, or the closes when none was set, without copying either.</summary>
+    internal ReadOnlySpan<double> InputSpan
+    {
+        get
+        {
+            if (_inputValues is not null)
+            {
+                return Compatibility.SpanCompat.AsReadOnlySpan(_inputValues);
+            }
+
+            return _closeMemory.HasValue
+                ? _closeMemory.Value.Span
+                : Compatibility.SpanCompat.AsReadOnlySpan(ClosePrices);
+        }
+    }
+
+    /// <summary>The open column, without copying it.</summary>
+    internal ReadOnlySpan<double> OpenSpan => _openMemory.HasValue
+        ? _openMemory.Value.Span
+        : Compatibility.SpanCompat.AsReadOnlySpan(OpenPrices);
+
+    /// <summary>The high column, without copying it.</summary>
+    internal ReadOnlySpan<double> HighSpan => _highMemory.HasValue
+        ? _highMemory.Value.Span
+        : Compatibility.SpanCompat.AsReadOnlySpan(HighPrices);
+
+    /// <summary>The low column, without copying it.</summary>
+    internal ReadOnlySpan<double> LowSpan => _lowMemory.HasValue
+        ? _lowMemory.Value.Span
+        : Compatibility.SpanCompat.AsReadOnlySpan(LowPrices);
+
+    /// <summary>The close column, without copying it.</summary>
+    internal ReadOnlySpan<double> CloseSpan => _closeMemory.HasValue
+        ? _closeMemory.Value.Span
+        : Compatibility.SpanCompat.AsReadOnlySpan(ClosePrices);
+
+    /// <summary>The volume column, without copying it.</summary>
+    internal ReadOnlySpan<double> VolumeSpan => _volumeMemory.HasValue
+        ? _volumeMemory.Value.Span
+        : Compatibility.SpanCompat.AsReadOnlySpan(Volumes);
 
     /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
     internal void RestoreSeries(List<double> published, List<double> chained)
@@ -228,6 +304,48 @@ public class StockData : IStockData
         Count = CalculateCount(_openPrices, _highPrices, _lowPrices, _closePrices, _volumes, _dates);
     }
 
+    /// <summary>
+    /// Takes the caller's columns as they are, without copying them.
+    /// </summary>
+    /// <remarks>
+    /// <para>The constructor above copies every column into a <see cref="List{T}"/>, six times. That is most of
+    /// what a batch run costs before any arithmetic happens: at 10,000 bars it is 961,168 of the 1,208,528
+    /// bytes a builder run allocated, against the 0 a library that reads a caller's span allocates.</para>
+    /// <para>Nothing here is defensive. The caller keeps ownership of the arrays these views sit on, and
+    /// writing to one while a run reads it changes what that run computes. That is the trade the caller makes
+    /// by choosing <c>IndicatorDataSource.FromColumns</c> over <c>FromBatch</c>, and it is why this is
+    /// internal: the facade is where the choice is offered and documented.</para>
+    /// <para>The <see cref="List{T}"/> properties still work. They are built from these views on first use, so
+    /// a caller that reaches for one pays exactly the copy it would have paid anyway, and the compute layer -
+    /// which reads the spans instead - never triggers it.</para>
+    /// </remarks>
+    internal StockData(ReadOnlyMemory<double> openPrices, ReadOnlyMemory<double> highPrices,
+        ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices, ReadOnlyMemory<double> volumes,
+        ReadOnlyMemory<DateTime> dates)
+    {
+        _openMemory = openPrices;
+        _highMemory = highPrices;
+        _lowMemory = lowPrices;
+        _closeMemory = closePrices;
+        _volumeMemory = volumes;
+        _dateMemory = dates;
+        _columnsInitialized = true;
+        _rowsInitialized = false;
+        _tickerDataList = null;
+        CustomValuesList = new List<double>();
+        OutputValues = new Dictionary<string, List<double>>();
+        SignalsList = new List<Signal>();
+        IndicatorName = IndicatorName.None;
+        Options = new IndicatorOptions();
+
+        // Mirrors CalculateCount: columns of unequal length describe no bars at all, and reporting a count for
+        // them would have every indicator read past the end of the shortest one.
+        var count = closePrices.Length;
+        Count = openPrices.Length == count && highPrices.Length == count && lowPrices.Length == count
+            && volumes.Length == count && dates.Length == count
+            ? count
+            : 0;
+    }
     /// <summary>
     /// Initializes the StockData Class using classic list of ticker information
     /// </summary>
@@ -397,6 +515,45 @@ public class StockData : IStockData
 
     private void EnsureColumns()
     {
+        // Built from the caller's columns on first use, and only for the columns actually asked for. The
+        // adopting constructor stores views rather than lists precisely so that a run which never reaches for
+        // one of these never pays for it.
+        if (_openMemory.HasValue)
+        {
+            _openPrices ??= new List<double>(_openMemory.Value.Length);
+            if (_openPrices.Count == 0) AppendTo(_openPrices, _openMemory.Value.Span);
+        }
+
+        if (_highMemory.HasValue)
+        {
+            _highPrices ??= new List<double>(_highMemory.Value.Length);
+            if (_highPrices.Count == 0) AppendTo(_highPrices, _highMemory.Value.Span);
+        }
+
+        if (_lowMemory.HasValue)
+        {
+            _lowPrices ??= new List<double>(_lowMemory.Value.Length);
+            if (_lowPrices.Count == 0) AppendTo(_lowPrices, _lowMemory.Value.Span);
+        }
+
+        if (_closeMemory.HasValue)
+        {
+            _closePrices ??= new List<double>(_closeMemory.Value.Length);
+            if (_closePrices.Count == 0) AppendTo(_closePrices, _closeMemory.Value.Span);
+        }
+
+        if (_volumeMemory.HasValue)
+        {
+            _volumes ??= new List<double>(_volumeMemory.Value.Length);
+            if (_volumes.Count == 0) AppendTo(_volumes, _volumeMemory.Value.Span);
+        }
+
+        if (_dateMemory.HasValue)
+        {
+            _dates ??= new List<DateTime>(_dateMemory.Value.Length);
+            if (_dates.Count == 0) AppendTo(_dates, _dateMemory.Value.Span);
+        }
+
         if (_columnsInitialized)
         {
             _openPrices ??= new List<double>();
@@ -446,6 +603,14 @@ public class StockData : IStockData
         _volumes = volumes;
         _dates = dates;
         _columnsInitialized = true;
+    }
+
+    private static void AppendTo<T>(List<T> target, ReadOnlySpan<T> source)
+    {
+        for (var i = 0; i < source.Length; i++)
+        {
+            target.Add(source[i]);
+        }
     }
 
     private void EnsureRows()
