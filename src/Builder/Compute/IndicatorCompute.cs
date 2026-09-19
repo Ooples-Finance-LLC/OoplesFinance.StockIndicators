@@ -1119,7 +1119,8 @@ internal static partial class IndicatorCompute
             EhlersFMDemodulatorIndicatorSpecOptions efmd => ComputeEhlersFMDemodulatorFast(data, context, efmd.FastLength, efmd.SlowLength, efmd.MaType),
 
             // Batch 25 - More Ehlers Indicators
-            EhlersPhaseCalculationSpecOptions epc => ComputeEhlersPhaseCalculationFast(data, context, epc.Length, epc.MaType),
+            // MaType smooths the phase into the Signal line only; the bound series is the raw phase.
+            EhlersPhaseCalculationSpecOptions epc => ComputeEhlersPhaseCalculationFast(data, context, epc.Length),
             EhlersRestoringPullIndicatorSpecOptions erpi => ComputeEhlersRestoringPullIndicatorFast(data, context, erpi.MinLength, erpi.MaxLength, erpi.Length1, erpi.Length2, erpi.MaType),
             EhlersRocketRelativeStrengthIndexSpecOptions errsi => ComputeEhlersRocketRsiFast(data, context, errsi.Length1, errsi.MaType),
             EhlersSimpleWindowIndicatorSpecOptions eswi => ComputeEhlersSimpleWindowIndicatorFast(data, context, eswi.Length, eswi.MaType),
@@ -8244,12 +8245,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers All Pass Phase Shifter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 20, double qq = 0.5)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersAllPassPhaseShifter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+
+        var a2 = qq != 0 && length != 0 ? -2 * Math.Cos(2 * Math.PI / length) / qq : 0;
+        var a3 = qq != 0 ? MathHelper.Pow(1 / qq, 2) : 0;
+        var b2 = length != 0 ? -2 * qq * Math.Cos(2 * Math.PI / length) : 0;
+        var b3 = MathHelper.Pow(qq, 2);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue1 = i >= 1 ? input[i - 1] : 0;
+            var previousValue2 = i >= 2 ? input[i - 2] : 0;
+            var previousPhaser1 = i >= 1 ? output[i - 1] : 0;
+            var previousPhaser2 = i >= 2 ? output[i - 2] : 0;
+
+            output[i] = (b3 * (input[i] + (a2 * previousValue1) + (a3 * previousValue2))) - (b2 * previousPhaser1) -
+                (b3 * previousPhaser2);
+        }
+
         return buffer;
     }
 
@@ -8259,9 +8278,32 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersAverageErrorFilterFast(StockData data, ComputeContext context, int length = 27)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersAverageErrorFilter(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
+        length = Math.Max(length, 1);
+
+        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
+        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
+        var c2 = b1;
+        var c3 = -1 * a1 * a1;
+        var c1 = 1 - c2 - c3;
+
+        using var superSmoothed = context.Rent(count);
+        using var errorFilter = context.Rent(count);
+        var ssf = superSmoothed.WritableSpan;
+        var e1 = errorFilter.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var previousValue = i >= 1 ? input[i - 1] : 0;
+
+            ssf[i] = i < 3 ? input[i] : (0.5 * c1 * (input[i] + previousValue)) + (c2 * ssf[i - 1]) + (c3 * ssf[i - 2]);
+            e1[i] = i < 3 ? 0 : (c1 * (input[i] - ssf[i])) + (c2 * e1[i - 1]) + (c3 * e1[i - 2]);
+            output[i] = ssf[i] + e1[i];
+        }
+
         return buffer;
     }
 
@@ -15278,55 +15320,36 @@ internal static partial class IndicatorCompute
 
     // Batch 25 - More Ehlers Indicators
 
-    internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15)
     {
-        // V1 Algorithm: Fourier-based phase calculation
-        // 1. For each bar, compute Fourier real/imag parts weighted by price
-        // 2. Convert to phase angle in degrees with quadrant adjustments
-        // 3. Apply MA to phase for smoothing (primary output)
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        // The published series is the raw phase angle; the moving average of it only feeds the Signal
+        // line, so smoothing here returned a series the batch never binds.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = data.Count;
         length = Math.Max(length, 2);
 
-        // Calculate phase angles using Fourier transform
-        var phaseBuffer = context.Rent(count);
-        var phaseSpan = phaseBuffer.WritableSpan;
-        double twoPiOverLen = 2.0 * Math.PI / length;
-
-        for (int i = 0; i < count; i++)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
             double realPart = 0, imagPart = 0;
-            for (int j = 0; j < length; j++)
+            for (var j = 0; j < length; j++)
             {
-                double weight = i >= j ? close[i - j] : 0;
-                realPart += Math.Cos(twoPiOverLen * j) * weight;
-                imagPart += Math.Sin(twoPiOverLen * j) * weight;
+                var weight = i >= j ? input[i - j] : 0;
+                realPart += Math.Cos(2 * Math.PI * j / length) * weight;
+                imagPart += Math.Sin(2 * Math.PI * j / length) * weight;
             }
 
-            // Calculate phase with quadrant adjustments
-            double phase;
-            if (Math.Abs(realPart) > 0.001)
-            {
-                phase = Math.Atan(imagPart / realPart) * (180.0 / Math.PI); // Convert to degrees
-            }
-            else
-            {
-                phase = 90 * Math.Sign(imagPart);
-            }
-            if (realPart < 0) phase += 180;
+            var phase = Math.Abs(realPart) > 0.001 ? Math.Atan(imagPart / realPart) * (180 / Math.PI) : 90 * Math.Sign(imagPart);
+            phase = realPart < 0 ? phase + 180 : phase;
             phase += 90;
-            if (phase < 0) phase += 360;
-            if (phase > 360) phase -= 360;
-            phaseSpan[i] = phase;
+            phase = phase < 0 ? phase + 360 : phase;
+            phase = phase > 360 ? phase - 360 : phase;
+            output[i] = phase;
         }
 
-        // Apply MA to phase for signal (primary output is smoothed phase)
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(phaseBuffer.Span, result.WritableSpan, length);
-
-        phaseBuffer.Dispose();
-        return result;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context, int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
