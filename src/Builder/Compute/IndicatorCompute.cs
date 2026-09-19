@@ -747,7 +747,7 @@ internal static partial class IndicatorCompute
             LeoMovingAverageSpecOptions leoma => ComputeLeoMovingAverageFast(data, context, leoma.Length),
             LightLeastSquaresMovingAverageSpecOptions llsma => ComputeLightLeastSquaresMovingAverageFast(data, context, llsma.Length),
             LinearExtrapolationSpecOptions lextra => ComputeLinearExtrapolationFast(data, context, lextra.Length),
-            LinearRegressionLineSpecOptions lrline => ComputeLinearRegressionLineFast(data, context, lrline.Length),
+            LinearRegressionLineSpecOptions lrline => ComputeLinearRegressionLineFast(data, context, lrline.Length, lrline.MaType),
             LinearWeightedMovingAverageCoreSpecOptions lwmac => ComputeLinearWeightedMovingAverageCoreFast(data, context, lwmac.Length),
             McNichollMovingAverageSpecOptions mcnma => ComputeMcNichollMovingAverageFast(data, context, mcnma.Length, mcnma.MaType),
             MovingAverageAdaptiveQSpecOptions maaq => ComputeMovingAverageAdaptiveQFast(data, context, maaq.Length),
@@ -1099,7 +1099,7 @@ internal static partial class IndicatorCompute
             GopalakrishnanRangeIndexSpecOptions gri => ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length),
             HighLowMovingAverageSpecOptions hlma => ComputeHighLowMovingAverageFast(data, context, hlma.Length, hlma.MaType),
             StiffnessIndicatorSpecOptions sti => ComputeStiffnessIndicatorFast(data, context, sti.Length1, sti.Length2, sti.SmoothingLength, sti.MaType),
-            MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length, mmi.MaType),
+            MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length),
             SharpeRatioSpecOptions sr => ComputeSharpeRatioFast(data, context, sr.Length, sr.Bmk, sr.MaType),
 
             // Batch 14 - More Risk Ratios and Trend Indicators
@@ -12315,12 +12315,53 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linear Regression Line using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateLinearRegressionLine fits the chained series against the bar index through a rolling
+        // correlation: the slope is that correlation scaled by the ratio of the two standard deviations and
+        // the intercept places the line on the moving averages of both series, so maType moves the result.
+        // MovingAverageCore.LinearRegressionLine solved a different least squares problem and ignored it.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.LinearRegressionLine(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var index = context.Rent(count);
+        var x = index.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            x[i] = i;
+        }
+
+        using var valueAverage = context.Rent(count);
+        MovingAverage(data, maType, length, input, valueAverage.WritableSpan);
+        var yMa = valueAverage.Span;
+
+        using var indexAverage = context.Rent(count);
+        MovingAverage(data, maType, length, index.Span, indexAverage.WritableSpan);
+        var xMa = indexAverage.Span;
+
+        using var valueDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, valueDeviation.WritableSpan, Math.Max(1, length));
+        var my = valueDeviation.Span;
+
+        using var indexDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(index.Span, indexDeviation.WritableSpan, Math.Max(1, length));
+        var mx = indexDeviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var correlation = new RollingCorrelation();
+        for (var i = 0; i < count; i++)
+        {
+            correlation.Add(input[i], i);
+            var corr = correlation.R(length);
+            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
+
+            var slope = mx[i] != 0 ? corr * (my[i] / mx[i]) : 0;
+            output[i] = (i * slope) + (yMa[i] - (slope * xMa[i]));
+        }
+
         return buffer;
     }
 
@@ -17677,89 +17718,45 @@ internal static partial class IndicatorCompute
     /// Computes Market Meanness Index using zero-allocation fast path.
     /// Counts reversals above/below median in a lookback period.
     /// </summary>
-    internal static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100)
     {
+        // CalculateMarketMeannessIndex publishes the raw count under "Mmi"; its moving average only feeds the
+        // separate "MmiSmoothed" series, so maType reaches nothing here and the arm no longer smooths. The
+        // median is the rolling median of the window so far - partial at the start rather than skipped - and
+        // the count is an integer division by length - 1, which is what the batch computes.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var mmiArray = pool.Rent(count);
 
-        try
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var medianWindow = new RollingMedian(length);
+        for (var i = 0; i < count; i++)
         {
-            var mmiSpan = mmiArray.AsSpan(0, count);
+            medianWindow.Add(input[i]);
+            var median = medianWindow.Median;
 
-            // Calculate raw MMI using a rolling window
-            for (var i = 0; i < count; i++)
+            int nl = 0, nh = 0;
+            for (var j = 1; j < length; j++)
             {
-                if (i < length - 1)
+                var value1 = i >= j - 1 ? input[i - (j - 1)] : 0;
+                var value2 = i >= j ? input[i - j] : 0;
+
+                if (value1 > median && value1 > value2)
                 {
-                    mmiSpan[i] = 0;
-                    continue;
+                    nl++;
                 }
-
-                // Calculate median for the window
-                var windowStart = i - length + 1;
-                var windowSize = length;
-
-                // Simple approach: sort and get median
-                var tempArray = pool.Rent(windowSize);
-                try
+                else if (value1 < median && value1 < value2)
                 {
-                    for (var j = 0; j < windowSize; j++)
-                    {
-                        tempArray[j] = input[windowStart + j];
-                    }
-                    Array.Sort(tempArray, 0, windowSize);
-                    var median = tempArray[windowSize / 2];
-
-                    // Count reversals
-                    int nl = 0, nh = 0;
-                    for (var j = 1; j < length; j++)
-                    {
-                        var value1 = i >= j - 1 ? input[i - (j - 1)] : 0;
-                        var value2 = i >= j ? input[i - j] : 0;
-
-                        if (value1 > median && value1 > value2)
-                        {
-                            nl++;
-                        }
-                        else if (value1 < median && value1 < value2)
-                        {
-                            nh++;
-                        }
-                    }
-
-                    mmiSpan[i] = length != 1 ? 100.0 * (nl + nh) / (length - 1) : 0;
-                }
-                finally
-                {
-                    pool.Return(tempArray);
+                    nh++;
                 }
             }
 
-            // Smooth with moving average
-            ReadOnlySpan<double> mmiReadOnly = mmiSpan;
-            var buffer = context.Rent(count);
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(mmiReadOnly, buffer.WritableSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(mmiReadOnly, buffer.WritableSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(mmiReadOnly, buffer.WritableSpan, length);
-                    break;
-            }
+            output[i] = length != 1 ? 100 * (nl + nh) / (length - 1) : 0;
+        }
 
-            return buffer;
-        }
-        finally
-        {
-            pool.Return(mmiArray);
-        }
+        return buffer;
     }
 
     /// <summary>
@@ -17812,87 +17809,75 @@ internal static partial class IndicatorCompute
     /// Computes Sortino Ratio using zero-allocation fast path.
     /// SortinoRatio = (returns - benchmark) / downsideDeviation
     /// </summary>
-    internal static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateSortinoRatio takes the return across the window in excess of the benchmark compounded over
+        // that fraction of a year, and divides the moving average of that return by the downside deviation:
+        // the root of the mean of the squared negative part. Under a simple moving average that mean is an
+        // exact window average, because a running sum of zeroes leaves a residue the root turns into nonsense.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var returnsArray = pool.Rent(count);
-        var avgReturnsArray = pool.Rent(count);
-        var downsideDevArray = pool.Rent(count);
-        var downsideSqArray = pool.Rent(count);
 
-        try
+        const double barsPerYear = 60d * 24 * 30 * 12 / (60 * 24);
+        var bench = MathHelper.Pow(1 + bmk, length / barsPerYear) - 1;
+
+        using var returns = context.Rent(count);
+        var ret = returns.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            var returnsSpan = returnsArray.AsSpan(0, count);
-            var avgReturnsSpan = avgReturnsArray.AsSpan(0, count);
-            var downsideDevSpan = downsideDevArray.AsSpan(0, count);
-            var downsideSqSpan = downsideSqArray.AsSpan(0, count);
+            var prevValue = i >= length ? input[i - length] : 0;
+            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 - bench : 0;
+        }
 
-            // Calculate returns
-            var dailyBmk = bmk / 252;
-            returnsSpan[0] = 0;
-            for (var i = 1; i < count; i++)
-            {
-                var prevClose = close[i - 1];
-                returnsSpan[i] = prevClose != 0 ? (close[i] - prevClose) / prevClose - dailyBmk : 0;
-            }
+        using var smoothedReturns = context.Rent(count);
+        MovingAverage(data, maType, length, returns.Span, smoothedReturns.WritableSpan);
+        var retSma = smoothedReturns.Span;
 
-            ReadOnlySpan<double> returnsReadOnly = returnsSpan;
+        using var downside = context.Rent(count);
+        var deviationSquared = downside.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            deviationSquared[i] = MathHelper.Pow(Math.Min(ret[i] - retSma[i], 0), 2);
+        }
 
-            // Calculate average returns
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(returnsReadOnly, avgReturnsSpan, length);
-                    break;
-            }
-
-            // Calculate downside deviation squared (only negative deviations)
+        using var meanSquared = context.Rent(count);
+        var mean = meanSquared.WritableSpan;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            var windowLength = Math.Max(1, length);
             for (var i = 0; i < count; i++)
             {
-                var deviation = Math.Min(returnsSpan[i] - avgReturnsSpan[i], 0);
-                downsideSqSpan[i] = deviation * deviation;
-            }
+                if (i < windowLength - 1)
+                {
+                    mean[i] = 0;
+                    continue;
+                }
 
-            // Smooth downside deviation squared
-            ReadOnlySpan<double> downsideSqReadOnly = downsideSqSpan;
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(downsideSqReadOnly, downsideDevSpan, length);
-                    break;
-            }
+                double sum = 0;
+                for (var j = i - windowLength + 1; j <= i; j++)
+                {
+                    sum += deviationSquared[j];
+                }
 
-            // Calculate Sortino Ratio
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                var downsideStdDev = Math.Sqrt(downsideDevSpan[i]);
-                buffer.WritableSpan[i] = downsideStdDev != 0 ? avgReturnsSpan[i] / downsideStdDev : 0;
+                mean[i] = sum / windowLength;
             }
-
-            return buffer;
         }
-        finally
+        else
         {
-            pool.Return(returnsArray);
-            pool.Return(avgReturnsArray);
-            pool.Return(downsideDevArray);
-            pool.Return(downsideSqArray);
+            MovingAverage(data, maType, length, downside.Span, mean);
         }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var stdDeviation = MathHelper.Sqrt(mean[i]);
+            output[i] = stdDeviation != 0 ? retSma[i] / stdDeviation : 0;
+        }
+
+        return buffer;
     }
 
     /// <summary>
