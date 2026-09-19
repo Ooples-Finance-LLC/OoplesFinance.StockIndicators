@@ -44,7 +44,11 @@ public class StockData : IStockData
         {
             if (_inputValues == null)
             {
-                _inputValues = new List<double>(ClosePrices);
+                // Straight from the adopted column when there is one. Going through ClosePrices would build that
+                // column's list as well, so the closes would be copied twice to answer for them once.
+                _inputValues = _closeMemory.HasValue
+                    ? Materialize(_closeMemory.Value.Span)
+                    : new List<double>(ClosePrices);
             }
 
             return _inputValues;
@@ -57,6 +61,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_openPrices is null && _openMemory.HasValue)
+            {
+                _openPrices = Materialize(_openMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _openPrices!;
         }
@@ -73,6 +82,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_highPrices is null && _highMemory.HasValue)
+            {
+                _highPrices = Materialize(_highMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _highPrices!;
         }
@@ -89,6 +103,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_lowPrices is null && _lowMemory.HasValue)
+            {
+                _lowPrices = Materialize(_lowMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _lowPrices!;
         }
@@ -105,6 +124,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_closePrices is null && _closeMemory.HasValue)
+            {
+                _closePrices = Materialize(_closeMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _closePrices!;
         }
@@ -121,6 +145,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_volumes is null && _volumeMemory.HasValue)
+            {
+                _volumes = Materialize(_volumeMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _volumes!;
         }
@@ -137,6 +166,11 @@ public class StockData : IStockData
     {
         get
         {
+            if (_dates is null && _dateMemory.HasValue)
+            {
+                _dates = Materialize(_dateMemory.Value.Span);
+            }
+
             EnsureColumns();
             return _dates!;
         }
@@ -515,45 +549,6 @@ public class StockData : IStockData
 
     private void EnsureColumns()
     {
-        // Built from the caller's columns on first use, and only for the columns actually asked for. The
-        // adopting constructor stores views rather than lists precisely so that a run which never reaches for
-        // one of these never pays for it.
-        if (_openMemory.HasValue)
-        {
-            _openPrices ??= new List<double>(_openMemory.Value.Length);
-            if (_openPrices.Count == 0) AppendTo(_openPrices, _openMemory.Value.Span);
-        }
-
-        if (_highMemory.HasValue)
-        {
-            _highPrices ??= new List<double>(_highMemory.Value.Length);
-            if (_highPrices.Count == 0) AppendTo(_highPrices, _highMemory.Value.Span);
-        }
-
-        if (_lowMemory.HasValue)
-        {
-            _lowPrices ??= new List<double>(_lowMemory.Value.Length);
-            if (_lowPrices.Count == 0) AppendTo(_lowPrices, _lowMemory.Value.Span);
-        }
-
-        if (_closeMemory.HasValue)
-        {
-            _closePrices ??= new List<double>(_closeMemory.Value.Length);
-            if (_closePrices.Count == 0) AppendTo(_closePrices, _closeMemory.Value.Span);
-        }
-
-        if (_volumeMemory.HasValue)
-        {
-            _volumes ??= new List<double>(_volumeMemory.Value.Length);
-            if (_volumes.Count == 0) AppendTo(_volumes, _volumeMemory.Value.Span);
-        }
-
-        if (_dateMemory.HasValue)
-        {
-            _dates ??= new List<DateTime>(_dateMemory.Value.Length);
-            if (_dates.Count == 0) AppendTo(_dates, _dateMemory.Value.Span);
-        }
-
         if (_columnsInitialized)
         {
             _openPrices ??= new List<double>();
@@ -605,12 +600,22 @@ public class StockData : IStockData
         _columnsInitialized = true;
     }
 
-    private static void AppendTo<T>(List<T> target, ReadOnlySpan<T> source)
+    /// <summary>
+    /// Builds the list form of one adopted column, for a caller that asked for that column and no other.
+    /// </summary>
+    /// <remarks>
+    /// Per column on purpose. Filling all six whenever one is touched costs 480,000 bytes at 10,000 bars to
+    /// answer a question about 80,000 of them, which is most of what the adopting constructor just saved.
+    /// </remarks>
+    private static List<T> Materialize<T>(ReadOnlySpan<T> source)
     {
+        var list = new List<T>(source.Length);
         for (var i = 0; i < source.Length; i++)
         {
-            target.Add(source[i]);
+            list.Add(source[i]);
         }
+
+        return list;
     }
 
     private void EnsureRows()
