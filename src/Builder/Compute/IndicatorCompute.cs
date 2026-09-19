@@ -8410,13 +8410,67 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fisher Transform Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFisherTransformStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFisherTransformStochasticOscillatorFast(StockData data, ComputeContext context, int length = 2,
+        int stochLength = 30, int smoothLength = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FisherTransformStochasticOscillator(high, low, close, buffer.WritableSpan, length);
+        // CalculateFisherTransformStochasticOscillator builds a rainbow average from ten successive moving
+        // averages of the chained series, weighted 5, 4, 3, 2 and then one apiece, stochastically scales it
+        // over stochLength with the numerator and denominator each summed over smoothLength, and publishes
+        // the Fisher transform of that. The core call it replaced read the high, low and close instead.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var stage = context.Rent(count);
+        using var scratch = context.Rent(count);
+        using var rainbow = context.Rent(count);
+        var rbw = rainbow.WritableSpan;
+
+        MovingAverage(data, maType, length, input, stage.WritableSpan);
+        for (var i = 0; i < count; i++)
+        {
+            rbw[i] = stage.Span[i] * 5;
+        }
+
+        for (var pass = 2; pass <= 10; pass++)
+        {
+            MovingAverage(data, maType, length, stage.Span, scratch.WritableSpan);
+            scratch.Span.CopyTo(stage.WritableSpan);
+
+            var weight = pass <= 4 ? 6 - pass : 1;
+            for (var i = 0; i < count; i++)
+            {
+                rbw[i] += stage.Span[i] * weight;
+            }
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            rbw[i] /= 20;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var window = new RollingMinMax(stochLength);
+        var numerators = new RollingSum();
+        var denominators = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            window.Add(rbw[i]);
+            numerators.Add(rbw[i] - window.Min);
+            denominators.Add(window.Max - window.Min);
+
+            var numeratorSum = numerators.Sum(smoothLength);
+            var denominatorSum = denominators.Sum(smoothLength);
+            var stochastic = denominatorSum + 0.0001 != 0
+                ? MathHelper.MinOrMax(numeratorSum / (denominatorSum + 0.0001) * 100, 100, 0)
+                : 0;
+
+            var scaled = MathHelper.Exp(2 * (0.1 * (stochastic - 50)));
+            output[i] = MathHelper.MinOrMax((((scaled - 1) / (scaled + 1)) + 1) * 50, 100, 0);
+        }
+
         return buffer;
     }
 
@@ -9124,11 +9178,80 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Prime Number Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePrimeNumberOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PrimeNumberOscillator(close, buffer.WritableSpan, length);
+        // CalculatePrimeNumberOscillator searches outward from the rounded chained value for the nearest
+        // prime above and the nearest below, within a band of length percent, and publishes whichever
+        // distance is the smaller signed offset. OscillatorCore.PrimeNumberOscillator read the close and
+        // measured something else. Each search falls back to the previous bar's prime when it finds none.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double previousUpperPrime = 0, previousLowerPrime = 0, previousOutput = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var ratio = currentValue * length / 100;
+            var convertedValue = (long)Math.Round(currentValue);
+            var sqrtValue = currentValue >= 0 ? (long)Math.Round(MathHelper.Sqrt(currentValue)) : 0;
+            var maxValue = (long)Math.Round(currentValue + ratio);
+            var minValue = (long)Math.Round(currentValue - ratio);
+
+            double upperPrime = 0, lowerPrime = 0;
+            for (var j = convertedValue; j <= maxValue; j++)
+            {
+                upperPrime = j;
+                for (var k = 2; k <= sqrtValue; k++)
+                {
+                    upperPrime = j % k == 0 ? 0 : j;
+                    if (upperPrime == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (upperPrime > 0)
+                {
+                    break;
+                }
+            }
+
+            upperPrime = upperPrime == 0 ? previousUpperPrime : upperPrime;
+            previousUpperPrime = upperPrime;
+
+            for (var l = convertedValue; l >= minValue; l--)
+            {
+                lowerPrime = l;
+                for (var m = 2; m <= sqrtValue; m++)
+                {
+                    lowerPrime = l % m == 0 ? 0 : l;
+                    if (lowerPrime == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (lowerPrime > 0)
+                {
+                    break;
+                }
+            }
+
+            lowerPrime = lowerPrime == 0 ? previousLowerPrime : lowerPrime;
+            previousLowerPrime = lowerPrime;
+
+            var offset = upperPrime - currentValue < currentValue - lowerPrime
+                ? upperPrime - currentValue
+                : lowerPrime - currentValue;
+            offset = offset == 0 ? previousOutput : offset;
+            output[i] = offset;
+            previousOutput = offset;
+        }
+
         return buffer;
     }
 
