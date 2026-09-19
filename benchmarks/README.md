@@ -43,3 +43,55 @@ Notes:
 - Results are emitted to `BenchmarkDotNet.Artifacts/results` as Markdown and CSV.
 - To override counts or lengths without editing code, set `OOPLES_BENCHMARK_COUNTS` or `OOPLES_BENCHMARK_LENGTHS` (comma/space separated).
 - To change the dataset size in code, edit `Count` in `benchmarks/OoplesFinance.StockIndicators.Benchmarks/IndicatorBenchmarks.cs`.
+
+
+---
+
+## Head-to-head against other libraries
+
+A second project, `benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks`, measures this library
+against Skender.Stock.Indicators 2.7.3, TALib.NETCore 0.5.0, Trady.Analysis 3.2.8 and QuanTAlib 1.0.0 over
+seven indicators. Nothing it references ships: the project is never packed and the library takes no reference
+on any competitor package.
+
+It has three commands that are not timings, and all three exist so a timing cannot be read out of context.
+
+What each library ships, so a missing row is never mistaken for a slow one:
+```
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --coverage
+```
+
+What each library computes, so the timings are known to be over the same arithmetic:
+```
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --verify
+```
+
+Where a measured allocation actually goes, so the adapter is not reported as the indicator:
+```
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --alloc
+```
+
+The timings themselves:
+```
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --filter *BatchBenchmarks*
+dotnet run -c Release --project benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj -- --filter *IncrementalBenchmarks*
+```
+
+### Reading the results honestly
+
+Three things must be said next to the numbers, because the numbers do not say them.
+
+**The incremental comparison is not close, and it is not a like-for-like race.** Skender, TA-Lib and Trady ship
+no incremental path at all, so their column is a full recompute of the whole history per bar and grows with it;
+only QuanTAlib has a real incremental arm. That is a genuine shipped-feature difference, which is what
+`--coverage` is for, not a trick of the measurement.
+
+**Our Stochastic row does less work than TA-Lib's and Skender's.** `--verify` shows a 17.26% spread, and its
+control fixture names the reason: our `%K` is the raw fast %K, theirs is a %K smoothed over three bars. The
+other six indicators agree to within 1.4e-11.
+
+**Most of our reported allocation is not indicator work.** Every competitor gets its input pre-built in a
+`GlobalSetup`, but the v1 and v2 arms must build a fresh `StockData` inside the measured method, because the
+batch API writes results back into the instance it is handed. `--alloc` splits it: at 10,000 bars the v2 EMA
+arm allocates 1,208,528 B, of which `NewStockData()` is 961,168 B. The adapter is charged to this library and
+to nobody else.
