@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Enums;
+﻿using OoplesFinance.StockIndicators.Enums;
 
 namespace OoplesFinance.StockIndicators.Builder.Specs;
 
@@ -4705,7 +4705,7 @@ public sealed class PriceVolumeOscillatorSpecOptions : IIndicatorSpecOptions
         Length = Math.Max(1, length);
     }
 
-    [Obsolete("Has no effect: PriceVolumeOscillator has no parameter this option could set. It will be removed in the next major version.")]
+    /// <summary>The number of bars the price change is measured over, which is the only length the "Po" series reads.</summary>
     public int Length { get; }
 }
 
