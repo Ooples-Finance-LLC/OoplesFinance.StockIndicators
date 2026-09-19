@@ -469,7 +469,7 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - RSI variants
             DoubleSmoothedRelativeStrengthIndexSpecOptions dsrsi => ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context, dsrsi.Length),
-            FastSlowRsiOscillatorSpecOptions fsrsi => ComputeFastSlowRsiOscillatorFast(data, context, fsrsi.Length),
+            FastSlowRsiOscillatorSpecOptions => ComputeFastSlowRsiOscillatorFast(data, context),
 
             // Batch 6 - DiNapoli/Ergodic oscillators
             DiNapoliPercentagePriceOscillatorSpecOptions dnppo => ComputeDiNapoliPercentagePriceOscillatorFast(data, context, dnppo.Length),
@@ -1189,7 +1189,7 @@ internal static partial class IndicatorCompute
             ApirineSlowRelativeStrengthIndexSpecOptions asrsi => ComputeApirineSlowRsiFast(data, context, asrsi.Length, asrsi.SmoothLength, asrsi.MaType),
             ElderSafeZoneStopsSpecOptions eszs => ComputeElderSafeZoneStopsFast(data, context, eszs.Length, eszs.Mult, eszs.MaType),
             EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.SignalLength, ei.MaType),
-            FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio, fsko.MaType),
+            FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio),
             FearAndGreedIndicatorSpecOptions fgi => ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.SmoothLength, fgi.MaType),
 
             // Batch 19 - Volume and Movement Indicators
@@ -7093,13 +7093,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes DiNapoli Preferred Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDiNapoliPreferredStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeDiNapoliPreferredStochasticOscillatorFast(StockData data, ComputeContext context, int length1 = 8,
+        int length2 = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.DiNapoliPreferredStochasticOscillator(high, low, close, buffer.WritableSpan, length, 3, 3);
+        // CalculateDiNapoliPreferredStochasticOscillator publishes the first of its two smoothings of the raw
+        // stochastic - each an exponential step of one over the smoothing length - so length3, which produces
+        // the second, never reaches this series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length2 = Math.Max(length2, 1);
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, fastK.WritableSpan);
+        var fast = fastK.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevR = i >= 1 ? output[i - 1] : 0;
+            output[i] = prevR + ((fast[i] - prevR) / length2);
+        }
+
         return buffer;
     }
 
@@ -7118,24 +7133,39 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowKurtosisOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowKurtosisOscillatorFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03)
     {
-        // Length parameter is unused - uses fixed fast/slow periods
-        _ = length;
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FastSlowKurtosisOscillator(close, buffer.WritableSpan, 5, 20);
-        return buffer;
+        // FastSlowKurtosisOscillatorSpecOptions and FastandSlowKurtosisOscillatorSpecOptions name one indicator.
+        return ComputeFastAndSlowKurtosisFast(data, context, length, ratio);
     }
 
     /// <summary>
     /// Computes Fast and Slow RSI Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length1 = 3, int length2 = 6,
+        int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.FastSlowRsiOscillator(close, buffer.WritableSpan, length / 2, length);
+        // CalculateFastandSlowRelativeStrengthIndexOscillator adds the relative strength index of the chained
+        // series to a smoothed kurtosis oscillator scaled up by ten thousand, so the kurtosis - which moves in
+        // ten-thousandths - carries the shape and the index carries the level. Its length4 reaches nothing.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var relativeStrength = ComputeRsiFast(data, context, length3, maType);
+        var rsi = relativeStrength.Span;
+
+        using var kurtosis = ComputeFastAndSlowKurtosisFast(data, context, length1);
+        using var smoothedKurtosis = context.Rent(count);
+        MovingAverage(data, maType, length2, kurtosis.Span, smoothedKurtosis.WritableSpan);
+        var v4 = smoothedKurtosis.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = (10000 * v4[i]) + rsi[i];
+        }
+
         return buffer;
     }
 
@@ -16698,26 +16728,27 @@ internal static partial class IndicatorCompute
     /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
     /// Returns the smoothed kurtosis value.
     /// </summary>
-    internal static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateFastandSlowKurtosisOscillator takes the change in momentum - the second difference of the
+        // chained series over the length - and runs it through an exponential step of the given ratio. Its
+        // maType reaches nothing in the published series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        switch (maType)
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double prevMomentum = 0;
+        double prevFsk = 0;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.WeightedMovingAverage:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.WeightedMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var prevValue = i >= length ? input[i - length] : 0;
+            var momentum = CalculationsHelper.MinPastValues(i, length, input[i] - prevValue);
+
+            prevFsk = (ratio * (momentum - prevMomentum)) + ((1 - ratio) * prevFsk);
+            prevMomentum = momentum;
+            output[i] = prevFsk;
         }
 
         return buffer;
@@ -16901,23 +16932,35 @@ internal static partial class IndicatorCompute
     /// Computes Kase Indicator using zero-allocation fast path.
     /// Returns the smoothed value.
     /// </summary>
-    internal static ComputeBuffer ComputeKaseIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeKaseIndicatorFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        // CalculateKaseIndicator scales each bar against the average volume of the window times the square root
+        // of that window, and publishes KaseUp - the previous high over the current low - as its first series.
+        // A bar whose true range has not yet developed carries the previous reading forward instead of zeroing.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
-        var buffer = context.Rent(count);
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        using var smoothedVolume = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), smoothedVolume.WritableSpan);
+        var volumeSma = smoothedVolume.Span;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+        var sqrtPeriod = MathHelper.Sqrt(length);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            var currentLow = lows[i];
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var ratio = volumeSma[i] * sqrtPeriod;
+            var prevKUp = i >= 1 ? output[i - 1] : 0;
+
+            output[i] = atr[i] > 0 && ratio != 0 && currentLow != 0 ? prevHigh / currentLow / ratio : prevKUp;
         }
 
         return buffer;
@@ -19099,11 +19142,22 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    internal static ComputeBuffer ComputeStochasticConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3,
+        int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.StochasticRsi(close, buffer.WritableSpan, length1, smoothLength1);
+        // CalculateStochasticConnorsRelativeStrengthIndex runs a stochastic over the Connors relative strength
+        // index rather than over price, and publishes that stochastic FastD - smoothed once by smoothLength1.
+        // Its smoothLength2 produces the SlowD, which is a separate key.
+        var count = (data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues).Count;
+
+        using var connorsRsi = ComputeConnorsRsiFast(data, context, length1, length2, length3);
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, connorsRsi.Span, length2, fastK.WritableSpan);
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, smoothLength1, fastK.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
