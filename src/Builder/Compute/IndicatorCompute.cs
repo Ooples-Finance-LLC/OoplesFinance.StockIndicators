@@ -724,7 +724,7 @@ internal static partial class IndicatorCompute
             HybridConvolutionFilterSpecOptions hcf => ComputeHybridConvolutionFilterFast(data, context, hcf.Length),
             IIRLeastSquaresEstimateSpecOptions iirls => ComputeIIRLeastSquaresEstimateFast(data, context, iirls.Length),
             InverseDistanceWeightedMovingAverageSpecOptions idwma => ComputeInverseDistanceWeightedMovingAverageFast(data, context, idwma.Length),
-            InverseFisherTransformCoreSpecOptions iftc => ComputeInverseFisherTransformCoreFast(data, context, iftc.Length),
+            InverseFisherTransformCoreSpecOptions => ComputeInverseFisherTransformCoreFast(data, context),
             JsaMovingAverageSpecOptions jsama => ComputeJsaMovingAverageFast(data, context, jsama.Length),
             KalmanSmootherSpecOptions ksmo => ComputeKalmanSmootherFast(data, context, ksmo.Length),
             KaufmanAdaptiveLeastSquaresMovingAverageSpecOptions kalsma => ComputeKaufmanAdaptiveLeastSquaresMovingAverageFast(data, context, kalsma.Length),
@@ -8571,11 +8571,28 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Fisherized Deviation Scaled Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersFisherizedDeviationScaledOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersFisherizedDeviationScaledOscillatorFast(StockData data, ComputeContext context,
+        int fastLength = 20, int slowLength = 40)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersFisherizedDeviationScaledOscillator(close, buffer.WritableSpan, length);
+        // CalculateEhlersFisherizedDeviationScaledOscillator fisherises the deviation scaled moving average
+        // itself, holding the previous reading whenever that average leaves the transform's domain. Its slow
+        // length is the average's own, not twice the fast one, so it needs the two length helper.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var scaled = context.Rent(count);
+        EhlersDeviationScaledMovingAverage(data, context, SpanCompat.AsReadOnlySpan(inputList), fastLength, slowLength,
+            MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, scaled.WritableSpan);
+        var filter = scaled.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var half = filter[i] / 2;
+            output[i] = Math.Abs(filter[i]) < 2 ? 0.5 * Math.Log((1 + half) / (1 - half)) : i >= 1 ? output[i - 1] : 0;
+        }
+
         return buffer;
     }
 
@@ -9269,12 +9286,61 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Deviation Scaled Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDeviationScaledMovingAverageFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDeviationScaledMovingAverageFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersDeviationScaledMovingAverage(close, buffer.WritableSpan, length);
+        // The spec binds its single length to fastLength and twice that to slowLength, which is what the
+        // helper below is given. Reading the close rather than the chained series, as this arm used to, made
+        // the average ignore whatever it was chained onto.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        EhlersDeviationScaledMovingAverage(data, context, SpanCompat.AsReadOnlySpan(inputList), length, length * 2, maType,
+            buffer.WritableSpan);
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes Ehlers' deviation scaled moving average over an arbitrary series, with the fast and slow
+    /// lengths kept apart so that indicators built on it can set them independently.
+    /// </summary>
+    private static void EhlersDeviationScaledMovingAverage(StockData data, ComputeContext context, ReadOnlySpan<double> input,
+        int fastLength, int slowLength, MovingAvgType maType, Span<double> output)
+    {
+        var count = input.Length;
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+
+        using var averaged = context.Rent(count);
+        var avgZeros = averaged.WritableSpan;
+        var prevZeros = 0d;
+        for (var i = 0; i < count; i++)
+        {
+            var zeros = CalculationsHelper.MinPastValues(i, 2, input[i] - (i >= 2 ? input[i - 2] : 0));
+            avgZeros[i] = (zeros + prevZeros) / 2;
+            prevZeros = zeros;
+        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, fastLength, averaged.Span, smoothed.WritableSpan);
+        var ssf = smoothed.Span;
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(ssf, deviation.WritableSpan, slowLength);
+        var stdDev = deviation.Span;
+
+        double prevScaledFilter = 0, prevEdsma = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var scaledFilter = stdDev[i] != 0 ? ssf[i] / stdDev[i] : prevScaledFilter;
+            var alpha = MathHelper.MinOrMax(5 * Math.Abs(scaledFilter) / slowLength, 0.99, 0.01);
+
+            prevEdsma = (alpha * input[i]) + ((1 - alpha) * prevEdsma);
+            output[i] = prevEdsma;
+            prevScaledFilter = scaledFilter;
+        }
     }
 
     /// <summary>
@@ -11213,12 +11279,40 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Inverse Fisher Transform using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length1 = 5,
+        int length2 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
+        // CalculateEhlersInverseFisherTransform centres the relative strength index on zero, scales it by a
+        // tenth, smooths that over length2 and then applies the inverse transform. The spec's only option is
+        // marked obsolete because it sets none of this, so both lengths keep the batch's own defaults.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.InverseFisherTransform(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var relativeStrength = context.Rent(count);
+        RelativeStrengthIndex(data, context, input, Math.Max(length1, 1), maType, relativeStrength.WritableSpan);
+        var rsi = relativeStrength.Span;
+
+        using var scaled = context.Rent(count);
+        var v1 = scaled.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            v1[i] = 0.1 * (rsi[i] - 50);
+        }
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length2, 1), scaled.Span, smoothed.WritableSpan);
+        var v2 = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var top = MathHelper.Exp(2 * v2[i]);
+            var bottom = top + 1;
+            output[i] = bottom != 0 ? MathHelper.MinOrMax((top - 1) / bottom, 1, -1) : 0;
+        }
+
         return buffer;
     }
 
