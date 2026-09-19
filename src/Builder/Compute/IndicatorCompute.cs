@@ -1139,7 +1139,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType, ChannelBand.Lower),
                 _ => null
             },
-            ScalpersChannelSpecOptions sc => ComputeScalpersChannelFast(data, context, sc.Length1, sc.Length2, sc.MaType),
+            ScalpersChannelSpecOptions sc => ComputeScalpersChannelFast(data, context, sc.Length2, sc.MaType),
             HurstCycleChannelSpecOptions hcc => spec.OutputKey switch
             {
                 null or "FastMiddleBand" => ComputeHurstCycleChannelFast(data, context, hcc.FastLength, hcc.SlowLength, hcc.FastMult,
@@ -7710,11 +7710,26 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeProjectionOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ProjectionOscillator(high, low, close, buffer.WritableSpan, length);
+        // CalculateProjectionOscillator places the chained series within the projection bands as a percentage
+        // of their width. Its moving average only feeds the separate Signal series, so this arm takes none.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var upperBand = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        ProjectionBands(data, context, length, upperBand.WritableSpan, lowerBand.WritableSpan);
+        var pu = upperBand.Span;
+        var pl = lowerBand.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var width = pu[i] - pl[i];
+            output[i] = width != 0 ? 100 * (input[i] - pl[i]) / width : 0;
+        }
+
         return buffer;
     }
 
@@ -16829,23 +16844,29 @@ internal static partial class IndicatorCompute
     /// Computes Scalpers Channel using zero-allocation fast path.
     /// Returns the middle band (SMA).
     /// </summary>
-    internal static ComputeBuffer ComputeScalpersChannelFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeScalpersChannelFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // The Scalper series that this spec is bound to is the moving average of the chained series less the
+        // logarithm of pi times the average true range, both over the second length. The first length draws
+        // the rolling high and low bands, which this series is deliberately not part of, so the arm does not
+        // take it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
 
-        switch (maType)
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
+        var sma = smoothed.Span;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
+        var atr = averageTrueRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
+            var scaled = Math.PI * atr[i];
+            output[i] = scaled > 0 ? sma[i] - Math.Log(scaled) : sma[i];
         }
 
         return buffer;
@@ -18582,10 +18603,34 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateProjectionBandwidth measures the projection bands - each bar projected forward by the
-        // linear regression slope of the high and the low - as a percentage of their midpoint. The batch keeps
-        // the terms whose lookback has not filled at zero rather than skipping them, which is what makes the
-        // opening bars read 200. Its moving average only feeds the separate Signal series.
+        // CalculateProjectionBandwidth measures the projection bands as a percentage of their midpoint. Its
+        // moving average only feeds the separate Signal series.
+        var count = data.Count;
+
+        using var upperBand = context.Rent(count);
+        using var lowerBand = context.Rent(count);
+        ProjectionBands(data, context, length, upperBand.WritableSpan, lowerBand.WritableSpan);
+        var pu = upperBand.Span;
+        var pl = lowerBand.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = pu[i] + pl[i] != 0 ? 200 * (pu[i] - pl[i]) / (pu[i] + pl[i]) : 0;
+        }
+
+        return buffer;
+    }
+
+    /// <summary>
+    /// Writes the projection bands - each of the last length bars projected forward to the current bar by the
+    /// linear regression slope of the high and of the low, taking the highest and lowest such projection.
+    /// The batch keeps the terms whose lookback has not filled at zero rather than skipping them, which is
+    /// what makes the opening bars of anything built on these bands read as a full-width range.
+    /// </summary>
+    private static void ProjectionBands(StockData data, ComputeContext context, int length, Span<double> upper, Span<double> lower)
+    {
         var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
@@ -18611,8 +18656,6 @@ internal static partial class IndicatorCompute
             }
         }
 
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
             double pu = highs[i], pl = lows[i];
@@ -18626,10 +18669,9 @@ internal static partial class IndicatorCompute
                 pl = Math.Min(pl, pLow + (lSlope * j));
             }
 
-            output[i] = pu + pl != 0 ? 200 * (pu - pl) / (pu + pl) : 0;
+            upper[i] = pu;
+            lower[i] = pl;
         }
-
-        return buffer;
     }
 
     internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
