@@ -1335,7 +1335,7 @@ internal static partial class IndicatorCompute
             RunningEquitySpecOptions re => ComputeRunningEquityFast(data, context, re.Length, re.MaType),
 
             // Batch 33 - Remaining Indicators (Part 2)
-            SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length, ss.MaType),
+            SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length),
             StandardDevationSpecOptions sd => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
             StationaryExtrapolatedLevelsSpecOptions sel => spec.OutputKey switch
             {
@@ -11127,10 +11127,26 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14)
     {
+        // CalculateTrimean takes the nearest-rank quartiles of the window - the same convention the batch's
+        // RollingOrderStatistic uses, which is what the routine this replaced got wrong on a partial window -
+        // and weights the median double: (q1 + 2 * median + q3) / 4.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.Trimean(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var order = new RollingOrderStatistic(Math.Max(length, 1));
+        for (var i = 0; i < count; i++)
+        {
+            order.Add(input[i]);
+            var q1 = order.PercentileNearestRank(25);
+            var median = order.PercentileNearestRank(50);
+            var q3 = order.PercentileNearestRank(75);
+            output[i] = (q1 + (2 * median) + q3) / 4;
+        }
+
         return buffer;
     }
 
@@ -11551,10 +11567,34 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeShapeshiftingMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
+        // CalculateShapeshiftingMovingAverage weights the window by 1 - 2x / (x^4 + 1), where x runs from zero
+        // at the current bar to one at the far end, and treats bars before the start of the series as zero
+        // rather than shortening the window. The published series is that filter; the second, symmetric filter
+        // the batch also builds is not published.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ShapeshiftingMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            double sumX = 0;
+            double weightedSumX = 0;
+            for (var j = 0; j <= length - 1; j++)
+            {
+                var x = (double)j / (length - 1);
+                var wx = 1 - (2 * x / (MathHelper.Pow(x, 4) + 1));
+                var prevValue = i >= j ? input[i - j] : 0;
+
+                sumX += prevValue * wx;
+                weightedSumX += wx;
+            }
+
+            output[i] = weightedSumX != 0 ? sumX / weightedSumX : 0;
+        }
+
         return buffer;
     }
 
@@ -20103,11 +20143,36 @@ internal static partial class IndicatorCompute
 
     // Batch 33 - Remaining Indicators (Part 2)
 
-    internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardDeviation(close, buffer.WritableSpan, length);
+        // CalculateSigmaSpikes divides each bar's return by the standard deviation of the returns as it stood
+        // at the PREVIOUS bar, and publishes that ratio raw - the moving average of it is the separate Signal
+        // series, which is why this arm takes no moving average type. It is not the deviation of the close.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var returns = context.Rent(count);
+        var ret = returns.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevValue = i >= 1 ? input[i - 1] : 0;
+            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
+        var stdDev = deviation.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var prevStd = i >= 1 ? stdDev[i - 1] : 0;
+            output[i] = prevStd != 0 ? returns.Span[i] / prevStd : 0;
+        }
+
         return buffer;
     }
 
