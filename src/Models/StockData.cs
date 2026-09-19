@@ -353,7 +353,18 @@ public class StockData : IStockData
     /// a caller that reaches for one pays exactly the copy it would have paid anyway, and the compute layer -
     /// which reads the spans instead - never triggers it.</para>
     /// </remarks>
-    internal StockData(ReadOnlyMemory<double> openPrices, ReadOnlyMemory<double> highPrices,
+    /// <remarks>
+    /// A factory rather than a constructor overload. <c>double[]</c> converts to both
+    /// <see cref="IEnumerable{T}"/> and <see cref="ReadOnlyMemory{T}"/>, so an overload would make every
+    /// existing <c>new StockData(arrays...)</c> call ambiguous - a source-breaking change for callers who are
+    /// not asking for any of this.
+    /// </remarks>
+    internal static StockData FromColumnViews(ReadOnlyMemory<double> openPrices,
+        ReadOnlyMemory<double> highPrices, ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices,
+        ReadOnlyMemory<double> volumes, ReadOnlyMemory<DateTime> dates) =>
+        new(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
+
+    private StockData(ReadOnlyMemory<double> openPrices, ReadOnlyMemory<double> highPrices,
         ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices, ReadOnlyMemory<double> volumes,
         ReadOnlyMemory<DateTime> dates)
     {
@@ -551,12 +562,15 @@ public class StockData : IStockData
     {
         if (_columnsInitialized)
         {
-            _openPrices ??= new List<double>();
-            _highPrices ??= new List<double>();
-            _lowPrices ??= new List<double>();
-            _closePrices ??= new List<double>();
-            _volumes ??= new List<double>();
-            _dates ??= new List<DateTime>();
+            // A column with a view is left null on purpose. Standing an empty list in for it here would satisfy
+            // the null check in its getter, so the view would never be read and the column would answer empty
+            // for the rest of this instance's life.
+            if (_openPrices is null && !_openMemory.HasValue) _openPrices = new List<double>();
+            if (_highPrices is null && !_highMemory.HasValue) _highPrices = new List<double>();
+            if (_lowPrices is null && !_lowMemory.HasValue) _lowPrices = new List<double>();
+            if (_closePrices is null && !_closeMemory.HasValue) _closePrices = new List<double>();
+            if (_volumes is null && !_volumeMemory.HasValue) _volumes = new List<double>();
+            if (_dates is null && !_dateMemory.HasValue) _dates = new List<DateTime>();
             return;
         }
 
@@ -629,12 +643,15 @@ public class StockData : IStockData
         EnsureColumns();
         var count = Count;
         var rows = new List<TickerData>(count);
-        var dates = _dates!;
-        var opens = _openPrices!;
-        var highs = _highPrices!;
-        var lows = _lowPrices!;
-        var closes = _closePrices!;
-        var volumes = _volumes!;
+
+        // Through the properties, not the fields: a column handed over as a view is built by its own getter, so
+        // reading the field would find the null this instance deliberately left there.
+        var dates = Dates;
+        var opens = OpenPrices;
+        var highs = HighPrices;
+        var lows = LowPrices;
+        var closes = ClosePrices;
+        var volumes = Volumes;
 
         for (var i = 0; i < count; i++)
         {

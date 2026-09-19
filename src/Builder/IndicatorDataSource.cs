@@ -130,7 +130,7 @@ public sealed class IndicatorDataSource
                 nameof(closePrices));
         }
 
-        var data = new StockData(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
+        var data = StockData.FromColumnViews(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
         return new IndicatorDataSource(IndicatorSourceKind.Batch, data, null, defaults, null, null);
     }
 
