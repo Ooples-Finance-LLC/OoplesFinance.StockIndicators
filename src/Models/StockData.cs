@@ -231,6 +231,27 @@ public class StockData : IStockData
     internal ReadOnlySpan<double> ChainedSpanOrInput =>
         ChainedValues.Count > 0 ? Compatibility.SpanCompat.AsReadOnlySpan(ChainedValues) : InputSpan;
 
+    /// <summary>
+    /// The input series as memory rather than a span, for the one caller that has to store it.
+    /// </summary>
+    /// <remarks>
+    /// A span cannot live in a field, and the evaluator caches the base input for the whole evaluation. Going
+    /// through <see cref="InputValues"/> and calling ToArray on it costs two arrays the size of the history -
+    /// one to build the list, one to copy it out - which was the last of the per-run copies.
+    /// </remarks>
+    internal ReadOnlyMemory<double> InputMemory
+    {
+        get
+        {
+            if (_inputValues is not null)
+            {
+                return _inputValues.ToArray();
+            }
+
+            return _closeMemory ?? (ReadOnlyMemory<double>)ClosePrices.ToArray();
+        }
+    }
+
     /// <summary>The caller's input series, or the closes when none was set, without copying either.</summary>
     internal ReadOnlySpan<double> InputSpan
     {

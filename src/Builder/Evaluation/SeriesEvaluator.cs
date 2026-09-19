@@ -18,7 +18,7 @@ internal sealed class SeriesEvaluator
     private readonly ComputeContext? _computeContext;
 
     // Cached base input to avoid repeated ToArray() calls
-    private double[]? _cachedDefaultInput;
+    private ReadOnlyMemory<double>? _cachedDefaultInput;
 
     // Reusable HashSet for cycle detection (avoid allocation per Evaluate call)
     private readonly HashSet<SeriesHandle> _visitingSet = new();
@@ -537,25 +537,27 @@ internal sealed class SeriesEvaluator
     /// <summary>
     /// Gets the base input values for a series key.
     /// </summary>
-    private double[] GetBaseInput(SeriesKey seriesKey)
+    private ReadOnlyMemory<double> GetBaseInput(SeriesKey seriesKey)
     {
         var data = GetBaseData(seriesKey);
 
-        // Fast path: cache default data input to avoid repeated ToArray() calls
+        // Fast path: cache default data input to avoid repeated copies
         if (ReferenceEquals(data, _defaultData))
         {
-            if (_cachedDefaultInput is not null)
+            if (_cachedDefaultInput.HasValue)
             {
-                return _cachedDefaultInput;
+                return _cachedDefaultInput.Value;
             }
 
-            var defaultInput = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
-            _cachedDefaultInput = defaultInput.ToArray();
-            return _cachedDefaultInput;
+            // InputMemory rather than InputValues.ToArray(): the latter builds the column as a list and then
+            // copies it out, two arrays the size of the history for a series the caller already holds.
+            _cachedDefaultInput = data.CustomValuesList.Count > 0
+                ? data.CustomValuesList.ToArray()
+                : data.InputMemory;
+            return _cachedDefaultInput.Value;
         }
 
-        var input = data.CustomValuesList.Count > 0 ? data.CustomValuesList : data.InputValues;
-        return input.ToArray();
+        return data.CustomValuesList.Count > 0 ? data.CustomValuesList.ToArray() : data.InputMemory;
     }
 
     /// <summary>
