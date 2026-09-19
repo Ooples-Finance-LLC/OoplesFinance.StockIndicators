@@ -579,7 +579,7 @@ internal static partial class IndicatorCompute
             EhlersUniversalOscillatorSpecOptions euo => ComputeEhlersUniversalOscillatorFast(data, context, euo.Length),
             // The oscillator's three lengths are all fixed in the batch, so the spec's single Length has
             // nothing to bind to and is marked as having no effect.
-            EhlersRecursiveMedianOscillatorSpecOptions ermo => ComputeEhlersRecursiveMedianOscillatorFast(data, context),
+            EhlersRecursiveMedianOscillatorSpecOptions => ComputeEhlersRecursiveMedianOscillatorFast(data, context),
             EhlersStochasticCenterOfGravityOscillatorSpecOptions escogo => ComputeEhlersStochasticCenterOfGravityOscillatorFast(data, context, escogo.Length),
             EhlersFisherizedDeviationScaledOscillatorSpecOptions efdso => ComputeEhlersFisherizedDeviationScaledOscillatorFast(data, context, efdso.Length),
             EhlersAdaptiveCenterOfGravityOscillatorSpecOptions eacogo => ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(data, context, eacogo.Length),
@@ -694,7 +694,7 @@ internal static partial class IndicatorCompute
             EhlersFilterSpecOptions efilter => ComputeEhlersFilterFast(data, context, efilter.Length),
             // The finite impulse response filter is a fixed seven-tap weighted average; it has no length
             // parameter, which is why both specs mark Length as having no effect.
-            EhlersFirFilterSpecOptions efir => ComputeEhlersFirFilterFast(data, context),
+            EhlersFirFilterSpecOptions => ComputeEhlersFirFilterFast(data, context),
             EhlersIirFilterSpecOptions eiir => ComputeEhlersIirFilterFast(data, context, eiir.Length),
 
             // Batch 7 - Cycle indicators
@@ -757,7 +757,7 @@ internal static partial class IndicatorCompute
             FareySequenceWeightedMovingAverageSpecOptions fswma => ComputeFareySequenceWeightedMovingAverageFast(data, context, fswma.Length),
             FisherLeastSquaresMovingAverageSpecOptions flsma => ComputeFisherLeastSquaresMovingAverageFast(data, context, flsma.Length,
                 flsma.MaType),
-            FollowingAdaptiveMovingAverageSpecOptions fama => spec.OutputKey switch
+            FollowingAdaptiveMovingAverageSpecOptions => spec.OutputKey switch
             {
                 null or "Fama" => ComputeFollowingAdaptiveMovingAverageFast(data, context),
                 _ => null
@@ -919,7 +919,7 @@ internal static partial class IndicatorCompute
 
             // Batch 30 - Additional Missing Core Methods
             GeneralizedDoubleExponentialMovingAverageSpecOptions gdema => ComputeGeneralizedDoubleExponentialMovingAverageFast(data, context, gdema.Length, gdema.VolumeFactor),
-            EhlersFiniteImpulseResponseFilterSpecOptions efirf => ComputeEhlersFiniteImpulseResponseFilterFast(data, context),
+            EhlersFiniteImpulseResponseFilterSpecOptions => ComputeEhlersFiniteImpulseResponseFilterFast(data, context),
             EhlersInfiniteImpulseResponseFilterSpecOptions eiirf => ComputeEhlersInfiniteImpulseResponseFilterFast(data, context, eiirf.Length),
             VolumeAdjustedMovingAverageSpecOptions vama => ComputeVolumeAdjustedMovingAverageFast(data, context, vama.Length,
                 vama.Factor, vama.MaType),
