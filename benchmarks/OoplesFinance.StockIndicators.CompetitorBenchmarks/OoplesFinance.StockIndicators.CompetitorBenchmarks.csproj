@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <!-- The competitor packages are third-party code we do not control; their own warnings are not
+         actionable here and must not fail a benchmark run. -->
+    <NoWarn>$(NoWarn);CS1591;NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <!-- Benchmark-only dependencies. Nothing here ships: this project is never packed, and the library
+       itself takes no reference on any of them. -->
+  <ItemGroup>
+    <PackageReference Include="Skender.Stock.Indicators" Version="2.7.3" />
+    <PackageReference Include="TALib.NETCore" Version="0.5.0" />
+    <PackageReference Include="Trady.Analysis" Version="3.2.8" />
+    <PackageReference Include="QuanTAlib" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OoplesFinance.StockIndicators.csproj" />
+  </ItemGroup>
+
+</Project>
