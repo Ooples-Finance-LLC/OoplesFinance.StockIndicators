@@ -1246,7 +1246,7 @@ internal static partial class IndicatorCompute
             PivotPointAverageSpecOptions ppa => ComputePivotPointAverageFast(data, context, ppa.Length, ppa.MaType),
             PriceVolumeRankSpecOptions => ComputePriceVolumeRankFast(data, context),
             PringSpecialKSpecOptions psk => ComputePringSpecialKFast(data, context, psk.SmoothLength, psk.MaType),
-            ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length, pb.MaType),
+            ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length),
             QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor, qwn.MaType),
             RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length, rrsi.MaType),
             ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
@@ -9041,11 +9041,59 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Fractal Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 16)
+    internal static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersFractalAdaptiveMovingAverage(close, buffer.WritableSpan, length);
+        // CalculateEhlersFractalAdaptiveMovingAverage derives its smoothing constant from the fractal
+        // dimension of the high-low range, comparing the full window against both halves - the recent half
+        // and the half one lag back. The core routine this replaced read the close and skipped the lagged
+        // half, so its dimension, and therefore its alpha, was a different number.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+        var halfP = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        using var halfHighest = context.Rent(count);
+        using var halfLowest = context.Rent(count);
+        var highest2 = halfHighest.WritableSpan;
+        var lowest2 = halfLowest.WritableSpan;
+
+        var fullHighWindow = new RollingMinMax(length);
+        var fullLowWindow = new RollingMinMax(length);
+        var halfHighWindow = new RollingMinMax(halfP);
+        var halfLowWindow = new RollingMinMax(halfP);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double prevFilter = 0;
+        for (var i = 0; i < count; i++)
+        {
+            fullHighWindow.Add(highs[i]);
+            fullLowWindow.Add(lows[i]);
+            halfHighWindow.Add(highs[i]);
+            halfLowWindow.Add(lows[i]);
+            highest2[i] = halfHighWindow.Max;
+            lowest2[i] = halfLowWindow.Min;
+
+            if (i == 0)
+            {
+                prevFilter = input[i];
+            }
+
+            var lagIndex = Math.Max(i - halfP, 0);
+            var n3 = (fullHighWindow.Max - fullLowWindow.Min) / length;
+            var n1 = (highest2[i] - lowest2[i]) / halfP;
+            var n2 = (highest2[lagIndex] - lowest2[lagIndex]) / halfP;
+            var dm = n1 > 0 && n2 > 0 && n3 > 0 ? (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2) : 0;
+
+            var alpha = MathHelper.MinOrMax(MathHelper.Exp(-4.6 * (dm - 1)), 1, 0.01);
+            prevFilter = (alpha * input[i]) + ((1 - alpha) * prevFilter);
+            output[i] = prevFilter;
+        }
+
         return buffer;
     }
 
@@ -11056,12 +11104,46 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Dynamically Adjustable Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6, int slowLength = 200)
+    internal static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6,
+        int slowLength = 200)
     {
+        // CalculateDynamicallyAdjustableMovingAverage picks its period from the ratio of the slow to the fast
+        // standard deviation, then averages the chained series over that period by differencing a running
+        // cumulative sum. The core routine this replaced averaged over the fast length throughout.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.DynamicallyAdjustableMovingAverage(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        fastLength = Math.Max(fastLength, 1);
+        slowLength = Math.Max(slowLength, 1);
+
+        using var shortDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, shortDeviation.WritableSpan, fastLength);
+        var shortStdDev = shortDeviation.Span;
+
+        using var longDeviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(input, longDeviation.WritableSpan, slowLength);
+        var longStdDev = longDeviation.Span;
+
+        using var cumulative = context.Rent(count);
+        var k = cumulative.WritableSpan;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double tempSum = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var a = shortStdDev[i];
+            var v = a != 0 ? (longStdDev[i] / a) + fastLength : fastLength;
+
+            tempSum += input[i];
+            k[i] = tempSum;
+
+            var p = (int)Math.Round(MathHelper.MinOrMax(v, slowLength, fastLength));
+            var prevK = i >= p ? k[i - p] : 0;
+            output[i] = p != 0 ? (k[i] - prevK) / p : 0;
+        }
+
         return buffer;
     }
 
@@ -18122,60 +18204,56 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeProjectionBandwidthFast(StockData data, ComputeContext context, int length = 14)
     {
-        // V1 Algorithm: Projection Bandwidth
-        // 1. Calculate linear regression slope of high and low prices
-        // 2. Project bands using slopes over length period
-        // 3. Pbw = 200 * (UpperBand - LowerBand) / (UpperBand + LowerBand)
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        int count = data.Count;
+        // CalculateProjectionBandwidth measures the projection bands - each bar projected forward by the
+        // linear regression slope of the high and the low - as a percentage of their midpoint. The batch keeps
+        // the terms whose lookback has not filled at zero rather than skipping them, which is what makes the
+        // opening bars read 200. Its moving average only feeds the separate Signal series.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = data.Count;
+        length = Math.Max(length, 1);
 
-        // Calculate linear regression slopes
-        var highSlopeBuffer = context.Rent(count);
-        var lowSlopeBuffer = context.Rent(count);
-        TrendCore.LinearRegressionSlope(high, highSlopeBuffer.WritableSpan, length);
-        TrendCore.LinearRegressionSlope(low, lowSlopeBuffer.WritableSpan, length);
-
-        var highSlope = highSlopeBuffer.Span;
-        var lowSlope = lowSlopeBuffer.Span;
-
-        // Calculate projection bands and bandwidth
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-
-        for (int i = 0; i < count; i++)
+        using var highSlopes = context.Rent(count);
+        var highSlope = highSlopes.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
         {
-            double pu = high[i];
-            double pl = low[i];
-
-            // Project bands over length period
-            for (int j = 1; j <= length; j++)
+            for (var i = 0; i < count; i++)
             {
-                int idx = i - j;
-                if (idx < 0) continue;
-
-                double hSlope = idx >= 0 ? highSlope[idx] : 0;
-                double lSlope = idx >= 0 ? lowSlope[idx] : 0;
-                double pHigh = i - j + 1 >= 0 ? high[i - j + 1] : 0;
-                double pLow = i - j + 1 >= 0 ? low[i - j + 1] : 0;
-
-                double vHigh = pHigh + (hSlope * j);
-                double vLow = pLow + (lSlope * j);
-
-                pu = Math.Max(pu, vHigh);
-                pl = Math.Min(pl, vLow);
+                highSlope[i] = regression.Next(highs[i], isFinal: true).Slope;
             }
-
-            // Calculate bandwidth
-            double sum = pu + pl;
-            resultSpan[i] = sum != 0 ? 200 * (pu - pl) / sum : 0;
         }
 
-        highSlopeBuffer.Dispose();
-        lowSlopeBuffer.Dispose();
-        return result;
+        using var lowSlopes = context.Rent(count);
+        var lowSlope = lowSlopes.WritableSpan;
+        using (var regression = new RollingLeastSquares(length))
+        {
+            for (var i = 0; i < count; i++)
+            {
+                lowSlope[i] = regression.Next(lows[i], isFinal: true).Slope;
+            }
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            double pu = highs[i], pl = lows[i];
+            for (var j = 1; j <= length; j++)
+            {
+                var hSlope = i >= j ? highSlope[i - j] : 0;
+                var lSlope = i >= j ? lowSlope[i - j] : 0;
+                var pHigh = i >= j - 1 ? highs[i - (j - 1)] : 0;
+                var pLow = i >= j - 1 ? lows[i - (j - 1)] : 0;
+                pu = Math.Max(pu, pHigh + (hSlope * j));
+                pl = Math.Min(pl, pLow + (lSlope * j));
+            }
+
+            output[i] = pu + pl != 0 ? 200 * (pu - pl) / (pu + pl) : 0;
+        }
+
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
