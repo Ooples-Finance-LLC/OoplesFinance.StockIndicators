@@ -7475,34 +7475,53 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Alligator Jaw using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAlligatorJawFast(StockData data, ComputeContext context, int length = 13)
+    /// <summary>
+    /// Computes one line of the alligator index: a smoothed median price displaced forward by the
+    /// line's own offset.
+    /// </summary>
+    private static ComputeBuffer AlligatorLine(StockData data, ComputeContext context, int length, int offset, MovingAvgType maType)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AlligatorJaw(close, buffer.WritableSpan, length);
+        var (inputList, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
+        var count = inputList.Count;
+
+        using var smoothed = context.Rent(count);
+        MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
+        var line = smoothed.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = i >= offset ? line[i - offset] : 0;
+        }
+
         return buffer;
+    }
+
+    internal static ComputeBuffer ComputeAlligatorJawFast(StockData data, ComputeContext context, int length = 13, int offset = 8,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        // The alligator lines average the median price, not the close, and each is displaced forward by
+        // its own offset before it is published.
+        return AlligatorLine(data, context, length, offset, maType);
     }
 
     /// <summary>
     /// Computes Alligator Teeth using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAlligatorTeethFast(StockData data, ComputeContext context, int length = 8)
+    internal static ComputeBuffer ComputeAlligatorTeethFast(StockData data, ComputeContext context, int length = 8, int offset = 5,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AlligatorTeeth(close, buffer.WritableSpan, length);
-        return buffer;
+        return AlligatorLine(data, context, length, offset, maType);
     }
 
     /// <summary>
     /// Computes Alligator Lips using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAlligatorLipsFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeAlligatorLipsFast(StockData data, ComputeContext context, int length = 5, int offset = 3,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.AlligatorLips(close, buffer.WritableSpan, length);
-        return buffer;
+        return AlligatorLine(data, context, length, offset, maType);
     }
 
     #endregion
@@ -10622,19 +10641,23 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var realBuffer = context.Rent(inputList.Count);
-        var imagBuffer = context.Rent(inputList.Count);
-        try
+        // The bound key is Real: the roofing filter normalised by its own running peak. The imaginary
+        // component is a separate published series and never reaches this one.
+        var count = data.Count;
+
+        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
+        var filter = roofing.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        double peak = 0;
+        for (var i = 0; i < count; i++)
         {
-            OscillatorCore.EhlersClassicHilbertTransformer(inputSpan, realBuffer.WritableSpan, imagBuffer.WritableSpan, length1, length2);
+            peak = Math.Max(0.991 * peak, Math.Abs(filter[i]));
+            output[i] = peak != 0 ? filter[i] / peak : 0;
         }
-        finally
-        {
-            imagBuffer.Dispose(); // Only return real component
-        }
-        return realBuffer;
+
+        return buffer;
     }
 
     /// <summary>
