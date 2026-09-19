@@ -104,7 +104,7 @@ internal static partial class IndicatorCompute
                 stochLength: srsi.StochLength),
             AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
             DpoSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
-            TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length),
+            TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length, trix.MaType),
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.SumLength),
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
             AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length, adx.MaType),
@@ -784,7 +784,8 @@ internal static partial class IndicatorCompute
                 mhlma.Length2, mhlma.MaType),
             VortexMinusSpecOptions vminus => ComputeVortexMinusFast(data, context, vminus.Length),
             VortexPlusSpecOptions vplus => ComputeVortexPlusFast(data, context, vplus.Length),
-            VolumeWeightedMovingAverageSpecOptions vwma27 => ComputeVolumeWeightedMovingAverageFast(data, context, vwma27.Length),
+            VolumeWeightedMovingAverageSpecOptions vwma27 => ComputeVolumeWeightedMovingAverageFast(data, context, vwma27.Length,
+                vwma27.MaType),
             KlingerSignalSpecOptions ksig => ComputeKlingerSignalFast(data, context, ksig.FastLength, ksig.SlowLength, ksig.SignalLength),
             EhlersChebyshevLowPassFilterSpecOptions eclpf => ComputeEhlersChebyshevLowPassFilterFast(data, context, eclpf.Length, eclpf.Ripple),
             EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
@@ -1923,12 +1924,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TRIX indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTrixFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeTrixFast(StockData data, ComputeContext context, int length = 15,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateTrix publishes the percentage change of the triple moving average of the chained series,
+        // and the percentage change is taken against the absolute previous value, so the first bar is zero
+        // rather than a change from nothing. The signal line is a separate series and is not this one.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.Trix(inputSpan, buffer.WritableSpan, length);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var first = context.Rent(count);
+        using var second = context.Rent(count);
+        using var third = context.Rent(count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), first.WritableSpan);
+        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+        MovingAverage(data, maType, length, second.Span, third.WritableSpan);
+        var ema3 = third.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = CalculationsHelper.CalculatePercentChange(ema3[i], i >= 1 ? ema3[i - 1] : 0);
+        }
+
         return buffer;
     }
 
@@ -4280,13 +4300,33 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Keltner Channel Width using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKeltnerChannelWidthFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeKeltnerChannelWidthFast(StockData data, ComputeContext context, int length = 20,
+        double multiplier = 2)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.KeltnerChannelWidth(high, low, close, buffer.WritableSpan, length, 2);
+        // CalculateKeltnerChannelWidth measures the span between the two bands as a percentage of the
+        // exponential average of the chained series that centres them. The bands are that average stepped by a
+        // multiple of the Wilders average true range, so the width is the whole span, not one side of it.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var average = context.Rent(count);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(inputList),
+            average.WritableSpan);
+        var ema = average.Span;
+
+        using var averageTrueRange = ComputeAtrFast(data, context, length, MovingAvgType.WildersSmoothingMethod);
+        var atr = averageTrueRange.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var upper = ema[i] + (multiplier * atr[i]);
+            var lower = ema[i] - (multiplier * atr[i]);
+            output[i] = ema[i] != 0 ? (upper - lower) / ema[i] * 100 : 0;
+        }
+
         return buffer;
     }
 
@@ -9798,12 +9838,41 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes General Filter Estimator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 100,
+        double beta = 5.25, double gamma = 1, double zeta = 1)
     {
+        // CalculateGeneralFilterEstimator runs two nested recursions over a period that is the length divided
+        // by beta: an inner series corrected by how far the chained value has come since that period ago, and
+        // the published series corrected by a blend of that same distance with the inner series' own. Both are
+        // seeded from the current value, not from zero.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.GeneralFilterEstimator(inputSpan, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var p = beta != 0 ? (int)Math.Ceiling(length / beta) : 0;
+
+        using var inner = context.Rent(count);
+        var b = inner.WritableSpan;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            var priorB = i >= p ? b[i - p] : currentValue;
+            var a = currentValue - priorB;
+
+            var prevB = i >= 1 ? b[i - 1] : currentValue;
+            b[i] = prevB + (a / p * gamma);
+
+            var priorD = i >= p ? output[i - p] : b[i];
+            var c = b[i] - priorD;
+
+            var prevD = i >= 1 ? output[i - 1] : currentValue;
+            output[i] = prevD + (((zeta * a) + ((1 - zeta) * c)) / p * gamma);
+        }
+
         return buffer;
     }
 
@@ -11029,13 +11098,34 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Weighted Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        // CalculateVolumeWeightedMovingAverage divides the average of price times volume by the moving average
+        // of volume - two separate averages, not one ratio of windowed sums - and the price average is taken
+        // over the bars seen so far while the volume average is whichever type was asked for.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.VolumeWeightedMovingAverage(inputSpan, volume, buffer.WritableSpan, length);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        using var smoothedVolume = context.Rent(count);
+        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
+        var volumeSma = smoothedVolume.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var volumePriceSum = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            volumePriceSum.Add(input[i] * volumes[i]);
+
+            var volumePriceSma = volumePriceSum.Average(length);
+            output[i] = volumeSma[i] != 0 ? volumePriceSma / volumeSma[i] : 0;
+        }
+
         return buffer;
     }
 
@@ -11959,12 +12049,42 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Recursive Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200, double alpha = 0.1)
+    internal static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200,
+        double alpha = 0.1)
     {
+        // CalculateRecursiveStochastic feeds its own output back in: the raw stochastic of the chained series
+        // is blended with the previous published value, and the published value is where that blend sits in its
+        // own running range. The range is of the blend, not of the price.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.RecursiveStochastic(inputSpan, buffer.WritableSpan, length, alpha);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var priceWindow = new RollingMinMax(length);
+        var blendWindow = new RollingMinMax(length);
+        for (var i = 0; i < count; i++)
+        {
+            var currentValue = input[i];
+            priceWindow.Add(currentValue);
+
+            var highest = priceWindow.Max;
+            var lowest = priceWindow.Min;
+            var stoch = highest - lowest != 0 ? (currentValue - lowest) / (highest - lowest) * 100 : 0;
+            var prevK = i >= 1 ? output[i - 1] : 0;
+
+            var ma = (alpha * stoch) + ((1 - alpha) * prevK);
+            blendWindow.Add(ma);
+
+            var highestMa = blendWindow.Max;
+            var lowestMa = blendWindow.Min;
+            output[i] = highestMa - lowestMa != 0
+                ? MathHelper.MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0)
+                : 0;
+        }
+
         return buffer;
     }
 
@@ -16606,23 +16726,43 @@ internal static partial class IndicatorCompute
     /// Computes Japanese Correlation Coefficient using zero-allocation fast path.
     /// Returns the correlation coefficient.
     /// </summary>
-    internal static ComputeBuffer ComputeJapaneseCorrelationCoefficientFast(StockData data, ComputeContext context, int length = 50, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeJapaneseCorrelationCoefficientFast(StockData data, ComputeContext context, int length = 50,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // CalculateJapaneseCorrelationCoefficient divides how far the smoothed chained series has travelled
+        // over the full length by the range of the smoothed highs and lows. Every smoothing, and both windows,
+        // run at half the length, which is the only place the length appears other than that lookback.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+        length = Math.Max(length, 1);
 
-        switch (maType)
+        var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
+
+        using var smoothedHigh = context.Rent(count);
+        using var smoothedLow = context.Rent(count);
+        using var smoothedInput = context.Rent(count);
+        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(data.HighPrices), smoothedHigh.WritableSpan);
+        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(data.LowPrices), smoothedLow.WritableSpan);
+        MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(inputList), smoothedInput.WritableSpan);
+        var h = smoothedHigh.Span;
+        var l = smoothedLow.Span;
+        var c = smoothedInput.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        var highWindow = new RollingMinMax(length1);
+        var lowWindow = new RollingMinMax(length1);
+        for (var i = 0; i < count; i++)
         {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
+            highWindow.Add(h[i]);
+            lowWindow.Add(l[i]);
+
+            var highest = highWindow.Max;
+            var lowest = lowWindow.Min;
+            var cChg = c[i] - (i >= length ? c[i - length] : 0);
+
+            output[i] = highest - lowest != 0 ? cChg / (highest - lowest) : 0;
         }
 
         return buffer;
