@@ -90,7 +90,15 @@ only QuanTAlib has a real incremental arm. That is a genuine shipped-feature dif
 control fixture names the reason: our `%K` is the raw fast %K, theirs is a %K smoothed over three bars. The
 other six indicators agree to within 1.4e-11.
 
-**Most of our reported allocation is not indicator work.** Every competitor gets its input pre-built in a
+**There are two Ooples v2 arms, and the difference between them is the adapter.** `Ooples v2 builder` is
+handed a `StockData`, which copies every column into a `List<double>`. `Ooples v2 columns` is handed the
+arrays through `IndicatorDataSource.FromColumns`, the same pre-built input every competitor receives from the
+`GlobalSetup`. At 10,000 bars `--alloc` puts the first at 1,049,184 B and the second at 8,536 B - and the
+second is 8,536 B at 1,000 bars too, because nothing left in that path grows with the history. TA-Lib's
+80,056 B is the one output array its caller has to allocate; its benchmark row reads 32 B only because that
+array is reused from a `GlobalSetup`.
+
+**Most of the remaining v2-builder allocation is not indicator work.** Every competitor gets its input pre-built in a
 `GlobalSetup`, but the v1 and v2 arms must build a fresh `StockData` inside the measured method, because the
 batch API writes results back into the instance it is handed. `--alloc` splits it: at 10,000 bars the v2 EMA
 arm allocates 1,208,528 B, of which `NewStockData()` is 961,168 B. The adapter is charged to this library and
