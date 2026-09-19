@@ -394,7 +394,7 @@ internal static partial class IndicatorCompute
             SmoothedWilliamsRSpecOptions swillr => ComputeSmoothedWilliamsRFast(data, context, swillr.Length, swillr.SmoothLength),
             PriceOscillatorPercentSpecOptions pop => ComputePriceOscillatorPercentFast(data, context, pop.ShortLength, pop.LongLength),
             NormalizedMacdSpecOptions nmacd => ComputeNormalizedMacdFast(data, context, nmacd.FastLength, nmacd.SlowLength),
-            RelativeVigorIndexSignalSpecOptions rvis => ComputeRelativeVigorIndexSignalFast(data, context, rvis.Length, rvis.SignalLength),
+            RelativeVigorIndexSignalSpecOptions rvis => ComputeRelativeVigorIndexSignalFast(data, context, rvis.Length),
             VolumeMomentumOscillatorSpecOptions vmo => ComputeVolumeMomentumOscillatorFast(data, context, vmo.ShortLength, vmo.LongLength),
             TrendContinuationFactorSpecOptions tcf => spec.OutputKey switch
             {
@@ -898,7 +898,7 @@ internal static partial class IndicatorCompute
             WilliamsAccumulationDistributionSpecOptions _ => ComputeWilliamsAccumulationDistributionFast(data, context),
             TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2,
                 tpi.MaType),
-            TurboTriggerSpecOptions tt => ComputeTurboTriggerFast(data, context, tt.Length, tt.PctMultiplier),
+            TurboTriggerSpecOptions tt => ComputeTurboTriggerFast(data, context, tt.Length, maType: tt.MaType),
             TurboScalerSpecOptions ts => ComputeTurboScalerFast(data, context, ts.Length, ts.MaType),
             TTMScalperIndicatorSpecOptions _ => ComputeTTMScalperIndicatorFast(data, context),
             StrengthOfMovementSpecOptions som => ComputeStrengthOfMovementFast(data, context, som.Length1, som.Length2, som.MaType),
@@ -1004,7 +1004,7 @@ internal static partial class IndicatorCompute
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
             PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
-            RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length),
+            RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length, rvi2.MaType),
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length, tma2.MaType),
             TrueStrengthIndexSpecOptions tsi2 => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2,
                 tsi2.MaType),
@@ -3035,23 +3035,53 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Relative Vigor Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10)
+    internal static ComputeBuffer ComputeRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var open = new double[count];
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
+        // CalculateRelativeVigorIndex measures how far each bar closed above its open against how far it
+        // ranged, weighting the current bar and the three before it 1-2-2-1, then divides the smoothed
+        // numerator by the smoothed denominator. OscillatorCore.RelativeVigorIndex read the raw ticker rows
+        // instead of the chained series and took no average type at all.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var close = SpanCompat.AsReadOnlySpan(inputList);
+        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = inputList.Count;
+
+        using var numerators = context.Rent(count);
+        using var denominators = context.Rent(count);
+        var numerator = numerators.WritableSpan;
+        var denominator = denominators.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            open[i] = (double)tickerList[i].Open;
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
+            // Bars before the fourth have no history to weight, so those terms read as zero.
+            var a = close[i] - opens[i];
+            var b = i >= 1 ? close[i - 1] - opens[i - 1] : 0;
+            var c = i >= 2 ? close[i - 2] - opens[i - 2] : 0;
+            var d = i >= 3 ? close[i - 3] - opens[i - 3] : 0;
+            var e = highs[i] - lows[i];
+            var f = i >= 1 ? highs[i - 1] - opens[i - 1] : 0;
+            var g = i >= 2 ? highs[i - 2] - opens[i - 2] : 0;
+            var h = i >= 3 ? highs[i - 3] - opens[i - 3] : 0;
+
+            numerator[i] = (a + (2 * b) + (2 * c) + d) / 6;
+            denominator[i] = (e + (2 * f) + (2 * g) + h) / 6;
         }
+
+        using var numeratorAverage = context.Rent(count);
+        using var denominatorAverage = context.Rent(count);
+        MovingAverage(data, maType, length, numerators.Span, numeratorAverage.WritableSpan);
+        MovingAverage(data, maType, length, denominators.Span, denominatorAverage.WritableSpan);
+
         var buffer = context.Rent(count);
-        OscillatorCore.RelativeVigorIndex(open, high, low, close, buffer.WritableSpan, length);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var smoothedDenominator = denominatorAverage.Span[i];
+            output[i] = smoothedDenominator != 0 ? numeratorAverage.Span[i] / smoothedDenominator : 0;
+        }
+
         return buffer;
     }
 
@@ -6773,14 +6803,28 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeRelativeVigorIndexSignalFast(StockData data, ComputeContext context, int length = 10, int signalLength = 4)
+    internal static ComputeBuffer ComputeRelativeVigorIndexSignalFast(StockData data, ComputeContext context, int length = 10,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RelativeVigorIndexSignal(open, high, low, close, buffer.WritableSpan, length, signalLength);
+        // The signal line CalculateRelativeVigorIndex publishes is the same 1-2-2-1 weighting applied to the
+        // index itself, not a second moving average, so the spec's signal length has nothing to set - which is
+        // why it carries [Obsolete] - and the arm no longer takes one.
+        var count = data.Count;
+
+        using var index = ComputeRelativeVigorIndexFast(data, context, length, maType);
+        var rvi = index.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var k = i >= 1 ? rvi[i - 1] : 0;
+            var l = i >= 2 ? rvi[i - 2] : 0;
+            var m = i >= 3 ? rvi[i - 3] : 0;
+
+            output[i] = (rvi[i] + (2 * k) + (2 * l) + m) / 6;
+        }
+
         return buffer;
     }
 
@@ -15628,11 +15672,43 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes TurboTrigger using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, double pctMultiplier = 1.0)
+    internal static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, int smoothLength = 2,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TurboTrigger(close, buffer.WritableSpan, length, pctMultiplier);
+        // CalculateTurboTrigger smooths the open, high and close, centres a long average on the midpoint of
+        // the smoothed open and close, and publishes the long average of how far the smoothed high sits above
+        // that centre as its "BullLine". The smoothed low only reaches the trigger line, which is a different
+        // series. OscillatorCore.TurboTrigger read the close alone and scaled it by a percentage.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = inputList.Count;
+
+        using var smoothedClose = context.Rent(count);
+        using var smoothedOpen = context.Rent(count);
+        using var smoothedHigh = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(inputList), smoothedClose.WritableSpan);
+        MovingAverage(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(data.OpenPrices), smoothedOpen.WritableSpan);
+        MovingAverage(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(data.HighPrices), smoothedHigh.WritableSpan);
+
+        using var midpoints = context.Rent(count);
+        var midpoint = midpoints.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            midpoint[i] = (smoothedClose.Span[i] + smoothedOpen.Span[i]) / 2;
+        }
+
+        using var centre = context.Rent(count);
+        MovingAverage(data, maType, length, midpoints.Span, centre.WritableSpan);
+
+        using var aboveCentre = context.Rent(count);
+        var above = aboveCentre.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            above[i] = smoothedHigh.Span[i] - centre.Span[i];
+        }
+
+        var buffer = context.Rent(count);
+        MovingAverage(data, maType, length, aboveCentre.Span, buffer.WritableSpan);
+
         return buffer;
     }
 
