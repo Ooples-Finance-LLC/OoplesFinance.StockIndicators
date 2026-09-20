@@ -52,8 +52,8 @@ internal static class IndicatorContract
 
         var state = indicator switch
         {
-            Indicator single => single.CreateState(),
-            MultiOutputIndicator multi => multi.CreateState(),
+            IndicatorBase single => single.CreateState(),
+            MultiOutputIndicatorBase multi => multi.CreateState(),
             _ => null
         };
 
@@ -83,7 +83,7 @@ internal static class IndicatorContract
 /// constructor, the category interface from the indicator's <c>[Category]</c> attribute, and the batch
 /// indicator and options from <c>BuilderArmTargets</c>.
 /// </remarks>
-public sealed class Sma : Indicator, IMovingAverage, ITrendIndicator, IBuiltInIndicator, IBuiltInMovingAverage
+public sealed class Sma : IndicatorBase, IMovingAverage, ITrendIndicator, IBuiltInIndicator, IBuiltInMovingAverage
 {
     /// <summary>Creates a simple moving average.</summary>
     public Sma(int length = 14) => Length = length;
@@ -104,7 +104,7 @@ public sealed class Sma : Indicator, IMovingAverage, ITrendIndicator, IBuiltInIn
 }
 
 /// <summary>Exponential moving average.</summary>
-public sealed class Ema : Indicator, IMovingAverage, ITrendIndicator, IBuiltInIndicator, IBuiltInMovingAverage
+public sealed class Ema : IndicatorBase, IMovingAverage, ITrendIndicator, IBuiltInIndicator, IBuiltInMovingAverage
 {
     /// <summary>Creates an exponential moving average.</summary>
     public Ema(int length = 14) => Length = length;
@@ -130,7 +130,7 @@ public sealed class Ema : Indicator, IMovingAverage, ITrendIndicator, IBuiltInIn
 /// <see cref="IMovingAverage"/> rather than a <see cref="MovingAvgType"/>, so a caller's own average drops in
 /// and a non-average does not compile.
 /// </remarks>
-public sealed class BollingerBands : MultiOutputIndicator, IVolatilityIndicator, IBuiltInIndicator
+public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndicator, IBuiltInIndicator
 {
     private readonly IMovingAverage _average;
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,7 +7,11 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-  </PropertyGroup>
+      <!-- This project exists to exercise the library, including the parts of it that are deprecated: the v1
+         Calculate* surface and the catalog lambda are both [Obsolete] and both deliberately under test here.
+         Without this the build reports nearly 2000 CS0618 warnings and a genuine one cannot be seen. It is
+         scoped to the test project on purpose - src must still report its own. -->
+    <NoWarn>$(NoWarn);CS0618</NoWarn></PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="TestData\MovingAvg\**" />

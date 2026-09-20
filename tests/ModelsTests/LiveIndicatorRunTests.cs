@@ -13,7 +13,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 /// </remarks>
 public sealed class LiveIndicatorRunTests
 {
-    private sealed class Doubled : Indicator
+    private sealed class Doubled : IndicatorBase
     {
         protected internal override object CreateState() => new State();
 

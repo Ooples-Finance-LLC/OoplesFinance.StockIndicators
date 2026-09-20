@@ -454,7 +454,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
             var memberNames = outputKeys.Select(Identifier).ToList();
 
-            // A key matching the type name cannot be a member of it. MultiOutputIndicator does not declare
+            // A key matching the type name cannot be a member of it. MultiOutputIndicatorBase does not declare
             // Value, so the indicator's own series takes that name and its siblings keep theirs - 30 types
             // would otherwise lose every typed member over one word, Macd among them.
             for (var i = 0; i < memberNames.Count; i++)
@@ -487,7 +487,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             }
 
             var isMulti = outputKeys.Count > 1;
-            var baseType = isMulti ? "MultiOutputIndicator" : "Indicator";
+            var baseType = isMulti ? "MultiOutputIndicatorBase" : "IndicatorBase";
 
             builder.AppendLine();
             builder.AppendLine("/// <summary>" + Escape(typeName) + ".</summary>");

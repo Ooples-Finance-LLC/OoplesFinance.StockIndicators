@@ -220,7 +220,7 @@ public sealed class GeneratedIndicatorTests
         // indicator cannot mean anything before 26.
         TryConstruct(Find("Macd"))!.WarmupBars.Should().Be(26);
     }
-    private sealed class MyOwnAverage : Indicator, IMovingAverage
+    private sealed class MyOwnAverage : IndicatorBase, IMovingAverage
     {
         protected internal override object CreateState() => new State();
 

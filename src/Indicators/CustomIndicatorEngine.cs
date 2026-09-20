@@ -73,8 +73,8 @@ internal sealed class CustomIndicatorEngine
 
         var state = indicator switch
         {
-            Indicator single => single.CreateState(),
-            MultiOutputIndicator multi => multi.CreateState(),
+            IndicatorBase single => single.CreateState(),
+            MultiOutputIndicatorBase multi => multi.CreateState(),
             _ => null
         };
 

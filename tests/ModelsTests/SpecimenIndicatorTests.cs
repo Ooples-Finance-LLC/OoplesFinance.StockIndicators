@@ -14,7 +14,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class SpecimenIndicatorTests
 {
     /// <summary>A caller's own average: implements the interface, has no MovingAvgType.</summary>
-    private sealed class MyOwnAverage : Indicator, IMovingAverage
+    private sealed class MyOwnAverage : IndicatorBase, IMovingAverage
     {
         public MyOwnAverage(int length) => Length = length;
 
@@ -32,7 +32,7 @@ public sealed class SpecimenIndicatorTests
         }
     }
 
-    private sealed class NoArithmetic : Indicator
+    private sealed class NoArithmetic : IndicatorBase
     {
     }
 
@@ -118,7 +118,7 @@ public sealed class SpecimenIndicatorTests
             .WithMessage("*does not match the number of series it publishes*");
     }
 
-    private sealed class WrongStateKind : MultiOutputIndicator
+    private sealed class WrongStateKind : MultiOutputIndicatorBase
     {
         public WrongStateKind() : base(2) => (First, Second) = DeclaredOutputs;
 

@@ -16,7 +16,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 /// </remarks>
 public sealed class IndicatorVocabularyTests
 {
-    private sealed class Single : Indicator
+    private sealed class Single : IndicatorBase
     {
         public Single(int warmup = 0) => WarmupOverride = warmup;
 
@@ -34,7 +34,7 @@ public sealed class IndicatorVocabularyTests
         }
     }
 
-    private sealed class Bands : MultiOutputIndicator
+    private sealed class Bands : MultiOutputIndicatorBase
     {
         public Bands() : base(3) => (Upper, Middle, Lower) = DeclaredOutputs;
 
@@ -59,7 +59,7 @@ public sealed class IndicatorVocabularyTests
         }
     }
 
-    private sealed class MiscountedBands : MultiOutputIndicator
+    private sealed class MiscountedBands : MultiOutputIndicatorBase
     {
         // Declares three, assigns two. The mismatch is the point.
         public MiscountedBands() : base(3) => (First, Second) = DeclaredOutputs;
@@ -122,10 +122,10 @@ public sealed class IndicatorVocabularyTests
 
         act.Should().NotThrow("three is a valid count");
         FluentActions.Invoking(() => new OneOutput()).Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*derive from Indicator for one*");
+            .WithMessage("*derive from IndicatorBase for one*");
     }
 
-    private sealed class OneOutput : MultiOutputIndicator
+    private sealed class OneOutput : MultiOutputIndicatorBase
     {
         public OneOutput() : base(1) { }
 

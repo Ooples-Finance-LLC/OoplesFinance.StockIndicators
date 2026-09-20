@@ -306,8 +306,8 @@ public sealed class StockIndicatorBuilder
 
             var own = indicator switch
             {
-                Indicators.Indicator single => single.CreateState(),
-                Indicators.MultiOutputIndicator multi => multi.CreateState(),
+                Indicators.IndicatorBase single => single.CreateState(),
+                Indicators.MultiOutputIndicatorBase multi => multi.CreateState(),
                 _ => null
             };
 
@@ -387,8 +387,15 @@ public sealed class StockIndicatorBuilder
     }
 
     /// <summary>
-    /// Configures indicators.
+    /// Configures indicators through the catalog lambda.
     /// </summary>
+    /// <remarks>
+    /// Superseded by the overloads taking indicator objects, where chaining is <c>new Sma(9).Of(rsi)</c>
+    /// rather than a captured <see cref="SeriesHandle"/>, and a result is addressed by the object the caller
+    /// configured rather than by a handle they had to remember to keep.
+    /// </remarks>
+    [Obsolete("Pass indicator objects instead: ConfigureIndicators(new Rsi(14), new Sma(9).Of(rsi)). "
+        + "This overload will be removed after v2 ships.")]
     public StockIndicatorBuilder ConfigureIndicators(IndicatorOptions? options = null, Action<IndicatorCatalog>? configure = null)
     {
         _indicatorOptions = options ?? new IndicatorOptions();
@@ -401,9 +408,13 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Configures indicators with a callback.
     /// </summary>
+    [Obsolete("Pass indicator objects instead: ConfigureIndicators(new Rsi(14), new Sma(9).Of(rsi)). "
+        + "This overload will be removed after v2 ships.")]
     public StockIndicatorBuilder ConfigureIndicators(Action<IndicatorCatalog> configure)
     {
+#pragma warning disable CS0618 // The pair is deprecated together; one calling the other is not a new use.
         return ConfigureIndicators(null, configure);
+#pragma warning restore CS0618
     }
 
     /// <summary>

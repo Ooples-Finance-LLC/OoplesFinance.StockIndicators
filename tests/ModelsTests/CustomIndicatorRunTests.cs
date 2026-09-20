@@ -16,7 +16,7 @@ public sealed class CustomIndicatorRunTests
     private const int BarCount = 120;
 
     /// <summary>Gap percent: how far this bar opened from the last one's close.</summary>
-    private sealed class GapPercent : Indicator
+    private sealed class GapPercent : IndicatorBase
     {
         protected internal override object CreateState() => new State();
 
@@ -36,7 +36,7 @@ public sealed class CustomIndicatorRunTests
     }
 
     /// <summary>Doubles whatever it is reading, so a chained value is obvious in the output.</summary>
-    private sealed class Doubled : Indicator
+    private sealed class Doubled : IndicatorBase
     {
         protected internal override object CreateState() => new State();
 
@@ -49,7 +49,7 @@ public sealed class CustomIndicatorRunTests
     }
 
     /// <summary>The distance from a component average, which proves components arrive computed.</summary>
-    private sealed class DistanceFromAverage : Indicator
+    private sealed class DistanceFromAverage : IndicatorBase
     {
         public DistanceFromAverage(IMovingAverage average) => Uses(average);
 
@@ -63,7 +63,7 @@ public sealed class CustomIndicatorRunTests
         }
     }
 
-    private sealed class HighAndLow : MultiOutputIndicator
+    private sealed class HighAndLow : MultiOutputIndicatorBase
     {
         public HighAndLow() : base(2) => (Top, Bottom) = DeclaredOutputs;
 
