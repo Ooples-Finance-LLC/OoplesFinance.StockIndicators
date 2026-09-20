@@ -50,6 +50,63 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         "EhlersNoiseEliminationTechnology",
     };
 
+    // Indicators whose output needs more than `length` bars to mean anything, written as an expression in
+    // $, the longest length the indicator declares.
+    // Keys are IndicatorName members, not type names: a key naming no indicator is a silent no-op, and
+    // WarmupBarsCoversTheWarmup is what catches the gap it leaves.
+    //
+    // The three exact rules are compositions of finite windows, so they are arithmetic, not estimates: a
+    // triangular average is an average of an average, a Farey-weighted average spans the same two windows,
+    // and a Hull average runs a length window and then a sqrt(length) one over it.
+    //
+    // The rest are recursions, which only approach their input. Each multiple is the bar the filter first
+    // stays within 1e-6 of a constant series over 4000 bars, divided by the length it declares and rounded
+    // up - measured at default parameters. That is the bar a step input settles by, not a promise for every
+    // series: the adaptive ones (Ama, the Kaufman and deviation-scaled filters) slow down or speed up with
+    // the data, which is why their multiples are the large ones.
+    private static readonly Dictionary<string, string> WarmupRule = new(StringComparer.Ordinal)
+    {
+        // Exact.
+        ["TriangularMovingAverage"] = "(2 * $) - 2",
+        ["FareySequenceWeightedMovingAverage"] = "(2 * $) - 1",
+        ["HullMovingAverage"] = "$ + (int)System.Math.Ceiling(System.Math.Sqrt($))",
+
+        // Measured. 1763 / 20 = 88.2, 988 / 14 = 70.6, 784 / 20 = 39.2, and so on down.
+        ["EhlersDeviationScaledMovingAverage"] = "$ * 89",
+        ["AdaptiveMovingAverage"] = "$ * 71",
+        ["EhlersKaufmanAdaptiveMovingAverage"] = "$ * 40",
+        ["HoltExponentialMovingAverage"] = "$ * 20",
+        ["AhrensMovingAverage"] = "$ * 17",
+        ["ZeroLowLagMovingAverage"] = "$ * 15",
+        ["RecursiveMovingTrendAverage"] = "$ * 11",
+        ["ElasticVolumeWeightedMovingAverageV1"] = "$ * 10",
+        ["WellRoundedMovingAverage"] = "$ * 10",
+        ["IIRLeastSquaresEstimate"] = "$ * 9",
+        ["EhlersInfiniteImpulseResponseFilter"] = "$ * 9",
+        ["HampelFilter"] = "$ * 9",
+        ["RegularizedExponentialMovingAverage"] = "$ * 9",
+        ["EhlersMedianAverageAdaptiveFilter"] = "$ * 8",
+        ["EhlersRecursiveMedianFilter"] = "$ * 7",
+        ["Ehlers3PoleButterworthFilterV1"] = "$ * 6",
+        ["EhlersSimpleDecycler"] = "$ * 5",
+        ["FallingRisingFilter"] = "$ * 5",
+        ["JurikMovingAverage"] = "$ * 5",
+        ["Ehlers2PoleButterworthFilterV1"] = "$ * 4",
+        ["Ehlers2PoleSuperSmootherFilterV2"] = "$ * 4",
+        ["EhlersSuperSmootherFilter"] = "$ * 4",
+        ["EhlersBetterExponentialMovingAverage"] = "$ * 4",
+        ["BryantAdaptiveMovingAverage"] = "$ * 4",
+        ["RepulsionMovingAverage"] = "$ * 3",
+        ["HybridConvolutionFilter"] = "$ * 3",
+        ["LinearExtrapolation"] = "$ * 2",
+        ["ParametricCorrectiveLinearMovingAverage"] = "$ * 2",
+        ["EhlersAllPassPhaseShifter"] = "$ * 2",
+        ["VolatilityWaveMovingAverage"] = "$ * 2",
+        ["EhlersGaussianFilter"] = "$ * 2",
+        ["CompoundRatioMovingAverage"] = "$ * 2",
+        ["VolatilityMovingAverage"] = "$ * 2",
+    };
+
     private static readonly HashSet<string> HandWritten = new(StringComparer.Ordinal)
     {
         "Sma", "Ema", "BollingerBands"
@@ -628,6 +685,14 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 for (var i = 1; i < lengthParameters.Count; i++)
                 {
                     warmup = "System.Math.Max(" + warmup + ", " + Capitalise(lengthParameters[i].Name) + ")";
+                }
+
+                // A filter whose output feeds back into itself does not reach its input in `length` bars.
+                // WarmupBars is what a caller discards and what the builder pulls as history for a live
+                // source, so an understated one publishes numbers before they mean anything.
+                if (WarmupRule.TryGetValue(target.IndicatorName, out var rule))
+                {
+                    warmup = rule.Replace("$", warmup);
                 }
 
                 builder.AppendLine("    public override int WarmupBars => " + warmup + ";");

@@ -145,15 +145,20 @@ public sealed class GeneratedIndicatorTests
         // the mechanism and these prove it picked the right numbers.
         Construct<IIndicator>("Rsi").Should().NotBeNull();
 
-        var rsi = TryConstruct(Find("Rsi"))!;
-        rsi.WarmupBars.Should().Be(14, "CalculateRelativeStrengthIndex defaults length to 14");
+        // The length itself, not WarmupBars standing in for it. They are equal for most indicators, which
+        // made WarmupBars look like a reading of the default - but a filter that needs more than its length
+        // to settle declares more, and then this test was asserting the wrong contract.
+        LengthOf(TryConstruct(Find("Rsi"))!).Should().Be(14, "CalculateRelativeStrengthIndex defaults length to 14");
+        LengthOf(TryConstruct(Find("Cci"))!).Should().Be(20, "CalculateCommodityChannelIndex defaults length to 20");
+        LengthOf(TryConstruct(Find("Hma"))!).Should().Be(20, "CalculateHullMovingAverage defaults length to 20");
 
-        var cci = TryConstruct(Find("Cci"))!;
-        cci.WarmupBars.Should().Be(20, "CalculateCommodityChannelIndex defaults length to 20");
-
-        var hma = TryConstruct(Find("Hma"))!;
-        hma.WarmupBars.Should().Be(20, "CalculateHullMovingAverage defaults length to 20");
+        TryConstruct(Find("Rsi"))!.WarmupBars.Should().Be(14, "a 14 bar RSI means something after 14 bars");
+        TryConstruct(Find("Hma"))!.WarmupBars.Should().Be(25,
+            "a Hull average runs a length window and then a sqrt(length) one over it, so 20 + ceil(sqrt(20))");
     }
+
+    private static int LengthOf(IIndicator indicator) =>
+        (int)indicator.GetType().GetProperty("Length")!.GetValue(indicator)!;
 
     [Fact]
     public void MacdPublishesItsThreeSeriesAsTypedMembers()
