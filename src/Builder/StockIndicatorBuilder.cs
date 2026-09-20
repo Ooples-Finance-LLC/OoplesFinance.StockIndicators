@@ -10,7 +10,9 @@ namespace OoplesFinance.StockIndicators.Builder;
 /// </summary>
 public sealed class StockIndicatorBuilder
 {
-    private readonly IndicatorDataSource _source;
+    private IndicatorDataSource? _configuredSource;
+    private Indicators.IBarSource? _barSource;
+    private readonly List<Indicators.IIndicator> _configuredIndicators = new();
     private readonly Dictionary<SeriesHandle, SeriesNode> _nodes;
     private readonly Dictionary<IndicatorNodeKey, SeriesHandle> _indicatorNodes;
     private readonly Dictionary<IndicatorKey, SeriesHandle> _keys;
@@ -37,9 +39,23 @@ public sealed class StockIndicatorBuilder
     /// Creates a new stock indicator builder.
     /// </summary>
     /// <param name="source">The data source to use.</param>
-    public StockIndicatorBuilder(IndicatorDataSource source)
+    public StockIndicatorBuilder()
+        : this(null, deferred: true)
     {
-        _source = source ?? throw new ArgumentNullException(nameof(source));
+    }
+
+    /// <summary>Creates a builder over a data source.</summary>
+    /// <param name="source">The data source to use.</param>
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    public StockIndicatorBuilder(IndicatorDataSource source)
+        : this(source ?? throw new ArgumentNullException(nameof(source)), deferred: false)
+    {
+    }
+
+    private StockIndicatorBuilder(IndicatorDataSource? source, bool deferred = true)
+    {
+        _ = deferred;
+        _configuredSource = source;
         _nodes = new Dictionary<SeriesHandle, SeriesNode>();
         _indicatorNodes = new Dictionary<IndicatorNodeKey, SeriesHandle>();
         _keys = new Dictionary<IndicatorKey, SeriesHandle>();
@@ -85,7 +101,149 @@ public sealed class StockIndicatorBuilder
     /// <summary>
     /// Gets the primary data source.
     /// </summary>
-    internal IndicatorDataSource PrimarySource => _source;
+    /// <summary>
+    /// Reads the bars from <paramref name="source"/> when the run is built.
+    /// </summary>
+    /// <remarks>
+    /// Finite or live is the source''s business, not the builder''s. That is the whole point: the two
+    /// programs differ by which source is handed over and by nothing else.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    public StockIndicatorBuilder ConfigureSource(Indicators.IBarSource source)
+    {
+        _barSource = source ?? throw new ArgumentNullException(nameof(source));
+        return this;
+    }
+
+    /// <summary>
+    /// The indicators to compute, as objects rather than names.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when indicators, or any of them, is null.</exception>
+    public StockIndicatorBuilder ConfigureIndicators(params Indicators.IIndicator[] indicators)
+    {
+        if (indicators is null) throw new ArgumentNullException(nameof(indicators));
+
+        foreach (var indicator in indicators)
+        {
+            if (indicator is null)
+            {
+                throw new ArgumentNullException(nameof(indicators), "An indicator cannot be null.");
+            }
+
+            _configuredIndicators.Add(indicator);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// The indicators to compute, from any sequence.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when indicators is null.</exception>
+    public StockIndicatorBuilder ConfigureIndicators(IEnumerable<Indicators.IIndicator> indicators)
+    {
+        if (indicators is null) throw new ArgumentNullException(nameof(indicators));
+        return ConfigureIndicators([.. indicators]);
+    }
+
+    /// <summary>
+    /// Reads the source and computes every configured indicator.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Backed by the existing evaluator: each indicator becomes the specification its batch calculation
+    /// already understands, so the values are the ones the v1 surface has always produced. A new API that
+    /// returns different numbers is not a new API.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
+    public async Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
+    {
+        var source = _barSource ?? throw new InvalidOperationException(
+            "No bar source. Call ConfigureSource before BuildAsync.");
+
+        var opens = new List<double>();
+        var highs = new List<double>();
+        var lows = new List<double>();
+        var closes = new List<double>();
+        var volumes = new List<double>();
+        var dates = new List<DateTime>();
+
+        await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            opens.Add(bar.Open);
+            highs.Add(bar.High);
+            lows.Add(bar.Low);
+            closes.Add(bar.Close);
+            volumes.Add(bar.Volume);
+            dates.Add(bar.Time);
+        }
+
+        _configuredSource = IndicatorDataSource.FromBatch(
+            new StockData(opens, highs, lows, closes, volumes, dates));
+
+        var handles = new Dictionary<Indicators.IIndicatorOutput, SeriesHandle>();
+        foreach (var indicator in _configuredIndicators)
+        {
+            Indicators.IndicatorContract.RequireComputable(indicator);
+
+            if (indicator is not Indicators.IBuiltInIndicator builtIn)
+            {
+                // A caller's own indicator needs the state engine, which is the next piece of work. Saying so
+                // beats computing something else and calling it theirs.
+                throw new NotSupportedException(
+                    indicator.GetType().Name + " supplies its own arithmetic, which this run cannot drive yet.");
+            }
+
+            var series = _indicators.Price();
+            var seriesKey = ResolveSeriesKey(series);
+
+            for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+            {
+                var outputKey = indicator.Outputs.Count > 1
+                    ? OutputKeyFor(indicator, slot)
+                    : builtIn.BatchOutputKey;
+
+                var spec = outputKey is null
+                    ? IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions())
+                    : IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), outputKey);
+                handles[indicator.Outputs[slot]] = AddIndicator(spec, series, seriesKey, null);
+            }
+        }
+
+        var runtime = Build();
+        runtime.Start();
+
+        var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+        foreach (var pair in handles)
+        {
+            series2[pair.Key] = runtime.GetSeries(pair.Value).AsSpan().ToArray();
+        }
+
+        return new Indicators.IndicatorRun(runtime, series2, closes.Count);
+    }
+
+    /// <summary>The published key a multi-output indicator''s slot stands for.</summary>
+    private static string? OutputKeyFor(Indicators.IIndicator indicator, int slot) =>
+        GeneratedIndicatorOutputs.KeysFor(((Indicators.IBuiltInIndicator)indicator).BatchName) is { } keys
+        && slot < keys.Count
+            ? keys[slot]
+            : null;
+
+    internal IndicatorDataSource PrimarySource => Source;
+
+    /// <summary>
+    /// The data source, once one has been configured.
+    /// </summary>
+    /// <remarks>
+    /// Deferred rather than a constructor argument, because ConfigureSource takes an IBarSource whose bars
+    /// have to be read before a StockData exists to hand over. Asking for it too early is a mistake worth
+    /// naming rather than a null reference somewhere downstream.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown when no source has been configured.</exception>
+    private IndicatorDataSource Source =>
+        _configuredSource ?? throw new InvalidOperationException(
+            "No data source. Pass one to the constructor, or call ConfigureSource before building.");
 
     /// <summary>
     /// Configures the symbols to use.
@@ -205,7 +363,7 @@ public sealed class StockIndicatorBuilder
         var streamingOptions = ResolveStreamingOptions(symbols, timeframe);
 
         return new IndicatorRuntime(
-            _source,
+            Source,
             new Dictionary<SeriesHandle, SeriesNode>(_nodes),
             new Dictionary<IndicatorKey, SeriesHandle>(_keys),
             _signals.Build(),
@@ -240,12 +398,12 @@ public sealed class StockIndicatorBuilder
     /// <exception cref="InvalidOperationException">If the data source is not batch mode.</exception>
     public BacktestResults Backtest(Action<BacktestOptions>? configure)
     {
-        if (_source.Kind != IndicatorSourceKind.Batch)
+        if (Source.Kind != IndicatorSourceKind.Batch)
         {
             throw new InvalidOperationException("Backtesting requires batch data. Use IndicatorDataSource.FromBatch().");
         }
 
-        var data = _source.BatchData ?? throw new InvalidOperationException("Batch data is missing.");
+        var data = Source.BatchData ?? throw new InvalidOperationException("Batch data is missing.");
 
         // Apply additional configuration if provided
         _backtestOptions ??= new BacktestOptions();
@@ -435,7 +593,7 @@ public sealed class StockIndicatorBuilder
             return symbols;
         }
 
-        if (_source.ProviderDefaults != null && _source.ProviderDefaults.TryGetDefaultSymbols(out var defaults)
+        if (Source.ProviderDefaults != null && Source.ProviderDefaults.TryGetDefaultSymbols(out var defaults)
             && defaults.Count > 0)
         {
             _resolvedSymbols = defaults;
@@ -465,7 +623,7 @@ public sealed class StockIndicatorBuilder
             return _resolvedTimeframe;
         }
 
-        if (_source.ProviderDefaults != null && _source.ProviderDefaults.TryGetDefaultTimeframe(out var providerTimeframe))
+        if (Source.ProviderDefaults != null && Source.ProviderDefaults.TryGetDefaultTimeframe(out var providerTimeframe))
         {
             _resolvedTimeframe = providerTimeframe;
             return providerTimeframe;
@@ -552,7 +710,7 @@ public sealed class StockIndicatorBuilder
 
     private StreamingOptions? ResolveStreamingOptions(IReadOnlyList<SymbolId> symbols, BarTimeframe timeframe)
     {
-        if (_source.Kind != IndicatorSourceKind.Streaming)
+        if (Source.Kind != IndicatorSourceKind.Streaming)
         {
             return null;
         }
@@ -565,9 +723,9 @@ public sealed class StockIndicatorBuilder
             return custom;
         }
 
-        if (_source.ProviderDefaults != null)
+        if (Source.ProviderDefaults != null)
         {
-            var providerOptions = _source.ProviderDefaults.CreateStreamingOptions(symbols, timeframe);
+            var providerOptions = Source.ProviderDefaults.CreateStreamingOptions(symbols, timeframe);
             if (providerOptions != null)
             {
                 providerOptions.Symbols ??= ToSymbolStrings(symbols);
