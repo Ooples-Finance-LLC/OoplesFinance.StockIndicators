@@ -309,6 +309,70 @@ public sealed class GeneratedIndicatorTests
         checkedTypes.Should().BeGreaterThan(200, "the sweep has to actually reach the component types");
         wrong.Should().BeEmpty("a supplied average must join the graph, or it is silently ignored");
     }
+    [Fact]
+    public void EveryMultiOutputTypeHasAnOutputEnumThatAgreesWithItsTypedMembers()
+    {
+        var wrong = new List<string>();
+        var checkedTypes = 0;
+
+        foreach (var type in GeneratedIndicators())
+        {
+            var nested = type.GetNestedType("Output");
+
+            // Declared only: IndicatorBase gives every single-output type an inherited Value, which would
+            // otherwise make all 600 of them look multi-output.
+            var members = type.GetProperties(BindingFlags.Public | BindingFlags.Instance
+                    | BindingFlags.DeclaredOnly)
+                .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+                .ToList();
+
+            if (members.Count == 0)
+            {
+                nested.Should().BeNull(type.Name + " publishes one series and needs no Output enum");
+                continue;
+            }
+
+            if (nested is null || !nested.IsEnum)
+            {
+                wrong.Add(type.Name + ": no Output enum");
+                continue;
+            }
+
+            checkedTypes++;
+
+            // The enum is the same vocabulary as the typed members, in the same order, with each value being
+            // the slot it names - so casting to int is the lookup rather than a table nobody maintains.
+            var enumNames = Enum.GetNames(nested);
+            var memberNames = members.Select(m => m.Name).ToArray();
+
+            if (!enumNames.OrderBy(n => n, StringComparer.Ordinal)
+                    .SequenceEqual(memberNames.OrderBy(n => n, StringComparer.Ordinal)))
+            {
+                wrong.Add(type.Name + ": enum [" + string.Join(",", enumNames) + "] against members ["
+                    + string.Join(",", memberNames) + "]");
+                continue;
+            }
+
+            var instance = TryConstruct(type);
+            if (instance is null)
+            {
+                continue;
+            }
+
+            foreach (var member in members)
+            {
+                var slot = ((IIndicatorOutput)member.GetValue(instance)!).Slot;
+                var value = (int)Enum.Parse(nested, member.Name);
+                if (slot != value)
+                {
+                    wrong.Add(type.Name + "." + member.Name + ": slot " + slot + " but enum " + value);
+                }
+            }
+        }
+
+        checkedTypes.Should().BeGreaterThan(200, "the sweep has to reach the multi-output types");
+        wrong.Should().BeEmpty();
+    }
     private static Type Find(string name) =>
         GeneratedIndicators().Single(t => t.Name == name);
 

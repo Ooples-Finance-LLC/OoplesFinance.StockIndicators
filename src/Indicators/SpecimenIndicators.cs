@@ -167,6 +167,23 @@ public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndica
     /// <summary>The lower band.</summary>
     public IIndicatorOutput Lower { get; }
 
+    /// <summary>The series BollingerBands publishes.</summary>
+    /// <remarks>
+    /// Per indicator rather than one enum for the library: the containing type is what makes a member
+    /// unique, so the names stay short and the compiler knows which keys belong here. Each value is its slot.
+    /// </remarks>
+    public enum Output
+    {
+        /// <summary>The upper band.</summary>
+        Upper = 0,
+
+        /// <summary>The middle band.</summary>
+        Middle = 1,
+
+        /// <summary>The lower band.</summary>
+        Lower = 2,
+    }
+
     /// <inheritdoc/>
     public override int WarmupBars => Math.Max(Length, _average.WarmupBars);
 

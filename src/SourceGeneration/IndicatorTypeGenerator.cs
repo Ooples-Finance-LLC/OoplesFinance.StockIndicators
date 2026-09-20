@@ -559,6 +559,25 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("    public IIndicatorOutput " + memberNames[i] + " { get; }");
             }
 
+            // One enum per indicator rather than one enum for the library. The containing type is what makes
+            // a member unique, so names stay short - a flat enum would need 1,482 members prefixed by their
+            // indicator, the longest 64 characters, and still could not say which keys belong to which
+            // indicator. Each member's value is its slot, so casting to int is the lookup.
+            if (memberNames.Count > 0)
+            {
+                builder.AppendLine();
+                builder.AppendLine("    /// <summary>The series " + Escape(typeName) + " publishes.</summary>");
+                builder.AppendLine("    public enum Output");
+                builder.AppendLine("    {");
+                for (var i = 0; i < memberNames.Count; i++)
+                {
+                    builder.AppendLine("        /// <summary>The " + Escape(outputKeys[i]) + " series.</summary>");
+                    builder.AppendLine("        " + memberNames[i] + " = " + i + ",");
+                }
+
+                builder.AppendLine("    }");
+            }
+
             for (var i = 0; i < options.Parameters.Count; i++)
             {
                 var parameter = options.Parameters[i];
