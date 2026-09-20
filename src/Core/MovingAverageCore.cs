@@ -607,7 +607,11 @@ internal static class MovingAverageCore
         {
             var pos = changesArray.AsSpan(0, input.Length);
             var neg = changesArray.AsSpan(input.Length, input.Length);
-            double posSum = 0, negSum = 0, vidya = 0;
+            // Seeded at the first price, not at zero: the smoothing constant is alpha * |CMO|, which is
+            // legitimately zero on a series with no momentum, and a recursion multiplied by zero never
+            // leaves its seed.
+            double posSum = 0, negSum = 0;
+            var vidya = input.Length > 0 ? input[0] : 0;
 
             for (var i = 0; i < input.Length; i++)
             {
@@ -651,7 +655,10 @@ internal static class MovingAverageCore
         var k = 1d / resolved;
         // The same rolling window as the indicator: the highest and lowest iS, O(1) amortised per bar.
         var isWindow = new RollingMinMax(resolved);
-        double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0, vma = 0;
+        // vma is seeded at the first price, not at zero: vI is legitimately zero when the index has not
+        // moved across the window, and a recursion multiplied by zero never leaves its seed.
+        double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0;
+        var vma = input.Length > 0 ? input[0] : 0;
 
         for (var i = 0; i < input.Length; i++)
         {

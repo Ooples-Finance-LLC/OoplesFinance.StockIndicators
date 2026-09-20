@@ -15692,7 +15692,9 @@ internal static partial class IndicatorCompute
             signSum.Add(Math.Sign(sma[i] - prevSma));
 
             double alpha = Math.Abs(signSum.Sum(length)) == length ? 1 : 0;
-            var prevSfma = i >= 1 ? output[i - 1] : sma[i];
+            // Seeded at the first price, not at an average that has not warmed up yet: on a series whose
+            // average never moves, alpha is zero on every bar and the seed is the whole answer.
+            var prevSfma = i >= 1 ? output[i - 1] : SpanCompat.AsReadOnlySpan(inputList)[i];
             output[i] = (alpha * sma[i]) + ((1 - alpha) * prevSfma);
         }
 
@@ -16163,7 +16165,9 @@ internal static partial class IndicatorCompute
             var denominator = changeSum.Sum(length);
             var vhf = denominator != 0 ? (window.Max - window.Min) / denominator : 0;
 
-            var prevVhma = i >= 1 ? output[i - 1] : 0;
+            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
+            // range nor travel, and a tracking rate of zero never leaves the seed.
+            var prevVhma = i >= 1 ? output[i - 1] : currentValue;
             output[i] = prevVhma + (MathHelper.Pow(vhf, 2) * (currentValue - prevVhma));
         }
 
@@ -17077,7 +17081,9 @@ internal static partial class IndicatorCompute
 
         var rangeTotal = new RollingSum();
         var deviationWindow = new RollingMinMax(lbLength);
-        double previousAverage = 0;
+        // An exponential average starts at a price. Seeded at zero it spends hundreds of bars climbing out of
+        // a value the series never held, and on a series with no volatility it never leaves it at all.
+        var previousAverage = count > 0 ? input[0] : 0;
         for (var i = 0; i < count; i++)
         {
             rangeTotal.Add(atr[i]);
@@ -17089,7 +17095,9 @@ internal static partial class IndicatorCompute
             deviationWindow.Add(deviation);
 
             var lowestDeviation = deviationWindow.Min;
-            var factor = deviation != 0 ? lowestDeviation / deviation : 0;
+            // A deviation of zero makes lowestDeviation zero too, so the ratio is 0/0 - two equal deviations,
+            // which is 1. Reading it as 0 kills the smoothing factor entirely.
+            var factor = deviation != 0 ? lowestDeviation / deviation : 1;
             var alpha = 2 * Math.Min(factor, min) / (length + 1);
 
             output[i] = (alpha * input[i]) + ((1 - alpha) * previousAverage);
