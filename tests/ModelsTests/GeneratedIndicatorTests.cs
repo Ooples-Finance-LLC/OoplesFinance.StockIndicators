@@ -220,6 +220,95 @@ public sealed class GeneratedIndicatorTests
         // indicator cannot mean anything before 26.
         TryConstruct(Find("Macd"))!.WarmupBars.Should().Be(26);
     }
+    private sealed class MyOwnAverage : Indicator, IMovingAverage
+    {
+        protected internal override object CreateState() => new State();
+
+        private sealed class State : IIndicatorState
+        {
+            public void Reset() { }
+
+            public double Update(in Bar bar) => bar.Close;
+        }
+    }
+
+    [Fact]
+    public void EveryMemberOfTheMovingAvgTypeEnumIsAnIMovingAverage()
+    {
+        var averages = GeneratedIndicators().Count(t => typeof(IMovingAverage).IsAssignableFrom(t));
+
+        averages.Should().BeGreaterThan(150,
+            "a component parameter asking for IMovingAverage has to have something to accept");
+    }
+
+    [Fact]
+    public void OneOfOurAveragesCollapsesIntoTheEnumTheBatchCalculationTakes()
+    {
+        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"), 14, Construct<IMovingAverage>("Ema"))!;
+
+        var options = ((IBuiltInIndicator)rsi).CreateOptions();
+        var maType = options.GetType().GetProperty("MaType")!.GetValue(options);
+
+        maType.Should().Be(MovingAvgType.ExponentialMovingAverage,
+            "a built-in average is one the batch calculation already knows how to run");
+    }
+
+    [Fact]
+    public void ACallersOwnAverageStaysAComponentAndTheOptionsKeepTheirDefault()
+    {
+        var mine = new MyOwnAverage();
+        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"), 14, mine)!;
+
+        // There is no enum member for someone else's average - which is why the parameter is an interface.
+        rsi.Components.Should().ContainSingle().Which.Should().BeSameAs(mine);
+
+        var options = ((IBuiltInIndicator)rsi).CreateOptions();
+        options.GetType().GetProperty("MaType")!.GetValue(options)
+            .Should().Be(MovingAvgType.WildersSmoothingMethod, "the batch default survives");
+    }
+
+    [Fact]
+    public void AnAverageSuppliedToAnyGeneratedTypeBecomesADeclaredComponent()
+    {
+        var wrong = new List<string>();
+        var checkedTypes = 0;
+
+        foreach (var type in GeneratedIndicators())
+        {
+            var constructor = type.GetConstructors()
+                .FirstOrDefault(c => c.GetParameters().All(p => p.IsOptional)
+                    && c.GetParameters().Any(p => p.ParameterType == typeof(IMovingAverage)));
+
+            if (constructor is null)
+            {
+                continue;
+            }
+
+            var mine = new MyOwnAverage();
+            var arguments = constructor.GetParameters()
+                .Select(p => p.ParameterType == typeof(IMovingAverage) ? mine : p.DefaultValue)
+                .ToArray();
+
+            IIndicator instance;
+            try
+            {
+                instance = (IIndicator)constructor.Invoke(arguments);
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            checkedTypes++;
+            if (!instance.Components.Contains(mine))
+            {
+                wrong.Add(type.Name);
+            }
+        }
+
+        checkedTypes.Should().BeGreaterThan(200, "the sweep has to actually reach the component types");
+        wrong.Should().BeEmpty("a supplied average must join the graph, or it is silently ignored");
+    }
     private static Type Find(string name) =>
         GeneratedIndicators().Single(t => t.Name == name);
 

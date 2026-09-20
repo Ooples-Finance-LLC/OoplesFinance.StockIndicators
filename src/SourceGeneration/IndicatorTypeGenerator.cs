@@ -88,12 +88,24 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Collect();
 
+        // Every member of MovingAvgType is an average the batch calculations already know how to run, so a
+        // generated type whose indicator shares that name is one of them and can be handed to a component
+        // parameter that asks for IMovingAverage.
+        var movingAverages = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is EnumDeclarationSyntax e
+                    && e.Identifier.Text == "MovingAvgType",
+                transform: static (ctx, _) => ((EnumDeclarationSyntax)ctx.Node).Members
+                    .Select(m => m.Identifier.Text).ToImmutableArray())
+            .Collect();
+
         var combined = optionsTypes.Combine(armTargets).Combine(categories)
-            .Combine(batchDefaults).Combine(publishedOutputs);
+            .Combine(batchDefaults).Combine(publishedOutputs).Combine(movingAverages);
 
         context.RegisterSourceOutput(combined, static (spc, source) =>
-            Emit(source.Left.Left.Left.Left, source.Left.Left.Left.Right, source.Left.Left.Right,
-                source.Left.Right, source.Right, spc));
+            Emit(source.Left.Left.Left.Left.Left, source.Left.Left.Left.Left.Right,
+                source.Left.Left.Left.Right, source.Left.Left.Right, source.Left.Right,
+                source.Right, spc));
     }
 
     private static bool IsOptionsType(SyntaxNode node) =>
@@ -309,6 +321,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         ImmutableArray<ImmutableArray<CategoryReading>?> categories,
         ImmutableArray<BatchReading?> batchReadings,
         ImmutableArray<IndicatorOutputMapGenerator.PublishedOutputs?> publishedOutputs,
+        ImmutableArray<ImmutableArray<string>> movingAverageMembers,
         SourceProductionContext context)
     {
         var targets = new Dictionary<string, ArmTargetReading>(StringComparer.Ordinal);
@@ -378,6 +391,15 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             }
         }
 
+        var movingAverages = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var batch in movingAverageMembers)
+        {
+            foreach (var member in batch)
+            {
+                movingAverages.Add(member);
+            }
+        }
+
         if (targets.Count == 0)
         {
             return;
@@ -408,7 +430,13 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 continue;
             }
 
+            var isAverage = movingAverages.Contains(target.IndicatorName);
             var interfaces = new List<string> { "IBuiltInIndicator" };
+            if (isAverage)
+            {
+                interfaces.Insert(0, "IMovingAverage");
+                interfaces.Add("IBuiltInMovingAverage");
+            }
             if (categoryOf.TryGetValue(target.IndicatorName, out var category))
             {
                 interfaces.Insert(0, CategoryInterface(category));
@@ -470,8 +498,22 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             batchOf.TryGetValue("Calculate" + target.IndicatorName, out var batchDefaults);
             var resolved = ResolveDefaults(options.Parameters, target, batchDefaults);
 
+            // A MovingAvgType parameter becomes an IMovingAverage component, so a caller can hand in one of
+            // ours or one of their own. Only where the batch method states a default, because that default is
+            // what the options type still receives when the caller supplies nothing - without it there would
+            // be nothing to fall back to.
+            var asComponent = new bool[options.Parameters.Count];
+            for (var i = 0; i < options.Parameters.Count; i++)
+            {
+                asComponent[i] = options.Parameters[i].Type == "MovingAvgType" && resolved[i] is not null;
+            }
+
+            var componentCount = asComponent.Count(x => x);
+
             var signature = string.Join(", ", options.Parameters.Select((p, i) =>
-                p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i])));
+                asComponent[i]
+                    ? "IMovingAverage? " + p.Name + " = null"
+                    : p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i])));
 
             builder.AppendLine("    /// <summary>Creates " + Escape(typeName) + ".</summary>");
             builder.AppendLine("    public " + typeName + "(" + signature + ")"
@@ -480,6 +522,25 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             foreach (var parameter in options.Parameters)
             {
                 builder.AppendLine("        " + Capitalise(parameter.Name) + " = " + parameter.Name + ";");
+            }
+
+            if (componentCount > 0)
+            {
+                // Explicit rather than a collection expression plus LINQ: generated code with no target type
+                // for [a, b] is CS9176, and keeping System.Linq out of the emitted file is one less thing
+                // that has to be true of it.
+                builder.AppendLine("        var components = new System.Collections.Generic.List<IIndicator>("
+                    + componentCount + ");");
+                for (var i = 0; i < options.Parameters.Count; i++)
+                {
+                    if (asComponent[i])
+                    {
+                        var member = Capitalise(options.Parameters[i].Name);
+                        builder.AppendLine("        if (" + member + " is not null) components.Add(" + member + ");");
+                    }
+                }
+
+                builder.AppendLine("        if (components.Count > 0) Uses(components.ToArray());");
             }
 
             // Assigned from Outputs rather than deconstructed: the deconstruction overloads stop at five,
@@ -498,11 +559,13 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("    public IIndicatorOutput " + memberNames[i] + " { get; }");
             }
 
-            foreach (var parameter in options.Parameters)
+            for (var i = 0; i < options.Parameters.Count; i++)
             {
+                var parameter = options.Parameters[i];
                 builder.AppendLine();
                 builder.AppendLine("    /// <summary>The " + Escape(parameter.Name) + ".</summary>");
-                builder.AppendLine("    public " + parameter.Type + " " + Capitalise(parameter.Name) + " { get; }");
+                builder.AppendLine("    public " + (asComponent[i] ? "IMovingAverage?" : parameter.Type)
+                    + " " + Capitalise(parameter.Name) + " { get; }");
             }
 
             // The longest length, not the first one declared. Macd takes fastLength, slowLength and
@@ -527,15 +590,27 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             }
 
             builder.AppendLine();
+            if (isAverage)
+            {
+                builder.AppendLine();
+                builder.AppendLine("    MovingAvgType IBuiltInMovingAverage.AvgType => MovingAvgType."
+                    + target.IndicatorName + ";");
+            }
+
+            builder.AppendLine();
             builder.AppendLine("    IndicatorName IBuiltInIndicator.BatchName => IndicatorName."
                 + target.IndicatorName + ";");
             builder.AppendLine();
             builder.AppendLine("    string? IBuiltInIndicator.BatchOutputKey => "
                 + (target.OutputKey is null ? "null" : "\"" + target.OutputKey + "\"") + ";");
             builder.AppendLine();
+            var arguments = string.Join(", ", options.Parameters.Select((p, i) => asComponent[i]
+                ? Capitalise(p.Name) + " is IBuiltInMovingAverage __" + p.Name + " ? __" + p.Name
+                    + ".AvgType : " + resolved[i]
+                : Capitalise(p.Name)));
+
             builder.AppendLine("    IIndicatorSpecOptions IBuiltInIndicator.CreateOptions() => new "
-                + options.Name + "(" + string.Join(", ", options.Parameters.Select(p => Capitalise(p.Name)))
-                + ");");
+                + options.Name + "(" + arguments + ");");
             builder.AppendLine("}");
             emitted++;
             if (isMulti)
