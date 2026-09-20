@@ -26,7 +26,13 @@ public sealed class IndicatorInvariantSweepTests
     // The flat series needs far more room than the random walk: twenty averages have a warmup of 200 bars or
     // more, and at 160 bars their settle window was empty, so they were skipped rather than checked. Twenty-one
     // failures hid behind that until the fixture was lengthened.
-    private const int FlatBars_ = 1200;
+    private const int FlatBars_ = 4000;
+
+    // The tail the average has to have reached the constant by. Everything before it is convergence, which is
+    // a separate question - WarmupBarsCoversTheWarmup asks it.
+    private const int FlatTail_ = 1000;
+
+    private const double FlatTolerance_ = 1e-6;
 
     private static IReadOnlyList<Type> Indicators() =>
         [.. typeof(IIndicator).Assembly.GetTypes()
@@ -229,19 +235,84 @@ public sealed class IndicatorInvariantSweepTests
 
             // Past the warm-up, an average of a constant can only be that constant. Any weighting, any
             // smoothing, any adaptive length: the weights sum to one over identical values.
-            // Three warmups, and never so far in that nothing is left to check: a window that empties is a
-            // skipped indicator wearing a pass.
-            var settled = values.Skip(Math.Min(FlatBars_ - 200, Math.Max(indicator.WarmupBars * 3, 60))).ToArray();
-            settled.Should().NotBeEmpty("an empty settle window checks nothing");
+            // The tail, not everything past some multiple of the declared warmup. An average that is still
+            // converging is not yet wrong; one that has settled somewhere other than the constant is, and over
+            // 1000 bars every average here that converges at all has converged.
+            var tail = values.Skip(FlatBars_ - FlatTail_).ToArray();
+            tail.Should().NotBeEmpty("an empty tail checks nothing");
 
-            var worst = settled.Max(v => Math.Abs(v - price));
-            if (worst > 1e-6)
+            var worst = tail.Max(v => Math.Abs(v - price));
+            if (worst > FlatTolerance_)
             {
-                wrong.Add(type.Name + ": off by " + worst.ToString("G4"));
+                wrong.Add(type.Name + ": settles " + worst.ToString("G4") + " away, at " + tail[^1].ToString("G8"));
             }
         }
 
         reached.Should().BeGreaterThan(100, "there are 180 moving averages to sweep");
-        wrong.Should().BeEmpty();
+        wrong.Should().BeEmpty("a filter that settles anywhere but the constant has a gain that is not 1");
+    }
+
+    [Fact]
+    public void WarmupBarsCoversTheWarmup()
+    {
+        const double price = 50;
+        var bars = Flat(price);
+        var wrong = new List<string>();
+        var reached = 0;
+
+        foreach (var type in Indicators().Where(t => typeof(IMovingAverage).IsAssignableFrom(t)))
+        {
+            var indicator = TryConstruct(type);
+            if (indicator is null)
+            {
+                continue;
+            }
+
+            var values = Run(indicator, bars);
+            if (values is null)
+            {
+                continue;
+            }
+
+            reached++;
+
+            // WarmupBars is what a caller discards. Whatever is left has to be usable, so on a series that
+            // never moves every value past it has to be the constant.
+            var declared = Math.Max(indicator.WarmupBars, 0);
+            if (declared >= values.Length)
+            {
+                wrong.Add(type.Name + ": declares " + declared + " warmup bars for a " + values.Length + " bar series");
+                continue;
+            }
+
+            var worst = values.Skip(declared).Max(v => Math.Abs(v - price));
+            if (worst <= FlatTolerance_)
+            {
+                continue;
+            }
+
+            // The bar it does settle by, so the declaration can be corrected rather than guessed at.
+            var settles = values.Length;
+            for (var i = values.Length - 1; i >= 0; i--)
+            {
+                if (Math.Abs(values[i] - price) > FlatTolerance_)
+                {
+                    break;
+                }
+
+                settles = i;
+            }
+
+            wrong.Add(type.Name + ": declares " + declared + ", settles by " + settles
+                + " (off by " + worst.ToString("G4") + " after the declared warmup)");
+        }
+
+        reached.Should().BeGreaterThan(100);
+
+        // Named in full rather than as a collection: an assertion on a list prints the first ten and calls
+        // the rest "at least these items", which is how a ledger gets read as shorter than it is.
+        wrong.Should().BeEmpty("a caller who discards WarmupBars bars is left with values that have settled; "
+            + reached + " averages swept, " + wrong.Count + " understate their warmup: "
+            + string.Join(" | ", wrong));
     }
 }
