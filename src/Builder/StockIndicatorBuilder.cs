@@ -177,6 +177,21 @@ public sealed class StockIndicatorBuilder
         var dates = new List<DateTime>();
         var bars = new List<Indicators.Bar>();
 
+        // Warm-up first, and counted, so the indicators see it but the caller does not. A finite source that
+        // carries warm-up would otherwise either publish it as real bars or not be warmed at all.
+        var warmupCount = 0;
+        await foreach (var bar in source.ReadWarmupAsync(cancellationToken).ConfigureAwait(false))
+        {
+            opens.Add(bar.Open);
+            highs.Add(bar.High);
+            lows.Add(bar.Low);
+            closes.Add(bar.Close);
+            volumes.Add(bar.Volume);
+            dates.Add(bar.Time);
+            bars.Add(bar);
+            warmupCount++;
+        }
+
         await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             opens.Add(bar.Open);
@@ -257,11 +272,15 @@ public sealed class StockIndicatorBuilder
             var values = engine.Compute(indicator);
             for (var slot = 0; slot < indicator.Outputs.Count; slot++)
             {
-                series2[indicator.Outputs[slot]] = values[slot];
+                // The warm-up primed the states; it is not part of the answer.
+                series2[indicator.Outputs[slot]] = warmupCount == 0
+                    ? values[slot]
+                    : values[slot].Skip(warmupCount).ToArray();
             }
         }
 
-        return new Indicators.IndicatorRun(runtime, series2, bars);
+        return new Indicators.IndicatorRun(
+            runtime, series2, warmupCount == 0 ? bars : bars.Skip(warmupCount).ToList());
     }
 
     /// <summary>

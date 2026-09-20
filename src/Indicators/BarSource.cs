@@ -69,6 +69,51 @@ public static class Bars
     public static IBarSource From(IEnumerable<Bar> bars) => From(bars, bar => bar);
 
     /// <summary>
+    /// The same finite source, primed with earlier bars the caller does not want reported.
+    /// </summary>
+    /// <remarks>
+    /// For reading a window out of a longer history: the indicators see everything, the run reports only the
+    /// window. Without it the first values of the window would be a warm-up the caller has to know to discard.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when source or warmup is null.</exception>
+    public static IBarSource WarmedWith(this IBarSource source, IEnumerable<Bar> warmup)
+    {
+        if (source is null) throw new ArgumentNullException(nameof(source));
+        if (warmup is null) throw new ArgumentNullException(nameof(warmup));
+
+        return new WarmedBarSource(source, warmup);
+    }
+
+    private sealed class WarmedBarSource : IBarSource
+    {
+        private readonly IBarSource _inner;
+        private readonly IEnumerable<Bar> _warmup;
+
+        internal WarmedBarSource(IBarSource inner, IEnumerable<Bar> warmup)
+        {
+            _inner = inner;
+            _warmup = warmup;
+        }
+
+        public bool IsFinite => _inner.IsFinite;
+
+        public IAsyncEnumerable<Bar> ReadAsync(CancellationToken cancellationToken = default) =>
+            _inner.ReadAsync(cancellationToken);
+
+        public async IAsyncEnumerable<Bar> ReadWarmupAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            foreach (var bar in _warmup)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return bar;
+            }
+
+            await Task.CompletedTask.ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
     /// A live source bars are pushed into.
     /// </summary>
     /// <remarks>

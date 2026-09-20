@@ -120,6 +120,31 @@ public sealed class IndicatorRunTests
     }
 
     [Fact]
+    public async Task WarmUpPrimesAFiniteRunWithoutBeingReported()
+    {
+        var all = SeededBars(BarCount);
+        var warmup = all.Take(100).ToList();
+        var window = all.Skip(100).ToList();
+        var rsi = new Rsi(14);
+
+        using var warmed = await new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(window).WarmedWith(warmup))
+            .ConfigureIndicators(rsi)
+            .BuildAsync();
+
+        warmed.BarCount.Should().Be(window.Count, "the warm-up is not part of the answer");
+        warmed[rsi].ToArray().Should().HaveCount(window.Count);
+
+        // The whole history computed in one go, then the same window taken from it. A warmed run over the
+        // window has to agree with it, or the warm-up did not actually prime the states.
+        using var whole = await new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(all))
+            .ConfigureIndicators(rsi)
+            .BuildAsync();
+
+        warmed[rsi].ToArray().Should().Equal(whole[rsi].ToArray().Skip(100));
+    }
+    [Fact]
     public async Task BuildingWithoutASourceSaysSo()
     {
         var act = async () => await new StockIndicatorBuilder()
