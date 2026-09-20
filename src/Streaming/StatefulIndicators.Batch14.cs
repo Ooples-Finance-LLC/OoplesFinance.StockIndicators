@@ -1862,8 +1862,10 @@ public sealed class HybridConvolutionFilterState : IStreamingIndicatorState, IDi
         double output = 0;
         for (var j = 1; j <= _length; j++)
         {
-            var sign = 0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)j / _length * Math.PI, 0.99, 0.01)));
-            var d = sign - (0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)(j - 1) / _length, 0.99, 0.01))));
+            // Both cosine arguments are the window position scaled by pi, and neither is clamped, so the
+            // weights d telescope across the window to exactly 1 and a constant series is a fixed point.
+            var sign = 0.5 * (1 - Math.Cos((double)j / _length * Math.PI));
+            var d = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / _length * Math.PI)));
             var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
             output += ((sign * prevOutput) + ((1 - sign) * prevValue)) * d;
         }

@@ -14129,8 +14129,10 @@ internal static partial class IndicatorCompute
             double value = 0;
             for (var j = 1; j <= length; j++)
             {
-                var sign = 0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)j / length * Math.PI, 0.99, 0.01)));
-                var d = sign - (0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)(j - 1) / length, 0.99, 0.01))));
+                // Both cosine arguments are the window position scaled by pi, and neither is clamped, so the
+                // weights d telescope across the window to exactly 1 and a constant series is a fixed point.
+                var sign = 0.5 * (1 - Math.Cos((double)j / length * Math.PI));
+                var d = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / length * Math.PI)));
                 var previousValue = i >= j - 1 ? input[i - (j - 1)] : 0;
                 value += ((sign * prevOutput) + ((1 - sign) * previousValue)) * d;
             }
@@ -15642,11 +15644,14 @@ internal static partial class IndicatorCompute
             for (var j = 0; j < length; j++)
             {
                 var prevV = i >= j ? input[i - j] : 0;
-                w += (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
-                vw += prevV * w;
+                // Each bar is weighted by its own Ricker weight, not by the running total of every weight up
+                // to it - against the running total the divisor no longer matches the numerator.
+                var weight = (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
+                w += weight;
+                vw += prevV * weight;
             }
 
-            output[i] = w != 0 ? vw / w : 0;
+            output[i] = w != 0 ? vw / w : input[i];
         }
 
         return buffer;

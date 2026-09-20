@@ -1440,12 +1440,16 @@ public static partial class Calculations
             for (var j = 0; j < length; j++)
             {
                 var prevV = i >= j ? inputList[i - j] : 0;
-                w += (1 - Pow(j / width, 2)) * Exp(-(Pow(j, 2) / (2 * Pow(width, 2))));
-                vw += prevV * w;
+                // Each bar is weighted by its own Ricker weight, not by the running total of every weight up
+                // to it. Against the running total the divisor no longer matches the numerator, and the
+                // filter read 2656.39 on a series held at 50.
+                var weight = (1 - Pow(j / width, 2)) * Exp(-(Pow(j, 2) / (2 * Pow(width, 2))));
+                w += weight;
+                vw += prevV * weight;
             }
-            
+
             var prevRrma = GetLastOrDefault(rrmaList);
-            var rrma = w != 0 ? vw / w : 0;
+            var rrma = w != 0 ? vw / w : currentValue;
             rrmaList.Add(rrma);
 
             var signal = GetCompareSignal(currentValue - rrma, prevValue - prevRrma);

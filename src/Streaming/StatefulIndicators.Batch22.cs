@@ -59,7 +59,7 @@ public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
 public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly double[] _cumulativeWeights;
+    private readonly double[] _weights;
     private readonly double _weightSum;
     private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
@@ -68,17 +68,19 @@ public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorStat
     {
         _length = Math.Max(1, length);
         var width = pctWidth / 100d * _length;
-        _cumulativeWeights = new double[_length];
-        double cumulative = 0;
+        // Each bar carries its own Ricker weight, not the running total of every weight up to it: against a
+        // running total the divisor no longer matches the numerator and the filter has a gain of 53.
+        _weights = new double[_length];
+        double total = 0;
         for (var j = 0; j < _length; j++)
         {
             var weight = (1 - MathHelper.Pow(j / width, 2))
                 * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
-            cumulative += weight;
-            _cumulativeWeights[j] = cumulative;
+            _weights[j] = weight;
+            total += weight;
         }
 
-        _weightSum = cumulative;
+        _weightSum = total;
         _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -121,10 +123,10 @@ public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorStat
                 }
             }
 
-            vw += prevV * _cumulativeWeights[j];
+            vw += prevV * _weights[j];
         }
 
-        var rrma = _weightSum != 0 ? vw / _weightSum : 0;
+        var rrma = _weightSum != 0 ? vw / _weightSum : value;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

@@ -1251,8 +1251,13 @@ public static partial class Calculations
             double output = 0;
             for (var j = 1; j <= length; j++)
             {
-                var sign = 0.5 * (1 - Math.Cos(MinOrMax((double)j / length * Math.PI, 0.99, 0.01)));
-                var d = sign - (0.5 * (1 - Math.Cos(MinOrMax((double)(j - 1) / length, 0.99, 0.01))));
+                // Both cosine arguments are the window position scaled by pi, and neither is clamped. That
+                // is what makes the weights d telescope across the window to exactly sign(length) - sign(0),
+                // which is 1, so a constant series is a fixed point of the blend. With pi missing from the
+                // second argument and both clamped to [0.01, 0.99], the weights summed to about 1.93 instead
+                // and the filter settled at 96.54 on a series held at 50.
+                var sign = 0.5 * (1 - Math.Cos((double)j / length * Math.PI));
+                var d = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / length * Math.PI)));
                 var prevValue = i >= j - 1 ? inputList[i - (j - 1)] : 0;
                 output += ((sign * prevOutput) + ((1 - sign) * prevValue)) * d;
             }
