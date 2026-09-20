@@ -1212,7 +1212,9 @@ public static partial class Calculations
             }
 
             var prevDwma = GetLastOrDefault(dwmaList);
-            var dwma = weightedSum != 0 ? sum / weightedSum : 0;
+            // Every weight is 1 / distance, so the weights only all vanish when every price in the window is
+            // the same price - and the average of a window of one repeated price is that price, not zero.
+            var dwma = weightedSum != 0 ? sum / weightedSum : currentValue;
             dwmaList.Add(dwma);
 
             var signal = GetCompareSignal(currentValue - dwma, prevVal - prevDwma);

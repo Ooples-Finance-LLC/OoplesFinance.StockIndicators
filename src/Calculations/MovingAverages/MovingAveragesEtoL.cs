@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -910,7 +910,9 @@ public static partial class Calculations
             }
 
             var prevIdwma = GetLastOrDefault(idwmaList);
-            var idwma = weightedSum != 0 ? sum / weightedSum : 0;
+            // The weights are summed distances, so they only all vanish on a window that never moves, whose
+            // average is the price it sits at.
+            var idwma = weightedSum != 0 ? sum / weightedSum : currentValue;
             idwmaList.Add(idwma);
 
             var signal = GetCompareSignal(currentValue - idwma, prevVal - prevIdwma);

@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -1129,7 +1129,10 @@ public static partial class Calculations
             }
 
             var prevEhlersFilter = GetLastOrDefault(filterList);
-            var ehlersFilter = sumC != 0 ? num / sumC : 0;
+            // sumC is a sum of absolute price differences: zero means the window holds one repeated price, and
+            // a weighted average of that window is that price. Ehlers leaves Filt at its previous value here,
+            // which is not the same thing - the last value before the window flattened is still catching up.
+            var ehlersFilter = sumC != 0 ? num / sumC : currentValue;
             filterList.Add(ehlersFilter);
 
             var signal = GetCompareSignal(currentValue - ehlersFilter, prevValue - prevEhlersFilter);
@@ -1191,7 +1194,9 @@ public static partial class Calculations
             }
 
             var prevFilter = GetLastOrDefault(filterList);
-            var filter = coefSum != 0 ? srcSum / coefSum : 0;
+            // Every coefficient is a sum of squared distances, so a zero total means the window never moved,
+            // and the coefficient-weighted average of a flat window is the level it is flat at.
+            var filter = coefSum != 0 ? srcSum / coefSum : currentValue;
             filterList.Add(filter);
 
             var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter);
