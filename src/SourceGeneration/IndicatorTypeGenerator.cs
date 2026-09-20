@@ -39,10 +39,12 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
     /// is shown to match them, at which point they are deleted and their tests keep running against generated
     /// code - which is the only way to know the generator reproduces the shape rather than something near it.
     /// </remarks>
-    // Members of MovingAvgType whose calculation does not publish an average of its input. Ehlers's Noise
-    // Elimination Technology normalises a count of pairwise sign comparisons by 0.5 * n * (n - 1), so it is
-    // a rank statistic bounded to [-1, 1] - on a constant series it is 0, and correctly so. Tagging it
-    // IMovingAverage offers it wherever a price average is asked for, where it would return an oscillator.
+    // Members of MovingAvgType that smooth something other than price. Ehlers's Noise Elimination
+    // Technology is a real smoother - it is what he applies inside the Market Meanness Index - but it
+    // normalises a count of pairwise sign comparisons by 0.5 * n * (n - 1), so its output is a rank
+    // statistic in [-1, 1] whatever the input is worth. It belongs on an oscillator or another bounded
+    // series. IMovingAverage is what a caller hands to anything asking for a price average, so it stays
+    // out of that surface and keeps its MovingAvgType member, which is how the batch still reaches it.
     private static readonly HashSet<string> NotAnAverage = new(StringComparer.Ordinal)
     {
         "EhlersNoiseEliminationTechnology",
