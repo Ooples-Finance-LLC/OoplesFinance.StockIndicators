@@ -79,10 +79,21 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Collect();
 
-        var combined = optionsTypes.Combine(armTargets).Combine(categories).Combine(batchDefaults);
+        // Reuses the reader the output map is built from, so the typed members cannot describe outputs the
+        // indicator does not publish - the two would otherwise drift the moment a calculation changed.
+        var publishedOutputs = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IndicatorOutputMapGenerator.IsCalculationMethod(node),
+                transform: static (ctx, _) => IndicatorOutputMapGenerator.ReadPublishedOutputs(ctx.Node))
+            .Where(static x => x is not null)
+            .Collect();
+
+        var combined = optionsTypes.Combine(armTargets).Combine(categories)
+            .Combine(batchDefaults).Combine(publishedOutputs);
 
         context.RegisterSourceOutput(combined, static (spc, source) =>
-            Emit(source.Left.Left.Left, source.Left.Left.Right, source.Left.Right, source.Right, spc));
+            Emit(source.Left.Left.Left.Left, source.Left.Left.Left.Right, source.Left.Left.Right,
+                source.Left.Right, source.Right, spc));
     }
 
     private static bool IsOptionsType(SyntaxNode node) =>
@@ -297,6 +308,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         ImmutableArray<ImmutableArray<ArmTargetReading>?> armTargets,
         ImmutableArray<ImmutableArray<CategoryReading>?> categories,
         ImmutableArray<BatchReading?> batchReadings,
+        ImmutableArray<IndicatorOutputMapGenerator.PublishedOutputs?> publishedOutputs,
         SourceProductionContext context)
     {
         var targets = new Dictionary<string, ArmTargetReading>(StringComparer.Ordinal);
@@ -349,6 +361,23 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             }
         }
 
+        // One entry per indicator, keeping the fullest reading: a calculation can publish its outputs from
+        // more than one branch, and the shorter branch would describe fewer members than exist.
+        var outputsOf = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var reading in publishedOutputs)
+        {
+            if (reading is null)
+            {
+                continue;
+            }
+
+            if (!outputsOf.TryGetValue(reading.IndicatorName, out var existing)
+                || reading.Keys.Count > existing.Count)
+            {
+                outputsOf[reading.IndicatorName] = reading.Keys;
+            }
+        }
+
         if (targets.Count == 0)
         {
             return;
@@ -364,6 +393,8 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         builder.AppendLine("namespace OoplesFinance.StockIndicators.Indicators;");
 
         var emitted = 0;
+        var multi = 0;
+        var collided = 0;
         foreach (var options in optionsTypes)
         {
             if (options is null || options.Parameters.Count == 0)
@@ -383,9 +414,57 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 interfaces.Insert(0, CategoryInterface(category));
             }
 
+            // An options type standing for one named output is single-output however many its indicator
+            // publishes - AlligatorJawSpecOptions is the Jaws series, not the whole Alligator.
+            var outputKeys = new List<string>();
+            if (target.OutputKey is null
+                && outputsOf.TryGetValue(target.IndicatorName, out var published)
+                && published.Count > 1)
+            {
+                outputKeys = published;
+            }
+
+            var memberNames = outputKeys.Select(Identifier).ToList();
+
+            // A key matching the type name cannot be a member of it. MultiOutputIndicator does not declare
+            // Value, so the indicator's own series takes that name and its siblings keep theirs - 30 types
+            // would otherwise lose every typed member over one word, Macd among them.
+            for (var i = 0; i < memberNames.Count; i++)
+            {
+                if (string.Equals(memberNames[i], typeName, StringComparison.Ordinal))
+                {
+                    memberNames[i] = "Value";
+                }
+            }
+
+            var reserved = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "Source", "Outputs", "Components", "WarmupBars", "Of", "Uses", "CreateState",
+                "Equals", "GetHashCode", "GetType", "ToString", typeName
+            };
+            foreach (var parameter in options.Parameters)
+            {
+                reserved.Add(Capitalise(parameter.Name));
+            }
+
+            // A key that collides with a parameter property, or with something the base already declares,
+            // would not compile. Emitting the type as single-output loses the named members but keeps the
+            // indicator usable, which is the better of the two failures.
+            if (memberNames.Count != memberNames.Distinct(StringComparer.Ordinal).Count()
+                || memberNames.Any(reserved.Contains))
+            {
+                outputKeys = new List<string>();
+                memberNames = new List<string>();
+                collided++;
+            }
+
+            var isMulti = outputKeys.Count > 1;
+            var baseType = isMulti ? "MultiOutputIndicator" : "Indicator";
+
             builder.AppendLine();
             builder.AppendLine("/// <summary>" + Escape(typeName) + ".</summary>");
-            builder.AppendLine("public sealed class " + typeName + " : Indicator, " + string.Join(", ", interfaces));
+            builder.AppendLine("public sealed class " + typeName + " : " + baseType + ", "
+                + string.Join(", ", interfaces));
             builder.AppendLine("{");
 
             batchOf.TryGetValue("Calculate" + target.IndicatorName, out var batchDefaults);
@@ -395,14 +474,29 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i])));
 
             builder.AppendLine("    /// <summary>Creates " + Escape(typeName) + ".</summary>");
-            builder.AppendLine("    public " + typeName + "(" + signature + ")");
+            builder.AppendLine("    public " + typeName + "(" + signature + ")"
+                + (isMulti ? "\n        : base(" + outputKeys.Count + ")" : string.Empty));
             builder.AppendLine("    {");
             foreach (var parameter in options.Parameters)
             {
                 builder.AppendLine("        " + Capitalise(parameter.Name) + " = " + parameter.Name + ";");
             }
 
+            // Assigned from Outputs rather than deconstructed: the deconstruction overloads stop at five,
+            // and generated code gains nothing from the nicer syntax.
+            for (var i = 0; i < memberNames.Count; i++)
+            {
+                builder.AppendLine("        " + memberNames[i] + " = Outputs[" + i + "];");
+            }
+
             builder.AppendLine("    }");
+
+            for (var i = 0; i < memberNames.Count; i++)
+            {
+                builder.AppendLine();
+                builder.AppendLine("    /// <summary>The " + Escape(outputKeys[i]) + " series.</summary>");
+                builder.AppendLine("    public IIndicatorOutput " + memberNames[i] + " { get; }");
+            }
 
             foreach (var parameter in options.Parameters)
             {
@@ -411,13 +505,25 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("    public " + parameter.Type + " " + Capitalise(parameter.Name) + " { get; }");
             }
 
-            var lengthParameter = options.Parameters.FirstOrDefault(p =>
-                p.Type == "int" && p.Name.IndexOf("ength", StringComparison.Ordinal) >= 0);
+            // The longest length, not the first one declared. Macd takes fastLength, slowLength and
+            // signalLength in that order, so reading the first said 12 where the indicator needs 26 - an
+            // understated warm-up publishes numbers before they mean anything.
+            var lengthParameters = options.Parameters
+                .Where(p => p.Type == "int" && p.Name.IndexOf("ength", StringComparison.Ordinal) >= 0)
+                .ToList();
+            var lengthParameter = lengthParameters.Count == 0 ? null : lengthParameters[0];
             if (lengthParameter is not null)
             {
                 builder.AppendLine();
                 builder.AppendLine("    /// <inheritdoc/>");
-                builder.AppendLine("    public override int WarmupBars => " + Capitalise(lengthParameter.Name) + ";");
+                // Math.Max takes two, so several lengths nest.
+                var warmup = Capitalise(lengthParameters[0].Name);
+                for (var i = 1; i < lengthParameters.Count; i++)
+                {
+                    warmup = "System.Math.Max(" + warmup + ", " + Capitalise(lengthParameters[i].Name) + ")";
+                }
+
+                builder.AppendLine("    public override int WarmupBars => " + warmup + ";");
             }
 
             builder.AppendLine();
@@ -432,12 +538,19 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 + ");");
             builder.AppendLine("}");
             emitted++;
+            if (isMulti)
+            {
+                multi++;
+            }
         }
 
         if (emitted == 0)
         {
             return;
         }
+
+        builder.AppendLine();
+        builder.AppendLine("// emitted=" + emitted + " multiOutput=" + multi + " nameCollisions=" + collided);
 
         context.AddSource("Indicators.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
     }
@@ -518,6 +631,27 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         "SupportAndResistance" => "ISupportAndResistanceIndicator",
         _ => "IIndicator"
     };
+
+    /// <summary>Turns a published output key into a member name.</summary>
+    private static string Identifier(string key)
+    {
+        var builder = new StringBuilder(key.Length);
+        foreach (var character in key)
+        {
+            if (char.IsLetterOrDigit(character) || character == '_')
+            {
+                builder.Append(character);
+            }
+        }
+
+        var text = builder.ToString();
+        if (text.Length == 0 || char.IsDigit(text[0]))
+        {
+            text = "Output" + text;
+        }
+
+        return Capitalise(text);
+    }
 
     private static string Capitalise(string name) =>
         name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);

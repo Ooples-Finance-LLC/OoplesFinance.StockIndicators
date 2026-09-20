@@ -155,6 +155,71 @@ public sealed class GeneratedIndicatorTests
         hma.WarmupBars.Should().Be(20, "CalculateHullMovingAverage defaults length to 20");
     }
 
+    [Fact]
+    public void MacdPublishesItsThreeSeriesAsTypedMembers()
+    {
+        var macd = TryConstruct(Find("Macd"))!;
+
+        macd.Should().BeAssignableTo<IMultiOutputIndicator>();
+        macd.Outputs.Should().HaveCount(3);
+
+        // The published key is "Macd", which cannot be a member of a type called Macd, so the indicator's
+        // own series takes the Value name and its siblings keep theirs.
+        var members = Find("Macd").GetProperties()
+            .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+            .Select(p => p.Name)
+            .ToList();
+
+        members.Should().BeEquivalentTo(["Value", "Signal", "Histogram"]);
+    }
+
+    [Fact]
+    public void EveryMultiOutputTypeExposesOneTypedMemberPerPublishedSeries()
+    {
+        var wrong = new List<string>();
+
+        foreach (var type in GeneratedIndicators())
+        {
+            var instance = TryConstruct(type);
+            if (instance is not IMultiOutputIndicator)
+            {
+                continue;
+            }
+
+            var members = type.GetProperties()
+                .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+                .ToList();
+
+            if (members.Count != instance.Outputs.Count)
+            {
+                wrong.Add(type.Name + ": " + members.Count + " members for "
+                    + instance.Outputs.Count + " outputs");
+                continue;
+            }
+
+            // Each member must be a distinct slot of this indicator, or two names address one series.
+            var slots = members.Select(m => ((IIndicatorOutput)m.GetValue(instance)!).Slot).ToList();
+            if (slots.Distinct().Count() != slots.Count)
+            {
+                wrong.Add(type.Name + ": members share a slot");
+            }
+
+            if (members.Any(m => ((IIndicatorOutput)m.GetValue(instance)!).Indicator != instance))
+            {
+                wrong.Add(type.Name + ": a member belongs to another indicator");
+            }
+        }
+
+        wrong.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WarmupIsTheLongestLengthNotTheFirstDeclared()
+    {
+        // Macd takes fastLength, slowLength then signalLength, so reading the first said 12 where the
+        // indicator cannot mean anything before 26.
+        TryConstruct(Find("Macd"))!.WarmupBars.Should().Be(26);
+    }
     private static Type Find(string name) =>
         GeneratedIndicators().Single(t => t.Name == name);
 
