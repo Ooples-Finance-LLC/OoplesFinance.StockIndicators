@@ -39,6 +39,15 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
     /// is shown to match them, at which point they are deleted and their tests keep running against generated
     /// code - which is the only way to know the generator reproduces the shape rather than something near it.
     /// </remarks>
+    // Members of MovingAvgType whose calculation does not publish an average of its input. Ehlers's Noise
+    // Elimination Technology normalises a count of pairwise sign comparisons by 0.5 * n * (n - 1), so it is
+    // a rank statistic bounded to [-1, 1] - on a constant series it is 0, and correctly so. Tagging it
+    // IMovingAverage offers it wherever a price average is asked for, where it would return an oscillator.
+    private static readonly HashSet<string> NotAnAverage = new(StringComparer.Ordinal)
+    {
+        "EhlersNoiseEliminationTechnology",
+    };
+
     private static readonly HashSet<string> HandWritten = new(StringComparer.Ordinal)
     {
         "Sma", "Ema", "BollingerBands"
@@ -396,6 +405,11 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         {
             foreach (var member in batch)
             {
+                if (NotAnAverage.Contains(member))
+                {
+                    continue;
+                }
+
                 movingAverages.Add(member);
             }
         }
