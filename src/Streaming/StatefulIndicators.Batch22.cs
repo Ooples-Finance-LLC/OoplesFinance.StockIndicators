@@ -923,7 +923,9 @@ public sealed class SequentiallyFilteredMovingAverageState : IStreamingIndicator
         var sign = Math.Sign(sma - prevSma);
         var sum = isFinal ? _signSum.Add(sign, out _) : _signSum.Preview(sign, out _);
         var alpha = Math.Abs(sum) == _length ? 1 : 0;
-        var prevSfma = _hasPrev ? _prevSfma : sma;
+        // Seeded at the first price, as the batch is, not at an average that has not warmed up yet: on a
+        // series whose average never moves, alpha is zero on every bar and the seed is the whole answer.
+        var prevSfma = _hasPrev ? _prevSfma : value;
         var sfma = (alpha * sma) + ((1 - alpha) * prevSfma);
 
         if (isFinal)

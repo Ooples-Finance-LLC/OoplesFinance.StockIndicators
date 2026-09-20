@@ -489,8 +489,9 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
         var value = _input.GetValue(bar);
         var cmo = _cmo.Update(bar, isFinal, includeOutputs: false).Value;
         var currentCmo = Math.Abs(cmo / 100);
-        // Seeded at 0, as the batch and the original's nz(vidya[1]) are: VIDYA grows into the price.
-        var prevVidya = _hasPrev ? _prevVidya : 0;
+        // Seeded at the first price, as the batch is: alpha * |CMO| is legitimately zero on a series with
+        // no momentum, and a recursion multiplied by zero never leaves its seed.
+        var prevVidya = _hasPrev ? _prevVidya : value;
         var vidya = (value * _alpha * currentCmo) + (prevVidya * (1 - (_alpha * currentCmo)));
 
         if (isFinal)
@@ -778,7 +779,9 @@ public sealed class VerticalHorizontalMovingAverageState : IStreamingIndicatorSt
         var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
         var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
         var vhf = changeSum != 0 ? (highest - lowest) / changeSum : 0;
-        var prevVhma = _hasPrev ? _prevVhma : 0;
+        // Seeded at the first price, as the batch is: vhf is legitimately zero when the window has neither
+        // range nor travel, and a tracking rate of zero never leaves the seed.
+        var prevVhma = _hasPrev ? _prevVhma : value;
         var vhma = prevVhma + (MathHelper.Pow(vhf, 2) * (value - prevVhma));
 
         if (isFinal)
@@ -2139,8 +2142,11 @@ internal sealed class VariableMovingAverageEngine : IDisposable
         var llv = isFinal ? _minWindow.Add(iS, out _) : _minWindow.Preview(iS, out _);
         var d1 = hhv - llv;
         var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-        // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI.
-        var vma = ((1 - (_k * vI)) * _prevVma) + (_k * vI * value);
+        // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. Seeded at the
+        // first price, as the batch is: vI is legitimately zero when the index has not moved across the
+        // window, and a recursion multiplied by zero never leaves its seed.
+        var prevVma = _hasPrev ? _prevVma : value;
+        var vma = ((1 - (_k * vI)) * prevVma) + (_k * vI * value);
 
         if (isFinal)
         {
