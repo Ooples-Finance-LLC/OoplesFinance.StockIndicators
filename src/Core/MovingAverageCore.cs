@@ -4450,7 +4450,7 @@ internal static class MovingAverageCore
                 vw += prevV * weight;
             }
 
-            output[i] = w != 0 ? vw / w : 0;
+            output[i] = w != 0 ? vw / w : input[i];
         }
     }
 
