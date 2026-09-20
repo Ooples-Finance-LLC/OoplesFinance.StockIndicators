@@ -74,9 +74,19 @@ public sealed class MovingAvgTypeRouteParityTests
                 continue;
             }
 
+            // A NaN on either side makes every comparison against it false, so a test that only tracks the
+            // largest difference reports parity while a route returns nothing usable. Non-finite is its own
+            // failure, checked before the difference is worth taking.
+            var nonFinite = -1;
             double worst = 0;
             for (var i = 0; i < buffer.Length; i++)
             {
+                if (!double.IsFinite(buffer[i]) || !double.IsFinite(viaCalculation[i]))
+                {
+                    nonFinite = i;
+                    break;
+                }
+
                 var difference = Math.Abs(buffer[i] - viaCalculation[i]);
                 if (difference > worst)
                 {
@@ -84,7 +94,12 @@ public sealed class MovingAvgTypeRouteParityTests
                 }
             }
 
-            if (worst > Tolerance_)
+            if (nonFinite >= 0)
+            {
+                wrong.Add(type + ": bar " + nonFinite + " is " + buffer[nonFinite] + " by fast path and "
+                    + viaCalculation[nonFinite] + " by calculation");
+            }
+            else if (worst > Tolerance_)
             {
                 wrong.Add(type + ": routes differ by " + worst.ToString("G6"));
             }

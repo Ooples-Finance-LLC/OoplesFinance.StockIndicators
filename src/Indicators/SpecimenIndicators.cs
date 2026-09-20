@@ -63,15 +63,24 @@ internal static class IndicatorContract
                 indicator.GetType().Name + " supplies no arithmetic: override CreateState to return a state.");
         }
 
-        var expected = indicator is IMultiOutputIndicator
-            ? state is IMultiOutputState or IComposedMultiOutputState
-            : state is IIndicatorState or IComposedIndicatorState;
-
-        if (!expected)
+        // The state exists only to be looked at. A caller's CreateState may hold a pooled buffer or a
+        // handle, and nothing else will ever own this one, so it is released here - including on the throw.
+        try
         {
-            throw new InvalidOperationException(
-                indicator.GetType().Name + " returned a " + state.GetType().Name
-                + ", which does not match the number of series it publishes.");
+            var expected = indicator is IMultiOutputIndicator
+                ? state is IMultiOutputState or IComposedMultiOutputState
+                : state is IIndicatorState or IComposedIndicatorState;
+
+            if (!expected)
+            {
+                throw new InvalidOperationException(
+                    indicator.GetType().Name + " returned a " + state.GetType().Name
+                    + ", which does not match the number of series it publishes.");
+            }
+        }
+        finally
+        {
+            (state as IDisposable)?.Dispose();
         }
     }
 }

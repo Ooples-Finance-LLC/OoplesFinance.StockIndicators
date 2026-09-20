@@ -41,7 +41,11 @@ public sealed class IndicatorInvariantSweepTests
             .Where(typeof(IIndicator).IsAssignableFrom)
             .OrderBy(t => t.Name, StringComparer.Ordinal)];
 
-    private static IIndicator? TryConstruct(Type type)
+    // Every failure is recorded rather than skipped. A sweep that turns an exception into a skip can
+    // report 500 indicators reached while a broken one quietly is not among them, and the floor assertion
+    // still passes. A type with no all-optional constructor is a real skip and not a failure; an exception
+    // from one that has one is not.
+    private static IIndicator? TryConstruct(Type type, List<string> broke)
     {
         var constructor = type.GetConstructors()
             .OrderBy(c => c.GetParameters().Length)
@@ -57,8 +61,9 @@ public sealed class IndicatorInvariantSweepTests
             return (IIndicator)constructor.Invoke(
                 constructor.GetParameters().Select(p => p.DefaultValue).ToArray());
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            broke.Add(type.Name + " threw " + ex.GetType().Name + " on construction: " + ex.Message);
             return null;
         }
     }
@@ -91,7 +96,7 @@ public sealed class IndicatorInvariantSweepTests
         return bars;
     }
 
-    private static double[]? Run(IIndicator indicator, IReadOnlyList<Bar> bars)
+    private static double[]? Run(IIndicator indicator, IReadOnlyList<Bar> bars, string name, List<string> broke)
     {
         try
         {
@@ -115,17 +120,18 @@ public sealed class IndicatorInvariantSweepTests
     {
         var bars = Seeded();
         var wrong = new List<string>();
+        var broke = new List<string>();
         var reached = 0;
 
         foreach (var type in Indicators())
         {
-            var indicator = TryConstruct(type);
+            var indicator = TryConstruct(type, broke);
             if (indicator is null)
             {
                 continue;
             }
 
-            var values = Run(indicator, bars);
+            var values = Run(indicator, bars, type.Name, broke);
             if (values is null)
             {
                 continue;
@@ -138,6 +144,7 @@ public sealed class IndicatorInvariantSweepTests
             }
         }
 
+        broke.Should().BeEmpty("an indicator that throws is a failure, not a skip: " + string.Join(" | ", broke));
         reached.Should().BeGreaterThan(500, "the sweep must actually compute indicators");
         wrong.Should().BeEmpty("anything indexing a series by bar is misaligned otherwise");
     }
@@ -147,19 +154,20 @@ public sealed class IndicatorInvariantSweepTests
     {
         var bars = Seeded();
         var wrong = new List<string>();
+        var broke = new List<string>();
         var reached = 0;
 
         foreach (var type in Indicators())
         {
-            var first = TryConstruct(type);
-            var second = TryConstruct(type);
+            var first = TryConstruct(type, broke);
+            var second = TryConstruct(type, broke);
             if (first is null || second is null)
             {
                 continue;
             }
 
-            var a = Run(first, bars);
-            var b = Run(second, bars);
+            var a = Run(first, bars, type.Name, broke);
+            var b = Run(second, bars, type.Name, broke);
             if (a is null || b is null)
             {
                 continue;
@@ -172,6 +180,7 @@ public sealed class IndicatorInvariantSweepTests
             }
         }
 
+        broke.Should().BeEmpty("an indicator that throws is a failure, not a skip: " + string.Join(" | ", broke));
         reached.Should().BeGreaterThan(500);
         wrong.Should().BeEmpty("the same bars must give the same answer - usually an unseeded random otherwise");
     }
@@ -181,17 +190,18 @@ public sealed class IndicatorInvariantSweepTests
     {
         var bars = Seeded();
         var wrong = new List<string>();
+        var broke = new List<string>();
         var reached = 0;
 
         foreach (var type in Indicators())
         {
-            var indicator = TryConstruct(type);
+            var indicator = TryConstruct(type, broke);
             if (indicator is null)
             {
                 continue;
             }
 
-            var values = Run(indicator, bars);
+            var values = Run(indicator, bars, type.Name, broke);
             if (values is null)
             {
                 continue;
@@ -205,6 +215,7 @@ public sealed class IndicatorInvariantSweepTests
             }
         }
 
+        broke.Should().BeEmpty("an indicator that throws is a failure, not a skip: " + string.Join(" | ", broke));
         reached.Should().BeGreaterThan(500);
         wrong.Should().BeEmpty("a NaN reaching a trading decision is the failure this exists to stop");
     }
@@ -215,17 +226,18 @@ public sealed class IndicatorInvariantSweepTests
         const double price = 50;
         var bars = Flat(price);
         var wrong = new List<string>();
+        var broke = new List<string>();
         var reached = 0;
 
         foreach (var type in Indicators().Where(t => typeof(IMovingAverage).IsAssignableFrom(t)))
         {
-            var indicator = TryConstruct(type);
+            var indicator = TryConstruct(type, broke);
             if (indicator is null)
             {
                 continue;
             }
 
-            var values = Run(indicator, bars);
+            var values = Run(indicator, bars, type.Name, broke);
             if (values is null)
             {
                 continue;
@@ -248,6 +260,7 @@ public sealed class IndicatorInvariantSweepTests
             }
         }
 
+        broke.Should().BeEmpty("an indicator that throws is a failure, not a skip: " + string.Join(" | ", broke));
         reached.Should().BeGreaterThan(100, "there are 180 moving averages to sweep");
         wrong.Should().BeEmpty("a filter that settles anywhere but the constant has a gain that is not 1");
     }
@@ -258,17 +271,18 @@ public sealed class IndicatorInvariantSweepTests
         const double price = 50;
         var bars = Flat(price);
         var wrong = new List<string>();
+        var broke = new List<string>();
         var reached = 0;
 
         foreach (var type in Indicators().Where(t => typeof(IMovingAverage).IsAssignableFrom(t)))
         {
-            var indicator = TryConstruct(type);
+            var indicator = TryConstruct(type, broke);
             if (indicator is null)
             {
                 continue;
             }
 
-            var values = Run(indicator, bars);
+            var values = Run(indicator, bars, type.Name, broke);
             if (values is null)
             {
                 continue;
@@ -307,6 +321,7 @@ public sealed class IndicatorInvariantSweepTests
                 + " (off by " + worst.ToString("G4") + " after the declared warmup)");
         }
 
+        broke.Should().BeEmpty("an indicator that throws is a failure, not a skip: " + string.Join(" | ", broke));
         reached.Should().BeGreaterThan(100);
 
         // Named in full rather than as a collection: an assertion on a list prints the first ten and calls

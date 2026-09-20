@@ -492,7 +492,10 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         var collided = 0;
         foreach (var options in optionsTypes)
         {
-            if (options is null || options.Parameters.Count == 0)
+            // Only a missing options type is a reason to skip. A parameterless one is a real indicator -
+            // ContractHighSpecOptions is mapped and has a public parameterless constructor - and the
+            // constructor emission below already produces ContractHigh() from an empty parameter list.
+            if (options is null)
             {
                 continue;
             }
