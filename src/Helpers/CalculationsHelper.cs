@@ -1468,6 +1468,11 @@ public static class CalculationsHelper
             case MovingAvgType.HybridConvolutionFilter:
                 movingAvgList = stockData.CalculateHybridConvolutionFilter(length).ChainedValues;
                 break;
+            case MovingAvgType.TrueRangeAdjustedExponentialMovingAverage:
+                // This arm was missing, so the type answered with an empty list the moment it was asked for
+                // by calculation rather than by its span fast path - and nothing asks which route it took.
+                movingAvgList = stockData.CalculateTrueRangeAdjustedExponentialMovingAverage(length).ChainedValues;
+                break;
             case MovingAvgType.IIRLeastSquaresEstimate:
                 movingAvgList = stockData.CalculateIIRLeastSquaresEstimate(length).ChainedValues;
                 break;
