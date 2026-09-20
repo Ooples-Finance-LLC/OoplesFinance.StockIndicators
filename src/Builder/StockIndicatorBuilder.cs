@@ -168,6 +168,7 @@ public sealed class StockIndicatorBuilder
         var closes = new List<double>();
         var volumes = new List<double>();
         var dates = new List<DateTime>();
+        var bars = new List<Indicators.Bar>();
 
         await foreach (var bar in source.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -177,26 +178,35 @@ public sealed class StockIndicatorBuilder
             closes.Add(bar.Close);
             volumes.Add(bar.Volume);
             dates.Add(bar.Time);
+            bars.Add(bar);
         }
 
         _configuredSource = IndicatorDataSource.FromBatch(
             new StockData(opens, highs, lows, closes, volumes, dates));
 
-        var handles = new Dictionary<Indicators.IIndicatorOutput, SeriesHandle>();
+        // Everything reachable, not just what was configured: an indicator used as a component or chained
+        // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being
+        // re-implemented by the custom engine.
+        var reachable = new List<Indicators.IIndicator>();
+        var seen = new HashSet<Indicators.IIndicator>(Indicators.IndicatorIdentity.Comparer);
         foreach (var indicator in _configuredIndicators)
+        {
+            CollectReachable(indicator, seen, reachable);
+        }
+
+        var handles = new Dictionary<Indicators.IIndicator, SeriesHandle[]>(Indicators.IndicatorIdentity.Comparer);
+        foreach (var indicator in reachable)
         {
             Indicators.IndicatorContract.RequireComputable(indicator);
 
             if (indicator is not Indicators.IBuiltInIndicator builtIn)
             {
-                // A caller's own indicator needs the state engine, which is the next piece of work. Saying so
-                // beats computing something else and calling it theirs.
-                throw new NotSupportedException(
-                    indicator.GetType().Name + " supplies its own arithmetic, which this run cannot drive yet.");
+                continue;
             }
 
             var series = _indicators.Price();
             var seriesKey = ResolveSeriesKey(series);
+            var slots = new SeriesHandle[indicator.Outputs.Count];
 
             for (var slot = 0; slot < indicator.Outputs.Count; slot++)
             {
@@ -207,22 +217,68 @@ public sealed class StockIndicatorBuilder
                 var spec = outputKey is null
                     ? IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions())
                     : IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions(), outputKey);
-                handles[indicator.Outputs[slot]] = AddIndicator(spec, series, seriesKey, null);
+
+                slots[slot] = AddIndicator(spec, series, seriesKey, null);
             }
+
+            handles[indicator] = slots;
         }
 
         var runtime = Build();
         runtime.Start();
 
-        var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
-        foreach (var pair in handles)
+        var engine = new Indicators.CustomIndicatorEngine(bars, indicator =>
         {
-            series2[pair.Key] = runtime.GetSeries(pair.Value).AsSpan().ToArray();
+            if (!handles.TryGetValue(indicator, out var slots))
+            {
+                return null;
+            }
+
+            var values = new double[slots.Length][];
+            for (var i = 0; i < slots.Length; i++)
+            {
+                values[i] = runtime.GetSeries(slots[i]).AsSpan().ToArray();
+            }
+
+            return values;
+        });
+
+        var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
+        foreach (var indicator in _configuredIndicators)
+        {
+            var values = engine.Compute(indicator);
+            for (var slot = 0; slot < indicator.Outputs.Count; slot++)
+            {
+                series2[indicator.Outputs[slot]] = values[slot];
+            }
         }
 
         return new Indicators.IndicatorRun(runtime, series2, closes.Count);
     }
 
+    /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
+    private static void CollectReachable(
+        Indicators.IIndicator indicator,
+        HashSet<Indicators.IIndicator> seen,
+        List<Indicators.IIndicator> ordered)
+    {
+        if (!seen.Add(indicator))
+        {
+            return;
+        }
+
+        foreach (var component in indicator.Components)
+        {
+            CollectReachable(component, seen, ordered);
+        }
+
+        if (indicator.Source is not null)
+        {
+            CollectReachable(indicator.Source, seen, ordered);
+        }
+
+        ordered.Add(indicator);
+    }
     /// <summary>The published key a multi-output indicator''s slot stands for.</summary>
     private static string? OutputKeyFor(Indicators.IIndicator indicator, int slot) =>
         GeneratedIndicatorOutputs.KeysFor(((Indicators.IBuiltInIndicator)indicator).BatchName) is { } keys
