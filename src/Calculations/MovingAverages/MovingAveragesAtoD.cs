@@ -376,18 +376,21 @@ public static partial class Calculations
             stdDevWindow.Add(stdDev);
 
             var stdDevLow = stdDevWindow.Min;
-            var stdDevFactorAFP = stdDev != 0 ? stdDevLow / stdDev : 0;
-            var stdDevFactorCTP = stdDevLow != 0 ? stdDev / stdDevLow : 0;
+            // stdDevLow is the lowest stdDev in the window, so a stdDev of zero makes both zero and both
+            // ratios 0/0 - two equal deviations, which is 1. Reading them as 0 kills the smoothing factor.
+            var stdDevFactorAFP = stdDev != 0 ? stdDevLow / stdDev : 1;
+            var stdDevFactorCTP = stdDevLow != 0 ? stdDev / stdDevLow : 1;
             var stdDevFactorAFPLow = Math.Min(stdDevFactorAFP, min);
             var stdDevFactorCTPLow = Math.Min(stdDevFactorCTP, min);
             var alphaAfp = (2 * stdDevFactorAFPLow) / (length + 1);
             var alphaCtp = (2 * stdDevFactorCTPLow) / (length + 1);
 
-            var prevEmaAfp = GetLastOrDefault(emaAFPList);
+            // An exponential average starts at a price, not at zero.
+            var prevEmaAfp = i >= 1 ? emaAFPList[i - 1] : currentValue;
             var emaAfp = (alphaAfp * currentValue) + ((1 - alphaAfp) * prevEmaAfp);
             emaAFPList.Add(emaAfp);
 
-            var prevEmaCtp = GetLastOrDefault(emaCTPList);
+            var prevEmaCtp = i >= 1 ? emaCTPList[i - 1] : currentValue;
             var emaCtp = (alphaCtp * currentValue) + ((1 - alphaCtp) * prevEmaCtp);
             emaCTPList.Add(emaCtp);
 
@@ -1212,7 +1215,9 @@ public static partial class Calculations
             }
 
             var prevDwma = GetLastOrDefault(dwmaList);
-            var dwma = weightedSum != 0 ? sum / weightedSum : 0;
+            // Every weight is 1 / distance, so the weights only all vanish when every price in the window is
+            // the same price - and the average of a window of one repeated price is that price, not zero.
+            var dwma = weightedSum != 0 ? sum / weightedSum : currentValue;
             dwmaList.Add(dwma);
 
             var signal = GetCompareSignal(currentValue - dwma, prevVal - prevDwma);

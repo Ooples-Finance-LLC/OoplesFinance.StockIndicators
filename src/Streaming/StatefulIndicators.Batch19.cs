@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -1943,7 +1943,10 @@ internal sealed class VariableIndexDynamicAverageEngine : IMovingAverageSmoother
         var negSum = isFinal ? _negSum.Add(neg, out _) : _negSum.Preview(neg, out _);
         var cmo = posSum + negSum != 0 ? MathHelper.MinOrMax((posSum - negSum) / (posSum + negSum) * 100, 100, -100) : 0;
         var currentCmo = Math.Abs(cmo / 100);
-        var vidya = (value * _alpha * currentCmo) + (_prevVidya * (1 - (_alpha * currentCmo)));
+        // Seeded at the first price, as the batch is: alpha * |CMO| is legitimately zero on a series with
+        // no momentum, and a recursion multiplied by zero never leaves its seed.
+        var prevVidya = _hasPrev ? _prevVidya : value;
+        var vidya = (value * _alpha * currentCmo) + (prevVidya * (1 - (_alpha * currentCmo)));
 
         if (isFinal)
         {

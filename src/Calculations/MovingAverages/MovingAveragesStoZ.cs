@@ -911,7 +911,9 @@ public static partial class Calculations
             var currentCmo = Math.Abs(cmoList[i] / 100);
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var prevVidya = GetLastOrDefault(vidyaList);
+            // Seeded at the first price, not at zero: alpha * |CMO| is legitimately zero on a series with no
+            // momentum, and a recursion multiplied by zero never leaves its seed.
+            var prevVidya = i >= 1 ? vidyaList[i - 1] : currentValue;
             var currentVidya = (currentValue * alpha * currentCmo) + (prevVidya * (1 - (alpha * currentCmo)));
             vidyaList.Add(currentVidya);
 
@@ -1267,7 +1269,9 @@ public static partial class Calculations
             var d1 = hhv - llv;
             var vI = d1 != 0 ? (iS - llv) / d1 : 0;
 
-            var prevVma = GetLastOrDefault(vmaList);
+            // Seeded at the first price, not at zero: vI is legitimately zero when the index has not moved
+            // across the window, and a recursion multiplied by zero never leaves its seed.
+            var prevVma = i >= 1 ? vmaList[i - 1] : currentValue;
             // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. This was
             // (1 - k) * vI * prevVma, which scaled the whole average by vI and pulled it towards zero.
             var vma = ((1 - (k * vI)) * prevVma) + (k * vI * currentValue);
@@ -1406,7 +1410,9 @@ public static partial class Calculations
             var denominator = changeSumWindow.Sum(length);
             var vhf = denominator != 0 ? numerator / denominator : 0;
 
-            var prevVhma = GetLastOrDefault(vhmaList);
+            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
+            // range nor travel, and a tracking rate of zero never leaves the seed.
+            var prevVhma = i >= 1 ? vhmaList[i - 1] : currentValue;
             var vhma = prevVhma + (Pow(vhf, 2) * (currentValue - prevVhma));
             vhmaList.Add(vhma);
 
@@ -2129,7 +2135,9 @@ public static partial class Calculations
 
             var sum = signSumWindow.Sum(length);
             double alpha = Math.Abs(sum) == length ? 1 : 0;
-            var prevSfma = i >= 1 ? sfmaList[i - 1] : sma;
+            // Seeded at the first price, not at an average that has not warmed up yet: on a series whose
+            // average never moves, alpha is zero on every bar and the seed is the whole answer.
+            var prevSfma = i >= 1 ? sfmaList[i - 1] : currentValue;
             var sfma = (alpha * sma) + ((1 - alpha) * prevSfma);
             sfmaList.Add(sfma);
 

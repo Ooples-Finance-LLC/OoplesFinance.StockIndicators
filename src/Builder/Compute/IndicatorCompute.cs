@@ -13020,7 +13020,9 @@ internal static partial class IndicatorCompute
                 coefficientSum += priceDiff;
             }
 
-            output[i] = coefficientSum != 0 ? numerator / coefficientSum : 0;
+            // coefficientSum is a sum of absolute price differences: zero means the window holds one repeated
+            // price, and a weighted average of that window is that price.
+            output[i] = coefficientSum != 0 ? numerator / coefficientSum : input[i];
         }
 
         return buffer;
@@ -13764,7 +13766,9 @@ internal static partial class IndicatorCompute
                 coefficientSum += distance;
             }
 
-            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : 0;
+            // Every coefficient is a sum of squared distances, so a zero total means the window never moved,
+            // and the coefficient-weighted average of a flat window is the level it is flat at.
+            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : input[i];
         }
 
         return buffer;
@@ -14125,8 +14129,10 @@ internal static partial class IndicatorCompute
             double value = 0;
             for (var j = 1; j <= length; j++)
             {
-                var sign = 0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)j / length * Math.PI, 0.99, 0.01)));
-                var d = sign - (0.5 * (1 - Math.Cos(MathHelper.MinOrMax((double)(j - 1) / length, 0.99, 0.01))));
+                // Both cosine arguments are the window position scaled by pi, and neither is clamped, so the
+                // weights d telescope across the window to exactly 1 and a constant series is a fixed point.
+                var sign = 0.5 * (1 - Math.Cos((double)j / length * Math.PI));
+                var d = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / length * Math.PI)));
                 var previousValue = i >= j - 1 ? input[i - (j - 1)] : 0;
                 value += ((sign * prevOutput) + ((1 - sign) * previousValue)) * d;
             }
@@ -14204,7 +14210,9 @@ internal static partial class IndicatorCompute
                 weightedSum += weight;
             }
 
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+            // The weights are summed distances, so they only all vanish on a window that never moves,
+            // whose average is the price it sits at.
+            output[i] = weightedSum != 0 ? sum / weightedSum : input[i];
         }
 
         return buffer;
@@ -14799,7 +14807,10 @@ internal static partial class IndicatorCompute
             var errMea = Math.Abs(priorEstimate - currentValue);
             var errPrv = Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) * -1);
             var prevErr = i >= 1 ? previousError : errPrv;
-            var kg = prevErr != 0 ? prevErr / (prevErr + errMea) : 0;
+            // A gain of prevErr / (prevErr + errMea) is 0/0 when neither the estimate nor the measurement
+            // carries any error - on a series that never moves, every bar. Holding the prior estimate there pins
+            // the filter to whatever it was seeded with; with nothing to disbelieve, take the measurement.
+            var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
             var prevEst = i >= 1 ? output[i - 1] : previousValue;
 
             output[i] = prevEst + (kg * (currentValue - prevEst));
@@ -15633,11 +15644,14 @@ internal static partial class IndicatorCompute
             for (var j = 0; j < length; j++)
             {
                 var prevV = i >= j ? input[i - j] : 0;
-                w += (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
-                vw += prevV * w;
+                // Each bar is weighted by its own Ricker weight, not by the running total of every weight up
+                // to it - against the running total the divisor no longer matches the numerator.
+                var weight = (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
+                w += weight;
+                vw += prevV * weight;
             }
 
-            output[i] = w != 0 ? vw / w : 0;
+            output[i] = w != 0 ? vw / w : input[i];
         }
 
         return buffer;
@@ -15683,7 +15697,9 @@ internal static partial class IndicatorCompute
             signSum.Add(Math.Sign(sma[i] - prevSma));
 
             double alpha = Math.Abs(signSum.Sum(length)) == length ? 1 : 0;
-            var prevSfma = i >= 1 ? output[i - 1] : sma[i];
+            // Seeded at the first price, not at an average that has not warmed up yet: on a series whose
+            // average never moves, alpha is zero on every bar and the seed is the whole answer.
+            var prevSfma = i >= 1 ? output[i - 1] : SpanCompat.AsReadOnlySpan(inputList)[i];
             output[i] = (alpha * sma[i]) + ((1 - alpha) * prevSfma);
         }
 
@@ -16154,7 +16170,9 @@ internal static partial class IndicatorCompute
             var denominator = changeSum.Sum(length);
             var vhf = denominator != 0 ? (window.Max - window.Min) / denominator : 0;
 
-            var prevVhma = i >= 1 ? output[i - 1] : 0;
+            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
+            // range nor travel, and a tracking rate of zero never leaves the seed.
+            var prevVhma = i >= 1 ? output[i - 1] : currentValue;
             output[i] = prevVhma + (MathHelper.Pow(vhf, 2) * (currentValue - prevVhma));
         }
 
@@ -17068,7 +17086,9 @@ internal static partial class IndicatorCompute
 
         var rangeTotal = new RollingSum();
         var deviationWindow = new RollingMinMax(lbLength);
-        double previousAverage = 0;
+        // An exponential average starts at a price. Seeded at zero it spends hundreds of bars climbing out of
+        // a value the series never held, and on a series with no volatility it never leaves it at all.
+        var previousAverage = count > 0 ? input[0] : 0;
         for (var i = 0; i < count; i++)
         {
             rangeTotal.Add(atr[i]);
@@ -17080,7 +17100,9 @@ internal static partial class IndicatorCompute
             deviationWindow.Add(deviation);
 
             var lowestDeviation = deviationWindow.Min;
-            var factor = deviation != 0 ? lowestDeviation / deviation : 0;
+            // A deviation of zero makes lowestDeviation zero too, so the ratio is 0/0 - two equal deviations,
+            // which is 1. Reading it as 0 kills the smoothing factor entirely.
+            var factor = deviation != 0 ? lowestDeviation / deviation : 1;
             var alpha = 2 * Math.Min(factor, min) / (length + 1);
 
             output[i] = (alpha * input[i]) + ((1 - alpha) * previousAverage);

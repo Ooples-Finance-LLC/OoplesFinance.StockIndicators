@@ -10012,10 +10012,14 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
         var diff = stdDevA - stdDevB;
         var stdDev = diff >= 0 ? MathHelper.Sqrt(diff) : 0;
         var stdDevLow = isFinal ? _stdDevMin.Add(stdDev, out _) : _stdDevMin.Preview(stdDev, out _);
-        var stdDevFactorAfp = stdDev != 0 ? stdDevLow / stdDev : 0;
+        // stdDevLow is the lowest stdDev in the window, so a stdDev of zero makes both zero and the ratio
+        // 0/0 - two equal deviations, which is 1. Reading it as 0 kills the smoothing factor entirely.
+        var stdDevFactorAfp = stdDev != 0 ? stdDevLow / stdDev : 1;
         var stdDevFactorAfpLow = Math.Min(stdDevFactorAfp, _min);
         var alphaAfp = (2 * stdDevFactorAfpLow) / (_length + 1);
-        var emaAfp = (alphaAfp * value) + ((1 - alphaAfp) * _prevEmaAfp);
+        // An exponential average starts at a price, not at zero, as the batch does.
+        var prevEmaAfp = _hasPrev ? _prevEmaAfp : value;
+        var emaAfp = (alphaAfp * value) + ((1 - alphaAfp) * prevEmaAfp);
 
         if (isFinal)
         {
