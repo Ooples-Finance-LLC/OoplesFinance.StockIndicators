@@ -68,6 +68,15 @@ public static class Bars
     /// <exception cref="ArgumentNullException">Thrown when bars is null.</exception>
     public static IBarSource From(IEnumerable<Bar> bars) => From(bars, bar => bar);
 
+    /// <summary>
+    /// A live source bars are pushed into.
+    /// </summary>
+    /// <remarks>
+    /// Whatever raises bars - a broker's websocket, a message queue, a test - calls Publish. Seed it from
+    /// history with WarmedWith so the first live bar is not an average of one value.
+    /// </remarks>
+    public static LiveBarSource Live() => new();
+
     private sealed class EnumerableBarSource<T> : IBarSource
     {
         private readonly IEnumerable<T> _items;

@@ -162,6 +162,13 @@ public sealed class StockIndicatorBuilder
         var source = _barSource ?? throw new InvalidOperationException(
             "No bar source. Call ConfigureSource before BuildAsync.");
 
+        // Before the drain, not after: a live source never runs out, so reading it into lists first blocks
+        // forever. That is exactly what it did.
+        if (!source.IsFinite)
+        {
+            return await BuildLiveAsync(source, cancellationToken).ConfigureAwait(false);
+        }
+
         var opens = new List<double>();
         var highs = new List<double>();
         var lows = new List<double>();
@@ -180,6 +187,7 @@ public sealed class StockIndicatorBuilder
             dates.Add(bar.Time);
             bars.Add(bar);
         }
+
 
         _configuredSource = IndicatorDataSource.FromBatch(
             new StockData(opens, highs, lows, closes, volumes, dates));
@@ -253,9 +261,64 @@ public sealed class StockIndicatorBuilder
             }
         }
 
-        return new Indicators.IndicatorRun(runtime, series2, closes.Count);
+        return new Indicators.IndicatorRun(runtime, series2, bars);
     }
 
+    /// <summary>
+    /// A run over a source whose bars have not run out.
+    /// </summary>
+    /// <remarks>
+    /// Built-ins are driven by their streaming states, which is the only way to compute them a bar at a time.
+    /// Not every indicator has one - the factory returns null - and saying which one cannot run live beats
+    /// publishing a number from something else.
+    /// </remarks>
+    /// <exception cref="NotSupportedException">Thrown when an indicator cannot be computed a bar at a time.</exception>
+    private async Task<Indicators.IIndicatorRun> BuildLiveAsync(
+        Indicators.IBarSource source, CancellationToken cancellationToken)
+    {
+        var reachable = new List<Indicators.IIndicator>();
+        var seen = new HashSet<Indicators.IIndicator>(Indicators.IndicatorIdentity.Comparer);
+        foreach (var indicator in _configuredIndicators)
+        {
+            CollectReachable(indicator, seen, reachable);
+        }
+
+        var states = new Dictionary<Indicators.IIndicator, object>(Indicators.IndicatorIdentity.Comparer);
+        var outputKeys = new Dictionary<Indicators.IIndicator, IReadOnlyList<string>>(
+            Indicators.IndicatorIdentity.Comparer);
+
+        foreach (var indicator in reachable)
+        {
+            Indicators.IndicatorContract.RequireComputable(indicator);
+
+            if (indicator is Indicators.IBuiltInIndicator builtIn)
+            {
+                var spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
+                var streaming = StreamingIndicatorFactory.CreateState(spec)
+                    ?? throw new NotSupportedException(
+                        indicator.GetType().Name + " has no streaming state, so it cannot run against a live "
+                        + "source. Use a finite source, or an indicator that can be computed a bar at a time.");
+
+                states[indicator] = streaming;
+                outputKeys[indicator] = GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName);
+                continue;
+            }
+
+            var own = indicator switch
+            {
+                Indicators.Indicator single => single.CreateState(),
+                Indicators.MultiOutputIndicator multi => multi.CreateState(),
+                _ => null
+            };
+
+            states[indicator] = own ?? throw new NotSupportedException(
+                indicator.GetType().Name + " supplies no arithmetic.");
+        }
+
+        var run = new Indicators.LiveIndicatorRun(source, reachable, states, outputKeys, _configuredIndicators);
+        await run.WarmAsync(cancellationToken).ConfigureAwait(false);
+        return run;
+    }
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
     private static void CollectReachable(
         Indicators.IIndicator indicator,

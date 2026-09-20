@@ -22,7 +22,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 /// one of its typed output members.
 /// </para>
 /// </remarks>
-public interface IIndicatorRun : IDisposable
+public interface IIndicatorRun : IAsyncEnumerable<IBarSnapshot>, IDisposable
 {
     /// <summary>The series this indicator published.</summary>
     /// <exception cref="ArgumentNullException">Thrown when indicator is null.</exception>
@@ -39,6 +39,10 @@ public interface IIndicatorRun : IDisposable
 
     /// <summary>Whether the source has run out, which a live one never does.</summary>
     bool IsComplete { get; }
+
+    /// <summary>The most recent bar and what every indicator made of it.</summary>
+    /// <exception cref="InvalidOperationException">Thrown before any bar has arrived.</exception>
+    IBarSnapshot Latest { get; }
 }
 
 /// <summary>
@@ -54,12 +58,15 @@ internal sealed class IndicatorRun : IIndicatorRun
 {
     private readonly Dictionary<IIndicatorOutput, double[]> _series;
     private readonly IndicatorRuntime _runtime;
+    private readonly IReadOnlyList<Bar> _bars;
 
-    internal IndicatorRun(IndicatorRuntime runtime, Dictionary<IIndicatorOutput, double[]> series, int barCount)
+    internal IndicatorRun(IndicatorRuntime runtime, Dictionary<IIndicatorOutput, double[]> series,
+        IReadOnlyList<Bar> bars)
     {
         _runtime = runtime;
         _series = series;
-        BarCount = barCount;
+        _bars = bars;
+        BarCount = bars.Count;
     }
 
     /// <inheritdoc/>
@@ -98,6 +105,30 @@ internal sealed class IndicatorRun : IIndicatorRun
 
     /// <inheritdoc/>
     public bool IsComplete => true;
+
+    /// <inheritdoc/>
+    public IBarSnapshot Latest => BarCount > 0
+        ? new BarSnapshot(_bars[BarCount - 1], BarCount - 1, _series)
+        : throw new InvalidOperationException("No bars have arrived yet.");
+
+    /// <summary>
+    /// Every bar in order, so a loop over history reads exactly like a loop over a live feed.
+    /// </summary>
+    /// <remarks>
+    /// A finite run has already computed everything by the time it is handed back, so this replays what it
+    /// holds rather than doing work. The loop ends, which is what history means.
+    /// </remarks>
+    public async IAsyncEnumerator<IBarSnapshot> GetAsyncEnumerator(
+        CancellationToken cancellationToken = default)
+    {
+        for (var i = 0; i < BarCount; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new BarSnapshot(_bars[i], i, _series);
+        }
+
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
 
     /// <inheritdoc/>
     public void Dispose() => _runtime.Dispose();
