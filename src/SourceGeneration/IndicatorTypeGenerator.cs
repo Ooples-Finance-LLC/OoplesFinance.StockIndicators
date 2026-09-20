@@ -430,7 +430,16 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var isAverage = movingAverages.Contains(target.IndicatorName);
+            // A type that selects one named output of an average is not itself that average: LinRegSlope
+            // publishes LinearRegression's "Slope" series, so tagging it IMovingAverage would let it be
+            // handed to anything asking for an average, and IBuiltInMovingAverage.AvgType would then
+            // silently substitute the regression line for the slope. Only the indicator's primary series -
+            // no output key, or the first key it publishes - is the average itself.
+            var isAverage = movingAverages.Contains(target.IndicatorName)
+                && (target.OutputKey is null
+                    || (outputsOf.TryGetValue(target.IndicatorName, out var ownKeys)
+                        && ownKeys.Count > 0
+                        && string.Equals(ownKeys[0], target.OutputKey, StringComparison.Ordinal)));
             var interfaces = new List<string> { "IBuiltInIndicator" };
             if (isAverage)
             {
