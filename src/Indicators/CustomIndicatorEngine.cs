@@ -44,6 +44,12 @@ internal sealed class IndicatorIdentity : IEqualityComparer<IIndicator>
 internal sealed class CustomIndicatorEngine
 {
     private readonly Dictionary<IIndicator, double[][]> _computed = new(IndicatorIdentity.Comparer);
+
+    // Of() refuses a cycle it can see in the Source chain, which is not every cycle: a component reached
+    // through Uses(), or a mix of the two, closes a loop Of() never looks at. Compute recurses before it
+    // records anything in _computed, so such a graph recurses until the stack ends. This is what is
+    // currently being visited, and reaching one of them again is the cycle.
+    private readonly HashSet<IIndicator> _visiting = new(IndicatorIdentity.Comparer);
     private readonly IReadOnlyList<Bar> _bars;
     private readonly Func<IIndicator, double[][]?> _resolveBuiltIn;
 
@@ -61,6 +67,16 @@ internal sealed class CustomIndicatorEngine
         {
             return already;
         }
+
+        if (!_visiting.Add(indicator))
+        {
+            throw new InvalidOperationException(
+                indicator.GetType().Name + " depends on itself through its components or its source. "
+                + "An indicator cannot be part of what it reads.");
+        }
+
+        try
+        {
 
         // A built-in was computed by the evaluator, which is the whole point of routing them there: the
         // custom engine never re-implements a calculation the library already has.
@@ -84,8 +100,8 @@ internal sealed class CustomIndicatorEngine
                 indicator.GetType().Name + " supplies no arithmetic and is not a built-in indicator.");
         }
 
-        // Depth first, so a component is ready before the indicator that reads it. Of() already refuses a
-        // cycle at the call that would close one, so recursion here terminates.
+        // Depth first, so a component is ready before the indicator that reads it. Recursion terminates
+        // because _visiting refuses a graph that comes back to something already on the stack.
         var components = new double[indicator.Components.Count][];
         for (var i = 0; i < indicator.Components.Count; i++)
         {
@@ -154,6 +170,11 @@ internal sealed class CustomIndicatorEngine
 
         _computed[indicator] = results;
         return results;
+        }
+        finally
+        {
+            _visiting.Remove(indicator);
+        }
     }
 
     private static Bar WithClose(in Bar bar, double close) =>

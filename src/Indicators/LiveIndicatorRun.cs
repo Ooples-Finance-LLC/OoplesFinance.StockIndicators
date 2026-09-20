@@ -97,11 +97,16 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     }
 
     /// <inheritdoc/>
+    private bool _isComplete;
+
     public int BarCount => _barCount;
 
     /// <inheritdoc/>
     /// <remarks>Never true: this run exists because the source does not run out.</remarks>
-    public bool IsComplete => false;
+    // A live source ends when its producer says so - LiveBarSource.Complete drains what is pending and
+    // then ends ReadAsync. Hard-coding false meant a caller could never tell a finished feed from a quiet
+    // one, so it is set when the enumeration runs to completion rather than being abandoned.
+    public bool IsComplete => _isComplete;
 
     /// <inheritdoc/>
     public IBarSnapshot Latest => _barCount > 0
@@ -126,6 +131,10 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
             Advance(bar, record: true);
             yield return Snapshot(bar, _barCount - 1);
         }
+
+        // Only on a normal end. A caller who stops enumerating early, or cancels, leaves the source live and
+        // never reaches this line.
+        _isComplete = true;
     }
 
     /// <inheritdoc/>
