@@ -1062,7 +1062,10 @@ public static partial class Calculations
             var errMea = Math.Abs(priorEst - currentValue);
             var errPrv = Math.Abs(MinPastValues(i, 1, currentValue - prevValue) * -1);
             var prevErr = i >= 1 ? errList[i - 1] : errPrv;
-            var kg = prevErr != 0 ? prevErr / (prevErr + errMea) : 0;
+            // A gain of prevErr / (prevErr + errMea) is 0/0 when neither the estimate nor the measurement
+            // carries any error - on a series that never moves, every bar. Holding the prior estimate there
+            // pins the filter to whatever it was seeded with; with nothing to disbelieve, take the measurement.
+            var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
             var prevEst = i >= 1 ? estList[i - 1] : prevValue;
 
             var est = prevEst + (kg * (currentValue - prevEst));

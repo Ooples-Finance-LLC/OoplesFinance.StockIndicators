@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 
 using OoplesFinance.StockIndicators.Helpers;
@@ -3296,7 +3296,9 @@ internal static class MovingAverageCore
                 weightedSum += weight;
             }
 
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+            // Every weight is 1 / distance, so the weights only all vanish when every price in the window is
+            // the same price - and the average of a window of one repeated price is that price, not zero.
+            output[i] = weightedSum != 0 ? sum / weightedSum : input[i];
         }
     }
 

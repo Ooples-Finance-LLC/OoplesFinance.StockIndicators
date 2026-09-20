@@ -13020,7 +13020,9 @@ internal static partial class IndicatorCompute
                 coefficientSum += priceDiff;
             }
 
-            output[i] = coefficientSum != 0 ? numerator / coefficientSum : 0;
+            // coefficientSum is a sum of absolute price differences: zero means the window holds one repeated
+            // price, and a weighted average of that window is that price.
+            output[i] = coefficientSum != 0 ? numerator / coefficientSum : input[i];
         }
 
         return buffer;
@@ -13764,7 +13766,9 @@ internal static partial class IndicatorCompute
                 coefficientSum += distance;
             }
 
-            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : 0;
+            // Every coefficient is a sum of squared distances, so a zero total means the window never moved,
+            // and the coefficient-weighted average of a flat window is the level it is flat at.
+            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : input[i];
         }
 
         return buffer;
@@ -14204,7 +14208,9 @@ internal static partial class IndicatorCompute
                 weightedSum += weight;
             }
 
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
+            // The weights are summed distances, so they only all vanish on a window that never moves,
+            // whose average is the price it sits at.
+            output[i] = weightedSum != 0 ? sum / weightedSum : input[i];
         }
 
         return buffer;
@@ -14799,7 +14805,10 @@ internal static partial class IndicatorCompute
             var errMea = Math.Abs(priorEstimate - currentValue);
             var errPrv = Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) * -1);
             var prevErr = i >= 1 ? previousError : errPrv;
-            var kg = prevErr != 0 ? prevErr / (prevErr + errMea) : 0;
+            // A gain of prevErr / (prevErr + errMea) is 0/0 when neither the estimate nor the measurement
+            // carries any error - on a series that never moves, every bar. Holding the prior estimate there pins
+            // the filter to whatever it was seeded with; with nothing to disbelieve, take the measurement.
+            var kg = prevErr + errMea != 0 ? prevErr / (prevErr + errMea) : 1;
             var prevEst = i >= 1 ? output[i - 1] : previousValue;
 
             output[i] = prevEst + (kg * (currentValue - prevEst));
