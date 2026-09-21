@@ -30,7 +30,6 @@ public sealed class SingleOutputParityTests
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
         "SmoothedVolatilityBands.MiddleBand",
-        "VariableLengthMovingAverage",
     };
 
     [Fact]

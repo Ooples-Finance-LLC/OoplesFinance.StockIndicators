@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 
 // The table still names specs that are obsolete, so that a caller holding one keeps computing until the spec
@@ -788,7 +788,9 @@ internal static class BuilderArmTargets
         [typeof(VaradiOscillatorSpecOptions)] = new(IndicatorName.VaradiOscillator),
         [typeof(VariableAdaptiveMovingAverageSpecOptions)] = new(IndicatorName.VariableAdaptiveMovingAverage),
         [typeof(VariableIndexDynamicAverageSpecOptions)] = new(IndicatorName.VariableIndexDynamicAverage),
-        [typeof(VariableLengthMovingAverageSpecOptions)] = new(IndicatorName.VariableLengthMovingAverage, null, new BuilderArgument("Length", "minLength"), new BuilderArgument("Length", "maxLength", v => v is int n ? n * 2 : v)),
+        // The upper bound was bound as twice the lower one, matching an arm that invented it that way, so
+        // this comparison agreed with the arm rather than with the batch. The options carry both bounds now.
+        [typeof(VariableLengthMovingAverageSpecOptions)] = new(IndicatorName.VariableLengthMovingAverage, null, new BuilderArgument("Length", "minLength"), new BuilderArgument("MaxLength", "maxLength")),
         [typeof(VariableMovingAverageBandsSpecOptions)] = new(IndicatorName.VariableMovingAverageBands, "MiddleBand"),
         [typeof(VarianceSpecOptions)] = new(IndicatorName.Variance),
         [typeof(VerticalHorizontalFilterSpecOptions)] = new(IndicatorName.VerticalHorizontalFilter),

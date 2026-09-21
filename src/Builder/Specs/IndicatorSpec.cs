@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Enums;
+using OoplesFinance.StockIndicators.Enums;
 
 namespace OoplesFinance.StockIndicators.Builder.Specs;
 
@@ -7538,16 +7538,28 @@ public sealed class VariableAdaptiveMovingAverageSpecOptions : IIndicatorSpecOpt
 /// </summary>
 public sealed class VariableLengthMovingAverageSpecOptions : IIndicatorSpecOptions
 {
+    // The batch walks its smoothing length between TWO bounds. Carrying only one of them left the arm to
+    // invent the other as twice the first, so the default upper bound was 10 where the batch uses 50 - and
+    // the length-50 average the decision reads was a length-10 average instead.
     public VariableLengthMovingAverageSpecOptions(int length)
-        : this(length, MovingAvgType.SimpleMovingAverage)
+        : this(length, 50, MovingAvgType.SimpleMovingAverage)
     {
     }
 
     public VariableLengthMovingAverageSpecOptions(int length, MovingAvgType maType)
+        : this(length, 50, maType)
+    {
+    }
+
+    public VariableLengthMovingAverageSpecOptions(int length, int maxLength, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaxLength = Math.Max(Math.Max(1, maxLength), Length);
         MaType = maType;
     }
+
+    /// <summary>The upper bound the smoothing length may walk up to.</summary>
+    public int MaxLength { get; }
 
     public int Length { get; }
     public MovingAvgType MaType { get; }

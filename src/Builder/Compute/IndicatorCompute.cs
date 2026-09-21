@@ -1002,7 +1002,7 @@ internal static partial class IndicatorCompute
             VariableAdaptiveMovingAverageSpecOptions vama => ComputeVariableAdaptiveMovingAverageFast(data, context, vama.Length,
                 vama.MaType),
             VariableLengthMovingAverageSpecOptions vlma => ComputeVariableLengthMovingAverageFast(data, context,
-                vlma.Length, vlma.Length * 2, vlma.MaType),
+                vlma.Length, vlma.MaxLength, vlma.MaType),
             VerticalHorizontalMovingAverageSpecOptions vhma => ComputeVerticalHorizontalMovingAverageFast(data, context, vhma.Length),
             VolatilityMovingAverageSpecOptions volma => ComputeVolatilityMovingAverageFast(data, context, volma.Length, volma.MaType),
             VolatilityWaveMovingAverageSpecOptions vwma => ComputeVolatilityWaveMovingAverageFast(data, context, vwma.Length,
