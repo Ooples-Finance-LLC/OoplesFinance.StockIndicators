@@ -575,6 +575,26 @@ needs no change beyond its declared return type. Going the other way, `TryGetSer
 `ReadOnlyMemory<double>`; call `.Span` to read it without copying, or `.ToArray()` if you need an array you
 own. A snapshot keeps its own copy of what it publishes, so it stays valid after the runtime is disposed.
 
+## StockData and TickerData are no longer [Serializable]
+
+The attribute served `BinaryFormatter`, which has been obsolete since .NET 5, is off by default
+in .NET 8 and was removed from the runtime in .NET 9 - so of this package's targets it could only
+still work on net461. Neither type ever implemented `ISerializable`, and nothing in the library
+binary-serializes them.
+
+If you were binary-serializing `StockData` or `TickerData` on .NET Framework, move to an explicit
+serializer. `System.Text.Json` ignores `[Serializable]` entirely, so JSON round-trips are
+unaffected by this change:
+
+```csharp
+// Unaffected - System.Text.Json never used the attribute
+var json = JsonSerializer.Serialize(tickerData);
+var back = JsonSerializer.Deserialize<TickerData>(json);
+```
+
+`MissingAccelerationPackageException` keeps the attribute, where exception serialization is still
+conventional on .NET Framework.
+
 ## Getting Help
 
 - [GitHub Issues](https://github.com/ooples/OoplesFinance.StockIndicators/issues)

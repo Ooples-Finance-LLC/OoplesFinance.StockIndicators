@@ -14,7 +14,6 @@ using System.Runtime.InteropServices;
 
 namespace OoplesFinance.StockIndicators.Models;
 
-[Serializable]
 public class StockData : IStockData
 {
     private List<double>? _inputValues;
@@ -446,39 +445,6 @@ public class StockData : IStockData
         ReadOnlyMemory<double> highPrices, ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices,
         ReadOnlyMemory<double> volumes, ReadOnlyMemory<DateTime> dates) =>
         new(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
-
-    /// <summary>
-    /// Re-checks the column invariant on an instance that arrived by deserialization.
-    /// </summary>
-    /// <remarks>
-    /// Deserialization does not run a constructor, so the length check below is bypassed entirely by it and
-    /// an instance can arrive describing columns of different lengths. Everything downstream assumes they
-    /// describe one series between them, so it is checked again here rather than surfacing later as an
-    /// indicator reading past the end of the shortest column.
-    /// </remarks>
-    /// <exception cref="System.Runtime.Serialization.SerializationException">
-    /// Thrown when the columns do not describe the same bars.
-    /// </exception>
-    [System.Runtime.Serialization.OnDeserialized]
-    internal void ValidateAfterDeserialization(System.Runtime.Serialization.StreamingContext context)
-    {
-        if (!_columnsInitialized || !_openMemory.HasValue)
-        {
-            return;
-        }
-
-        var length = _openMemory.Value.Length;
-        if (ColumnLength(_highMemory) != length || ColumnLength(_lowMemory) != length
-            || ColumnLength(_closeMemory) != length || ColumnLength(_volumeMemory) != length
-            || (_dateMemory.HasValue && _dateMemory.Value.Length != length))
-        {
-            throw new System.Runtime.Serialization.SerializationException(
-                "Every column must describe the same bars, and this instance arrived with columns of "
-                + "different lengths.");
-        }
-    }
-
-    private static int ColumnLength(ReadOnlyMemory<double>? column) => column?.Length ?? -1;
 
     private StockData(ReadOnlyMemory<double> openPrices, ReadOnlyMemory<double> highPrices,
         ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices, ReadOnlyMemory<double> volumes,
