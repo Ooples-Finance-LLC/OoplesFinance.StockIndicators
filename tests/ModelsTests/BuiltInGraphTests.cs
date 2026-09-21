@@ -84,6 +84,46 @@ public sealed class BuiltInGraphTests
         middle.Should().NotEqual(standard, "the supplied average is not the default one");
     }
 
+    [Fact]
+    public async Task AnIndicatorThatCannotTakeAnOwnAverageSaysSoRatherThanIgnoringIt()
+    {
+        var bars = Walk();
+
+        // 370 generated types accept an IMovingAverage and declare it with Uses(), and none of them has
+        // arithmetic of its own to consume it yet - the batch calculation behind each names its smoother by
+        // MovingAvgType, which cannot name a caller's type. Until that arithmetic exists the only honest
+        // answer is to refuse: returning the default average would be the right number for a question
+        // nobody asked. When one of them learns to consume its component, this assertion is what fails and
+        // says so.
+        var build = async () =>
+        {
+            using var run = await new StockIndicatorBuilder()
+                .ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(new Rsi(14, new AlwaysSeven()))
+                .BuildAsync();
+        };
+
+        (await build.Should().ThrowAsync<NotSupportedException>())
+            .WithMessage("*AlwaysSeven*", "the message names the component that could not be honoured");
+    }
+
+    [Fact]
+    public async Task AnIndicatorGivenOneOfOurAveragesStillUsesTheBatchCalculation()
+    {
+        var bars = Walk();
+        var named = new Rsi(14, new Sma(20));
+        var plain = new Rsi(14);
+
+        using var run = await new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(named, plain)
+            .BuildAsync();
+
+        // One of ours collapses into the MovingAvgType its options type takes, so it stays on the evaluator
+        // and answers exactly as it always did. The refusal above must not have caught this case too.
+        run[named].ToArray().Should().NotBeEmpty("a built-in average is still computed by the batch");
+    }
+
     /// <summary>An average that is not one of ours and answers a constant, so using it is unmistakable.</summary>
     private sealed class AlwaysSeven : IndicatorBase, IMovingAverage
     {

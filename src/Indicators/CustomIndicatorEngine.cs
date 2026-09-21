@@ -117,6 +117,24 @@ internal sealed class CustomIndicatorEngine
 
         if (state is null && indicator is IBuiltInIndicator && _createBuiltInState is not null)
         {
+            // The streaming state is built from CreateOptions(), which names a smoother by MovingAvgType.
+            // A component that is not one of ours has no member there, so it would be dropped and the
+            // indicator would answer with its default - the right number for a question nobody asked. 370
+            // generated types are in this position: they declare the component correctly and have no
+            // arithmetic of their own to consume it yet. Refusing is the only honest answer until they do.
+            foreach (var component in indicator.Components)
+            {
+                if (component is not IBuiltInMovingAverage)
+                {
+                    throw new NotSupportedException(
+                        indicator.GetType().Name + " cannot yet take " + component.GetType().Name
+                        + " as a component: it has no arithmetic of its own, and the batch calculation "
+                        + "behind it names a moving average by MovingAvgType, which cannot name your type. "
+                        + "Use one of the library's averages here, or compute this indicator from a custom "
+                        + "indicator of your own.");
+                }
+            }
+
             (state, streamingKeys) = _createBuiltInState(indicator);
         }
 
