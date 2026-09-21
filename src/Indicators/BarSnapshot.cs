@@ -34,19 +34,48 @@ public interface IBarSnapshot
 
     /// <summary>Where this bar sits in the run, counting from zero.</summary>
     int Index { get; }
+
+    /// <summary>
+    /// Whether every configured indicator has had at least its <see cref="IIndicator.WarmupBars"/> inputs.
+    /// </summary>
+    /// <remarks>
+    /// False means the values on this snapshot are arithmetic over too little history to mean anything. A
+    /// live run suppresses these bars unless it was asked for them, so a caller who never opted in only ever
+    /// sees true.
+    /// </remarks>
+    bool IsWarmedUp { get; }
 }
 
 /// <summary>One bar of a run, reading from series the run already holds.</summary>
 internal sealed class BarSnapshot : IBarSnapshot
 {
-    private readonly IReadOnlyDictionary<IIndicatorOutput, double[]> _series;
+    // Two shapes, because the two runs hold their series differently and neither should pay for the other.
+    // A finite run has every series already and shares it, reading this bar out by index at no cost. A live
+    // run has no finished array to share, so it hands over this bar's values alone - it used to copy every
+    // series in full on every bar, which allocated the whole run again each time and went quadratic over a
+    // feed that does not end. The interface only ever exposes this bar either way.
+    private readonly IReadOnlyDictionary<IIndicatorOutput, double[]>? _series;
+    private readonly IReadOnlyDictionary<IIndicatorOutput, double>? _values;
 
     internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double[]> series)
     {
         Bar = bar;
         Index = index;
         _series = series;
+        IsWarmedUp = true;
     }
+
+    internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double> values,
+        bool isWarmedUp)
+    {
+        Bar = bar;
+        Index = index;
+        _values = values;
+        IsWarmedUp = isWarmedUp;
+    }
+
+    /// <inheritdoc/>
+    public bool IsWarmedUp { get; }
 
     /// <inheritdoc/>
     public Bar Bar { get; }
@@ -71,7 +100,19 @@ internal sealed class BarSnapshot : IBarSnapshot
         {
             if (output is null) throw new ArgumentNullException(nameof(output));
 
-            if (!_series.TryGetValue(output, out var values))
+            if (_values is not null)
+            {
+                if (!_values.TryGetValue(output, out var value))
+                {
+                    throw new KeyNotFoundException(
+                        "That series was not configured on this run. Pass the indicator to "
+                        + "ConfigureIndicators before reading it.");
+                }
+
+                return value;
+            }
+
+            if (_series is null || !_series.TryGetValue(output, out var values))
             {
                 throw new KeyNotFoundException(
                     "That series was not configured on this run. Pass the indicator to ConfigureIndicators "

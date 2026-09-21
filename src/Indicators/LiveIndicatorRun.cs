@@ -40,6 +40,13 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     private readonly Dictionary<IIndicator, double[]> _current;
     private Bar _latestBar;
     private int _barCount;
+    private bool _isComplete;
+
+    // Inputs seen across warm-up and live bars, against the largest WarmupBars any configured indicator
+    // declares. The builder feeds whatever ReadWarmupAsync returns without checking it was enough, so an
+    // Sma(14) warmed with four bars was publishing from its first live bar.
+    private int _inputsSeen;
+    private readonly int _warmupRequired;
 
     internal LiveIndicatorRun(
         IBarSource source,
@@ -57,6 +64,10 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         foreach (var indicator in ordered)
         {
             _current[indicator] = new double[indicator.Outputs.Count];
+            if (indicator.WarmupBars > _warmupRequired)
+            {
+                _warmupRequired = indicator.WarmupBars;
+            }
         }
 
         foreach (var indicator in configured)
@@ -97,8 +108,6 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     }
 
     /// <inheritdoc/>
-    private bool _isComplete;
-
     public int BarCount => _barCount;
 
     /// <inheritdoc/>
@@ -108,9 +117,18 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     // one, so it is set when the enumeration runs to completion rather than being abandoned.
     public bool IsComplete => _isComplete;
 
+    /// <summary>
+    /// Whether bars computed over less than <see cref="IIndicator.WarmupBars"/> inputs are published.
+    /// </summary>
+    /// <remarks>
+    /// False by default: anything a caller receives has settled. Set it to see every bar from the first,
+    /// with <see cref="IBarSnapshot.IsWarmedUp"/> saying which are worth acting on.
+    /// </remarks>
+    internal bool PublishBeforeWarmup { get; set; }
+
     /// <inheritdoc/>
     public IBarSnapshot Latest => _barCount > 0
-        ? Snapshot(_latestBar, _barCount - 1)
+        ? Snapshot(_latestBar, _barCount - 1, _inputsSeen >= _warmupRequired)
         : throw new InvalidOperationException("No bars have arrived yet.");
 
     /// <summary>Feeds the warm-up bars through without publishing a snapshot for any of them.</summary>
@@ -129,7 +147,14 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         await foreach (var bar in _source.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             Advance(bar, record: true);
-            yield return Snapshot(bar, _barCount - 1);
+
+            // A bar computed over too little history is arithmetic, not information. It is suppressed
+            // unless the caller asked to see it, and when it is shown IsWarmedUp says what it is.
+            var warmedUp = _inputsSeen >= _warmupRequired;
+            if (warmedUp || PublishBeforeWarmup)
+            {
+                yield return Snapshot(bar, _barCount - 1, warmedUp);
+            }
         }
 
         // Only on a normal end. A caller who stops enumerating early, or cancels, leaves the source live and
@@ -149,21 +174,24 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         }
     }
 
-    private IBarSnapshot Snapshot(Bar bar, int index)
+    private IBarSnapshot Snapshot(Bar bar, int index, bool warmedUp)
     {
-        var frozen = new Dictionary<IIndicatorOutput, double[]>(_series.Count);
+        // This bar's value from each series, not a copy of every series up to it. The copy allocated the
+        // whole run again on every bar, so a feed that does not end went quadratic and never stopped.
+        var values = new Dictionary<IIndicatorOutput, double>(_series.Count);
         foreach (var pair in _series)
         {
-            frozen[pair.Key] = [.. pair.Value];
+            values[pair.Key] = pair.Value.Count > index ? pair.Value[index] : double.NaN;
         }
 
-        return new BarSnapshot(bar, index, frozen);
+        return new BarSnapshot(bar, index, values, warmedUp);
     }
 
     /// <summary>Drives every indicator one bar, in dependency order.</summary>
     private void Advance(Bar bar, bool record)
     {
         _latestBar = bar;
+        _inputsSeen++;
 
         foreach (var indicator in _ordered)
         {

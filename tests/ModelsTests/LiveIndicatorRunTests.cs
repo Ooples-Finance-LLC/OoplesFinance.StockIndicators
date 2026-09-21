@@ -122,11 +122,16 @@ public sealed class LiveIndicatorRunTests
         var values = new List<double>();
         await foreach (var snapshot in run)
         {
+            snapshot.IsWarmedUp.Should().BeTrue("a published bar has had its indicator's WarmupBars inputs");
             values.Add(snapshot[sma]);
         }
 
-        values.Should().HaveCount(4);
-        values[3].Should().BeApproximately(30, 1e-9, "the mean of 20, 30 and 40");
+        // Four bars in, two out. An Sma(3) has nothing to say about the first two - its mean over one bar
+        // and over two is arithmetic, not a three bar mean - so the run does not publish them. Both values
+        // that arrive are real means of three closes.
+        values.Should().HaveCount(2);
+        values[0].Should().BeApproximately(20, 1e-9, "the mean of 10, 20 and 30");
+        values[1].Should().BeApproximately(30, 1e-9, "the mean of 20, 30 and 40");
     }
 
     [Fact]
