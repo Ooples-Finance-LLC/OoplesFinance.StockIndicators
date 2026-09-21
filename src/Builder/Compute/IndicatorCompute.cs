@@ -22428,77 +22428,10 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeMovingAverageBandsFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var fastMaArray = pool.Rent(count);
-        var slowMaArray = pool.Rent(count);
-
-        try
-        {
-            var fastMaSpan = fastMaArray.AsSpan(0, count);
-            var slowMaSpan = slowMaArray.AsSpan(0, count);
-
-            // Calculate fast and slow MAs
-            MovingAverage(data, maType, fastLength, close, fastMaSpan);
-            MovingAverage(data, maType, slowLength, close, slowMaSpan);
-
-            // Return middle band (average of fast and slow)
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                buffer.WritableSpan[i] = (fastMaSpan[i] + slowMaSpan[i]) / 2;
-            }
-
-            return buffer;
-        }
-        finally
-        {
-            pool.Return(fastMaArray);
-            pool.Return(slowMaArray);
-        }
-    }
-
     /// <summary>
     /// Computes Moving Average Band Width using zero-allocation fast path.
     /// Returns the width between fast and slow MA bands.
     /// </summary>
-    internal static ComputeBuffer ComputeMovingAverageBandWidthFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
-    {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var pool = ArrayPool<double>.Shared;
-        var fastMaArray = pool.Rent(count);
-        var slowMaArray = pool.Rent(count);
-
-        try
-        {
-            var fastMaSpan = fastMaArray.AsSpan(0, count);
-            var slowMaSpan = slowMaArray.AsSpan(0, count);
-
-            // Calculate fast and slow MAs
-            MovingAverage(data, maType, fastLength, close, fastMaSpan);
-            MovingAverage(data, maType, slowLength, close, slowMaSpan);
-
-            // Return band width
-            var buffer = context.Rent(count);
-            for (var i = 0; i < count; i++)
-            {
-                var middle = (fastMaSpan[i] + slowMaSpan[i]) / 2;
-                buffer.WritableSpan[i] = middle != 0 ? Math.Abs(fastMaSpan[i] - slowMaSpan[i]) * mult / middle * 100 : 0;
-            }
-
-            return buffer;
-        }
-        finally
-        {
-            pool.Return(fastMaArray);
-            pool.Return(slowMaArray);
-        }
-    }
-
     /// <summary>
     /// Computes Moving Average Channel using zero-allocation fast path.
     /// Returns the MA of high-low range.
