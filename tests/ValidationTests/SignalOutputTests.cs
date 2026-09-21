@@ -59,6 +59,57 @@ public sealed class SignalOutputTests
         signal.Should().NotEqual(line, "an average of the line is not the line");
     }
 
+    [Theory]
+    [InlineData("Floor")]
+    [InlineData("Fibonacci")]
+    [InlineData("Woodie")]
+    public void TheRemainingPivotTypesPublishEveryLevelPerPeriod(string family)
+    {
+        var bars = Walk(400);
+        var batchInput = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList());
+
+        var threeDeep = new[] { "Pivot", "S1", "S2", "S3", "R1", "R2", "R3", "M1", "M2", "M3", "M4", "M5", "M6" };
+        var (indicator, batch, keys) = family switch
+        {
+            "Floor" => ((IIndicator)new FloorPivotPoint(), batchInput.CalculateFloorPivotPoints(), threeDeep),
+            "Fibonacci" => (new FibonacciPivotPoint(), batchInput.CalculateFibonacciPivotPoints(), threeDeep),
+            _ => (new WoodiePivotPoint(), batchInput.CalculateWoodiePivotPoints(),
+                new[] { "Pivot", "S1", "S2", "S3", "S4", "R1", "R2", "R3", "R4", "M1", "M2", "M3", "M4" }),
+        };
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        indicator.Outputs.Should().HaveCount(keys.Length);
+        for (var slot = 0; slot < keys.Length; slot++)
+        {
+            run[indicator.Outputs[slot]].ToArray().Should().Equal(
+                batch.OutputValues[keys[slot]].ToArray(), family + "'s " + keys[slot] + " is published on its own key");
+        }
+
+        // A level belongs to a period, so it holds across that period's bars; and the supports sit below
+        // the pivot with the resistances above it, nesting outward. Every key used to carry the pivot,
+        // which holds none of this.
+        var pivot = run[indicator.Outputs[0]].ToArray();
+        pivot.Distinct().Should().HaveCountLessThan(pivot.Length / 2);
+
+        var support1 = run[indicator.Outputs[Array.IndexOf(keys, "S1")]].ToArray();
+        var support2 = run[indicator.Outputs[Array.IndexOf(keys, "S2")]].ToArray();
+        var resistance1 = run[indicator.Outputs[Array.IndexOf(keys, "R1")]].ToArray();
+        var resistance2 = run[indicator.Outputs[Array.IndexOf(keys, "R2")]].ToArray();
+        for (var i = 0; i < pivot.Length; i++)
+        {
+            support2[i].Should().BeLessThanOrEqualTo(support1[i]);
+            support1[i].Should().BeLessThanOrEqualTo(resistance1[i]);
+            resistance1[i].Should().BeLessThanOrEqualTo(resistance2[i]);
+        }
+    }
+
     [Fact]
     public void CamarillaPublishesAllSeventeenOfItsLevels()
     {

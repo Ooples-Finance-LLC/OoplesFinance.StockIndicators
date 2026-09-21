@@ -1160,7 +1160,23 @@ internal static partial class IndicatorCompute
                 stc.MaType),
             SmoothedRateOfChangeSpecOptions sroc => ComputeSmoothedRateOfChangeFast(data, context, sroc.RocLength,
                 sroc.SmoothLength, sroc.MaType),
-            FloorPivotPointSpecOptions _ => ComputeFloorPivotPointFast(data, context),
+            FloorPivotPointSpecOptions _ => spec.OutputKey switch
+            {
+                null or "Pivot" => ComputeFloorPivotPointFast(data, context),
+                "S1" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Support1),
+                "S2" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Support2),
+                "S3" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Support3),
+                "R1" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Resistance1),
+                "R2" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Resistance2),
+                "R3" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Resistance3),
+                "M1" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid1),
+                "M2" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid2),
+                "M3" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid3),
+                "M4" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid4),
+                "M5" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid5),
+                "M6" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid6),
+                _ => null
+            },
             FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointS1Fast(data, context),
             FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointR1Fast(data, context),
             CamarillaPivotPointSpecOptions _ => spec.OutputKey switch
@@ -1184,8 +1200,40 @@ internal static partial class IndicatorCompute
                 "M6" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid6),
                 _ => null
             },
-            WoodiePivotPointSpecOptions _ => ComputeWoodiePivotPointFast(data, context),
-            FibonacciPivotPointSpecOptions _ => ComputeFibonacciPivotPointFast(data, context),
+            WoodiePivotPointSpecOptions _ => spec.OutputKey switch
+            {
+                null or "Pivot" => ComputeWoodiePivotPointFast(data, context),
+                "S1" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Support1),
+                "S2" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Support2),
+                "S3" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Support3),
+                "S4" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Support4),
+                "R1" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Resistance1),
+                "R2" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Resistance2),
+                "R3" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Resistance3),
+                "R4" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Resistance4),
+                "M1" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Mid1),
+                "M2" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Mid2),
+                "M3" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Mid3),
+                "M4" => ComputeWoodiePivotPointFast(data, context, series: PivotSeries.Mid4),
+                _ => null
+            },
+            FibonacciPivotPointSpecOptions _ => spec.OutputKey switch
+            {
+                null or "Pivot" => ComputeFibonacciPivotPointFast(data, context),
+                "S1" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Support1),
+                "S2" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Support2),
+                "S3" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Support3),
+                "R1" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Resistance1),
+                "R2" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Resistance2),
+                "R3" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Resistance3),
+                "M1" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid1),
+                "M2" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid2),
+                "M3" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid3),
+                "M4" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid4),
+                "M5" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid5),
+                "M6" => ComputeFibonacciPivotPointFast(data, context, series: PivotSeries.Mid6),
+                _ => null
+            },
             DemarkPivotPointSpecOptions _ => spec.OutputKey switch
             {
                 null or "Pivot" => ComputeDemarkPivotPointFast(data, context),
@@ -19213,14 +19261,92 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Floor Pivot Point using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context)
+    /// <summary>
+    /// Selects which level a pivot routine publishes. The three-support types leave the fourth unused.
+    /// </summary>
+    internal enum PivotSeries
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        /// <summary>The pivot itself.</summary>
+        Pivot,
+
+        /// <summary>Support levels one to four.</summary>
+        Support1, Support2, Support3, Support4,
+
+        /// <summary>Resistance levels one to four.</summary>
+        Resistance1, Resistance2, Resistance3, Resistance4,
+
+        /// <summary>Midpoints one to six.</summary>
+        Mid1, Mid2, Mid3, Mid4, Mid5, Mid6
+    }
+
+    /// <summary>
+    /// Projects one level per period onto the bars of its own period.
+    /// </summary>
+    private static ComputeBuffer PivotLevels(StockData data, ComputeContext context, InputLength inputLength,
+        Func<int, List<double>, List<double>, List<double>, double> level)
+    {
+        // Every pivot type shares this: one level per PERIOD, derived from the PRECEDING period, projected
+        // back onto that period's bars. See ComputeDemarkPivotPointFast for what passing raw per-bar spans
+        // to TrendCore did instead - it moved the level on every bar and matched the batch on no series at
+        // all, the primary included.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
+
+        var periods = inputList.Count;
+        var levels = new List<double>(periods);
+        for (var i = 0; i < periods; i++)
+        {
+            levels.Add(level(i, inputList, highList, lowList));
+        }
+
+        var groupIndexes = CalculationsHelper.GetInputLengthGroupIndexes(data, inputLength);
+        var expanded = CalculationsHelper.ExpandPeriodValuesToBars(levels, groupIndexes);
+
         var buffer = context.Rent(data.Count);
-        TrendCore.FloorPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        var output = buffer.WritableSpan;
+        output.Clear();
+        for (var i = 0; i < output.Length && i < expanded.Count; i++)
+        {
+            output[i] = expanded[i];
+        }
+
         return buffer;
+    }
+
+    internal static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context,
+        InputLength inputLength = InputLength.Day, PivotSeries series = PivotSeries.Pivot)
+    {
+        return PivotLevels(data, context, inputLength, (i, inputList, highList, lowList) =>
+        {
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var range = prevHigh - prevLow;
+
+            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            var support1 = (pivot * 2) - prevHigh;
+            var resistance1 = (pivot * 2) - prevLow;
+            var support2 = pivot - range;
+            var resistance2 = pivot + range;
+            var support3 = support1 - range;
+            var resistance3 = resistance1 + range;
+
+            return series switch
+            {
+                PivotSeries.Support1 => support1,
+                PivotSeries.Support2 => support2,
+                PivotSeries.Support3 => support3,
+                PivotSeries.Resistance1 => resistance1,
+                PivotSeries.Resistance2 => resistance2,
+                PivotSeries.Resistance3 => resistance3,
+                PivotSeries.Mid1 => (support3 + support2) / 2,
+                PivotSeries.Mid2 => (support2 + support1) / 2,
+                PivotSeries.Mid3 => (support1 + pivot) / 2,
+                PivotSeries.Mid4 => (resistance1 + pivot) / 2,
+                PivotSeries.Mid5 => (resistance2 + resistance1) / 2,
+                PivotSeries.Mid6 => (resistance3 + resistance2) / 2,
+                _ => pivot
+            };
+        });
     }
 
     /// <summary>
@@ -19342,27 +19468,87 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Woodie Pivot Point using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeWoodiePivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeWoodiePivotPointFast(StockData data, ComputeContext context,
+        InputLength inputLength = InputLength.Day, PivotSeries series = PivotSeries.Pivot)
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.WoodiePivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
-        return buffer;
+        return PivotLevels(data, context, inputLength, (i, inputList, highList, lowList) =>
+        {
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var range = prevHigh - prevLow;
+
+            // Woodie weights the close twice and divides by four, where the other types take the mean of
+            // three, and its third levels are reflections of the period's extremes rather than offsets of
+            // the first ones.
+            var pivot = (prevHigh + prevLow + (prevClose * 2)) / 4;
+            var support1 = (pivot * 2) - prevHigh;
+            var resistance1 = (pivot * 2) - prevLow;
+            var support2 = pivot - range;
+            var resistance2 = pivot + range;
+            var support3 = prevLow - (2 * (prevHigh - pivot));
+            var resistance3 = prevHigh + (2 * (pivot - prevLow));
+            var support4 = support3 - range;
+            var resistance4 = resistance3 + range;
+
+            return series switch
+            {
+                PivotSeries.Support1 => support1,
+                PivotSeries.Support2 => support2,
+                PivotSeries.Support3 => support3,
+                PivotSeries.Support4 => support4,
+                PivotSeries.Resistance1 => resistance1,
+                PivotSeries.Resistance2 => resistance2,
+                PivotSeries.Resistance3 => resistance3,
+                PivotSeries.Resistance4 => resistance4,
+                PivotSeries.Mid1 => (support1 + support2) / 2,
+                PivotSeries.Mid2 => (pivot + support1) / 2,
+                PivotSeries.Mid3 => (resistance1 + pivot) / 2,
+                PivotSeries.Mid4 => (resistance1 + resistance2) / 2,
+                _ => pivot
+            };
+        });
     }
 
     /// <summary>
     /// Computes Fibonacci Pivot Point using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFibonacciPivotPointFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeFibonacciPivotPointFast(StockData data, ComputeContext context,
+        InputLength inputLength = InputLength.Day, PivotSeries series = PivotSeries.Pivot)
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.FibonacciPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
-        return buffer;
+        return PivotLevels(data, context, inputLength, (i, inputList, highList, lowList) =>
+        {
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var range = prevHigh - prevLow;
+
+            // The retracements are 0.382, the inverse of the golden ratio, and the whole range.
+            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            var support1 = pivot - (range * 0.382);
+            var support2 = pivot - (range * MathHelper.InversePhi);
+            var support3 = pivot - (range * 1);
+            var resistance1 = pivot + (range * 0.382);
+            var resistance2 = pivot + (range * MathHelper.InversePhi);
+            var resistance3 = pivot + (range * 1);
+
+            return series switch
+            {
+                PivotSeries.Support1 => support1,
+                PivotSeries.Support2 => support2,
+                PivotSeries.Support3 => support3,
+                PivotSeries.Resistance1 => resistance1,
+                PivotSeries.Resistance2 => resistance2,
+                PivotSeries.Resistance3 => resistance3,
+                PivotSeries.Mid1 => (support3 + support2) / 2,
+                PivotSeries.Mid2 => (support2 + support1) / 2,
+                PivotSeries.Mid3 => (support1 + pivot) / 2,
+                PivotSeries.Mid4 => (resistance1 + pivot) / 2,
+                PivotSeries.Mid5 => (resistance2 + resistance1) / 2,
+                PivotSeries.Mid6 => (resistance3 + resistance2) / 2,
+                _ => pivot
+            };
+        });
     }
 
     /// <summary>
