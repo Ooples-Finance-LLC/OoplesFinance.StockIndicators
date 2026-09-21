@@ -89,6 +89,52 @@ public sealed class IndicatorDataSource
     }
 
     /// <summary>
+    /// Creates a batch data source over columns the caller already holds, without copying them.
+    /// </summary>
+    /// <remarks>
+    /// <para><see cref="FromBatch(StockData, IDataProviderDefaults?)"/> copies every column into a
+    /// <c>List&lt;double&gt;</c>, which at 10,000 bars is 961,168 of the 1,208,528 bytes a run allocates. This
+    /// overload reads the caller's arrays where they already are, so that cost is not paid at all.</para>
+    /// <para>The caller keeps ownership. These are views, not copies: writing to one of these arrays while a
+    /// runtime built over it is computing changes what that run computes. Hand over arrays the run can read
+    /// undisturbed, or use <see cref="FromBatch(StockData, IDataProviderDefaults?)"/>, which copies and is
+    /// therefore immune.</para>
+    /// </remarks>
+    /// <param name="openPrices">The open column.</param>
+    /// <param name="highPrices">The high column.</param>
+    /// <param name="lowPrices">The low column.</param>
+    /// <param name="closePrices">The close column.</param>
+    /// <param name="volumes">The volume column.</param>
+    /// <param name="dates">The bar timestamps.</param>
+    /// <param name="defaults">Optional provider defaults.</param>
+    /// <exception cref="ArgumentException">Thrown when the columns are not all the same length.</exception>
+    public static IndicatorDataSource FromColumns(
+        ReadOnlyMemory<double> openPrices,
+        ReadOnlyMemory<double> highPrices,
+        ReadOnlyMemory<double> lowPrices,
+        ReadOnlyMemory<double> closePrices,
+        ReadOnlyMemory<double> volumes,
+        ReadOnlyMemory<DateTime> dates,
+        IDataProviderDefaults? defaults = null)
+    {
+        var count = closePrices.Length;
+        if (openPrices.Length != count || highPrices.Length != count || lowPrices.Length != count
+            || volumes.Length != count || dates.Length != count)
+        {
+            // StockData answers a count of 0 for mismatched columns rather than throwing, which turns a caller's
+            // slicing mistake into an empty result far from where it was made. At the entry point it can be said.
+            throw new ArgumentException(
+                "All columns must have the same length. Received open=" + openPrices.Length
+                + ", high=" + highPrices.Length + ", low=" + lowPrices.Length + ", close=" + count
+                + ", volume=" + volumes.Length + ", dates=" + dates.Length + ".",
+                nameof(closePrices));
+        }
+
+        var data = StockData.FromColumnViews(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
+        return new IndicatorDataSource(IndicatorSourceKind.Batch, data, null, defaults, null, null);
+    }
+
+    /// <summary>
     /// Creates a batch data source from a collection of stock data.
     /// The data is merged into a single StockData instance.
     /// </summary>

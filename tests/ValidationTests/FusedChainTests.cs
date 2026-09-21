@@ -56,7 +56,7 @@ public sealed class FusedChainTests : GlobalTestData
             "the SMA feeding the EMA is read by nothing else and was not asked for, so the chain is fused");
         plainEvaluator.FusedChainHits.Should().Be(0,
             "asking for the SMA itself means it has to be published, so that arm computes it as a series");
-        fused[Ema].Should().Equal(plain[Ema],
+        fused[Ema].ToArray().Should().Equal(plain[Ema].ToArray(),
             "the fused chain drives the same states over the same bars, so it returns the same values exactly");
     }
 
@@ -92,7 +92,7 @@ public sealed class FusedChainTests : GlobalTestData
 
         fusedEvaluator.FusedChainHits.Should().Be(1, "a cascaded pair of exponential averages is a chain too");
         plainEvaluator.FusedChainHits.Should().Be(0, "asking for the faster average means it has to be published");
-        fused[Ema].Should().Equal(plain[Ema], "the cascade fuses without moving a single value");
+        fused[Ema].ToArray().Should().Equal(plain[Ema].ToArray(), "the cascade fuses without moving a single value");
     }
 
     /// <summary>
@@ -117,7 +117,9 @@ public sealed class FusedChainTests : GlobalTestData
         var first = evaluator.Evaluate(new[] { Bars, Ema, Second });
         var second = evaluator.Evaluate(new[] { Bars });
 
-        first[Bars].Should().BeSameAs(second[Bars],
+        // ReadOnlyMemory equality is identity - the same underlying object, offset and length - so this still
+        // asserts one materialisation handed to both, which BeSameAs asserted when the currency was an array.
+        first[Bars].Equals(second[Bars]).Should().BeTrue(
             "the base series is materialised once for the evaluation and handed to everything that reads it");
     }
 
@@ -176,7 +178,7 @@ public sealed class FusedChainTests : GlobalTestData
         fusedEvaluator.FusedChainHits.Should().Be(1,
             "which series the head reads is settled by feeding it that series, not by refusing to fuse");
         plainEvaluator.FusedChainHits.Should().Be(0, "asking for the SMA itself means it has to be published");
-        fused[Ema].Should().Equal(plain[Ema],
+        fused[Ema].ToArray().Should().Equal(plain[Ema].ToArray(),
             "the fused head reads the caller's input series, which is what the fast arm it replaces reads");
     }
 
