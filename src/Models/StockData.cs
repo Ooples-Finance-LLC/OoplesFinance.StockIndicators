@@ -273,29 +273,42 @@ public class StockData : IStockData
     }
 
     /// <summary>The open column, without copying it.</summary>
-    internal ReadOnlySpan<double> OpenSpan => _openMemory.HasValue
-        ? _openMemory.Value.Span
-        : Compatibility.SpanCompat.AsReadOnlySpan(OpenPrices);
+    // The materialised list first, then the adopted view. Reading a column materialises it, and the list
+    // handed back is the column from then on - a caller that writes to it has replaced those values. Reading
+    // the view instead would compute from what the caller replaced.
+    internal ReadOnlySpan<double> OpenSpan => _openPrices is not null
+        ? Compatibility.SpanCompat.AsReadOnlySpan(_openPrices)
+        : _openMemory.HasValue
+            ? _openMemory.Value.Span
+            : Compatibility.SpanCompat.AsReadOnlySpan(OpenPrices);
 
     /// <summary>The high column, without copying it.</summary>
-    internal ReadOnlySpan<double> HighSpan => _highMemory.HasValue
-        ? _highMemory.Value.Span
-        : Compatibility.SpanCompat.AsReadOnlySpan(HighPrices);
+    internal ReadOnlySpan<double> HighSpan => _highPrices is not null
+        ? Compatibility.SpanCompat.AsReadOnlySpan(_highPrices)
+        : _highMemory.HasValue
+            ? _highMemory.Value.Span
+            : Compatibility.SpanCompat.AsReadOnlySpan(HighPrices);
 
     /// <summary>The low column, without copying it.</summary>
-    internal ReadOnlySpan<double> LowSpan => _lowMemory.HasValue
-        ? _lowMemory.Value.Span
-        : Compatibility.SpanCompat.AsReadOnlySpan(LowPrices);
+    internal ReadOnlySpan<double> LowSpan => _lowPrices is not null
+        ? Compatibility.SpanCompat.AsReadOnlySpan(_lowPrices)
+        : _lowMemory.HasValue
+            ? _lowMemory.Value.Span
+            : Compatibility.SpanCompat.AsReadOnlySpan(LowPrices);
 
     /// <summary>The close column, without copying it.</summary>
-    internal ReadOnlySpan<double> CloseSpan => _closeMemory.HasValue
-        ? _closeMemory.Value.Span
-        : Compatibility.SpanCompat.AsReadOnlySpan(ClosePrices);
+    internal ReadOnlySpan<double> CloseSpan => _closePrices is not null
+        ? Compatibility.SpanCompat.AsReadOnlySpan(_closePrices)
+        : _closeMemory.HasValue
+            ? _closeMemory.Value.Span
+            : Compatibility.SpanCompat.AsReadOnlySpan(ClosePrices);
 
     /// <summary>The volume column, without copying it.</summary>
-    internal ReadOnlySpan<double> VolumeSpan => _volumeMemory.HasValue
-        ? _volumeMemory.Value.Span
-        : Compatibility.SpanCompat.AsReadOnlySpan(Volumes);
+    internal ReadOnlySpan<double> VolumeSpan => _volumes is not null
+        ? Compatibility.SpanCompat.AsReadOnlySpan(_volumes)
+        : _volumeMemory.HasValue
+            ? _volumeMemory.Value.Span
+            : Compatibility.SpanCompat.AsReadOnlySpan(Volumes);
 
     /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
     internal void RestoreSeries(List<double> published, List<double> chained)
