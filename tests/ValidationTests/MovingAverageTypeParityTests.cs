@@ -29,8 +29,6 @@ public sealed class MovingAverageTypeParityTests
     // Indicators that ignore the average they are given. Delete an entry when the arm is fixed.
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
-        "ChaikinOscillator",
-        "RangeActionVerificationIndex",
     };
 
     [Fact]

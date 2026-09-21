@@ -252,7 +252,7 @@ internal static partial class IndicatorCompute
             NviSpecOptions nvi => ComputeNviFast(data, context, nvi.Length),
             PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length),
             PvtSpecOptions pvt => ComputePvtFast(data, context, pvt.Length),
-            ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength),
+            ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength, co.MaType),
             EmvSpecOptions => ComputeEmvFast(data, context),
             KvoSpecOptions kvo => ComputeKlingerVolumeFast(data, context, kvo.Length),
             MfiSpecOptions mfi => ComputeMoneyFlowIndexFast(data, context, mfi.Length),
@@ -1114,7 +1114,8 @@ internal static partial class IndicatorCompute
             RecursiveStochasticSpecOptions rs => ComputeRecursiveStochasticFast(data, context, rs.Length, rs.Alpha),
             ShinoharaIntensityRatioASpecOptions sira => ComputeShinoharaIntensityRatioAFast(data, context, sira.Length),
             ShinoharaIntensityRatioBSpecOptions sirb => ComputeShinoharaIntensityRatioBFast(data, context, sirb.Length),
-            RangeActionVerificationIndexSpecOptions ravi => ComputeRangeActionVerificationIndexFast(data, context, ravi.FastLength, ravi.SlowLength),
+            RangeActionVerificationIndexSpecOptions ravi => ComputeRangeActionVerificationIndexFast(data, context, ravi.FastLength,
+                ravi.SlowLength, ravi.MaType),
             WilliamsAccumulationDistributionSpecOptions _ => ComputeWilliamsAccumulationDistributionFast(data, context),
             TotalPowerIndicatorSpecOptions tpi => ComputeTotalPowerIndicatorFast(data, context, tpi.Length1, tpi.Length2,
                 tpi.MaType),
@@ -2942,23 +2943,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chaikin Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChaikinOscillatorFast(StockData data, ComputeContext context, int fastLength = 3, int slowLength = 10)
+    internal static ComputeBuffer ComputeChaikinOscillatorFast(StockData data, ComputeContext context, int fastLength = 3,
+        int slowLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
+        // CalculateChaikinOscillator is the gap between two averages OF THE ACCUMULATION DISTRIBUTION LINE,
+        // taken with whichever average it was given. VolumeCore.ChaikinOscillator has no average to give it,
+        // so the type the caller configured reached nothing.
+        using var line = ComputeAccumulationDistributionLineFast(data, context);
+        var adl = line.Span;
+        var count = adl.Length;
+
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, adl, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, adl, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var fastSpan = fast.Span;
+        var slowSpan = slow.Span;
         for (var i = 0; i < count; i++)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            output[i] = fastSpan[i] - slowSpan[i];
         }
-        var buffer = context.Rent(count);
-        VolumeCore.ChaikinOscillator(high, low, close, volume, buffer.WritableSpan, fastLength, slowLength);
+
         return buffer;
     }
 
@@ -18384,11 +18392,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Range Action Verification Index (RAVI) using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7, int slowLength = 65)
+    internal static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7,
+        int slowLength = 65, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.RangeActionVerificationIndex(close, buffer.WritableSpan, fastLength, slowLength);
+        // CalculateRangeActionVerificationIndex is the gap between two averages of the CHAINED series as a
+        // percentage of the slower one, taken with whichever average it was given.
+        // OscillatorCore.RangeActionVerificationIndex has no average to give it - the arm took no maType at
+        // all - and it read the close rather than the chained series.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var fastSpan = fast.Span;
+        var slowSpan = slow.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = slowSpan[i] != 0 ? (fastSpan[i] - slowSpan[i]) / slowSpan[i] * 100 : 0;
+        }
+
         return buffer;
     }
 
