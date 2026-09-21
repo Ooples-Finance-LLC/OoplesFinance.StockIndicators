@@ -60,6 +60,28 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void AdxPublishesItsTwoDirectionalIndicatorsAndNotTheAdxLineThreeTimes()
+    {
+        var bars = Walk(150);
+        var adx = new Adx();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(adx)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateAverageDirectionalIndex();
+
+        run[adx.DiPlus].ToArray().Should().Equal(batch.OutputValues["DiPlus"].ToArray());
+        run[adx.DiMinus].ToArray().Should().Equal(batch.OutputValues["DiMinus"].ToArray());
+        run[adx.Value].ToArray().Should().Equal(batch.OutputValues["Adx"].ToArray());
+    }
+
+    [Fact]
     public void AroonPublishesItsTwoLegsAndNotTheOscillatorThreeTimes()
     {
         var bars = Walk(150);

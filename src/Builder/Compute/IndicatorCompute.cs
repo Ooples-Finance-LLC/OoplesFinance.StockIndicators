@@ -228,7 +228,15 @@ internal static partial class IndicatorCompute
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.EmaLength, mi.SumLength,
                 mi.MaType),
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
-            AdxSpecOptions adx => ComputeAdxFast(data, context, adx.Length, adx.MaType),
+            AdxSpecOptions adx => spec.OutputKey switch
+            {
+                // The two directional indicators are what the ADX line is the smoothed spread of, and
+                // DirectionalIndicators already returns both of them.
+                "DiPlus" => ComputeDiPlusFast(data, context, adx.Length, adx.MaType),
+                "DiMinus" => ComputeDiMinusFast(data, context, adx.Length, adx.MaType),
+                null or "Adx" => ComputeAdxFast(data, context, adx.Length, adx.MaType),
+                _ => null
+            },
 
             // Volume
             ObvSpecOptions obv => ComputeObvFast(data, context, obv.Length),
@@ -1170,7 +1178,13 @@ internal static partial class IndicatorCompute
             },
             AdaptiveExponentialMovingAverageSpecOptions aema => ComputeAdaptiveExponentialMovingAverageFast(data, context,
                 aema.Length, aema.MaType),
-            AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length, adx2.MaType),
+            AverageDirectionalIndexSpecOptions adx2 => spec.OutputKey switch
+            {
+                "DiPlus" => ComputeDiPlusFast(data, context, adx2.Length, adx2.MaType),
+                "DiMinus" => ComputeDiMinusFast(data, context, adx2.Length, adx2.MaType),
+                null or "Adx" => ComputeAverageDirectionalIndexFast(data, context, adx2.Length, adx2.MaType),
+                _ => null
+            },
             AverageTrueRangeSpecOptions atr2 => ComputeAverageTrueRangeFast(data, context, atr2.Length, atr2.MaType),
             ChandeMomentumOscillatorSpecOptions cmo2 => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length),
             // Length and MaType reach only the Signal line of CalculateEaseOfMovement, not the series
@@ -2213,6 +2227,28 @@ internal static partial class IndicatorCompute
         }
 
         return (plusBuffer, minusBuffer);
+    }
+
+    /// <summary>
+    /// Computes the upward directional indicator that the ADX is built from.
+    /// </summary>
+    internal static ComputeBuffer ComputeDiPlusFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var (plusBuffer, minusBuffer) = DirectionalIndicators(data, context, length, maType);
+        minusBuffer.Dispose();
+        return plusBuffer;
+    }
+
+    /// <summary>
+    /// Computes the downward directional indicator that the ADX is built from.
+    /// </summary>
+    internal static ComputeBuffer ComputeDiMinusFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    {
+        var (plusBuffer, minusBuffer) = DirectionalIndicators(data, context, length, maType);
+        plusBuffer.Dispose();
+        return minusBuffer;
     }
 
     internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14,
