@@ -1163,7 +1163,27 @@ internal static partial class IndicatorCompute
             FloorPivotPointSpecOptions _ => ComputeFloorPivotPointFast(data, context),
             FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointS1Fast(data, context),
             FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointR1Fast(data, context),
-            CamarillaPivotPointSpecOptions _ => ComputeCamarillaPivotPointFast(data, context),
+            CamarillaPivotPointSpecOptions _ => spec.OutputKey switch
+            {
+                null or "Pivot" => ComputeCamarillaPivotPointFast(data, context),
+                "S1" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Support1),
+                "S2" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Support2),
+                "S3" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Support3),
+                "S4" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Support4),
+                "S5" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Support5),
+                "R1" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Resistance1),
+                "R2" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Resistance2),
+                "R3" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Resistance3),
+                "R4" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Resistance4),
+                "R5" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Resistance5),
+                "M1" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid1),
+                "M2" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid2),
+                "M3" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid3),
+                "M4" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid4),
+                "M5" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid5),
+                "M6" => ComputeCamarillaPivotPointFast(data, context, series: CamarillaPivotSeries.Mid6),
+                _ => null
+            },
             WoodiePivotPointSpecOptions _ => ComputeWoodiePivotPointFast(data, context),
             FibonacciPivotPointSpecOptions _ => ComputeFibonacciPivotPointFast(data, context),
             DemarkPivotPointSpecOptions _ => spec.OutputKey switch
@@ -19232,13 +19252,90 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Camarilla Pivot Point using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context)
+    /// <summary>
+    /// Selects which of the seventeen series the Camarilla pivot routine publishes.
+    /// </summary>
+    internal enum CamarillaPivotSeries
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        /// <summary>The pivot itself.</summary>
+        Pivot,
+
+        /// <summary>Support levels one to five.</summary>
+        Support1, Support2, Support3, Support4, Support5,
+
+        /// <summary>Resistance levels one to five.</summary>
+        Resistance1, Resistance2, Resistance3, Resistance4, Resistance5,
+
+        /// <summary>Midpoints one to six.</summary>
+        Mid1, Mid2, Mid3, Mid4, Mid5, Mid6
+    }
+
+    internal static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context,
+        InputLength inputLength = InputLength.Day, CamarillaPivotSeries series = CamarillaPivotSeries.Pivot)
+    {
+        // Per PERIOD, like every pivot: see ComputeDemarkPivotPointFast for why the per-bar spans this used
+        // to pass to TrendCore cannot match the batch on any series, the primary included.
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
+
+        var periods = inputList.Count;
+        var levels = new List<double>(periods);
+        for (var i = 0; i < periods; i++)
+        {
+            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var prevHigh = i >= 1 ? highList[i - 1] : 0;
+            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+
+            // The batch reads the PREVIOUS period once the series has one, and falls back to the current
+            // period only on the first, so current and previous are the same value everywhere after bar 0.
+            var close = i >= 1 ? prevClose : inputList[i];
+            var high = i >= 1 ? prevHigh : highList[i];
+            var low = i >= 1 ? prevLow : lowList[i];
+            var range = high - low;
+
+            var support1 = close - (0.0916 * range);
+            var support2 = close - (0.183 * range);
+            var support3 = close - (0.275 * range);
+            var support4 = close - (0.55 * range);
+            var resistance1 = close + (0.0916 * range);
+            var resistance2 = close + (0.183 * range);
+            var resistance3 = close + (0.275 * range);
+            var resistance4 = close + (0.55 * range);
+            var resistance5 = low != 0 ? high / low * close : 0;
+            var support5 = close - (resistance5 - close);
+
+            levels.Add(series switch
+            {
+                CamarillaPivotSeries.Support1 => support1,
+                CamarillaPivotSeries.Support2 => support2,
+                CamarillaPivotSeries.Support3 => support3,
+                CamarillaPivotSeries.Support4 => support4,
+                CamarillaPivotSeries.Support5 => support5,
+                CamarillaPivotSeries.Resistance1 => resistance1,
+                CamarillaPivotSeries.Resistance2 => resistance2,
+                CamarillaPivotSeries.Resistance3 => resistance3,
+                CamarillaPivotSeries.Resistance4 => resistance4,
+                CamarillaPivotSeries.Resistance5 => resistance5,
+                CamarillaPivotSeries.Mid1 => (support3 + support2) / 2,
+                CamarillaPivotSeries.Mid2 => (support2 + support1) / 2,
+                CamarillaPivotSeries.Mid3 => (resistance2 + resistance1) / 2,
+                CamarillaPivotSeries.Mid4 => (resistance3 + resistance2) / 2,
+                CamarillaPivotSeries.Mid5 => (resistance3 + resistance4) / 2,
+                CamarillaPivotSeries.Mid6 => (support4 + support3) / 2,
+                _ => (prevHigh + prevLow + prevClose) / 3
+            });
+        }
+
+        var groupIndexes = CalculationsHelper.GetInputLengthGroupIndexes(data, inputLength);
+        var expanded = CalculationsHelper.ExpandPeriodValuesToBars(levels, groupIndexes);
+
         var buffer = context.Rent(data.Count);
-        TrendCore.CamarillaPivotPoint(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
+        var output = buffer.WritableSpan;
+        output.Clear();
+        for (var i = 0; i < output.Length && i < expanded.Count; i++)
+        {
+            output[i] = expanded[i];
+        }
+
         return buffer;
     }
 

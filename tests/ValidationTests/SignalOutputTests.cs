@@ -60,6 +60,46 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void CamarillaPublishesAllSeventeenOfItsLevels()
+    {
+        var bars = Walk(400);
+        var camarilla = new CamarillaPivotPoint();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(camarilla)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateCamarillaPivotPoints();
+
+        var keys = new[] { "Pivot", "S1", "S2", "S3", "S4", "S5", "R1", "R2", "R3", "R4", "R5", "M1", "M2", "M3", "M4", "M5", "M6" };
+        camarilla.Outputs.Should().HaveCount(keys.Length);
+
+        for (var slot = 0; slot < keys.Length; slot++)
+        {
+            run[camarilla.Outputs[slot]].ToArray().Should().Equal(
+                batch.OutputValues[keys[slot]].ToArray(), "the " + keys[slot] + " level is published on its own key");
+        }
+
+        // The supports and resistances fan out symmetrically around the close, so the bands are ordered.
+        // Every one of these keys used to carry the pivot, which satisfies no ordering at all.
+        var s1 = run[camarilla.S1].ToArray();
+        var s4 = run[camarilla.S4].ToArray();
+        var r1 = run[camarilla.R1].ToArray();
+        var r4 = run[camarilla.R4].ToArray();
+        for (var i = 0; i < s1.Length; i++)
+        {
+            s4[i].Should().BeLessThanOrEqualTo(s1[i]);
+            r1[i].Should().BeLessThanOrEqualTo(r4[i]);
+            s1[i].Should().BeLessThanOrEqualTo(r1[i]);
+        }
+    }
+
+    [Fact]
     public void DemarkPivotsAreComputedPerPeriodAndNotPerBar()
     {
         var bars = Walk(400);
