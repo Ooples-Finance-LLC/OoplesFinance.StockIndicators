@@ -19,6 +19,14 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 /// </summary>
 internal static class AgreementCheck
 {
+    // The row labels are one thing said in many places, and they have to line up in the printed table.
+    private const string OoplesV2Row = "  OoplesV2    ";
+    private const string OoplesV1Row = "  OoplesV1    ";
+    private const string SkenderRow = "  Skender     ";
+    private const string TaLibRow = "  TaLib       ";
+    private const string TradyRow = "  Trady       ";
+    private const string QuanTAlibRow = "  QuanTAlib   ";
+
     private const int Bars = 2_000;
     private const int Length = 20;
     private const int RsiLength = 14;
@@ -120,11 +128,11 @@ internal static class AgreementCheck
 
         output.WriteLine("Control: ATR(14) where every true range is exactly " + trueRange
             + ", so the answer is " + trueRange);
-        output.WriteLine("  OoplesV2    " + runtime.GetSeries(handle).AsSpan()[^1].ToString("R"));
-        output.WriteLine("  Skender     " + (quotes.GetAtr(AtrLength).Last().Atr ?? double.NaN).ToString("R"));
-        output.WriteLine("  TaLib       " + LastOf(taLib, taLibRange).ToString("R"));
-        output.WriteLine("  Trady       " + ((double)(candles.Atr(AtrLength).Last().Tick ?? 0m)).ToString("R"));
-        output.WriteLine("  QuanTAlib   " + quanTAlibValue.ToString("R"));
+        output.WriteLine(OoplesV2Row + runtime.GetSeries(handle).AsSpan()[^1].ToString("R"));
+        output.WriteLine(SkenderRow + (quotes.GetAtr(AtrLength).Last().Atr ?? double.NaN).ToString("R"));
+        output.WriteLine(TaLibRow + LastOf(taLib, taLibRange).ToString("R"));
+        output.WriteLine(TradyRow + ((double)(candles.Atr(AtrLength)[^1].Tick ?? 0m)).ToString("R"));
+        output.WriteLine(QuanTAlibRow + quanTAlibValue.ToString("R"));
         output.WriteLine();
     }
 
@@ -168,7 +176,7 @@ internal static class AgreementCheck
                 data.NewStockData().CalculateSimpleMovingAverage(Length).CustomValuesList[^1]),
             (CompetitorLibrary.Skender, data.Quotes.GetSma(Length).Last().Sma ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(taLib, taLibRange)),
-            (CompetitorLibrary.Trady, (double)(data.Candles.Sma(Length).Last().Tick ?? 0m)),
+            (CompetitorLibrary.Trady, (double)(data.Candles.Sma(Length)[^1].Tick ?? 0m)),
             (CompetitorLibrary.QuanTAlib, quanTAlibValue)
         ];
     }
@@ -198,7 +206,7 @@ internal static class AgreementCheck
                 data.NewStockData().CalculateExponentialMovingAverage(Length).CustomValuesList[^1]),
             (CompetitorLibrary.Skender, data.Quotes.GetEma(Length).Last().Ema ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(taLib, taLibRange)),
-            (CompetitorLibrary.Trady, (double)(data.Candles.Ema(Length).Last().Tick ?? 0m)),
+            (CompetitorLibrary.Trady, (double)(data.Candles.Ema(Length)[^1].Tick ?? 0m)),
             (CompetitorLibrary.QuanTAlib, quanTAlibValue)
         ];
     }
@@ -221,7 +229,7 @@ internal static class AgreementCheck
                 data.NewStockData().CalculateRelativeStrengthIndex(length: RsiLength).CustomValuesList[^1]),
             (CompetitorLibrary.Skender, data.Quotes.GetRsi(RsiLength).Last().Rsi ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(taLib, taLibRange)),
-            (CompetitorLibrary.Trady, (double)(data.Candles.Rsi(RsiLength).Last().Tick ?? 0m))
+            (CompetitorLibrary.Trady, (double)(data.Candles.Rsi(RsiLength)[^1].Tick ?? 0m))
         ];
     }
 
@@ -251,7 +259,7 @@ internal static class AgreementCheck
                 data.NewStockData().CalculateAverageTrueRange(length: AtrLength).CustomValuesList[^1]),
             (CompetitorLibrary.Skender, data.Quotes.GetAtr(AtrLength).Last().Atr ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(taLib, taLibRange)),
-            (CompetitorLibrary.Trady, (double)(data.Candles.Atr(AtrLength).Last().Tick ?? 0m)),
+            (CompetitorLibrary.Trady, (double)(data.Candles.Atr(AtrLength)[^1].Tick ?? 0m)),
             (CompetitorLibrary.QuanTAlib, quanTAlibValue)
         ];
     }
@@ -307,7 +315,7 @@ internal static class AgreementCheck
                 data.Quotes.GetMacd(MacdFast, MacdSlow, MacdSignal).Last().Macd ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(line, taLibRange)),
             (CompetitorLibrary.Trady,
-                (double)(data.Candles.Macd(MacdFast, MacdSlow, MacdSignal).Last().Tick.MacdLine ?? 0m))
+                (double)(data.Candles.Macd(MacdFast, MacdSlow, MacdSignal)[^1].Tick.MacdLine ?? 0m))
         ];
     }
 
@@ -409,15 +417,15 @@ internal static class AgreementCheck
 
             output.WriteLine("Control: MACD(12,26,9) on a unit-slope ramp, so the answer is "
                 + (((MacdSlow - 1) / 2.0) - ((MacdFast - 1) / 2.0)).ToString("R"));
-            output.WriteLine("  OoplesV2    " + runtime.GetSeries(macd.Primary).AsSpan()[^1].ToString("R"));
-            output.WriteLine("  OoplesV1    " + NewStockData().CalculateMovingAverageConvergenceDivergence(
+            output.WriteLine(OoplesV2Row + runtime.GetSeries(macd.Primary).AsSpan()[^1].ToString("R"));
+            output.WriteLine(OoplesV1Row + NewStockData().CalculateMovingAverageConvergenceDivergence(
                 fastLength: MacdFast, slowLength: MacdSlow, signalLength: MacdSignal)
                 .OutputValues["Macd"][^1].ToString("R"));
-            output.WriteLine("  Skender     "
+            output.WriteLine(SkenderRow
                 + (quotes.GetMacd(MacdFast, MacdSlow, MacdSignal).Last().Macd ?? double.NaN).ToString("R"));
-            output.WriteLine("  TaLib       " + LastOf(line, taLibRange).ToString("R"));
-            output.WriteLine("  Trady       "
-                + ((double)(candles.Macd(MacdFast, MacdSlow, MacdSignal).Last().Tick.MacdLine ?? 0m)).ToString("R"));
+            output.WriteLine(TaLibRow + LastOf(line, taLibRange).ToString("R"));
+            output.WriteLine(TradyRow
+                + ((double)(candles.Macd(MacdFast, MacdSlow, MacdSignal)[^1].Tick.MacdLine ?? 0m)).ToString("R"));
             output.WriteLine();
         }
 
@@ -436,14 +444,14 @@ internal static class AgreementCheck
                 TALib.Core.MAType.Sma);
 
             output.WriteLine("Control: Stochastic %K on a strictly rising ramp, so the answer is 100");
-            output.WriteLine("  OoplesV2    " + runtime.GetSeries(stochastic.K).AsSpan()[^1].ToString("R"));
-            output.WriteLine("  OoplesV1    " + NewStockData().CalculateStochasticOscillator(
+            output.WriteLine(OoplesV2Row + runtime.GetSeries(stochastic.K).AsSpan()[^1].ToString("R"));
+            output.WriteLine(OoplesV1Row + NewStockData().CalculateStochasticOscillator(
                     length: StochasticLength, smoothLength1: StochasticSmooth, smoothLength2: StochasticSmooth)
                 .OutputValues["FastK"][^1].ToString("R"));
-            output.WriteLine("  Skender     "
+            output.WriteLine(SkenderRow
                 + (quotes.GetStoch(StochasticLength, StochasticSmooth, StochasticSmooth).Last().Oscillator
                     ?? double.NaN).ToString("R"));
-            output.WriteLine("  TaLib       " + LastOf(slowK, taLibRange).ToString("R"));
+            output.WriteLine(TaLibRow + LastOf(slowK, taLibRange).ToString("R"));
             output.WriteLine();
         }
 
@@ -467,17 +475,17 @@ internal static class AgreementCheck
             output.WriteLine("Control: BollingerBands(20,2) upper minus middle on a unit-slope ramp, so the "
                 + "answer is " + population.ToString("R") + " with a population sigma or " + sample.ToString("R")
                 + " with a sample sigma");
-            output.WriteLine("  OoplesV2    " + (runtime.GetSeries(bands.Upper).AsSpan()[^1]
+            output.WriteLine(OoplesV2Row + (runtime.GetSeries(bands.Upper).AsSpan()[^1]
                 - runtime.GetSeries(bands.Middle).AsSpan()[^1]).ToString("R"));
-            output.WriteLine("  OoplesV1    "
+            output.WriteLine(OoplesV1Row
                 + (v1.OutputValues["UpperBand"][^1] - v1.OutputValues["MiddleBand"][^1]).ToString("R"));
             var skender = quotes.GetBollingerBands(Length, BollingerStdDev).Last();
-            output.WriteLine("  Skender     "
+            output.WriteLine(SkenderRow
                 + ((skender.UpperBand ?? double.NaN) - (skender.Sma ?? double.NaN)).ToString("R"));
-            output.WriteLine("  TaLib       "
+            output.WriteLine(TaLibRow
                 + (LastOf(upper, taLibRange) - LastOf(middle, taLibRange)).ToString("R"));
             var trady = candles.Bb(Length, (decimal)BollingerStdDev).Last().Tick;
-            output.WriteLine("  Trady       "
+            output.WriteLine(TradyRow
                 + ((double)((trady.UpperBand ?? 0m) - (trady.MiddleBand ?? 0m))).ToString("R"));
             output.WriteLine();
         }
@@ -557,14 +565,14 @@ internal static class AgreementCheck
 
         output.WriteLine("Control: Stochastic %K where the last three raw %K values are 100, 50 and 0, so the "
             + "answer is 0 for a raw fast %K or 50 for a %K smoothed over 3");
-        output.WriteLine("  OoplesV2    " + runtime.GetSeries(stochastic.K).AsSpan()[^1].ToString("R"));
-        output.WriteLine("  OoplesV1    " + NewStockData().CalculateStochasticOscillator(
+        output.WriteLine(OoplesV2Row + runtime.GetSeries(stochastic.K).AsSpan()[^1].ToString("R"));
+        output.WriteLine(OoplesV1Row + NewStockData().CalculateStochasticOscillator(
                 length: StochasticLength, smoothLength1: StochasticSmooth, smoothLength2: StochasticSmooth)
             .OutputValues["FastK"][^1].ToString("R"));
-        output.WriteLine("  Skender     "
+        output.WriteLine(SkenderRow
             + (quotes.GetStoch(StochasticLength, StochasticSmooth, StochasticSmooth).Last().Oscillator
                 ?? double.NaN).ToString("R"));
-        output.WriteLine("  TaLib       " + LastOf(slowK, taLibRange).ToString("R"));
+        output.WriteLine(TaLibRow + LastOf(slowK, taLibRange).ToString("R"));
         output.WriteLine();
     }
 

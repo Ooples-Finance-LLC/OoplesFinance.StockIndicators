@@ -707,9 +707,9 @@ public class StockData : IStockData
     private static List<T> Materialize<T>(ReadOnlyMemory<T> source)
     {
 #if NET8_0_OR_GREATER
-        // Bulk copy, not a loop of Add. new List<T>(T[]) takes ICollection.CopyTo and moves the whole block;
-        // filling element by element instead made every arm that still reads a column as a list slower than
-        // the copying constructor it replaced - ATR and Stochastic measurably so.
+        // Bulk copy rather than a loop of Add. The copying constructor takes ICollection.CopyTo and moves
+        // the whole block; filling element by element instead made every arm that still reads a column as a
+        // list slower than the constructor it replaced, ATR and Stochastic measurably so.
         var list = new List<T>(source.Length);
         CollectionsMarshal.SetCount(list, source.Length);
         source.Span.CopyTo(CollectionsMarshal.AsSpan(list));

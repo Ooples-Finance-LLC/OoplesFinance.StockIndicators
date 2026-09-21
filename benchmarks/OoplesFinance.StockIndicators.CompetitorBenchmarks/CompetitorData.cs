@@ -111,8 +111,12 @@ internal sealed class CompetitorData
     public static CompetitorData Create(int count, int seed = 42)
     {
         // Seeded deliberately: a benchmark that cannot be reproduced bar for bar cannot be argued with, and
-        // every competitor must see the identical series for the comparison to mean anything.
+        // every competitor must see the identical series for the comparison to mean anything. A
+        // cryptographic generator is the opposite of what this needs - nothing here is a secret, and an
+        // unreproducible fixture would make every number in the table unarguable.
+#pragma warning disable S2245 // Weak random is the point: these bars must be identical on every run.
         var random = new Random(seed);
+#pragma warning restore S2245
         var opens = new double[count];
         var highs = new double[count];
         var lows = new double[count];

@@ -34,8 +34,6 @@ public class IncrementalBenchmarks
     private const int RsiLength = 14;
     private const int AtrLength = 14;
 
-    private CompetitorData _history = CompetitorData.Create(1);
-
     // The same bars plus the one that just arrived. A streaming state is measured advancing over that bar,
     // so a library without one has to recompute the series that includes it - recomputing the history alone
     // measures a smaller problem and flatters the recompute arms by one bar's work.
@@ -60,7 +58,8 @@ public class IncrementalBenchmarks
     public void Setup()
     {
         var full = CompetitorData.Create(History + 1);
-        _history = full.Take(History);
+        // Only the states' warm-up reads this, so it stays inside Setup; the arms read _withNextBar.
+        var history = full.Take(History);
         _withNextBar = full;
         _output = new double[History + 1];
 
@@ -80,14 +79,14 @@ public class IncrementalBenchmarks
         // the History-th update and not the first.
         for (var i = 0; i < History; i++)
         {
-            var bar = new OhlcvBar("BENCH", BarTimeframe.Minutes(1), _history.Dates[i], _history.Dates[i],
-                _history.Opens[i], _history.Highs[i], _history.Lows[i], _history.Closes[i],
-                _history.Volumes[i], true);
+            var bar = new OhlcvBar("BENCH", BarTimeframe.Minutes(1), history.Dates[i], history.Dates[i],
+                history.Opens[i], history.Highs[i], history.Lows[i], history.Closes[i],
+                history.Volumes[i], true);
             _sma.Update(bar, true, false);
             _rsi.Update(bar, true, false);
             _atr.Update(bar, true, false);
-            _quanTAlibSma.Calc(new QuanTAlib.TValue(_history.Closes[i], true, false));
-            _quanTAlibAtr.Calc(_history.Bars[i]);
+            _quanTAlibSma.Calc(new QuanTAlib.TValue(history.Closes[i], true, false));
+            _quanTAlibAtr.Calc(history.Bars[i]);
         }
     }
 
