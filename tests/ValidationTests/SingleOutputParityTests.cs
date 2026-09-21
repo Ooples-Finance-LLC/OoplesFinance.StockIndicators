@@ -29,8 +29,6 @@ public sealed class SingleOutputParityTests
     // Series that do not match their batch. Delete an entry when the indicator is fixed; the test says so.
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
-        "MovingAverageBands.UpperBand",
-        "MovingAverageBandWidth",
         "OptimizedTrendTracker",
         "SmoothedVolatilityBands.MiddleBand",
         "VariableLengthMovingAverage",

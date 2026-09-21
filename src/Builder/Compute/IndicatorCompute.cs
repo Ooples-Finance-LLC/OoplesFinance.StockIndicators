@@ -1474,8 +1474,16 @@ internal static partial class IndicatorCompute
             PriceChannelSpecOptions pc => ComputePriceChannelFast(data, context, pc.Length, pc.Pct, pc.MaType),
 
             // Batch 15 - Moving Average Band Indicators
-            MovingAverageBandsSpecOptions mab => ComputeMovingAverageBandsFast(data, context, mab.FastLength, mab.SlowLength, mab.Mult, mab.MaType),
-            MovingAverageBandWidthSpecOptions mabw => ComputeMovingAverageBandWidthFast(data, context, mabw.FastLength, mabw.SlowLength, mabw.Mult, mabw.MaType),
+            MovingAverageBandsSpecOptions mab => MovingAverageBandLevels(data, context, mab.FastLength, mab.SlowLength,
+                mab.Mult, mab.MaType, spec.OutputKey switch
+                {
+                    "MiddleBand" => MovingAverageBandSeries.MiddleBand,
+                    "LowerBand" => MovingAverageBandSeries.LowerBand,
+                    "FastMa" => MovingAverageBandSeries.FastMa,
+                    _ => MovingAverageBandSeries.UpperBand
+                }),
+            MovingAverageBandWidthSpecOptions mabw => MovingAverageBandLevels(data, context, mabw.FastLength,
+                mabw.SlowLength, mabw.Mult, mabw.MaType, MovingAverageBandSeries.BandWidth),
             MovingAverageChannelSpecOptions mac => ComputeMovingAverageChannelFast(data, context, mac.Length, mac.MaType),
             MovingAverageEnvelopeSpecOptions mae => ComputeMovingAverageEnvelopeFast(data, context, mae.Length, mae.Pct, mae.MaType),
             MovingAverageSupportResistanceSpecOptions masr => ComputeMovingAverageSupportResistanceFast(data, context, masr.Length, masr.MaType),
@@ -22312,6 +22320,80 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Bands using zero-allocation fast path.
     /// Returns middle band (average of fast and slow MAs).
     /// </summary>
+    /// <summary>
+    /// Selects which series of the moving average bands a caller wants.
+    /// </summary>
+    internal enum MovingAverageBandSeries
+    {
+        /// <summary>The slow average plus the deviation.</summary>
+        UpperBand,
+
+        /// <summary>The slow average, which the bands are centred on.</summary>
+        MiddleBand,
+
+        /// <summary>The slow average less the deviation.</summary>
+        LowerBand,
+
+        /// <summary>The fast average, published beside the bands.</summary>
+        FastMa,
+
+        /// <summary>The width of the bands against the middle, as a percentage.</summary>
+        BandWidth
+    }
+
+    /// <summary>
+    /// Computes the moving average bands as CalculateMovingAverageBands publishes them.
+    /// </summary>
+    /// <remarks>
+    /// The bands are the SLOW average plus and minus a deviation, that deviation being the root mean square
+    /// gap between the two averages over the fast length, scaled by the multiplier. The routine this replaced
+    /// returned the mean of the two averages, which is a different quantity altogether - it matched only over
+    /// the opening bars, while the two averages were still close enough for the deviation to be negligible.
+    /// It also read the close rather than the chained series and understood two moving average types.
+    ///
+    /// CalculateMovingAverageBandWidth chains off this one and publishes the span of the bands against the
+    /// middle as a percentage, so it is served here too rather than recomputing the pair.
+    /// </remarks>
+    private static ComputeBuffer MovingAverageBandLevels(StockData data, ComputeContext context, int fastLength,
+        int slowLength, double mult, MovingAvgType maType, MovingAverageBandSeries series)
+    {
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var fastAverage = context.Rent(count);
+        using var slowAverage = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var fast = fastAverage.Span;
+        var slow = slowAverage.Span;
+
+        var gaps = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            var gap = slow[i] - fast[i];
+            gaps.Add(gap * gap);
+
+            var deviation = Math.Sqrt(gaps.Average(fastLength)) * mult;
+            var upper = slow[i] + deviation;
+            var lower = slow[i] - deviation;
+
+            output[i] = series switch
+            {
+                MovingAverageBandSeries.MiddleBand => slow[i],
+                MovingAverageBandSeries.LowerBand => lower,
+                MovingAverageBandSeries.FastMa => fast[i],
+                MovingAverageBandSeries.BandWidth => slow[i] != 0 ? (upper - lower) / slow[i] * 100 : 0,
+                _ => upper
+            };
+        }
+
+        return buffer;
+    }
+
     internal static ComputeBuffer ComputeMovingAverageBandsFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 50, double mult = 1, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
