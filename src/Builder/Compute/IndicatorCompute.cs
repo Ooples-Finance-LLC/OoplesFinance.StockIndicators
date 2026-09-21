@@ -22190,8 +22190,14 @@ internal static partial class IndicatorCompute
     /// Computes Optimized Trend Tracker using zero-allocation fast path.
     /// OTT is a trend-following indicator based on MA with percentage bands.
     /// </summary>
-    internal static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2, double percent = 1.4, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2,
+        double percent = 1.4, MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage)
     {
+        // The average was picked by a switch that knew only the simple and exponential types and fell through
+        // to a simple one for everything else, so the variable index dynamic average that
+        // CalculateOptimizedTrendTracker and OptimizedTrendTrackerSpecOptions both default to never reached
+        // it. The stops themselves were right: the batch ratchets the LONG stop and leaves the short one to
+        // follow the average freely, which is what this does.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = data.Count;
@@ -22206,19 +22212,7 @@ internal static partial class IndicatorCompute
             var longStopSpan = longStopArray.AsSpan(0, count);
             var shortStopSpan = shortStopArray.AsSpan(0, count);
 
-            // Calculate MA
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(input, maSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(input, maSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(input, maSpan, length);
-                    break;
-            }
+            MovingAverage(data, maType, length, input, maSpan);
 
             // Calculate OTT
             var buffer = context.Rent(count);

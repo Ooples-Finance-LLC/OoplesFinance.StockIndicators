@@ -33,7 +33,6 @@ public sealed class ParameterisedParityTests
     // Indicators that disagree with their batch at one or more of the lengths above.
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
-        "OptimizedTrendTracker",
     };
 
     [Fact]
