@@ -22540,30 +22540,23 @@ internal static partial class IndicatorCompute
     /// Computes Moving Average Envelope using zero-allocation fast path.
     /// Returns the middle band (MA).
     /// </summary>
-    internal static ComputeBuffer ComputeMovingAverageEnvelopeFast(StockData data, ComputeContext context, int length = 20, double pct = 0.025, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeMovingAverageEnvelopeFast(StockData data, ComputeContext context, int length = 20,
+        double pct = 0.025, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
+        // CalculateMovingAverageEnvelope publishes the average itself as its MiddleBand, taken over the
+        // CHAINED series with whichever average it was given. This read the close, and chose the average
+        // from a switch that knew the simple and exponential types and fell back to simple for the rest, so
+        // any other type silently became a simple average and a chained source was ignored entirely.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
         var pool = ArrayPool<double>.Shared;
         var maArray = pool.Rent(count);
 
         try
         {
             var maSpan = maArray.AsSpan(0, count);
-
-            // Calculate MA
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
-                    break;
-            }
+            MovingAverage(data, maType, length, input, maSpan);
 
             // Return middle band
             var buffer = context.Rent(count);
