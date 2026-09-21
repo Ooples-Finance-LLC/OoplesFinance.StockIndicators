@@ -189,6 +189,41 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheSimpleDecyclerPublishesItsBandsAndNotTheDecyclerThreeTimes()
+    {
+        var bars = Walk(400);
+        var decycler = new EhlersSimpleDecycler();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(decycler)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateEhlersSimpleDecycler(length: new EhlersSimpleDecycler().Length);
+
+        var upper = run[decycler.UpperBand].ToArray();
+        var middle = run[decycler.Value].ToArray();
+        var lower = run[decycler.LowerBand].ToArray();
+
+        upper.Should().Equal(batch.OutputValues["UpperBand"].ToArray());
+        middle.Should().Equal(batch.OutputValues["MiddleBand"].ToArray());
+        lower.Should().Equal(batch.OutputValues["LowerBand"].ToArray());
+
+        // The bands are the decycler scaled by half a percent either way, so each sits at a fixed ratio to
+        // the middle rather than a fixed distance. All three keys used to carry the middle, which satisfies
+        // no ratio but one.
+        for (var i = 0; i < middle.Length; i++)
+        {
+            upper[i].Should().BeApproximately(middle[i] * 1.005, 1e-9);
+            lower[i].Should().BeApproximately(middle[i] * 0.995, 1e-9);
+        }
+    }
+
+    [Fact]
     public void TheTwoKaufmanDerivedAveragesPublishTheirDiagnosticSeries()
     {
         var bars = Walk(200);
