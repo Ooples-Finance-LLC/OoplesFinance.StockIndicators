@@ -1206,8 +1206,11 @@ internal static partial class IndicatorCompute
                 "M6" => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Mid6),
                 _ => null
             },
-            FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointS1Fast(data, context),
-            FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointR1Fast(data, context),
+            // These two publish one level of the Floor pivots on their own, so they take that level from
+            // the same per-period routine the whole set does. Their own Compute*Fast helpers computed it per
+            // bar, which is the defect 1135048 fixed for FloorPivotPoint without reaching them.
+            FloorPivotPointS1SpecOptions _ => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Support1),
+            FloorPivotPointR1SpecOptions _ => ComputeFloorPivotPointFast(data, context, series: PivotSeries.Resistance1),
             CamarillaPivotPointSpecOptions _ => spec.OutputKey switch
             {
                 null or "Pivot" => ComputeCamarillaPivotPointFast(data, context),
