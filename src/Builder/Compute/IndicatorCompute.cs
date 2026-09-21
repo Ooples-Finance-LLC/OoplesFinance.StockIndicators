@@ -917,7 +917,14 @@ internal static partial class IndicatorCompute
             // Batch 26 - Additional Unwired Core Methods
             ZeroLowLagMovingAverageSpecOptions zllma => ComputeZeroLowLagMovingAverageFast(data, context, zllma.Length),
             RecursiveMovingTrendAverageSpecOptions rmta => ComputeRecursiveMovingTrendAverageFast(data, context, rmta.Length),
-            TrimeanSpecOptions trimean => ComputeTrimeanFast(data, context, trimean.Length),
+            TrimeanSpecOptions trimean => spec.OutputKey switch
+            {
+                null or "Trimean" => ComputeTrimeanFast(data, context, trimean.Length),
+                "Q1" => ComputeTrimeanFast(data, context, trimean.Length, TrimeanSeries.FirstQuartile),
+                "Median" => ComputeTrimeanFast(data, context, trimean.Length, TrimeanSeries.Median),
+                "Q3" => ComputeTrimeanFast(data, context, trimean.Length, TrimeanSeries.ThirdQuartile),
+                _ => null
+            },
             SkewnessSpecOptions skew => ComputeSkewnessFast(data, context, skew.Length),
             HampelFilterSpecOptions hampel => ComputeHampelFilterFast(data, context, hampel.Length, hampel.ScalingFactor),
             ModularFilterSpecOptions modf => ComputeModularFilterFast(data, context, modf.Length, modf.Beta),
@@ -15103,7 +15110,26 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trimean using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Selects which of the four series the trimean routine publishes.
+    /// </summary>
+    internal enum TrimeanSeries
+    {
+        /// <summary>The trimean itself.</summary>
+        Trimean,
+
+        /// <summary>The lower quartile.</summary>
+        FirstQuartile,
+
+        /// <summary>The median.</summary>
+        Median,
+
+        /// <summary>The upper quartile.</summary>
+        ThirdQuartile
+    }
+
+    internal static ComputeBuffer ComputeTrimeanFast(StockData data, ComputeContext context, int length = 14,
+        TrimeanSeries series = TrimeanSeries.Trimean)
     {
         // CalculateTrimean takes the nearest-rank quartiles of the window - the same convention the batch's
         // RollingOrderStatistic uses, which is what the routine this replaced got wrong on a partial window -
@@ -15122,7 +15148,16 @@ internal static partial class IndicatorCompute
             var q1 = order.PercentileNearestRank(25);
             var median = order.PercentileNearestRank(50);
             var q3 = order.PercentileNearestRank(75);
-            output[i] = (q1 + (2 * median) + q3) / 4;
+
+            // All three quartiles were already being computed here and then discarded, which is why the
+            // Q1, Median and Q3 keys all answered with the trimean.
+            output[i] = series switch
+            {
+                TrimeanSeries.FirstQuartile => q1,
+                TrimeanSeries.Median => median,
+                TrimeanSeries.ThirdQuartile => q3,
+                _ => (q1 + (2 * median) + q3) / 4
+            };
         }
 
         return buffer;

@@ -60,6 +60,41 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TrimeanPublishesItsThreeQuartilesAndNotTheTrimeanFourTimes()
+    {
+        var bars = Walk(150);
+        var trimean = new Trimean();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(trimean)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateTrimean();
+
+        var value = run[trimean.Value].ToArray();
+        var q1 = run[trimean.Q1].ToArray();
+        var median = run[trimean.Median].ToArray();
+        var q3 = run[trimean.Q3].ToArray();
+
+        value.Should().Equal(batch.OutputValues["Trimean"].ToArray());
+        q1.Should().Equal(batch.OutputValues["Q1"].ToArray());
+        median.Should().Equal(batch.OutputValues["Median"].ToArray());
+        q3.Should().Equal(batch.OutputValues["Q3"].ToArray());
+
+        // The trimean weights the median double against the two quartiles, so it cannot equal any of them
+        // across the series - which is what the builder used to return for all four keys.
+        for (var i = 0; i < value.Length; i++)
+        {
+            value[i].Should().BeApproximately((q1[i] + (2 * median[i]) + q3[i]) / 4, 1e-9);
+        }
+    }
+
+    [Fact]
     public void AdxPublishesItsTwoDirectionalIndicatorsAndNotTheAdxLineThreeTimes()
     {
         var bars = Walk(150);
