@@ -66,12 +66,42 @@ internal sealed class CustomIndicatorEngine
 
     // Runs a built-in's own calculation with the one average it asks for answered by a caller's series,
     // and reports how many averages it asked for - one means the substitution was unambiguous.
-    private readonly Func<IIndicator, IReadOnlyList<double>, (double[][]? Values, int Requests)>?
-        _computeWithAverage;
+    private readonly Func<IIndicator, Func<IReadOnlyList<double>, int, IReadOnlyList<double>>,
+        (double[][]? Values, int Requests)>? _computeWithAverage;
+
+    /// <summary>Runs an indicator over a series of values rather than over the bars' own closes.</summary>
+    /// <remarks>
+    /// The same rewriting <c>Of()</c> does: the bar keeps its high, low and volume, and its close becomes
+    /// the value being smoothed. That is what lets a caller's average apply to a true range or an
+    /// oscillator and not only to price.
+    /// </remarks>
+    internal IReadOnlyList<double> RunOver(IIndicator indicator, IReadOnlyList<double> series)
+    {
+        var state = indicator switch
+        {
+            IndicatorBase single => single.CreateState(),
+            MultiOutputIndicatorBase multi => multi.CreateState(),
+            _ => null
+        };
+
+        var values = new double[series.Count];
+        if (state is not IIndicatorState simple)
+        {
+            return values;
+        }
+
+        for (var i = 0; i < series.Count && i < _bars.Count; i++)
+        {
+            values[i] = simple.Update(WithClose(_bars[i], series[i]));
+        }
+
+        return values;
+    }
 
     internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
         Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null,
-        Func<IIndicator, IReadOnlyList<double>, (double[][]? Values, int Requests)>? computeWithAverage = null)
+        Func<IIndicator, Func<IReadOnlyList<double>, int, IReadOnlyList<double>>,
+            (double[][]? Values, int Requests)>? computeWithAverage = null)
     {
         _bars = bars;
         _resolveBuiltIn = resolveBuiltIn;
@@ -145,7 +175,8 @@ internal sealed class CustomIndicatorEngine
                 // caller's series. Nothing is re-implemented, so the substitution is exact - and if it
                 // asked for more than one average, which of them was meant is ambiguous and it refuses
                 // rather than swapping the wrong one.
-                var (substituted, requests) = _computeWithAverage(indicator, Compute(substitute)[0]);
+                var (substituted, requests) = _computeWithAverage(indicator,
+                    (series, _) => RunOver(substitute, series));
                 if (substituted is not null && requests == 1)
                 {
                     _computed[indicator] = substituted;

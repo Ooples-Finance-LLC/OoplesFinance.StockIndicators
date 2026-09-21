@@ -175,6 +175,12 @@ public sealed class ComponentAverageParityTests
             }
         }
 
+        // Written out on success as well as failure: how many indicators accept a caller's own average is
+        // the number this work is measured by, and an assertion message is only shown when it fails.
+        System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+            "component-average-parity.txt"),
+            "substituted=" + proved + " refused=" + refused + " disagree=" + disagreed.Count);
+
         proved.Should().BeGreaterThan(0, "the substitution has to be exercised for this to prove anything");
         disagreed.Should().BeEmpty(proved + " indicators substituted, " + refused + " refused as ambiguous, "
             + disagreed.Count + " disagree: " + string.Join(" | ", disagreed.Take(12)));

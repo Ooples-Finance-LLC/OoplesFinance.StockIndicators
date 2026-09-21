@@ -318,7 +318,7 @@ public sealed class StockIndicatorBuilder
             // The component was computed over the closes, so it may only stand in for an average the
             // indicator takes over those same closes - not over a true range or any other series it
             // derived, where it would be answering a different question.
-            using (ComponentAverage.Arm(average, batch.ClosePrices))
+            using (ComponentAverage.Arm(average))
             {
                 var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
                 if (buffer is null)

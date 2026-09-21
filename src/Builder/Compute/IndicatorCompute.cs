@@ -35,13 +35,10 @@ namespace OoplesFinance.StockIndicators.Builder.Compute;
 internal static class ComponentAverage
 {
     [ThreadStatic]
-    private static IReadOnlyList<double>? _pending;
-
-    [ThreadStatic]
     private static int _requests;
 
     [ThreadStatic]
-    private static IReadOnlyList<double>? _over;
+    private static Func<IReadOnlyList<double>, int, IReadOnlyList<double>>? _average;
 
     [ThreadStatic]
     private static int _substitutions;
@@ -51,10 +48,9 @@ internal static class ComponentAverage
     /// </summary>
     /// <param name="series">What the caller's average computed, over the same bars.</param>
     /// <param name="over">The series the caller's average was computed from - the indicator's input.</param>
-    internal static IDisposable Arm(IReadOnlyList<double> series, IReadOnlyList<double> over)
+    internal static IDisposable Arm(Func<IReadOnlyList<double>, int, IReadOnlyList<double>> average)
     {
-        _pending = series;
-        _over = over;
+        _average = average;
         _requests = 0;
         _substitutions = 0;
         return new Scope();
@@ -80,42 +76,27 @@ internal static class ComponentAverage
         _requests++;
         _lengthAsked = length;
 
-        if (_pending is null || _over is null || !SameSeries(input, _over))
+        if (_average is null)
         {
-            // The indicator is averaging something it derived - a true range, a difference, an oscillator -
-            // not the series the caller's average was computed over. Standing one in for the other would
-            // answer a different question, so this request is left to the real average and the count says
-            // the substitution did not happen.
             return null;
         }
 
-        var taken = _pending;
-        _pending = null;
-        _substitutions++;
-        return taken;
-    }
-
-    private static bool SameSeries(ReadOnlySpan<double> input, IReadOnlyList<double> over)
-    {
-        if (input.Length != over.Count)
-        {
-            return false;
-        }
-
+        // The caller's average of whatever this indicator is smoothing - a true range, a difference, an
+        // oscillator, or the input itself. Running it over the right series is what makes this exact for
+        // every shape rather than only when the indicator happens to smooth its own input.
+        var values = new double[input.Length];
         for (var i = 0; i < input.Length; i++)
         {
-            if (input[i] != over[i])
-            {
-                return false;
-            }
+            values[i] = input[i];
         }
 
-        return true;
+        _substitutions++;
+        return _average(values, length);
     }
 
     private sealed class Scope : IDisposable
     {
-        public void Dispose() => _pending = null;
+        public void Dispose() => _average = null;
     }
 }
 
