@@ -6,11 +6,12 @@ using OoplesFinance.StockIndicators.Models;
 namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 
 /// <summary>
-/// The signal line of the Accumulation Distribution Line is an average of the line, and it used to be the
-/// line: the fast arm dispatched on the options type alone and answered every request with the primary
-/// series, so asking for AdlSignal returned Adl unsmoothed and nothing said so.
+/// A named signal output has to be the signal. A fast arm that dispatches on the options type alone answers
+/// every request with the indicator's primary series, so asking for the signal returned the series it is
+/// supposed to smooth - silently, and in more than one indicator. Each one here is held against the v1
+/// calculation that publishes both series.
 /// </summary>
-public sealed class AccumulationDistributionSignalTests
+public sealed class SignalOutputTests
 {
     private static List<Bar> Walk(int count = 120)
     {
@@ -56,5 +57,32 @@ public sealed class AccumulationDistributionSignalTests
         signal.Should().Equal(batch.OutputValues["AdlSignal"].ToArray(),
             "the signal is the average of the line, which is what the batch publishes");
         signal.Should().NotEqual(line, "an average of the line is not the line");
+    }
+
+    [Fact]
+    public void TheStochasticRsiSignalIsTheSecondSmoothingAndNotTheFirst()
+    {
+        var bars = Walk(150);
+        var srsi = new StochasticRelativeStrengthIndex();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(srsi)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateStochasticRelativeStrengthIndex();
+
+        var series = run[srsi.StochRsi].ToArray();
+        var signal = run[srsi.Signal].ToArray();
+
+        // FastD is the first smoothing of the stochastic and SlowD the second, so the signal is a smoothing
+        // of the series rather than the series itself.
+        series.Should().Equal(batch.OutputValues["StochRsi"].ToArray());
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
+        signal.Should().NotEqual(series, "the second smoothing is not the first");
     }
 }

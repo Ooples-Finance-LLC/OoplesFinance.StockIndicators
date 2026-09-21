@@ -1200,8 +1200,14 @@ internal static partial class IndicatorCompute
             EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
                 crsi2.Length3, crsi2.MaType),
-            StochasticRelativeStrengthIndexSpecOptions srsi2 => ComputeStochasticRsiFast(data, context, srsi2.Length,
-                srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
+            StochasticRelativeStrengthIndexSpecOptions srsi2 => spec.OutputKey switch
+            {
+                null or "StochRsi" => ComputeStochasticRsiFast(data, context, srsi2.Length,
+                    srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
+                "Signal" => ComputeStochasticRsiSignalFast(data, context, srsi2.Length,
+                    srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
+                _ => null
+            },
             StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.Length2,
                 smi.SmoothLength1, smi.MaType),
 
@@ -20231,6 +20237,33 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         MovingAverage(data, maType, smoothLength1, stochastic.Span, buffer.WritableSpan);
 
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes the signal series of the Stochastic Relative Strength Index.
+    /// </summary>
+    /// <remarks>
+    /// The stochastic of the relative strength index is smoothed twice: the first smoothing is FastD, which
+    /// the indicator publishes as its own series, and the second is SlowD, which it publishes as Signal.
+    /// smoothLength2 reaches nothing else, which is why the primary arm discards it - and why asking for
+    /// Signal returned the primary until this existed.
+    /// </remarks>
+    internal static ComputeBuffer ComputeStochasticRsiSignalFast(StockData data, ComputeContext context,
+        int length = 14, int smoothLength1 = 3, int smoothLength2 = 3,
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int? stochLength = null)
+    {
+        using var fastD = ComputeStochasticRsiFast(data, context, length, smoothLength1, smoothLength2, maType,
+            stochLength);
+
+        var source = fastD.Span;
+        var buffer = context.Rent(source.Length);
+
+        // Cleared first: a rented buffer arrives holding whatever the last caller left in it, and a smoother
+        // that wrote nothing would hand that back - which is how the primary series came to look like the
+        // signal in the first place.
+        buffer.WritableSpan.Clear();
+        MovingAverage(data, maType, smoothLength2, source, buffer.WritableSpan);
         return buffer;
     }
 
