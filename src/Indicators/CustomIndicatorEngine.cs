@@ -66,7 +66,7 @@ internal sealed class CustomIndicatorEngine
 
     // Runs a built-in's own calculation with the one average it asks for answered by a caller's series,
     // and reports how many averages it asked for - one means the substitution was unambiguous.
-    private readonly Func<IIndicator, Func<IReadOnlyList<double>, int, IReadOnlyList<double>>,
+    private readonly Func<IIndicator, IReadOnlyList<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>,
         (double[][]? Values, int Requests)>? _computeWithAverage;
 
     /// <summary>Runs an indicator over a series of values rather than over the bars' own closes.</summary>
@@ -100,7 +100,7 @@ internal sealed class CustomIndicatorEngine
 
     internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
         Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null,
-        Func<IIndicator, Func<IReadOnlyList<double>, int, IReadOnlyList<double>>,
+        Func<IIndicator, IReadOnlyList<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>,
             (double[][]? Values, int Requests)>? computeWithAverage = null)
     {
         _bars = bars;
@@ -159,15 +159,19 @@ internal sealed class CustomIndicatorEngine
             // indicator would answer with its default - the right number for a question nobody asked. 370
             // generated types are in this position: they declare the component correctly and have no
             // arithmetic of their own to consume it yet. Refusing is the only honest answer until they do.
-            IIndicator? substitute = null;
+            // Every component the caller supplied, in the order the indicator declared them, so the Nth
+            // average a calculation asks for is answered by the Nth one handed over. An indicator that
+            // smooths two things is asking two different questions.
+            var substitutes = new List<IIndicator>();
             foreach (var component in indicator.Components)
             {
                 if (component is not IBuiltInMovingAverage)
                 {
-                    substitute = component;
-                    break;
+                    substitutes.Add(component);
                 }
             }
+
+            var substitute = substitutes.Count > 0 ? substitutes[0] : null;
 
             if (substitute is not null && _computeWithAverage is not null)
             {
@@ -175,8 +179,11 @@ internal sealed class CustomIndicatorEngine
                 // caller's series. Nothing is re-implemented, so the substitution is exact - and if it
                 // asked for more than one average, which of them was meant is ambiguous and it refuses
                 // rather than swapping the wrong one.
-                var (substituted, requests) = _computeWithAverage(indicator,
-                    (series, _) => RunOver(substitute, series));
+                var factories = substitutes
+                    .Select<IIndicator, Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>(
+                        component => (series, _) => RunOver(component, series))
+                    .ToList();
+                var (substituted, requests) = _computeWithAverage(indicator, factories);
                 if (substituted is not null)
                 {
                     _computed[indicator] = substituted;
@@ -185,9 +192,9 @@ internal sealed class CustomIndicatorEngine
 
                 throw new NotSupportedException(
                     indicator.GetType().Name + " cannot take " + substitute.GetType().Name
-                    + " as its average: it asks for " + requests + " averages, so which one you meant is "
-                    + "ambiguous. Use one of the library's averages here, or write this as a custom "
-                    + "indicator of your own.");
+                    + " that way: it asks for " + requests + " averages and was given "
+                    + substitutes.Count + ". Supply one per average it smooths with, or name a "
+                    + "MovingAvgType, which applies to all of them.");
             }
 
             (state, streamingKeys) = _createBuiltInState(indicator);

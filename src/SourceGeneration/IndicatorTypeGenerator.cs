@@ -167,14 +167,73 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                     .Select(m => m.Identifier.Text).ToImmutableArray())
             .Collect();
 
+        // How many averages each calculation asks for. An indicator that smooths two different things needs
+        // to be handed two, and one component answering both call sites would make a difference of averages
+        // into a difference of one average with itself - AwesomeOscillator returns zero that way.
+        var averageCounts = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is MethodDeclarationSyntax m
+                    && m.Identifier.Text.StartsWith("Calculate", StringComparison.Ordinal),
+                transform: static (ctx, _) => ReadAverageCount((MethodDeclarationSyntax)ctx.Node))
+            .Where(static x => x is not null)
+            .Collect();
+
         var combined = optionsTypes.Combine(armTargets).Combine(categories)
-            .Combine(batchDefaults).Combine(publishedOutputs).Combine(movingAverages);
+            .Combine(batchDefaults).Combine(publishedOutputs).Combine(movingAverages)
+            .Combine(averageCounts);
 
         context.RegisterSourceOutput(combined, static (spc, source) =>
-            Emit(source.Left.Left.Left.Left.Left, source.Left.Left.Left.Left.Right,
-                source.Left.Left.Left.Right, source.Left.Left.Right, source.Left.Right,
-                source.Right, spc));
+            Emit(source.Left.Left.Left.Left.Left.Left, source.Left.Left.Left.Left.Left.Right,
+                source.Left.Left.Left.Left.Right, source.Left.Left.Left.Right, source.Left.Left.Right,
+                source.Left.Right, source.Right, spc));
     }
+
+    /// <summary>How many averages one calculation asks for, and which indicator it is.</summary>
+    private sealed class AverageCountReading
+    {
+        internal AverageCountReading(string indicatorName, int count)
+        {
+            IndicatorName = indicatorName;
+            Count = count;
+        }
+
+        internal string IndicatorName { get; }
+
+        internal int Count { get; }
+    }
+
+    /// <summary>
+    /// Counts the averages a calculation asks for by its maType parameter, and the indicator it publishes as.
+    /// </summary>
+    private static AverageCountReading? ReadAverageCount(MethodDeclarationSyntax method)
+    {
+        if (method.Body is null)
+        {
+            return null;
+        }
+
+        var body = method.Body.ToString();
+        var name = System.Text.RegularExpressions.Regex.Match(
+            body, @"IndicatorName\s*=\s*IndicatorName\.(\w+)");
+        if (!name.Success)
+        {
+            return null;
+        }
+
+        var asks = System.Text.RegularExpressions.Regex.Matches(
+            body, @"GetMovingAverageList\(\s*stockData\s*,\s*maType").Count;
+
+        return new AverageCountReading(name.Groups[1].Value, asks);
+    }
+
+    private static string Ordinal(int n) => n switch
+    {
+        2 => "second",
+        3 => "third",
+        4 => "fourth",
+        5 => "fifth",
+        _ => "average" + n
+    };
 
     private static bool IsOptionsType(SyntaxNode node) =>
         node is ClassDeclarationSyntax c
@@ -390,8 +449,19 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         ImmutableArray<BatchReading?> batchReadings,
         ImmutableArray<IndicatorOutputMapGenerator.PublishedOutputs?> publishedOutputs,
         ImmutableArray<ImmutableArray<string>> movingAverageMembers,
+        ImmutableArray<AverageCountReading?> averageCounts,
         SourceProductionContext context)
     {
+        // Keyed by the IndicatorName the calculation assigns, which is the same key the arm targets use.
+        var averagesAskedFor = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var reading in averageCounts)
+        {
+            if (reading is not null && reading.Count > 0)
+            {
+                averagesAskedFor[reading.IndicatorName] = reading.Count;
+            }
+        }
+
         var targets = new Dictionary<string, ArmTargetReading>(StringComparer.Ordinal);
         foreach (var batch in armTargets)
         {
@@ -595,10 +665,27 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
             var componentCount = asComponent.Count(x => x);
 
+            // A calculation that smooths several things asks for an average once per thing, and its options
+            // type carries only one MovingAvgType to name them all with. Naming one is fine - it applies to
+            // every one of them - but handing over a single IMovingAverage cannot, because the enum is
+            // re-parameterised at each call site and a configured average is not. So the extra ones get
+            // parameters of their own, and the caller says which average smooths what.
+            var extraAverages = new List<string>();
+            if (componentCount == 1
+                && averagesAskedFor.TryGetValue(target.IndicatorName, out var asked)
+                && asked > 1)
+            {
+                for (var i = 2; i <= asked; i++)
+                {
+                    extraAverages.Add(Ordinal(i) + "Average");
+                }
+            }
+
             var signature = string.Join(", ", options.Parameters.Select((p, i) =>
                 asComponent[i]
                     ? "IMovingAverage? " + p.Name + " = null"
-                    : p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i])));
+                    : p.Type + " " + p.Name + (resolved[i] is null ? string.Empty : " = " + resolved[i]))
+                .Concat(extraAverages.Select(a => "IMovingAverage? " + a + " = null")));
 
             builder.AppendLine("    /// <summary>Creates " + Escape(typeName) + ".</summary>");
             builder.AppendLine("    public " + typeName + "(" + signature + ")"
@@ -609,13 +696,18 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("        " + Capitalise(parameter.Name) + " = " + parameter.Name + ";");
             }
 
+            foreach (var extra in extraAverages)
+            {
+                builder.AppendLine("        " + Capitalise(extra) + " = " + extra + ";");
+            }
+
             if (componentCount > 0)
             {
                 // Explicit rather than a collection expression plus LINQ: generated code with no target type
                 // for [a, b] is CS9176, and keeping System.Linq out of the emitted file is one less thing
                 // that has to be true of it.
                 builder.AppendLine("        var components = new System.Collections.Generic.List<IIndicator>("
-                    + componentCount + ");");
+                    + (componentCount + extraAverages.Count) + ");");
                 for (var i = 0; i < options.Parameters.Count; i++)
                 {
                     if (asComponent[i])
@@ -623,6 +715,12 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                         var member = Capitalise(options.Parameters[i].Name);
                         builder.AppendLine("        if (" + member + " is not null) components.Add(" + member + ");");
                     }
+                }
+
+                foreach (var extra in extraAverages)
+                {
+                    var member = Capitalise(extra);
+                    builder.AppendLine("        if (" + member + " is not null) components.Add(" + member + ");");
                 }
 
                 builder.AppendLine("        if (components.Count > 0) Uses(components.ToArray());");
@@ -636,6 +734,14 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             }
 
             builder.AppendLine("    }");
+
+            foreach (var extra in extraAverages)
+            {
+                builder.AppendLine();
+                builder.AppendLine("    /// <summary>The " + Escape(extra)
+                    + ", for the next thing this indicator smooths.</summary>");
+                builder.AppendLine("    public IMovingAverage? " + Capitalise(extra) + " { get; }");
+            }
 
             for (var i = 0; i < memberNames.Count; i++)
             {

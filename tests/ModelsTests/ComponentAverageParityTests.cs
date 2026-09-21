@@ -67,12 +67,31 @@ public sealed class ComponentAverageParityTests
     }
 
     [Fact]
+    public void AnIndicatorThatSmoothsTwoThingsTakesOneAverageForEach()
+    {
+        var bars = Walk();
+
+        // AwesomeOscillator is the fast average of the median minus the slow one, at 5 bars and 34. Handing
+        // it one average answers both and makes it a difference of an average with itself, which is zero;
+        // handing it the two it actually asks for has to reproduce naming the simple average exactly.
+        var named = Run(new AwesomeOscillator(), bars);
+        var supplied = Run(new AwesomeOscillator(5, new MirrorSma(5), new MirrorSma(34)), bars);
+
+        named.Should().NotBeNull();
+        supplied.Should().NotBeNull();
+        supplied!.Should().Equal(named!, "the two averages it asks for are the two it was given");
+        supplied.Skip(40).Should().Contain(v => Math.Abs(v) > 1e-9,
+            "a difference of two different averages is not identically zero");
+    }
+
+    [Fact]
     public void SubstitutingAnAverageComputesWhatNamingItComputes()
     {
         var bars = Walk();
         var disagreed = new List<string>();
         var proved = 0;
         var refused = 0;
+        var multiAverage = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
@@ -125,8 +144,20 @@ public sealed class ComponentAverageParityTests
                 // Cleared first: an indicator that computes its own bands never reaches the substitution,
                 // and reading a period left behind by the previous indicator would mirror the wrong one.
                 StockIndicatorBuilder.LastAverageLength = 0;
+                StockIndicatorBuilder.LastAverageRequests = 0;
                 substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(length))), bars);
                 var asked = StockIndicatorBuilder.LastAverageLength;
+
+                // Naming a MovingAvgType applies it to every average the calculation asks for. Handing over
+                // components does not - each one answers a different request, which is the point of them.
+                // So the two forms are the same question only where there is one average to answer, and
+                // this test supplies the same instance to every slot, which on a difference of two averages
+                // is zero by construction. Those are covered by giving each slot its own average instead.
+                if (StockIndicatorBuilder.LastAverageRequests > 1)
+                {
+                    multiAverage++;
+                    continue;
+                }
 
                 // An average whose window never fills over this fixture is not being exercised by either
                 // side - HirashimaSugitaRS asks for 1000 bars of it - so there is nothing here to hold the
@@ -172,7 +203,8 @@ public sealed class ComponentAverageParityTests
         // the number this work is measured by, and an assertion message is only shown when it fails.
         System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(),
             "component-average-parity.txt"),
-            "substituted=" + proved + " refused=" + refused + " disagree=" + disagreed.Count);
+            "substituted=" + proved + " refused=" + refused + " multiAverage=" + multiAverage
+                + " disagree=" + disagreed.Count);
 
         proved.Should().BeGreaterThan(0, "the substitution has to be exercised for this to prove anything");
         disagreed.Should().BeEmpty(proved + " indicators substituted, " + refused + " refused as ambiguous, "

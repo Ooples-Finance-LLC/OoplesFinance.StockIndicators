@@ -41,6 +41,9 @@ internal static class ComponentAverage
     private static Func<IReadOnlyList<double>, int, IReadOnlyList<double>>? _average;
 
     [ThreadStatic]
+    private static IReadOnlyList<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>>? _averages;
+
+    [ThreadStatic]
     private static int _substitutions;
 
     /// <summary>
@@ -49,8 +52,21 @@ internal static class ComponentAverage
     /// <param name="series">What the caller's average computed, over the same bars.</param>
     /// <param name="over">The series the caller's average was computed from - the indicator's input.</param>
     internal static IDisposable Arm(Func<IReadOnlyList<double>, int, IReadOnlyList<double>> average)
+        => Arm(new[] { average });
+
+    /// <summary>
+    /// Stands each average in for one of the averages the calculation asks for, in the order it asks.
+    /// </summary>
+    /// <remarks>
+    /// An indicator that smooths two things asks twice, and the two are different questions - the fast and
+    /// the slow average of AwesomeOscillator, say. Answering both from one component turns a difference of
+    /// averages into a difference of one average with itself, which is zero, so each request takes its own.
+    /// A request past the end of the list goes unanswered and the count then refuses the substitution.
+    /// </remarks>
+    internal static IDisposable Arm(IReadOnlyList<Func<IReadOnlyList<double>, int, IReadOnlyList<double>>> averages)
     {
-        _average = average;
+        _averages = averages;
+        _average = averages.Count > 0 ? averages[0] : null;
         _requests = 0;
         _substitutions = 0;
         _lengthAsked = 0;
@@ -88,7 +104,10 @@ internal static class ComponentAverage
         _requests++;
         _lengthAsked = length;
 
-        if (_average is null)
+        var which = _averages is not null && _requests - 1 < _averages.Count
+            ? _averages[_requests - 1]
+            : null;
+        if (which is null)
         {
             return null;
         }
@@ -103,12 +122,16 @@ internal static class ComponentAverage
         }
 
         _substitutions++;
-        return _average(values, length);
+        return which(values, length);
     }
 
     private sealed class Scope : IDisposable
     {
-        public void Dispose() => _average = null;
+        public void Dispose()
+        {
+            _average = null;
+            _averages = null;
+        }
     }
 }
 
