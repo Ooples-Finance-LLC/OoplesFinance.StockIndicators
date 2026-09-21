@@ -189,6 +189,34 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheDetrendedLeadingIndicatorPublishesItsDetrendedPrice()
+    {
+        var bars = Walk(300);
+        var deli = new EhlersDetrendedLeadingIndicator();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(deli)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateEhlersDetrendedLeadingIndicator(length: new EhlersDetrendedLeadingIndicator().Length);
+
+        var dsp = run[deli.Dsp].ToArray();
+        var indicator = run[deli.Value].ToArray();
+
+        dsp.Should().Equal(batch.OutputValues["Dsp"].ToArray());
+        indicator.Should().Equal(batch.OutputValues["Deli"].ToArray());
+
+        // The indicator is the detrended price less its own smoothing, so the two are never the same
+        // series - which is what the builder used to answer for both keys.
+        dsp.Should().NotEqual(indicator);
+    }
+
+    [Fact]
     public void TheErgodicMacdPublishesItsSignalAndHistogram()
     {
         var bars = Walk(300);

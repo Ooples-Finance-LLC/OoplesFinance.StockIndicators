@@ -1148,7 +1148,12 @@ internal static partial class IndicatorCompute
             EhlersCycleAmplitudeSpecOptions eca => ComputeEhlersCycleAmplitudeFast(data, context, eca.Length, eca.Delta),
             EhlersHpLpRoofingFilterSpecOptions ehplprf => ComputeEhlersHpLpRoofingFilterFast(data, context, ehplprf.Length1, ehplprf.Length2),
             EhlersEarlyOnsetTrendIndicatorSpecOptions eeoti => ComputeEhlersEarlyOnsetTrendIndicatorFast(data, context, eeoti.Length1, eeoti.Length2, eeoti.K),
-            EhlersDetrendedLeadingIndicatorSpecOptions edli => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length),
+            EhlersDetrendedLeadingIndicatorSpecOptions edli => spec.OutputKey switch
+            {
+                null or "Deli" => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length),
+                "Dsp" => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length, detrendedPrice: true),
+                _ => null
+            },
             EhlersClassicHilbertTransformerSpecOptions echt => ComputeEhlersClassicHilbertTransformerFast(data, context, echt.Length1, echt.Length2),
             EhlersZeroMeanRoofingFilterSpecOptions ezmrf => ComputeEhlersZeroMeanRoofingFilterFast(data, context, ezmrf.Length1, ezmrf.Length2),
             EhlersSuperPassbandFilterSpecOptions espf => ComputeEhlersSuperPassbandFilterFast(data, context, espf.FastLength, espf.SlowLength, espf.Length1, espf.Length2),
@@ -18892,12 +18897,46 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Detrended Leading Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast(StockData data, ComputeContext context, int length = 14,
+        bool detrendedPrice = false)
     {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersDetrendedLeadingIndicator(highSpan, lowSpan, buffer.WritableSpan, length);
+        // CalculateEhlersDetrendedLeadingIndicator publishes both the detrended price - the difference of
+        // two exponential averages of the midpoint, one at half the other's rate - and the indicator itself,
+        // which is that difference less its own smoothing. Only the indicator was produced, so the Dsp key
+        // answered with it. Both are transcribed here rather than routed through the core, so the two cannot
+        // drift apart.
+        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
+        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var count = data.Count;
+
+        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
+        var alpha2 = alpha / 2;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        double ema1 = 0, ema2 = 0, temp = 0;
+        for (var i = 0; i < count; i++)
+        {
+            // The batch takes the running extreme against the PREVIOUS bar, which on the first bar is zero:
+            // the low is then min(0, low) rather than the low itself. Transcribed as written.
+            var prevHigh = i >= 1 ? highs[i - 1] : 0;
+            var prevLow = i >= 1 ? lows[i - 1] : 0;
+            var currentHigh = Math.Max(prevHigh, highs[i]);
+            var currentLow = Math.Min(prevLow, lows[i]);
+            var currentPrice = (currentHigh + currentLow) / 2;
+
+            var prevEma1 = i >= 1 ? ema1 : currentPrice;
+            var prevEma2 = i >= 1 ? ema2 : currentPrice;
+            ema1 = (alpha * currentPrice) + ((1 - alpha) * prevEma1);
+            ema2 = (alpha2 * currentPrice) + ((1 - alpha2) * prevEma2);
+
+            var dsp = ema1 - ema2;
+            temp = (alpha * dsp) + ((1 - alpha) * temp);
+
+            output[i] = detrendedPrice ? dsp : dsp - temp;
+        }
+
         return buffer;
     }
 
