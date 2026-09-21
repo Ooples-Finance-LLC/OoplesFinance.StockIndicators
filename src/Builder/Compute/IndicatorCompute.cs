@@ -200,7 +200,12 @@ internal static partial class IndicatorCompute
             TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length, tma.MaType),
             WwmaSpecOptions wwma => ComputeWwmaFast(data, context, wwma.Length),
             LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length),
-            KamaSpecOptions kama => ComputeKamaFast(data, context, kama.Length),
+            KamaSpecOptions kama => spec.OutputKey switch
+            {
+                null or "Kama" => ComputeKamaFast(data, context, kama.Length),
+                "Er" => ComputeKamaFast(data, context, kama.Length, KamaSeries.EfficiencyRatio),
+                _ => null
+            },
             ZlemaSpecOptions zlema => ComputeZlemaFast(data, context, zlema.Length),
 
             // Oscillators
@@ -1940,12 +1945,50 @@ internal static partial class IndicatorCompute
     /// Computes Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeKamaFast(StockData data, ComputeContext context, int length = 10)
+    /// <summary>
+    /// Selects which of the two series the Kaufman adaptive routine publishes.
+    /// </summary>
+    internal enum KamaSeries
+    {
+        /// <summary>The adaptive average itself.</summary>
+        Kama,
+
+        /// <summary>The efficiency ratio that drives its smoothing constant.</summary>
+        EfficiencyRatio
+    }
+
+    internal static ComputeBuffer ComputeKamaFast(StockData data, ComputeContext context, int length = 10,
+        KamaSeries series = KamaSeries.Kama)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
 
         var buffer = context.Rent(inputList.Count);
+
+        if (series == KamaSeries.EfficiencyRatio)
+        {
+            // CalculateKaufmanAdaptiveMovingAverage publishes the efficiency ratio beside the average as its
+            // Er key: the distance travelled over the window against the distance walked to get there. The
+            // core computes it internally and does not hand it back, so it is recomputed here on the same
+            // convention - both differences are zero until the window they span is available.
+            var efficiency = buffer.WritableSpan;
+            double volatilitySum = 0;
+            for (var i = 0; i < inputSpan.Length; i++)
+            {
+                volatilitySum += i >= 1 ? Math.Abs(inputSpan[i] - inputSpan[i - 1]) : 0;
+                if (i >= length)
+                {
+                    var leaving = i - length;
+                    volatilitySum -= leaving >= 1 ? Math.Abs(inputSpan[leaving] - inputSpan[leaving - 1]) : 0;
+                }
+
+                var momentum = i >= length ? Math.Abs(inputSpan[i] - inputSpan[i - length]) : 0;
+                efficiency[i] = volatilitySum != 0 ? momentum / volatilitySum : 0;
+            }
+
+            return buffer;
+        }
+
         MovingAverageCore.KaufmanAdaptiveMovingAverage(inputSpan, buffer.WritableSpan, length);
 
         return buffer;

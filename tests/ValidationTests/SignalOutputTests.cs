@@ -60,6 +60,33 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void KamaPublishesItsEfficiencyRatioAndNotTheAverageTwice()
+    {
+        var bars = Walk(150);
+        var kama = new Kama();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(kama)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateKaufmanAdaptiveMovingAverage(length: new Kama().Length);
+
+        var er = run[kama.Er].ToArray();
+
+        er.Should().Equal(batch.OutputValues["Er"].ToArray());
+        run[kama.Value].ToArray().Should().Equal(batch.OutputValues["Kama"].ToArray());
+
+        // The efficiency ratio is a fraction of the distance walked, so it is bounded where the average
+        // tracks price. The builder used to answer this key with the average.
+        er.Should().OnlyContain(x => x >= 0 && x <= 1);
+    }
+
+    [Fact]
     public void ConnorsRsiPublishesItsThreePartsAndNotTheirAverageFourTimes()
     {
         var bars = Walk(200);
