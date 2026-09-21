@@ -89,6 +89,32 @@ public sealed class IndicatorDataSource
     }
 
     /// <summary>
+    /// Creates a batch data source from a collection of stock data.
+    /// The data is merged into a single StockData instance.
+    /// </summary>
+    /// <param name="data">The collection of stock data to use.</param>
+    /// <param name="defaults">Optional provider defaults.</param>
+    /// <exception cref="ArgumentNullException">Thrown when data is null.</exception>
+    public static IndicatorDataSource FromBatch(IEnumerable<StockData> data, IDataProviderDefaults? defaults = null)
+    {
+        if (data is null) throw new ArgumentNullException(nameof(data));
+        var list = data.ToList();
+        if (list.Count == 0)
+        {
+            throw new ArgumentException("Data collection cannot be empty.", nameof(data));
+        }
+
+        if (list.Count == 1)
+        {
+            return FromBatch(list[0], defaults);
+        }
+
+        // Merge multiple StockData instances by concatenating their data
+        var merged = MergeStockData(list);
+        return new IndicatorDataSource(IndicatorSourceKind.Batch, merged, null, defaults, null, null);
+    }
+
+    /// <summary>
     /// Creates a batch data source over columns the caller already holds, without copying them.
     /// </summary>
     /// <remarks>
@@ -134,31 +160,6 @@ public sealed class IndicatorDataSource
         return new IndicatorDataSource(IndicatorSourceKind.Batch, data, null, defaults, null, null);
     }
 
-    /// <summary>
-    /// Creates a batch data source from a collection of stock data.
-    /// The data is merged into a single StockData instance.
-    /// </summary>
-    /// <param name="data">The collection of stock data to use.</param>
-    /// <param name="defaults">Optional provider defaults.</param>
-    /// <exception cref="ArgumentNullException">Thrown when data is null.</exception>
-    public static IndicatorDataSource FromBatch(IEnumerable<StockData> data, IDataProviderDefaults? defaults = null)
-    {
-        if (data is null) throw new ArgumentNullException(nameof(data));
-        var list = data.ToList();
-        if (list.Count == 0)
-        {
-            throw new ArgumentException("Data collection cannot be empty.", nameof(data));
-        }
-
-        if (list.Count == 1)
-        {
-            return FromBatch(list[0], defaults);
-        }
-
-        // Merge multiple StockData instances by concatenating their data
-        var merged = MergeStockData(list);
-        return new IndicatorDataSource(IndicatorSourceKind.Batch, merged, null, defaults, null, null);
-    }
 
     /// <summary>
     /// Creates a streaming data source from an IStreamSource.

@@ -44,6 +44,21 @@ public sealed class AdoptedColumnTests
     }
 
     [Fact]
+    public void ColumnsOfDifferentLengthsAreRefusedWhenTheyAreAdopted()
+    {
+        var eight = new double[8];
+        var seven = new double[7];
+        var dates = new DateTime[8];
+
+        // Adopted columns describe one series between them. Accepting a short one would show up later as an
+        // indicator reading past the end of it, a long way from the call that caused it.
+        var build = () => StockData.FromColumnViews(eight, eight, seven, eight, eight, dates);
+
+        build.Should().Throw<ArgumentException>()
+            .WithMessage("*7 lows*", "the message names the column that does not match and its length");
+    }
+
+    [Fact]
     public void AnUntouchedColumnStillReadsFromTheAdoptedViewWithoutCopying()
     {
         var data = Adopted();

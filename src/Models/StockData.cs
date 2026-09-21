@@ -451,6 +451,18 @@ public class StockData : IStockData
         ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices, ReadOnlyMemory<double> volumes,
         ReadOnlyMemory<DateTime> dates)
     {
+        // Adopted columns describe one series between them, so a caller that hands over columns of different
+        // lengths has a bug that would otherwise surface as an indicator quietly reading past the short one.
+        if (highPrices.Length != openPrices.Length || lowPrices.Length != openPrices.Length
+            || closePrices.Length != openPrices.Length || volumes.Length != openPrices.Length
+            || dates.Length != openPrices.Length)
+        {
+            throw new ArgumentException(
+                "Every column must describe the same bars: got " + openPrices.Length + " opens, "
+                + highPrices.Length + " highs, " + lowPrices.Length + " lows, " + closePrices.Length
+                + " closes, " + volumes.Length + " volumes and " + dates.Length + " dates.", nameof(openPrices));
+        }
+
         _openMemory = openPrices;
         _highMemory = highPrices;
         _lowMemory = lowPrices;
@@ -645,31 +657,49 @@ public class StockData : IStockData
     {
         if (_columnsInitialized)
         {
-            // A column with a view is left null on purpose. Standing an empty list in for it here would satisfy
-            // the null check in its getter, so the view would never be read and the column would answer empty
-            // for the rest of this instance's life.
-            if (_openPrices is null && !_openMemory.HasValue) _openPrices = new List<double>();
-            if (_highPrices is null && !_highMemory.HasValue) _highPrices = new List<double>();
-            if (_lowPrices is null && !_lowMemory.HasValue) _lowPrices = new List<double>();
-            if (_closePrices is null && !_closeMemory.HasValue) _closePrices = new List<double>();
-            if (_volumes is null && !_volumeMemory.HasValue) _volumes = new List<double>();
-            if (_dates is null && !_dateMemory.HasValue) _dates = new List<DateTime>();
+            StandInForColumnsWithoutViews();
             return;
         }
 
         if (_tickerDataList == null || _tickerDataList.Count == 0)
         {
-            _openPrices = new List<double>();
-            _highPrices = new List<double>();
-            _lowPrices = new List<double>();
-            _closePrices = new List<double>();
-            _volumes = new List<double>();
-            _dates = new List<DateTime>();
-            _columnsInitialized = true;
+            EmptyEveryColumn();
             return;
         }
 
-        var count = _tickerDataList.Count;
+        BuildColumnsFromRows();
+    }
+
+    /// <summary>Gives an empty list to each column that has neither a list nor a view behind it.</summary>
+    /// <remarks>
+    /// A column with a view is left null on purpose. Standing an empty list in for it would satisfy the null
+    /// check in its getter, so the view would never be read and the column would answer empty for the rest of
+    /// this instance's life.
+    /// </remarks>
+    private void StandInForColumnsWithoutViews()
+    {
+        _openPrices ??= _openMemory.HasValue ? null : new List<double>();
+        _highPrices ??= _highMemory.HasValue ? null : new List<double>();
+        _lowPrices ??= _lowMemory.HasValue ? null : new List<double>();
+        _closePrices ??= _closeMemory.HasValue ? null : new List<double>();
+        _volumes ??= _volumeMemory.HasValue ? null : new List<double>();
+        _dates ??= _dateMemory.HasValue ? null : new List<DateTime>();
+    }
+
+    private void EmptyEveryColumn()
+    {
+        _openPrices = new List<double>();
+        _highPrices = new List<double>();
+        _lowPrices = new List<double>();
+        _closePrices = new List<double>();
+        _volumes = new List<double>();
+        _dates = new List<DateTime>();
+        _columnsInitialized = true;
+    }
+
+    private void BuildColumnsFromRows()
+    {
+        var count = _tickerDataList!.Count;
         var openPrices = new List<double>(count);
         var highPrices = new List<double>(count);
         var lowPrices = new List<double>(count);
