@@ -334,6 +334,17 @@ public sealed class IndicatorRuntime : IDisposable
         var data = _source.BatchData ?? throw new InvalidOperationException("Batch source missing data.");
         var evaluator = new SeriesEvaluator(data, _nodes, _computeContext);
         var series = evaluator.Evaluate(_activeSeries);
+
+        // A snapshot outlives this runtime. Everything inside it was computed into buffers the
+        // ComputeContext owns and hands back to the pool on Dispose, so publishing those views would give a
+        // caller memory that the next rental overwrites - a snapshot reporting whatever someone else wrote
+        // rather than what it computed. It keeps its own copy. Series that feed other indicators stay
+        // zero-copy inside the evaluator; this is only the boundary where results leave.
+        foreach (var handle in series.Keys.ToList())
+        {
+            series[handle] = series[handle].ToArray();
+        }
+
         Publish(new IndicatorSnapshot(series, _keys, handle =>
         {
             if (series.TryGetValue(handle, out var existing))
@@ -341,7 +352,7 @@ public sealed class IndicatorRuntime : IDisposable
                 return existing;
             }
 
-            var computed = evaluator.Evaluate(handle);
+            var computed = evaluator.Evaluate(handle).ToArray();
             series[handle] = computed;
             ActivateSeries(handle);
             return computed;
