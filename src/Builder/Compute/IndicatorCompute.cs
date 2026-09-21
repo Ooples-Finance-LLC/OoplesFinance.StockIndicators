@@ -216,7 +216,7 @@ internal static partial class IndicatorCompute
             CciSpecOptions cci => ComputeCciFast(data, context, cci.Length),
             CmoSpecOptions cmo => ComputeCmoFast(data, context, cmo.Length),
             PpoSpecOptions ppo => ComputePpoFast(data, context, ppo.FastLength, ppo.SlowLength),
-            ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength),
+            ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength, apo.MaType),
             UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
             TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType),
             StochRsiSpecOptions srsi => ComputeStochasticRsiFast(data, context, srsi.RsiLength, maType: srsi.MaType,
@@ -1294,7 +1294,7 @@ internal static partial class IndicatorCompute
             LinearRegressionInterceptSpecOptions lri => ComputeLinearRegressionInterceptFast(data, context, lri.Length),
 
             // Batch 5 - Indicators with Core methods (23 indicators)
-            AbsolutePriceOscillatorSpecOptions apo2 => ComputeAbsolutePriceOscillatorFast(data, context, apo2.FastLength, apo2.SlowLength),
+            AbsolutePriceOscillatorSpecOptions apo2 => ComputeApoFast(data, context, apo2.FastLength, apo2.SlowLength, apo2.MaType),
             AccumulationDistributionLineSpecOptions adl2 => spec.OutputKey switch
             {
                 null or "Adl" => ComputeAccumulationDistributionLineFast(data, context),
@@ -2517,13 +2517,29 @@ internal static partial class IndicatorCompute
     /// Computes Absolute Price Oscillator using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeApoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputeApoFast(StockData data, ComputeContext context, int fastLength = 12,
+        int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // CalculateAbsolutePriceOscillator is the difference of two averages of the chained series, taken
+        // with whichever average it was given. OscillatorCore.AbsolutePriceOscillator has no average to give
+        // it - the arm never took a maType at all - so the type the caller configured reached nothing.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.AbsolutePriceOscillator(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var fastSpan = fast.Span;
+        var slowSpan = slow.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = fastSpan[i] - slowSpan[i];
+        }
 
         return buffer;
     }
