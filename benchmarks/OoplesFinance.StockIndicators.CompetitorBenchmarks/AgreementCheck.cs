@@ -288,7 +288,7 @@ internal static class AgreementCheck
                 data.Quotes.GetBollingerBands(Length, BollingerStdDev).Last().UpperBand ?? double.NaN),
             (CompetitorLibrary.TaLib, LastOf(upper, taLibRange)),
             (CompetitorLibrary.Trady,
-                (double)(data.Candles.Bb(Length, (decimal)BollingerStdDev).Last().Tick.UpperBand ?? 0m))
+                (double)(data.Candles.Bb(Length, (decimal)BollingerStdDev)[^1].Tick.UpperBand ?? 0m))
         ];
     }
 
@@ -484,7 +484,7 @@ internal static class AgreementCheck
                 + ((skender.UpperBand ?? double.NaN) - (skender.Sma ?? double.NaN)).ToString("R"));
             output.WriteLine(TaLibRow
                 + (LastOf(upper, taLibRange) - LastOf(middle, taLibRange)).ToString("R"));
-            var trady = candles.Bb(Length, (decimal)BollingerStdDev).Last().Tick;
+            var trady = candles.Bb(Length, (decimal)BollingerStdDev)[^1].Tick;
             output.WriteLine(TradyRow
                 + ((double)((trady.UpperBand ?? 0m) - (trady.MiddleBand ?? 0m))).ToString("R"));
             output.WriteLine();
