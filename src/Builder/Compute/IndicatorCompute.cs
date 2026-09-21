@@ -1874,11 +1874,9 @@ internal static partial class IndicatorCompute
                 tdi.Length2, tdi.Length4, spec.OutputKey switch
                 {
                     "Signal" => TradersDynamicSeries.Signal,
-
-                    // The three bands sit around the relative strength index's own signal line, and that line
-                    // does not yet agree with the batch's at the opening bar - 100/14 against zero - so
-                    // whether the seed or the deviation window is at fault is unsettled. They keep answering
-                    // with Tdi until it is, rather than carrying a second wrong series.
+                    "UpperBand" => TradersDynamicSeries.UpperBand,
+                    "MiddleBand" => TradersDynamicSeries.MiddleBand,
+                    "LowerBand" => TradersDynamicSeries.LowerBand,
                     _ => TradersDynamicSeries.Tdi
                 }),
 
@@ -28080,9 +28078,10 @@ internal static partial class IndicatorCompute
         // index's OWN signal line, offset by 1.6185 deviations of the index over length2. Only Tdi was being
         // produced, so the other four keys answered with it, and length2 and length4 reached nothing at all.
         //
-        // The index's signal line is a Wilder average whatever maType is given - that is how
-        // CalculateRelativeStrengthIndex computes it - so it is taken that way here rather than through the
-        // general helper.
+        // The index's signal line is its own maType average over length2. CalculateRelativeStrengthIndex
+        // has TWO branches: it uses a Wilder average only when it was GIVEN the Wilder type, and otherwise
+        // the average it was given. Reading only the first branch had this taking a Wilder average always,
+        // which put bar 0 at 100/34 where the batch has a simple average still filling its window at zero.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
@@ -28107,7 +28106,7 @@ internal static partial class IndicatorCompute
         }
 
         using var indexSignal = context.Rent(count);
-        MovingAverageCore.WellesWilderMovingAverage(rsi, indexSignal.WritableSpan, length2);
+        MovingAverage(data, maType, length2, rsi, indexSignal.WritableSpan);
 
         using var deviation = context.Rent(count);
         VolatilityCore.StandardDeviation(rsi, deviation.WritableSpan, length2);
