@@ -60,6 +60,44 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void DemarkPivotsAreComputedPerPeriodAndNotPerBar()
+    {
+        var bars = Walk(400);
+        var demark = new DemarkPivotPoint();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(demark)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateDemarkPivotPoints();
+
+        var pivot = run[demark.Pivot].ToArray();
+        var support = run[demark.S1].ToArray();
+        var resistance = run[demark.R1].ToArray();
+
+        pivot.Should().Equal(batch.OutputValues["Pivot"].ToArray());
+        support.Should().Equal(batch.OutputValues["S1"].ToArray());
+        resistance.Should().Equal(batch.OutputValues["R1"].ToArray());
+
+        // A level belongs to a period, so it holds across that period's bars rather than moving on every
+        // one of them. The routine this replaced recomputed it per bar, which no amount of comparing the
+        // named keys against the primary could have caught - all three were wrong together.
+        pivot.Distinct().Should().HaveCountLessThan(pivot.Length / 2);
+
+        // Resistance sits above support, because it subtracts the period's low where support subtracts its
+        // high, and they were both being answered with the pivot.
+        for (var i = 0; i < pivot.Length; i++)
+        {
+            resistance[i].Should().BeGreaterThanOrEqualTo(support[i]);
+        }
+    }
+
+    [Fact]
     public void KamaPublishesItsEfficiencyRatioAndNotTheAverageTwice()
     {
         var bars = Walk(150);
