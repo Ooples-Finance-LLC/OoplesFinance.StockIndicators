@@ -329,7 +329,9 @@ public sealed class StockIndicatorBuilder
                 using (buffer.Value)
                 {
                     // Exact only when the indicator asked for one average and that one was the caller's.
-                    var exact = ComponentAverage.Requests == 1 && ComponentAverage.Substitutions == 1;
+                    var exact = ComponentAverage.Requests > 0
+                        && ComponentAverage.Substitutions == ComponentAverage.Requests
+                        && !ComponentAverage.MixedLengths;
                     LastAverageLength = ComponentAverage.LengthAsked;
                     return (exact ? [buffer.Value.Span.ToArray()] : null, ComponentAverage.Requests);
                 }

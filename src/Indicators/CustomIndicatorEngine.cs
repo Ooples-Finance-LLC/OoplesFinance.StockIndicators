@@ -177,7 +177,7 @@ internal sealed class CustomIndicatorEngine
                 // rather than swapping the wrong one.
                 var (substituted, requests) = _computeWithAverage(indicator,
                     (series, _) => RunOver(substitute, series));
-                if (substituted is not null && requests == 1)
+                if (substituted is not null)
                 {
                     _computed[indicator] = substituted;
                     return substituted;

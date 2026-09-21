@@ -53,6 +53,8 @@ internal static class ComponentAverage
         _average = average;
         _requests = 0;
         _substitutions = 0;
+        _lengthAsked = 0;
+        _mixedLengths = false;
         return new Scope();
     }
 
@@ -65,6 +67,11 @@ internal static class ComponentAverage
     [ThreadStatic]
     private static int _lengthAsked;
 
+    [ThreadStatic]
+    private static bool _mixedLengths;
+
+    internal static bool MixedLengths => _mixedLengths;
+
     /// <summary>
     /// The period the indicator asked its average for, which is not always the length it was constructed
     /// with - several smooth over a second parameter entirely.
@@ -73,6 +80,11 @@ internal static class ComponentAverage
 
     internal static IReadOnlyList<double>? Take(ReadOnlySpan<double> input, int length)
     {
+        if (_requests > 0 && length != _lengthAsked)
+        {
+            _mixedLengths = true;
+        }
+
         _requests++;
         _lengthAsked = length;
 
