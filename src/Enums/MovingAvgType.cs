@@ -63,6 +63,12 @@ public enum MovingAvgType
     EhlersMedianAverageAdaptiveFilter,
     EhlersMesaAdaptiveMovingAverage,
     EhlersModifiedOptimumEllipticFilter,
+    /// <summary>
+    /// Ehlers's Noise Elimination Technology. Smooths an oscillator or another bounded series - it is what
+    /// Ehlers applies inside the Market Meanness Index - and is not a price average: its output is a rank
+    /// statistic normalised by 0.5 * n * (n - 1), so it lives in [-1, 1] whatever the input is worth. It is
+    /// deliberately not an <see cref="Indicators.IMovingAverage"/> for that reason.
+    /// </summary>
     EhlersNoiseEliminationTechnology,
     EhlersOptimumEllipticFilter,
     EhlersRecursiveMedianFilter,

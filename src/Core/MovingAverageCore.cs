@@ -5333,34 +5333,27 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        // Combine EMA and WMA for hybrid filtering
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
+        // The same filter CalculateHybridConvolutionFilter runs: its own previous output blended with each of
+        // the last length values under a raised cosine, whose weights telescope across the window to exactly
+        // 1. This was an error-weighted blend of an EMA and a WMA - a different filter altogether, so
+        // MovingAvgType.HybridConvolutionFilter meant one thing on the span path and another on the list one.
+        var resolved = Math.Max(length, 1);
         {
-            ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
-            WeightedMovingAverage(input, wmaBuffer.AsSpan(0, input.Length), length);
-
             for (var i = 0; i < input.Length; i++)
             {
-                // Hybrid: adaptive blend based on volatility
-                var currentValue = input[i];
-                var emaVal = emaBuffer[i];
-                var wmaVal = wmaBuffer[i];
+                var prevOutput = i >= 1 ? output[i - 1] : input[i];
 
-                var emaError = Math.Abs(currentValue - emaVal);
-                var wmaError = Math.Abs(currentValue - wmaVal);
-                var totalError = emaError + wmaError;
+                double value = 0;
+                for (var j = 1; j <= resolved; j++)
+                {
+                    var sign = 0.5 * (1 - Math.Cos((double)j / resolved * Math.PI));
+                    var d = sign - (0.5 * (1 - Math.Cos((double)(j - 1) / resolved * Math.PI)));
+                    var previousValue = i >= j - 1 ? input[i - (j - 1)] : 0;
+                    value += ((sign * prevOutput) + ((1 - sign) * previousValue)) * d;
+                }
 
-                // Weight towards the filter with less error
-                var emaWeight = totalError > 0 ? wmaError / totalError : 0.5;
-                output[i] = (emaWeight * emaVal) + ((1 - emaWeight) * wmaVal);
+                output[i] = value;
             }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(emaBuffer);
-            ArrayPool<double>.Shared.Return(wmaBuffer);
         }
     }
 

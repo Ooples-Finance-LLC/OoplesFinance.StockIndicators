@@ -8,244 +8,312 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
-using OoplesFinance.StockIndicators.Helpers;
+using OoplesFinance.StockIndicators.Builder.Specs;
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
 /// <summary>
-/// Base class for an indicator. Derive from this, override <see cref="Calculate"/>, and everything
-/// else - resolving the input series, the derived series most indicators need, publishing outputs,
-/// and taking part in chaining - is handled here.
+/// One series an indicator publishes.
+/// </summary>
+/// <remarks>
+/// Constructed only by <see cref="IndicatorBase"/> and <see cref="MultiOutputIndicatorBase"/>, so the only way a
+/// caller obtains one is through a typed member of the indicator that publishes it.
+/// </remarks>
+internal sealed class IndicatorOutput : IIndicatorOutput
+{
+    internal IndicatorOutput(IIndicator indicator, int slot)
+    {
+        Indicator = indicator;
+        Slot = slot;
+    }
+
+    /// <inheritdoc/>
+    public IIndicator Indicator { get; }
+
+    /// <inheritdoc/>
+    public int Slot { get; }
+}
+
+/// <summary>
+/// What a built-in indicator additionally knows: the batch indicator it stands for, and how to build the
+/// options the compute layer dispatches on.
+/// </summary>
+/// <remarks>
+/// Internal on purpose, and deliberately NOT part of <see cref="IIndicator"/>. <see cref="IndicatorName"/> is
+/// a closed enum of this library's own indicators, so requiring it publicly would make a caller's own
+/// indicator impossible to write - which is exactly what <c>IStreamingIndicatorState.Name</c> does today.
+/// </remarks>
+internal interface IBuiltInIndicator
+{
+    /// <summary>The batch indicator this stands for.</summary>
+    IndicatorName BatchName { get; }
+
+    /// <summary>The single output this stands for, when it stands for one of several.</summary>
+    string? BatchOutputKey { get; }
+
+    /// <summary>Builds the options the compute layer dispatches on.</summary>
+    IIndicatorSpecOptions CreateOptions();
+}
+
+/// <summary>
+/// An indicator publishing one series.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A complete indicator is the calculation and nothing else:
-/// </para>
-/// <code>
-/// [Indicator("Range Bands")]
-/// public sealed class RangeBands : IndicatorBase
-/// {
-///     public RangeBands(int length = 20, double multiplier = 2)
-///     {
-///         Length = length;
-///         Multiplier = multiplier;
-///     }
-///
-///     public int Length { get; }
-///     public double Multiplier { get; }
-///
-///     protected override void Calculate()
-///     {
-///         var basis = MovingAverage(Input, MovingAvgType.SimpleMovingAverage, Length);
-///         var range = AverageTrueRange(Length);
-///
-///         var upper = new List&lt;double&gt;(Count);
-///         var lower = new List&lt;double&gt;(Count);
-///         for (var i = 0; i &lt; Count; i++)
-///         {
-///             upper.Add(basis[i] + (range[i] * Multiplier));
-///             lower.Add(basis[i] - (range[i] * Multiplier));
-///         }
-///
-///         Publish("UpperBand", upper);
-///         Publish("MiddleBand", basis);
-///         Publish("LowerBand", lower);
-///         SetPrimary(basis);
-///     }
-/// }
-/// </code>
-/// <para>
-/// Running it returns a <see cref="StockData"/>, exactly like the built-in indicators, so it chains
-/// both ways with no further work:
-/// </para>
-/// <code>
-/// var bands = new RangeBands(20, 2).Run(data);
-/// var rsiOfUpper = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(14);
-/// var onAnIndicator = new RangeBands().Run(data.CalculateSimpleMovingAverage(50));
-/// </code>
-/// <para>
-/// The input series is resolved once, when the run starts, and cannot change underneath the
-/// calculation - the helpers below take it as a parameter rather than reading it back off shared
-/// state. That is what makes the class of defect described in issue #145 impossible to write here.
+/// Derive from this, return a state from <see cref="CreateState"/>, and everything else - taking part in
+/// chaining, being someone else's component, having components of its own, running over history and over a
+/// live feed - comes from here. The library's own generated indicators derive from this same class on the
+/// same terms.
 /// </para>
 /// </remarks>
-public abstract class IndicatorBase
+public abstract class IndicatorBase : IIndicator
 {
-    private StockData? _data;
-    private IndicatorSource _source;
-    private Dictionary<string, List<double>>? _outputs;
-    private List<double>? _primary;
+    private readonly IIndicatorOutput[] _outputs;
+    private IIndicator[] _components = [];
+
+    /// <summary>Creates an indicator publishing a single series, which is the indicator itself.</summary>
+    protected IndicatorBase()
+    {
+        // A single-output indicator is its own output. That is what lets run[rsi] work without naming one,
+        // and it is why "no primary declared" is not a mistake this shape can make.
+        _outputs = [new IndicatorOutput(this, 0)];
+    }
+
+    /// <inheritdoc/>
+    public IIndicator? Source { get; private set; }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IIndicatorOutput> Outputs => _outputs;
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IIndicator> Components => _components;
+
+    /// <inheritdoc/>
+    /// <remarks>Override when the indicator needs history before its values mean anything.</remarks>
+    public virtual int WarmupBars => 0;
+
+    /// <summary>The single series this indicator publishes.</summary>
+    public IIndicatorOutput Value => _outputs[0];
 
     /// <summary>
-    /// The name this indicator is known by. Defaults to the type name, or to the name given to
-    /// <see cref="IndicatorAttribute"/> when one is applied.
+    /// Reads <paramref name="source"/>'s series instead of the bars.
     /// </summary>
-    public virtual string Name
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the chain would read itself.</exception>
+    public IndicatorBase Of(IIndicator source)
     {
-        get
-        {
-            var type = GetType();
-            var attribute = (IndicatorAttribute?)Attribute.GetCustomAttribute(type, typeof(IndicatorAttribute));
+        if (source is null) throw new ArgumentNullException(nameof(source));
 
-            return attribute?.Name ?? type.Name;
+        // Caught here rather than as a stack overflow inside the evaluator, or a cycle error naming handles
+        // the caller never saw.
+        for (var link = source; link is not null; link = link.Source)
+        {
+            if (ReferenceEquals(link, this))
+            {
+                throw new InvalidOperationException(
+                    "An indicator cannot read a series that is computed from itself.");
+            }
         }
+
+        Source = source;
+        return this;
     }
 
     /// <summary>
-    /// The bars and the series being measured, resolved once at the start of the run.
-    /// </summary>
-    protected IndicatorSource Source => _source;
-
-    /// <summary>The series this indicator is measuring - close prices, or a chained series.</summary>
-    protected IReadOnlyList<double> Input => _source.Values;
-
-    /// <summary>The number of bars.</summary>
-    protected int Count => _source.Count;
-
-    /// <summary>
-    /// Runs the indicator over <paramref name="data"/> and returns the result.
+    /// Declares the indicators this one is built from, in the order its state receives them.
     /// </summary>
     /// <remarks>
-    /// <paramref name="data"/> is not modified. The returned <see cref="StockData"/> is a view over the
-    /// same bars carrying this indicator's outputs, so it can be chained from or branched freely.
+    /// A component is a node in the same graph as anything else, so one component shared by several
+    /// indicators is computed once for the run rather than once per consumer.
     /// </remarks>
-    /// <param name="data">The bars, or the result of another indicator to chain from.</param>
-    public StockData Run(StockData data)
+    /// <exception cref="ArgumentNullException">Thrown when components, or any of them, is null.</exception>
+    protected void Uses(params IIndicator[] components)
     {
-        if (data is null)
+        if (components is null) throw new ArgumentNullException(nameof(components));
+
+        foreach (var component in components)
         {
-            throw new ArgumentNullException(nameof(data));
+            if (component is null)
+            {
+                throw new ArgumentNullException(nameof(components), "A component cannot be null.");
+            }
         }
 
-        _data = data;
-        _source = IndicatorSource.Resolve(data);
-        _outputs = new Dictionary<string, List<double>>();
-        _primary = null;
-
-        Calculate();
-
-        var outputs = _outputs;
-        var primary = _primary;
-
-        if (primary is null && outputs.Count > 0)
-        {
-            // An indicator that published outputs but named no primary chains from its first one.
-            // Written as a loop that breaks on its first iteration until SonarCloud pointed out that
-            // is just First() spelled at length - and a loop whose body cannot run twice reads as if
-            // it might, which is the actual cost.
-            primary = outputs.Values.First();
-        }
-
-        var result = data.WithValues(primary ?? new List<double>());
-        result.SetOutputValues(() => outputs);
-        result.IndicatorName = IndicatorName.None;
-
-        _data = null;
-        _outputs = null;
-        _primary = null;
-
-        return result;
+        _components = components;
     }
 
     /// <summary>
-    /// Computes this indicator. The only thing a new indicator has to write.
+    /// Creates the arithmetic. Return an <see cref="IIndicatorState"/>, or an
+    /// <see cref="IComposedIndicatorState"/> when the indicator declared components.
     /// </summary>
-    protected abstract void Calculate();
+    /// <remarks>
+    /// <para>
+    /// Called once per run, never shared between runs, so a state is free to hold whatever it needs without
+    /// worrying about another run's bars arriving in it.
+    /// </para>
+    /// <para>
+    /// Virtual rather than abstract, and returning <see langword="null"/> by default, because a generated
+    /// indicator is not its own arithmetic: it names a batch indicator through <see cref="IBuiltInIndicator"/>
+    /// and the compute layer supplies the calculation. Exactly one of the two has to be true of any
+    /// indicator, which is what <c>RequireComputable</c> checks.
+    /// </para>
+    /// </remarks>
+    protected internal virtual object? CreateState() => null;
+}
 
-    /// <summary>
-    /// Publishes a named output, which becomes chainable and appears on the result.
-    /// </summary>
-    /// <param name="name">The output name, as callers will ask for it.</param>
-    /// <param name="values">The series. Must have one value per bar.</param>
-    protected void Publish(string name, List<double> values)
+/// <summary>
+/// An indicator publishing several series.
+/// </summary>
+public abstract class MultiOutputIndicatorBase : IMultiOutputIndicator
+{
+    private readonly IIndicatorOutput[] _outputs;
+    private IIndicator[] _components = [];
+
+    /// <summary>Creates an indicator publishing <paramref name="outputCount"/> series.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when fewer than two outputs are declared.</exception>
+    protected MultiOutputIndicatorBase(int outputCount)
     {
-        if (name is null || name.Length == 0)
+        if (outputCount < 2)
         {
-            throw new ArgumentException("An output name is required.", nameof(name));
+            throw new ArgumentOutOfRangeException(nameof(outputCount),
+                "A multi-output indicator publishes at least two series; derive from IndicatorBase for one.");
         }
 
-        if (values is null)
+        _outputs = new IIndicatorOutput[outputCount];
+        for (var i = 0; i < outputCount; i++)
         {
-            throw new ArgumentNullException(nameof(values));
+            _outputs[i] = new IndicatorOutput(this, i);
+        }
+    }
+
+    /// <inheritdoc/>
+    public IIndicator? Source { get; private set; }
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IIndicatorOutput> Outputs => _outputs;
+
+    /// <inheritdoc/>
+    public IReadOnlyList<IIndicator> Components => _components;
+
+    /// <inheritdoc/>
+    public virtual int WarmupBars => 0;
+
+    /// <summary>The outputs declared by this indicator, for assigning to its typed members.</summary>
+    protected OutputSet DeclaredOutputs => new(_outputs);
+
+    /// <summary>Reads <paramref name="source"/>'s series instead of the bars.</summary>
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the chain would read itself.</exception>
+    public MultiOutputIndicatorBase Of(IIndicator source)
+    {
+        if (source is null) throw new ArgumentNullException(nameof(source));
+
+        for (var link = source; link is not null; link = link.Source)
+        {
+            if (ReferenceEquals(link, this))
+            {
+                throw new InvalidOperationException(
+                    "An indicator cannot read a series that is computed from itself.");
+            }
         }
 
-        if (_outputs is null)
+        Source = source;
+        return this;
+    }
+
+    /// <summary>Declares the indicators this one is built from.</summary>
+    /// <exception cref="ArgumentNullException">Thrown when components, or any of them, is null.</exception>
+    protected void Uses(params IIndicator[] components)
+    {
+        if (components is null) throw new ArgumentNullException(nameof(components));
+
+        foreach (var component in components)
         {
-            throw new InvalidOperationException("Publish may only be called while the indicator is running.");
+            if (component is null)
+            {
+                throw new ArgumentNullException(nameof(components), "A component cannot be null.");
+            }
         }
 
-        if (values.Count != Count)
-        {
-            throw new CalculationException(
-                $"{Name} published '{name}' with {values.Count} values for {Count} bars. Every output must "
-                + "have one value per bar so that it lines up with the price series.");
-        }
-
-        _outputs[name] = values;
+        _components = components;
     }
 
     /// <summary>
-    /// Names the series a chained calculation continues from when no output is named explicitly.
+    /// Creates the arithmetic. Return an <see cref="IMultiOutputState"/>, or an
+    /// <see cref="IComposedMultiOutputState"/> when the indicator declared components.
     /// </summary>
-    /// <remarks>Optional. Without it the first published output is used.</remarks>
-    protected void SetPrimary(List<double> values)
+    /// <remarks>
+    /// Virtual for the same reason as <see cref="IndicatorBase.CreateState"/>: a generated indicator routes to the
+    /// compute layer instead of carrying its own arithmetic.
+    /// </remarks>
+    protected internal virtual object? CreateState() => null;
+}
+
+/// <summary>
+/// The outputs a multi-output indicator declared, ready to be deconstructed into its typed members.
+/// </summary>
+/// <remarks>
+/// Deconstruction rather than indexing, so <c>(Upper, Middle, Lower) = DeclaredOutputs;</c> fails to compile
+/// when the count and the members disagree - a mismatch that an indexer would turn into a runtime surprise
+/// somewhere far from the constructor that caused it.
+/// </remarks>
+public readonly struct OutputSet
+{
+    private readonly IIndicatorOutput[] _outputs;
+
+    internal OutputSet(IIndicatorOutput[] outputs) => _outputs = outputs;
+
+    /// <summary>Deconstructs two declared outputs.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when a different number was declared.</exception>
+    public void Deconstruct(out IIndicatorOutput first, out IIndicatorOutput second)
     {
-        if (values is null)
-        {
-            throw new ArgumentNullException(nameof(values));
-        }
-
-        // The same bar-count rule Publish enforces on named outputs. The primary series is the one
-        // Run hands to WithValues, so it becomes the input of whatever is chained next - a
-        // misaligned primary is read against the wrong bars there, or indexed past its end, with
-        // nothing at the point of the mistake to say so. Publish already refuses this for a series
-        // nobody chains from; the one that IS chained from should not be the lenient case.
-        if (values.Count != Count)
-        {
-            throw new CalculationException(
-                $"{Name} set a primary series of {values.Count} values for {Count} bars. The primary "
-                + "series is what a chained calculation continues from, so it must have one value "
-                + "per bar.");
-        }
-
-        _primary = values;
+        Require(2);
+        first = _outputs[0];
+        second = _outputs[1];
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // The derived series most indicators need. Each takes the series it measures as a parameter, so
-    // computing one cannot change what another reads.
-    // ---------------------------------------------------------------------------------------------
+    /// <summary>Deconstructs three declared outputs.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when a different number was declared.</exception>
+    public void Deconstruct(out IIndicatorOutput first, out IIndicatorOutput second, out IIndicatorOutput third)
+    {
+        Require(3);
+        first = _outputs[0];
+        second = _outputs[1];
+        third = _outputs[2];
+    }
 
-    /// <summary>A moving average of <paramref name="values"/>.</summary>
-    protected List<double> MovingAverage(IReadOnlyList<double> values, MovingAvgType maType, int length) =>
-        IndicatorMath.MovingAverage(RequireData(), values, maType, length);
+    /// <summary>Deconstructs four declared outputs.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when a different number was declared.</exception>
+    public void Deconstruct(out IIndicatorOutput first, out IIndicatorOutput second, out IIndicatorOutput third,
+        out IIndicatorOutput fourth)
+    {
+        Require(4);
+        first = _outputs[0];
+        second = _outputs[1];
+        third = _outputs[2];
+        fourth = _outputs[3];
+    }
 
-    /// <summary>A moving average of the input series.</summary>
-    protected List<double> MovingAverage(MovingAvgType maType, int length) =>
-        MovingAverage(Input, maType, length);
+    /// <summary>Deconstructs five declared outputs.</summary>
+    /// <exception cref="InvalidOperationException">Thrown when a different number was declared.</exception>
+    public void Deconstruct(out IIndicatorOutput first, out IIndicatorOutput second, out IIndicatorOutput third,
+        out IIndicatorOutput fourth, out IIndicatorOutput fifth)
+    {
+        Require(5);
+        first = _outputs[0];
+        second = _outputs[1];
+        third = _outputs[2];
+        fourth = _outputs[3];
+        fifth = _outputs[4];
+    }
 
-    /// <summary>
-    /// The rolling standard deviation of <paramref name="values"/> - the population standard deviation
-    /// about each window's own mean, which is what dispersion bands are defined against.
-    /// </summary>
-    protected List<double> StandardDeviation(IReadOnlyList<double> values, int length) =>
-        IndicatorMath.RollingStandardDeviation(values, length);
-
-    /// <summary>The rolling standard deviation of the input series.</summary>
-    protected List<double> StandardDeviation(int length) => StandardDeviation(Input, length);
-
-    /// <summary>The true range of each bar.</summary>
-    protected List<double> TrueRange() => IndicatorMath.TrueRange(_source);
-
-    /// <summary>The average true range, smoothed by <paramref name="maType"/>.</summary>
-    protected List<double> AverageTrueRange(int length,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod) =>
-        IndicatorMath.AverageTrueRange(RequireData(), _source, maType, length);
-
-    /// <summary>A new series sized to the bar count, for accumulating results.</summary>
-    protected List<double> NewSeries() => new(Count);
-
-    private StockData RequireData() =>
-        _data ?? throw new InvalidOperationException(
-            "This may only be called while the indicator is running, from inside Calculate.");
+    private void Require(int count)
+    {
+        var declared = _outputs?.Length ?? 0;
+        if (declared != count)
+        {
+            throw new InvalidOperationException(
+                "This indicator declared " + declared + " outputs but is assigning " + count + ".");
+        }
+    }
 }

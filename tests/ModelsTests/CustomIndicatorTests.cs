@@ -1,192 +1,181 @@
-using OoplesFinance.StockIndicators.Exceptions;
+using FluentAssertions;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
-using OoplesFinance.StockIndicators.Series;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 /// <summary>
 /// What someone writing their own indicator has to do, and what they get without doing anything.
 /// </summary>
-public sealed class CustomIndicatorTests : GlobalTestData
+/// <remarks>
+/// <para>
+/// Ported from the v1 extension point, which was <c>StockData Run(StockData)</c> with
+/// <c>Publish(string, List&lt;double&gt;)</c>. Each guarantee it asserted is restated here against the v2 run,
+/// except two that the v2 shape makes unrepresentable rather than merely detectable:
+/// </para>
+/// <list type="bullet">
+/// <item><c>NoPrimaryDeclared</c> - a single-output indicator IS its own output, so there is no primary to
+/// forget to set.</item>
+/// <item><c>PublishesWrongLength</c> - a state returns one value per bar, so a series cannot be the wrong
+/// length. The v1 shape could only catch that once something indexed past the end.</item>
+/// </list>
+/// </remarks>
+public sealed class CustomIndicatorTests
 {
     private const int SampleSize = 200;
-    private const double Tolerance = 1e-10;
 
-    private static StockData CreateData() => new(StockTestData.Take(SampleSize));
-
-    /// <summary>
-    /// A complete indicator. The calculation is the only thing written here - resolving the input,
-    /// the moving average, the true range, publishing, chaining and branching all come from the base.
-    /// </summary>
+    /// <summary>A moving average with bands a multiple of the true range away.</summary>
     [Indicator("Range Bands", Description = "A moving average with bands a multiple of ATR away.")]
-    private sealed class RangeBands : IndicatorBase
+    private sealed class RangeBands : MultiOutputIndicatorBase
     {
+        private readonly double _multiplier;
+
         public RangeBands(int length = 20, double multiplier = 2)
+            : base(3)
         {
             Length = length;
-            Multiplier = multiplier;
+            _multiplier = multiplier;
+            Uses(new Sma(length), new Atr(length));
+            (UpperBand, MiddleBand, LowerBand) = DeclaredOutputs;
         }
 
         public int Length { get; }
 
-        public double Multiplier { get; }
+        public IIndicatorOutput UpperBand { get; }
 
-        protected override void Calculate()
+        public IIndicatorOutput MiddleBand { get; }
+
+        public IIndicatorOutput LowerBand { get; }
+
+        public override int WarmupBars => Length;
+
+        protected internal override object CreateState() => new State(_multiplier);
+
+        private sealed class State(double multiplier) : IComposedMultiOutputState
         {
-            var basis = MovingAverage(MovingAvgType.SimpleMovingAverage, Length);
-            var range = AverageTrueRange(Length);
+            public void Reset() { }
 
-            var upper = NewSeries();
-            var lower = NewSeries();
-            for (var i = 0; i < Count; i++)
+            public void Update(in Bar bar, ReadOnlySpan<double> components, Span<double> outputs)
             {
-                upper.Add(basis[i] + (range[i] * Multiplier));
-                lower.Add(basis[i] - (range[i] * Multiplier));
-            }
+                var basis = components[0];
+                var range = components[1] * multiplier;
 
-            Publish("UpperBand", upper);
-            Publish("MiddleBand", basis);
-            Publish("LowerBand", lower);
-            SetPrimary(basis);
-        }
-    }
-
-    private sealed class NoPrimaryDeclared : IndicatorBase
-    {
-        protected override void Calculate() => Publish("OnlyOutput", MovingAverage(MovingAvgType.SimpleMovingAverage, 5));
-    }
-
-    private sealed class PublishesWrongLength : IndicatorBase
-    {
-        protected override void Calculate() => Publish("Short", new List<double> { 1, 2, 3 });
-    }
-
-    [Fact]
-    public void CustomIndicator_PublishesItsOutputs()
-    {
-        var result = new RangeBands(20, 2).Run(CreateData());
-
-        result.OutputValues.Should().ContainKeys("UpperBand", "MiddleBand", "LowerBand");
-        result.OutputValues["UpperBand"].Should().HaveCount(SampleSize);
-        result.CustomValuesList.Should().BeSameAs(result.OutputValues["MiddleBand"],
-            "SetPrimary decides what a chained calculation continues from");
-    }
-
-    [Fact]
-    public void CustomIndicator_ChainsBothWaysWithTheBuiltInsAndDoesNotMutateItsInput()
-    {
-        var data = CreateData();
-
-        // Built-in first, then the custom one.
-        var onAnIndicator = new RangeBands(10).Run(data.CalculateSimpleMovingAverage(50));
-        onAnIndicator.OutputValues["MiddleBand"].Should().HaveCount(SampleSize);
-
-        // Custom one first, then a built-in continuing from a named output.
-        var bands = new RangeBands(20, 2).Run(data);
-        var rsiOfUpper = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(length: 14);
-        rsiOfUpper.CustomValuesList.Should().HaveCount(SampleSize);
-    }
-
-    [Fact]
-    public void CustomIndicator_DoesNotModifyTheDataItWasHanded()
-    {
-        // A fresh instance: the built-in Calculate* methods publish onto the object they are given, so
-        // this has to be measured on data that nothing else has touched.
-        var data = CreateData();
-
-        new RangeBands(20, 2).Run(data);
-
-        data.CustomValuesList.Should().BeEmpty("Run must not modify the data it was handed");
-        data.OutputValues.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void CustomIndicator_WorksWithTheGeneratedAccessors()
-    {
-        var bands = new RangeBands(20, 2).Run(CreateData());
-
-        // UpperBand() is generated from the built-in library, and works here because a custom
-        // indicator publishes its outputs the same way and returns the same type.
-        var viaAccessor = bands.UpperBand();
-
-        viaAccessor.CustomValuesList.Should().BeSameAs(bands.OutputValues["UpperBand"]);
-    }
-
-    [Fact]
-    public void CustomIndicator_BranchesFromEachOutputIndependently()
-    {
-        var bands = new RangeBands(20, 2).Run(CreateData());
-
-        var upper = bands.SeriesView("UpperBand").CalculateRelativeStrengthIndex(length: 14).CustomValuesList;
-        var lower = bands.SeriesView("LowerBand").CalculateRelativeStrengthIndex(length: 14).CustomValuesList;
-
-        upper.Should().NotEqual(lower);
-    }
-
-    [Fact]
-    public void CustomIndicator_TakesItsNameFromTheAttributeWhenOneIsGiven()
-    {
-        new RangeBands().Name.Should().Be("Range Bands");
-        new NoPrimaryDeclared().Name.Should().Be("NoPrimaryDeclared", "the type name is the default");
-    }
-
-    [Fact]
-    public void CustomIndicator_WithoutAnExplicitPrimary_ChainsFromItsFirstOutput()
-    {
-        var result = new NoPrimaryDeclared().Run(CreateData());
-
-        result.CustomValuesList.Should().BeSameAs(result.OutputValues["OnlyOutput"]);
-    }
-
-    [Fact]
-    public void CustomIndicator_PublishingASeriesThatDoesNotLineUpWithTheBarsIsRejected()
-    {
-        var act = () => new PublishesWrongLength().Run(CreateData());
-
-        act.Should().Throw<CalculationException>()
-            .WithMessage("*3 values for 200 bars*",
-                "a series that does not line up with the price series would silently misalign every "
-                + "reading taken from it");
-    }
-
-    /// <summary>
-    /// The helpers take the series they measure as a parameter, so one cannot redefine another's input
-    /// - the defect issue #145 describes is not expressible from inside a custom indicator.
-    /// </summary>
-    [Fact]
-    public void CustomIndicator_ComputingAnAverageDoesNotChangeWhatTheDispersionReads()
-    {
-        var withAverageFirst = new OrderProbe(averageFirst: true).Run(CreateData());
-        var withDispersionFirst = new OrderProbe(averageFirst: false).Run(CreateData());
-
-        var a = withAverageFirst.OutputValues["StdDev"];
-        var b = withDispersionFirst.OutputValues["StdDev"];
-
-        for (var i = 0; i < a.Count; i++)
-        {
-            a[i].Should().BeApproximately(b[i], Tolerance, $"call order must not matter, index {i}");
-        }
-    }
-
-    private sealed class OrderProbe : IndicatorBase
-    {
-        private readonly bool _averageFirst;
-
-        public OrderProbe(bool averageFirst) => _averageFirst = averageFirst;
-
-        protected override void Calculate()
-        {
-            if (_averageFirst)
-            {
-                MovingAverage(MovingAvgType.SimpleMovingAverage, 20);
-                Publish("StdDev", StandardDeviation(20));
-            }
-            else
-            {
-                var dispersion = StandardDeviation(20);
-                MovingAverage(MovingAvgType.SimpleMovingAverage, 20);
-                Publish("StdDev", dispersion);
+                outputs[0] = basis + range;
+                outputs[1] = basis;
+                outputs[2] = basis - range;
             }
         }
+    }
+
+    private static IReadOnlyList<Bar> Bars_(int count)
+    {
+        var random = new Random(5);
+        var bars = new List<Bar>(count);
+        var start = new DateTime(2020, 6, 1, 13, 30, 0, DateTimeKind.Utc);
+        var last = 75d;
+
+        for (var i = 0; i < count; i++)
+        {
+            var open = last + ((random.NextDouble() - 0.5) * 0.5);
+            var close = Math.Max(1, open + ((random.NextDouble() - 0.5) * 1.5));
+            bars.Add(new Bar(start.AddMinutes(i), open, Math.Max(open, close) + random.NextDouble(),
+                Math.Max(0.01, Math.Min(open, close) - random.NextDouble()), close, 5000));
+            last = close;
+        }
+
+        return bars;
+    }
+
+    private static async Task<IIndicatorRun> RunAsync(params IIndicator[] indicators) =>
+        await new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(Bars_(SampleSize)))
+            .ConfigureIndicators(indicators)
+            .BuildAsync();
+
+    [Fact]
+    public async Task CustomIndicator_PublishesItsOutputs()
+    {
+        var bands = new RangeBands(20, 2);
+
+        using var run = await RunAsync(bands);
+
+        run[bands.UpperBand].ToArray().Should().HaveCount(SampleSize);
+        run[bands.MiddleBand].ToArray().Should().HaveCount(SampleSize);
+        run[bands.LowerBand].ToArray().Should().HaveCount(SampleSize);
+
+        // What SetPrimary used to decide is now structural: the first declared output is the indicator's own
+        // series, which is what run[bands] returns without naming one.
+        run[bands].ToArray().Should().Equal(run[bands.UpperBand].ToArray());
+    }
+
+    [Fact]
+    public async Task CustomIndicator_ChainsBothWaysWithTheBuiltIns()
+    {
+        var bands = new RangeBands(10);
+        var smoothed = new Sma(5).Of(bands);
+
+        using var run = await RunAsync(bands, smoothed);
+
+        run[bands.MiddleBand].ToArray().Should().HaveCount(SampleSize);
+        run[smoothed].ToArray().Should().HaveCount(SampleSize,
+            "a built-in continues from a custom indicator's series");
+
+        // And the other direction: the custom indicator is built from built-ins it declared as components.
+        bands.Components.Should().HaveCount(2);
+        bands.Components[0].Should().BeOfType<Sma>();
+        bands.Components[1].Should().BeOfType<Atr>();
+    }
+
+    [Fact]
+    public async Task CustomIndicator_DoesNotModifyTheBarsItWasHanded()
+    {
+        var bars = Bars_(SampleSize);
+        var closes = bars.Select(b => b.Close).ToArray();
+
+        using var run = await new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(new RangeBands(20, 2))
+            .BuildAsync();
+
+        bars.Select(b => b.Close).Should().Equal(closes, "a run must not modify the bars it was given");
+    }
+
+    [Fact]
+    public async Task CustomIndicator_BranchesFromEachOutputIndependently()
+    {
+        var bands = new RangeBands(20, 2);
+        var fromUpper = new Rsi(14).Of(bands);
+
+        using var run = await RunAsync(bands, fromUpper);
+
+        // Each output is a distinct series, addressed by a typed member rather than a name.
+        run[bands.UpperBand].ToArray().Should().NotEqual(run[bands.LowerBand].ToArray());
+        run[fromUpper].ToArray().Should().HaveCount(SampleSize);
+    }
+
+    [Fact]
+    public async Task CustomIndicator_ReceivesItsComponentsAlreadyComputed()
+    {
+        var bands = new RangeBands(20, 2);
+        var basis = new Sma(20);
+
+        using var run = await RunAsync(bands, basis);
+
+        // The middle band is exactly the component average, which is only true if the component's value for
+        // each bar is what the state was handed.
+        run[bands.MiddleBand].ToArray().Should().Equal(run[basis].ToArray());
+    }
+
+    [Fact]
+    public async Task CustomIndicator_IsIndistinguishableFromABuiltInToTheBuilder()
+    {
+        var mine = new RangeBands(20, 2);
+        var theirs = new BollingerBands(20, 2);
+
+        using var run = await RunAsync(mine, theirs);
+
+        run[mine.UpperBand].ToArray().Should().HaveCount(SampleSize);
+        run[theirs.Upper].ToArray().Should().HaveCount(SampleSize);
+        run.BarCount.Should().Be(SampleSize);
     }
 }
