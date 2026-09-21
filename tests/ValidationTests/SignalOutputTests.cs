@@ -189,6 +189,41 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheErgodicMacdPublishesItsSignalAndHistogram()
+    {
+        var bars = Walk(300);
+        var ergodic = new ErgodicMovingAverageConvergenceDivergence();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(ergodic)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateErgodicMovingAverageConvergenceDivergence();
+
+        var macd = run[ergodic.Value].ToArray();
+        var signal = run[ergodic.Signal].ToArray();
+        var histogram = run[ergodic.Histogram].ToArray();
+
+        macd.Should().Equal(batch.OutputValues["Macd"].ToArray());
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
+        histogram.Should().Equal(batch.OutputValues["Histogram"].ToArray());
+
+        // The histogram is the line less its own smoothing, which is zero for every bar when one series
+        // answers all three keys - so the relation is checked together with the line and signal differing.
+        for (var i = 0; i < macd.Length; i++)
+        {
+            histogram[i].Should().BeApproximately(macd[i] - signal[i], 1e-9);
+        }
+
+        macd.Should().NotEqual(signal);
+    }
+
+    [Fact]
     public void TrenderPublishesBothStopsAndNotTheLineThreeTimes()
     {
         var bars = Walk(300);

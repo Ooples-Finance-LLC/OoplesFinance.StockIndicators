@@ -1805,7 +1805,15 @@ internal static partial class IndicatorCompute
 
             // Batch 29 - Ergodic and Momentum Indicators
             ErgodicCommoditySelectionIndexSpecOptions ecsi => ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType),
-            ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
+            ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => spec.OutputKey switch
+            {
+                null or "Macd" => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
+                "Signal" => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType,
+                    ErgodicMacdSeries.Signal),
+                "Histogram" => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType,
+                    ErgodicMacdSeries.Histogram),
+                _ => null
+            },
             ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
                 etsiv1.Length2, etsiv1.Length3, etsiv1.MaType),
             ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length4,
@@ -27326,11 +27334,65 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    /// <summary>
+    /// Selects which of the three series the ergodic convergence/divergence routine publishes.
+    /// </summary>
+    internal enum ErgodicMacdSeries
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.MacdLine(close, buffer.WritableSpan, length2, length1);
+        /// <summary>The convergence/divergence line itself.</summary>
+        Macd,
+
+        /// <summary>Its smoothing.</summary>
+        Signal,
+
+        /// <summary>The line less its smoothing.</summary>
+        Histogram
+    }
+
+    internal static ComputeBuffer ComputeErgodicMacdFast(StockData data, ComputeContext context, int length1 = 32, int length2 = 5,
+        int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        ErgodicMacdSeries series = ErgodicMacdSeries.Macd)
+    {
+        // CalculateErgodicMovingAverageConvergenceDivergence smooths the CHAINED series by each of its first
+        // two lengths and publishes the first less the second, then smooths that by the third for its Signal
+        // and takes the difference of the two for its Histogram. This arm called OscillatorCore.MacdLine over
+        // the close with the two lengths the other way round, so it answered every key with a line that was
+        // neither of the right series nor even of the right sign, and ignored length3 and maType entirely.
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
+
+        using var firstSmoothing = context.Rent(count);
+        using var secondSmoothing = context.Rent(count);
+        MovingAverage(data, maType, length1, input, firstSmoothing.WritableSpan);
+        MovingAverage(data, maType, length2, input, secondSmoothing.WritableSpan);
+
+        using var line = context.Rent(count);
+        var macd = line.WritableSpan;
+        var first = firstSmoothing.Span;
+        var second = secondSmoothing.Span;
+        for (var i = 0; i < count; i++)
+        {
+            macd[i] = first[i] - second[i];
+        }
+
+        using var signalLine = context.Rent(count);
+        MovingAverage(data, maType, length3, line.Span, signalLine.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var signalSpan = signalLine.Span;
+        var macdSpan = line.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = series switch
+            {
+                ErgodicMacdSeries.Signal => signalSpan[i],
+                ErgodicMacdSeries.Histogram => macdSpan[i] - signalSpan[i],
+                _ => macdSpan[i]
+            };
+        }
+
         return buffer;
     }
 
