@@ -22849,25 +22849,23 @@ internal static partial class IndicatorCompute
     /// Computes Smoothed Volatility Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
-    internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast(StockData data, ComputeContext context, int length1 = 20,
+        int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = data.Count;
-        var buffer = context.Rent(count);
+        // This arm is bound to the MiddleBand key, which CalculateSmoothedVolatilityBands takes over
+        // LENGTH2 - the two bands around it are the ones built from length1 and the average true range.
+        // Averaging over length1 put the middle band a bar out of step with the batch on every bar past its
+        // warmup. The series is also the chained one rather than the close, and the average is whichever the
+        // caller asked for rather than one of the two the switch here knew.
+        _ = deviation;
+        _ = bandAdjust;
 
-        // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-        }
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+
+        var buffer = context.Rent(inputList.Count);
+        MovingAverage(data, maType, length2, input, buffer.WritableSpan);
 
         return buffer;
     }
