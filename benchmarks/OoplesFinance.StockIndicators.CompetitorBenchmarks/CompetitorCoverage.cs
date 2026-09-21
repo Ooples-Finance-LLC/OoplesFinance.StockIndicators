@@ -46,7 +46,17 @@ public enum IndicatorSupport
     Batch,
 
     /// <summary>Shipped with per-bar state, so a new bar costs one update rather than a recomputation.</summary>
-    Incremental
+    Incremental,
+
+    /// <summary>
+    /// Shipped, but not through an entry point this harness can call, so there is no timing for it.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="Absent"/>, which says the library does not have the indicator at all. Reading
+    /// "not shipped" against something a library does ship is exactly the misinformation the coverage table
+    /// exists to prevent.
+    /// </remarks>
+    ShippedNotMeasurable
 }
 
 /// <summary>
@@ -106,7 +116,7 @@ internal static class CompetitorCoverage
             { (BenchmarkedIndicator.Atr, CompetitorLibrary.Trady), IndicatorSupport.Batch },
             { (BenchmarkedIndicator.BollingerBands, CompetitorLibrary.Trady), IndicatorSupport.Batch },
             { (BenchmarkedIndicator.Macd, CompetitorLibrary.Trady), IndicatorSupport.Batch },
-            { (BenchmarkedIndicator.Stochastic, CompetitorLibrary.Trady), IndicatorSupport.Absent },
+            { (BenchmarkedIndicator.Stochastic, CompetitorLibrary.Trady), IndicatorSupport.ShippedNotMeasurable },
 
             // QuanTAlib 1.0.0 ships moving averages, statistics and ATR; the momentum family is not there.
             { (BenchmarkedIndicator.Sma, CompetitorLibrary.QuanTAlib), IndicatorSupport.Incremental },
@@ -171,6 +181,7 @@ internal static class CompetitorCoverage
     {
         IndicatorSupport.Incremental => "batch + streaming",
         IndicatorSupport.Batch => "batch only",
+        IndicatorSupport.ShippedNotMeasurable => "shipped, not benchmarkable",
         IndicatorSupport.Absent => "not shipped",
         _ => "unknown"
     };

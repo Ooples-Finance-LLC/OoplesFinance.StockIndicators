@@ -64,7 +64,11 @@ public sealed class ColumnSourceParityTests
 
             for (var i = 0; i < fromBatch.Values.Length; i++)
             {
-                if (!fromBatch.Values[i].Equals(fromColumns.Values[i]))
+                // The bits, not the value: double.Equals calls +0 and -0 the same number, and a column
+                // path that turned one into the other would slip past a test whose whole job is to say the
+                // two paths compute the same thing.
+                if (BitConverter.DoubleToInt64Bits(fromBatch.Values[i])
+                    != BitConverter.DoubleToInt64Bits(fromColumns.Values[i]))
                 {
                     disagreed.Add(method.Name + "[" + i + "]: " + fromBatch.Values[i].ToString("R") + " against "
                         + fromColumns.Values[i].ToString("R"));

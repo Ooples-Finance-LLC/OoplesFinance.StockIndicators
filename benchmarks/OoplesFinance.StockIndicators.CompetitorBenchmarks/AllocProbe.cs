@@ -40,7 +40,7 @@ internal static class AllocProbe
             }
 
             output.WriteLine("    repeated runs            " + string.Join(", ", repeats) + " B");
-            output.WriteLine("    pool rent+return 10k     " + Measure(() =>
+            output.WriteLine("    pool rent+return " + bars + " bars".PadRight(9) + Measure(() =>
             {
                 var a = System.Buffers.ArrayPool<double>.Shared.Rent(bars);
                 System.Buffers.ArrayPool<double>.Shared.Return(a);

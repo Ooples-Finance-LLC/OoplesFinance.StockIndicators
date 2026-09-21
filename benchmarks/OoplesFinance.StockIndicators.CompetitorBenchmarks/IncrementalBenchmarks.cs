@@ -35,6 +35,11 @@ public class IncrementalBenchmarks
     private const int AtrLength = 14;
 
     private CompetitorData _history = CompetitorData.Create(1);
+
+    // The same bars plus the one that just arrived. A streaming state is measured advancing over that bar,
+    // so a library without one has to recompute the series that includes it - recomputing the history alone
+    // measures a smaller problem and flatters the recompute arms by one bar's work.
+    private CompetitorData _withNextBar = CompetitorData.Create(1);
     private OhlcvBar _nextBar = new("BENCH", BarTimeframe.Minutes(1), DateTime.UtcNow, DateTime.UtcNow,
         1, 1, 1, 1, 1, true);
     private QuanTAlib.TBar _nextQuanTAlibBar;
@@ -56,7 +61,8 @@ public class IncrementalBenchmarks
     {
         var full = CompetitorData.Create(History + 1);
         _history = full.Take(History);
-        _output = new double[History];
+        _withNextBar = full;
+        _output = new double[History + 1];
 
         var last = History;
         _nextClose = full.Closes[last];
@@ -101,14 +107,14 @@ public class IncrementalBenchmarks
         _quanTAlibSma.Calc(new QuanTAlib.TValue(_nextClose, true, false)).Value;
 
     [BenchmarkCategory("Sma"), Benchmark(Description = "Skender (full recompute)")]
-    public int SmaSkenderRecompute() => _history.Quotes.GetSma(SmaLength).ToList().Count;
+    public int SmaSkenderRecompute() => _withNextBar.Quotes.GetSma(SmaLength).ToList().Count;
 
     [BenchmarkCategory("Sma"), Benchmark(Description = "TA-Lib (full recompute)")]
     public TALib.Core.RetCode SmaTaLibRecompute() =>
-        Functions.Sma<double>(_history.Closes, Range.All, _output, out _, SmaLength);
+        Functions.Sma<double>(_withNextBar.Closes, Range.All, _output, out _, SmaLength);
 
     [BenchmarkCategory("Sma"), Benchmark(Description = "Trady (full recompute)")]
-    public int SmaTradyRecompute() => _history.Candles.Sma(SmaLength).Count;
+    public int SmaTradyRecompute() => _withNextBar.Candles.Sma(SmaLength).Count;
 
     // ------------------------------------------------------------------ RSI(14), one more bar
 
@@ -116,14 +122,14 @@ public class IncrementalBenchmarks
     public double RsiOoplesStreaming() => _rsi.Update(_nextBar, true, false).Value;
 
     [BenchmarkCategory("Rsi"), Benchmark(Description = "Skender (full recompute)")]
-    public int RsiSkenderRecompute() => _history.Quotes.GetRsi(RsiLength).ToList().Count;
+    public int RsiSkenderRecompute() => _withNextBar.Quotes.GetRsi(RsiLength).ToList().Count;
 
     [BenchmarkCategory("Rsi"), Benchmark(Description = "TA-Lib (full recompute)")]
     public TALib.Core.RetCode RsiTaLibRecompute() =>
-        Functions.Rsi<double>(_history.Closes, Range.All, _output, out _, RsiLength);
+        Functions.Rsi<double>(_withNextBar.Closes, Range.All, _output, out _, RsiLength);
 
     [BenchmarkCategory("Rsi"), Benchmark(Description = "Trady (full recompute)")]
-    public int RsiTradyRecompute() => _history.Candles.Rsi(RsiLength).Count;
+    public int RsiTradyRecompute() => _withNextBar.Candles.Rsi(RsiLength).Count;
 
     // ------------------------------------------------------------------ ATR(14), one more bar
 
@@ -134,13 +140,13 @@ public class IncrementalBenchmarks
     public double AtrQuanTAlibIncremental() => _quanTAlibAtr.Calc(_nextQuanTAlibBar).Value;
 
     [BenchmarkCategory("Atr"), Benchmark(Description = "Skender (full recompute)")]
-    public int AtrSkenderRecompute() => _history.Quotes.GetAtr(AtrLength).ToList().Count;
+    public int AtrSkenderRecompute() => _withNextBar.Quotes.GetAtr(AtrLength).ToList().Count;
 
     [BenchmarkCategory("Atr"), Benchmark(Description = "TA-Lib (full recompute)")]
     public TALib.Core.RetCode AtrTaLibRecompute() =>
-        Functions.Atr<double>(_history.Highs, _history.Lows, _history.Closes, Range.All, _output, out _,
+        Functions.Atr<double>(_withNextBar.Highs, _withNextBar.Lows, _withNextBar.Closes, Range.All, _output, out _,
             AtrLength);
 
     [BenchmarkCategory("Atr"), Benchmark(Description = "Trady (full recompute)")]
-    public int AtrTradyRecompute() => _history.Candles.Atr(AtrLength).Count;
+    public int AtrTradyRecompute() => _withNextBar.Candles.Atr(AtrLength).Count;
 }
