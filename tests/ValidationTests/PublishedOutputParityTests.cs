@@ -30,6 +30,9 @@ public sealed class PublishedOutputParityTests
     // the indicator is fixed; the test tells you to.
     private static readonly HashSet<string> KnownDivergences = new(StringComparer.Ordinal)
     {
+        "TradersDynamicIndex.LowerBand",
+        "TradersDynamicIndex.MiddleBand",
+        "TradersDynamicIndex.UpperBand",
         "AccumulativeSwingIndex.Signal",
         "AdaptiveErgodicCandlestickOscillator.Signal",
         "Adl.AdlSignal",
@@ -234,10 +237,6 @@ public sealed class PublishedOutputParityTests
         "TotalPowerIndicator.BullCount",
         "TraderPressureIndex.Bears",
         "TraderPressureIndex.Bulls",
-        "TradersDynamicIndex.LowerBand",
-        "TradersDynamicIndex.MiddleBand",
-        "TradersDynamicIndex.Signal",
-        "TradersDynamicIndex.UpperBand",
         "TradeVolumeIndex.Signal",
         "TrendAnalysisIndex.Signal",
         "TrendAnalysisIndicator.Signal",

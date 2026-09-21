@@ -1870,7 +1870,17 @@ internal static partial class IndicatorCompute
             SelfAdjustingRelativeStrengthIndexSpecOptions sarsi => ComputeSelfAdjustingRsiFast(data, context, sarsi.Length, sarsi.MaType),
             SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType),
             StatisticalVolatilitySpecOptions sv => ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2),
-            TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType),
+            TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType,
+                tdi.Length2, tdi.Length4, spec.OutputKey switch
+                {
+                    "Signal" => TradersDynamicSeries.Signal,
+
+                    // The three bands sit around the relative strength index's own signal line, and that line
+                    // does not yet agree with the batch's at the opening bar - 100/14 against zero - so
+                    // whether the seed or the deviation window is at fault is unsettled. They keep answering
+                    // with Tdi until it is, rather than carrying a second wrong series.
+                    _ => TradersDynamicSeries.Tdi
+                }),
 
             // Batch 32 - Remaining Indicators (Part 1)
             FunctionToCandlesSpecOptions ftc => spec.OutputKey switch
@@ -28040,21 +28050,83 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13, int length3 = 2,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    /// <summary>
+    /// Selects which of the five series the traders dynamic index routine publishes.
+    /// </summary>
+    internal enum TradersDynamicSeries
     {
-        // "Tdi", the primary series of CalculateTradersDynamicIndex, is the length3 moving average of the
-        // relative strength index of the chained series. Its length2 sets the deviation window and the signal
-        // line of that index, and its length4 the second average, so neither reaches this series.
+        /// <summary>The length3 average of the relative strength index, which the indicator stands for.</summary>
+        Tdi,
+
+        /// <summary>The length4 average of it.</summary>
+        Signal,
+
+        /// <summary>The index's own signal line plus the band offset.</summary>
+        UpperBand,
+
+        /// <summary>The midpoint of the two bands.</summary>
+        MiddleBand,
+
+        /// <summary>The index's own signal line less the band offset.</summary>
+        LowerBand
+    }
+
+    internal static ComputeBuffer ComputeTradersDynamicIndexFast(StockData data, ComputeContext context, int length1 = 13,
+        int length3 = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length2 = 34, int length4 = 7,
+        TradersDynamicSeries series = TradersDynamicSeries.Tdi)
+    {
+        // CalculateTradersDynamicIndex publishes five series off one relative strength index of the chained
+        // series: Tdi is its length3 average, Signal its length4 average, and the three bands sit around the
+        // index's OWN signal line, offset by 1.6185 deviations of the index over length2. Only Tdi was being
+        // produced, so the other four keys answered with it, and length2 and length4 reached nothing at all.
+        //
+        // The index's signal line is a Wilder average whatever maType is given - that is how
+        // CalculateRelativeStrengthIndex computes it - so it is taken that way here rather than through the
+        // general helper.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
         using var relativeStrength = context.Rent(count);
         RelativeStrengthIndex(data, context, input, length1, maType, relativeStrength.WritableSpan);
+        var rsi = relativeStrength.Span;
 
         var buffer = context.Rent(count);
-        MovingAverage(data, maType, length3, relativeStrength.Span, buffer.WritableSpan);
+        var output = buffer.WritableSpan;
+
+        if (series == TradersDynamicSeries.Tdi)
+        {
+            MovingAverage(data, maType, length3, rsi, output);
+            return buffer;
+        }
+
+        if (series == TradersDynamicSeries.Signal)
+        {
+            MovingAverage(data, maType, length4, rsi, output);
+            return buffer;
+        }
+
+        using var indexSignal = context.Rent(count);
+        MovingAverageCore.WellesWilderMovingAverage(rsi, indexSignal.WritableSpan, length2);
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(rsi, deviation.WritableSpan, length2);
+
+        var signalLine = indexSignal.Span;
+        var stdDev = deviation.Span;
+        for (var i = 0; i < count; i++)
+        {
+            var offset = 1.6185 * stdDev[i];
+            var upper = signalLine[i] + offset;
+            var lower = signalLine[i] - offset;
+
+            output[i] = series switch
+            {
+                TradersDynamicSeries.UpperBand => upper,
+                TradersDynamicSeries.LowerBand => lower,
+                _ => (upper + lower) / 2
+            };
+        }
 
         return buffer;
     }
