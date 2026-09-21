@@ -50,6 +50,7 @@ public sealed class SingleOutputParityTests
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 
         var diverged = new HashSet<string>(StringComparer.Ordinal);
+        var skipped = new List<string>();
         var compared = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
@@ -59,14 +60,21 @@ public sealed class SingleOutputParityTests
             .Where(typeof(IIndicator).IsAssignableFrom)
             .OrderBy(t => t.Name, StringComparer.Ordinal))
         {
-            var constructor = type.GetConstructors().FirstOrDefault(c => c.GetParameters().All(p => p.IsOptional));
-            if (constructor is null) { continue; }
+            var constructor = Constructor(type);
+            if (constructor is null) { skipped.Add(type.Name); continue; }
+
+            // A value we had to invent for a required parameter has to reach the batch as well, or the two
+            // sides are simply configured differently and every difference is the fixture rather than a
+            // defect. Where the batch has no parameter of that name there is no honest comparison to make.
+            var supplied = constructor.GetParameters()
+                .Where(p => !p.IsOptional)
+                .ToDictionary(p => p.Name ?? string.Empty, p => Supply(p.ParameterType), StringComparer.Ordinal);
 
             IIndicator indicator;
             IBuiltInIndicator builtIn;
             try
             {
-                indicator = (IIndicator)constructor.Invoke(constructor.GetParameters().Select(p => p.DefaultValue).ToArray());
+                indicator = (IIndicator)constructor.Invoke(Arguments(constructor));
                 if (indicator is not IBuiltInIndicator built) { continue; }
                 builtIn = built;
             }
@@ -77,11 +85,20 @@ public sealed class SingleOutputParityTests
 
             if (!calculations.TryGetValue("Calculate" + builtIn.BatchName, out var method)) { continue; }
 
+            if (supplied.Count > 0
+                && supplied.Keys.Any(name => method.GetParameters().All(p => p.Name != name)))
+            {
+                skipped.Add(type.Name);
+                continue;
+            }
+
             List<double> theirs;
             try
             {
                 var arguments = method.GetParameters()
-                    .Select((p, i) => i == 0 ? (object?)Batch() : Type.Missing).ToArray();
+                    .Select((p, i) => i == 0 ? (object?)Batch()
+                        : supplied.TryGetValue(p.Name ?? string.Empty, out var same) ? same : Type.Missing)
+                    .ToArray();
                 if (method.Invoke(null, arguments) is not StockData result) { continue; }
 
                 var key = builtIn.BatchOutputKey;
@@ -123,8 +140,49 @@ public sealed class SingleOutputParityTests
         var appeared = diverged.Except(KnownDivergences).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var fixedSince = KnownDivergences.Except(diverged).OrderBy(x => x, StringComparer.Ordinal).ToList();
 
+        // A skipped indicator is compared against nothing, so the count of skips is itself a coverage
+        // claim and is held here rather than left implicit.
+        // An indicator that cannot be paired with its batch is compared against NOTHING, and it is absent
+        // rather than failing, so no count of what was compared reveals it. 48 are in that position today:
+        // either no constructor whose arguments can all be supplied, or a required argument with no
+        // parameter of that name on the batch, which would mean configuring the two sides differently and
+        // calling the difference a defect. The bound is a ratchet - it may shrink, never grow.
+        skipped.Should().HaveCountLessThanOrEqualTo(48,
+            "an unpaired indicator is verified by nothing: " + string.Join(", ", skipped));
+
         appeared.Should().BeEmpty("these indicators stopped matching the series their batch stands for");
         fixedSince.Should().BeEmpty("these now match their batch, so delete them from KnownDivergences");
+    }
+
+    /// <summary>
+    /// The constructor to build an indicator with, preferring one whose arguments can all be supplied.
+    /// </summary>
+    /// <remarks>
+    /// Taking only all-optional constructors silently skipped 79 of the 844 indicator types, and a skipped
+    /// indicator is absent rather than failing, so no count of what WAS compared reveals it. Anything whose
+    /// parameters are lengths, multipliers, flags or enums can be built here.
+    /// </remarks>
+    private static ConstructorInfo? Constructor(Type type) =>
+        type.GetConstructors()
+            .Where(c => c.GetParameters().All(p => p.IsOptional || Supply(p.ParameterType) is not null))
+            .OrderBy(c => c.GetParameters().Count(p => !p.IsOptional))
+            .FirstOrDefault();
+
+    private static object?[] Arguments(ConstructorInfo constructor) =>
+        constructor.GetParameters()
+            .Select(p => p.IsOptional ? p.DefaultValue : Supply(p.ParameterType))
+            .ToArray();
+
+    private static object? Supply(Type type)
+    {
+        if (type == typeof(int)) { return 14; }
+        if (type == typeof(double)) { return 2.0; }
+        if (type == typeof(bool)) { return false; }
+        if (Nullable.GetUnderlyingType(type) is not null) { return null; }
+        if (type.IsEnum) { return Enum.GetValues(type).GetValue(0); }
+        if (!type.IsValueType) { return null; }
+
+        return null;
     }
 
     private static List<Bar> Walk(int count)
