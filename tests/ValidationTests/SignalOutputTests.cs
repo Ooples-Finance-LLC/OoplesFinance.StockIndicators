@@ -189,6 +189,43 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheTwoKaufmanDerivedAveragesPublishTheirDiagnosticSeries()
+    {
+        var bars = Walk(200);
+        var powered = new PoweredKaufmanAdaptiveMovingAverage();
+        var autonomous = new AdaptiveAutonomousRecursiveMovingAverage();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(powered, autonomous)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        StockData Batch() => new(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList());
+
+        var poweredBatch = Batch().CalculatePoweredKaufmanAdaptiveMovingAverage(length: new PoweredKaufmanAdaptiveMovingAverage().Length);
+        var per = run[powered.Per].ToArray();
+        per.Should().Equal(poweredBatch.OutputValues["Per"].ToArray());
+        run[powered.Value].ToArray().Should().Equal(poweredBatch.OutputValues["Pkama"].ToArray());
+
+        // The powered efficiency ratio is a fraction raised to a power, so it stays within the unit
+        // interval where the average tracks price.
+        per.Should().OnlyContain(x => x >= 0 && x <= 1);
+
+        var autonomousBatch = Batch().CalculateAdaptiveAutonomousRecursiveMovingAverage(
+            length: new AdaptiveAutonomousRecursiveMovingAverage().Length);
+        var deviation = run[autonomous.D].ToArray();
+        deviation.Should().Equal(autonomousBatch.OutputValues["D"].ToArray());
+        run[autonomous.Value].ToArray().Should().Equal(autonomousBatch.OutputValues["Aarma"].ToArray());
+
+        // A band width is a distance, so it is never negative - which the average it used to answer with is
+        // no guarantee of.
+        deviation.Should().OnlyContain(x => x >= 0);
+    }
+
+    [Fact]
     public void KamaPublishesItsEfficiencyRatioAndNotTheAverageTwice()
     {
         var bars = Walk(150);

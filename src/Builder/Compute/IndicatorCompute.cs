@@ -878,7 +878,12 @@ internal static partial class IndicatorCompute
             StandardErrorCoreSpecOptions sec => ComputeStandardErrorCoreFast(data, context, sec.Length),
 
             // Batch 25 - Additional Moving Averages (Unwired Core Methods)
-            AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length, aarmao.Lambda),
+            AdaptiveAutonomousRecursiveMovingAverageSpecOptions aarmao => spec.OutputKey switch
+            {
+                null or "Aarma" => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length, aarmao.Lambda),
+                "D" => ComputeAdaptiveAutonomousRecursiveMovingAverageFast(data, context, aarmao.Length, aarmao.Lambda, deviation: true),
+                _ => null
+            },
             CorrectedMovingAverageSpecOptions cma => ComputeCorrectedMovingAverageFast(data, context, cma.Length,
                 cma.MaType),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
@@ -953,7 +958,12 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             PolynomialLeastSquaresMovingAverageSpecOptions plsma => ComputePolynomialLeastSquaresMovingAverageFast(data, context, plsma.Length),
-            PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
+            PoweredKaufmanAdaptiveMovingAverageSpecOptions pkama => spec.OutputKey switch
+            {
+                null or "Pkama" => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length),
+                "Per" => ComputePoweredKaufmanAdaptiveMovingAverageFast(data, context, pkama.Length, powered: true),
+                _ => null
+            },
             QuadraticLeastSquaresMovingAverageSpecOptions qlsma => spec.OutputKey switch
             {
                 null or "Qlma" => ComputeQuadraticLeastSquaresMovingAverageFast(data, context, qlsma.Length),
@@ -15624,7 +15634,7 @@ internal static partial class IndicatorCompute
     /// Computes Powered Kaufman Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 100,
-        double factor = 3)
+        double factor = 3, bool powered = false)
     {
         // CalculatePoweredKaufmanAdaptiveMovingAverage raises Kaufman's efficiency ratio to a fixed power to
         // get its smoothing factor, and seeds the recursion from the first value rather than from zero. The
@@ -15636,6 +15646,10 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
+
+        // The average is recursive, so it needs a home of its own whenever the caller asked for the ratio.
+        using var averageBuffer = context.Rent(count);
+        var averages = powered ? averageBuffer.WritableSpan : output;
 
         var volatilityWindow = new RollingSum();
         for (var i = 0; i < count; i++)
@@ -15651,8 +15665,11 @@ internal static partial class IndicatorCompute
 
             var per = MathHelper.Pow(er, factor);
 
-            var prevA = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = (per * currentValue) + ((1 - per) * prevA);
+            // The powered efficiency ratio is the batch's Per key; it was computed here and discarded, so
+            // that key answered with the average instead.
+            var prevA = i >= 1 ? averages[i - 1] : currentValue;
+            averages[i] = (per * currentValue) + ((1 - per) * prevA);
+            output[i] = powered ? per : averages[i];
         }
 
         return buffer;
@@ -17595,16 +17612,26 @@ internal static partial class IndicatorCompute
     /// Computes Adaptive Autonomous Recursive Moving Average using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast(StockData data, ComputeContext context,
-        int length = 14, double gamma = 3)
+        int length = 14, double gamma = 3, bool deviation = false)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
 
-        var buffer = context.Rent(count);
-        using var deviations = context.Rent(count);
+        // The routine fills both series in one pass and the band width was being thrown away, which is why
+        // the D key answered with the average.
+        var average = context.Rent(count);
+        var deviations = context.Rent(count);
         AdaptiveAutonomousRecursiveMovingAverage(context, SpanCompat.AsReadOnlySpan(inputList), length, gamma,
-            buffer.WritableSpan, deviations.WritableSpan);
-        return buffer;
+            average.WritableSpan, deviations.WritableSpan);
+
+        if (deviation)
+        {
+            average.Dispose();
+            return deviations;
+        }
+
+        deviations.Dispose();
+        return average;
     }
 
     /// <summary>
