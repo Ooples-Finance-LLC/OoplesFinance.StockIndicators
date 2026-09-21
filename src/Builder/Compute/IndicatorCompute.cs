@@ -216,7 +216,13 @@ internal static partial class IndicatorCompute
             TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType),
             StochRsiSpecOptions srsi => ComputeStochasticRsiFast(data, context, srsi.RsiLength, maType: srsi.MaType,
                 stochLength: srsi.StochLength),
-            AroonSpecOptions aroon => ComputeAroonOscillatorFast(data, context, aroon.Length),
+            AroonSpecOptions aroon => spec.OutputKey switch
+            {
+                null or "Aroon" => ComputeAroonOscillatorFast(data, context, aroon.Length),
+                "AroonUp" => ComputeAroonOscillatorFast(data, context, aroon.Length, AroonSeries.Up),
+                "AroonDown" => ComputeAroonOscillatorFast(data, context, aroon.Length, AroonSeries.Down),
+                _ => null
+            },
             DpoSpecOptions dpo => ComputeDetrendedPriceOscillatorFast(data, context, dpo.Length),
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length, trix.MaType),
             MassIndexSpecOptions mi => ComputeMassIndexFast(data, context, mi.EmaLength, mi.EmaLength, mi.SumLength,
@@ -2342,7 +2348,23 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Aroon Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAroonOscillatorFast(StockData data, ComputeContext context, int length = 25)
+    /// <summary>
+    /// Selects which of the three series the Aroon routine publishes.
+    /// </summary>
+    internal enum AroonSeries
+    {
+        /// <summary>Aroon Up less Aroon Down.</summary>
+        Oscillator,
+
+        /// <summary>The upward leg on its own.</summary>
+        Up,
+
+        /// <summary>The downward leg on its own.</summary>
+        Down
+    }
+
+    internal static ComputeBuffer ComputeAroonOscillatorFast(StockData data, ComputeContext context, int length = 25,
+        AroonSeries series = AroonSeries.Oscillator)
     {
         // CalculateAroonOscillator counts the bars since the chained series last touched the high and the low
         // of its own window and publishes the difference of the two readings. Where a value repeats it takes
@@ -2376,7 +2398,17 @@ internal static partial class IndicatorCompute
 
             var aroonUp = (double)(length - (i - maxIndex)) / length * 100;
             var aroonDown = (double)(length - (i - minIndex)) / length * 100;
-            output[i] = aroonUp - aroonDown;
+
+            // Both legs were already being computed here and then discarded, which is why every key
+            // answered with the oscillator. They are taken from the chained series, so ComputeAroonUpFast
+            // and ComputeAroonDownFast - which read the bars' highs and lows - are a different reading and
+            // would not satisfy Value == AroonUp - AroonDown.
+            output[i] = series switch
+            {
+                AroonSeries.Up => aroonUp,
+                AroonSeries.Down => aroonDown,
+                _ => aroonUp - aroonDown
+            };
         }
 
         return buffer;

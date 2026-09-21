@@ -60,6 +60,39 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void AroonPublishesItsTwoLegsAndNotTheOscillatorThreeTimes()
+    {
+        var bars = Walk(150);
+        var aroon = new Aroon();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(aroon)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateAroonOscillator();
+
+        var value = run[aroon.Value].ToArray();
+        var up = run[aroon.AroonUp].ToArray();
+        var down = run[aroon.AroonDown].ToArray();
+
+        value.Should().Equal(batch.OutputValues["Aroon"].ToArray());
+        up.Should().Equal(batch.OutputValues["AroonUp"].ToArray());
+        down.Should().Equal(batch.OutputValues["AroonDown"].ToArray());
+
+        // The oscillator is the difference of the two legs, so all three carrying one series - which is
+        // what the builder used to answer - is arithmetically impossible rather than merely imprecise.
+        for (var i = 0; i < value.Length; i++)
+        {
+            value[i].Should().BeApproximately(up[i] - down[i], 1e-9);
+        }
+    }
+
+    [Fact]
     public void TheStochasticRsiSignalIsTheSecondSmoothingAndNotTheFirst()
     {
         var bars = Walk(150);
