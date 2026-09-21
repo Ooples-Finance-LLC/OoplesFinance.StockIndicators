@@ -1156,7 +1156,12 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Indicators with Core methods (23 indicators)
             AbsolutePriceOscillatorSpecOptions apo2 => ComputeAbsolutePriceOscillatorFast(data, context, apo2.FastLength, apo2.SlowLength),
-            AccumulationDistributionLineSpecOptions adl2 => ComputeAccumulationDistributionLineFast(data, context),
+            AccumulationDistributionLineSpecOptions adl2 => spec.OutputKey switch
+            {
+                null or "Adl" => ComputeAccumulationDistributionLineFast(data, context),
+                "AdlSignal" => ComputeAccumulationDistributionLineSignalFast(data, context, adl2.Length, adl2.MaType),
+                _ => null
+            },
             AdaptiveExponentialMovingAverageSpecOptions aema => ComputeAdaptiveExponentialMovingAverageFast(data, context,
                 aema.Length, aema.MaType),
             AverageDirectionalIndexSpecOptions adx2 => ComputeAverageDirectionalIndexFast(data, context, adx2.Length, adx2.MaType),
@@ -19502,6 +19507,29 @@ internal static partial class IndicatorCompute
         }
         var buffer = context.Rent(count);
         VolumeCore.AccumulationDistributionLine(high, low, close, volume, buffer.WritableSpan);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Computes the signal line of the Accumulation Distribution Line using the zero-allocation fast path.
+    /// </summary>
+    /// <remarks>
+    /// The signal is the average of the line itself, which is the only part of this indicator the
+    /// MovingAvgType reaches - Adl is the same series whichever average is named. Reaching it through the
+    /// fast path is what lets a caller's own average stand in for it, since the substitution hooks the
+    /// request for an average rather than the arm that makes it.
+    /// </remarks>
+    internal static ComputeBuffer ComputeAccumulationDistributionLineSignalFast(StockData data,
+        ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        using var line = ComputeAccumulationDistributionLineFast(data, context);
+        var source = line.Span;
+        var buffer = context.Rent(source.Length);
+
+        // Cleared first: a rented buffer arrives with whatever the last caller left in it, and a smoother
+        // that writes nothing would otherwise hand back that, which is how this first read as the line.
+        buffer.WritableSpan.Clear();
+        MovingAverage(data, maType, length, source, buffer.WritableSpan);
         return buffer;
     }
 
