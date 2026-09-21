@@ -637,7 +637,16 @@ internal static partial class IndicatorCompute
             ErgodicPercentagePriceOscillatorSpecOptions eppo => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length,
                 eppo.MaType),
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length),
-            MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context, mppo.Length),
+            MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context,
+                mppo.Length, mppo.MaType, mppo.SignalLength, spec.OutputKey switch
+                {
+                    "Signal" => MirroredPpoSeries.Signal,
+                    "Histogram" => MirroredPpoSeries.Histogram,
+                    "MirrorPpo" => MirroredPpoSeries.MirrorPpo,
+                    "MirrorSignal" => MirroredPpoSeries.MirrorSignal,
+                    "MirrorHistogram" => MirroredPpoSeries.MirrorHistogram,
+                    _ => MirroredPpoSeries.Ppo
+                }),
             PercentagePriceOscillatorLeaderSpecOptions => ComputePercentagePriceOscillatorLeaderFast(data, context),
             TFSMboPercentagePriceOscillatorSpecOptions tfsppo => ComputeTFSMboPercentagePriceOscillatorFast(data, context,
                 maType: tfsppo.MaType),
@@ -9628,12 +9637,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Mirrored Percentage Price Oscillator using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Selects which of the six series the mirrored percentage price oscillator publishes.
+    /// </summary>
+    internal enum MirroredPpoSeries
+    {
+        /// <summary>The oscillator itself.</summary>
+        Ppo,
+
+        /// <summary>Its smoothing.</summary>
+        Signal,
+
+        /// <summary>The oscillator less its smoothing.</summary>
+        Histogram,
+
+        /// <summary>The same comparison taken the other way round.</summary>
+        MirrorPpo,
+
+        /// <summary>The mirror's smoothing.</summary>
+        MirrorSignal,
+
+        /// <summary>The mirror less its smoothing.</summary>
+        MirrorHistogram
+    }
+
     internal static ComputeBuffer ComputeMirroredPercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 20,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int signalLength = 9,
+        MirroredPpoSeries series = MirroredPpoSeries.Ppo)
     {
         // CalculateMirroredPercentagePriceOscillator compares the moving average of the chained series with
-        // the moving average of the opens, as a percentage of the latter. The mirrored series and the signal
-        // are published under their own keys, so neither reaches the arm.
+        // the moving average of the opens. The two oscillators are that gap as a percentage of the opens'
+        // average and, mirrored, of the closes', each smoothed again for a signal and differenced for a
+        // histogram - six series in all, of which only the first was produced.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
 
@@ -9642,12 +9677,43 @@ internal static partial class IndicatorCompute
         using var closeAverage = context.Rent(count);
         MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), closeAverage.WritableSpan);
 
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
+        var mirrored = series is MirroredPpoSeries.MirrorPpo or MirroredPpoSeries.MirrorSignal
+            or MirroredPpoSeries.MirrorHistogram;
+
+        using var oscillator = context.Rent(count);
+        var osc = oscillator.WritableSpan;
         for (var i = 0; i < count; i++)
         {
             var mao = openAverage.Span[i];
-            output[i] = mao != 0 ? (closeAverage.Span[i] - mao) / mao * 100 : 0;
+            var mac = closeAverage.Span[i];
+            osc[i] = mirrored
+                ? mac != 0 ? (mao - mac) / mac * 100 : 0
+                : mao != 0 ? (mac - mao) / mao * 100 : 0;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        if (series is MirroredPpoSeries.Ppo or MirroredPpoSeries.MirrorPpo)
+        {
+            oscillator.Span.CopyTo(output);
+            return buffer;
+        }
+
+        using var signalLine = context.Rent(count);
+        MovingAverage(data, maType, signalLength, oscillator.Span, signalLine.WritableSpan);
+
+        if (series is MirroredPpoSeries.Signal or MirroredPpoSeries.MirrorSignal)
+        {
+            signalLine.Span.CopyTo(output);
+            return buffer;
+        }
+
+        var oscSpan = oscillator.Span;
+        var signalSpan = signalLine.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = oscSpan[i] - signalSpan[i];
         }
 
         return buffer;

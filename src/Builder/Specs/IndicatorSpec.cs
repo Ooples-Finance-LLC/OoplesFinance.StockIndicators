@@ -4627,12 +4627,27 @@ public sealed class MidpointOscillatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class MirroredPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
 {
+    // The batch smooths each oscillator again for its Signal key and takes whichever average it was given.
+    // Carrying only the length left both out of reach of the arm.
     public MirroredPercentagePriceOscillatorSpecOptions(int length)
+        : this(length, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MirroredPercentagePriceOscillatorSpecOptions(int length, int signalLength, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths each oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average both oscillators and both signal lines are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
