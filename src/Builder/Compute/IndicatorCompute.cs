@@ -1033,7 +1033,17 @@ internal static partial class IndicatorCompute
                 "Eclpf6" => ComputeEhlersChebyshevLowPassFilterFast(data, context, ChebyshevWave.Six),
                 _ => null
             },
-            EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, egf.Poles),
+            // CalculateEhlersGaussianFilter computes ALL FOUR pole counts every bar and publishes them as
+            // Egf1 to Egf4; its poles argument only chooses which of them the indicator stands for. So each
+            // key is the filter at its own pole count, and the primary is the one the caller configured.
+            EhlersGaussianFilterSpecOptions egf => ComputeEhlersGaussianFilterFast(data, context, egf.Length, spec.OutputKey switch
+            {
+                "Egf1" => 1,
+                "Egf2" => 2,
+                "Egf3" => 3,
+                "Egf4" => 4,
+                _ => egf.Poles
+            }),
             EhlersMedianAverageAdaptiveFilterSpecOptions emaaf => ComputeEhlersMedianAverageAdaptiveFilterFast(data, context, emaaf.Length, emaaf.Threshold),
             EhlersMesaAdaptiveMovingAverageSpecOptions emama => spec.OutputKey switch
             {

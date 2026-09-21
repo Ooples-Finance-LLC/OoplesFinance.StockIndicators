@@ -102,7 +102,10 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         ["ParametricCorrectiveLinearMovingAverage"] = "$ * 2",
         ["EhlersAllPassPhaseShifter"] = "$ * 2",
         ["VolatilityWaveMovingAverage"] = "$ * 2",
-        ["EhlersGaussianFilter"] = "$ * 2",
+        // Each pole is another recursive term, so the filter settles more slowly the more of them it is
+        // given. Two lengths covered the single-pole reading this used to publish for every key; the four
+        // pole filter the batch publishes as Egf4 is still moving 40 bars in at length 14.
+        ["EhlersGaussianFilter"] = "$ * 3",
         ["CompoundRatioMovingAverage"] = "$ * 2",
         ["VolatilityMovingAverage"] = "$ * 2",
     };
