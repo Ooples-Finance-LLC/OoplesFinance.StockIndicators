@@ -172,6 +172,9 @@ public sealed class GeneratedIndicatorTests
         // own series takes the Value name and its siblings keep theirs.
         var members = Find("Macd").GetProperties()
             .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+            // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
+            // of the indicator's output set and must not be counted as one.
+            .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
             .Select(p => p.Name)
             .ToList();
 
@@ -193,6 +196,9 @@ public sealed class GeneratedIndicatorTests
 
             var members = type.GetProperties()
                 .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+                // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
+                // of the indicator's output set and must not be counted as one.
+                .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
                 .ToList();
 
             if (members.Count != instance.Outputs.Count)
@@ -329,6 +335,9 @@ public sealed class GeneratedIndicatorTests
             var members = type.GetProperties(BindingFlags.Public | BindingFlags.Instance
                     | BindingFlags.DeclaredOnly)
                 .Where(p => p.PropertyType == typeof(IIndicatorOutput))
+                // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
+                // of the indicator's output set and must not be counted as one.
+                .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
                 .ToList();
 
             if (members.Count == 0)

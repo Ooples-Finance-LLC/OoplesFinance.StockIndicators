@@ -92,6 +92,17 @@ public interface IIndicator
 /// <summary>An indicator that publishes more than one series.</summary>
 public interface IMultiOutputIndicator : IIndicator
 {
+    /// <summary>
+    /// The series this indicator is named for, used wherever one of its outputs has to stand for it.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="IIndicator.Outputs"/> is in the order the batch publishes its keys, which does not always
+    /// put the indicator's own value first - Kaufman's adaptive average publishes its efficiency ratio ahead
+    /// of the average, and the average directional index publishes both directional indicators ahead of the
+    /// index. Resolving <c>run[indicator]</c> through this rather than through <c>Outputs[0]</c> is what stops
+    /// it handing back a diagnostic series in place of the indicator.
+    /// </remarks>
+    IIndicatorOutput PrimaryOutput { get; }
 }
 
 /// <summary>

@@ -198,6 +198,13 @@ public abstract class MultiOutputIndicatorBase : IMultiOutputIndicator
     /// <inheritdoc/>
     public virtual int WarmupBars => 0;
 
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Declaration order by default; the generated types override this with the member the indicator is
+    /// named for, which is not always the first series the batch publishes.
+    /// </remarks>
+    public virtual IIndicatorOutput PrimaryOutput => _outputs[0];
+
     /// <summary>The outputs declared by this indicator, for assigning to its typed members.</summary>
     protected OutputSet DeclaredOutputs => new(_outputs);
 

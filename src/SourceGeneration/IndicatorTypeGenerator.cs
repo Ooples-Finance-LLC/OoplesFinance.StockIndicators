@@ -750,6 +750,15 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("    public IIndicatorOutput " + memberNames[i] + " { get; }");
             }
 
+            // The batch's key order decides Outputs, and it does not always publish the indicator's own
+            // value first, so name the member that stands for the indicator instead of taking Outputs[0].
+            if (memberNames.IndexOf("Value") > 0)
+            {
+                builder.AppendLine();
+                builder.AppendLine("    /// <inheritdoc/>");
+                builder.AppendLine("    public override IIndicatorOutput PrimaryOutput => Value;");
+            }
+
             // One enum per indicator rather than one enum for the library. The containing type is what makes
             // a member unique, so names stay short - a flat enum would need 1,482 members prefixed by their
             // indicator, the longest 64 characters, and still could not say which keys belong to which
