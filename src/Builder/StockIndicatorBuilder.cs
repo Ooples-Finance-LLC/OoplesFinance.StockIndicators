@@ -109,6 +109,22 @@ public sealed class StockIndicatorBuilder
     /// programs differ by which source is handed over and by nothing else.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    /// <summary>Publishes live bars from the first one, before the indicators have warmed up.</summary>
+    /// <remarks>
+    /// A live run suppresses bars computed over less than <see cref="Indicators.IIndicator.WarmupBars"/>
+    /// inputs, because their values are arithmetic over too little history to act on. Call this to receive
+    /// them anyway - to show a feed filling, say - and read
+    /// <see cref="Indicators.IBarSnapshot.IsWarmedUp"/> to tell which are worth acting on. It has no effect
+    /// on a finite source.
+    /// </remarks>
+    private bool _publishBeforeWarmup;
+
+    public StockIndicatorBuilder PublishBeforeWarmup()
+    {
+        _publishBeforeWarmup = true;
+        return this;
+    }
+
     public StockIndicatorBuilder ConfigureSource(Indicators.IBarSource source)
     {
         _barSource = source ?? throw new ArgumentNullException(nameof(source));
@@ -334,7 +350,10 @@ public sealed class StockIndicatorBuilder
                 indicator.GetType().Name + " supplies no arithmetic.");
         }
 
-        var run = new Indicators.LiveIndicatorRun(source, reachable, states, outputKeys, _configuredIndicators);
+        var run = new Indicators.LiveIndicatorRun(source, reachable, states, outputKeys, _configuredIndicators)
+        {
+            PublishBeforeWarmup = _publishBeforeWarmup
+        };
         await run.WarmAsync(cancellationToken).ConfigureAwait(false);
         return run;
     }
