@@ -60,6 +60,42 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void ConnorsRsiPublishesItsThreePartsAndNotTheirAverageFourTimes()
+    {
+        var bars = Walk(200);
+        var connors = new ConnorsRsi();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(connors)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateConnorsRelativeStrengthIndex(length2: new ConnorsRsi().Length);
+
+        var rsi = run[connors.Rsi].ToArray();
+        var pctRank = run[connors.PctRank].ToArray();
+        var streakRsi = run[connors.StreakRsi].ToArray();
+        var value = run[connors.Value].ToArray();
+
+        rsi.Should().Equal(batch.OutputValues["Rsi"].ToArray());
+        pctRank.Should().Equal(batch.OutputValues["PctRank"].ToArray());
+        streakRsi.Should().Equal(batch.OutputValues["StreakRsi"].ToArray());
+        value.Should().Equal(batch.OutputValues["ConnorsRsi"].ToArray());
+
+        // The published series is the average of the three parts, so all four keys carrying one series -
+        // which is what the builder used to answer - is arithmetically impossible.
+        for (var i = 0; i < value.Length; i++)
+        {
+            value[i].Should().BeApproximately(
+                Math.Clamp((rsi[i] + pctRank[i] + streakRsi[i]) / 3, 0, 100), 1e-9);
+        }
+    }
+
+    [Fact]
     public void TrimeanPublishesItsThreeQuartilesAndNotTheTrimeanFourTimes()
     {
         var bars = Walk(150);

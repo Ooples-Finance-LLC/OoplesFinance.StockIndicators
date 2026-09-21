@@ -274,7 +274,14 @@ internal static partial class IndicatorCompute
             AcceleratorOscillatorSpecOptions aco => ComputeAcceleratorOscillatorFast(data, context, aco.Length, aco.MaType),
             StochasticKSpecOptions sk => ComputeStochasticKFast(data, context, sk.Length),
             FisherTransformSpecOptions ft => ComputeEhlersFisherTransformFast(data, context, ft.Length),
-            ConnorsRsiSpecOptions crsi => ComputeConnorsRsiFast(data, context, length2: crsi.Length),
+            ConnorsRsiSpecOptions crsi => spec.OutputKey switch
+            {
+                null or "ConnorsRsi" => ComputeConnorsRsiFast(data, context, length2: crsi.Length),
+                "Rsi" => ComputeConnorsRsiFast(data, context, length2: crsi.Length, series: ConnorsRsiSeries.PriceStrength),
+                "PctRank" => ComputeConnorsRsiFast(data, context, length2: crsi.Length, series: ConnorsRsiSeries.PercentRank),
+                "StreakRsi" => ComputeConnorsRsiFast(data, context, length2: crsi.Length, series: ConnorsRsiSeries.StreakStrength),
+                _ => null
+            },
             PmoSpecOptions pmo => ComputePmoFast(data, context, pmo.Length),
             KstSpecOptions kst => ComputeKstFast(data, context, kst.Length),
             PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
@@ -1225,8 +1232,18 @@ internal static partial class IndicatorCompute
             DeltaMovingAverageSpecOptions dma => ComputeDeltaMovingAverageFast(data, context, dma.Length2),
             FoldedRelativeStrengthIndexSpecOptions frsi => ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType),
             EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType),
-            ConnorsRelativeStrengthIndexSpecOptions crsi2 => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
-                crsi2.Length3, crsi2.MaType),
+            ConnorsRelativeStrengthIndexSpecOptions crsi2 => spec.OutputKey switch
+            {
+                null or "ConnorsRsi" => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
+                    crsi2.Length3, crsi2.MaType),
+                "Rsi" => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
+                    crsi2.Length3, crsi2.MaType, ConnorsRsiSeries.PriceStrength),
+                "PctRank" => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
+                    crsi2.Length3, crsi2.MaType, ConnorsRsiSeries.PercentRank),
+                "StreakRsi" => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
+                    crsi2.Length3, crsi2.MaType, ConnorsRsiSeries.StreakStrength),
+                _ => null
+            },
             StochasticRelativeStrengthIndexSpecOptions srsi2 => spec.OutputKey switch
             {
                 null or "StochRsi" => ComputeStochasticRsiFast(data, context, srsi2.Length,
@@ -20262,8 +20279,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Connors RSI using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Selects which of the four series the Connors relative strength routine publishes.
+    /// </summary>
+    internal enum ConnorsRsiSeries
+    {
+        /// <summary>The average of the three parts.</summary>
+        ConnorsRsi,
+
+        /// <summary>The relative strength of the price series.</summary>
+        PriceStrength,
+
+        /// <summary>The percentile rank of the one-bar rate of change.</summary>
+        PercentRank,
+
+        /// <summary>The relative strength of the up/down streak.</summary>
+        StreakStrength
+    }
+
     internal static ComputeBuffer ComputeConnorsRsiFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 3,
-        int length3 = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+        int length3 = 100, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
+        ConnorsRsiSeries series = ConnorsRsiSeries.ConnorsRsi)
     {
         // CalculateConnorsRelativeStrengthIndex averages three parts: the relative strength of the series over
         // length2, the relative strength of the up/down streak over length1, and the percentile rank of the
@@ -20310,7 +20346,15 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = MathHelper.MinOrMax((priceStrength.Span[i] + rank[i] + streakStrength.Span[i]) / 3, 100, 0);
+            // All three parts were already being computed here and then discarded, which is why the Rsi,
+            // PctRank and StreakRsi keys all answered with the average of them.
+            output[i] = series switch
+            {
+                ConnorsRsiSeries.PriceStrength => priceStrength.Span[i],
+                ConnorsRsiSeries.PercentRank => rank[i],
+                ConnorsRsiSeries.StreakStrength => streakStrength.Span[i],
+                _ => MathHelper.MinOrMax((priceStrength.Span[i] + rank[i] + streakStrength.Span[i]) / 3, 100, 0)
+            };
         }
 
         return buffer;
