@@ -189,6 +189,40 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheErgodicTrueStrengthIndexPublishesBothOfItsIndicesAndASignal()
+    {
+        var bars = Walk(300);
+        var ergodic = new ErgodicTrueStrengthIndexV2();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(ergodic)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateErgodicTrueStrengthIndexV2();
+
+        var first = run[ergodic.Etsi1].ToArray();
+        var second = run[ergodic.Value].ToArray();
+        var signal = run[ergodic.Signal].ToArray();
+
+        first.Should().Equal(batch.OutputValues["Etsi1"].ToArray());
+        second.Should().Equal(batch.OutputValues["Etsi2"].ToArray());
+        signal.Should().Equal(batch.OutputValues["Signal"].ToArray());
+
+        // The two indices smooth the same changes over different length triples and the signal smooths the
+        // second again, so no two of the three are the same series - which is what all three keys used to
+        // carry. Both indices are ratios of a value to its own magnitude, so they stay within the hundreds.
+        first.Should().NotEqual(second);
+        second.Should().NotEqual(signal);
+        first.Should().OnlyContain(x => x >= -100 && x <= 100);
+        second.Should().OnlyContain(x => x >= -100 && x <= 100);
+    }
+
+    [Fact]
     public void TheDetrendedLeadingIndicatorPublishesItsDetrendedPrice()
     {
         var bars = Walk(300);

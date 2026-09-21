@@ -1821,8 +1821,16 @@ internal static partial class IndicatorCompute
             },
             ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
                 etsiv1.Length2, etsiv1.Length3, etsiv1.MaType),
-            ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length4,
-                etsiv2.Length5, etsiv2.Length6, etsiv2.MaType),
+            ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => spec.OutputKey switch
+            {
+                null or "Etsi2" => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length4,
+                    etsiv2.Length5, etsiv2.Length6, etsiv2.MaType),
+                "Etsi1" => ComputeErgodicTsiV2Fast(data, context, etsiv2.Length1,
+                    etsiv2.Length2, etsiv2.Length3, etsiv2.MaType),
+                "Signal" => ComputeErgodicTsiV2SignalFast(data, context, etsiv2.Length4, etsiv2.Length5,
+                    etsiv2.Length6, etsiv2.SignalLength, etsiv2.MaType),
+                _ => null
+            },
             SMIErgodicIndicatorSpecOptions smie => ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
                 smie.SlowLength, smie.MaType),
             InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength,
@@ -27482,14 +27490,36 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Smooths the ergodic true strength index once more, which is the Signal series the batch publishes.
+    /// </summary>
+    internal static ComputeBuffer ComputeErgodicTsiV2SignalFast(StockData data, ComputeContext context, int length4 = 17,
+        int length5 = 6, int length6 = 2, int signalLength = 2,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        using var index = ComputeErgodicTsiV2Fast(data, context, length4, length5, length6, maType);
+        var source = index.Span;
+
+        var buffer = context.Rent(source.Length);
+        buffer.WritableSpan.Clear();
+        MovingAverage(data, maType, signalLength, source, buffer.WritableSpan);
+
+        return buffer;
+    }
+
     internal static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length4 = 17, int length5 = 6,
         int length6 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateErgodicTrueStrengthIndexV2 publishes "Etsi2": the bar-to-bar change and its absolute value
-        // each smoothed three times, over length4, length5 and length6, and divided one by the other. The
-        // lengths 1 to 3 build the separate "Etsi1" series, so the arm does not take them - the parameter
-        // names here are the batch's own so the two cannot be transposed. What this replaced returned the
-        // plain true strength index of the close.
+        // CalculateErgodicTrueStrengthIndexV2 smooths the bar-to-bar change and its absolute value three
+        // times each and divides one by the other, clamped to the hundreds. It does that TWICE over the same
+        // changes: once over length4/5/6 for its Etsi2 - the series it stands for - and once over
+        // length1/2/3 for Etsi1. The two differ only in their three lengths, so this routine serves both and
+        // the caller names which. Its Signal is Etsi2 smoothed once more, which
+        // ComputeErgodicTsiV2SignalFast does. What this replaced returned the plain true strength index of
+        // the close, and answered all three keys with it.
+        //
+        // The parameters keep the batch's own names so the two triples cannot be transposed: pass
+        // length1/2/3 here to get Etsi1.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
