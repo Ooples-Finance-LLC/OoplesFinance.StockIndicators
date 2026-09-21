@@ -8,6 +8,9 @@
 //     so if you are going to re-use or modify my code then I just ask
 //     that you include my copyright info and my contact info in a comment
 
+using OoplesFinance.StockIndicators.Compatibility;
+using OoplesFinance.StockIndicators.Streaming;
+
 namespace OoplesFinance.StockIndicators.Indicators;
 
 /// <summary>
@@ -51,13 +54,26 @@ internal sealed class CustomIndicatorEngine
     // currently being visited, and reaching one of them again is the cycle.
     private readonly HashSet<IIndicator> _visiting = new(IndicatorIdentity.Comparer);
     private readonly IReadOnlyList<Bar> _bars;
+    private static readonly BarTimeframe Timeframe = BarTimeframe.Minutes(1);
+
     private readonly Func<IIndicator, double[][]?> _resolveBuiltIn;
 
-    internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn)
+    // A built-in the evaluator could not be asked for - because it reads another indicator's series, or
+    // takes a component the evaluator has no handle for - is driven here instead, through the same
+    // streaming state the live run drives it with. Component substitution needs no path of its own: a
+    // component is another node in this graph, which is what the graph was for.
+    private readonly Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? _createBuiltInState;
+
+    internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
+        Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null)
     {
         _bars = bars;
         _resolveBuiltIn = resolveBuiltIn;
+        _createBuiltInState = createBuiltInState;
     }
+
+    private static OhlcvBar ToOhlcv(in Bar bar) =>
+        new("history", Timeframe, bar.Time, bar.Time, bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true);
 
     /// <summary>Computes an indicator and everything it depends on, once each.</summary>
     /// <exception cref="InvalidOperationException">Thrown when the graph cannot be computed.</exception>
@@ -87,12 +103,22 @@ internal sealed class CustomIndicatorEngine
             return builtIn;
         }
 
+        // The indicator's own arithmetic first, even for a built-in. A built-in that was handed a
+        // component the options type cannot name supplies a composed state that reads that component, and
+        // that is the whole answer; only one with nothing of its own falls through to the streaming state
+        // the batch calculation is held to.
+        IReadOnlyList<string>? streamingKeys = null;
         var state = indicator switch
         {
             IndicatorBase single => single.CreateState(),
             MultiOutputIndicatorBase multi => multi.CreateState(),
             _ => null
         };
+
+        if (state is null && indicator is IBuiltInIndicator && _createBuiltInState is not null)
+        {
+            (state, streamingKeys) = _createBuiltInState(indicator);
+        }
 
         if (state is null)
         {
@@ -133,6 +159,26 @@ internal sealed class CustomIndicatorEngine
 
             switch (state)
             {
+                // The same adaptation LiveIndicatorRun makes, so a built-in reached through Of() or given a
+                // component computes here exactly what it computes there.
+                case IStreamingIndicatorState streaming:
+                    {
+                        var streamed = streaming.Update(ToOhlcv(input), isFinal: true, includeOutputs: true);
+                        results[0][bar] = streamed.Value;
+
+                        if (outputCount > 1 && streamed.Outputs is not null && streamingKeys is not null)
+                        {
+                            for (var i = 0; i < outputCount && i < streamingKeys.Count; i++)
+                            {
+                                results[i][bar] = streamed.Outputs.TryGetValue(streamingKeys[i], out var v)
+                                    ? v
+                                    : streamed.Value;
+                            }
+                        }
+
+                        break;
+                    }
+
                 case IIndicatorState single:
                     results[0][bar] = single.Update(in input);
                     break;

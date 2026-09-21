@@ -206,4 +206,66 @@ public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndica
         _average is IBuiltInMovingAverage builtIn
             ? new BollingerBandsSpecOptions(Length, StdDev, builtIn.AvgType)
             : new BollingerBandsSpecOptions(Length, StdDev);
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Null when the average is one of ours, so the batch calculation answers and stays bit for bit what it
+    /// always was. When it is the caller's own, the options type has no way to name it - a MovingAvgType
+    /// cannot spell a type the library has never heard of - so the bands are computed here instead, reading
+    /// the middle line from the component the graph already ran.
+    /// </remarks>
+    protected internal override object? CreateState() =>
+        _average is IBuiltInMovingAverage ? null : new Bands(Length, StdDev);
+
+    /// <summary>Bollinger bands around a middle line somebody else computed.</summary>
+    private sealed class Bands : IComposedMultiOutputState
+    {
+        private readonly int _length;
+        private readonly double _stdDev;
+        private readonly Queue<double> _window;
+
+        internal Bands(int length, double stdDev)
+        {
+            _length = Math.Max(1, length);
+            _stdDev = stdDev;
+            _window = new Queue<double>(_length);
+        }
+
+        public void Reset() => _window.Clear();
+
+        public void Update(in Bar bar, ReadOnlySpan<double> components, Span<double> outputs)
+        {
+            _window.Enqueue(bar.Close);
+            if (_window.Count > _length)
+            {
+                _window.Dequeue();
+            }
+
+            // The middle line is the component's value for this bar - whatever the caller handed us - and
+            // the width is the deviation of the closes about their own mean, which is what a Bollinger band
+            // measures whatever sits in the middle.
+            var middle = components.Length > 0 ? components[0] : 0;
+
+            double sum = 0;
+            foreach (var close in _window)
+            {
+                sum += close;
+            }
+
+            var mean = sum / _window.Count;
+
+            double variance = 0;
+            foreach (var close in _window)
+            {
+                var deviation = close - mean;
+                variance += deviation * deviation;
+            }
+
+            var width = _stdDev * Math.Sqrt(variance / _window.Count);
+
+            outputs[0] = middle + width;
+            outputs[1] = middle;
+            outputs[2] = middle - width;
+        }
+    }
 }

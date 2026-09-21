@@ -243,6 +243,16 @@ public sealed class StockIndicatorBuilder
                 continue;
             }
 
+            // The evaluator computes a built-in over price with whatever its options say. That is the right
+            // answer only when the indicator asked for nothing else. One that reads another indicator's
+            // series, or was handed a component the options cannot carry, goes to the graph engine instead -
+            // where a component is just another node, which is what the graph was always for. Registering it
+            // here would answer over close prices with a default smoother and look like it had worked.
+            if (NeedsGraph(indicator))
+            {
+                continue;
+            }
+
             var series = _indicators.Price();
             var seriesKey = ResolveSeriesKey(series);
             var slots = new SeriesHandle[indicator.Outputs.Count];
@@ -266,7 +276,7 @@ public sealed class StockIndicatorBuilder
         var runtime = Build();
         runtime.Start();
 
-        var engine = new Indicators.CustomIndicatorEngine(bars, indicator =>
+        var engine = new Indicators.CustomIndicatorEngine(bars, resolveBuiltIn: indicator =>
         {
             if (!handles.TryGetValue(indicator, out var slots))
             {
@@ -280,6 +290,17 @@ public sealed class StockIndicatorBuilder
             }
 
             return values;
+        },
+        createBuiltInState: indicator =>
+        {
+            if (indicator is not Indicators.IBuiltInIndicator builtIn)
+            {
+                return (null, null);
+            }
+
+            var spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
+            return (StreamingIndicatorFactory.CreateState(spec),
+                GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName));
         });
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
@@ -358,6 +379,28 @@ public sealed class StockIndicatorBuilder
         return run;
     }
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
+    /// <summary>Whether a built-in asked for something the evaluator has no way to give it.</summary>
+    private static bool NeedsGraph(Indicators.IIndicator indicator)
+    {
+        // Of() - the indicator reads another indicator's series rather than the bars.
+        if (indicator.Source is not null)
+        {
+            return true;
+        }
+
+        // Uses() - a component that is not one of ours collapses to nothing in CreateOptions, because the
+        // options types name a smoother by MovingAvgType and a caller's own type has no member there.
+        foreach (var component in indicator.Components)
+        {
+            if (component is not Indicators.IBuiltInMovingAverage)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void CollectReachable(
         Indicators.IIndicator indicator,
         HashSet<Indicators.IIndicator> seen,
