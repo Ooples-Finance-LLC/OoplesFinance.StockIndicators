@@ -42,7 +42,7 @@ public sealed class SignalOutputTests
             .ConfigureIndicators(adl)
             .BuildAsync().GetAwaiter().GetResult();
 
-        var line = run[adl.Adl].ToArray();
+        var line = run[adl.Value].ToArray();
         var signal = run[adl.AdlSignal].ToArray();
 
         // The v1 calculation is the reference both routes reproduce, so the signal is held to it rather
@@ -167,7 +167,7 @@ public sealed class SignalOutputTests
             bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
             .CalculateDemarkPivotPoints();
 
-        var pivot = run[demark.Pivot].ToArray();
+        var pivot = run[demark.Value].ToArray();
         var support = run[demark.S1].ToArray();
         var resistance = run[demark.R1].ToArray();
 

@@ -515,6 +515,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         // One entry per indicator, keeping the fullest reading: a calculation can publish its outputs from
         // more than one branch, and the shorter branch would describe fewer members than exist.
         var outputsOf = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var primaryOf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var reading in publishedOutputs)
         {
             if (reading is null)
@@ -526,6 +527,11 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 || reading.Keys.Count > existing.Count)
             {
                 outputsOf[reading.IndicatorName] = reading.Keys;
+            }
+
+            if (reading.PrimaryKey.Length > 0)
+            {
+                primaryOf[reading.IndicatorName] = reading.PrimaryKey;
             }
         }
 
@@ -609,12 +615,22 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
             var memberNames = outputKeys.Select(Identifier).ToList();
 
-            // A key matching the type name cannot be a member of it. MultiOutputIndicatorBase does not declare
-            // Value, so the indicator's own series takes that name and its siblings keep theirs - 30 types
-            // would otherwise lose every typed member over one word, Macd among them.
+            // The indicator's own series takes the Value name and its siblings keep theirs.
+            // MultiOutputIndicatorBase does not declare Value, so a key matching the type name could not be a
+            // member of it anyway - 30 types would otherwise lose every typed member over one word, Macd
+            // among them. But matching the type name only ever caught the indicators whose key happens to be
+            // spelled like them: Kama publishes Er/Kama and matched, while PoweredKaufmanAdaptiveMovingAverage
+            // publishes Per/Pkama and did not, leaving run[indicator] resolving to its efficiency ratio. The
+            // batch says which series it stands for with SetCustomValues, so use that where it is known and
+            // keep the name match for the rest.
+            primaryOf.TryGetValue(target.IndicatorName, out var primaryKey);
             for (var i = 0; i < memberNames.Count; i++)
             {
-                if (string.Equals(memberNames[i], typeName, StringComparison.Ordinal))
+                var isPrimary = primaryKey is { Length: > 0 }
+                    ? string.Equals(outputKeys[i], primaryKey, StringComparison.Ordinal)
+                    : string.Equals(memberNames[i], typeName, StringComparison.Ordinal);
+
+                if (isPrimary)
                 {
                     memberNames[i] = "Value";
                 }

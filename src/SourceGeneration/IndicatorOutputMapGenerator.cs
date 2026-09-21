@@ -94,6 +94,13 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
         public string IndicatorName { get; set; } = string.Empty;
 
         public List<string> Keys { get; } = new List<string>();
+
+    /// <summary>
+    /// The key of the series the calculation marks as its own with <c>SetCustomValues</c>, or empty when it
+    /// marks none. This is what an indicator stands for when one of its outputs has to answer for it, and it
+    /// is not always the first key published or the one named after the type.
+    /// </summary>
+    public string PrimaryKey { get; set; } = string.Empty;
     }
 
     private static PublishedOutputs? Extract(SyntaxNode node)
@@ -125,6 +132,8 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
         }
 
         var result = new PublishedOutputs { IndicatorName = indicatorName };
+        var keyOfSeries = new Dictionary<string, string>(StringComparer.Ordinal);
+        string? customSeries = null;
 
         foreach (var invocation in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
@@ -154,9 +163,44 @@ public class IndicatorOutputMapGenerator : IIncrementalGenerator
                         {
                             result.Keys.Add(key);
                         }
+
+                        // The list each key is published from, so the one SetCustomValues marks can be
+                        // named. A calculation may reassign the list before publishing it - the pivots
+                        // project theirs onto bars - but the identifier stays the same.
+                        if (key.Length > 0 && entry.Expressions.Count > 1
+                            && entry.Expressions[1] is IdentifierNameSyntax series)
+                        {
+                            keyOfSeries[series.Identifier.Text] = key;
+                        }
                     }
                 }
             }
+        }
+
+        // SetCustomValues names the series the indicator stands for. Reading it here is what lets the type
+        // generator give that member the Value name, rather than guessing from the type name - which only
+        // ever matched where a key happened to be spelled like its indicator.
+        foreach (var invocation in body.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+            var isSetCustom = invocation.Expression switch
+            {
+                MemberAccessExpressionSyntax member => member.Name.Identifier.Text == "SetCustomValues",
+                IdentifierNameSyntax identifier => identifier.Identifier.Text == "SetCustomValues",
+                _ => false
+            };
+
+            if (isSetCustom
+                && invocation.ArgumentList.Arguments.Count > 0
+                && invocation.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax custom)
+            {
+                customSeries = custom.Identifier.Text;
+                break;
+            }
+        }
+
+        if (customSeries is not null && keyOfSeries.TryGetValue(customSeries, out var primaryKey))
+        {
+            result.PrimaryKey = primaryKey;
         }
 
         return result.Keys.Count > 0 ? result : null;
