@@ -742,7 +742,15 @@ internal static partial class IndicatorCompute
                 selo.Length, selo.MaType),
 
             // Batch 6 - Kaufman/MACD oscillators
-            KaufmanAdaptiveCorrelationOscillatorSpecOptions kaco => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length),
+            KaufmanAdaptiveCorrelationOscillatorSpecOptions kaco => spec.OutputKey switch
+            {
+                null or "Kaco" => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length),
+                "IndexSt" => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length,
+                    MovingAvgType.KaufmanAdaptiveMovingAverage, KaufmanCorrelationSeries.IndexStandardised),
+                "SrcSt" => ComputeKaufmanAdaptiveCorrelationOscillatorFast(data, context, kaco.Length,
+                    MovingAvgType.KaufmanAdaptiveMovingAverage, KaufmanCorrelationSeries.SourceStandardised),
+                _ => null
+            },
             StochasticMacdOscillatorSpecOptions smo => ComputeStochasticMacdOscillatorFast(data, context, smo.Length),
             McClellanOscillatorSpecOptions mcco => ComputeMcClellanOscillatorFast(data, context, maType: mcco.MaType),
 
@@ -11581,8 +11589,24 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Selects which of the three series the Kaufman adaptive correlation routine publishes.
+    /// </summary>
+    internal enum KaufmanCorrelationSeries
+    {
+        /// <summary>The correlation itself.</summary>
+        Correlation,
+
+        /// <summary>The standardised bar index.</summary>
+        IndexStandardised,
+
+        /// <summary>The standardised source series.</summary>
+        SourceStandardised
+    }
+
     internal static ComputeBuffer ComputeKaufmanAdaptiveCorrelationOscillatorFast(StockData data, ComputeContext context,
-        int length = 14, MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage)
+        int length = 14, MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage,
+        KaufmanCorrelationSeries series = KaufmanCorrelationSeries.Correlation)
     {
         // CalculateKaufmanAdaptiveCorrelationOscillator is the Pearson correlation of the chained series with
         // the bar index, with every moment taken through the adaptive average rather than a plain window.
@@ -11592,14 +11616,29 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
-        using var indexDeviation = context.Rent(count);
-        using var sourceDeviation = context.Rent(count);
-
-        var buffer = context.Rent(count);
+        // Both standardised series are filled by the routine and were being disposed unused, which is why
+        // their keys answered with the correlation.
+        var indexDeviation = context.Rent(count);
+        var sourceDeviation = context.Rent(count);
+        var correlation = context.Rent(count);
         KaufmanAdaptiveCorrelation(data, context, input, length, maType, indexDeviation.WritableSpan,
-            sourceDeviation.WritableSpan, buffer.WritableSpan);
+            sourceDeviation.WritableSpan, correlation.WritableSpan);
 
-        return buffer;
+        switch (series)
+        {
+            case KaufmanCorrelationSeries.IndexStandardised:
+                sourceDeviation.Dispose();
+                correlation.Dispose();
+                return indexDeviation;
+            case KaufmanCorrelationSeries.SourceStandardised:
+                indexDeviation.Dispose();
+                correlation.Dispose();
+                return sourceDeviation;
+            default:
+                indexDeviation.Dispose();
+                sourceDeviation.Dispose();
+                return correlation;
+        }
     }
 
     // The three series CalculateKaufmanAdaptiveCorrelationOscillator publishes - IndexSt, SrcSt and Kaco -

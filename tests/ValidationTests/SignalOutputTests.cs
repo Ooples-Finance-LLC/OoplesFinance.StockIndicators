@@ -189,6 +189,40 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TheKaufmanCorrelationPublishesBothStandardisedSeries()
+    {
+        var bars = Walk(300);
+        var correlation = new KaufmanAdaptiveCorrelationOscillator();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(correlation)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateKaufmanAdaptiveCorrelationOscillator(length: new KaufmanAdaptiveCorrelationOscillator().Length);
+
+        var index = run[correlation.IndexSt].ToArray();
+        var source = run[correlation.SrcSt].ToArray();
+        var kaco = run[correlation.Value].ToArray();
+
+        index.Should().Equal(batch.OutputValues["IndexSt"].ToArray());
+        source.Should().Equal(batch.OutputValues["SrcSt"].ToArray());
+        kaco.Should().Equal(batch.OutputValues["Kaco"].ToArray());
+
+        // No two of the three are the same series, which is what all three keys used to carry. Note the
+        // published Kaco is NOT bounded to a correlation's usual range - the batch divides by moments taken
+        // through the adaptive average rather than by a plain window standard deviation, and reaches -41 on
+        // this fixture - so the bound a correlation would normally satisfy is not an invariant here.
+        index.Should().NotEqual(source);
+        index.Should().NotEqual(kaco);
+        source.Should().NotEqual(kaco);
+    }
+
+    [Fact]
     public void TheErgodicTrueStrengthIndexPublishesBothOfItsIndicesAndASignal()
     {
         var bars = Walk(300);
