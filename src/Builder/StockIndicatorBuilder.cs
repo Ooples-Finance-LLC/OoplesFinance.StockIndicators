@@ -329,10 +329,15 @@ public sealed class StockIndicatorBuilder
                 using (buffer.Value)
                 {
                     // Exact only when the indicator asked for one average and that one was the caller's.
+                    // Every average the calculation asked for was answered by the caller's. The period is
+                    // not part of the test: a MovingAvgType is re-parameterised at each call site, but an
+                    // IMovingAverage arrives already configured and carries its own - that is what passing
+                    // an average rather than naming one means. An indicator that smooths at several periods
+                    // therefore uses the caller's average at all of them, as configured.
                     var exact = ComponentAverage.Requests > 0
-                        && ComponentAverage.Substitutions == ComponentAverage.Requests
-                        && !ComponentAverage.MixedLengths;
+                        && ComponentAverage.Substitutions == ComponentAverage.Requests;
                     LastAverageLength = ComponentAverage.LengthAsked;
+                    LastAverageMixedLengths = ComponentAverage.MixedLengths;
                     return (exact ? [buffer.Value.Span.ToArray()] : null, ComponentAverage.Requests);
                 }
             }
@@ -416,6 +421,16 @@ public sealed class StockIndicatorBuilder
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
     /// <summary>The period the last substituted average was asked for, so a test can mirror it exactly.</summary>
     internal static int LastAverageLength { get; set; }
+
+    /// <summary>
+    /// Whether the last substitution answered an average the calculation asks for at more than one period.
+    /// </summary>
+    /// <remarks>
+    /// Naming a MovingAvgType re-parameterises it per call site; handing over an IMovingAverage does not,
+    /// because it arrives configured. The two therefore agree only where a calculation asks at one period,
+    /// which is what decides whether a parity check against the named form is a fair question.
+    /// </remarks>
+    internal static bool LastAverageMixedLengths { get; set; }
 
     /// <summary>Whether a built-in asked for something the evaluator has no way to give it.</summary>
     private static bool NeedsGraph(Indicators.IIndicator indicator)

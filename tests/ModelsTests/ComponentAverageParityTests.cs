@@ -73,6 +73,7 @@ public sealed class ComponentAverageParityTests
         var disagreed = new List<string>();
         var proved = 0;
         var refused = 0;
+        var mixedPeriods = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
@@ -140,6 +141,16 @@ public sealed class ComponentAverageParityTests
                 {
                     substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(asked))), bars);
                 }
+
+                // A calculation that smooths at several periods cannot be held to the named form: naming a
+                // MovingAvgType re-parameterises it per call site, and handing over an IMovingAverage does
+                // not, because it arrives configured. That is the facade working as intended, not a
+                // disagreement. ACallersOwnAverageIsActuallyUsed is what covers these instead.
+                if (StockIndicatorBuilder.LastAverageMixedLengths)
+                {
+                    mixedPeriods++;
+                    continue;
+                }
             }
             catch (NotSupportedException)
             {
@@ -172,7 +183,8 @@ public sealed class ComponentAverageParityTests
         // the number this work is measured by, and an assertion message is only shown when it fails.
         System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(),
             "component-average-parity.txt"),
-            "substituted=" + proved + " refused=" + refused + " disagree=" + disagreed.Count);
+            "substituted=" + proved + " refused=" + refused + " mixedPeriods=" + mixedPeriods
+                + " disagree=" + disagreed.Count);
 
         proved.Should().BeGreaterThan(0, "the substitution has to be exercised for this to prove anything");
         disagreed.Should().BeEmpty(proved + " indicators substituted, " + refused + " refused as ambiguous, "
