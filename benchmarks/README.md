@@ -87,8 +87,19 @@ only QuanTAlib has a real incremental arm. That is a genuine shipped-feature dif
 `--coverage` is for, not a trick of the measurement.
 
 **Our Stochastic row does less work than TA-Lib's and Skender's.** `--verify` shows a 17.26% spread, and its
-control fixture names the reason: our `%K` is the raw fast %K, theirs is a %K smoothed over three bars. The
-other six indicators agree to within 1.4e-11.
+control fixture names the reason: our `%K` is the raw fast %K, theirs is a %K smoothed over three bars. On the
+control where the last three raw `%K` values are 100, 50 and 0, we and v1 report 0 and both of them report 50,
+which is the same statement made twice.
+
+**QuanTAlib's ATR is a different quantity, and it is the whole of the ATR spread.** `--verify` reports 91.09%
+across the ATR row, but four of the five libraries sit within 1.4e-14 of each other - QuanTAlib alone reports
+0.135 against everyone else's 1.518. The control says why: on a series whose true range is exactly 2 every bar,
+the answer is 2, and QuanTAlib returns 0.142857, which is 2/14. It is reporting one bar's range divided by the
+period rather than a smoothed average of them.
+
+**Five of the seven agree to within 1.4e-11**, which is SMA, EMA, RSI, BollingerBands and MACD - the tightest
+being MACD at 1.4e-14 and the widest BollingerBands at 1.4e-11. ATR and Stochastic are the two above, and both
+are convention differences rather than precision ones.
 
 **There are two Ooples v2 arms, and the difference between them is the adapter.** `Ooples v2 builder` is
 handed a `StockData`, which copies every column into a `List<double>`. `Ooples v2 columns` is handed the

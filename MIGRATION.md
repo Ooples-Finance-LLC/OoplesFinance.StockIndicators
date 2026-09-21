@@ -1,4 +1,4 @@
-﻿# Migration Guide: v1.x to v2.0
+# Migration Guide: v1.x to v2.0
 
 This guide helps you migrate from OoplesFinance.StockIndicators v1.x to v2.0.
 
@@ -553,6 +553,27 @@ var builder = new StockIndicatorBuilder(source)
 using var runtime = builder.Build();
 // Runtime will process streaming updates automatically
 ```
+
+## IndicatorSnapshot takes memory, not lists
+
+`IndicatorSnapshot` is constructed from `Dictionary<SeriesHandle, ReadOnlyMemory<double>>` and an optional
+`Func<SeriesHandle, ReadOnlyMemory<double>?>?` resolver. It used to take `double[]` dictionaries and an
+array-returning resolver, so callers that built either by hand need one conversion each.
+
+```csharp
+// Before
+var series = new Dictionary<SeriesHandle, double[]> { [handle] = values };
+var snapshot = new IndicatorSnapshot(series, keys, h => Lookup(h));
+
+// After - an array converts implicitly, so the dictionary is the only change
+var series = new Dictionary<SeriesHandle, ReadOnlyMemory<double>> { [handle] = values };
+var snapshot = new IndicatorSnapshot(series, keys, h => Lookup(h) is { } found ? found : null);
+```
+
+`ReadOnlyMemory<double>` converts from `double[]` implicitly, so a resolver that already returns an array
+needs no change beyond its declared return type. Going the other way, `TryGetSeries` hands back
+`ReadOnlyMemory<double>`; call `.Span` to read it without copying, or `.ToArray()` if you need an array you
+own. A snapshot keeps its own copy of what it publishes, so it stays valid after the runtime is disposed.
 
 ## Getting Help
 
