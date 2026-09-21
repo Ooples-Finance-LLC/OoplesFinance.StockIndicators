@@ -246,6 +246,16 @@ public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndica
             // measures whatever sits in the middle.
             var middle = components.Length > 0 ? components[0] : 0;
 
+            // Nothing until the window is full, which is what the batch calculation publishes. A band drawn
+            // from a partial window is a different number from the one the library has always given.
+            if (_window.Count < _length)
+            {
+                outputs[0] = 0;
+                outputs[1] = 0;
+                outputs[2] = 0;
+                return;
+            }
+
             double sum = 0;
             foreach (var close in _window)
             {

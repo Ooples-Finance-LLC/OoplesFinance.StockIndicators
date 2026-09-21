@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.Builder.Backtest;
+using OoplesFinance.StockIndicators.Builder.Compute;
 using OoplesFinance.StockIndicators.Builder.Catalogs;
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Streaming;
@@ -220,8 +221,8 @@ public sealed class StockIndicatorBuilder
         }
 
 
-        _configuredSource = IndicatorDataSource.FromBatch(
-            new StockData(opens, highs, lows, closes, volumes, dates));
+        var batch = new StockData(opens, highs, lows, closes, volumes, dates);
+        _configuredSource = IndicatorDataSource.FromBatch(batch);
 
         // Everything reachable, not just what was configured: an indicator used as a component or chained
         // onto still has to be computed, and a built-in one still belongs in the evaluator rather than being
@@ -301,6 +302,38 @@ public sealed class StockIndicatorBuilder
             var spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
             return (StreamingIndicatorFactory.CreateState(spec),
                 GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName));
+        },
+        computeWithAverage: (indicator, average) =>
+        {
+            // The indicator's own calculation, unchanged, with the one average it asks for answered by the
+            // caller's series instead of by a MovingAvgType. Nothing is re-implemented, so the only way this
+            // can be wrong is if the indicator asks for more than one average - which Requests reports.
+            if (indicator is not Indicators.IBuiltInIndicator builtIn)
+            {
+                return (null, 0);
+            }
+
+            var spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
+            using var context = new ComputeContext();
+            // The component was computed over the closes, so it may only stand in for an average the
+            // indicator takes over those same closes - not over a true range or any other series it
+            // derived, where it would be answering a different question.
+            using (ComponentAverage.Arm(average, batch.ClosePrices))
+            {
+                var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
+                if (buffer is null)
+                {
+                    return (null, 0);
+                }
+
+                using (buffer.Value)
+                {
+                    // Exact only when the indicator asked for one average and that one was the caller's.
+                    var exact = ComponentAverage.Requests == 1 && ComponentAverage.Substitutions == 1;
+                    LastAverageLength = ComponentAverage.LengthAsked;
+                    return (exact ? [buffer.Value.Span.ToArray()] : null, ComponentAverage.Requests);
+                }
+            }
         });
 
         var series2 = new Dictionary<Indicators.IIndicatorOutput, double[]>();
@@ -379,6 +412,9 @@ public sealed class StockIndicatorBuilder
         return run;
     }
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
+    /// <summary>The period the last substituted average was asked for, so a test can mirror it exactly.</summary>
+    internal static int LastAverageLength { get; set; }
+
     /// <summary>Whether a built-in asked for something the evaluator has no way to give it.</summary>
     private static bool NeedsGraph(Indicators.IIndicator indicator)
     {

@@ -21,6 +21,104 @@ namespace OoplesFinance.StockIndicators.Builder.Compute;
 /// <para>Results are stored in pooled buffers that are automatically returned on dispose.</para>
 /// <para>For complex multi-output or chained indicators, use the standard SeriesEvaluator path.</para>
 /// </remarks>
+/// <summary>
+/// Lets a caller's own moving average stand in for the one an indicator would have computed from its
+/// <see cref="MovingAvgType"/>.
+/// </summary>
+/// <remarks>
+/// An indicator asks for its average through one helper, so the substitution happens there rather than
+/// being threaded through every signature. It is only certain when the indicator asks exactly once -
+/// substituting into the first of several would silently swap the wrong one - so the request count is
+/// recorded and checked by the caller, rather than keeping a list of which indicators are safe, which
+/// would rot the moment one of them gained a second average.
+/// </remarks>
+internal static class ComponentAverage
+{
+    [ThreadStatic]
+    private static IReadOnlyList<double>? _pending;
+
+    [ThreadStatic]
+    private static int _requests;
+
+    [ThreadStatic]
+    private static IReadOnlyList<double>? _over;
+
+    [ThreadStatic]
+    private static int _substitutions;
+
+    /// <summary>
+    /// Stands <paramref name="series"/> in for an average taken over <paramref name="over"/>.
+    /// </summary>
+    /// <param name="series">What the caller's average computed, over the same bars.</param>
+    /// <param name="over">The series the caller's average was computed from - the indicator's input.</param>
+    internal static IDisposable Arm(IReadOnlyList<double> series, IReadOnlyList<double> over)
+    {
+        _pending = series;
+        _over = over;
+        _requests = 0;
+        _substitutions = 0;
+        return new Scope();
+    }
+
+    /// <summary>Averages asked for while armed.</summary>
+    internal static int Requests => _requests;
+
+    /// <summary>Averages the caller's series actually stood in for. One, with one request, is exact.</summary>
+    internal static int Substitutions => _substitutions;
+
+    [ThreadStatic]
+    private static int _lengthAsked;
+
+    /// <summary>
+    /// The period the indicator asked its average for, which is not always the length it was constructed
+    /// with - several smooth over a second parameter entirely.
+    /// </summary>
+    internal static int LengthAsked => _lengthAsked;
+
+    internal static IReadOnlyList<double>? Take(ReadOnlySpan<double> input, int length)
+    {
+        _requests++;
+        _lengthAsked = length;
+
+        if (_pending is null || _over is null || !SameSeries(input, _over))
+        {
+            // The indicator is averaging something it derived - a true range, a difference, an oscillator -
+            // not the series the caller's average was computed over. Standing one in for the other would
+            // answer a different question, so this request is left to the real average and the count says
+            // the substitution did not happen.
+            return null;
+        }
+
+        var taken = _pending;
+        _pending = null;
+        _substitutions++;
+        return taken;
+    }
+
+    private static bool SameSeries(ReadOnlySpan<double> input, IReadOnlyList<double> over)
+    {
+        if (input.Length != over.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (input[i] != over[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private sealed class Scope : IDisposable
+    {
+        public void Dispose() => _pending = null;
+    }
+}
+
 internal static partial class IndicatorCompute
 {
     /// <summary>
@@ -1874,6 +1972,22 @@ internal static partial class IndicatorCompute
     internal static void MovingAverage(StockData data, MovingAvgType maType, int length, ReadOnlySpan<double> input,
         Span<double> output)
     {
+        // A caller's own average standing in for the one this indicator would have computed. The series is
+        // already there - the graph ran it - so no arithmetic is synthesised here and there is nothing to get
+        // subtly wrong: "use my average instead" is exactly the substitution of one series for another.
+        // Only the first request is served, and ComponentAverage.Requests is what tells the caller whether
+        // that was unambiguous. 124 of the served fast paths ask for an average exactly once.
+        var substitute = ComponentAverage.Take(input, length);
+        if (substitute is not null)
+        {
+            for (var i = 0; i < output.Length; i++)
+            {
+                output[i] = i < substitute.Count ? substitute[i] : 0;
+            }
+
+            return;
+        }
+
         if (CalculationsHelper.TryComputeMovingAverage(data, maType, length, input, output))
         {
             return;

@@ -64,12 +64,19 @@ internal sealed class CustomIndicatorEngine
     // component is another node in this graph, which is what the graph was for.
     private readonly Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? _createBuiltInState;
 
+    // Runs a built-in's own calculation with the one average it asks for answered by a caller's series,
+    // and reports how many averages it asked for - one means the substitution was unambiguous.
+    private readonly Func<IIndicator, IReadOnlyList<double>, (double[][]? Values, int Requests)>?
+        _computeWithAverage;
+
     internal CustomIndicatorEngine(IReadOnlyList<Bar> bars, Func<IIndicator, double[][]?> resolveBuiltIn,
-        Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null)
+        Func<IIndicator, (object? State, IReadOnlyList<string>? Keys)>? createBuiltInState = null,
+        Func<IIndicator, IReadOnlyList<double>, (double[][]? Values, int Requests)>? computeWithAverage = null)
     {
         _bars = bars;
         _resolveBuiltIn = resolveBuiltIn;
         _createBuiltInState = createBuiltInState;
+        _computeWithAverage = computeWithAverage;
     }
 
     private static OhlcvBar ToOhlcv(in Bar bar) =>
@@ -122,17 +129,34 @@ internal sealed class CustomIndicatorEngine
             // indicator would answer with its default - the right number for a question nobody asked. 370
             // generated types are in this position: they declare the component correctly and have no
             // arithmetic of their own to consume it yet. Refusing is the only honest answer until they do.
+            IIndicator? substitute = null;
             foreach (var component in indicator.Components)
             {
                 if (component is not IBuiltInMovingAverage)
                 {
-                    throw new NotSupportedException(
-                        indicator.GetType().Name + " cannot yet take " + component.GetType().Name
-                        + " as a component: it has no arithmetic of its own, and the batch calculation "
-                        + "behind it names a moving average by MovingAvgType, which cannot name your type. "
-                        + "Use one of the library's averages here, or compute this indicator from a custom "
-                        + "indicator of your own.");
+                    substitute = component;
+                    break;
                 }
+            }
+
+            if (substitute is not null && _computeWithAverage is not null)
+            {
+                // The indicator's own calculation, with the single average it asks for answered by the
+                // caller's series. Nothing is re-implemented, so the substitution is exact - and if it
+                // asked for more than one average, which of them was meant is ambiguous and it refuses
+                // rather than swapping the wrong one.
+                var (substituted, requests) = _computeWithAverage(indicator, Compute(substitute)[0]);
+                if (substituted is not null && requests == 1)
+                {
+                    _computed[indicator] = substituted;
+                    return substituted;
+                }
+
+                throw new NotSupportedException(
+                    indicator.GetType().Name + " cannot take " + substitute.GetType().Name
+                    + " as its average: it asks for " + requests + " averages, so which one you meant is "
+                    + "ambiguous. Use one of the library's averages here, or write this as a custom "
+                    + "indicator of your own.");
             }
 
             (state, streamingKeys) = _createBuiltInState(indicator);
