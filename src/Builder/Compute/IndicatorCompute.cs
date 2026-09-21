@@ -1776,7 +1776,13 @@ internal static partial class IndicatorCompute
             TrendDirectionForceIndexSpecOptions tdfi => ComputeTrendDirectionForceIndexFast(data, context, tdfi.Length1, tdfi.Length2, tdfi.MaType),
             TrendAnalysisIndexSpecOptions tai => ComputeTrendAnalysisIndexFast(data, context, tai.Length1, tai.Length2, tai.MaType),
             TrendAnalysisIndicatorSpecOptions tai2 => ComputeTrendAnalysisIndicatorFast(data, context, tai2.Length1, tai2.Length2, tai2.MaType),
-            TrenderSpecOptions tr => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType),
+            TrenderSpecOptions tr => spec.OutputKey switch
+            {
+                null or "Trender" => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType),
+                "TrendUp" => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType, TrenderSeries.TrendUp),
+                "TrendDn" => ComputeTrenderFast(data, context, tr.Length, tr.AtrMult, tr.MaType, TrenderSeries.TrendDown),
+                _ => null
+            },
             TurboStochasticsFastSpecOptions tsf => ComputeTurboStochasticsFastFast(data, context, tsf.Length1, tsf.Length2, tsf.TurboLength),
 
             // Batch 28 - Volume and Volatility Indicators
@@ -26862,8 +26868,24 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    /// <summary>
+    /// Selects which of the three series the trender routine publishes.
+    /// </summary>
+    internal enum TrenderSeries
+    {
+        /// <summary>The trend line the indicator stands for.</summary>
+        Trender,
+
+        /// <summary>The upward stop.</summary>
+        TrendUp,
+
+        /// <summary>The downward stop.</summary>
+        TrendDown
+    }
+
     internal static ComputeBuffer ComputeTrenderFast(StockData data, ComputeContext context, int length = 14,
-        double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
+        TrenderSeries series = TrenderSeries.Trender)
     {
         // CalculateTrender publishes the trend line itself: the down stop while the smoothed adaptive line
         // sits below the average of the chained series, the up stop while it sits above, and the previous
@@ -26904,7 +26926,7 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        double previousTrendDown = 0, previousTrendUp = 0;
+        double previousTrendDown = 0, previousTrendUp = 0, previousTrender = 0;
         for (var i = 0; i < count; i++)
         {
             var currentValue = input[i];
@@ -26920,9 +26942,22 @@ internal static partial class IndicatorCompute
             var trendUp = adm[i] > ema[i] && previousAdaptive < previousAverage ? previousLow :
                 currentValue > previousValue ? currentValue - offset : previousTrendUp;
 
-            output[i] = adm[i] < ema[i] ? trendDown : adm[i] > ema[i] ? trendUp : (i >= 1 ? output[i - 1] : 0);
+            // Both stops were already being carried here and only the line they alternate between was kept,
+            // which is why the TrendUp and TrendDn keys answered with the line. The trender's own recursion
+            // reads its previous value from a local rather than from the buffer, so the buffer is free to
+            // hold whichever series was asked for.
+            var trender = adm[i] < ema[i] ? trendDown : adm[i] > ema[i] ? trendUp : (i >= 1 ? previousTrender : 0);
+
+            output[i] = series switch
+            {
+                TrenderSeries.TrendUp => trendUp,
+                TrenderSeries.TrendDown => trendDown,
+                _ => trender
+            };
+
             previousTrendDown = trendDown;
             previousTrendUp = trendUp;
+            previousTrender = trender;
         }
 
         return buffer;

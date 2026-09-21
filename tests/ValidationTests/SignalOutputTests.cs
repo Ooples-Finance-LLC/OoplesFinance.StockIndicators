@@ -189,6 +189,42 @@ public sealed class SignalOutputTests
     }
 
     [Fact]
+    public void TrenderPublishesBothStopsAndNotTheLineThreeTimes()
+    {
+        var bars = Walk(300);
+        var trender = new Trender();
+
+        using var run = new StockIndicatorBuilder()
+            .ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(trender)
+            .BuildAsync().GetAwaiter().GetResult();
+
+        var batch = new StockData(
+            bars.Select(b => b.Open).ToList(), bars.Select(b => b.High).ToList(),
+            bars.Select(b => b.Low).ToList(), bars.Select(b => b.Close).ToList(),
+            bars.Select(b => (double)b.Volume).ToList(), bars.Select(b => b.Time).ToList())
+            .CalculateTrender(length: new Trender().Length);
+
+        var up = run[trender.TrendUp].ToArray();
+        var down = run[trender.TrendDn].ToArray();
+        var line = run[trender.Value].ToArray();
+
+        up.Should().Equal(batch.OutputValues["TrendUp"].ToArray());
+        down.Should().Equal(batch.OutputValues["TrendDn"].ToArray());
+        line.Should().Equal(batch.OutputValues["Trender"].ToArray());
+
+        // The line alternates between the two stops, so on every bar it equals one of them. When all three
+        // keys carried the line that held trivially, so it is checked alongside the batch rather than alone:
+        // the stops must also differ from each other somewhere, which a single repeated series cannot do.
+        for (var i = 0; i < line.Length; i++)
+        {
+            (Math.Abs(line[i] - up[i]) < 1e-9 || Math.Abs(line[i] - down[i]) < 1e-9).Should().BeTrue();
+        }
+
+        up.Should().NotEqual(down);
+    }
+
+    [Fact]
     public void TheSimpleDecyclerPublishesItsBandsAndNotTheDecyclerThreeTimes()
     {
         var bars = Walk(400);
