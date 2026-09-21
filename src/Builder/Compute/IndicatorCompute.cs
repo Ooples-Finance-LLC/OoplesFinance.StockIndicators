@@ -21618,25 +21618,8 @@ internal static partial class IndicatorCompute
             var slowMaSpan = slowMaArray.AsSpan(0, count);
 
             // Compute fast and slow MAs
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(inputSpan, fastMaSpan, fastLength);
-                    MovingAverageCore.SimpleMovingAverage(inputSpan, slowMaSpan, slowLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(inputSpan, fastMaSpan, fastLength);
-                    MovingAverageCore.ExponentialMovingAverage(inputSpan, slowMaSpan, slowLength);
-                    break;
-                case MovingAvgType.WeightedMovingAverage:
-                    MovingAverageCore.WeightedMovingAverage(inputSpan, fastMaSpan, fastLength);
-                    MovingAverageCore.WeightedMovingAverage(inputSpan, slowMaSpan, slowLength);
-                    break;
-                default:
-                    MovingAverageCore.WeightedMovingAverage(inputSpan, fastMaSpan, fastLength);
-                    MovingAverageCore.WeightedMovingAverage(inputSpan, slowMaSpan, slowLength);
-                    break;
-            }
+            MovingAverage(data, maType, fastLength, inputSpan, fastMaSpan);
+            MovingAverage(data, maType, slowLength, inputSpan, slowMaSpan);
 
             ReadOnlySpan<double> fastMaReadOnly = fastMaSpan;
             ReadOnlySpan<double> slowMaReadOnly = slowMaSpan;
@@ -21783,18 +21766,7 @@ internal static partial class IndicatorCompute
             var maSpan = maArray.AsSpan(0, count);
 
             // Calculate MA of close prices
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, maSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(close, maSpan, length);
-                    break;
-            }
+            MovingAverage(data, maType, length, close, maSpan);
 
             // Calculate Mayer Multiple = price / MA
             ReadOnlySpan<double> maReadOnly = maSpan;
@@ -22402,21 +22374,8 @@ internal static partial class IndicatorCompute
             var slowMaSpan = slowMaArray.AsSpan(0, count);
 
             // Calculate fast and slow MAs
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.SimpleMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.ExponentialMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.ExponentialMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-            }
+            MovingAverage(data, maType, fastLength, close, fastMaSpan);
+            MovingAverage(data, maType, slowLength, close, slowMaSpan);
 
             // Return middle band (average of fast and slow)
             var buffer = context.Rent(count);
@@ -22452,21 +22411,8 @@ internal static partial class IndicatorCompute
             var slowMaSpan = slowMaArray.AsSpan(0, count);
 
             // Calculate fast and slow MAs
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.SimpleMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.ExponentialMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(close, fastMaSpan, fastLength);
-                    MovingAverageCore.ExponentialMovingAverage(close, slowMaSpan, slowLength);
-                    break;
-            }
+            MovingAverage(data, maType, fastLength, close, fastMaSpan);
+            MovingAverage(data, maType, slowLength, close, slowMaSpan);
 
             // Return band width
             var buffer = context.Rent(count);
@@ -22504,21 +22450,8 @@ internal static partial class IndicatorCompute
             var lowMaSpan = lowMaArray.AsSpan(0, count);
 
             // Calculate MA of high and low
-            switch (maType)
-            {
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(high, highMaSpan, length);
-                    MovingAverageCore.SimpleMovingAverage(low, lowMaSpan, length);
-                    break;
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(high, highMaSpan, length);
-                    MovingAverageCore.ExponentialMovingAverage(low, lowMaSpan, length);
-                    break;
-                default:
-                    MovingAverageCore.SimpleMovingAverage(high, highMaSpan, length);
-                    MovingAverageCore.SimpleMovingAverage(low, lowMaSpan, length);
-                    break;
-            }
+            MovingAverage(data, maType, length, high, highMaSpan);
+            MovingAverage(data, maType, length, low, lowMaSpan);
 
             // Return middle (average of high and low MAs)
             var buffer = context.Rent(count);
@@ -22584,18 +22517,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
 
         // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        MovingAverage(data, maType, length, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -22768,18 +22690,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
 
         // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        MovingAverage(data, maType, length, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -22795,18 +22706,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
 
         // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, bbLength);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, bbLength);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, bbLength);
-                break;
-        }
+        MovingAverage(data, maType, bbLength, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -22822,18 +22722,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
 
         // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-            default:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length1);
-                break;
-        }
+        MovingAverage(data, maType, length1, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -22874,18 +22763,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
 
         // Calculate MA
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        MovingAverage(data, maType, length, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -23291,18 +23169,7 @@ internal static partial class IndicatorCompute
         var count = data.Count;
         var buffer = context.Rent(count);
 
-        switch (maType)
-        {
-            case MovingAvgType.SimpleMovingAverage:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            case MovingAvgType.ExponentialMovingAverage:
-                MovingAverageCore.ExponentialMovingAverage(close, buffer.WritableSpan, length);
-                break;
-            default:
-                MovingAverageCore.SimpleMovingAverage(close, buffer.WritableSpan, length);
-                break;
-        }
+        MovingAverage(data, maType, length, close, buffer.WritableSpan);
 
         return buffer;
     }
@@ -23381,18 +23248,7 @@ internal static partial class IndicatorCompute
             OscillatorCore.RateOfChange(close, rocSpan, length);
 
             // Smooth with MA
-            switch (maType)
-            {
-                case MovingAvgType.ExponentialMovingAverage:
-                    MovingAverageCore.ExponentialMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
-                    break;
-                case MovingAvgType.SimpleMovingAverage:
-                    MovingAverageCore.SimpleMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
-                    break;
-                default:
-                    MovingAverageCore.ExponentialMovingAverage(rocSpan, buffer.WritableSpan, smoothLength);
-                    break;
-            }
+            MovingAverage(data, maType, smoothLength, rocSpan, buffer.WritableSpan);
         }
         finally
         {

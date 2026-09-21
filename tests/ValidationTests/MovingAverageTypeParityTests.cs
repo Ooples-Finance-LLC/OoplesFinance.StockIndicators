@@ -31,17 +31,8 @@ public sealed class MovingAverageTypeParityTests
     {
         "AbsolutePriceOscillator",
         "Apo",
-        "BollingerBandsFibonacciRatios",
-        "BollingerBandsWithAtrPct",
         "ChaikinOscillator",
-        "KirshenbaumBands",
-        "MayerMultiple",
-        "MovingAverageChannel",
-        "MovingAverageSupportResistance",
-        "PriceHeadleyAccelerationBands",
         "RangeActionVerificationIndex",
-        "RateOfChangeBands",
-        "StollerAverageRangeChannels",
     };
 
     [Fact]
