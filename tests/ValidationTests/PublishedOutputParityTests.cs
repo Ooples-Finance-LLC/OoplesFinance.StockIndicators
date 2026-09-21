@@ -73,8 +73,6 @@ public sealed class PublishedOutputParityTests
         "EhlersSimpleClipIndicator.Signal",
         "EhlersSimpleDerivIndicator.Signal",
         "EhlersSimpleWindowIndicator.Roc",
-        "EhlersSnakeUniversalTradingFilter.LowerBand",
-        "EhlersSnakeUniversalTradingFilter.UpperBand",
         "EhlersStochasticCyberCycle.Signal",
         "EhlersSuperPassbandFilter.LowerBand",
         "EhlersSuperPassbandFilter.UpperBand",

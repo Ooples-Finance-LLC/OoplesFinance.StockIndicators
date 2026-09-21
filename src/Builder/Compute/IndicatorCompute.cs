@@ -1780,7 +1780,13 @@ internal static partial class IndicatorCompute
                     esam.MaType, MacdSeries.Signal),
                 _ => null
             },
-            EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context, esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType),
+            EhlersSnakeUniversalTradingFilterSpecOptions esutf => ComputeEhlersSnakeUniversalTradingFilterFast(data, context,
+                esutf.Length1, esutf.Length2, esutf.Bw, esutf.MaType, spec.OutputKey switch
+                {
+                    "UpperBand" => SnakeFilterSeries.UpperBand,
+                    "LowerBand" => SnakeFilterSeries.LowerBand,
+                    _ => SnakeFilterSeries.Erf
+                }),
             EhlersTrendExtractionSpecOptions ete => ComputeEhlersTrendExtractionFast(data, context, ete.Length, ete.Delta, ete.MaType),
             EhlersTripleDelayLineDetrenderSpecOptions etdld => ComputeEhlersTripleDelayLineDetrenderFast(data, context, etdld.Length, etdld.MaType),
 
@@ -26197,15 +26203,33 @@ internal static partial class IndicatorCompute
         return smoothed;
     }
 
-    internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 23, int length2 = 50, double bw = 1.4, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
+    /// <summary>
+    /// Selects which of the three series the snake filter routine publishes.
+    /// </summary>
+    internal enum SnakeFilterSeries
+    {
+        /// <summary>The filter itself, which the indicator stands for.</summary>
+        Erf,
+
+        /// <summary>The root mean square of the filter over length2.</summary>
+        UpperBand,
+
+        /// <summary>Its negation.</summary>
+        LowerBand
+    }
+
+    internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(StockData data, ComputeContext context,
+        int length1 = 23, int length2 = 50, double bw = 1.4,
+        MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, SnakeFilterSeries band = SnakeFilterSeries.Erf)
     {
         // V1 Algorithm: Bandpass filter with MA smoothing
         // 1. Calculate bandpass coefficients from length1 and bw
         // 2. Calculate recursive bandpass: bp = 0.5*(1-s1)*(value-prevValue2) + l1*(1+s1)*prevBp1 - s1*prevBp2
         // 3. Apply MA to bp
         // Primary output is the filtered bandpass
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var close = SpanCompat.AsReadOnlySpan(inputList);
+        int count = inputList.Count;
         length1 = Math.Max(1, length1);
         length2 = Math.Max(1, length2);
 
@@ -26234,7 +26258,28 @@ internal static partial class IndicatorCompute
         maCore.Compute(bpBuffer.Span, result.WritableSpan, length1);
         bpBuffer.Dispose();
 
-        return result;
+        if (band == SnakeFilterSeries.Erf)
+        {
+            return result;
+        }
+
+        // The bands are the root mean square of the filter over length2, one either side of zero. Only the
+        // filter was produced, so both band keys carried it - and since the lower band is the upper one
+        // negated, the pair could not both have been right.
+        using var filter = result;
+        var filt = filter.Span;
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        var power = new RollingSum();
+        for (var i = 0; i < count; i++)
+        {
+            power.Add(filt[i] * filt[i]);
+            var rms = Math.Sqrt(power.Average(length2));
+            output[i] = band == SnakeFilterSeries.LowerBand ? -rms : rms;
+        }
+
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1,
