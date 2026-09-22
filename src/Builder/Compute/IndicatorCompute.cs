@@ -674,7 +674,15 @@ internal static partial class IndicatorCompute
             GroverLlorensCycleOscillatorSpecOptions glco => ComputeGroverLlorensCycleOscillatorFast(data, context, glco.Length,
                 maType: glco.MaType),
             LindaRaschke310OscillatorSpecOptions lr310 => ComputeLindaRaschke310OscillatorFast(data, context, lr310.FastLength,
-                lr310.SlowLength, lr310.MaType),
+                lr310.SlowLength, lr310.MaType, lr310.SmoothLength, spec.OutputKey switch
+                {
+                    "LindaMacdSignal" => LindaRaschkeSeries.MacdSignal,
+                    "LindaMacdHistogram" => LindaRaschkeSeries.MacdHistogram,
+                    "LindaPpo" => LindaRaschkeSeries.Ppo,
+                    "LindaPpoSignal" => LindaRaschkeSeries.PpoSignal,
+                    "LindaPpoHistogram" => LindaRaschkeSeries.PpoHistogram,
+                    _ => LindaRaschkeSeries.Macd
+                }),
             MidpointOscillatorSpecOptions mpo => ComputeMidpointOscillatorFast(data, context, mpo.Length),
             MobilityOscillatorSpecOptions mobo => spec.OutputKey switch
             {
@@ -9576,12 +9584,38 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Linda Raschke 3/10 Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int fastLength = 3,
-        int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    /// <summary>
+    /// Selects which of the six series the Linda Raschke oscillator publishes.
+    /// </summary>
+    internal enum LindaRaschkeSeries
     {
-        // "LindaMacd", the primary series of CalculateLindaRaschke3_10Oscillator, is simply the fast moving
-        // average of the chained series less the slow one. Its smoothLength only builds the separate signal
-        // and histogram series, so it reaches nothing here; the arm had bound one length for both.
+        /// <summary>The fast average less the slow one, which the indicator stands for.</summary>
+        Macd,
+
+        /// <summary>Its smoothing.</summary>
+        MacdSignal,
+
+        /// <summary>It less its smoothing.</summary>
+        MacdHistogram,
+
+        /// <summary>The same gap as a percentage of the slow average.</summary>
+        Ppo,
+
+        /// <summary>The percentage form's smoothing.</summary>
+        PpoSignal,
+
+        /// <summary>The percentage form less its smoothing.</summary>
+        PpoHistogram
+    }
+
+    internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast(StockData data, ComputeContext context, int fastLength = 3,
+        int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 16,
+        LindaRaschkeSeries series = LindaRaschkeSeries.Macd)
+    {
+        // CalculateLindaRaschke3_10Oscillator takes the fast average of the chained series less the slow one
+        // and publishes it twice over - as that difference and as the same gap in percent of the slow
+        // average - each smoothed by smoothLength for a signal and differenced against it for a histogram.
+        // Only the first of the six was produced, so five keys carried it and smoothLength reached nothing.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
@@ -9591,11 +9625,40 @@ internal static partial class IndicatorCompute
         MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
         MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
 
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
+        var percent = series is LindaRaschkeSeries.Ppo or LindaRaschkeSeries.PpoSignal
+            or LindaRaschkeSeries.PpoHistogram;
+
+        using var oscillator = context.Rent(count);
+        var osc = oscillator.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = fast.Span[i] - slow.Span[i];
+            var gap = fast.Span[i] - slow.Span[i];
+            osc[i] = percent ? (slow.Span[i] != 0 ? gap / slow.Span[i] * 100 : 0) : gap;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        if (series is LindaRaschkeSeries.Macd or LindaRaschkeSeries.Ppo)
+        {
+            oscillator.Span.CopyTo(output);
+            return buffer;
+        }
+
+        using var signalLine = context.Rent(count);
+        MovingAverage(data, maType, smoothLength, oscillator.Span, signalLine.WritableSpan);
+
+        if (series is LindaRaschkeSeries.MacdSignal or LindaRaschkeSeries.PpoSignal)
+        {
+            signalLine.Span.CopyTo(output);
+            return buffer;
+        }
+
+        var oscSpan = oscillator.Span;
+        var signalSpan = signalLine.Span;
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = oscSpan[i] - signalSpan[i];
         }
 
         return buffer;
