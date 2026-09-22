@@ -1906,7 +1906,14 @@ internal static partial class IndicatorCompute
             RelativeSpreadStrengthSpecOptions rss => ComputeRelativeSpreadStrengthFast(data, context, rss.FastLength, rss.SlowLength, rss.Length, rss.SmoothLength, rss.MaType),
             RelativeVolatilityIndexV2SpecOptions rviv2 => ComputeRelativeVolatilityIndexV2Fast(data, context, rviv2.Length, rviv2.SmoothLength, rviv2.MaType),
             RelativeVolumeIndicatorSpecOptions rvi => ComputeRelativeVolumeIndicatorFast(data, context, rvi.Length, rvi.MaType),
-            SelfAdjustingRelativeStrengthIndexSpecOptions sarsi => ComputeSelfAdjustingRsiFast(data, context, sarsi.Length, sarsi.MaType),
+            SelfAdjustingRelativeStrengthIndexSpecOptions sarsi => ComputeSelfAdjustingRsiFast(data, context, sarsi.Length,
+                sarsi.MaType, sarsi.SmoothingLength, sarsi.Mult, spec.OutputKey switch
+                {
+                    "Signal" => SelfAdjustingRsiSeries.Signal,
+                    "ObLevel" => SelfAdjustingRsiSeries.ObLevel,
+                    "OsLevel" => SelfAdjustingRsiSeries.OsLevel,
+                    _ => SelfAdjustingRsiSeries.SaRsi
+                }),
             SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType),
             StatisticalVolatilitySpecOptions sv => ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2),
             TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType,
@@ -28145,17 +28152,65 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    /// <summary>
+    /// Selects which of the four series the self adjusting relative strength index publishes.
+    /// </summary>
+    internal enum SelfAdjustingRsiSeries
     {
-        // CalculateSelfAdjustingRelativeStrengthIndex publishes the relative strength index itself and uses
-        // the smoothing length and the multiplier only for the signal line and the two adjusting levels, so
-        // neither reaches the series this arm returns. The routine this replaced fixed the average at Wilders
-        // and read the close, where the batch call smooths gains and losses with whichever average it is given
-        // and reads the chained series.
+        /// <summary>The relative strength index itself.</summary>
+        SaRsi,
+
+        /// <summary>Its smoothing over the smoothing length.</summary>
+        Signal,
+
+        /// <summary>Fifty plus the multiplied deviation of the index.</summary>
+        ObLevel,
+
+        /// <summary>Fifty less it.</summary>
+        OsLevel
+    }
+
+    internal static ComputeBuffer ComputeSelfAdjustingRsiFast(StockData data, ComputeContext context, int length = 14,
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothingLength = 21, double mult = 2,
+        SelfAdjustingRsiSeries series = SelfAdjustingRsiSeries.SaRsi)
+    {
+        // CalculateSelfAdjustingRelativeStrengthIndex publishes the relative strength index, its smoothing
+        // over smoothingLength, and two levels that sit at 50 plus and minus mult deviations OF THE INDEX
+        // taken over length - not over the smoothing length. Only the index was produced, so all three of
+        // the others answered with it and neither smoothingLength nor mult reached the arm at all.
+        //
+        // The routine this replaced fixed the average at Wilders and read the close, where the batch smooths
+        // gains and losses with whichever average it is given and reads the chained series.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(inputList.Count);
-        RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        if (series == SelfAdjustingRsiSeries.SaRsi)
+        {
+            RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
+            return buffer;
+        }
+
+        using var index = context.Rent(count);
+        RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, index.WritableSpan);
+
+        if (series == SelfAdjustingRsiSeries.Signal)
+        {
+            MovingAverage(data, maType, smoothingLength, index.Span, buffer.WritableSpan);
+            return buffer;
+        }
+
+        using var deviation = context.Rent(count);
+        VolatilityCore.StandardDeviation(index.Span, deviation.WritableSpan, length);
+
+        var output = buffer.WritableSpan;
+        var stdDev = deviation.Span;
+        for (var i = 0; i < count; i++)
+        {
+            var adjusting = mult * stdDev[i];
+            output[i] = series == SelfAdjustingRsiSeries.OsLevel ? 50 - adjusting : 50 + adjusting;
+        }
+
         return buffer;
     }
 
