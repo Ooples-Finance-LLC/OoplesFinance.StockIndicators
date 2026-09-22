@@ -904,7 +904,14 @@ internal static partial class IndicatorCompute
             DonchianChannelWidthSpecOptions dcw => ComputeDonchianChannelWidthFast(data, context, dcw.Length),
             KeltnerChannelWidthSpecOptions kcw => ComputeKeltnerChannelWidthFast(data, context, kcw.Length),
             MassIndexCoreSpecOptions mic => ComputeMassIndexCoreFast(data, context, mic.Length),
-            RahulMohindarOscillatorSpecOptions rmo => ComputeRahulMohindarOscillatorFast(data, context, rmo.Length),
+            RahulMohindarOscillatorSpecOptions rmo => ComputeRahulMohindarOscillatorFast(data, context, rmo.Length,
+                length1: 2, length3: 30, length4: 81, series: spec.OutputKey switch
+                {
+                    "SwingTrade1" => RahulMohindarSeries.SwingTrade1,
+                    "SwingTrade2" => RahulMohindarSeries.SwingTrade2,
+                    "SwingTrade3" => RahulMohindarSeries.SwingTrade3,
+                    _ => RahulMohindarSeries.Rmo
+                }),
             RviVolatilitySpecOptions rviv => ComputeRviVolatilityFast(data, context, rviv.Length),
             StandardErrorCoreSpecOptions sec => ComputeStandardErrorCoreFast(data, context, sec.Length),
 
@@ -6135,8 +6142,26 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rahul Mohindar Oscillator using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Selects which of the four series the Rahul Mohindar routine publishes.
+    /// </summary>
+    internal enum RahulMohindarSeries
+    {
+        /// <summary>The long exponential average of the swing, which the indicator stands for.</summary>
+        Rmo,
+
+        /// <summary>The swing itself.</summary>
+        SwingTrade1,
+
+        /// <summary>Its exponential average over length3.</summary>
+        SwingTrade2,
+
+        /// <summary>That average smoothed again by the same length.</summary>
+        SwingTrade3
+    }
+
     internal static ComputeBuffer ComputeRahulMohindarOscillatorFast(StockData data, ComputeContext context, int length2 = 10,
-        int length1 = 2, int length3 = 30, int length4 = 81)
+        int length1 = 2, int length3 = 30, int length4 = 81, RahulMohindarSeries series = RahulMohindarSeries.Rmo)
     {
         // CalculateRahulMohindarOscillator measures the chained value against the average of ten successive
         // short simple averages of itself, scaled by the range of the window, and publishes the long
@@ -6175,7 +6200,30 @@ internal static partial class IndicatorCompute
         }
 
         var buffer = context.Rent(count);
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length4, swing.Span, buffer.WritableSpan);
+
+        // The swing was already being built here and thrown away, and the batch publishes it plus two
+        // successive exponential averages of it over length3 beside the long one this returned.
+        if (series == RahulMohindarSeries.SwingTrade1)
+        {
+            swing.Span.CopyTo(buffer.WritableSpan);
+            return buffer;
+        }
+
+        if (series == RahulMohindarSeries.Rmo)
+        {
+            MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length4, swing.Span, buffer.WritableSpan);
+            return buffer;
+        }
+
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length3, swing.Span, buffer.WritableSpan);
+        if (series == RahulMohindarSeries.SwingTrade2)
+        {
+            return buffer;
+        }
+
+        using var second = context.Rent(count);
+        buffer.Span.CopyTo(second.WritableSpan);
+        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length3, second.Span, buffer.WritableSpan);
 
         return buffer;
     }
