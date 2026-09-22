@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentAssertions.Execution;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Builder.Compute;
@@ -507,7 +507,18 @@ public sealed class BuilderArmTests : GlobalTestData
 
         if (type == typeof(MovingAvgType))
         {
-            return alternate ? MovingAvgType.ExponentialMovingAverage : declared ?? MovingAvgType.SimpleMovingAverage;
+            // The alternate set must move the average OFF whatever the spec declares. Returning a fixed
+            // ExponentialMovingAverage here moved nothing for the many specs that already declare it, so a
+            // route that drops the requested average agreed with a batch given that same default and passed.
+            var declaredType = declared is MovingAvgType m ? m : MovingAvgType.SimpleMovingAverage;
+            if (!alternate)
+            {
+                return declaredType;
+            }
+
+            return declaredType == MovingAvgType.SimpleMovingAverage
+                ? MovingAvgType.ExponentialMovingAverage
+                : MovingAvgType.SimpleMovingAverage;
         }
 
         if (type == typeof(InputName))
