@@ -223,8 +223,22 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             return null;
         }
 
+        // The average parameter is not always called maType - CalculateRelativeStrengthIndex names it
+        // movingAvgType, and matching one spelling counted its three requests as none, so the generated
+        // type offered no SecondAverage or ThirdAverage to configure. Take the name from the signature
+        // rather than guessing it, so a third spelling cannot go quiet the same way.
+        var averageParameter = method.ParameterList.Parameters
+            .FirstOrDefault(p => p.Type is not null && p.Type.ToString().EndsWith("MovingAvgType", StringComparison.Ordinal));
+        if (averageParameter is null)
+        {
+            return new AverageCountReading(name.Groups[1].Value, 0);
+        }
+
         var asks = System.Text.RegularExpressions.Regex.Matches(
-            body, @"GetMovingAverageList\(\s*stockData\s*,\s*maType").Count;
+            body,
+            @"GetMovingAverageList\(\s*stockData\s*,\s*"
+                + System.Text.RegularExpressions.Regex.Escape(averageParameter.Identifier.Text)
+                + @"\b").Count;
 
         return new AverageCountReading(name.Groups[1].Value, asks);
     }

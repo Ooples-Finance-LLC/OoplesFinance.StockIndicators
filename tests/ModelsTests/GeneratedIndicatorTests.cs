@@ -255,7 +255,14 @@ public sealed class GeneratedIndicatorTests
     [Fact]
     public void OneOfOurAveragesCollapsesIntoTheEnumTheBatchCalculationTakes()
     {
-        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"), 14, Construct<IMovingAverage>("Ema"))!;
+        // Rsi asks for three averages, so its generated constructor carries SecondAverage and ThirdAverage
+        // beside the first. Activator does not fill optional parameters unless told to.
+        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"),
+            System.Reflection.BindingFlags.CreateInstance | System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.OptionalParamBinding,
+            binder: null,
+            args: [14, Construct<IMovingAverage>("Ema"), Type.Missing, Type.Missing],
+            culture: null)!;
 
         var options = ((IBuiltInIndicator)rsi).CreateOptions();
         var maType = options.GetType().GetProperty("MaType")!.GetValue(options);
@@ -268,7 +275,12 @@ public sealed class GeneratedIndicatorTests
     public void ACallersOwnAverageStaysAComponentAndTheOptionsKeepTheirDefault()
     {
         var mine = new MyOwnAverage();
-        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"), 14, mine)!;
+        var rsi = (IIndicator)Activator.CreateInstance(Find("Rsi"),
+            System.Reflection.BindingFlags.CreateInstance | System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.OptionalParamBinding,
+            binder: null,
+            args: [14, mine, Type.Missing, Type.Missing],
+            culture: null)!;
 
         // There is no enum member for someone else's average - which is why the parameter is an interface.
         rsi.Components.Should().ContainSingle().Which.Should().BeSameAs(mine);
