@@ -199,7 +199,13 @@ internal static partial class IndicatorCompute
             HmaSpecOptions hma => ComputeHullMovingAverageFast(data, context, hma.Length),
             TmaSpecOptions tma => ComputeTmaFast(data, context, tma.Length, tma.MaType),
             WwmaSpecOptions wwma => ComputeWwmaFast(data, context, wwma.Length),
-            LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length),
+            LinRegSpecOptions linreg => ComputeLinRegFast(data, context, linreg.Length, spec.OutputKey switch
+            {
+                "PredictedTomorrow" => LinearRegressionSeries.PredictedTomorrow,
+                "Slope" => LinearRegressionSeries.Slope,
+                "Intercept" => LinearRegressionSeries.Intercept,
+                _ => LinearRegressionSeries.Fit
+            }),
             KamaSpecOptions kama => spec.OutputKey switch
             {
                 null or "Kama" => ComputeKamaFast(data, context, kama.Length),
@@ -2108,13 +2114,55 @@ internal static partial class IndicatorCompute
     /// Computes Linear Regression using zero-allocation fast path.
     /// Uses MovingAverageCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputeLinRegFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Selects which of the four series the linear regression routine publishes.
+    /// </summary>
+    internal enum LinearRegressionSeries
+    {
+        /// <summary>The fitted value at the current bar, which the indicator stands for.</summary>
+        Fit,
+
+        /// <summary>The fit carried one bar forward.</summary>
+        PredictedTomorrow,
+
+        /// <summary>The slope of the fitted line.</summary>
+        Slope,
+
+        /// <summary>Its intercept, reported at bar 0 of the series.</summary>
+        Intercept
+    }
+
+    internal static ComputeBuffer ComputeLinRegFast(StockData data, ComputeContext context, int length = 14,
+        LinearRegressionSeries series = LinearRegressionSeries.Fit)
     {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
 
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.LinearRegression(inputSpan, buffer.WritableSpan, length);
+        if (series == LinearRegressionSeries.Fit)
+        {
+            var fitted = context.Rent(inputList.Count);
+            MovingAverageCore.LinearRegression(inputSpan, fitted.WritableSpan, length);
+            return fitted;
+        }
+
+        // CalculateLinearRegression fits one line through the trailing window per bar and publishes four
+        // readings of it - the fit here, the fit one bar on, the slope, and the intercept carried back to
+        // bar 0 of the series. Only the first was produced, so the other three keys answered with it.
+        var count = inputList.Count;
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        using var regression = new RollingLeastSquares(length);
+        for (var i = 0; i < count; i++)
+        {
+            var fit = regression.Next(inputSpan[i], isFinal: true);
+            output[i] = series switch
+            {
+                LinearRegressionSeries.PredictedTomorrow => fit.Next,
+                LinearRegressionSeries.Slope => fit.Slope,
+                _ => fit.Intercept - (fit.Slope * (i - fit.Count + 1))
+            };
+        }
 
         return buffer;
     }
