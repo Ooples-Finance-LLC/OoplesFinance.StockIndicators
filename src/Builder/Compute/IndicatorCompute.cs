@@ -263,7 +263,11 @@ internal static partial class IndicatorCompute
             VrocSpecOptions vroc => ComputeVrocFast(data, context, vroc.Length),
             NviSpecOptions nvi => ComputeNviFast(data, context, nvi.Length),
             PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length),
-            PvtSpecOptions pvt => ComputePvtFast(data, context, pvt.Length),
+            PvtSpecOptions pvt => spec.OutputKey switch
+            {
+                "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt.Length, pvt.MaType),
+                _ => ComputePvtFast(data, context, pvt.Length)
+            },
             ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength, co.MaType),
             EmvSpecOptions => ComputeEmvFast(data, context),
             KvoSpecOptions kvo => ComputeKlingerVolumeFast(data, context, kvo.Length),
@@ -465,7 +469,11 @@ internal static partial class IndicatorCompute
             DemandIndexSpecOptions dmidx => ComputeDemandIndexFast(data, context, dmidx.Length),
             WilliamsADSpecOptions wad => ComputeWilliamsADFast(data, context, wad.Length),
             CumulativeVolumeIndexSpecOptions cvi => ComputeCumulativeVolumeIndexFast(data, context, cvi.Length),
-            VolumePriceTrendSpecOptions vpt => ComputeVolumePriceTrendFast(data, context, vpt.Length),
+            VolumePriceTrendSpecOptions vpt => spec.OutputKey switch
+            {
+                "Signal" => ComputePriceVolumeTrendSignalFast(data, context, vpt.Length, vpt.MaType),
+                _ => ComputeVolumePriceTrendFast(data, context, vpt.Length)
+            },
             ElderRayBullPowerSpecOptions erbp => ComputeElderRayBullPowerFast(data, context, erbp.Length),
             ElderRayBearPowerSpecOptions erbrp => ComputeElderRayBearPowerFast(data, context, erbrp.Length),
             VolumeWeightedRsiSpecOptions vwrsi => ComputeVolumeWeightedRsiFast(data, context, vwrsi.Length),
@@ -1407,7 +1415,11 @@ internal static partial class IndicatorCompute
             PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue),
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
-            PriceVolumeTrendSpecOptions pvt2 => ComputePriceVolumeTrendFast(data, context),
+            PriceVolumeTrendSpecOptions pvt2 => spec.OutputKey switch
+            {
+                "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt2.Length, pvt2.MaType),
+                _ => ComputePriceVolumeTrendFast(data, context)
+            },
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
             RelativeVigorIndexSpecOptions rvi2 => ComputeRelativeVigorIndexFast(data, context, rvi2.Length, rvi2.MaType),
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length, tma2.MaType),
@@ -21007,6 +21019,20 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Volume Trend using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Smooths the price volume trend, which is the Signal key its batch publishes beside the trend.
+    /// </summary>
+    internal static ComputeBuffer ComputePriceVolumeTrendSignalFast(StockData data, ComputeContext context,
+        int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        using var trend = ComputePriceVolumeTrendFast(data, context);
+        var buffer = context.Rent(trend.Span.Length);
+        buffer.WritableSpan.Clear();
+        MovingAverage(data, maType, length, trend.Span, buffer.WritableSpan);
+
+        return buffer;
+    }
+
     internal static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context)
     {
         var tickerList = data.TickerDataList;

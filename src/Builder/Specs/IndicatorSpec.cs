@@ -1013,11 +1013,22 @@ public sealed class PviSpecOptions : IIndicatorSpecOptions
 public sealed class PvtSpecOptions : IIndicatorSpecOptions
 {
     public PvtSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the price volume trend batch, whose Signal key is the trend smoothed by this length with
+    // whichever average it was given. Carrying no average left that key out of reach.
+    public PvtSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths the trend with for its signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -2998,11 +3009,22 @@ public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
 public sealed class VolumePriceTrendSpecOptions : IIndicatorSpecOptions
 {
     public VolumePriceTrendSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the price volume trend batch, whose Signal key is the trend smoothed by this length with
+    // whichever average it was given. Carrying no average left that key out of reach.
+    public VolumePriceTrendSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths the trend with for its signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
