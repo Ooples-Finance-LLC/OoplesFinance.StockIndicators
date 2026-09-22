@@ -1311,11 +1311,30 @@ public sealed class AcceleratorOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class StochasticKSpecOptions : IIndicatorSpecOptions
 {
     public StochasticKSpecOptions(int length)
+        : this(length, 3, 3, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    // Bound to the stochastic oscillator batch, which smooths its raw series once for FastD and again for
+    // SlowD. Carrying only a length left both keys out of reach.
+    public StochasticKSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths its raw stochastic by for FastD.</summary>
+    public int SmoothLength1 { get; }
+
+    /// <summary>The length it smooths that again by for SlowD.</summary>
+    public int SmoothLength2 { get; }
+
+    /// <summary>The average both smoothings are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4046,11 +4065,30 @@ public sealed class RollingMinSpecOptions : IIndicatorSpecOptions
 public sealed class PricePositionSpecOptions : IIndicatorSpecOptions
 {
     public PricePositionSpecOptions(int length)
+        : this(length, 3, 3, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    // Bound to the stochastic oscillator batch, which smooths its raw series once for FastD and again for
+    // SlowD. Carrying only a length left both keys out of reach.
+    public PricePositionSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths its raw stochastic by for FastD.</summary>
+    public int SmoothLength1 { get; }
+
+    /// <summary>The length it smooths that again by for SlowD.</summary>
+    public int SmoothLength2 { get; }
+
+    /// <summary>The average both smoothings are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>

@@ -289,7 +289,15 @@ internal static partial class IndicatorCompute
             // Additional Oscillators
             AwesomeOscillatorSpecOptions ao => ComputeAwesomeOscillatorFast(data, context, ao.Length, ao.MaType),
             AcceleratorOscillatorSpecOptions aco => ComputeAcceleratorOscillatorFast(data, context, aco.Length, aco.MaType),
-            StochasticKSpecOptions sk => ComputeStochasticKFast(data, context, sk.Length),
+            // Bound to the stochastic oscillator batch, so its FastD and SlowD are that batch's smoothings.
+            StochasticKSpecOptions sk => spec.OutputKey switch
+            {
+                "FastD" => ComputeStochasticOscillatorFast(data, context, sk.Length, sk.SmoothLength1,
+                    sk.SmoothLength2, sk.MaType, StochasticSeries.FastD),
+                "SlowD" => ComputeStochasticOscillatorFast(data, context, sk.Length, sk.SmoothLength1,
+                    sk.SmoothLength2, sk.MaType, StochasticSeries.SlowD),
+                _ => ComputeStochasticKFast(data, context, sk.Length)
+            },
             FisherTransformSpecOptions ft => ComputeEhlersFisherTransformFast(data, context, ft.Length),
             ConnorsRsiSpecOptions crsi => spec.OutputKey switch
             {
@@ -588,7 +596,14 @@ internal static partial class IndicatorCompute
             CumulativeSumSpecOptions csum => ComputeCumulativeSumFast(data, context),
             RollingMaxSpecOptions rmax => ComputeRollingMaxFast(data, context, rmax.Length),
             RollingMinSpecOptions rmin => ComputeRollingMinFast(data, context, rmin.Length),
-            PricePositionSpecOptions ppos => ComputePricePositionFast(data, context, ppos.Length),
+            PricePositionSpecOptions ppos => spec.OutputKey switch
+            {
+                "FastD" => ComputeStochasticOscillatorFast(data, context, ppos.Length, ppos.SmoothLength1,
+                    ppos.SmoothLength2, ppos.MaType, StochasticSeries.FastD),
+                "SlowD" => ComputeStochasticOscillatorFast(data, context, ppos.Length, ppos.SmoothLength1,
+                    ppos.SmoothLength2, ppos.MaType, StochasticSeries.SlowD),
+                _ => ComputePricePositionFast(data, context, ppos.Length)
+            },
             AtrPercentSpecOptions atrp => ComputeNormalizedAtrFast(data, context, atrp.Length),
 
             // Batch 5 - Trend/Activator indicators
