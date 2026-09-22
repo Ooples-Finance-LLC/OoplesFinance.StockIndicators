@@ -1431,14 +1431,29 @@ internal static partial class IndicatorCompute
                 _ => ComputeOnBalanceVolumeFast(data, context)
             },
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
-            PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+            PercentageVolumeOscillatorSpecOptions pvo2 => spec.OutputKey switch
+            {
+                "Signal" => SmoothPublished(data, context,
+                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+                    pvo2.SignalLength, pvo2.MaType),
+                "Histogram" => DifferenceFromSmoothing(data, context,
+                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+                    pvo2.SignalLength, pvo2.MaType),
+                _ => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength)
+            },
             PositiveVolumeIndexSpecOptions pvi2 => spec.OutputKey switch
             {
                 "PviSignal" => SmoothPublished(data, context, ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue), pvi2.Length, pvi2.MaType),
                 _ => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue)
             },
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
-            PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
+            PriceMomentumOscillatorSpecOptions pmo2 => spec.OutputKey switch
+            {
+                "Signal" => SmoothPublished(data, context,
+                    ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
+                    pmo2.SignalLength, pmo2.MaType),
+                _ => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2)
+            },
             PriceVolumeTrendSpecOptions pvt2 => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt2.Length, pvt2.MaType),
@@ -2984,6 +2999,30 @@ internal static partial class IndicatorCompute
     /// keys have - answers a keyless request with whatever it always returns, so a mechanism built that way
     /// smooths an already smoothed series wherever the key was right.
     /// </remarks>
+    /// <summary>
+    /// A series less its own smoothing, which is the shape of most published histograms.
+    /// </summary>
+    private static ComputeBuffer DifferenceFromSmoothing(StockData data, ComputeContext context, ComputeBuffer source,
+        int length, MovingAvgType maType)
+    {
+        using (source)
+        {
+            var count = source.Span.Length;
+            using var signalLine = context.Rent(count);
+            signalLine.WritableSpan.Clear();
+            MovingAverage(data, maType, length, source.Span, signalLine.WritableSpan);
+
+            var buffer = context.Rent(count);
+            var output = buffer.WritableSpan;
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = source.Span[i] - signalLine.Span[i];
+            }
+
+            return buffer;
+        }
+    }
+
     private static ComputeBuffer SmoothPublished(StockData data, ComputeContext context, ComputeBuffer source,
         int length, MovingAvgType maType)
     {

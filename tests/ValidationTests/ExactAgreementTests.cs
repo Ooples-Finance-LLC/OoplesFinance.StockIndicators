@@ -15,7 +15,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 /// The review on PR #243 asked for a 1e-8 tolerance in <see cref="SignalOutputTests"/> on the grounds that
 /// two independent implementations need not produce bit-identical doubles. That is true of some arms and
 /// not others, and it was worth measuring rather than deciding: of the series that agree within 1e-8,
-/// <b>798 are bit-identical and 32 are not</b>. The 32 are listed below.
+/// <b>798 are bit-identical and 34 are not</b>. The 34 are listed below.
 /// </para>
 /// <para>
 /// So the exact assertions in SignalOutputTests stay exact - none of the indicators they pin is on this
@@ -53,7 +53,11 @@ public sealed class ExactAgreementTests
         "Mfi.Mfi",
         "MfiCore.Mfi",
         "PercentageChange.PerformanceIndex",
+        // Signal and Histogram are taken from the primary above, so they inherit its one-ulp offset:
+        // measured at 1.8e-15 absolute, 3.2e-16 relative, over the same walk this test uses.
+        "PercentageVolumeOscillator.Histogram",
         "PercentageVolumeOscillator.Pvo",
+        "PercentageVolumeOscillator.Signal",
         "PercentChange.PerformanceIndex",
         "Pvo.Pvo",
         "QuadraticWma.Pwma",
@@ -63,7 +67,7 @@ public sealed class ExactAgreementTests
     };
 
     [Fact]
-    public void EveryAgreeingSeriesIsBitIdenticalExceptTheKnownThirtyTwo()
+    public void EveryAgreeingSeriesIsBitIdenticalExceptTheKnownThirtyFour()
     {
         var bars = Walk(150);
 
