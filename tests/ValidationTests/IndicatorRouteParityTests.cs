@@ -48,6 +48,8 @@ public sealed class IndicatorRouteParityTests
     public void EveryIndicatorWithAFastPathComputesWhatItsStatefulTwinComputes()
     {
         var disagreed = new List<string>();
+        var failed = new List<string>();
+        var noTwin = new List<string>();
         var compared = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
@@ -74,8 +76,11 @@ public sealed class IndicatorRouteParityTests
                 builtIn = instance;
                 spec = IndicatorSpecs.Create(builtIn.BatchName, builtIn.CreateOptions());
             }
-            catch
+            catch (Exception ex)
             {
+                // A route that THROWS is a failure, not an indicator out of scope. Swallowing it removed the
+                // indicator before it was counted, so the sweep could stay green while a route was broken.
+                if (ex is NotSupportedException) { noTwin.Add(type.Name); } else { failed.Add(type.Name + ": " + ex.GetType().Name + " - " + ex.Message); }
                 continue;
             }
 
@@ -94,8 +99,11 @@ public sealed class IndicatorRouteParityTests
                     viaFastPath = buffer.Value.Span.ToArray();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // A route that THROWS is a failure, not an indicator out of scope. Swallowing it removed the
+                // indicator before it was counted, so the sweep could stay green while a route was broken.
+                if (ex is NotSupportedException) { noTwin.Add(type.Name); } else { failed.Add(type.Name + ": " + ex.GetType().Name + " - " + ex.Message); }
                 continue;
             }
 
@@ -114,8 +122,11 @@ public sealed class IndicatorRouteParityTests
                 // the question being asked of it.
                 viaState = BatchCompute.ComputeAll(Walk(), state, builtIn.BatchOutputKey);
             }
-            catch
+            catch (Exception ex)
             {
+                // A route that THROWS is a failure, not an indicator out of scope. Swallowing it removed the
+                // indicator before it was counted, so the sweep could stay green while a route was broken.
+                if (ex is NotSupportedException) { noTwin.Add(type.Name); } else { failed.Add(type.Name + ": " + ex.GetType().Name + " - " + ex.Message); }
                 continue;
             }
 
@@ -142,6 +153,16 @@ public sealed class IndicatorRouteParityTests
                 }
             }
         }
+
+        // Reported before the count, because a route that threw was previously dropped before being
+        // counted: the sweep could satisfy its own threshold while a route was broken.
+        failed.Should().BeEmpty("a route that throws is a failure, not an indicator out of scope");
+
+        // The out-of-scope count is asserted too: an indicator that quietly stops having a stateful twin
+        // would otherwise leave the sweep smaller without anything saying so.
+        noTwin.Should().HaveCountLessThanOrEqualTo(635,
+            "635 indicators have no stateful twin and so are not compared here at all - this sweep covers "
+            + "the ones that do, and the ceiling is a ratchet so the covered set cannot quietly shrink");
 
         compared.Should().BeGreaterThan(100, "the indicators with both routes are what this exists to check");
         disagreed.Should().BeEmpty("which route runs is not something a caller chooses; " + compared
