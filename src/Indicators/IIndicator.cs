@@ -92,6 +92,20 @@ public interface IIndicator
 /// <summary>An indicator that publishes more than one series.</summary>
 public interface IMultiOutputIndicator : IIndicator
 {
+}
+
+/// <summary>
+/// An indicator that names which of its outputs stands for it.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Separate from <see cref="IMultiOutputIndicator"/> so that adding it cannot break a type outside this
+/// library that already implements that one: an indicator which does not name a primary is resolved
+/// through <c>Outputs[0]</c> as before.
+/// </para>
+/// </remarks>
+public interface IPrimaryOutputIndicator
+{
     /// <summary>
     /// The series this indicator is named for, used wherever one of its outputs has to stand for it.
     /// </summary>
@@ -104,6 +118,7 @@ public interface IMultiOutputIndicator : IIndicator
     /// </remarks>
     IIndicatorOutput PrimaryOutput { get; }
 }
+
 
 /// <summary>
 /// An indicator usable wherever an average of a series is called for.

@@ -80,7 +80,7 @@ internal sealed class IndicatorRun : IIndicatorRun
             // caller naming one. A multi-output indicator names the series it stands for, because the batch's
             // key order does not always publish that one first: Outputs[0] is the efficiency ratio on Kaufman's
             // adaptive average and the positive directional indicator on the average directional index.
-            return this[indicator is IMultiOutputIndicator multi ? multi.PrimaryOutput : indicator.Outputs[0]];
+            return this[indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0]];
         }
     }
 

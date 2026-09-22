@@ -164,7 +164,7 @@ public abstract class IndicatorBase : IIndicator
 /// <summary>
 /// An indicator publishing several series.
 /// </summary>
-public abstract class MultiOutputIndicatorBase : IMultiOutputIndicator
+public abstract class MultiOutputIndicatorBase : IMultiOutputIndicator, IPrimaryOutputIndicator
 {
     private readonly IIndicatorOutput[] _outputs;
     private IIndicator[] _components = [];

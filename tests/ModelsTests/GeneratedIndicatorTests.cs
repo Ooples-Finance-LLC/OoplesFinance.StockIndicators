@@ -174,7 +174,7 @@ public sealed class GeneratedIndicatorTests
             .Where(p => p.PropertyType == typeof(IIndicatorOutput))
             // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
             // of the indicator's output set and must not be counted as one.
-            .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
+            .Where(p => p.Name != nameof(IPrimaryOutputIndicator.PrimaryOutput))
             .Select(p => p.Name)
             .ToList();
 
@@ -198,7 +198,7 @@ public sealed class GeneratedIndicatorTests
                 .Where(p => p.PropertyType == typeof(IIndicatorOutput))
                 // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
                 // of the indicator's output set and must not be counted as one.
-                .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
+                .Where(p => p.Name != nameof(IPrimaryOutputIndicator.PrimaryOutput))
                 .ToList();
 
             if (members.Count != instance.Outputs.Count)
@@ -337,7 +337,7 @@ public sealed class GeneratedIndicatorTests
                 .Where(p => p.PropertyType == typeof(IIndicatorOutput))
                 // PrimaryOutput names one of the series below rather than publishing another, so it is not a member
                 // of the indicator's output set and must not be counted as one.
-                .Where(p => p.Name != nameof(IMultiOutputIndicator.PrimaryOutput))
+                .Where(p => p.Name != nameof(IPrimaryOutputIndicator.PrimaryOutput))
                 .ToList();
 
             if (members.Count == 0)
