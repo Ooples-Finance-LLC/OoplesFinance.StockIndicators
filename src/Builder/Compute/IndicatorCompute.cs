@@ -1788,7 +1788,14 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             ProjectionBandwidthSpecOptions pb => ComputeProjectionBandwidthFast(data, context, pb.Length),
-            QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor, qwn.MaType),
+            QuasiWhiteNoiseSpecOptions qwn => ComputeQuasiWhiteNoiseFast(data, context, qwn.Length, qwn.NoiseLength, qwn.Divisor,
+                qwn.MaType, spec.OutputKey switch
+                {
+                    "WhiteNoiseMa" => QuasiWhiteNoiseSeries.WhiteNoiseMa,
+                    "WhiteNoiseStdDev" => QuasiWhiteNoiseSeries.WhiteNoiseStdDev,
+                    "WhiteNoiseVariance" => QuasiWhiteNoiseSeries.WhiteNoiseVariance,
+                    _ => QuasiWhiteNoiseSeries.WhiteNoise
+                }),
             RapidRelativeStrengthIndexSpecOptions rrsi => ComputeRapidRsiFast(data, context, rrsi.Length),
             ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
 
@@ -25765,7 +25772,25 @@ internal static partial class IndicatorCompute
         }
     }
 
-    internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+    /// <summary>
+    /// Selects which of the four series the quasi white noise routine publishes.
+    /// </summary>
+    internal enum QuasiWhiteNoiseSeries
+    {
+        /// <summary>The noise itself, which the indicator stands for.</summary>
+        WhiteNoise,
+
+        /// <summary>Its average over the noise length.</summary>
+        WhiteNoiseMa,
+
+        /// <summary>The deviation of the same window.</summary>
+        WhiteNoiseStdDev,
+
+        /// <summary>That deviation squared.</summary>
+        WhiteNoiseVariance
+    }
+
+    internal static ComputeBuffer ComputeQuasiWhiteNoiseFast(StockData data, ComputeContext context, int length = 20, int noiseLength = 500, double divisor = 40, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, QuasiWhiteNoiseSeries series = QuasiWhiteNoiseSeries.WhiteNoise)
     {
         // CalculateQuasiWhiteNoise centres the Connors relative strength index on zero and scales it by the
         // divisor. Its WhiteNoise key is that series alone, so the moving average, deviation and variance the
@@ -25785,9 +25810,39 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         var connorsSpan = connors.Span;
         var scale = 1 / divisor;
+
+        // The noise is built here either way; the batch also publishes its average over noiseLength, the
+        // deviation of the same window, and that deviation squared, and all three answered with the noise.
+        if (series == QuasiWhiteNoiseSeries.WhiteNoise)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] = (connorsSpan[i] - 50) * scale;
+            }
+
+            return buffer;
+        }
+
+        using var noise = context.Rent(count);
+        var noiseSpan = noise.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (connorsSpan[i] - 50) * scale;
+            noiseSpan[i] = (connorsSpan[i] - 50) * scale;
+        }
+
+        if (series == QuasiWhiteNoiseSeries.WhiteNoiseMa)
+        {
+            MovingAverage(data, maType, noiseLength, noise.Span, output);
+            return buffer;
+        }
+
+        VolatilityCore.StandardDeviation(noise.Span, output, noiseLength);
+        if (series == QuasiWhiteNoiseSeries.WhiteNoiseVariance)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                output[i] *= output[i];
+            }
         }
 
         return buffer;
