@@ -1438,7 +1438,13 @@ internal static partial class IndicatorCompute
             BullPowerIndicatorSpecOptions bpi => ComputeBullPowerFast(data, context, bpi.Length),
             BearPowerIndicatorSpecOptions beari => ComputeBearPowerFast(data, context, beari.Length),
             MomentumOscillatorSpecOptions mosc => ComputeMomentumOscillatorFast(data, context, mosc.Length),
-            StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length),
+            StochasticOscillatorSpecOptions stosc => ComputeStochasticOscillatorFast(data, context, stosc.Length,
+                stosc.SmoothLength1, stosc.SmoothLength2, stosc.MaType, spec.OutputKey switch
+                {
+                    "FastD" => StochasticSeries.FastD,
+                    "SlowD" => StochasticSeries.SlowD,
+                    _ => StochasticSeries.FastK
+                }),
             StochasticFastOscillatorSpecOptions stfo => ComputeStochasticFastFast(data, context, stfo.Length,
                 stfo.SmoothLength1, stfo.MaType),
 
@@ -21524,15 +21530,52 @@ internal static partial class IndicatorCompute
         }
     }
 
-    internal static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14)
+    /// <summary>
+    /// Selects which of the three series the stochastic oscillator publishes.
+    /// </summary>
+    internal enum StochasticSeries
     {
-        // CalculateStochasticOscillator publishes the raw stochastic as its primary series - the smoothed
-        // FastD and SlowD are separate keys - so the smoothing lengths never reach this output. The arm this
-        // replaced rebuilt the price spans from the ticker list, ignored the chained series and then smoothed
-        // on top, so it was the wrong series computed from the wrong input.
+        /// <summary>The raw stochastic, which the indicator stands for.</summary>
+        FastK,
+
+        /// <summary>Its smoothing over the first smoothing length.</summary>
+        FastD,
+
+        /// <summary>That smoothed again over the second.</summary>
+        SlowD
+    }
+
+    internal static ComputeBuffer ComputeStochasticOscillatorFast(StockData data, ComputeContext context, int length = 14,
+        int smoothLength1 = 3, int smoothLength2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
+        StochasticSeries series = StochasticSeries.FastK)
+    {
+        // CalculateStochasticOscillator publishes the raw stochastic, its smoothing over smoothLength1 as
+        // FastD, and that smoothed again over smoothLength2 as SlowD. Only the raw series was produced, so
+        // both smoothed keys carried it and neither smoothing length reached the arm. The arm this replaced
+        // rebuilt the price spans from the ticker list, ignored the chained series and then smoothed on top,
+        // so it was the wrong series computed from the wrong input.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(inputList.Count);
-        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, buffer.WritableSpan);
+        var count = inputList.Count;
+
+        var buffer = context.Rent(count);
+        if (series == StochasticSeries.FastK)
+        {
+            StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, buffer.WritableSpan);
+            return buffer;
+        }
+
+        using var fastK = context.Rent(count);
+        StochasticFastK(data, context, SpanCompat.AsReadOnlySpan(inputList), length, fastK.WritableSpan);
+        MovingAverage(data, maType, smoothLength1, fastK.Span, buffer.WritableSpan);
+
+        if (series == StochasticSeries.FastD)
+        {
+            return buffer;
+        }
+
+        using var fastD = context.Rent(count);
+        buffer.Span.CopyTo(fastD.WritableSpan);
+        MovingAverage(data, maType, smoothLength2, fastD.Span, buffer.WritableSpan);
 
         return buffer;
     }

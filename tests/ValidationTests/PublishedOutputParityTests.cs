@@ -190,8 +190,6 @@ public sealed class PublishedOutputParityTests
         "StochasticMacdOscillator.Histogram",
         "StochasticMacdOscillator.Signal",
         "StochasticMomentumIndex.Signal",
-        "StochasticOscillator.FastD",
-        "StochasticOscillator.SlowD",
         "StochasticRegular.Signal",
         "StochasticRsiOscillator.Signal",
         "TFSMboIndicator.Histogram",
