@@ -53,6 +53,8 @@ public sealed class ParameterisedParityTests
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 
         var diverged = new HashSet<string>(StringComparer.Ordinal);
+
+        var swallowed = new List<string>();
         var comparisons = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
@@ -73,8 +75,9 @@ public sealed class ParameterisedParityTests
                     as IBuiltInIndicator;
                 if (probe is null) { continue; }
             }
-            catch (TargetInvocationException)
+            catch (TargetInvocationException ex)
             {
+                swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
             }
 
@@ -111,8 +114,9 @@ public sealed class ParameterisedParityTests
                         .BuildAsync().GetAwaiter().GetResult();
                     mine = run[indicator].ToArray();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    swallowed.Add(type.Name + ": " + ex.GetType().Name);
                     continue;
                 }
 
@@ -126,6 +130,10 @@ public sealed class ParameterisedParityTests
 
         // A positive control: this must actually reach the library at several lengths.
         comparisons.Should().BeGreaterThan(900, "the sweep must run its comparisons for its result to mean anything");
+        // An indicator whose construction or batch call THROWS was dropped before it could be compared,
+        // and a count of what was compared cannot show that. Measured at 1 today; the ceiling is a ratchet.
+        swallowed.Should().HaveCountLessThanOrEqualTo(1,
+            "an indicator that throws is never compared: " + string.Join(", ", swallowed));
 
         var appeared = diverged.Except(KnownDivergences).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var fixedSince = KnownDivergences.Except(diverged).OrderBy(x => x, StringComparer.Ordinal).ToList();

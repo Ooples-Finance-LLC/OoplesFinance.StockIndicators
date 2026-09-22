@@ -59,6 +59,7 @@ public sealed class MovingAverageTypeParityTests
         var avgType = ((IBuiltInMovingAverage)Substitute()).AvgType;
 
         var diverged = new HashSet<string>(StringComparer.Ordinal);
+        var swallowed = new List<string>();
         var paired = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
@@ -85,8 +86,9 @@ public sealed class MovingAverageTypeParityTests
                 if (indicator is not IBuiltInIndicator built) { continue; }
                 builtIn = built;
             }
-            catch (TargetInvocationException)
+            catch (TargetInvocationException ex)
             {
+                swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
             }
 
@@ -118,8 +120,9 @@ public sealed class MovingAverageTypeParityTests
                     .BuildAsync().GetAwaiter().GetResult();
                 mine = run[indicator].ToArray();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                swallowed.Add(type.Name + ": " + ex.GetType().Name);
                 continue;
             }
 
@@ -130,6 +133,10 @@ public sealed class MovingAverageTypeParityTests
         }
 
         paired.Should().BeGreaterThan(150, "the sweep must reach the indicators that take an average");
+        // An indicator whose construction or batch call THROWS was dropped before it could be compared,
+        // and a count of what was compared cannot show that. Measured at 0 today; the ceiling is a ratchet.
+        swallowed.Should().HaveCountLessThanOrEqualTo(0,
+            "an indicator that throws is never compared: " + string.Join(", ", swallowed));
 
         var appeared = diverged.Except(KnownDivergences).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var fixedSince = KnownDivergences.Except(diverged).OrderBy(x => x, StringComparer.Ordinal).ToList();

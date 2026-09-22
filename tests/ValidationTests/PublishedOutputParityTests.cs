@@ -260,6 +260,7 @@ public sealed class PublishedOutputParityTests
             mine.Length == theirs.Count && !mine.Where((x, i) => Math.Abs(x - theirs[i]) > 1e-8).Any();
 
         var diverged = new HashSet<string>(StringComparer.Ordinal);
+        var swallowed = new List<string>();
         var compared = 0;
 
         foreach (var type in typeof(IIndicator).Assembly.GetTypes()
@@ -279,8 +280,9 @@ public sealed class PublishedOutputParityTests
                 if (indicator is not IBuiltInIndicator built) { continue; }
                 builtIn = built;
             }
-            catch (TargetInvocationException)
+            catch (TargetInvocationException ex)
             {
+                swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
             }
 
@@ -294,8 +296,9 @@ public sealed class PublishedOutputParityTests
                 if (method.Invoke(null, arguments) is not StockData result) { continue; }
                 published = result.OutputValues;
             }
-            catch (TargetInvocationException)
+            catch (TargetInvocationException ex)
             {
+                swallowed.Add(type.Name + ": " + (ex.InnerException ?? ex).GetType().Name);
                 continue;
             }
 
@@ -308,8 +311,9 @@ public sealed class PublishedOutputParityTests
                     .BuildAsync().GetAwaiter().GetResult();
                 mine = indicator.Outputs.Select(o => run[o].ToArray()).ToArray();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                swallowed.Add(type.Name + ": " + ex.GetType().Name);
                 continue;
             }
 
@@ -329,6 +333,10 @@ public sealed class PublishedOutputParityTests
 
         // A positive control: the sweep has to be reaching enough series for its verdict to mean anything.
         compared.Should().BeGreaterThan(500, "the sweep must actually compare series for its result to mean anything");
+        // An indicator whose construction or batch call THROWS was dropped before it could be compared,
+        // and a count of what was compared cannot show that. Measured at 0 today; the ceiling is a ratchet.
+        swallowed.Should().HaveCountLessThanOrEqualTo(0,
+            "an indicator that throws is never compared: " + string.Join(", ", swallowed));
 
         var appeared = diverged.Except(KnownDivergences).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var fixedSince = KnownDivergences.Except(diverged).OrderBy(x => x, StringComparer.Ordinal).ToList();
