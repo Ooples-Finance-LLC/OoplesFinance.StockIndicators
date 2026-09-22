@@ -1307,7 +1307,16 @@ internal static partial class IndicatorCompute
                 "R1" => ComputeDemarkPivotPointFast(data, context, series: DemarkPivotSeries.Resistance1),
                 _ => null
             },
-            LinearChannelMiddleSpecOptions lcm => ComputeLinearChannelMiddleFast(data, context, lcm.Length),
+            // This spec is bound to the LINEAR REGRESSION batch, so its named keys are that calculation's
+            // slope, intercept and forward reading. Only its own middle series keeps the channel routine,
+            // which is what the batch publishes as the primary.
+            LinearChannelMiddleSpecOptions lcm => spec.OutputKey switch
+            {
+                "PredictedTomorrow" => ComputeLinRegFast(data, context, lcm.Length, LinearRegressionSeries.PredictedTomorrow),
+                "Slope" => ComputeLinRegFast(data, context, lcm.Length, LinearRegressionSeries.Slope),
+                "Intercept" => ComputeLinRegFast(data, context, lcm.Length, LinearRegressionSeries.Intercept),
+                _ => ComputeLinearChannelMiddleFast(data, context, lcm.Length)
+            },
             PriceChannelUpperSpecOptions pcu => ComputePriceChannelUpperFast(data, context, pcu.Length),
             PriceChannelLowerSpecOptions pcl => ComputePriceChannelLowerFast(data, context, pcl.Length),
             DonchianChannelUpperSpecOptions dcu => ComputeDonchianChannelUpperFast(data, context, dcu.Length),
