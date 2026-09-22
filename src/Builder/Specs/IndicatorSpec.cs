@@ -1417,14 +1417,19 @@ public sealed class PmoSpecOptions : IIndicatorSpecOptions
     {
     }
 
-    public PmoSpecOptions(int length, MovingAvgType maType)
+    // signalLength is the length the batch smooths the oscillator by for the Signal key it publishes beside it.
+    public PmoSpecOptions(int length, MovingAvgType maType, int signalLength = 10)
     {
         Length = Math.Max(1, length);
         MaType = maType;
+        SignalLength = Math.Max(1, signalLength);
     }
 
     public int Length { get; }
     public MovingAvgType MaType { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
 }
 
 /// <summary>
@@ -1765,11 +1770,28 @@ public sealed class RviSpecOptions : IIndicatorSpecOptions
 public sealed class PvoSpecOptions : IIndicatorSpecOptions
 {
     public PvoSpecOptions(int length)
+        : this(length, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths the oscillator by a signal length for its Signal key, differences the two for its
+    // Histogram, and averages the volume with the average it is given. Carrying none of that put all three
+    // out of reach, so the arm answered every key with the oscillator itself.
+    public PvoSpecOptions(int length, int signalLength = 9,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average the volume and the signal line are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>

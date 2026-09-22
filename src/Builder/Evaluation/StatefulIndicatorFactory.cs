@@ -182,7 +182,8 @@ internal static partial class StatefulIndicatorFactory
             AcceleratorOscillatorSpecOptions aco => new AcceleratorOscillatorState(fastLength: aco.Length, maType: aco.MaType),
             FisherTransformSpecOptions ft => new EhlersFisherTransformState(length: ft.Length),
             ConnorsRsiSpecOptions crsi => new ConnorsRelativeStrengthIndexState(length2: crsi.Length),
-            PmoSpecOptions pmo => new PriceMomentumOscillatorState(maType: pmo.MaType, length1: pmo.Length),
+            PmoSpecOptions pmo => new PriceMomentumOscillatorState(maType: pmo.MaType, length1: pmo.Length,
+                signalLength: pmo.SignalLength),
             KstSpecOptions kst => new KnowSureThingState(length1: kst.Length),
             ChoppinessIndexSpecOptions ci => new ChoppinessIndexState(length: ci.Length),
             CoppockCurveSpecOptions cop => new CoppockCurveState(maType: cop.MaType, length: cop.Length),
@@ -197,7 +198,8 @@ internal static partial class StatefulIndicatorFactory
             VortexNegativeSpecOptions vn => new VortexIndicatorState(length: vn.Length),
             TrendIntensityIndexSpecOptions tii => new TrendIntensityIndexState(maType: tii.MaType, fastLength: tii.Length),
             StochRsiSpecOptions srsi => new StochasticRelativeStrengthIndexState(maType: srsi.MaType, length: srsi.RsiLength, stochLength: srsi.StochLength),
-            PvoSpecOptions pvo => new PercentageVolumeOscillatorState(fastLength: pvo.Length),
+            PvoSpecOptions pvo => new PercentageVolumeOscillatorState(maType: pvo.MaType, fastLength: pvo.Length,
+                signalLength: pvo.SignalLength),
             RviSpecOptions rvi => new RelativeVigorIndexState(length: rvi.Length),
 
             // Additional MAs - using named parameters to skip MovingAvgType defaults

@@ -323,7 +323,12 @@ internal static partial class IndicatorCompute
                 "StreakRsi" => ComputeConnorsRsiFast(data, context, length2: crsi.Length, series: ConnorsRsiSeries.StreakStrength),
                 _ => null
             },
-            PmoSpecOptions pmo => ComputePmoFast(data, context, pmo.Length),
+            PmoSpecOptions pmo => spec.OutputKey switch
+            {
+                "Signal" => SmoothPublished(data, context, ComputePmoFast(data, context, pmo.Length),
+                    pmo.SignalLength, pmo.MaType),
+                _ => ComputePmoFast(data, context, pmo.Length)
+            },
             KstSpecOptions kst => ComputeKstFast(data, context, kst.Length),
             PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
             ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length),
@@ -355,7 +360,14 @@ internal static partial class IndicatorCompute
 
             // Batch 3 - Volume/Power indicators
             BalanceOfPowerSpecOptions bop => ComputeBalanceOfPowerFast(data, context, bop.Length),
-            PvoSpecOptions pvo => ComputePvoFast(data, context, pvo.Length),
+            PvoSpecOptions pvo => spec.OutputKey switch
+            {
+                "Signal" => SmoothPublished(data, context, ComputePvoFast(data, context, pvo.Length, pvo.MaType),
+                    pvo.SignalLength, pvo.MaType),
+                "Histogram" => DifferenceFromSmoothing(data, context,
+                    ComputePvoFast(data, context, pvo.Length, pvo.MaType), pvo.SignalLength, pvo.MaType),
+                _ => ComputePvoFast(data, context, pvo.Length, pvo.MaType)
+            },
 
             // Batch 3 - More Oscillators
             CoppockCurveSpecOptions coppock => ComputeCoppockCurveFast(data, context, coppock.Length, coppock.MaType),
@@ -1434,12 +1446,12 @@ internal static partial class IndicatorCompute
             PercentageVolumeOscillatorSpecOptions pvo2 => spec.OutputKey switch
             {
                 "Signal" => SmoothPublished(data, context,
-                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType),
                     pvo2.SignalLength, pvo2.MaType),
                 "Histogram" => DifferenceFromSmoothing(data, context,
-                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
+                    ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType),
                     pvo2.SignalLength, pvo2.MaType),
-                _ => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength)
+                _ => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType)
             },
             PositiveVolumeIndexSpecOptions pvi2 => spec.OutputKey switch
             {
@@ -4253,18 +4265,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePvoFast(StockData data, ComputeContext context, int length = 12)
+    internal static ComputeBuffer ComputePvoFast(StockData data, ComputeContext context, int length = 12,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        OscillatorCore.PercentageVolumeOscillator(volume, buffer.WritableSpan, length);
-        return buffer;
+        // PvoSpecOptions binds its single length to the batch's fast length and leaves the slow one at its
+        // default, so this is the same oscillator seen through fewer knobs. It read the volume off the ticker
+        // list rather than the StockData's own volume series, which is the series the batch averages.
+        return ComputePercentageVolumeOscillatorFast(data, context, fastLength: length, maType: maType);
     }
 
     /// <summary>
@@ -21032,11 +21039,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percentage Volume Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePercentageVolumeOscillatorFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePercentageVolumeOscillatorFast(StockData data, ComputeContext context,
+        int fastLength = 12, int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
+        // The batch averages the volume with the average it is given, and OscillatorCore's routine takes an
+        // exponential one whatever it is asked for, so the two averages are taken here instead. An arm that
+        // kept the core call answered a request for any other average with the exponential series.
         var volumeSpan = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.PercentageVolumeOscillator(volumeSpan, buffer.WritableSpan, fastLength, slowLength);
+        var count = data.Count;
+        using var fastBuffer = context.Rent(count);
+        using var slowBuffer = context.Rent(count);
+        fastBuffer.WritableSpan.Clear();
+        slowBuffer.WritableSpan.Clear();
+        MovingAverage(data, maType, fastLength, volumeSpan, fastBuffer.WritableSpan);
+        MovingAverage(data, maType, slowLength, volumeSpan, slowBuffer.WritableSpan);
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            var slow = slowBuffer.Span[i];
+            output[i] = slow != 0 ? ((fastBuffer.Span[i] - slow) / slow) * 100 : 0;
+        }
+
         return buffer;
     }
 
