@@ -915,11 +915,22 @@ public sealed class MassIndexSpecOptions : IIndicatorSpecOptions
 public sealed class ObvSpecOptions : IIndicatorSpecOptions
 {
     public ObvSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public ObvSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -987,11 +998,22 @@ public sealed class VrocSpecOptions : IIndicatorSpecOptions
 public sealed class NviSpecOptions : IIndicatorSpecOptions
 {
     public NviSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public NviSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1000,11 +1022,22 @@ public sealed class NviSpecOptions : IIndicatorSpecOptions
 public sealed class PviSpecOptions : IIndicatorSpecOptions
 {
     public PviSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public PviSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>

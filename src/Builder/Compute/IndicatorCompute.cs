@@ -256,13 +256,25 @@ internal static partial class IndicatorCompute
             },
 
             // Volume
-            ObvSpecOptions obv => ComputeObvFast(data, context, obv.Length),
+            ObvSpecOptions obv => spec.OutputKey switch
+            {
+                "ObvSignal" => SmoothPublished(data, context, ComputeObvFast(data, context, obv.Length), obv.Length, obv.MaType),
+                _ => ComputeObvFast(data, context, obv.Length)
+            },
             AdlSpecOptions adl => ComputeAdlFast(data, context, adl.Length),
             CmfSpecOptions cmf => ComputeCmfFast(data, context, cmf.Length),
             ForceIndexSpecOptions fi => ComputeForceIndexFast(data, context, fi.Length, fi.MaType),
             VrocSpecOptions vroc => ComputeVrocFast(data, context, vroc.Length),
-            NviSpecOptions nvi => ComputeNviFast(data, context, nvi.Length),
-            PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length),
+            NviSpecOptions nvi => spec.OutputKey switch
+            {
+                "NviSignal" => SmoothPublished(data, context, ComputeNviFast(data, context, nvi.Length), nvi.Length, nvi.MaType),
+                _ => ComputeNviFast(data, context, nvi.Length)
+            },
+            PviSpecOptions pvi => spec.OutputKey switch
+            {
+                "PviSignal" => SmoothPublished(data, context, ComputePviFast(data, context, pvi.Length), pvi.Length, pvi.MaType),
+                _ => ComputePviFast(data, context, pvi.Length)
+            },
             PvtSpecOptions pvt => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt.Length, pvt.MaType),
@@ -1408,11 +1420,23 @@ internal static partial class IndicatorCompute
                 kvo2.SlowLength, kvo2.SignalLength, kvo2.MaType),
             KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2,
                 kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4, kst2.MaType),
-            NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue),
-            OnBalanceVolumeSpecOptions obv2 => ComputeOnBalanceVolumeFast(data, context),
+            NegativeVolumeIndexSpecOptions nvi2 => spec.OutputKey switch
+            {
+                "NviSignal" => SmoothPublished(data, context, ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue), nvi2.Length, nvi2.MaType),
+                _ => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue)
+            },
+            OnBalanceVolumeSpecOptions obv2 => spec.OutputKey switch
+            {
+                "ObvSignal" => SmoothPublished(data, context, ComputeOnBalanceVolumeFast(data, context), obv2.Length, obv2.MaType),
+                _ => ComputeOnBalanceVolumeFast(data, context)
+            },
             PercentagePriceOscillatorSpecOptions ppo2 => ComputePercentagePriceOscillatorFast(data, context, ppo2.FastLength, ppo2.SlowLength),
             PercentageVolumeOscillatorSpecOptions pvo2 => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength),
-            PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue),
+            PositiveVolumeIndexSpecOptions pvi2 => spec.OutputKey switch
+            {
+                "PviSignal" => SmoothPublished(data, context, ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue), pvi2.Length, pvi2.MaType),
+                _ => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue)
+            },
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
             PriceVolumeTrendSpecOptions pvt2 => spec.OutputKey switch
@@ -2951,6 +2975,27 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes On Balance Volume using zero-allocation fast path.
     /// </summary>
+    /// <summary>
+    /// Smooths a series an arm has already produced, which is the shape of most published signal lines.
+    /// </summary>
+    /// <remarks>
+    /// The caller passes the primary it computed and this takes ownership of it. Deliberately NOT a generic
+    /// lookup that fetches the primary itself: an arm which ignores the output key - the very defect these
+    /// keys have - answers a keyless request with whatever it always returns, so a mechanism built that way
+    /// smooths an already smoothed series wherever the key was right.
+    /// </remarks>
+    private static ComputeBuffer SmoothPublished(StockData data, ComputeContext context, ComputeBuffer source,
+        int length, MovingAvgType maType)
+    {
+        using (source)
+        {
+            var buffer = context.Rent(source.Span.Length);
+            buffer.WritableSpan.Clear();
+            MovingAverage(data, maType, length, source.Span, buffer.WritableSpan);
+            return buffer;
+        }
+    }
+
     internal static ComputeBuffer ComputeObvFast(StockData data, ComputeContext context, int length = 14)
     {
         _ = length;
