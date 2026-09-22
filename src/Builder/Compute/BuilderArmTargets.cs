@@ -575,7 +575,7 @@ internal static class BuilderArmTargets
         [typeof(PriceMomentumSpecOptions)] = new(IndicatorName.PriceMomentum),
         [typeof(PriceLineChannelSpecOptions)] = new(IndicatorName.PriceLineChannel, "MiddleBand"),
         [typeof(PriceMomentumOscillatorSpecOptions)] = new(IndicatorName.PriceMomentumOscillator),
-        [typeof(PriceOscillatorPercentSpecOptions)] = new(IndicatorName.PercentagePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength")),
+        [typeof(PriceOscillatorPercentSpecOptions)] = new(IndicatorName.PercentagePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength"), new BuilderArgument("SignalLength", "signalLength")),
         [typeof(PriceOscillatorSpecOptions)] = new(IndicatorName.AbsolutePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength")),
         [typeof(PricePositionSpecOptions)] = new(IndicatorName.StochasticOscillator),
         [typeof(PriceVolumeOscillatorSpecOptions)] = new(IndicatorName.PriceVolumeOscillator, "Po",

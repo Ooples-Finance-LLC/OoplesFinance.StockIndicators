@@ -221,7 +221,13 @@ internal static partial class IndicatorCompute
             WilliamsRSpecOptions willr => ComputeWilliamsRFast(data, context, willr.Length),
             CciSpecOptions cci => ComputeCciFast(data, context, cci.Length),
             CmoSpecOptions cmo => ComputeCmoFast(data, context, cmo.Length),
-            PpoSpecOptions ppo => ComputePpoFast(data, context, ppo.FastLength, ppo.SlowLength),
+            PpoSpecOptions ppo => ComputePpoFast(data, context, ppo.FastLength, ppo.SlowLength, ppo.MaType,
+                ppo.SignalLength, spec.OutputKey switch
+                {
+                    "Signal" => MacdSeries.Signal,
+                    "Histogram" => MacdSeries.Histogram,
+                    _ => MacdSeries.Line
+                }),
             ApoSpecOptions apo => ComputeApoFast(data, context, apo.FastLength, apo.SlowLength, apo.MaType),
             UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
             TsiSpecOptions tsi => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType),
@@ -543,7 +549,14 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Smoothed oscillators
             SmoothedWilliamsRSpecOptions swillr => ComputeSmoothedWilliamsRFast(data, context, swillr.Length, swillr.SmoothLength),
-            PriceOscillatorPercentSpecOptions pop => ComputePriceOscillatorPercentFast(data, context, pop.ShortLength, pop.LongLength),
+            // Bound to the same batch as PpoSpecOptions, so it is the same three series.
+            PriceOscillatorPercentSpecOptions pop => ComputePpoFast(data, context, pop.ShortLength, pop.LongLength,
+                pop.MaType, pop.SignalLength, spec.OutputKey switch
+                {
+                    "Signal" => MacdSeries.Signal,
+                    "Histogram" => MacdSeries.Histogram,
+                    _ => MacdSeries.Line
+                }),
             NormalizedMacdSpecOptions nmacd => ComputeNormalizedMacdFast(data, context, nmacd.FastLength, nmacd.SlowLength),
             RelativeVigorIndexSignalSpecOptions rvis => ComputeRelativeVigorIndexSignalFast(data, context, rvis.Length),
             VolumeMomentumOscillatorSpecOptions vmo => ComputeVolumeMomentumOscillatorFast(data, context, vmo.ShortLength, vmo.LongLength),
@@ -2622,13 +2635,52 @@ internal static partial class IndicatorCompute
     /// Computes Percentage Price Oscillator using zero-allocation fast path.
     /// Uses OscillatorCore with span-based computation directly into pooled buffer.
     /// </summary>
-    internal static ComputeBuffer ComputePpoFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
+    internal static ComputeBuffer ComputePpoFast(StockData data, ComputeContext context, int fastLength = 12,
+        int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int signalLength = 9,
+        MacdSeries series = MacdSeries.Line)
     {
+        // CalculatePercentagePriceOscillator is the gap between two averages of the chained series as a
+        // percentage of the slower one, smoothed again over signalLength for its Signal and differenced
+        // against that for its Histogram. Only the oscillator was produced, so both other keys carried it,
+        // and neither signalLength nor maType reached the arm - OscillatorCore's routine takes neither.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = inputList.Count;
 
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.PercentagePriceOscillator(inputSpan, buffer.WritableSpan, fastLength, slowLength);
+        using var fast = context.Rent(count);
+        using var slow = context.Rent(count);
+        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+
+        using var oscillator = context.Rent(count);
+        var osc = oscillator.WritableSpan;
+        for (var i = 0; i < count; i++)
+        {
+            osc[i] = slow.Span[i] != 0 ? 100 * (fast.Span[i] - slow.Span[i]) / slow.Span[i] : 0;
+        }
+
+        var buffer = context.Rent(count);
+        var output = buffer.WritableSpan;
+
+        if (series == MacdSeries.Line)
+        {
+            oscillator.Span.CopyTo(output);
+            return buffer;
+        }
+
+        using var signalLine = context.Rent(count);
+        MovingAverage(data, maType, signalLength, oscillator.Span, signalLine.WritableSpan);
+
+        if (series == MacdSeries.Signal)
+        {
+            signalLine.Span.CopyTo(output);
+            return buffer;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            output[i] = oscillator.Span[i] - signalLine.Span[i];
+        }
 
         return buffer;
     }

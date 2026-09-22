@@ -736,15 +736,26 @@ public sealed class PpoSpecOptions : IIndicatorSpecOptions
     }
 
     public PpoSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
+        : this(fastLength, slowLength, maType, 9)
+    {
+    }
+
+    // The batch smooths the oscillator again for its Signal key and differences the two for its Histogram.
+    // Carrying no signal length left both out of the arm's reach.
+    public PpoSpecOptions(int fastLength, int slowLength, MovingAvgType maType, int signalLength)
     {
         FastLength = Math.Max(1, fastLength);
         SlowLength = Math.Max(1, slowLength);
         MaType = maType;
+        SignalLength = Math.Max(1, signalLength);
     }
 
     public int FastLength { get; }
     public int SlowLength { get; }
     public MovingAvgType MaType { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
 }
 
 /// <summary>
@@ -3591,13 +3602,28 @@ public sealed class SmoothedWilliamsRSpecOptions : IIndicatorSpecOptions
 public sealed class PriceOscillatorPercentSpecOptions : IIndicatorSpecOptions
 {
     public PriceOscillatorPercentSpecOptions(int shortLength = 10, int longLength = 20)
+        : this(shortLength, longLength, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the same batch as PpoSpecOptions, which takes a signal length and an average; this carried
+    // neither, so its Signal and Histogram keys could not be served.
+    public PriceOscillatorPercentSpecOptions(int shortLength, int longLength, int signalLength, MovingAvgType maType)
     {
         ShortLength = Math.Max(1, shortLength);
         LongLength = Math.Max(1, longLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int ShortLength { get; }
     public int LongLength { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average the oscillator and its signal line are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
