@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Builder.Specs;
+using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Enums;
 
 // The table still names specs that are obsolete, so that a caller holding one keeps computing until the spec
@@ -575,7 +575,7 @@ internal static class BuilderArmTargets
         [typeof(PriceMomentumSpecOptions)] = new(IndicatorName.PriceMomentum),
         [typeof(PriceLineChannelSpecOptions)] = new(IndicatorName.PriceLineChannel, "MiddleBand"),
         [typeof(PriceMomentumOscillatorSpecOptions)] = new(IndicatorName.PriceMomentumOscillator),
-        [typeof(PriceOscillatorPercentSpecOptions)] = new(IndicatorName.PercentagePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength")),
+        [typeof(PriceOscillatorPercentSpecOptions)] = new(IndicatorName.PercentagePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength"), new BuilderArgument("SignalLength", "signalLength")),
         [typeof(PriceOscillatorSpecOptions)] = new(IndicatorName.AbsolutePriceOscillator, null, new BuilderArgument("ShortLength", "fastLength"), new BuilderArgument("LongLength", "slowLength")),
         [typeof(PricePositionSpecOptions)] = new(IndicatorName.StochasticOscillator),
         [typeof(PriceVolumeOscillatorSpecOptions)] = new(IndicatorName.PriceVolumeOscillator, "Po",
@@ -788,7 +788,9 @@ internal static class BuilderArmTargets
         [typeof(VaradiOscillatorSpecOptions)] = new(IndicatorName.VaradiOscillator),
         [typeof(VariableAdaptiveMovingAverageSpecOptions)] = new(IndicatorName.VariableAdaptiveMovingAverage),
         [typeof(VariableIndexDynamicAverageSpecOptions)] = new(IndicatorName.VariableIndexDynamicAverage),
-        [typeof(VariableLengthMovingAverageSpecOptions)] = new(IndicatorName.VariableLengthMovingAverage, null, new BuilderArgument("Length", "minLength"), new BuilderArgument("Length", "maxLength", v => v is int n ? n * 2 : v)),
+        // The upper bound was bound as twice the lower one, matching an arm that invented it that way, so
+        // this comparison agreed with the arm rather than with the batch. The options carry both bounds now.
+        [typeof(VariableLengthMovingAverageSpecOptions)] = new(IndicatorName.VariableLengthMovingAverage, null, new BuilderArgument("Length", "minLength"), new BuilderArgument("MaxLength", "maxLength")),
         [typeof(VariableMovingAverageBandsSpecOptions)] = new(IndicatorName.VariableMovingAverageBands, "MiddleBand"),
         [typeof(VarianceSpecOptions)] = new(IndicatorName.Variance),
         [typeof(VerticalHorizontalFilterSpecOptions)] = new(IndicatorName.VerticalHorizontalFilter),

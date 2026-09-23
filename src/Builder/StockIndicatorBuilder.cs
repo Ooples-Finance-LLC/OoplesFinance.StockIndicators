@@ -303,7 +303,7 @@ public sealed class StockIndicatorBuilder
             return (StreamingIndicatorFactory.CreateState(spec),
                 GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName));
         },
-        computeWithAverage: (indicator, average) =>
+        computeWithAverage: (indicator, averages) =>
         {
             // The indicator's own calculation, unchanged, with the one average it asks for answered by the
             // caller's series instead of by a MovingAvgType. Nothing is re-implemented, so the only way this
@@ -318,7 +318,7 @@ public sealed class StockIndicatorBuilder
             // The component was computed over the closes, so it may only stand in for an average the
             // indicator takes over those same closes - not over a true range or any other series it
             // derived, where it would be answering a different question.
-            using (ComponentAverage.Arm(average))
+            using (ComponentAverage.Arm(averages))
             {
                 var buffer = IndicatorCompute.TryComputeFast(batch, spec, context);
                 if (buffer is null)
@@ -329,10 +329,14 @@ public sealed class StockIndicatorBuilder
                 using (buffer.Value)
                 {
                     // Exact only when the indicator asked for one average and that one was the caller's.
+                    // Every average the calculation asked for was answered by one the caller supplied.
+                    // The periods no longer have to match: each request takes its own component, so an
+                    // indicator that smooths at two periods is handed two averages rather than one used
+                    // twice - which is what made a difference of averages collapse to zero.
                     var exact = ComponentAverage.Requests > 0
-                        && ComponentAverage.Substitutions == ComponentAverage.Requests
-                        && !ComponentAverage.MixedLengths;
+                        && ComponentAverage.Substitutions == ComponentAverage.Requests;
                     LastAverageLength = ComponentAverage.LengthAsked;
+                    LastAverageRequests = ComponentAverage.Requests;
                     return (exact ? [buffer.Value.Span.ToArray()] : null, ComponentAverage.Requests);
                 }
             }
@@ -416,6 +420,12 @@ public sealed class StockIndicatorBuilder
     /// <summary>Walks an indicator's components and chained source, depth first, without repeating one.</summary>
     /// <summary>The period the last substituted average was asked for, so a test can mirror it exactly.</summary>
     internal static int LastAverageLength { get; set; }
+
+    /// <summary>
+    /// How many averages the last substitution answered, so a test can tell whether comparing against the
+    /// named form is a fair question: one MovingAvgType applies to all of them, one IMovingAverage does not.
+    /// </summary>
+    internal static int LastAverageRequests { get; set; }
 
     /// <summary>Whether a built-in asked for something the evaluator has no way to give it.</summary>
     private static bool NeedsGraph(Indicators.IIndicator indicator)

@@ -1,4 +1,4 @@
-﻿using OoplesFinance.StockIndicators.Enums;
+using OoplesFinance.StockIndicators.Enums;
 
 namespace OoplesFinance.StockIndicators.Builder.Specs;
 
@@ -736,15 +736,26 @@ public sealed class PpoSpecOptions : IIndicatorSpecOptions
     }
 
     public PpoSpecOptions(int fastLength, int slowLength, MovingAvgType maType)
+        : this(fastLength, slowLength, maType, 9)
+    {
+    }
+
+    // The batch smooths the oscillator again for its Signal key and differences the two for its Histogram.
+    // Carrying no signal length left both out of the arm's reach.
+    public PpoSpecOptions(int fastLength, int slowLength, MovingAvgType maType, int signalLength)
     {
         FastLength = Math.Max(1, fastLength);
         SlowLength = Math.Max(1, slowLength);
         MaType = maType;
+        SignalLength = Math.Max(1, signalLength);
     }
 
     public int FastLength { get; }
     public int SlowLength { get; }
     public MovingAvgType MaType { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
 }
 
 /// <summary>
@@ -904,11 +915,22 @@ public sealed class MassIndexSpecOptions : IIndicatorSpecOptions
 public sealed class ObvSpecOptions : IIndicatorSpecOptions
 {
     public ObvSpecOptions(int length = 14)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public ObvSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -976,11 +998,22 @@ public sealed class VrocSpecOptions : IIndicatorSpecOptions
 public sealed class NviSpecOptions : IIndicatorSpecOptions
 {
     public NviSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public NviSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -989,11 +1022,22 @@ public sealed class NviSpecOptions : IIndicatorSpecOptions
 public sealed class PviSpecOptions : IIndicatorSpecOptions
 {
     public PviSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths its own series by this length for the signal key it publishes beside it, with
+    // whichever average it was given; carrying none left that key unservable.
+    public PviSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths its series with for the signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1002,11 +1046,22 @@ public sealed class PviSpecOptions : IIndicatorSpecOptions
 public sealed class PvtSpecOptions : IIndicatorSpecOptions
 {
     public PvtSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the price volume trend batch, whose Signal key is the trend smoothed by this length with
+    // whichever average it was given. Carrying no average left that key out of reach.
+    public PvtSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths the trend with for its signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1300,11 +1355,30 @@ public sealed class AcceleratorOscillatorSpecOptions : IIndicatorSpecOptions
 public sealed class StochasticKSpecOptions : IIndicatorSpecOptions
 {
     public StochasticKSpecOptions(int length)
+        : this(length, 3, 3, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    // Bound to the stochastic oscillator batch, which smooths its raw series once for FastD and again for
+    // SlowD. Carrying only a length left both keys out of reach.
+    public StochasticKSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths its raw stochastic by for FastD.</summary>
+    public int SmoothLength1 { get; }
+
+    /// <summary>The length it smooths that again by for SlowD.</summary>
+    public int SmoothLength2 { get; }
+
+    /// <summary>The average both smoothings are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -1343,14 +1417,19 @@ public sealed class PmoSpecOptions : IIndicatorSpecOptions
     {
     }
 
-    public PmoSpecOptions(int length, MovingAvgType maType)
+    // signalLength is the length the batch smooths the oscillator by for the Signal key it publishes beside it.
+    public PmoSpecOptions(int length, MovingAvgType maType, int signalLength = 10)
     {
         Length = Math.Max(1, length);
         MaType = maType;
+        SignalLength = Math.Max(1, signalLength);
     }
 
     public int Length { get; }
     public MovingAvgType MaType { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
 }
 
 /// <summary>
@@ -1691,11 +1770,28 @@ public sealed class RviSpecOptions : IIndicatorSpecOptions
 public sealed class PvoSpecOptions : IIndicatorSpecOptions
 {
     public PvoSpecOptions(int length)
+        : this(length, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // The batch smooths the oscillator by a signal length for its Signal key, differences the two for its
+    // Histogram, and averages the volume with the average it is given. Carrying none of that put all three
+    // out of reach, so the arm answered every key with the oscillator itself.
+    public PvoSpecOptions(int length, int signalLength = 9,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average the volume and the signal line are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -2968,11 +3064,22 @@ public sealed class CumulativeVolumeIndexSpecOptions : IIndicatorSpecOptions
 public sealed class VolumePriceTrendSpecOptions : IIndicatorSpecOptions
 {
     public VolumePriceTrendSpecOptions(int length)
+        : this(length, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the price volume trend batch, whose Signal key is the trend smoothed by this length with
+    // whichever average it was given. Carrying no average left that key out of reach.
+    public VolumePriceTrendSpecOptions(int length, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The average the batch smooths the trend with for its signal line.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -3591,13 +3698,28 @@ public sealed class SmoothedWilliamsRSpecOptions : IIndicatorSpecOptions
 public sealed class PriceOscillatorPercentSpecOptions : IIndicatorSpecOptions
 {
     public PriceOscillatorPercentSpecOptions(int shortLength = 10, int longLength = 20)
+        : this(shortLength, longLength, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    // Bound to the same batch as PpoSpecOptions, which takes a signal length and an average; this carried
+    // neither, so its Signal and Histogram keys could not be served.
+    public PriceOscillatorPercentSpecOptions(int shortLength, int longLength, int signalLength, MovingAvgType maType)
     {
         ShortLength = Math.Max(1, shortLength);
         LongLength = Math.Max(1, longLength);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int ShortLength { get; }
     public int LongLength { get; }
+
+    /// <summary>The length the batch smooths the oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average the oscillator and its signal line are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4020,11 +4142,30 @@ public sealed class RollingMinSpecOptions : IIndicatorSpecOptions
 public sealed class PricePositionSpecOptions : IIndicatorSpecOptions
 {
     public PricePositionSpecOptions(int length)
+        : this(length, 3, 3, MovingAvgType.SimpleMovingAverage)
+    {
+    }
+
+    // Bound to the stochastic oscillator batch, which smooths its raw series once for FastD and again for
+    // SlowD. Carrying only a length left both keys out of reach.
+    public PricePositionSpecOptions(int length, int smoothLength1, int smoothLength2, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SmoothLength1 = Math.Max(1, smoothLength1);
+        SmoothLength2 = Math.Max(1, smoothLength2);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths its raw stochastic by for FastD.</summary>
+    public int SmoothLength1 { get; }
+
+    /// <summary>The length it smooths that again by for SlowD.</summary>
+    public int SmoothLength2 { get; }
+
+    /// <summary>The average both smoothings are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -4627,12 +4768,27 @@ public sealed class MidpointOscillatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class MirroredPercentagePriceOscillatorSpecOptions : IIndicatorSpecOptions
 {
+    // The batch smooths each oscillator again for its Signal key and takes whichever average it was given.
+    // Carrying only the length left both out of reach of the arm.
     public MirroredPercentagePriceOscillatorSpecOptions(int length)
+        : this(length, 9, MovingAvgType.ExponentialMovingAverage)
+    {
+    }
+
+    public MirroredPercentagePriceOscillatorSpecOptions(int length, int signalLength, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        SignalLength = Math.Max(1, signalLength);
+        MaType = maType;
     }
 
     public int Length { get; }
+
+    /// <summary>The length the batch smooths each oscillator by for its signal line.</summary>
+    public int SignalLength { get; }
+
+    /// <summary>The average both oscillators and both signal lines are taken with.</summary>
+    public MovingAvgType MaType { get; }
 }
 
 /// <summary>
@@ -7538,16 +7694,28 @@ public sealed class VariableAdaptiveMovingAverageSpecOptions : IIndicatorSpecOpt
 /// </summary>
 public sealed class VariableLengthMovingAverageSpecOptions : IIndicatorSpecOptions
 {
+    // The batch walks its smoothing length between TWO bounds. Carrying only one of them left the arm to
+    // invent the other as twice the first, so the default upper bound was 10 where the batch uses 50 - and
+    // the length-50 average the decision reads was a length-10 average instead.
     public VariableLengthMovingAverageSpecOptions(int length)
-        : this(length, MovingAvgType.SimpleMovingAverage)
+        : this(length, 50, MovingAvgType.SimpleMovingAverage)
     {
     }
 
     public VariableLengthMovingAverageSpecOptions(int length, MovingAvgType maType)
+        : this(length, 50, maType)
+    {
+    }
+
+    public VariableLengthMovingAverageSpecOptions(int length, int maxLength, MovingAvgType maType)
     {
         Length = Math.Max(1, length);
+        MaxLength = Math.Max(Math.Max(1, maxLength), Length);
         MaType = maType;
     }
+
+    /// <summary>The upper bound the smoothing length may walk up to.</summary>
+    public int MaxLength { get; }
 
     public int Length { get; }
     public MovingAvgType MaType { get; }

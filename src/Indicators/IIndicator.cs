@@ -95,6 +95,32 @@ public interface IMultiOutputIndicator : IIndicator
 }
 
 /// <summary>
+/// An indicator that names which of its outputs stands for it.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Separate from <see cref="IMultiOutputIndicator"/> so that adding it cannot break a type outside this
+/// library that already implements that one: an indicator which does not name a primary is resolved
+/// through <c>Outputs[0]</c> as before.
+/// </para>
+/// </remarks>
+public interface IPrimaryOutputIndicator
+{
+    /// <summary>
+    /// The series this indicator is named for, used wherever one of its outputs has to stand for it.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="IIndicator.Outputs"/> is in the order the batch publishes its keys, which does not always
+    /// put the indicator's own value first - Kaufman's adaptive average publishes its efficiency ratio ahead
+    /// of the average, and the average directional index publishes both directional indicators ahead of the
+    /// index. Resolving <c>run[indicator]</c> through this rather than through <c>Outputs[0]</c> is what stops
+    /// it handing back a diagnostic series in place of the indicator.
+    /// </remarks>
+    IIndicatorOutput PrimaryOutput { get; }
+}
+
+
+/// <summary>
 /// An indicator usable wherever an average of a series is called for.
 /// </summary>
 /// <remarks>
