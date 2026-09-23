@@ -378,6 +378,13 @@ public sealed class StockIndicatorBuilder
             CollectReachable(indicator, seen, reachable);
         }
 
+        // The live factory cannot represent independently configured average stages.
+        var unsupportedStages = reachable.FirstOrDefault(indicator => indicator is Indicators.IBuiltInIndicator
+            && indicator.Components.Count > 1);
+        if (unsupportedStages is not null)
+            throw new NotSupportedException(unsupportedStages.GetType().Name
+                + " has separately configured average stages. Use a finite source for component substitution.");
+
         var states = new Dictionary<Indicators.IIndicator, object>(Indicators.IndicatorIdentity.Comparer);
         var outputKeys = new Dictionary<Indicators.IIndicator, IReadOnlyList<string>>(
             Indicators.IndicatorIdentity.Comparer);
@@ -435,6 +442,8 @@ public sealed class StockIndicatorBuilder
         {
             return true;
         }
+
+        if (indicator.Components.Count > 1) return true;
 
         // Uses() - a component that is not one of ours collapses to nothing in CreateOptions, because the
         // options types name a smoother by MovingAvgType and a caller's own type has no member there.

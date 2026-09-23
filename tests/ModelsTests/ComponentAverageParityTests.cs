@@ -84,6 +84,34 @@ public sealed class ComponentAverageParityTests
             "a difference of two different averages is not identically zero");
     }
 
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ConfiguredStagesRetainTheirOrderAndPeriods(bool builtInFirst, bool builtInSecond)
+    {
+        var bars = Walk();
+        // Deliberately different from AO defaults: ignoring either period must fail.
+        IMovingAverage first = builtInFirst ? new Sma(3) : new MirrorSma(3);
+        IMovingAverage second = builtInSecond ? new Sma(11) : new MirrorSma(11);
+        var actual = Run(new AwesomeOscillator(5, first, second), bars)!;
+        var expected = Run(new AwesomeOscillator(5, new MirrorSma(3), new MirrorSma(11)), bars)!;
+        actual.Should().Equal(expected, (a, e) => Math.Abs(a - e) <= 1e-8);
+        actual.Skip(40).Should().Contain(v => Math.Abs(v) > 1e-9);
+    }
+
+    [Fact]
+    public async Task LiveSourceRejectsStagesItCannotRepresent()
+    {
+        var feed = Bars.Live();
+        var builder = new StockIndicatorBuilder().ConfigureSource(feed)
+            .ConfigureIndicators(new AwesomeOscillator(5, new Sma(3), new Sma(11)));
+        Func<Task> build = async () => { using var run = await builder.BuildAsync(); };
+        await build.Should().ThrowAsync<NotSupportedException>()
+            .WithMessage("*separately configured average stages*");
+        feed.Complete();
+    }
+
     [Fact]
     public void SubstitutingAnAverageComputesWhatNamingItComputes()
     {
@@ -167,10 +195,11 @@ public sealed class ComponentAverageParityTests
                     continue;
                 }
 
-                if (asked > 0 && asked != length)
-                {
-                    substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(asked))), bars);
-                }
+                var matchedLength = asked > 0 ? asked : length;
+                substituted = Run((IIndicator)ctor.Invoke(Args(new MirrorSma(matchedLength))), bars);
+                // Multiple configured built-in stages now retain their periods too. Comparing
+                // Sma(20) with MirrorSma(matchedLength) would test different configurations.
+                baseline = Run((IIndicator)ctor.Invoke(Args(new Sma(matchedLength))), bars);
             }
             catch (NotSupportedException)
             {
