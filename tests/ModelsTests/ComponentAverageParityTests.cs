@@ -101,6 +101,12 @@ public sealed class ComponentAverageParityTests
     }
 
     [Fact]
+    public void AnExtraAverageCannotSilentlyReplaceAnOmittedPrecedingStage()
+    {
+        Assert.Throws<ArgumentException>(() => new AwesomeOscillator(5, null, new Sma(13)));
+    }
+
+    [Fact]
     public async Task LiveSourceRejectsStagesItCannotRepresent()
     {
         var feed = Bars.Live();
