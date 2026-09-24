@@ -98,6 +98,21 @@ def campaign_complete(entries, results):
             all(result["disposition"] == "killed" for result in results))
 
 
+def select_shard(entries, index, count):
+    if index is None and count is None:
+        return entries
+    if index is None or count is None or not 1 <= count <= len(entries) or not 0 <= index < count:
+        raise ValueError("Supply a valid zero-based shard index and a count no larger than the manifest.")
+    return entries[index::count]
+
+
+def shard_matrix(entries):
+    count = (len(entries) + 9) // 10
+    if not 1 <= count <= 256:
+        raise ValueError("The manifest must fit GitHub's matrix limit with ten faults per shard.")
+    return {"include": [{"shard": index, "count": count} for index in range(count)]}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="artifacts/correctness/mutations")
@@ -105,19 +120,27 @@ def main():
     parser.add_argument("--baseline-timeout", type=int, default=1800,
                         help="Seconds for the initial build and union of all selected test filters.")
     parser.add_argument("--only", nargs="+", help="Run selected faults; a subset cannot satisfy the full release gate.")
+    parser.add_argument("--shard-index", type=int)
+    parser.add_argument("--shard-count", type=int)
+    parser.add_argument("--list-shards", action="store_true", help="Print the complete CI matrix without executing tests.")
     args = parser.parse_args()
     if args.timeout <= 0 or args.baseline_timeout <= 0:
         raise ValueError("The per-run timeout must be positive.")
     repo = Path(__file__).resolve().parent.parent
-    output = Path(args.output).resolve()
-    if output.exists() and any(output.iterdir()):
-        raise ValueError("Use a new output directory so stale test results cannot satisfy the gate.")
-    output.mkdir(parents=True, exist_ok=True)
     entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8"))
     if not entries or len({m["id"] for m in entries}) != len(entries):
         raise ValueError("Critical faults must be nonempty and uniquely named.")
     all_entries = entries
-    entries = select_entries(all_entries, args.only)
+    if args.list_shards:
+        print(json.dumps(shard_matrix(all_entries)))
+        return 0
+    if args.only is not None and (args.shard_index is not None or args.shard_count is not None):
+        raise ValueError("Do not combine a selected subset with CI sharding.")
+    entries = select_shard(select_entries(all_entries, args.only), args.shard_index, args.shard_count)
+    output = Path(args.output).resolve()
+    if output.exists() and any(output.iterdir()):
+        raise ValueError("Use a new output directory so stale test results cannot satisfy the gate.")
+    output.mkdir(parents=True, exist_ok=True)
     paths = sorted(set(p for p in subprocess.check_output(
         ["git", "ls-files", "-c", "-o", "--exclude-standard", "-z"], cwd=repo).decode("utf-8").split("\0") if p))
     temp_root = Path(tempfile.gettempdir()).resolve()
