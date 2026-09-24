@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <EmbeddedResource Include="ValidationTests/FormulaReferenceBacklog.txt" LogicalName="FormulaReferenceBacklog.txt" />
+    <EmbeddedResource Include="ValidationTests/NumericalFixtureBacklog.txt" LogicalName="NumericalFixtureBacklog.txt" />
     <EmbeddedResource Include="ValidationTests/CatalogFormulaBacklog.txt" LogicalName="CatalogFormulaBacklog.txt" />
   </ItemGroup>
 

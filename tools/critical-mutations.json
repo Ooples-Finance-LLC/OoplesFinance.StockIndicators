@@ -309,9 +309,10 @@
     "id": "customer-numerical-fixtures-bypass",
     "module": "validation",
     "file": "src/Validation/IndicatorValidation.cs",
-    "before": "includeNumericalExtremes = checkCustomerReset ||",
-    "after": "includeNumericalExtremes = false ||",
-    "filter": "FullyQualifiedName~CustomerDiscoveryAutomaticallyDetectsErasedTinyInputs"
+    "before": "var includeNumericalExtremes = CustomerStateValidation.RequiresCheck(probe) ||",
+    "after": "var includeNumericalExtremes = false ||",
+    "filter": "FullyQualifiedName~CustomerDiscoveryAutomaticallyDetectsErasedTinyInputs",
+    "scope": "internal static bool IncludesNumericalFixtures("
   },
   {
     "id": "rational-reference-ties-away-from-even",
@@ -2138,5 +2139,14 @@
     "before": "var gto = prevHighest2 > prevHighest1 && highest > prevHighest1 ? 1",
     "after": "var gto = prevHighest2 >= prevHighest1 && highest >= prevHighest1 ? 1",
     "filter": "FullyQualifiedName~GannNumericalTests.SimultaneousReversalsPreferHighAndExactTiesRetainState"
+  },
+  {
+    "id": "numerical-enrollment-removes-completed-family",
+    "module": "validation-coverage",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "scope": "internal static bool IncludesNumericalFixtures(",
+    "before": " or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator",
+    "after": "",
+    "filter": "FullyQualifiedName~NumericalEnrollmentCoverageTests.MissingNumericalConfigurationsCannotGrowOrHideCompletedWork"
   }
 ]

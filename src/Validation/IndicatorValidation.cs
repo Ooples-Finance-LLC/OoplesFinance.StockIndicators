@@ -155,37 +155,7 @@ public static class IndicatorValidation
             volumeDifferenceOverflow = probe is VolumeMomentum;
             rangeOverflow = probe is IBuiltInIndicator rangeIndicator && rangeIndicator.BatchName is IndicatorName.Range or IndicatorName.TrueRange;
             includeWilliamsOverflowFixtures = probe is IBuiltInIndicator williams && williams.BatchName == IndicatorName.WilliamsR;
-            includeNumericalExtremes = checkCustomerReset || probe is IBuiltInIndicator builtIn && builtIn.BatchName is
-                IndicatorName.SimpleMovingAverage or IndicatorName.ExponentialMovingAverage or IndicatorName.StandardDeviation
-                or IndicatorName.WellesWilderMovingAverage or IndicatorName.JsaMovingAverage or IndicatorName.VariableIndexDynamicAverage
-                or IndicatorName.ChandeMomentumOscillatorAbsolute
-                or IndicatorName.DiNapoliPreferredStochasticOscillator or IndicatorName.WilliamsR or IndicatorName.RateOfChange or IndicatorName.VolumeRateOfChange or IndicatorName.MarketFacilitationIndex or IndicatorName.PriceMomentum or IndicatorName.VolumeMomentum or IndicatorName.Range or IndicatorName.TrueRange or IndicatorName.NetVolume or IndicatorName.NormalizedVolume or IndicatorName.SimpleReturns or IndicatorName.CumulativeSum or IndicatorName.CumulativeVolumeIndex or IndicatorName.VolumeZoneOscillator or IndicatorName.AverageDayRange or IndicatorName.MoneyFlowIndex or IndicatorName.MoveTracker or IndicatorName.LogReturns
-                or IndicatorName.ChandeMomentumOscillatorAverage or IndicatorName.ChandeMomentumOscillatorAbsoluteAverage
-                or IndicatorName.EhlersHannMovingAverage or IndicatorName.SineWeightedMovingAverage or IndicatorName.NaturalMovingAverage or IndicatorName.DistanceWeightedMovingAverage or IndicatorName.InverseDistanceWeightedMovingAverage or IndicatorName.FareySequenceWeightedMovingAverage or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice
-                or IndicatorName.ParabolicWeightedMovingAverage or IndicatorName.CubedWeightedMovingAverage or IndicatorName.QuickMovingAverage or IndicatorName.FibonacciWeightedMovingAverage or IndicatorName.SquareRootWeightedMovingAverage
-                or IndicatorName.SymmetricallyWeightedMovingAverage or IndicatorName.EhlersTriangleMovingAverage
-                or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
-                or IndicatorName.MedianValue or IndicatorName.Trimean
-                or IndicatorName.AroonUp or IndicatorName.AroonDown or IndicatorName.AroonOscillator
-                or IndicatorName.PsychologicalLine or IndicatorName.ChandeTrendScore
-                or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier or IndicatorName.WilliamsFractals or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator
-                        or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan
-                or IndicatorName.WeightedMovingAverage or IndicatorName.LinearWeightedMovingAverage or IndicatorName.SimplifiedWeightedMovingAverage or IndicatorName.AveragePrice or IndicatorName.MedianPrice
-                or IndicatorName.TypicalPrice or IndicatorName.FullTypicalPrice or IndicatorName.WeightedClose;
-            includeNumericalExtremes |= probe is IBuiltInIndicator volumeIndicator && (BuiltInFormulaReferences.HasSimpleVolumeMean(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedTriangularMean(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedChande(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedFilteredChande(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedEnvelope(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedPriceChannel(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedObv(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedHighLowIndex(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedBalanceOfPower(volumeIndicator)
-                || BuiltInFormulaReferences.HasRoundedMomentum(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedStochastic(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedSequentialMean(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedMiddleMean(volumeIndicator)
-                || BuiltInFormulaReferences.HasBoundedSlowMean(volumeIndicator));
+            includeNumericalExtremes = IncludesNumericalFixtures(probe);
             inputDomain = IndicatorInputDomain.For(probe);
             warmup = probe.WarmupBars;
             startupPolicies = probe.Outputs.Select(output => probe is IIndicatorStartupContract startup
@@ -494,5 +464,42 @@ public static class IndicatorValidation
         internal static readonly IndicatorReferenceComparer Instance = new();
         public bool Equals(IIndicator? x, IIndicator? y) => ReferenceEquals(x, y);
         public int GetHashCode(IIndicator obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+    }
+
+    // Shared by execution and the per-configuration migration backlog check.
+    internal static bool IncludesNumericalFixtures(IIndicator probe)
+    {
+        var includeNumericalExtremes = CustomerStateValidation.RequiresCheck(probe) || probe is IBuiltInIndicator builtIn && builtIn.BatchName is
+            IndicatorName.SimpleMovingAverage or IndicatorName.ExponentialMovingAverage or IndicatorName.StandardDeviation
+            or IndicatorName.WellesWilderMovingAverage or IndicatorName.JsaMovingAverage or IndicatorName.VariableIndexDynamicAverage
+            or IndicatorName.ChandeMomentumOscillatorAbsolute
+            or IndicatorName.DiNapoliPreferredStochasticOscillator or IndicatorName.WilliamsR or IndicatorName.RateOfChange or IndicatorName.VolumeRateOfChange or IndicatorName.MarketFacilitationIndex or IndicatorName.PriceMomentum or IndicatorName.VolumeMomentum or IndicatorName.Range or IndicatorName.TrueRange or IndicatorName.NetVolume or IndicatorName.NormalizedVolume or IndicatorName.SimpleReturns or IndicatorName.CumulativeSum or IndicatorName.CumulativeVolumeIndex or IndicatorName.VolumeZoneOscillator or IndicatorName.AverageDayRange or IndicatorName.MoneyFlowIndex or IndicatorName.MoveTracker or IndicatorName.LogReturns
+            or IndicatorName.ChandeMomentumOscillatorAverage or IndicatorName.ChandeMomentumOscillatorAbsoluteAverage
+            or IndicatorName.EhlersHannMovingAverage or IndicatorName.SineWeightedMovingAverage or IndicatorName.NaturalMovingAverage or IndicatorName.DistanceWeightedMovingAverage or IndicatorName.InverseDistanceWeightedMovingAverage or IndicatorName.FareySequenceWeightedMovingAverage or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice
+            or IndicatorName.ParabolicWeightedMovingAverage or IndicatorName.CubedWeightedMovingAverage or IndicatorName.QuickMovingAverage or IndicatorName.FibonacciWeightedMovingAverage or IndicatorName.SquareRootWeightedMovingAverage
+            or IndicatorName.SymmetricallyWeightedMovingAverage or IndicatorName.EhlersTriangleMovingAverage
+            or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
+            or IndicatorName.MedianValue or IndicatorName.Trimean
+            or IndicatorName.AroonUp or IndicatorName.AroonDown or IndicatorName.AroonOscillator
+            or IndicatorName.PsychologicalLine or IndicatorName.ChandeTrendScore
+            or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier or IndicatorName.WilliamsFractals or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator
+            or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan
+            or IndicatorName.WeightedMovingAverage or IndicatorName.LinearWeightedMovingAverage or IndicatorName.SimplifiedWeightedMovingAverage or IndicatorName.AveragePrice or IndicatorName.MedianPrice
+            or IndicatorName.TypicalPrice or IndicatorName.FullTypicalPrice or IndicatorName.WeightedClose;
+        includeNumericalExtremes |= probe is IBuiltInIndicator volumeIndicator && (BuiltInFormulaReferences.HasSimpleVolumeMean(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedTriangularMean(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedChande(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedFilteredChande(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedEnvelope(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedPriceChannel(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedObv(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedHighLowIndex(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedBalanceOfPower(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedMomentum(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedStochastic(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedSequentialMean(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedMiddleMean(volumeIndicator)
+            || BuiltInFormulaReferences.HasBoundedSlowMean(volumeIndicator));
+        return includeNumericalExtremes;
     }
 }
