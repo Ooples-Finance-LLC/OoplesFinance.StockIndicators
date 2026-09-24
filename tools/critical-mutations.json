@@ -3013,5 +3013,41 @@
     "id": "percentage-stops-reversed-short",
     "before": "RoundedPercentageBand.Percent(currentLow, _pct, 1)",
     "after": "RoundedPercentageBand.Percent(currentLow, _pct, -1)"
+  },
+  {
+    "module": "lagged-percentage",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePerformanceIndex",
+    "filter": "FullyQualifiedName~LaggedPercentageNumericalTests",
+    "id": "performance-intermediate-overflow",
+    "before": "var kpi = RoundedPercentageChange.Of(currentValue, prevValue);",
+    "after": "var kpi = prevValue == 0 ? 0 : (currentValue - prevValue) * 100 / prevValue;"
+  },
+  {
+    "module": "lagged-percentage",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePerformanceIndexFast",
+    "filter": "FullyQualifiedName~LaggedPercentageNumericalTests",
+    "id": "performance-selected-input",
+    "before": "var close = SpanCompat.AsReadOnlySpan(inputList);",
+    "after": "var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);"
+  },
+  {
+    "module": "lagged-percentage",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PerformanceIndexState",
+    "filter": "FullyQualifiedName~LaggedPercentageNumericalTests",
+    "id": "performance-streaming-lag",
+    "before": "EhlersStreamingWindow.GetOffsetValue(_values, value, _length)",
+    "after": "EhlersStreamingWindow.GetOffsetValue(_values, value, Math.Max(1, _length - 1))"
+  },
+  {
+    "module": "lagged-percentage",
+    "file": "src/Core/TrendCore.cs",
+    "scope": "internal static void PercentageChange",
+    "filter": "FullyQualifiedName~LaggedPercentageNumericalTests",
+    "id": "percentage-alias-unit-scale",
+    "before": "OscillatorCore.RateOfChange(input, output, Math.Max(1, length));",
+    "after": "OscillatorCore.RateOfChange(input, output, Math.Max(1, length));\n        for (var i = 0; i < input.Length; i++) output[i] /= 100;"
   }
 ]

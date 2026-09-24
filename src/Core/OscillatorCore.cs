@@ -3706,23 +3706,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PercentChange(ReadOnlySpan<double> input, Span<double> output, int length = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var prevValue = input[i - length];
-                output[i] = prevValue != 0 ? (input[i] - prevValue) / prevValue * 100 : 0;
-            }
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>
@@ -8231,20 +8215,7 @@ internal static class OscillatorCore
     /// <param name="length">Lookback length.</param>
     internal static void PerformanceIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= length ? input[i - length] : 0;
-
-            // MinPastValues equivalent: only compute if we have enough history
-            var change = i >= length ? currentValue - prevValue : 0;
-            output[i] = prevValue != 0 ? change * 100 / prevValue : 0;
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>

@@ -1863,6 +1863,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePerformanceIndex(this StockData stockData, int length = 14)
     {
+        length = Math.Max(1, length);
         List<double> kpiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1873,7 +1874,7 @@ public static partial class Calculations
             var prevValue = i >= length ? inputList[i - length] : 0;
 
             var prevKpi = GetLastOrDefault(kpiList);
-            var kpi = prevValue != 0 ? MinPastValues(i, length, currentValue - prevValue) * 100 / prevValue : 0;
+            var kpi = RoundedPercentageChange.Of(currentValue, prevValue);
             kpiList.Add(kpi);
 
             var signal = GetCompareSignal(kpi, prevKpi);

@@ -14069,7 +14069,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePerformanceIndexFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var close = SpanCompat.AsReadOnlySpan(inputList);
         var buffer = context.Rent(data.Count);
         OscillatorCore.PerformanceIndex(close, buffer.WritableSpan, length);
         return buffer;

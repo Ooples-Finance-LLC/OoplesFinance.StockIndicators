@@ -336,6 +336,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PerformanceIndex)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedLaggedPercentage(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PercentageTrailingStops)
         {
             var stopOptions = builtIn.CreateOptions();

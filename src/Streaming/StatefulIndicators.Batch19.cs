@@ -1164,8 +1164,7 @@ public sealed class PerformanceIndexState : IStreamingIndicatorState, IDisposabl
     {
         var value = _input.GetValue(bar);
         var priorValue = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length) : 0;
-        var diff = _index >= _length ? value - priorValue : 0;
-        var kpi = priorValue != 0 ? diff * 100 / priorValue : 0;
+        var kpi = RoundedPercentageChange.Of(value, priorValue);
 
         if (isFinal)
         {

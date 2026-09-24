@@ -242,23 +242,7 @@ internal static class TrendCore
     /// </summary>
     internal static void PercentageChange(ReadOnlySpan<double> input, Span<double> output, int length = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var prev = input[i - length];
-                output[i] = prev != 0 ? ((input[i] - prev) / prev) * 100 : 0;
-            }
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>
