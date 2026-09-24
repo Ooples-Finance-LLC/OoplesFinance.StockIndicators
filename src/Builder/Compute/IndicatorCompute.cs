@@ -2684,7 +2684,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        using var regression = new RollingLeastSquares(length);
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < count; i++)
         {
             var fit = regression.Next(inputSpan[i], isFinal: true);
@@ -2692,7 +2692,7 @@ internal static partial class IndicatorCompute
             {
                 LinearRegressionSeries.PredictedTomorrow => fit.Next,
                 LinearRegressionSeries.Slope => fit.Slope,
-                _ => fit.Intercept - (fit.Slope * (i - fit.Count + 1))
+                _ => fit.GlobalIntercept
             };
         }
 
@@ -6723,11 +6723,11 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        using var regression = new RollingLeastSquares(length);
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < count; i++)
         {
             var fit = regression.Next(input[i], isFinal: true);
-            output[i] = fit.Intercept - (fit.Slope * (i - fit.Count + 1));
+            output[i] = fit.GlobalIntercept;
         }
 
         return buffer;
@@ -7312,7 +7312,7 @@ internal static partial class IndicatorCompute
 
         using var regressed = context.Rent(count);
         var src = regressed.WritableSpan;
-        using (var regression = new RollingLeastSquares(Math.Max(Math.Abs(slowLength - fastLength), 1)))
+        using (var regression = new ExactLinearFitWindow(Math.Max(Math.Abs(slowLength - fastLength), 1)))
         {
             for (var i = 0; i < count; i++)
             {
@@ -8272,7 +8272,7 @@ internal static partial class IndicatorCompute
         double stdDevMult = 2, ChannelBand band = ChannelBand.Middle)
     {
         // CalculateStandardDeviationChannel centres its channel on the linear regression of the chained
-        // series - the fitted value at the current bar, taken through the same RollingLeastSquares the batch
+        // series - the fitted value at the current bar, taken through the same ExactLinearFitWindow the batch
         // uses so the opening window is fitted identically - and offsets the outer bands by a multiple of the
         // population standard deviation of that window. VolatilityCore.StandardDeviationChannel took the
         // close and measured something else entirely.
@@ -8284,7 +8284,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -10382,7 +10382,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var rosc = buffer.WritableSpan;
 
-        using var regression = new RollingLeastSquares(length);
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < count; i++)
         {
             var linReg = regression.Next(input[i], isFinal: true).Last;
@@ -10824,7 +10824,7 @@ internal static partial class IndicatorCompute
         var u = angle.WritableSpan;
 
         var wb = Math.Asin(Math.Sign(1)) * 2;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             double prevS = 0;
             for (var i = 0; i < count; i++)
@@ -10839,7 +10839,7 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -11972,7 +11972,7 @@ internal static partial class IndicatorCompute
 
         using var linear = context.Rent(count);
         var linreg = linear.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -14255,7 +14255,7 @@ internal static partial class IndicatorCompute
 
         using var fullFit = context.Rent(count);
         var linreg = fullFit.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -14265,7 +14265,7 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        using (var regression = new RollingLeastSquares(length2))
+        using (var regression = new ExactLinearFitWindow(length2))
         {
             for (var i = 0; i < count; i++)
             {
@@ -14496,7 +14496,7 @@ internal static partial class IndicatorCompute
         using var regressedBuffer = context.Rent(count);
         var offset = offsetBuffer.WritableSpan;
         var regressed = regressedBuffer.WritableSpan;
-        using var leastSquares = new RollingLeastSquares(smoothLength);
+        using var leastSquares = new ExactLinearFitWindow(smoothLength);
 
         for (var i = 0; i < count; i++)
         {
@@ -16308,7 +16308,7 @@ internal static partial class IndicatorCompute
 
         using var linear = context.Rent(count);
         var linreg = linear.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -16704,7 +16704,7 @@ internal static partial class IndicatorCompute
 
         using var regressionFit = context.Rent(count);
         var fitted = regressionFit.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -23138,7 +23138,7 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(input.Length);
         MovingAverage(data, maType, length1, input, buffer.WritableSpan);
         if (band == ChannelBand.Middle) return buffer;
-        using var regression = new RollingLeastSquares(length2);
+        using var regression = new ExactLinearFitWindow(length2);
         var energy = new RollingSum();
         var multiplier = band == ChannelBand.Upper ? stdDevFactor : -stdDevFactor;
         var output = buffer.WritableSpan;
@@ -24656,7 +24656,7 @@ internal static partial class IndicatorCompute
 
         using var firstFit = context.Rent(count);
         var s1 = firstFit.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -24666,7 +24666,7 @@ internal static partial class IndicatorCompute
 
         using var secondFit = context.Rent(count);
         var s2 = secondFit.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -24712,8 +24712,8 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        using var fullRegression = new RollingLeastSquares(length);
-        using var halfRegression = new RollingLeastSquares(length1);
+        using var fullRegression = new ExactLinearFitWindow(length);
+        using var halfRegression = new ExactLinearFitWindow(length1);
         for (var i = 0; i < count; i++)
         {
             var linreg1 = fullRegression.Next(sma[i], isFinal: true).Last;
@@ -26021,7 +26021,7 @@ internal static partial class IndicatorCompute
 
         using var highSlopes = context.Rent(count);
         var highSlope = highSlopes.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -26031,7 +26031,7 @@ internal static partial class IndicatorCompute
 
         using var lowSlopes = context.Rent(count);
         var lowSlope = lowSlopes.WritableSpan;
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -27573,7 +27573,7 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        using (var regression = new RollingLeastSquares(Math.Max(length2 + turbo, 1)))
+        using (var regression = new ExactLinearFitWindow(Math.Max(length2 + turbo, 1)))
         {
             for (var i = 0; i < count; i++)
             {
@@ -27606,7 +27606,7 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        using (var regression = new RollingLeastSquares(Math.Max(length2 + turbo, 1)))
+        using (var regression = new ExactLinearFitWindow(Math.Max(length2 + turbo, 1)))
         {
             for (var i = 0; i < count; i++)
             {
@@ -28251,7 +28251,7 @@ internal static partial class IndicatorCompute
 
         var highWindow = new RollingMinMax(length);
         var lowWindow = new RollingMinMax(length);
-        using (var regression = new RollingLeastSquares(length))
+        using (var regression = new ExactLinearFitWindow(length))
         {
             for (var i = 0; i < count; i++)
             {
@@ -28765,7 +28765,7 @@ internal static partial class IndicatorCompute
         using var fitted = context.Rent(count);
         var offset = offsets.WritableSpan;
         var fit = fitted.WritableSpan;
-        using (var regression = new RollingLeastSquares(smoothLength))
+        using (var regression = new ExactLinearFitWindow(smoothLength))
         {
             for (var i = 0; i < count; i++)
             {

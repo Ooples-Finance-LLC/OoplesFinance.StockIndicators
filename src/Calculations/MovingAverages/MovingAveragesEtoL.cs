@@ -1515,8 +1515,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         // The line through the trailing window, x counted from its first bar and fitted through the bars there
-        // are until it fills; see RollingLeastSquares.
-        using var regression = new RollingLeastSquares(length);
+        // are until it fills; see ExactLinearFitWindow.
+        using var regression = new ExactLinearFitWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1528,7 +1528,7 @@ public static partial class Calculations
             slopeList.Add(b);
 
             // The intercept is still reported at bar 0 of the series, as it always was.
-            var a = fit.Intercept - (b * (i - fit.Count + 1));
+            var a = fit.GlobalIntercept;
             interceptList.Add(a);
 
             var predictedToday = fit.Last;

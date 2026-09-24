@@ -362,6 +362,11 @@ internal static partial class StatefulIndicatorFactory
             McGinleyDynamicSpecOptions mcg => new McGinleyDynamicIndicatorState(length: mcg.Length),
             T3SpecOptions t3 => new TillsonT3MovingAverageState(maType: t3.MaType, length: t3.Length),
             LinRegSpecOptions linreg => new LinearRegressionState(length: linreg.Length),
+            LinearChannelMiddleSpecOptions channelMiddle => new LinearRegressionState(channelMiddle.Length),
+            LinRegSlopeSpecOptions linSlope => new LinearRegressionState(length: linSlope.Length),
+            LinRegInterceptSpecOptions linIntercept => new LinearRegressionState(length: linIntercept.Length),
+            LinearRegressionSlopeSpecOptions linearSlope => new LinearRegressionState(length: linearSlope.Length),
+            LinearRegressionInterceptSpecOptions linearIntercept => new LinearRegressionState(length: linearIntercept.Length),
 
             // Oscillators - using named parameters where needed
             RsiSpecOptions rsi => new RelativeStrengthIndexState(length: rsi.Length, maType: rsi.MaType),

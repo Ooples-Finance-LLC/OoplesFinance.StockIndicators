@@ -110,6 +110,14 @@ internal struct ExactMeanAccumulator
         return Encode((ulong)mantissa, grid, negative);
     }
 
+    internal static double UnitRatio(BigInteger numerator, BigInteger denominator)
+    {
+        if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
+        var top = new ExactMeanAccumulator(); top.AddLarge(numerator, 0);
+        var bottom = new ExactMeanAccumulator(); bottom.AddLarge(denominator, 1074);
+        return top.Ratio(bottom);
+    }
+
     private void AddSmall(long value, int scale)
     {
         if (value == 0) return;

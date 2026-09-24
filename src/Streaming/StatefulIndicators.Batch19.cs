@@ -380,7 +380,7 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
 {
     private readonly int _length;
     private readonly int _length1;
-    private readonly RollingLeastSquares _regression;
+    private readonly ExactLinearFitWindow _regression;
     private readonly RollingWindowSum _bSum;
     private readonly RollingWindowMax _bSmaMax;
     private readonly IMovingAverageSmoother _indexSmoother;
@@ -395,7 +395,7 @@ public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorSt
     {
         _length = Math.Max(1, length);
         _length1 = (int)Math.Ceiling((double)_length / 2);
-        _regression = new RollingLeastSquares(_length);
+        _regression = new ExactLinearFitWindow(_length);
         _bSum = new RollingWindowSum(_length1);
         _bSmaMax = new RollingWindowMax(_length);
         _indexSmoother = MovingAverageSmootherFactory.Create(maType, _length);

@@ -298,6 +298,19 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.LinearRegression)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            var regressionKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "LinearRegression" }
+                : new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" };
+            for (var slot = 0; slot < regressionKeys.Length; slot++)
+            {
+                var key = regressionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLinearRegression(bars, period)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.StandardError or IndicatorName.StandardErrorOfTheMean)
         {
             var regression = builtIn.BatchName == IndicatorName.StandardError;

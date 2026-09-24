@@ -2543,5 +2543,37 @@
     "before": "comparison > 0 || comparison == 0 && !significand.IsEven",
     "after": "comparison >= 0",
     "filter": "FullyQualifiedName~StandardErrorNumericalTests.SquareRootIsRoundedOnlyAfterTheExactMeanOrFit"
+  },
+  {
+    "module": "linear-regression",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~LinearRegressionNumericalTests",
+    "id": "linear-regression-eviction",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted - _sum"
+  },
+  {
+    "module": "linear-regression",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~LinearRegressionNumericalTests",
+    "id": "linear-regression-global-origin",
+    "before": "_n - 1 - 2 * _index",
+    "after": "_n - 1"
+  },
+  {
+    "module": "linear-regression",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~LinearRegressionNumericalTests",
+    "id": "linear-regression-preview-commits",
+    "before": "if (isFinal)",
+    "after": "if (true)"
+  },
+  {
+    "module": "linear-regression",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~LinearRegressionNumericalTests",
+    "id": "linear-regression-forecast-position",
+    "before": "internal double Next => At(_n + 1);",
+    "after": "internal double Next => At(_n - 1);"
   }
 ]

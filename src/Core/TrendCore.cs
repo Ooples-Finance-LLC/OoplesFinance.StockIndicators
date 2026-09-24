@@ -271,27 +271,9 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // CalculateLinearRegression fits through the bars there are until the window fills, see
-        // RollingLeastSquares, so the slope is measured from the second bar rather than from the length'th.
-        // A single bar has no slope, which the zero denominator below already reports as zero.
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < input.Length; i++)
-        {
-            var count = Math.Min(length, i + 1);
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < count; j++)
-            {
-                var x = j;
-                var y = input[i - count + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
-
-            var denominator = (count * sumX2) - (sumX * sumX);
-            output[i] = denominator != 0 ? ((count * sumXY) - (sumX * sumY)) / denominator : 0;
-        }
+            output[i] = regression.Next(input[i], isFinal: true).Slope;
     }
 
     /// <summary>

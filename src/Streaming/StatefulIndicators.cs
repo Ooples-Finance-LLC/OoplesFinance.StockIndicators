@@ -2542,13 +2542,12 @@ public sealed class RangeIdentifierState : IStreamingIndicatorState
 [PrimaryOutput("LinearRegression")]
 public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingLeastSquares _regression;
+    private readonly ExactLinearFitWindow _regression;
     private readonly StreamingInputResolver _input;
-    private int _index;
 
     public LinearRegressionState(int length = 14)
     {
-        _regression = new RollingLeastSquares(length);
+        _regression = new ExactLinearFitWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -2559,7 +2558,7 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
             throw new ArgumentNullException(nameof(selector));
         }
 
-        _regression = new RollingLeastSquares(length);
+        _regression = new ExactLinearFitWindow(length);
         _input = new StreamingInputResolver(InputName.Close, selector);
     }
 
@@ -2568,7 +2567,6 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
     public void Reset()
     {
         _regression.Reset();
-        _index = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -2579,14 +2577,10 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
         var fit = _regression.Next(value, isFinal);
         var slope = fit.Slope;
         // The intercept is reported at the first bar of the stream, as batch reports it at bar 0.
-        var intercept = fit.Intercept - (slope * (_index - fit.Count + 1));
+        var intercept = fit.GlobalIntercept;
         var predictedToday = fit.Last;
         var predictedTomorrow = fit.Next;
 
-        if (isFinal)
-        {
-            _index++;
-        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -12682,8 +12676,8 @@ internal sealed class ProjectionBandsCalculator : IDisposable
     private readonly int _length;
     // The slopes batch CalculateProjectionBands takes from CalculateLinearRegression: the same class, fed the
     // same highs and lows.
-    private readonly RollingLeastSquares _highFit;
-    private readonly RollingLeastSquares _lowFit;
+    private readonly ExactLinearFitWindow _highFit;
+    private readonly ExactLinearFitWindow _lowFit;
     private readonly PooledRingBuffer<double> _highs;
     private readonly PooledRingBuffer<double> _lows;
     private readonly PooledRingBuffer<double> _highSlopes;
@@ -12693,8 +12687,8 @@ internal sealed class ProjectionBandsCalculator : IDisposable
     public ProjectionBandsCalculator(int length)
     {
         _length = Math.Max(1, length);
-        _highFit = new RollingLeastSquares(_length);
-        _lowFit = new RollingLeastSquares(_length);
+        _highFit = new ExactLinearFitWindow(_length);
+        _lowFit = new ExactLinearFitWindow(_length);
         _highs = new PooledRingBuffer<double>(_length);
         _lows = new PooledRingBuffer<double>(_length);
         _highSlopes = new PooledRingBuffer<double>(_length);
@@ -13697,11 +13691,11 @@ internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverag
 /// </summary>
 internal sealed class LinearRegressionCoreSmoother : IMovingAverageSmoother
 {
-    private readonly RollingLeastSquares _regression;
+    private readonly ExactLinearFitWindow _regression;
 
     public LinearRegressionCoreSmoother(int length)
     {
-        _regression = new RollingLeastSquares(length);
+        _regression = new ExactLinearFitWindow(length);
     }
 
     // The fit of MovingAverageCore.LinearRegression: the same class, fed the same values.

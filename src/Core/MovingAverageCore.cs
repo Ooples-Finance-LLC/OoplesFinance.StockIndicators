@@ -349,8 +349,8 @@ internal static class MovingAverageCore
         }
 
         // The line through the trailing window, x counted from its first value: running sums over the bar index
-        // cancel catastrophically and drift, see RollingLeastSquares. A one-value window returns the value.
-        using var regression = new RollingLeastSquares(length);
+        // cancel catastrophically and drift, see ExactLinearFitWindow. A one-value window returns the value.
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
             output[i] = regression.Next(input[i], isFinal: true).Last;

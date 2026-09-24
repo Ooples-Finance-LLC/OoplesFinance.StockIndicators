@@ -603,6 +603,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Cmo", line), ("Signal", Average(line, signalLength, kind)));
                 });
             case IndicatorName.LinearRegression:
+                return new("LinearRegression", new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" },
+                    bars => RoundedLinearRegression(bars, length));
             case IndicatorName.RSquared:
                 return new(name == IndicatorName.LinearRegression ? "LinearRegression" : "RSquared",
                     name == IndicatorName.LinearRegression ? new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" }
