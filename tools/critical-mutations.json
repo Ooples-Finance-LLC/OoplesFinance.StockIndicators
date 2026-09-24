@@ -2120,5 +2120,23 @@
     "before": "if (first == center && second < center && third < center) return true;",
     "after": "if (Math.Abs(first - center) < 1e-10 && second < center && third < center) return true;",
     "filter": "FullyQualifiedName~FractalNumericalTests.PlateauShapesDistinguishAdjacentValuesAtEveryMagnitude"
+  },
+  {
+    "id": "gann-swing-low-reversal-priority",
+    "module": "gann-oscillators",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class GannSwingOscillatorState",
+    "before": "var gso = prevHighest2 > prevHighest1 && highest > prevHighest1 ? 1",
+    "after": "var gso = prevHighest2 > prevHighest1 && highest > prevHighest1 && !(prevLowest2 < prevLowest1 && lowest < prevLowest1) ? 1",
+    "filter": "FullyQualifiedName~GannNumericalTests.SimultaneousReversalsPreferHighAndExactTiesRetainState"
+  },
+  {
+    "id": "gann-trend-accepts-high-ties",
+    "module": "gann-oscillators",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class GannTrendOscillatorState",
+    "before": "var gto = prevHighest2 > prevHighest1 && highest > prevHighest1 ? 1",
+    "after": "var gto = prevHighest2 >= prevHighest1 && highest >= prevHighest1 ? 1",
+    "filter": "FullyQualifiedName~GannNumericalTests.SimultaneousReversalsPreferHighAndExactTiesRetainState"
   }
 ]

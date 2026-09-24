@@ -5225,10 +5225,9 @@ internal static class OscillatorCore
 
         length = Math.Max(1, length);
 
-        // CalculateGannSwingOscillator turns when the rolling extreme of the last few bars breaks the one
-        // before it and that one had already broken its own predecessor - two consecutive extremes moving
-        // the same way, not a single bar beating the running high. This tracked the latter, and it ignored
-        // the length entirely, so it swung on bars the indicator never counted as a swing.
+        // A strict local minimum in three consecutive rolling highs selects +1; a strict
+        // local maximum in the rolling lows selects -1. Simultaneous events select +1.
+        // With no event, retain the preceding oscillator value.
         double swing = 0;
         double prevHighest1 = 0, prevHighest2 = 0;
         double prevLowest1 = 0, prevLowest2 = 0;
