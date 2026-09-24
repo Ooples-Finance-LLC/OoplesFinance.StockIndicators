@@ -892,7 +892,7 @@ public sealed class QmaSmaDifferenceState : IStreamingIndicatorState, IDisposabl
     public QmaSmaDifferenceState(int length = 14)
     {
         _qma = new QuadraticMovingAverageState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = new RoundedSimpleMovingAverageSmoother(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 

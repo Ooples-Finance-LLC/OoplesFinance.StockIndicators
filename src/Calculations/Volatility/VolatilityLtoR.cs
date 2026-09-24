@@ -616,7 +616,8 @@ public static partial class Calculations
         var callerSeries = stockData.CaptureInputSeries();
         var qmaList = CalculateQuadraticMovingAverage(stockData, length).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        var smaList = inputList.Select(v => mean.Next(v, true)).ToList();
         stockData.RestoreInputSeries(callerSeries);
         var emaList = CalculateExponentialMovingAverage(stockData, length).ChainedValues;
 

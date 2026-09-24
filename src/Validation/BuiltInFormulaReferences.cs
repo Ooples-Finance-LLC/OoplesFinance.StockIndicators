@@ -336,6 +336,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.QmaSmaDifference)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedQmaSmaDifference(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ChandeForecastOscillator)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

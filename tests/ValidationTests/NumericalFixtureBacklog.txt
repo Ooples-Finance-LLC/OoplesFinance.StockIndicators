@@ -3198,10 +3198,6 @@ OoplesFinance.StockIndicators.Indicators.Pzo/default
 OoplesFinance.StockIndicators.Indicators.Pzo/longer-periods
 OoplesFinance.StockIndicators.Indicators.Pzo/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Pzo/shorter-periods
-OoplesFinance.StockIndicators.Indicators.QmaSmaDifference/default
-OoplesFinance.StockIndicators.Indicators.QmaSmaDifference/longer-periods
-OoplesFinance.StockIndicators.Indicators.QmaSmaDifference/minimum-periods
-OoplesFinance.StockIndicators.Indicators.QmaSmaDifference/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Qstick/default
 OoplesFinance.StockIndicators.Indicators.Qstick/longer-periods
 OoplesFinance.StockIndicators.Indicators.Qstick/minimum-periods

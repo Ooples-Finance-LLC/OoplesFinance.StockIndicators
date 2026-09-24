@@ -2935,5 +2935,29 @@
     "id": "displaced-middle-from-rounded-bands",
     "before": "var middle = prevEma;",
     "after": "var middle = (upper + lower) / 2;"
+  },
+  {
+    "module": "qma-sma",
+    "file": "src/Calculations/Volatility/VolatilityLtoR.cs",
+    "filter": "FullyQualifiedName~QmaSmaNumericalTests",
+    "id": "qma-sma-reversed-difference",
+    "before": "var c = qma - sma;",
+    "after": "var c = sma - qma;"
+  },
+  {
+    "module": "qma-sma",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "filter": "FullyQualifiedName~QmaSmaNumericalTests",
+    "id": "qma-sma-unrounded-streaming-mean",
+    "before": "_sma = new RoundedSimpleMovingAverageSmoother(length);",
+    "after": "_sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));"
+  },
+  {
+    "module": "qma-sma",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "filter": "FullyQualifiedName~QmaSmaNumericalTests",
+    "id": "qma-sma-missing-streaming-subtraction",
+    "before": "var diff = qma - sma;",
+    "after": "var diff = qma;"
   }
 ]
