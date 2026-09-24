@@ -2102,5 +2102,23 @@
     "before": "var up = value < prevUp && value > prevDown ? prevUp : bar.High;",
     "after": "var up = value <= prevUp && value > prevDown ? prevUp : bar.High;",
     "filter": "FullyQualifiedName~RangeIdentifierNumericalTests.BreakoutTiesReplaceTheAnchorAndFiniteBoundsKeepFiniteMidpoints"
+  },
+  {
+    "id": "fractal-ignores-second-confirmation",
+    "module": "williams-fractals",
+    "file": "src/Helpers/WilliamsFractalPattern.cs",
+    "scope": "internal static bool IsFractal(",
+    "before": "if (sign * neighborhood[older + 1] >= center || sign * neighborhood[older + 2] >= center) return false;",
+    "after": "if (sign * neighborhood[older + 1] >= center) return false;",
+    "filter": "FullyQualifiedName~FractalNumericalTests.PlateauShapesDistinguishAdjacentValuesAtEveryMagnitude"
+  },
+  {
+    "id": "fractal-approximate-plateau-tie",
+    "module": "williams-fractals",
+    "file": "src/Helpers/WilliamsFractalPattern.cs",
+    "scope": "internal static bool IsFractal(",
+    "before": "if (first == center && second < center && third < center) return true;",
+    "after": "if (Math.Abs(first - center) < 1e-10 && second < center && third < center) return true;",
+    "filter": "FullyQualifiedName~FractalNumericalTests.PlateauShapesDistinguishAdjacentValuesAtEveryMagnitude"
   }
 ]

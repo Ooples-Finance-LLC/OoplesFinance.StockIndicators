@@ -168,7 +168,7 @@ public static class IndicatorValidation
                 or IndicatorName.MedianValue or IndicatorName.Trimean
                 or IndicatorName.AroonUp or IndicatorName.AroonDown or IndicatorName.AroonOscillator
                 or IndicatorName.PsychologicalLine or IndicatorName.ChandeTrendScore
-                or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier
+                or IndicatorName.VolumeWeightedAveragePrice or IndicatorName.WindowedVolumeWeightedMovingAverage or IndicatorName.DonchianChannels or IndicatorName.RangeIdentifier or IndicatorName.WilliamsFractals
                         or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan
                 or IndicatorName.WeightedMovingAverage or IndicatorName.LinearWeightedMovingAverage or IndicatorName.SimplifiedWeightedMovingAverage or IndicatorName.AveragePrice or IndicatorName.MedianPrice
                 or IndicatorName.TypicalPrice or IndicatorName.FullTypicalPrice or IndicatorName.WeightedClose;
