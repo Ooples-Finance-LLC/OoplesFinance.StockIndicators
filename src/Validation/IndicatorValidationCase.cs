@@ -101,6 +101,7 @@ public static partial class IndicatorValidationDiscovery
             result.AddRange(SineNaturalCompositionCases(type));
             result.AddRange(HannCompositionCases(type));
             result.AddRange(VidyaCompositionCases(type));
+            result.AddRange(AlmaCompositionCases(type));
             result.AddRange(ChandeCompositionCases(type));
             result.AddRange(StochasticCompositionCases(type));
             result.AddRange(MomentumCompositionCases(type));
@@ -120,7 +121,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(Obv) && type != typeof(OnBalanceVolume)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -131,7 +132,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return type == typeof(Obv) ? new Obv(length, average) : new OnBalanceVolume(length, average);
@@ -144,7 +145,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(MovingAverageEnvelope)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -155,7 +156,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return new MovingAverageEnvelope(length, .025, average);
@@ -168,7 +169,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(PriceChannel)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -179,7 +180,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return new PriceChannel(length, .06, average);
@@ -192,7 +193,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(HighLowIndex)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -203,7 +204,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return new HighLowIndex(length, average);
@@ -216,7 +217,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(BalanceOfPower)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -227,7 +228,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return new BalanceOfPower(length, average);
@@ -240,7 +241,7 @@ public static partial class IndicatorValidationDiscovery
     {
         if (type != typeof(MomentumOscillator)) yield break;
         foreach (var length in new[] { 1, 3, 14 })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -251,7 +252,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return new MomentumOscillator(length, 3, average);
@@ -267,7 +268,7 @@ public static partial class IndicatorValidationDiscovery
             && type != typeof(DynamicMomentumOscillator) && type != typeof(DoubleStochasticOscillator)
             && type != typeof(StochasticFastOscillator)) yield break;
         foreach (var (length, first, third) in new[] { (1, 3, 7), (3, 1, 3), (14, 3, 1) })
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             var last = type == typeof(Stochastic) ? 3 : third;
             IIndicator Create()
@@ -279,7 +280,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return type == typeof(Stochastic) ? new Stochastic(length, first, average)
@@ -306,7 +307,7 @@ public static partial class IndicatorValidationDiscovery
             : type == typeof(Cmo) ? new[] { (1, 3), (3, 3), (14, 3) }
             : new[] { (1, 3), (3, 1), (3, 7), (14, 3) };
         foreach (var (length, signal) in periods)
-        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 })
         {
             IIndicator Create()
             {
@@ -317,7 +318,7 @@ public static partial class IndicatorValidationDiscovery
                     9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
                     11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
                     13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
-                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(), 20 => new Alma(),
                     _ => throw new InvalidOperationException()
                 };
                 return type == typeof(Cmo) ? new Cmo(length, average)
@@ -384,6 +385,25 @@ public static partial class IndicatorValidationDiscovery
                     : new SequentiallyFilteredMovingAverage(length, average);
             }
             yield return new IndicatorValidationCase(type, $"vidya-composition/{length}", Create);
+        }
+    }
+
+    private static IEnumerable<IndicatorValidationCase> AlmaCompositionCases(Type type)
+    {
+        if (type != typeof(Tma) && type != typeof(TriangularMovingAverage) && type != typeof(SlowSmoothedMovingAverage)
+            && type != typeof(MiddleHighLowMovingAverage) && type != typeof(SequentiallyFilteredMovingAverage)) yield break;
+        foreach (var length in new[] { 1, 3, 14 })
+        {
+            IIndicator Create()
+            {
+                IMovingAverage average = new Alma();
+                return type == typeof(Tma) ? new Tma(length, average)
+                    : type == typeof(TriangularMovingAverage) ? new TriangularMovingAverage(length, average)
+                    : type == typeof(SlowSmoothedMovingAverage) ? new SlowSmoothedMovingAverage(length, average)
+                    : type == typeof(MiddleHighLowMovingAverage) ? new MiddleHighLowMovingAverage(length, length, average)
+                    : new SequentiallyFilteredMovingAverage(length, average);
+            }
+            yield return new IndicatorValidationCase(type, $"alma-composition/{length}", Create);
         }
     }
 

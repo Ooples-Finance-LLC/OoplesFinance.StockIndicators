@@ -18,7 +18,7 @@ public sealed class StochasticNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(255, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("stochastic-composition/")));
+        => Assert.Equal(270, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("stochastic-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)
@@ -161,7 +161,7 @@ public sealed class StochasticNumericalTests
 
     [Fact]
     public void DiscoveryIncludesDoubleStochasticCompositions()
-        => Assert.Equal(51, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("double-stochastic-composition/")));
+        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("double-stochastic-composition/")));
 
     [Theory]
     [InlineData(1, 7)]
@@ -215,7 +215,7 @@ public sealed class StochasticNumericalTests
 
     [Fact]
     public void DiscoveryIncludesDynamicMomentumCompositions()
-        => Assert.Equal(51, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("dynamic-momentum-composition/")));
+        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("dynamic-momentum-composition/")));
 
     [Theory]
     [InlineData(1, 7)]

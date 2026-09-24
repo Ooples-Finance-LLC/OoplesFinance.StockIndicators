@@ -5,7 +5,7 @@ namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
 {
     internal static bool HasBoundedSlowMean(IBuiltInIndicator indicator) =>
-        indicator.BatchName == IndicatorName.SlowSmoothedMovingAverage && BoundedMeanKind(indicator.CreateOptions(), 2) is 1 or 2 or 3 or 6 or 7 or 8 or 9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19;
+        indicator.BatchName == IndicatorName.SlowSmoothedMovingAverage && BoundedMeanKind(indicator.CreateOptions(), 2) is 1 or 2 or 3 or 6 or 7 or 8 or 9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19 or 20;
 
     internal static double[] RoundedSlowMean(IReadOnlyList<Bar> bars, int length, int kind)
     {

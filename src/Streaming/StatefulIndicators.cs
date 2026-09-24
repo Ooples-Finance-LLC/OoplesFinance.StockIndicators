@@ -13807,6 +13807,7 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.QuadraticMovingAverage => new RootMeanSquareSmoother(length),
             MovingAvgType.KaufmanAdaptiveMovingAverage => new KaufmanMovingAverageSmoother(length),
             MovingAvgType.SineWeightedMovingAverage => new SineMovingAverageSmoother(length),
+            MovingAvgType.ArnaudLegouxMovingAverage => new AlmaMovingAverageSmoother(length),
             MovingAvgType.NaturalMovingAverage => new NaturalMovingAverageSmoother(length),
             MovingAvgType.VariableIndexDynamicAverage => new VariableIndexDynamicAverageEngine(length),
             _ => throw new NotSupportedException($"MovingAvgType {maType} is not supported in streaming stateful indicators.")

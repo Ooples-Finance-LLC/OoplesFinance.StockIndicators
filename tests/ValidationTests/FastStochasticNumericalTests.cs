@@ -13,7 +13,7 @@ public sealed class FastStochasticNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(51, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("stochastic-fast-composition/")));
+        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("stochastic-fast-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)

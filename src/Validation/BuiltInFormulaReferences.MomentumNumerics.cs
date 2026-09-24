@@ -30,7 +30,7 @@ internal static partial class BuiltInFormulaReferences
             - ReferenceFraction.FromDouble(b.Low)) / ReferenceFraction.FromDouble(b.Volume)).ToDouble()).ToArray();
 
     internal static bool HasRoundedMomentum(IBuiltInIndicator indicator) => indicator.BatchName == IndicatorName.MomentumOscillator
-        && BoundedMeanKind(indicator.CreateOptions(), 2) is 1 or 2 or 3 or 6 or 7 or 8 or 9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19;
+        && BoundedMeanKind(indicator.CreateOptions(), 2) is 1 or 2 or 3 or 6 or 7 or 8 or 9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19 or 20;
 
     internal static double[] RoundedMomentum(IReadOnlyList<Bar> bars, int length)
         => Enumerable.Range(0, bars.Count).Select(i => i < length || bars[i - length].Close == 0 ? 0

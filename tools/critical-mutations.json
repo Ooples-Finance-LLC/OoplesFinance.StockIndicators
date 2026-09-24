@@ -2220,5 +2220,22 @@
     "before": "if (commit) _values.TryAdd(value, out _);",
     "after": "_values.TryAdd(value, out _);",
     "filter": "FullyQualifiedName~AlmaNumericalTests"
+  },
+  {
+    "id": "alma-composition-wrong-stage",
+    "module": "alma-compositions",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal static class MovingAverageSmootherFactory",
+    "before": "MovingAvgType.ArnaudLegouxMovingAverage => new AlmaMovingAverageSmoother(length)",
+    "after": "MovingAvgType.ArnaudLegouxMovingAverage => new SimpleMovingAverageSmoother(length)",
+    "filter": "FullyQualifiedName~AlmaCompositionNumericalTests.NativeCompositionsAndLegacyMatchIndependentStages"
+  },
+  {
+    "id": "alma-composition-discovery-omitted",
+    "module": "alma-compositions",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "            result.AddRange(AlmaCompositionCases(type));",
+    "after": "            // Fault: new component configurations are not discovered.",
+    "filter": "FullyQualifiedName~AlmaCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
   }
 ]

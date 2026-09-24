@@ -13,7 +13,7 @@ public sealed class ObvNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(102, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("obv-composition/")));
+        => Assert.Equal(108, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("obv-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)
