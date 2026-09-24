@@ -209,28 +209,10 @@ public static partial class Calculations
         List<double> rSquaredList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactRSquaredWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double rSquared = 0;
-            if (i >= length - 1)
-            {
-                double sumX = 0, sumY = 0, sumXy = 0, sumX2 = 0, sumY2 = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    double x = j;
-                    var y = inputList[i - length + 1 + j];
-                    sumX += x;
-                    sumY += y;
-                    sumXy += x * y;
-                    sumX2 += x * x;
-                    sumY2 += y * y;
-                }
-
-                var numerator = (length * sumXy) - (sumX * sumY);
-                var denominator = Sqrt(((length * sumX2) - (sumX * sumX)) * ((length * sumY2) - (sumY * sumY)));
-                var r = denominator != 0 ? numerator / denominator : 0;
-                rSquared = r * r;
-            }
+            var rSquared = window.Next(inputList[i], true);
 
             rSquaredList.Add(rSquared);
 

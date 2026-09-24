@@ -286,31 +286,8 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j;
-                var y = input[i - length + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-                sumY2 += y * y;
-            }
-
-            var numerator = (length * sumXY) - (sumX * sumY);
-            var denominator = Math.Sqrt(((length * sumX2) - (sumX * sumX)) * ((length * sumY2) - (sumY * sumY)));
-            var r = denominator != 0 ? numerator / denominator : 0;
-            output[i] = r * r;
-        }
+        using var window = new ExactRSquaredWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

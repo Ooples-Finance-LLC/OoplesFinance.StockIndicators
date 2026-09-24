@@ -298,6 +298,12 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RSquared)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedRSquared(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LinearRegression)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

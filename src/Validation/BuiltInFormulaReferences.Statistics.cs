@@ -606,32 +606,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("LinearRegression", new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" },
                     bars => RoundedLinearRegression(bars, length));
             case IndicatorName.RSquared:
-                return new(name == IndicatorName.LinearRegression ? "LinearRegression" : "RSquared",
-                    name == IndicatorName.LinearRegression ? new[] { "LinearRegression", "PredictedTomorrow", "Slope", "Intercept" }
-                        : new[] { "RSquared" }, bars =>
-                    {
-                        var fit = new double[bars.Count];
-                        var next = new double[bars.Count];
-                        var slope = new double[bars.Count];
-                        var intercept = new double[bars.Count];
-                        var squared = new double[bars.Count];
-                        for (var i = 0; i < bars.Count; i++)
-                        {
-                            var window = Window(bars, i, length).Select(b => b.Close).ToArray();
-                            var center = (window.Length - 1) / 2d;
-                            var mean = window.Average();
-                            var xx = Enumerable.Range(0, window.Length).Sum(j => (j - center) * (j - center));
-                            var xy = window.Select((v, j) => (j - center) * (v - mean)).Sum();
-                            var yy = window.Sum(v => (v - mean) * (v - mean));
-                            slope[i] = xx == 0 ? 0 : xy / xx;
-                            fit[i] = mean + slope[i] * center;
-                            next[i] = fit[i] + slope[i];
-                            intercept[i] = fit[i] - slope[i] * i;
-                            squared[i] = window.Length < length || xx * yy == 0 ? 0 : xy * xy / (xx * yy);
-                        }
-                        return Outputs(("LinearRegression", fit), ("PredictedTomorrow", next),
-                            ("Slope", slope), ("Intercept", intercept), ("RSquared", squared));
-                    });
+                return new("RSquared", new[] { "RSquared" }, bars => Outputs(("RSquared", RoundedRSquared(bars, length))));
             default: return null;
         }
     }

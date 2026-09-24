@@ -252,14 +252,12 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("RSquared")]
 public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactRSquaredWindow _window;
     private readonly StreamingInputResolver _input;
 
     public RSquaredState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactRSquaredWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -267,39 +265,14 @@ public sealed class RSquaredState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double rSquared = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            var start = _window.Count - (_length - 1);
-            double sumX = 0, sumY = 0, sumXy = 0, sumX2 = 0, sumY2 = 0;
-            for (var j = 0; j < _length; j++)
-            {
-                double x = j;
-                var y = j < _length - 1 ? _window[start + j] : value;
-                sumX += x;
-                sumY += y;
-                sumXy += x * y;
-                sumX2 += x * x;
-                sumY2 += y * y;
-            }
-
-            var numerator = (_length * sumXy) - (sumX * sumY);
-            var denominator = Sqrt(((_length * sumX2) - (sumX * sumX)) * ((_length * sumY2) - (sumY * sumY)));
-            var r = denominator != 0 ? numerator / denominator : 0;
-            rSquared = r * r;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var rSquared = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

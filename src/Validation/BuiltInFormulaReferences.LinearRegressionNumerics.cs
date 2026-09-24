@@ -29,4 +29,22 @@ internal static partial class BuiltInFormulaReferences
         }
         return Outputs(("LinearRegression", fit), ("PredictedTomorrow", next), ("Slope", slopes), ("Intercept", intercepts));
     }
+    internal static double[] RoundedRSquared(IReadOnlyList<Bar> bars, int length)
+    {
+        return bars.Select((_, i) =>
+        {
+            if (i + 1 < length || length == 1) return 0d;
+            var values = bars.Skip(i - length + 1).Take(length).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            var mean = values.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / new ReferenceFraction(length);
+            var center = new ReferenceFraction(length - 1) / new ReferenceFraction(2);
+            var xx = new ReferenceFraction(0); var xy = new ReferenceFraction(0); var yy = new ReferenceFraction(0);
+            for (var j = 0; j < length; j++)
+            {
+                var x = new ReferenceFraction(j) - center;
+                var y = values[j] - mean;
+                xx += x * x; xy += x * y; yy += y * y;
+            }
+            return yy.Sign == 0 ? 0 : (xy * xy / (xx * yy)).ToDouble();
+        }).ToArray();
+    }
 }

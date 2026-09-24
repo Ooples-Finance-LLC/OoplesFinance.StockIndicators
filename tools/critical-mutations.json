@@ -2575,5 +2575,29 @@
     "id": "linear-regression-forecast-position",
     "before": "internal double Next => At(_n + 1);",
     "after": "internal double Next => At(_n - 1);"
+  },
+  {
+    "module": "r-squared",
+    "file": "src/Helpers/ExactRSquaredWindow.cs",
+    "filter": "FullyQualifiedName~RSquaredNumericalTests",
+    "id": "r-squared-eviction",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted - _sum"
+  },
+  {
+    "module": "r-squared",
+    "file": "src/Helpers/ExactRSquaredWindow.cs",
+    "filter": "FullyQualifiedName~RSquaredNumericalTests",
+    "id": "r-squared-wrong-divisor",
+    "before": "(n * n - 1) * centered",
+    "after": "n * n * centered"
+  },
+  {
+    "module": "r-squared",
+    "file": "src/Helpers/ExactRSquaredWindow.cs",
+    "filter": "FullyQualifiedName~RSquaredNumericalTests",
+    "id": "r-squared-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]

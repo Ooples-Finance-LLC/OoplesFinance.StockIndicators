@@ -3392,10 +3392,6 @@ OoplesFinance.StockIndicators.Indicators.RSINGIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.RSINGIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.RSINGIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RSINGIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.RSquared/default
-OoplesFinance.StockIndicators.Indicators.RSquared/longer-periods
-OoplesFinance.StockIndicators.Indicators.RSquared/minimum-periods
-OoplesFinance.StockIndicators.Indicators.RSquared/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RahulMohindarOscillator/default
 OoplesFinance.StockIndicators.Indicators.RahulMohindarOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.RahulMohindarOscillator/minimum-periods
