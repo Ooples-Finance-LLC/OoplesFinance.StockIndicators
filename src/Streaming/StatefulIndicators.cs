@@ -3687,7 +3687,8 @@ public sealed class PriceChannelState : IStreamingIndicatorState, IDisposable
         double pct = 0.06)
     {
         var resolved = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved)
+            : MovingAverageSmootherFactory.Create(maType, resolved);
         _pct = pct;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -3703,9 +3704,9 @@ public sealed class PriceChannelState : IStreamingIndicatorState, IDisposable
     {
         var value = _input.GetValue(bar);
         var ema = _smoother.Next(value, isFinal);
-        var upper = ema * (1 + _pct);
-        var lower = ema * (1 - _pct);
-        var middle = (upper + lower) / 2;
+        var upper = RoundedPercentageBand.Of(ema, _pct, 1);
+        var lower = RoundedPercentageBand.Of(ema, _pct, -1);
+        var middle = ema;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

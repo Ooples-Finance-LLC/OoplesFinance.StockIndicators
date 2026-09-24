@@ -2039,5 +2039,32 @@
     "before": "        StreamingInputValidation.Validate(bar);",
     "after": "        // Invalid native bars are deliberately admitted by this fault.",
     "filter": "FullyQualifiedName~DiscoveredNativeInputRejectionTests"
+  },
+  {
+    "id": "price-channel-rounds-percentage-first",
+    "module": "price-channel",
+    "file": "src/Helpers/RoundedPercentageBand.cs",
+    "scope": "internal static double Of(",
+    "before": "return value.Mean(1);",
+    "after": "return center * (1 + direction * fraction);",
+    "filter": "FullyQualifiedName~PriceChannelNumericalTests.PercentageBandsRoundOnceAndDoNotCreateAnIntermediateInfinity"
+  },
+  {
+    "id": "price-channel-native-middle-from-bands",
+    "module": "price-channel",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class PriceChannelState",
+    "before": "var middle = ema;",
+    "after": "var middle = (upper + lower) / 2;",
+    "filter": "FullyQualifiedName~PriceChannelNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "price-channel-rounded-sma-replaced",
+    "module": "price-channel",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceChannelFast(",
+    "before": "StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);",
+    "after": "MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);",
+    "filter": "FullyQualifiedName~PriceChannelNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
   }
 ]

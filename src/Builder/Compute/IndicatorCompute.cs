@@ -22775,17 +22775,17 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
+        StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
 
         if (band == ChannelBand.Middle)
         {
             return buffer;
         }
 
-        var multiplier = band == ChannelBand.Upper ? 1 + pct : 1 - pct;
+        var direction = band == ChannelBand.Upper ? 1 : -1;
         for (var i = 0; i < count; i++)
         {
-            output[i] *= multiplier;
+            output[i] = RoundedPercentageBand.Of(output[i], pct, direction);
         }
 
         return buffer;

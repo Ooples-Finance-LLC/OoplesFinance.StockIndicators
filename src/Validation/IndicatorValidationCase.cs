@@ -107,6 +107,7 @@ public static partial class IndicatorValidationDiscovery
             result.AddRange(BalanceCompositionCases(type));
             result.AddRange(HighLowCompositionCases(type));
             result.AddRange(ObvCompositionCases(type));
+            result.AddRange(PriceChannelCompositionCases(type));
 
             void Add(string name, double scale, bool weighted) => result.Add(new IndicatorValidationCase(type, name,
                 () => (IIndicator)ctor.Invoke(parameters.Select((p, i) => Argument(type, p, i, scale, weighted)).ToArray())));
@@ -135,6 +136,30 @@ public static partial class IndicatorValidationDiscovery
                 return type == typeof(Obv) ? new Obv(length, average) : new OnBalanceVolume(length, average);
             }
             yield return new IndicatorValidationCase(type, $"obv-composition/{length}/{kind}", Create);
+        }
+    }
+
+    private static IEnumerable<IndicatorValidationCase> PriceChannelCompositionCases(Type type)
+    {
+        if (type != typeof(PriceChannel)) yield break;
+        foreach (var length in new[] { 1, 3, 14 })
+        foreach (var kind in new[] { 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 })
+        {
+            IIndicator Create()
+            {
+                IMovingAverage average = kind switch
+                {
+                    1 => new Sma(), 2 => new Wma(), 3 => new Ema(), 6 => new Wwma(),
+                    7 => new SymmetricallyWeightedMovingAverage(), 8 => new FibonacciWeightedMovingAverage(),
+                    9 => new SquareRootWeightedMovingAverage(), 10 => new ParabolicWma(),
+                    11 => new CubedWeightedMovingAverage(), 12 => new QuickMovingAverage(),
+                    13 => new JsaMovingAverage(), 14 => new QuadraticMovingAverage(), 15 => new Kama(),
+                    16 => new SineWma(), 17 => new NaturalMa(), 18 => new EhlersHannMovingAverage(), 19 => new Vidya(),
+                    _ => throw new InvalidOperationException()
+                };
+                return new PriceChannel(length, .06, average);
+            }
+            yield return new IndicatorValidationCase(type, $"price-channel-composition/{length}/{kind}", Create);
         }
     }
 

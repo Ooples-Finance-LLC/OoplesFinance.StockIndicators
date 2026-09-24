@@ -22,6 +22,12 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < emaList.Count; i++) emaList[i] = mean.Next(inputList[i], true);
+        }
+
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -29,14 +35,14 @@ public static partial class Calculations
             var currentEma = emaList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var upperPriceChannel = currentEma * (1 + pct);
+            var upperPriceChannel = RoundedPercentageBand.Of(currentEma, pct, 1);
             upperPriceChannelList.Add(upperPriceChannel);
 
-            var lowerPriceChannel = currentEma * (1 - pct);
+            var lowerPriceChannel = RoundedPercentageBand.Of(currentEma, pct, -1);
             lowerPriceChannelList.Add(lowerPriceChannel);
 
             var prevMidPriceChannel = GetLastOrDefault(midPriceChannelList);
-            var midPriceChannel = (upperPriceChannel + lowerPriceChannel) / 2;
+            var midPriceChannel = currentEma;
             midPriceChannelList.Add(midPriceChannel);
 
             var signal = GetCompareSignal(currentValue - midPriceChannel, prevValue - prevMidPriceChannel);
