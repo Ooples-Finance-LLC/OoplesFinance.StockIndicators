@@ -2783,5 +2783,29 @@
     "id": "guppy-distance-skips-last-gap",
     "before": "i < values.Length",
     "after": "i < values.Length - 1"
+  },
+  {
+    "module": "midpoint",
+    "file": "src/Helpers/RoundedMidpointOscillator.cs",
+    "filter": "FullyQualifiedName~MidpointNumericalTests",
+    "id": "midpoint-wrong-center",
+    "before": "numerator.Add(value, 200)",
+    "after": "numerator.Add(value, 100)"
+  },
+  {
+    "module": "midpoint",
+    "file": "src/Helpers/RoundedMidpointOscillator.cs",
+    "filter": "FullyQualifiedName~MidpointNumericalTests",
+    "id": "midpoint-ignores-low",
+    "before": "denominator.Add(low, -1)",
+    "after": "denominator.Add(low, 1)"
+  },
+  {
+    "module": "midpoint",
+    "file": "src/Helpers/RoundedMidpointOscillator.cs",
+    "filter": "FullyQualifiedName~MidpointNumericalTests",
+    "id": "midpoint-missing-clamp",
+    "before": "Math.Max(-100, Math.Min(100, numerator.Ratio(denominator)))",
+    "after": "numerator.Ratio(denominator)"
   }
 ]

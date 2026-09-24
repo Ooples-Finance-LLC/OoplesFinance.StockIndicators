@@ -3502,7 +3502,7 @@ public static partial class Calculations
             var hh = highestList[i];
             var ll = lowestList[i];
 
-            var mo = hh - ll != 0 ? MinOrMax(100 * ((2 * currentValue) - hh - ll) / (hh - ll), 100, -100) : 0;
+            var mo = RoundedMidpointOscillator.Of(currentValue, hh, ll);
             moList.Add(mo);
         }
 

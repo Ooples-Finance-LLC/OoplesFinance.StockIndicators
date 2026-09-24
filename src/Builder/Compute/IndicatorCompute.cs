@@ -9953,10 +9953,10 @@ internal static partial class IndicatorCompute
         // CalculateMidpointOscillator publishes where the chained value sits between the window's high and low
         // as a percentage of that range, clamped either side. It is the raw reading: the moving average of it
         // is the separate signal series, and no average type reaches this one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
         var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
@@ -9972,7 +9972,7 @@ internal static partial class IndicatorCompute
 
             var hh = highWindow.Max;
             var ll = lowWindow.Min;
-            output[i] = hh - ll != 0 ? MathHelper.MinOrMax(100 * ((2 * input[i]) - hh - ll) / (hh - ll), 100, -100) : 0;
+            output[i] = RoundedMidpointOscillator.Of(input[i], hh, ll);
         }
 
         return buffer;

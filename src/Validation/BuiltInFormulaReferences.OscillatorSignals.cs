@@ -303,7 +303,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var lower = window.Min(b => b.Low);
                         var upper = window.Max(b => b.High);
-                        return upper == lower ? 0 : 200 * (bar.Close - lower) / (upper - lower) - 100; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+                        return upper == lower ? 0 : Math.Max(-100, Math.Min(100, 200 * (bar.Close - lower) / (upper - lower) - 100)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     return Outputs(("Mo", line), ("Signal", Average(line, 9, kind)));
                 });

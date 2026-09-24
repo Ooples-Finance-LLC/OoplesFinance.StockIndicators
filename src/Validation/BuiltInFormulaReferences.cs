@@ -324,6 +324,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MidpointOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var midpointOptions = builtIn.CreateOptions();
+            var midpointKeys = new[] { "Mo", "Signal" };
+            for (var slot = 0; slot < midpointKeys.Length; slot++)
+            {
+                var key = midpointKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot,
+                    bars => RoundedMidpoint(bars, Integer(midpointOptions, "Length", 26), BoundedMeanKind(midpointOptions, 3))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.GuppyDistanceIndicator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
         {
             var distanceOptions = builtIn.CreateOptions();

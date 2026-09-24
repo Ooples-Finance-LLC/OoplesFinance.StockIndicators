@@ -726,10 +726,7 @@ public sealed class MidpointOscillatorState : IStreamingIndicatorState, IDisposa
         var value = _input.GetValue(bar);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var mo = range != 0
-            ? MathHelper.MinOrMax(100 * ((2 * value) - highest - lowest) / range, 100, -100)
-            : 0;
+        var mo = RoundedMidpointOscillator.Of(value, highest, lowest);
         var signal = _signalSmoother.Next(mo, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
