@@ -8,80 +8,35 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// How far the input series strays from its own regression line, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateStandardError</c>. It fits the line with the same
-/// <c>RollingLeastSquares</c> the batch path fits it with, so the two agree rather than drifting apart as a
-/// second implementation of the same regression would.
+/// The streaming twin of <c>Calculations.CalculateStandardError</c>. It uses the same
+/// exact centered moments as the batch path, without rounding fitted coefficients
+/// before measuring the residuals.
 /// </remarks>
 [PrimaryOutput("StandardError")]
 public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingLeastSquares _regression;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactStandardErrorWindow _window;
     private readonly StreamingInputResolver _input;
 
     public StandardErrorState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _regression = new RollingLeastSquares(_length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactStandardErrorWindow(length, true);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.StandardError;
-
-    public void Reset()
-    {
-        _regression.Reset();
-        _window.Clear();
-    }
+    public void Reset() => _window.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fit = _regression.Next(value, isFinal);
-
-        double standardError = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window, and each
-            // residual taken against the line where that bar sits. Against the line's endpoint instead,
-            // a window lying exactly on a sloped line reports scatter where there is none.
-            var start = _window.Count - (_length - 1);
-            double sumSquaredDiff = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var fitted = fit.Intercept + (fit.Slope * (i - start));
-                var diff = _window[i] - fitted;
-                sumSquaredDiff += diff * diff;
-            }
-
-            var currentFitted = fit.Intercept + (fit.Slope * (_length - 1));
-            var currentDiff = value - currentFitted;
-            sumSquaredDiff += currentDiff * currentDiff;
-
-            standardError = Sqrt(sumSquaredDiff / _length);
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "StandardError", standardError } };
-        }
-
-        return new StreamingIndicatorStateResult(standardError, outputs);
+        var result = _window.Next(value, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double> { { "StandardError", result } } : null;
+        return new StreamingIndicatorStateResult(result, outputs);
     }
 
-    public void Dispose()
-    {
-        _regression.Dispose();
-        _window.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>
@@ -94,48 +49,28 @@ public sealed class StandardErrorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Sem")]
 public sealed class StandardErrorOfTheMeanState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _sqrtLength;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly ExactStandardErrorWindow _window;
     private readonly StreamingInputResolver _input;
 
     public StandardErrorOfTheMeanState(int length = 20)
     {
-        var resolved = Math.Max(1, length);
-        _sqrtLength = Sqrt(resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _window = new ExactStandardErrorWindow(length, false);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.StandardErrorOfTheMean;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-    }
+    public void Reset() => _window.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-
-        // The window's population standard deviation, taken from the primitive the other deviation-based
-        // states already share rather than summed again here: the same two passes over the window, oldest
-        // value first with this bar last, and the same zero until the window fills.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var standardError = stdDev / _sqrtLength;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Sem", standardError } };
-        }
-
-        return new StreamingIndicatorStateResult(standardError, outputs);
+        var result = _window.Next(value, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double> { { "Sem", result } } : null;
+        return new StreamingIndicatorStateResult(result, outputs);
     }
 
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>

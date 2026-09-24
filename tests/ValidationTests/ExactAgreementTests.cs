@@ -55,7 +55,6 @@ public sealed class ExactAgreementTests
         "RateOfChangeBands.UpperBand",
         "SmoothedVolatilityBands.LowerBand",
         "SmoothedVolatilityBands.UpperBand",
-        "StandardErrorCore.Sem",
 
         "BollingerBandsPercentB.PctB",
         "BollingerBandsWidth.BbWidth",

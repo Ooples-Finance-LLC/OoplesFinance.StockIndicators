@@ -296,28 +296,10 @@ public static partial class Calculations
         List<double> standardErrorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        // The scatter about the fitted line, measured at each position in the window. Taken against the
-        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
-        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
-        using var regression = new RollingLeastSquares(length);
-
+        using var window = new ExactStandardErrorWindow(length, true);
         for (var i = 0; i < count; i++)
         {
-            var fit = regression.Next(inputList[i], isFinal: true);
-            double standardError = 0;
-            if (i >= length - 1)
-            {
-                double sumSquaredDiff = 0;
-                var first = i - length + 1;
-                for (var j = first; j <= i; j++)
-                {
-                    var fitted = fit.Intercept + (fit.Slope * (j - first));
-                    var diff = inputList[j] - fitted;
-                    sumSquaredDiff += diff * diff;
-                }
-
-                standardError = Sqrt(sumSquaredDiff / length);
-            }
+            var standardError = window.Next(inputList[i], true);
 
             standardErrorList.Add(standardError);
 
@@ -356,31 +338,11 @@ public static partial class Calculations
         var count = inputList.Count;
         List<double> standardErrorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var sqrtLength = Sqrt(length);
-
+        using var window = new ExactStandardErrorWindow(length, false);
         for (var i = 0; i < count; i++)
         {
-            double stdDev = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
+            var standardError = window.Next(inputList[i], true);
 
-                var mean = sum / length;
-                double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                stdDev = Sqrt(variance / length);
-            }
-
-            var standardError = stdDev / sqrtLength;
             standardErrorList.Add(standardError);
 
             var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;

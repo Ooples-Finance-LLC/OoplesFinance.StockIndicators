@@ -42,6 +42,26 @@ internal struct ExactPopulationDeviation
         return (double)significand * scale;
     }
 
+    // Correctly round sqrt(numerator / denominator) in units of 2^-1074.
+    // Unlike rounding the variance first, this preserves subnormal deviations.
+    internal static double RootRatio(BigInteger numerator, BigInteger denominator)
+    {
+        if (numerator.Sign < 0 || denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(numerator));
+        if (numerator.IsZero) return 0;
+        var exponent = BitLength(numerator) - BitLength(denominator);
+        if (exponent >= 0 ? numerator < (denominator << exponent) : (numerator << -exponent) < denominator) exponent--;
+        var shift = Math.Max(0, exponent / 2 - 52);
+        // Normalize before taking the integer root: at most 106 quotient bits,
+        // even when the original moments occupy thousands of binary places.
+        var scaledDenominator = denominator << (2 * shift);
+        var quotient = numerator / scaledDenominator;
+        var significand = quotient.IsZero ? BigInteger.Zero : IntegerRoot(quotient);
+        var midpoint = 2 * significand + 1;
+        var comparison = (4 * numerator).CompareTo(scaledDenominator * midpoint * midpoint);
+        if (comparison > 0 || comparison == 0 && !significand.IsEven) significand++;
+        return ExactMeanAccumulator.Encode((ulong)significand, shift, false);
+    }
+
     internal static BigInteger IntegerRoot(BigInteger value)
     {
         var current = BigInteger.One << ((BitLength(value) + 1) / 2);

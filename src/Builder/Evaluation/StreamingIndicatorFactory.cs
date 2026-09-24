@@ -48,6 +48,8 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.StandardError when spec.Options is StandardErrorSpecOptions error => new StandardErrorState(error.Length),
+            IndicatorName.StandardErrorOfTheMean when spec.Options is StandardErrorCoreSpecOptions meanError => new StandardErrorOfTheMeanState(meanError.Length),
             IndicatorName.Variance when spec.Options is VarianceSpecOptions variance => new VarianceState(variance.Length),
             IndicatorName.CumulativeVolumeIndex => new CumulativeVolumeIndexState(),
             IndicatorName.HighLowIndex when spec.Options is HighLowIndexSpecOptions highLow

@@ -476,28 +476,9 @@ internal static class VolatilityCore
     internal static void StandardError(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            StandardDeviation(input, stdDev, length);
-
-            var sqrtLength = Math.Sqrt(length);
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = stdDev[i] / sqrtLength;
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        using var window = new ExactStandardErrorWindow(length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

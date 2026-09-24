@@ -337,35 +337,9 @@ internal static class TrendCore
     internal static void StandardError(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // The scatter about the fitted line, measured at each position in the window. Taken against the
-        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
-        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
-        using var regression = new RollingLeastSquares(length);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var fit = regression.Next(input[i], isFinal: true);
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumSqDiff = 0;
-            var first = i - length + 1;
-            for (var j = first; j <= i; j++)
-            {
-                var fitted = fit.Intercept + (fit.Slope * (j - first));
-                var diff = input[j] - fitted;
-                sumSqDiff += diff * diff;
-            }
-
-            output[i] = Math.Sqrt(sumSqDiff / length);
-        }
+        using var window = new ExactStandardErrorWindow(length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

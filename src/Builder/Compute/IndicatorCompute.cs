@@ -5986,9 +5986,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeStandardErrorCoreFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.StandardError(close, buffer.WritableSpan, length);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(inputList.Count);
+        VolatilityCore.StandardError(SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan, length);
         return buffer;
     }
 

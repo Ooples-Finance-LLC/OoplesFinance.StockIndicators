@@ -432,7 +432,8 @@
     "file": "src/Helpers/ExactPopulationDeviation.cs",
     "before": "comparison > 0 || comparison == 0 && !significand.IsEven",
     "after": "comparison >= 0",
-    "filter": "FullyQualifiedName~PopulationDeviationNumericalTests"
+    "filter": "FullyQualifiedName~PopulationDeviationNumericalTests",
+    "scope": "internal double Value()"
   },
   {
     "id": "population-streaming-omit-extreme-fallback",
@@ -2497,5 +2498,50 @@
     "before": "if (commit)",
     "after": "if (true)",
     "filter": "FullyQualifiedName~VarianceNumericalTests.EveryRouteMatchesIndependentPopulationVariance"
+  },
+  {
+    "id": "standard-error-keeps-slope-scatter",
+    "module": "standard-error",
+    "file": "src/Helpers/ExactStandardErrorWindow.cs",
+    "scope": "internal double Next(",
+    "before": "spread * centered - 3 * covariance * covariance",
+    "after": "spread * centered",
+    "filter": "FullyQualifiedName~StandardErrorNumericalTests.AffinePricesHaveNoRegressionScatterAndExpiredExtremesLeaveNoResidue"
+  },
+  {
+    "id": "standard-error-mean-wrong-divisor",
+    "module": "standard-error",
+    "file": "src/Helpers/ExactStandardErrorWindow.cs",
+    "scope": "internal double Next(",
+    "before": "RootRatio(centered, n * n * n)",
+    "after": "RootRatio(centered, n * n)",
+    "filter": "FullyQualifiedName~StandardErrorNumericalTests.SquareRootIsRoundedOnlyAfterTheExactMeanOrFit"
+  },
+  {
+    "id": "standard-error-preview-commits",
+    "module": "standard-error",
+    "file": "src/Helpers/ExactStandardErrorWindow.cs",
+    "scope": "internal double Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~StandardErrorNumericalTests.EveryRouteMatchesIndependentCenteredResiduals"
+  },
+  {
+    "id": "standard-error-core-ignores-selected-input",
+    "module": "standard-error",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStandardErrorCoreFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~StandardErrorNumericalTests.SelectedInputReachesPublicAndLegacyBuilderPaths"
+  },
+  {
+    "id": "standard-error-root-ties-away",
+    "module": "standard-error",
+    "file": "src/Helpers/ExactPopulationDeviation.cs",
+    "scope": "internal static double RootRatio(",
+    "before": "comparison > 0 || comparison == 0 && !significand.IsEven",
+    "after": "comparison >= 0",
+    "filter": "FullyQualifiedName~StandardErrorNumericalTests.SquareRootIsRoundedOnlyAfterTheExactMeanOrFit"
   }
 ]

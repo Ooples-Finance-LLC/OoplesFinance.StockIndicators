@@ -10,7 +10,7 @@ internal sealed class ExactVarianceWindow : IDisposable
 
     internal ExactVarianceWindow(int length) => _window = new PooledRingBuffer<double>(Math.Max(1, length));
 
-    private static BigInteger Units(double value)
+    internal static BigInteger Units(double value)
     {
         var bits = BitConverter.DoubleToInt64Bits(value);
         var exponent = (int)((bits >> 52) & 2047);
