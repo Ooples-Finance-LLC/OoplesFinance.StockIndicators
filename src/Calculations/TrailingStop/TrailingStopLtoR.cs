@@ -115,7 +115,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var pct = length * 0.01;
+        var pct = (double)length;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -130,25 +130,25 @@ public static partial class Calculations
             if (prevTrend >= 0)
             {
                 hp = currentValue > prevHp ? currentValue : prevHp;
-                nrtr = hp * (1 - pct);
+                nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
 
                 if (currentValue <= nrtr)
                 {
                     trend = -1;
                     lp = currentValue;
-                    nrtr = lp * (1 + pct);
+                    nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
                 }
             }
             else
             {
                 lp = currentValue < prevLp ? currentValue : prevLp;
-                nrtr = lp * (1 + pct);
+                nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
 
                 if (currentValue > nrtr)
                 {
                     trend = 1;
                     hp = currentValue;
-                    nrtr = hp * (1 - pct);
+                    nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
                 }
             }
             trendList.Add(trend);

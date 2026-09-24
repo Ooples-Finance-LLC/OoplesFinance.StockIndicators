@@ -2959,5 +2959,32 @@
     "id": "qma-sma-missing-streaming-subtraction",
     "before": "var diff = qma - sma;",
     "after": "var diff = qma;"
+  },
+  {
+    "module": "trailing-reverse",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NickRypockTrailingReverseState",
+    "filter": "FullyQualifiedName~TrailingReverseNumericalTests",
+    "id": "trailing-reverse-rising-equality",
+    "before": "if (value <= nrtr)",
+    "after": "if (value < nrtr)"
+  },
+  {
+    "module": "trailing-reverse",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NickRypockTrailingReverseState",
+    "filter": "FullyQualifiedName~TrailingReverseNumericalTests",
+    "id": "trailing-reverse-falling-equality",
+    "before": "if (value > nrtr)",
+    "after": "if (value >= nrtr)"
+  },
+  {
+    "module": "trailing-reverse",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NickRypockTrailingReverseState",
+    "filter": "FullyQualifiedName~TrailingReverseNumericalTests",
+    "id": "trailing-reverse-percent-direction",
+    "before": "_pct = Math.Max(1, length);",
+    "after": "_pct = -Math.Max(1, length);"
   }
 ]

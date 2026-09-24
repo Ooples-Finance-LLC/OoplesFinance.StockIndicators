@@ -1298,7 +1298,7 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
 
     public NickRypockTrailingReverseState(int length = 2)
     {
-        _pct = Math.Max(1, length) * 0.01;
+        _pct = Math.Max(1, length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1328,26 +1328,26 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
         if (prevTrend >= 0)
         {
             hp = value > prevHp ? value : prevHp;
-            nrtr = hp * (1 - _pct);
+            nrtr = RoundedPercentageBand.Percent(hp, _pct, -1);
             // Only set trend=-1 when value <= nrtr; otherwise preserve the current trend
             if (value <= nrtr)
             {
                 trend = -1;
                 lp = value;
-                nrtr = lp * (1 + _pct);
+                nrtr = RoundedPercentageBand.Percent(lp, _pct, 1);
             }
             // Note: lp stays 0 when value > nrtr (matching batch behavior)
         }
         else
         {
             lp = value < prevLp ? value : prevLp;
-            nrtr = lp * (1 + _pct);
+            nrtr = RoundedPercentageBand.Percent(lp, _pct, 1);
             // Only set trend=1 when value > nrtr; otherwise preserve the current trend
             if (value > nrtr)
             {
                 trend = 1;
                 hp = value;
-                nrtr = hp * (1 - _pct);
+                nrtr = RoundedPercentageBand.Percent(hp, _pct, -1);
             }
             // Note: hp stays 0 when value <= nrtr (matching batch behavior)
         }
