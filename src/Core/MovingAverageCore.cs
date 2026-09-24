@@ -2442,24 +2442,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersHammingMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20, double pedestal = 3)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double filtSum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? input[i - j] : 0;
-                var sine = length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
-                filtSum += sine * prevV;
-                coefSum += sine;
-            }
-
-            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
-        }
+        HammingWindowMean.Compute(input, output, length, pedestal);
     }
 
     /// <summary>

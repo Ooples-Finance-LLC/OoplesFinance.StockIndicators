@@ -1368,58 +1368,11 @@ public sealed class EhlersKaufmanAdaptiveMovingAverageState : IStreamingIndicato
 
 internal sealed class EhlersHammingMovingAverageSmoother : IMovingAverageSmoother
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersHammingMovingAverageSmoother(int length, double pedestal = 3)
-    {
-        _length = Math.Max(1, length);
-        _weights = new double[_length];
-        double sum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var weight = _length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (_length - 1))));
-            _weights[j] = weight;
-            sum += weight;
-        }
-
-        _weightSum = sum;
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var count = _values.Count;
-        double sum = _weights[0] * value;
-
-        for (var j = 1; j < _length; j++)
-        {
-            var offset = j;
-            var prevValue = offset <= count ? _values[count - offset] : 0;
-            sum += _weights[j] * prevValue;
-        }
-
-        var result = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        return result;
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    private readonly HammingWindowMean _mean;
+    public EhlersHammingMovingAverageSmoother(int length, double pedestal = 3) => _mean = new HammingWindowMean(length, pedestal);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
 }
 
 internal sealed class EhlersHilbertTransformIndicatorEngine : IDisposable

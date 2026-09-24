@@ -2309,5 +2309,32 @@
     "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
     "after": "var inputList = data.ClosePrices;",
     "filter": "FullyQualifiedName~ApoNumericalTests.SelectedInputReachesBothAliasesAndLegacyBuilderArms"
+  },
+  {
+    "id": "hamming-rounds-weighted-products",
+    "module": "hamming",
+    "file": "src/Helpers/HammingWindowMean.cs",
+    "scope": "internal sealed class HammingWindowMean",
+    "before": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? value : _values[_values.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~HammingNumericalTests"
+  },
+  {
+    "id": "hamming-overflows-pedestal-phase",
+    "module": "hamming",
+    "file": "src/Helpers/HammingWindowMean.cs",
+    "scope": "internal sealed class HammingWindowMean",
+    "before": "var phase = pedestal * (1 - 2 * position) + Math.PI * position;",
+    "after": "var phase = pedestal + (Math.PI - 2 * pedestal) * position;",
+    "filter": "FullyQualifiedName~HammingNumericalTests"
+  },
+  {
+    "id": "hamming-discards-zero-padding",
+    "module": "hamming",
+    "file": "src/Helpers/HammingWindowMean.cs",
+    "scope": "internal sealed class HammingWindowMean",
+    "before": "var result = sum.Ratio(_denominator);",
+    "after": "var result = _values.Count + 1 < _weights.Length ? value : sum.Ratio(_denominator);",
+    "filter": "FullyQualifiedName~HammingNumericalTests"
   }
 ]

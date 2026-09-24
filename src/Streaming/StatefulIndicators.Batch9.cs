@@ -1397,45 +1397,26 @@ public sealed class EhlersGaussianFilterState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ehma")]
 public sealed class EhlersHammingMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _pedestal;
+    private readonly HammingWindowMean _mean;
     private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
 
     public EhlersHammingMovingAverageState(int length = 20, double pedestal = 3)
     {
-        _length = Math.Max(1, length);
-        _pedestal = pedestal;
+        _mean = new HammingWindowMean(length, pedestal);
         _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
     }
 
     public IndicatorName Name => IndicatorName.EhlersHammingMovingAverage;
 
     public void Reset()
     {
-        _values.Clear();
+        _mean.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        double filtSum = 0;
-        double coefSum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var prevV = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var sine = _length == 1 ? 1 : Math.Sin(_pedestal + ((Math.PI - (2 * _pedestal)) * ((double)j / (_length - 1))));
-            filtSum += sine * prevV;
-            coefSum += sine;
-        }
-
-        var filt = coefSum != 0 ? filtSum / coefSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
+        var filt = _mean.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1451,7 +1432,7 @@ public sealed class EhlersHammingMovingAverageState : IStreamingIndicatorState, 
 
     public void Dispose()
     {
-        _values.Dispose();
+        _mean.Dispose();
     }
 }
 

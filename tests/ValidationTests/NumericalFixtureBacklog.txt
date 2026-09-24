@@ -1165,10 +1165,6 @@ OoplesFinance.StockIndicators.Indicators.EhlersGaussianFilter/default
 OoplesFinance.StockIndicators.Indicators.EhlersGaussianFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.EhlersGaussianFilter/minimum-periods
 OoplesFinance.StockIndicators.Indicators.EhlersGaussianFilter/shorter-periods
-OoplesFinance.StockIndicators.Indicators.EhlersHammingMovingAverage/default
-OoplesFinance.StockIndicators.Indicators.EhlersHammingMovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.EhlersHammingMovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.EhlersHammingMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.EhlersHammingWindowIndicator/default
 OoplesFinance.StockIndicators.Indicators.EhlersHammingWindowIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.EhlersHammingWindowIndicator/minimum-periods
@@ -2147,10 +2143,6 @@ OoplesFinance.StockIndicators.Indicators.HalfTrend/longer-periods
 OoplesFinance.StockIndicators.Indicators.HalfTrend/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HalfTrend/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HalfTrend/weighted-average
-OoplesFinance.StockIndicators.Indicators.HammingMa/default
-OoplesFinance.StockIndicators.Indicators.HammingMa/longer-periods
-OoplesFinance.StockIndicators.Indicators.HammingMa/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HammingMa/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HampelFilter/default
 OoplesFinance.StockIndicators.Indicators.HampelFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.HampelFilter/minimum-periods

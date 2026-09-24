@@ -268,6 +268,15 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedApo(bars, apoFast, apoSlow, BoundedMeanKind(apoOptions, 3)), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersHammingMovingAverage)
+        {
+            var hammingOptions = builtIn.CreateOptions();
+            var period = Integer(hammingOptions, "Length", 20);
+            var pedestal = Number(hammingOptions, 3, "Pedestal");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

@@ -13800,31 +13800,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersHammingMovingAverageFast(StockData data, ComputeContext context, int length = 20,
         double pedestal = 3)
     {
-        // CalculateEhlersHammingMovingAverage weights the window by a sine raised off a pedestal and divides
-        // by the sum of those weights, so the weights do not depend on the data and the window is not padded
-        // when it is short - the missing taps contribute zero. The core routine read the close.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            double filtSum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var previousValue = i >= j ? input[i - j] : 0;
-                var sine = length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
-                filtSum += sine * previousValue;
-                coefSum += sine;
-            }
-
-            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
-        }
-
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.EhlersHammingMovingAverage(SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan, length, pedestal);
         return buffer;
     }
 

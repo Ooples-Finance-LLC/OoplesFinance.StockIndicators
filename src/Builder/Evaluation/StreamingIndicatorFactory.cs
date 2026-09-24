@@ -128,6 +128,10 @@ internal static class StreamingIndicatorFactory
                 => new AbsolutePriceOscillatorState(absolute.MaType, absolute.FastLength, absolute.SlowLength),
             IndicatorName.AbsolutePriceOscillator when spec.Options is PriceOscillatorSpecOptions priceOscillator
                 => new AbsolutePriceOscillatorState(fastLength: priceOscillator.ShortLength, slowLength: priceOscillator.LongLength),
+            IndicatorName.EhlersHammingMovingAverage when spec.Options is HammingMaSpecOptions hamming
+                => new EhlersHammingMovingAverageState(hamming.Length),
+            IndicatorName.EhlersHammingMovingAverage when spec.Options is EhlersHammingMovingAverageSpecOptions hammingAlias
+                => new EhlersHammingMovingAverageState(hammingAlias.Length),
             IndicatorName.LeoMovingAverage when spec.Options is LeoMovingAverageSpecOptions leo
                 => new LeoMovingAverageState(leo.Length),
             IndicatorName.ArnaudLegouxMovingAverage when spec.Options is AlmaSpecOptions alma

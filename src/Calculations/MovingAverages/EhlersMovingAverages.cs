@@ -1880,22 +1880,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        using var mean = new HammingWindowMean(length, pedestal);
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevFilt = i >= 1 ? filtList[i - 1] : 0;
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            double filtSum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? inputList[i - j] : 0;
-                var sine = length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
-                filtSum += sine * prevV;
-                coefSum += sine;
-            }
-
-            var filt = coefSum != 0 ? filtSum / coefSum : 0;
+            var filt = mean.Next(currentValue, true);
             filtList.Add(filt);
 
             var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilt);
