@@ -2030,5 +2030,14 @@
     "before": "return argument == 1 ? relative : Math.Log(argument) * (relative / (argument - 1));",
     "after": "return Math.Log(current) - Math.Log(previous);",
     "filter": "FullyQualifiedName~LogReturnsNumericalTests.IndependentLogarithmMatchesKnownValuesAndPreservesAdjacentPrices"
+  },
+  {
+    "id": "money-flow-native-input-validation-removed",
+    "module": "money-flow",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MoneyFlowIndexState",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // Invalid native bars are deliberately admitted by this fault.",
+    "filter": "FullyQualifiedName~DiscoveredNativeInputRejectionTests"
   }
 ]

@@ -5891,6 +5891,7 @@ public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _flow.Next(_selectedClose ? bar.Close : RollingMoneyFlowIndex.TypicalPrice(bar.High, bar.Low, bar.Close), bar.Volume, isFinal);
         IReadOnlyDictionary<string, double>? outputs = includeOutputs
             ? new Dictionary<string, double>(1) { { "Mfi", value } } : null;
