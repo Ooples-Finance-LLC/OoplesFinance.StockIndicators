@@ -723,15 +723,8 @@ internal static partial class BuiltInFormulaReferences
                     Average(TrueRanges(bars), length, 6).Select(v => 2 * widthMultiplier * v).ToArray())));
             case IndicatorName.StandardDeviationChannel:
                 var deviationMultiplier = Number(options, 2, "StdDevMult");
-                return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var fit = RegressionEndpoints(prices, length);
-                    var variance = PopulationVariance(prices, length);
-                    return Outputs(("MiddleBand", fit),
-                        ("UpperBand", fit.Select((v, i) => v + deviationMultiplier * Math.Sqrt(variance[i])).ToArray()),
-                        ("LowerBand", fit.Select((v, i) => v - deviationMultiplier * Math.Sqrt(variance[i])).ToArray()));
-                });
+                return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" },
+                    bars => RoundedRegressionChannel(bars, length, deviationMultiplier));
             case IndicatorName.StollerAverageRangeChannels:
                 kind = AverageKind(options, 1);
                 var atrMultiplier = Number(options, 2, "AtrMult");

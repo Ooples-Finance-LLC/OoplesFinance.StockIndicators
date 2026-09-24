@@ -48,6 +48,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.StandardDeviationChannel when spec.Options is StandardDeviationChannelSpecOptions deviationChannel => new StandardDeviationChannelState(deviationChannel.Length),
             IndicatorName.RSquared when spec.Options is RSquaredSpecOptions squared => new RSquaredState(squared.Length),
             IndicatorName.LinearRegression when spec.Options is LinRegSpecOptions linreg => new LinearRegressionState(linreg.Length),
             IndicatorName.LinearRegression when spec.Options is LinearChannelMiddleSpecOptions channelMiddle => new LinearRegressionState(channelMiddle.Length),

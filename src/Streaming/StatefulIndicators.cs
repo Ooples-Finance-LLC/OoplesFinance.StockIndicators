@@ -2606,32 +2606,22 @@ public sealed class LinearRegressionState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("MiddleBand")]
 public sealed class StandardDeviationChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingStandardDeviation _stdDevState;
-    private readonly LinearRegressionState _regressionState;
-    private readonly double _stdDevMult;
-
+    private readonly ExactRegressionChannelWindow _channel;
     public StandardDeviationChannelState(int length = 40, double stdDevMult = 2)
-    {
-        _stdDevState = new RollingStandardDeviation(length);
-        _regressionState = new LinearRegressionState(length);
-        _stdDevMult = stdDevMult;
-    }
+        => _channel = new ExactRegressionChannelWindow(length, stdDevMult);
 
     public IndicatorName Name => IndicatorName.StandardDeviationChannel;
 
     public void Reset()
     {
-        _stdDevState.Reset();
-        _regressionState.Reset();
+        _channel.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var stdDev = _stdDevState.Next(bar.Close, isFinal);
-        var middle = _regressionState.Update(bar, isFinal, includeOutputs: false).Value;
-        var upper = middle + (stdDev * _stdDevMult);
-        var lower = middle - (stdDev * _stdDevMult);
+        var bands = _channel.Next(bar.Close, isFinal);
+        var upper = bands.Upper; var middle = bands.Middle; var lower = bands.Lower;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -2649,8 +2639,7 @@ public sealed class StandardDeviationChannelState : IStreamingIndicatorState, ID
 
     public void Dispose()
     {
-        _stdDevState.Dispose();
-        _regressionState.Dispose();
+        _channel.Dispose();
     }
 }
 

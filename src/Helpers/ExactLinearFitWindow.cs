@@ -43,6 +43,15 @@ internal sealed class ExactLinearFitWindow : IDisposable
         internal double Last => At(_n - 1);
         internal double Next => At(_n + 1);
         internal double GlobalIntercept => At(_n - 1 - 2 * _index);
+        // Offset the exact fitted endpoint before the final output rounding.
+        internal double Offset(double value, double multiplier)
+        {
+            var denominator = _n.IsOne ? BigInteger.One : _n * _spread;
+            var numerator = _n.IsOne ? _sum : _sum * _spread + 3 * _covariance * (_n - 1);
+            var product = ExactVarianceWindow.Units(value) * ExactVarianceWindow.Units(multiplier);
+            return ExactMeanAccumulator.UnitRatio((numerator << 1074) + product * denominator, denominator << 1074);
+        }
+
     }
 
     internal void Reset() { _window.Clear(); _sum = default; _weighted = default; _index = default; }

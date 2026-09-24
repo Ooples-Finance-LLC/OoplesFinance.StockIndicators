@@ -1084,22 +1084,7 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Calculate moving average as middle line
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = close[i];
-                continue;
-            }
-
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += close[j];
-            }
-            output[i] = sum / length;
-        }
+        MovingAverageCore.LinearRegression(close, output, length);
     }
 
     /// <summary>

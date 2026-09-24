@@ -8271,41 +8271,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStandardDeviationChannelFast(StockData data, ComputeContext context, int length = 20,
         double stdDevMult = 2, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateStandardDeviationChannel centres its channel on the linear regression of the chained
-        // series - the fitted value at the current bar, taken through the same ExactLinearFitWindow the batch
-        // uses so the opening window is fitted identically - and offsets the outer bands by a multiple of the
-        // population standard deviation of that window. VolatilityCore.StandardDeviationChannel took the
-        // close and measured something else entirely.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using (var regression = new ExactLinearFitWindow(length))
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var channel = new ExactRegressionChannelWindow(length, stdDevMult);
+        for (var i = 0; i < input.Count; i++)
         {
-            for (var i = 0; i < count; i++)
-            {
-                output[i] = regression.Next(input[i], isFinal: true).Last;
-            }
+            var bands = channel.Next(input[i], true);
+            buffer.WritableSpan[i] = band == ChannelBand.Upper ? bands.Upper : band == ChannelBand.Lower ? bands.Lower : bands.Middle;
         }
-
-        if (band == ChannelBand.Middle)
-        {
-            return buffer;
-        }
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-        var multiplier = band == ChannelBand.Upper ? stdDevMult : -stdDevMult;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] += multiplier * stdDev[i];
-        }
-
         return buffer;
     }
 

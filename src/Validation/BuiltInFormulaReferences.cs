@@ -298,6 +298,19 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.StandardDeviationChannel)
+        {
+            var channelOptions = builtIn.CreateOptions();
+            var channelKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < channelKeys.Length; slot++)
+            {
+                var key = channelKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedRegressionChannel(bars, Integer(channelOptions, "Length", 40), Number(channelOptions, 2, "StdDevMult"))[key],
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RSquared)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

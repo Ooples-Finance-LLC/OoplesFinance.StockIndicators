@@ -47,4 +47,26 @@ internal static partial class BuiltInFormulaReferences
             return yy.Sign == 0 ? 0 : (xy * xy / (xx * yy)).ToDouble();
         }).ToArray();
     }
+    internal static IReadOnlyDictionary<string, double[]> RoundedRegressionChannel(IReadOnlyList<Bar> bars, int length, double multiplier)
+    {
+        var deviation = PopulationDeviation(bars.Select(b => b.Close).ToArray(), length);
+        var middle = new double[bars.Count]; var upper = new double[bars.Count]; var lower = new double[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            var count = Math.Min(length, i + 1);
+            var values = bars.Skip(i - count + 1).Take(count).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            var mean = values.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / new ReferenceFraction(count);
+            var center = new ReferenceFraction(count - 1) / new ReferenceFraction(2);
+            var xx = new ReferenceFraction(0); var xy = new ReferenceFraction(0);
+            for (var j = 0; j < count; j++)
+            {
+                var x = new ReferenceFraction(j) - center;
+                xx += x * x; xy += x * (values[j] - mean);
+            }
+            var endpoint = count == 1 ? mean : mean + xy / xx * center;
+            var width = ReferenceFraction.FromDouble(deviation[i]) * ReferenceFraction.FromDouble(multiplier);
+            middle[i] = endpoint.ToDouble(); upper[i] = (endpoint + width).ToDouble(); lower[i] = (endpoint - width).ToDouble();
+        }
+        return Outputs(("UpperBand", upper), ("MiddleBand", middle), ("LowerBand", lower));
+    }
 }

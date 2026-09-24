@@ -2599,5 +2599,29 @@
     "id": "r-squared-preview-commits",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "regression-channel",
+    "file": "src/Helpers/ExactRegressionChannelWindow.cs",
+    "filter": "FullyQualifiedName~RegressionChannelNumericalTests",
+    "id": "regression-channel-sample-divisor",
+    "before": "n * n);",
+    "after": "n * (n - 1));"
+  },
+  {
+    "module": "regression-channel",
+    "file": "src/Helpers/ExactRegressionChannelWindow.cs",
+    "filter": "FullyQualifiedName~RegressionChannelNumericalTests",
+    "id": "regression-channel-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
+  },
+  {
+    "module": "regression-channel",
+    "file": "src/Helpers/ExactRegressionChannelWindow.cs",
+    "filter": "FullyQualifiedName~RegressionChannelNumericalTests",
+    "id": "regression-channel-lower-sign",
+    "before": "fit.Offset(deviation, -_multiplier)",
+    "after": "fit.Offset(deviation, _multiplier)"
   }
 ]
