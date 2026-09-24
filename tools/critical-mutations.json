@@ -2425,5 +2425,23 @@
     "before": "if (isFinal)",
     "after": "if (true)",
     "filter": "FullyQualifiedName~DpoNumericalTests.EveryRouteMatchesTheIndependentReference"
+  },
+  {
+    "id": "lsma-overflows-intermediate",
+    "module": "lsma",
+    "file": "src/Helpers/LeastSquaresAverage.cs",
+    "scope": "internal static double Combine(",
+    "before": "return sum.Mean(1);",
+    "after": "return 3 * weighted - 2 * simple;",
+    "filter": "FullyQualifiedName~LsmaNumericalTests.CombinationPreservesFiniteCancellationAndReportsRealOverflow"
+  },
+  {
+    "id": "lsma-core-uses-partial-regression",
+    "module": "lsma",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void LeastSquaresMovingAverage(",
+    "before": "        using var weighted = new Streaming.WmaState(length);\n        using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);\n        for (var i = 0; i < input.Length; i++)\n            output[i] = LeastSquaresAverage.Combine(weighted.GetNext(input[i], true), simple.Next(input[i], true));",
+    "after": "        LinearRegression(input, output, length);",
+    "filter": "FullyQualifiedName~LsmaNumericalTests.RoutesMatchRoundedComponentReferencesIncludingOverflow"
   }
 ]

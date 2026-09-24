@@ -5168,9 +5168,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLsmaFast(StockData data, ComputeContext context, int length = 25)
     {
-        // CalculateLeastSquaresMovingAverage is three weighted averages less two simple ones, both taken over
-        // the chained series. MovingAverageCore.LeastSquaresMovingAverage fits a regression instead, which is
-        // a different line.
+        // Both rounded component averages measure the selected series. Preserve
+        // component overrides and combine without overflowing the weighted terms.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
@@ -5180,14 +5179,19 @@ internal static partial class IndicatorCompute
         var wma = weighted.Span;
 
         using var simple = context.Rent(count);
-        MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, input, simple.WritableSpan);
+        if (!ComponentAverage.HasOverrides)
+        {
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < count; i++) simple.WritableSpan[i] = mean.Next(input[i], true);
+        }
+        else MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, input, simple.WritableSpan);
         var sma = simple.Span;
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (3 * wma[i]) - (2 * sma[i]);
+            output[i] = LeastSquaresAverage.Combine(wma[i], sma[i]);
         }
 
         return buffer;

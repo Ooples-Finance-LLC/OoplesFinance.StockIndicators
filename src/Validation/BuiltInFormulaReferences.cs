@@ -298,6 +298,12 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.LeastSquaresMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 25);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedLeastSquaresMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

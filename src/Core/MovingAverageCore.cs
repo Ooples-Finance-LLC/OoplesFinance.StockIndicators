@@ -569,8 +569,10 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // LSMA is essentially the same as linear regression value
-        LinearRegression(input, output, length);
+        using var weighted = new Streaming.WmaState(length);
+        using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = LeastSquaresAverage.Combine(weighted.GetNext(input[i], true), simple.Next(input[i], true));
     }
 
     /// <summary>
@@ -3866,7 +3868,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             // Apply 1LC correction: 2*LSMA - SMA
             var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
@@ -4081,7 +4084,8 @@ internal static class MovingAverageCore
         var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
             SimpleMovingAverage(input, smaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
@@ -4415,7 +4419,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             var alpha = 2.0 / (length + 1);
             for (var i = 0; i < input.Length; i++)
@@ -4550,7 +4555,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
             {
@@ -4580,7 +4586,8 @@ internal static class MovingAverageCore
         var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
             ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
@@ -4658,7 +4665,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
             {

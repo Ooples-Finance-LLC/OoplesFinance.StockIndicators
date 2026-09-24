@@ -371,7 +371,8 @@ public static partial class Calculations
         var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        var smaList = inputList.Select(value => simple.Next(value, true)).ToList();
         stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -382,7 +383,7 @@ public static partial class Calculations
             var currentSma = smaList[i];
 
             var prevLsma = GetLastOrDefault(lsmaList);
-            var lsma = (3 * currentWma) - (2 * currentSma);
+            var lsma = LeastSquaresAverage.Combine(currentWma, currentSma);
             lsmaList.Add(lsma);
 
             var signal = GetCompareSignal(currentValue - lsma, prevValue - prevLsma);

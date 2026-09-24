@@ -2573,10 +2573,6 @@ OoplesFinance.StockIndicators.Indicators.LogisticCorrelation/default
 OoplesFinance.StockIndicators.Indicators.LogisticCorrelation/longer-periods
 OoplesFinance.StockIndicators.Indicators.LogisticCorrelation/minimum-periods
 OoplesFinance.StockIndicators.Indicators.LogisticCorrelation/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Lsma/default
-OoplesFinance.StockIndicators.Indicators.Lsma/longer-periods
-OoplesFinance.StockIndicators.Indicators.Lsma/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Lsma/shorter-periods
 OoplesFinance.StockIndicators.Indicators.MacZIndicator/default
 OoplesFinance.StockIndicators.Indicators.MacZIndicator/longer-fastLength
 OoplesFinance.StockIndicators.Indicators.MacZIndicator/longer-length
