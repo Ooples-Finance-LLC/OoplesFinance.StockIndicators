@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Indicators;
+﻿using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
 
@@ -25,7 +25,9 @@ internal static class IndicatorValidationFixtures
 
     private static IReadOnlyList<Bar> Series(int count, string shape)
     {
+#pragma warning disable S2245 // Deterministic numerical fixtures, not security-sensitive random values.
         var random = new Random(shape == "walk-42" ? 42 : 31);
+#pragma warning restore S2245
         var bars = new Bar[count];
         var price = 100d;
         var start = new DateTime(2021, 1, 4, 0, 0, 0, DateTimeKind.Utc);
@@ -46,7 +48,9 @@ internal static class IndicatorValidationFixtures
             };
             var flat = shape is "flat" or "flat-50" or "zero-price" or "negative-price";
             var open = flat ? price : previous;
-            var time = shape == "sessions" ? start.AddDays(i / 4).AddMinutes(i % 4) : start.AddMinutes(i);
+            // Four observations belong to each completed session; fractional days are not intended.
+            var sessionIndex = i / 4;
+            var time = shape == "sessions" ? start.AddDays(sessionIndex).AddMinutes(i % 4) : start.AddMinutes(i);
             bars[i] = new Bar(time, open,
                 flat ? price : Math.Max(open, price) + 0.5,
                 flat ? price : Math.Max(0.01, Math.Min(open, price) - 0.5), price,

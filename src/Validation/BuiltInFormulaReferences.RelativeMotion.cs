@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Indicators;
+﻿using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
 
@@ -100,7 +100,8 @@ internal static partial class BuiltInFormulaReferences
                         var ceiling = ceilings.Skip(segment).Take(i - segment + 1).Min();
                         var floor = floors.Skip(segment).Take(i - segment + 1).Max();
                         var wasBullish = bullish;
-                        if (seekingFall && highMeans[i] < floor && bars[i].Close < (i == 0 ? lows[i] : lows[i - 1]))
+                        // A rising confirmation on an earlier bar must precede seekingFall.
+                        if (seekingFall && highMeans[i] < floor && bars[i].Close < lows[i - 1])
                         { bullish = false; seekingFall = false; segment = i; ceiling = ceilings[i]; }
                         else if (!seekingFall && lowMeans[i] > ceiling && bars[i].Close > (i == 0 ? highs[i] : highs[i - 1]))
                         { bullish = true; seekingFall = true; segment = i; floor = floors[i]; }

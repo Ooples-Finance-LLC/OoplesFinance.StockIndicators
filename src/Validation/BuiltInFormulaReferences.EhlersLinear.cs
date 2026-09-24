@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
@@ -442,8 +442,11 @@ internal static partial class BuiltInFormulaReferences
                     for (var i = 0; i < result.Length; i++)
                     {
                         var prior = i == 0 ? 0 : result[i - 1];
-                        result[i] = Math.Max(6, prior);
-                        if (!crossings.Contains(i)) continue;
+                        if (!crossings.Contains(i))
+                        {
+                            result[i] = Math.Max(6, prior);
+                            continue;
+                        }
                         var measured = 2d * (i - previousCrossing);
                         result[i] = Math.Min(1.25 * prior, Math.Max(.8 * prior, measured));
                         previousCrossing = i;

@@ -979,7 +979,8 @@ public sealed class HalfTrendState : IStreamingIndicatorState, IDisposable
         if (prevNextTrend == 1)
         {
             maxLow = Math.Max(lowest, maxLow);
-            if (highMa < maxLow && value < (_hasPrev ? prevLow : lowest))
+            // prevNextTrend can be one only after a committed previous observation.
+            if (highMa < maxLow && value < prevLow)
             {
                 trend = 1;
                 nextTrend = 0;
