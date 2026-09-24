@@ -24,7 +24,7 @@ public sealed class MomentumNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("momentum-composition/")));
+        => Assert.Equal(57, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("momentum-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)

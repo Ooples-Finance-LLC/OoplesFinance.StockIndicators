@@ -15,7 +15,7 @@ public sealed class ApoNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(72, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("apo-composition/")));
+        => Assert.Equal(76, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("apo-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)

@@ -13,7 +13,7 @@ public sealed class HighLowIndexNumericalTests
 
     [Fact]
     public void DiscoveryIncludesEveryPromotedComposition()
-        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("high-low-composition/")));
+        => Assert.Equal(57, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("high-low-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)

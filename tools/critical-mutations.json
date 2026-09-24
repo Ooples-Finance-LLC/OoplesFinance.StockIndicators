@@ -2336,5 +2336,22 @@
     "before": "var result = sum.Ratio(_denominator);",
     "after": "var result = _values.Count + 1 < _weights.Length ? value : sum.Ratio(_denominator);",
     "filter": "FullyQualifiedName~HammingNumericalTests"
+  },
+  {
+    "id": "hamming-composition-wrong-stage",
+    "module": "hamming-compositions",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal static class MovingAverageSmootherFactory",
+    "before": "MovingAvgType.EhlersHammingMovingAverage => new EhlersHammingMovingAverageSmoother(length)",
+    "after": "MovingAvgType.EhlersHammingMovingAverage => new EhlersHannMovingAverageSmoother(length)",
+    "filter": "FullyQualifiedName~HammingCompositionNumericalTests.NativeCompositionsAndLegacyMatchIndependentStages"
+  },
+  {
+    "id": "hamming-composition-discovery-omitted",
+    "module": "hamming-compositions",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "            result.AddRange(HammingCompositionCases(type));",
+    "after": "            // Fault: component configurations are not discovered.",
+    "filter": "FullyQualifiedName~HammingCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
   }
 ]

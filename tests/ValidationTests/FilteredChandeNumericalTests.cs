@@ -16,7 +16,7 @@ public sealed class FilteredChandeNumericalTests
 
     [Fact]
     public void DiscoveryIncludesAllPromotedComponents()
-        => Assert.Equal(54, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("chande-composition/")));
+        => Assert.Equal(57, Cases.Count(row => ((IndicatorValidationCase)row[0]).Name.StartsWith("chande-composition/")));
 
     [Theory, MemberData(nameof(Cases))]
     public async Task EveryConfigurationReceivesEveryNumericalClass(IndicatorValidationCase testCase)
