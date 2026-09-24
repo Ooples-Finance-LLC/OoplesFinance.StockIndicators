@@ -1344,8 +1344,7 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
 public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly PooledRingBuffer<double> _prices;
-    private readonly int _length;
+    private readonly ExactMeanAbsoluteDeviationWindow _deviation;
     private readonly StreamingInputResolver _input;
     private readonly double _stdDevFactor;
 
@@ -1353,9 +1352,9 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
         var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _length = resolved;
-        _prices = new PooledRingBuffer<double>(resolved);
+        _meanSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _deviation = new ExactMeanAbsoluteDeviationWindow(resolved);
         _stdDevFactor = stdDevFactor;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1365,24 +1364,16 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Reset()
     {
         _meanSmoother.Reset();
-        _prices.Clear();
+        _deviation.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var middle = _meanSmoother.Next(value, isFinal);
-        var start = _prices.Count == _length ? 1 : 0;
-        var count = _prices.Count - start + 1;
-        double offsetSum = 0;
-        for (var j = start; j < _prices.Count; j++) offsetSum += _prices[j] - value;
-        var meanOffset = offsetSum / count;
-        var absoluteSum = Math.Abs(meanOffset);
-        for (var j = start; j < _prices.Count; j++) absoluteSum += Math.Abs((_prices[j] - value) - meanOffset);
-        var stdDev = absoluteSum / count;
-        if (isFinal) _prices.TryAdd(value, out _);
-        var upper = middle + (stdDev * _stdDevFactor);
-        var lower = middle - (stdDev * _stdDevFactor);
+        var deviation = _deviation.Next(value, isFinal);
+        var upper = BollingerArithmetic.Band(middle, deviation, _stdDevFactor);
+        var lower = BollingerArithmetic.Band(middle, deviation, -_stdDevFactor);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1401,7 +1392,7 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Dispose()
     {
         _meanSmoother.Dispose();
-        _prices.Dispose();
+        _deviation.Dispose();
     }
 }
 

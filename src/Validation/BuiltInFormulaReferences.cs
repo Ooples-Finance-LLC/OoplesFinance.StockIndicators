@@ -324,6 +324,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MeanAbsoluteDeviationBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var madOptions = builtIn.CreateOptions();
+            var madKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < madKeys.Length; slot++)
+            {
+                var key = madKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMadBands(bars, madOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.InterquartileRangeBands)
         {
             var quartileOptions = builtIn.CreateOptions();

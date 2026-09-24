@@ -48,6 +48,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.MeanAbsoluteDeviationBands when spec.Options is MeanAbsoluteDeviationBandsSpecOptions mad => new MeanAbsoluteDeviationBandsState(mad.StdDevFactor, mad.MaType, mad.Length),
             IndicatorName.InterquartileRangeBands when spec.Options is InterquartileRangeBandsSpecOptions quartile => new InterquartileRangeBandsState(quartile.Length, quartile.Mult),
             IndicatorName.RangeBands when spec.Options is RangeBandsSpecOptions range => new RangeBandsState(range.StdDevFactor, range.MaType, range.Length),
             IndicatorName.MidpointOscillator when spec.Options is MidpointOscillatorSpecOptions midpoint => new MidpointOscillatorState(midpoint.MaType, midpoint.Length),

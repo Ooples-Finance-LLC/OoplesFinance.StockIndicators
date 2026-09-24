@@ -2839,5 +2839,29 @@
     "id": "range-band-midpoint-wrong-divisor",
     "before": "sum.Mean(2)",
     "after": "sum.Mean(1)"
+  },
+  {
+    "module": "mad-band",
+    "file": "src/Helpers/ExactMeanAbsoluteDeviationWindow.cs",
+    "filter": "FullyQualifiedName~MadBandNumericalTests",
+    "id": "mad-band-wrong-divisor",
+    "before": "deviations, n * n",
+    "after": "deviations, n"
+  },
+  {
+    "module": "mad-band",
+    "file": "src/Helpers/ExactMeanAbsoluteDeviationWindow.cs",
+    "filter": "FullyQualifiedName~MadBandNumericalTests",
+    "id": "mad-band-retain-expired",
+    "before": "for (var j = full ? 1 : 0;",
+    "after": "for (var j = 0;"
+  },
+  {
+    "module": "mad-band",
+    "file": "src/Helpers/ExactMeanAbsoluteDeviationWindow.cs",
+    "filter": "FullyQualifiedName~MadBandNumericalTests",
+    "id": "mad-band-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]

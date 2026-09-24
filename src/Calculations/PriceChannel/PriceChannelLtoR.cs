@@ -1375,20 +1375,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
         var devList = new List<double>(stockData.Count);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var start = Math.Max(0, i - Math.Max(1, length) + 1);
-            var count = i - start + 1;
-            var origin = inputList[i];
-            double offsetSum = 0;
-            for (var j = start; j <= i; j++) offsetSum += inputList[j] - origin;
-            var meanOffset = offsetSum / count;
-            double deviationSum = 0;
-            for (var j = start; j <= i; j++) deviationSum += Math.Abs((inputList[j] - origin) - meanOffset);
-            devList.Add(deviationSum / count);
-        }
+        using var deviation = new ExactMeanAbsoluteDeviationWindow(length);
+        for (var i = 0; i < stockData.Count; i++) devList.Add(deviation.Next(inputList[i], true));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1399,11 +1390,11 @@ public static partial class Calculations
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (currentStdDeviation * stdDevFactor);
+            var upperBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, stdDevFactor);
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (currentStdDeviation * stdDevFactor);
+            var lowerBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, -stdDevFactor);
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
