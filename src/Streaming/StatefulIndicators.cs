@@ -11776,13 +11776,12 @@ public sealed class ChandeCompositeMomentumIndexState : IStreamingIndicatorState
 [PrimaryOutput("Cfo")]
 public sealed class ChandeForecastOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly LinearRegressionState _regression;
+    private readonly ExactLinearFitWindow _regression;
     private readonly StreamingInputResolver _input;
-    private double _regressionInput;
 
     public ChandeForecastOscillatorState(int length = 14)
     {
-        _regression = new LinearRegressionState(length, _ => _regressionInput);
+        _regression = new ExactLinearFitWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -11791,15 +11790,12 @@ public sealed class ChandeForecastOscillatorState : IStreamingIndicatorState, ID
     public void Reset()
     {
         _regression.Reset();
-        _regressionInput = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        _regressionInput = value;
-        var linReg = _regression.Update(bar, isFinal, includeOutputs: false).Value;
-        var pf = value != 0 ? (value - linReg) * 100 / value : 0;
+        var pf = _regression.Next(value, isFinal).PercentResidual(value);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

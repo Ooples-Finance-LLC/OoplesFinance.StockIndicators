@@ -324,6 +324,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ChandeForecastOscillator)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedForecastOscillator(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MeanAbsoluteErrorBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
         {
             var maeOptions = builtIn.CreateOptions();

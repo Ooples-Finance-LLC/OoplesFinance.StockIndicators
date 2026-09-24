@@ -391,11 +391,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ctcv", PopulationVariance(returns, length).Select(v => Math.Sqrt(252 * v)).ToArray()));
                 });
             case IndicatorName.ChandeForecastOscillator:
-                return new("Cfo", new[] { "Cfo" }, bars =>
-                {
-                    var fit = RegressionEndpoints(Closes(bars), length);
-                    return Outputs(("Cfo", bars.Select((b, i) => b.Close == 0 ? 0 : 100 * (b.Close - fit[i]) / b.Close).ToArray()));
-                });
+                return new("Cfo", new[] { "Cfo" }, bars => Outputs(("Cfo", RoundedForecastOscillator(bars, length))));
             case IndicatorName.StochasticRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
                 if (kind == 0) return null;

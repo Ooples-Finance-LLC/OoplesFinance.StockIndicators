@@ -43,6 +43,17 @@ internal sealed class ExactLinearFitWindow : IDisposable
         internal double Last => At(_n - 1);
         internal double Next => At(_n + 1);
         internal double GlobalIntercept => At(_n - 1 - 2 * _index);
+        // Normalize the exact residual before rounding, even when the hidden endpoint overflows.
+        internal double PercentResidual(double value)
+        {
+            var price = ExactVarianceWindow.Units(value);
+            if (price.IsZero) return 0;
+            var denominator = _n.IsOne ? BigInteger.One : _n * _spread;
+            var numerator = _n.IsOne ? _sum : _sum * _spread + 3 * _covariance * (_n - 1);
+            return ExactMeanAccumulator.UnitRatio((100 * (price * denominator - numerator) * price.Sign) << 1074,
+                BigInteger.Abs(price) * denominator);
+        }
+
         // Offset the exact fitted endpoint before the final output rounding.
         internal double Offset(double value, double multiplier)
         {

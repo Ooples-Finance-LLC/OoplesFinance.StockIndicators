@@ -1714,23 +1714,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var linRegArray = pool.Rent(input.Length);
-
-        try
-        {
-            var linReg = linRegArray.AsSpan(0, input.Length);
-            MovingAverageCore.LinearRegression(input, linReg, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = input[i] != 0 ? ((input[i] - linReg[i]) / input[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(linRegArray);
-        }
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = regression.Next(input[i], true).PercentResidual(input[i]);
     }
 
     /// <summary>

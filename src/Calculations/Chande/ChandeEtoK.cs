@@ -71,15 +71,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
+        using var regression = new ExactLinearFitWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var currentLinReg = linRegList[i];
 
             var prevPf = GetLastOrDefault(pfList);
-            var pf = currentValue != 0 ? (currentValue - currentLinReg) * 100 / currentValue : 0;
+            var pf = regression.Next(currentValue, true).PercentResidual(currentValue);
             pfList.Add(pf);
 
             var signal = GetCompareSignal(pf, prevPf);

@@ -2887,5 +2887,29 @@
     "id": "mae-band-preview-commits",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "forecast-oscillator",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~ChandeForecastNumericalTests",
+    "id": "forecast-oscillator-wrong-percent",
+    "before": "(100 * (price * denominator - numerator)",
+    "after": "(10 * (price * denominator - numerator)"
+  },
+  {
+    "module": "forecast-oscillator",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~ChandeForecastNumericalTests",
+    "id": "forecast-oscillator-reversed-residual",
+    "before": "price * denominator - numerator",
+    "after": "numerator - price * denominator"
+  },
+  {
+    "module": "forecast-oscillator",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "filter": "FullyQualifiedName~ChandeForecastNumericalTests",
+    "id": "forecast-oscillator-loses-reflection",
+    "before": "* price.Sign) << 1074",
+    "after": "* 1) << 1074"
   }
 ]

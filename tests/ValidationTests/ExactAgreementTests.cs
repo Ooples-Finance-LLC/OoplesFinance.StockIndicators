@@ -55,7 +55,6 @@ public sealed class ExactAgreementTests
         "SmoothedVolatilityBands.LowerBand",
         "SmoothedVolatilityBands.UpperBand",
 
-        "ChandeForecastOscillator.Cfo",
         "Cmf.Cmf",
         "DemarkPressureRatioV1.Dpr",
         "DemarkPressureRatioV2.Dpr",
