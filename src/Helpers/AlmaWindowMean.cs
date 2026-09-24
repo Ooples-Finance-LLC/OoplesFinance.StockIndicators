@@ -19,7 +19,10 @@ internal sealed class AlmaWindowMean : IDisposable
         {
             // Scale each location before multiplying by sigma. This avoids an
             // overflowing offset*(length-1) or a squared window width.
-            var distance = ((length - 1d - lag) / length - offset * ((length - 1d) / length)) * sigma;
+            // At the midpoint, center first to preserve equal mirrored taps.
+            var distance = offset == .5 // NOSONAR: S1244 - Only the exact midpoint selects the symmetric Gaussian contract.
+                ? ((length - 1d) / 2 - lag) / length * sigma
+                : ((length - 1d - lag) / length - offset * ((length - 1d) / length)) * sigma;
             var weight = Math.Exp(-0.5 * distance * distance);
             _weights[lag] = weight;
             denominator.Add(weight);

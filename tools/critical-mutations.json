@@ -2208,8 +2208,8 @@
     "module": "alma",
     "file": "src/Helpers/AlmaWindowMean.cs",
     "scope": "internal sealed class AlmaWindowMean",
-    "before": "var distance = ((length - 1d - lag) / length",
-    "after": "var distance = (lag / (double)length",
+    "before": ": ((length - 1d - lag) / length",
+    "after": ": (lag / (double)length",
     "filter": "FullyQualifiedName~AlmaNumericalTests"
   },
   {
@@ -2353,5 +2353,23 @@
     "before": "            result.AddRange(HammingCompositionCases(type));",
     "after": "            // Fault: component configurations are not discovered.",
     "filter": "FullyQualifiedName~HammingCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "hamming-breaks-tap-symmetry",
+    "module": "symmetric-kernels",
+    "file": "src/Helpers/HammingWindowMean.cs",
+    "scope": "internal HammingWindowMean(",
+    "before": "Math.Min(lag, length - 1 - lag) / (length - 1d)",
+    "after": "lag / (length - 1d)",
+    "filter": "FullyQualifiedName~SymmetricKernelNumericalTests"
+  },
+  {
+    "id": "alma-breaks-centered-symmetry",
+    "module": "symmetric-kernels",
+    "file": "src/Helpers/AlmaWindowMean.cs",
+    "scope": "internal AlmaWindowMean(",
+    "before": "? ((length - 1d) / 2 - lag) / length * sigma",
+    "after": "? ((length - 1d - lag) / length - offset * ((length - 1d) / length)) * sigma",
+    "filter": "FullyQualifiedName~SymmetricKernelNumericalTests"
   }
 ]

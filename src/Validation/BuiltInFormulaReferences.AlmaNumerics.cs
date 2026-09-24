@@ -11,7 +11,9 @@ internal static partial class BuiltInFormulaReferences
         // final division; missing history is zero, with the full denominator.
         var weights = Enumerable.Range(0, length).Select(j =>
         {
-            var location = (j / (double)length - offset * ((length - 1d) / length)) * sigma;
+            var location = offset == .5 // NOSONAR: S1244 - Only the exact midpoint selects the symmetric Gaussian contract.
+                ? (j - (length - 1d) / 2) / length * sigma
+                : (j / (double)length - offset * ((length - 1d) / length)) * sigma;
             return ReferenceFraction.FromDouble(Math.Exp(-0.5 * location * location));
         }).ToArray();
         var denominator = weights.Aggregate(new ReferenceFraction(0), (s, w) => s + w);

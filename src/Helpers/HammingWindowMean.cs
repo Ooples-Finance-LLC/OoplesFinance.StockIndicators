@@ -16,7 +16,8 @@ internal sealed class HammingWindowMean : IDisposable
         var denominator = new ExactMeanAccumulator();
         for (var lag = 0; lag < length; lag++)
         {
-            var position = length == 1 ? 0 : lag / (length - 1d);
+            // Mirror the phase itself so paired coefficients cancel exactly.
+            var position = length == 1 ? 0 : Math.Min(lag, length - 1 - lag) / (length - 1d);
             // Interpolate the phase without forming 2*pedestal, which can
             // overflow even when every interpolated phase is representable.
             var phase = pedestal * (1 - 2 * position) + Math.PI * position;
