@@ -643,11 +643,6 @@ OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.DetrendedPriceOscillator/default
-OoplesFinance.StockIndicators.Indicators.DetrendedPriceOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.DetrendedPriceOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DetrendedPriceOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.DetrendedPriceOscillator/weighted-average
 OoplesFinance.StockIndicators.Indicators.DetrendedSyntheticPrice/default
 OoplesFinance.StockIndicators.Indicators.DetrendedSyntheticPrice/longer-periods
 OoplesFinance.StockIndicators.Indicators.DetrendedSyntheticPrice/minimum-periods
@@ -709,10 +704,6 @@ OoplesFinance.StockIndicators.Indicators.DownsideDeviation/default
 OoplesFinance.StockIndicators.Indicators.DownsideDeviation/longer-periods
 OoplesFinance.StockIndicators.Indicators.DownsideDeviation/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DownsideDeviation/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Dpo/default
-OoplesFinance.StockIndicators.Indicators.Dpo/longer-periods
-OoplesFinance.StockIndicators.Indicators.Dpo/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Dpo/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/default
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/longer-length1
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/longer-length2

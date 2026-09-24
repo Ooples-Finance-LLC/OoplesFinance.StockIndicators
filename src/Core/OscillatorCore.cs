@@ -732,34 +732,14 @@ internal static class OscillatorCore
     internal static void DetrendedPriceOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var offset = (length / 2) + 1;
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-
-        try
+        var resolved = Math.Max(1, length);
+        var offset = MathHelper.MinOrMax((int)Math.Ceiling(resolved / 2d + 1));
+        using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(resolved);
+        for (var i = 0; i < input.Length; i++)
         {
-            var sma = smaArray.AsSpan(0, input.Length);
-            MovingAverageCore.SimpleMovingAverage(input, sma, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i >= offset)
-                {
-                    output[i] = input[i - offset] - sma[i];
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
+            var average = mean.Next(input[i], true);
+            output[i] = (i >= offset ? input[i - offset] : 0) - average;
         }
     }
 

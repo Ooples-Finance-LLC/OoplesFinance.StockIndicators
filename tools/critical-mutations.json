@@ -2398,5 +2398,32 @@
     "before": "var range = bull ? highRange.Span : lowRange.Span;",
     "after": "var range = bull ? SpanCompat.AsReadOnlySpan(data.HighPrices) : SpanCompat.AsReadOnlySpan(data.LowPrices);",
     "filter": "FullyQualifiedName~ElderRayNumericalTests.LegacySelectedInputUsesSyntheticRangeForBothPowers"
+  },
+  {
+    "id": "dpo-floors-odd-lag",
+    "module": "dpo",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedPriceOscillator(",
+    "before": "var offset = MathHelper.MinOrMax((int)Math.Ceiling(resolved / 2d + 1));",
+    "after": "var offset = MathHelper.MinOrMax(resolved / 2 + 1);",
+    "filter": "FullyQualifiedName~DpoNumericalTests.LagAndStartupAreExplicit"
+  },
+  {
+    "id": "dpo-blanks-startup",
+    "module": "dpo",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedPriceOscillator(",
+    "before": "output[i] = (i >= offset ? input[i - offset] : 0) - average;",
+    "after": "output[i] = i >= offset ? input[i - offset] - average : 0;",
+    "filter": "FullyQualifiedName~DpoNumericalTests.LagAndStartupAreExplicit"
+  },
+  {
+    "id": "dpo-preview-advances-history",
+    "module": "dpo",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DetrendedPriceOscillatorState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DpoNumericalTests.EveryRouteMatchesTheIndependentReference"
   }
 ]

@@ -19677,7 +19677,12 @@ internal static partial class IndicatorCompute
 
         using var averageBuffer = context.Rent(count);
         var average = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length, inputSpan, average);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
+        {
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < count; i++) average[i] = mean.Next(inputSpan[i], true);
+        }
+        else MovingAverage(data, maType, length, inputSpan, average);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;

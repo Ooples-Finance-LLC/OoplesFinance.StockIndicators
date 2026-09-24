@@ -6588,7 +6588,9 @@ public sealed class DetrendedPriceOscillatorState : IStreamingIndicatorState, ID
     {
         var resolved = Math.Max(1, length);
         _prevPeriods = MathHelper.MinOrMax((int)Math.Ceiling(((double)resolved / 2) + 1));
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _smoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(resolved)
+            : MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _window = new PooledRingBuffer<double>(_prevPeriods);
     }

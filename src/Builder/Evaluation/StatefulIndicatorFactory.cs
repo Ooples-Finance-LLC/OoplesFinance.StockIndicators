@@ -394,6 +394,7 @@ internal static partial class StatefulIndicatorFactory
             TsiSpecOptions tsi => new TrueStrengthIndexState(maType: tsi.MaType, length1: tsi.LongLength, length2: tsi.ShortLength),
             AroonSpecOptions aroon => new AroonOscillatorState(length: aroon.Length),
             DpoSpecOptions dpo => new DetrendedPriceOscillatorState(length: dpo.Length),
+            DetrendedPriceOscillatorSpecOptions detrended => new DetrendedPriceOscillatorState(detrended.MaType, detrended.Length),
             TrixSpecOptions trix => new TrixState(length: trix.Length, maType: trix.MaType),
             UltimateOscillatorSpecOptions uo => new UltimateOscillatorState(length1: uo.Length1, length2: uo.Length2, length3: uo.Length3),
 

@@ -671,7 +671,13 @@ public static partial class Calculations
 
         var prevPeriods = MinOrMax((int)Math.Ceiling(((double)length / 2) + 1));
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        List<double> smaList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            smaList = inputList.Select(value => mean.Next(value, true)).ToList();
+        }
+        else smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
