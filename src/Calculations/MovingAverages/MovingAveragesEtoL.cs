@@ -552,7 +552,8 @@ public static partial class Calculations
         var callerSeries = stockData.CaptureInputSeries();
         var wmaList = CalculateWeightedMovingAverage(stockData, length).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
-        var smaList = CalculateSimpleMovingAverage(stockData, length).ChainedValues;
+        using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        var smaList = inputList.Select(value => simple.Next(value, true)).ToArray();
         stockData.RestoreInputSeries(callerSeries);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -563,7 +564,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevLma = GetLastOrDefault(lmaList);
-            var lma = (2 * currentWma) - currentSma;
+            var lma = LeoAverage.Combine(currentWma, currentSma);
             lmaList.Add(lma);
 
             var signal = GetCompareSignal(currentValue - lma, prevValue - prevLma);

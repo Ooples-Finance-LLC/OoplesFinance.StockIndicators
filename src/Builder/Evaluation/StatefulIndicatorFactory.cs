@@ -352,6 +352,7 @@ internal static partial class StatefulIndicatorFactory
             KamaSpecOptions kama => new KaufmanAdaptiveMovingAverageState(kama.Length),
             VidyaSpecOptions vidya => new VariableIndexDynamicAverageState(maType: vidya.MaType, length: vidya.Length),
             VariableIndexDynamicAverageSpecOptions dynamicAverage => new VariableIndexDynamicAverageState(dynamicAverage.MaType, dynamicAverage.Length),
+            LeoMovingAverageSpecOptions leo => new LeoMovingAverageState(leo.Length),
             AlmaSpecOptions alma => new ArnaudLegouxMovingAverageState(alma.Length),
             LsmaSpecOptions lsma => new LeastSquaresMovingAverageState(lsma.Length),
             FramaSpecOptions frama => new EhlersFractalAdaptiveMovingAverageState(frama.Length),

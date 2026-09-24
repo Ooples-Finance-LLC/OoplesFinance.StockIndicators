@@ -116,6 +116,8 @@ internal static class StreamingIndicatorFactory
                 => new EhlersHannMovingAverageState(hann.Length),
             IndicatorName.SineWeightedMovingAverage when spec.Options is SineWmaSpecOptions sine
                 => new SineWeightedMovingAverageState(sine.Length),
+            IndicatorName.LeoMovingAverage when spec.Options is LeoMovingAverageSpecOptions leo
+                => new LeoMovingAverageState(leo.Length),
             IndicatorName.ArnaudLegouxMovingAverage when spec.Options is AlmaSpecOptions alma
                 => new ArnaudLegouxMovingAverageState(alma.Length),
             IndicatorName.NaturalMovingAverage when spec.Options is NaturalMaSpecOptions natural

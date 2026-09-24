@@ -2237,5 +2237,23 @@
     "before": "            result.AddRange(AlmaCompositionCases(type));",
     "after": "            // Fault: new component configurations are not discovered.",
     "filter": "FullyQualifiedName~AlmaCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "leo-intermediate-overflow",
+    "module": "leo",
+    "file": "src/Helpers/LeoAverage.cs",
+    "scope": "internal static double Combine(",
+    "before": "return sum.Mean(1);",
+    "after": "return 2 * weighted - simple;",
+    "filter": "FullyQualifiedName~LeoNumericalTests"
+  },
+  {
+    "id": "leo-wrong-extrapolation",
+    "module": "leo",
+    "file": "src/Helpers/LeoAverage.cs",
+    "scope": "internal static double Combine(",
+    "before": "sum.Add(weighted, 2);",
+    "after": "sum.Add(weighted, 1);",
+    "filter": "FullyQualifiedName~LeoNumericalTests"
   }
 ]

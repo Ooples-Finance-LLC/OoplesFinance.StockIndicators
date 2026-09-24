@@ -251,6 +251,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.Reference(0, bars => RoundedHannMean(bars, period), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedLeoMean(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ArnaudLegouxMovingAverage)
         {
             var almaOptions = builtIn.CreateOptions();

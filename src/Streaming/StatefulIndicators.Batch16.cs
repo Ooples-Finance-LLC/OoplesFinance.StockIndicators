@@ -955,7 +955,7 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
     public LeoMovingAverageState(int length = 14)
     {
         _wma = new WmaState(length);
-        _sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, Math.Max(1, length));
+        _sma = new RoundedSimpleMovingAverageSmoother(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -972,7 +972,7 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
         var value = _input.GetValue(bar);
         var wma = _wma.GetNext(value, isFinal);
         var sma = _sma.Next(value, isFinal);
-        var lma = (2 * wma) - sma;
+        var lma = LeoAverage.Combine(wma, sma);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

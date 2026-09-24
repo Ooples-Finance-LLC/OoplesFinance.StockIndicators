@@ -2925,11 +2925,12 @@ internal static class MovingAverageCore
             var sma = smaBuffer.AsSpan(0, input.Length);
 
             WeightedMovingAverage(input, wma, length);
-            SimpleMovingAverage(input, sma, length);
+            using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < input.Length; i++) sma[i] = simple.Next(input[i], true);
 
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * wma[i]) - sma[i];
+                output[i] = LeoAverage.Combine(wma[i], sma[i]);
             }
         }
         finally
