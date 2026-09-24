@@ -2515,7 +2515,7 @@ public sealed class RangeIdentifierState : IStreamingIndicatorState
         var prevDown = _hasPrev ? _prevDown : 0;
         var up = value < prevUp && value > prevDown ? prevUp : bar.High;
         var down = value < prevUp && value > prevDown ? prevDown : bar.Low;
-        var middle = (up + down) / 2;
+        var middle = PriceMean.Of(up, down);
 
         if (isFinal)
         {

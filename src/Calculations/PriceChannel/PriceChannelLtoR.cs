@@ -956,7 +956,7 @@ public static partial class Calculations
             downList.Add(down);
 
             var prevMid = GetLastOrDefault(midList);
-            var mid = (up + down) / 2;
+            var mid = PriceMean.Of(up, down);
             midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);

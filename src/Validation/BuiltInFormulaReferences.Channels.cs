@@ -365,7 +365,7 @@ internal static partial class BuiltInFormulaReferences
                         lower[i] = bars[anchor].Low;
                     }
                     return Outputs(("UpperBand", upper), ("LowerBand", lower),
-                        ("MiddleBand", upper.Zip(lower, (u, l) => (u + l) / 2).ToArray()));
+                        ("MiddleBand", upper.Zip(lower, (u, l) => ExactPriceMean(u, l)).ToArray()));
                 });
             case IndicatorName.MovingAverageDisplacedEnvelope:
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>

@@ -2084,5 +2084,23 @@
     "before": "StochasticSmooth(data, maType, length, input, maSpan);",
     "after": "MovingAverage(data, maType, length, input, maSpan);",
     "filter": "FullyQualifiedName~EnvelopeNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "range-identifier-midpoint-overflow",
+    "module": "range-identifier",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class RangeIdentifierState",
+    "before": "var middle = PriceMean.Of(up, down);",
+    "after": "var middle = (up + down) / 2;",
+    "filter": "FullyQualifiedName~RangeIdentifierNumericalTests.BreakoutTiesReplaceTheAnchorAndFiniteBoundsKeepFiniteMidpoints"
+  },
+  {
+    "id": "range-identifier-retains-upper-tie",
+    "module": "range-identifier",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class RangeIdentifierState",
+    "before": "var up = value < prevUp && value > prevDown ? prevUp : bar.High;",
+    "after": "var up = value <= prevUp && value > prevDown ? prevUp : bar.High;",
+    "filter": "FullyQualifiedName~RangeIdentifierNumericalTests.BreakoutTiesReplaceTheAnchorAndFiniteBoundsKeepFiniteMidpoints"
   }
 ]
