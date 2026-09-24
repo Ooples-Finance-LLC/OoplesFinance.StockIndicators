@@ -3049,5 +3049,32 @@
     "id": "percentage-alias-unit-scale",
     "before": "OscillatorCore.RateOfChange(input, output, Math.Max(1, length));",
     "after": "OscillatorCore.RateOfChange(input, output, Math.Max(1, length));\n        for (var i = 0; i < input.Length; i++) output[i] /= 100;"
+  },
+  {
+    "module": "disparity",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateDisparityIndex",
+    "filter": "FullyQualifiedName~DisparityNumericalTests",
+    "id": "disparity-intermediate-overflow",
+    "before": "RoundedPercentageChange.Of(currentValue, currentSma)",
+    "after": "currentSma == 0 ? 0 : (currentValue - currentSma) / currentSma * 100"
+  },
+  {
+    "module": "disparity",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DisparityIndexState",
+    "filter": "FullyQualifiedName~DisparityNumericalTests",
+    "id": "disparity-unrounded-streaming-mean",
+    "before": "maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(length) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length))",
+    "after": "MovingAverageSmootherFactory.Create(maType, Math.Max(1, length))"
+  },
+  {
+    "module": "disparity",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DisparityIndexState",
+    "filter": "FullyQualifiedName~DisparityNumericalTests",
+    "id": "disparity-wrong-denominator",
+    "before": "RoundedPercentageChange.Of(value, sma)",
+    "after": "RoundedPercentageChange.Of(sma, value)"
   }
 ]

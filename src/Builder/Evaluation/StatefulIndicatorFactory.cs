@@ -99,6 +99,7 @@ internal static partial class StatefulIndicatorFactory
             EarningSupportResistanceLevelsSpecOptions => new EarningSupportResistanceLevelsState(),
             PercentageTrailingStopsSpecOptions percent => new PercentageTrailingStopsState(percent.Length, percent.Pct),
             PerformanceIndexSpecOptions performance => new PerformanceIndexState(performance.Length),
+            DisparityIndexSpecOptions disparity => new DisparityIndexState(disparity.MaType, disparity.Length),
             PercentChangeSpecOptions change => new PerformanceIndexState(change.Length),
             PercentageChangeSpecOptions percentage => new PerformanceIndexState(percentage.Length),
             KaufmanAdaptiveBandsSpecOptions adaptive => new KaufmanAdaptiveBandsState(adaptive.Length, adaptive.StdDevFactor),

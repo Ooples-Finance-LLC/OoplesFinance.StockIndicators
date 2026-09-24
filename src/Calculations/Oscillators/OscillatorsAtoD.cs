@@ -1797,7 +1797,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1805,7 +1805,7 @@ public static partial class Calculations
             var currentSma = smaList[i];
 
             var prevDisparityIndex = GetLastOrDefault(disparityIndexList);
-            var disparityIndex = currentSma != 0 ? (currentValue - currentSma) / currentSma * 100 : 0;
+            var disparityIndex = RoundedPercentageChange.Of(currentValue, currentSma);
             disparityIndexList.Add(disparityIndex);
 
             var signal = GetCompareSignal(disparityIndex, prevDisparityIndex);

@@ -2315,11 +2315,11 @@ internal static class OscillatorCore
         try
         {
             var ma = maArray.AsSpan(0, close.Length);
-            MovingAverageCore.SimpleMovingAverage(close, ma, length);
+            BollingerArithmetic.Mean(close, ma, length);
 
             for (var i = 0; i < close.Length; i++)
             {
-                output[i] = ma[i] != 0 ? ((close[i] - ma[i]) / ma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(close[i], ma[i]);
             }
         }
         finally

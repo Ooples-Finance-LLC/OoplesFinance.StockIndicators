@@ -5703,13 +5703,14 @@ internal static partial class IndicatorCompute
 
         using var averageBuffer = context.Rent(count);
         var average = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length, inputSpan, average);
+        if (maType == MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(inputSpan, average, length);
+        else MovingAverage(data, maType, length, inputSpan, average);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = average[i] != 0 ? (inputSpan[i] - average[i]) / average[i] * 100 : 0;
+            output[i] = RoundedPercentageChange.Of(inputSpan[i], average[i]);
         }
 
         return buffer;

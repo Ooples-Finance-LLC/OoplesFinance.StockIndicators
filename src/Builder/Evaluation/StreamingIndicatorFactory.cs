@@ -48,6 +48,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.DisparityIndex when spec.Options is DisparityIndexSpecOptions disparity => new DisparityIndexState(disparity.MaType, disparity.Length),
             IndicatorName.PerformanceIndex when spec.Options is PerformanceIndexSpecOptions performance => new PerformanceIndexState(performance.Length),
             IndicatorName.PerformanceIndex when spec.Options is PercentChangeSpecOptions percent => new PerformanceIndexState(percent.Length),
             IndicatorName.PerformanceIndex when spec.Options is PercentageChangeSpecOptions percentage => new PerformanceIndexState(percentage.Length),

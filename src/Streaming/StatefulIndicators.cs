@@ -7784,7 +7784,7 @@ public sealed class DisparityIndexState : IStreamingIndicatorState, IDisposable
 
     public DisparityIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(length) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -7799,7 +7799,7 @@ public sealed class DisparityIndexState : IStreamingIndicatorState, IDisposable
     {
         var value = _input.GetValue(bar);
         var sma = _smoother.Next(value, isFinal);
-        var disparity = sma != 0 ? (value - sma) / sma * 100 : 0;
+        var disparity = RoundedPercentageChange.Of(value, sma);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
