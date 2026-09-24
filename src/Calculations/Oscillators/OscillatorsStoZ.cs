@@ -253,30 +253,10 @@ public static partial class Calculations
         List<double> skewnessList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactSkewnessWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double skewness = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                double sumSquaredDev = 0;
-                double sumCubedDev = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var dev = inputList[j] - mean;
-                    sumSquaredDev += dev * dev;
-                    sumCubedDev += dev * dev * dev;
-                }
-
-                var stdDev = Sqrt(sumSquaredDev / length);
-                skewness = stdDev != 0 ? sumCubedDev / length / (stdDev * stdDev * stdDev) : 0;
-            }
+            var skewness = window.Next(inputList[i], true);
 
             skewnessList.Add(skewness);
 

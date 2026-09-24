@@ -2655,5 +2655,29 @@
     "file": "src/Helpers/ExactPopulationWindow.cs",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "skewness",
+    "file": "src/Helpers/ExactSkewnessWindow.cs",
+    "filter": "FullyQualifiedName~SkewnessNumericalTests",
+    "id": "skewness-uncentered-third",
+    "before": " + 2 * sum * sum * sum",
+    "after": ""
+  },
+  {
+    "module": "skewness",
+    "file": "src/Helpers/ExactSkewnessWindow.cs",
+    "filter": "FullyQualifiedName~SkewnessNumericalTests",
+    "id": "skewness-unsigned-result",
+    "before": "third.Sign * ExactPopulationDeviation.RootRatio",
+    "after": "ExactPopulationDeviation.RootRatio"
+  },
+  {
+    "module": "skewness",
+    "file": "src/Helpers/ExactSkewnessWindow.cs",
+    "filter": "FullyQualifiedName~SkewnessNumericalTests",
+    "id": "skewness-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]

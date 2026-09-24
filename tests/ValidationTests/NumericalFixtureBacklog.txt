@@ -3710,10 +3710,6 @@ OoplesFinance.StockIndicators.Indicators.SimplePriceZone/default
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/longer-periods
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Skewness/default
-OoplesFinance.StockIndicators.Indicators.Skewness/longer-periods
-OoplesFinance.StockIndicators.Indicators.Skewness/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Skewness/shorter-periods
 OoplesFinance.StockIndicators.Indicators.SmartEnvelope/default
 OoplesFinance.StockIndicators.Indicators.SmartEnvelope/longer-periods
 OoplesFinance.StockIndicators.Indicators.SmartEnvelope/minimum-periods

@@ -8576,39 +8576,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateSkewness returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var mean = sum / length;
-
-            // Calculate variance and third moment
-            double sumSquaredDev = 0;
-            double sumCubedDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var dev = input[j] - mean;
-                sumSquaredDev += dev * dev;
-                sumCubedDev += dev * dev * dev;
-            }
-            var variance = sumSquaredDev / length;
-            var stdDev = Math.Sqrt(variance);
-
-            // Skewness = E[(X-μ)³] / σ³
-            output[i] = stdDev != 0 ? (sumCubedDev / length) / (stdDev * stdDev * stdDev) : 0;
-        }
+        using var window = new ExactSkewnessWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

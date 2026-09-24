@@ -169,14 +169,12 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Skewness")]
 public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactSkewnessWindow _window;
     private readonly StreamingInputResolver _input;
 
     public SkewnessState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactSkewnessWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -184,48 +182,14 @@ public sealed class SkewnessState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double skewness = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _length;
-            double sumSquaredDev = 0;
-            double sumCubedDev = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var dev = _window[i] - mean;
-                sumSquaredDev += dev * dev;
-                sumCubedDev += dev * dev * dev;
-            }
-
-            var currentDev = value - mean;
-            sumSquaredDev += currentDev * currentDev;
-            sumCubedDev += currentDev * currentDev * currentDev;
-
-            var stdDev = Sqrt(sumSquaredDev / _length);
-            skewness = stdDev != 0 ? sumCubedDev / _length / (stdDev * stdDev * stdDev) : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var skewness = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

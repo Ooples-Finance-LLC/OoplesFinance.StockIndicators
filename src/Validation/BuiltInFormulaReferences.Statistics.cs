@@ -376,17 +376,7 @@ internal static partial class BuiltInFormulaReferences
                     return ExactPriceMean(ordered[(length - 1) / 2], ordered[length / 2]);
                 }).ToArray())));
             case IndicatorName.Skewness:
-                return new("Skewness", new[] { "Skewness" }, bars => Outputs(("Skewness", bars.Select((_, i) =>
-                {
-                    if (i + 1 < length) return 0;
-                    var values = Window(bars, i, length).Select(b => b.Close).ToArray();
-                    var mean = values[0] + values.Average(v => v - values[0]);
-                    var deviations = values.Select(v => v - mean).ToArray();
-                    var scale = deviations.Max(v => Math.Abs(v));
-                    if (scale == 0) return 0;
-                    var normalized = deviations.Select(v => v / scale).ToArray();
-                    return normalized.Average(v => v * v * v) / Math.Pow(normalized.Average(v => v * v), 1.5);
-                }).ToArray())));
+                return new("Skewness", new[] { "Skewness" }, bars => Outputs(("Skewness", RoundedSkewness(bars, length))));
             case IndicatorName.TypicalPriceVolatility:
                 return new("Tpv", new[] { "Tpv" }, bars => Outputs(("Tpv",
                     PopulationVariance(bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray(), length)
