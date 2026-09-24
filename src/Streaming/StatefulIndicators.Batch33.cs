@@ -14,14 +14,12 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Cv")]
 public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactCoefficientWindow _window;
     private readonly StreamingInputResolver _input;
 
     public CoefficientOfVariationState(int length = 20)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactCoefficientWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -29,45 +27,14 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double cv = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_length - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _length;
-            double variance = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var diff = _window[i] - mean;
-                variance += diff * diff;
-            }
-
-            var currentDiff = value - mean;
-            variance += currentDiff * currentDiff;
-
-            var stdDev = Sqrt(variance / _length);
-            cv = mean != 0 ? stdDev / mean * 100 : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var cv = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

@@ -382,13 +382,7 @@ internal static partial class BuiltInFormulaReferences
                     PopulationVariance(bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray(), length)
                         .Select(Math.Sqrt).ToArray())));
             case IndicatorName.CoefficientOfVariation:
-                return new("Cv", new[] { "Cv" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var variance = PopulationVariance(prices, length);
-                    var mean = Average(prices, length, 1);
-                    return Outputs(("Cv", mean.Select((v, i) => v == 0 ? 0 : 100 * Math.Sqrt(variance[i]) / v).ToArray()));
-                });
+                return new("Cv", new[] { "Cv" }, bars => Outputs(("Cv", RoundedCoefficient(bars, length))));
             case IndicatorName.DownsideDeviation:
                 var target = Number(options, 0, "TargetReturn");
                 return new("Dd", new[] { "Dd" }, bars => Outputs(("Dd", bars.Select((_, i) =>

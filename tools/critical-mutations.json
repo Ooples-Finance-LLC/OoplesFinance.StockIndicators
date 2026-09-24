@@ -2679,5 +2679,29 @@
     "id": "skewness-preview-commits",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "coefficient",
+    "file": "src/Helpers/ExactCoefficientWindow.cs",
+    "filter": "FullyQualifiedName~CoefficientOfVariationNumericalTests",
+    "id": "coefficient-unsigned-mean",
+    "before": "sum.Sign *",
+    "after": "1 *"
+  },
+  {
+    "module": "coefficient",
+    "file": "src/Helpers/ExactCoefficientWindow.cs",
+    "filter": "FullyQualifiedName~CoefficientOfVariationNumericalTests",
+    "id": "coefficient-wrong-percent",
+    "before": "10000 *",
+    "after": "100 *"
+  },
+  {
+    "module": "coefficient",
+    "file": "src/Helpers/ExactCoefficientWindow.cs",
+    "filter": "FullyQualifiedName~CoefficientOfVariationNumericalTests",
+    "id": "coefficient-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]

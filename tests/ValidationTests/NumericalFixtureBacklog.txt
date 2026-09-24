@@ -454,10 +454,6 @@ OoplesFinance.StockIndicators.Indicators.Cmf/default
 OoplesFinance.StockIndicators.Indicators.Cmf/longer-periods
 OoplesFinance.StockIndicators.Indicators.Cmf/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Cmf/shorter-periods
-OoplesFinance.StockIndicators.Indicators.CoefficientOfVariation/default
-OoplesFinance.StockIndicators.Indicators.CoefficientOfVariation/longer-periods
-OoplesFinance.StockIndicators.Indicators.CoefficientOfVariation/minimum-periods
-OoplesFinance.StockIndicators.Indicators.CoefficientOfVariation/shorter-periods
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/default
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/minimum-periods

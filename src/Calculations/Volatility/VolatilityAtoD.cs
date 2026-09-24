@@ -67,28 +67,10 @@ public static partial class Calculations
         List<double> cvList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactCoefficientWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double cv = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                var stdDev = Sqrt(variance / length);
-                cv = mean != 0 ? stdDev / mean * 100 : 0;
-            }
+            var cv = window.Next(inputList[i], true);
 
             cvList.Add(cv);
 

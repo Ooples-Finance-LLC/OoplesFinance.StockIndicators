@@ -324,6 +324,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.CoefficientOfVariation)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedCoefficient(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.Skewness)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

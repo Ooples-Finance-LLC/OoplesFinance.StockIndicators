@@ -397,34 +397,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            StandardDeviation(input, stdDev, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                // Calculate mean
-                double sum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sum += input[j];
-                }
-                var mean = sum / length;
-
-                output[i] = mean != 0 ? (stdDev[i] / mean) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        using var window = new ExactCoefficientWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

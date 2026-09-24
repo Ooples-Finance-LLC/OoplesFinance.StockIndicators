@@ -34,7 +34,6 @@ public sealed class ExactAgreementTests
         "BollingerBandsWithAtrPct.LowerBand",
         "BollingerBandsWithAtrPct.UpperBand",
         "CloseToCloseVolatility.Ctcv",
-        "CoefficientOfVariation.Cv",
         "CommoditySelectionIndex.Signal",
         "DampedSineWaveWeightedFilter.Dswwf",
         "EhlersCommodityChannelIndexInverseFisherTransform.Eiftcci",
