@@ -2911,5 +2911,29 @@
     "id": "forecast-oscillator-loses-reflection",
     "before": "* price.Sign) << 1074",
     "after": "* 1) << 1074"
+  },
+  {
+    "module": "displaced-envelope",
+    "file": "src/Helpers/RoundedPercentageBand.cs",
+    "filter": "FullyQualifiedName~DisplacedEnvelopeNumericalTests",
+    "id": "displaced-wrong-percent-scale",
+    "before": "return value.Mean(100);",
+    "after": "return value.Mean(10);"
+  },
+  {
+    "module": "displaced-envelope",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~DisplacedEnvelopeNumericalTests",
+    "id": "displaced-lookahead",
+    "before": "var prevEma = _emaWindow.Count >= _length2 ? _emaWindow[0] : 0;",
+    "after": "var prevEma = _emaWindow.Count >= _length2 ? ema : 0;"
+  },
+  {
+    "module": "displaced-envelope",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~DisplacedEnvelopeNumericalTests",
+    "id": "displaced-middle-from-rounded-bands",
+    "before": "var middle = prevEma;",
+    "after": "var middle = (upper + lower) / 2;"
   }
 ]

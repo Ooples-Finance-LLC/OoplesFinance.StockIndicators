@@ -1416,9 +1416,9 @@ public sealed class MovingAverageDisplacedEnvelopeState : IStreamingIndicatorSta
         var value = _input.GetValue(bar);
         var ema = _emaSmoother.Next(value, isFinal);
         var prevEma = _emaWindow.Count >= _length2 ? _emaWindow[0] : 0;
-        var upper = prevEma * ((100 + _pct) / 100);
-        var lower = prevEma * ((100 - _pct) / 100);
-        var middle = (upper + lower) / 2;
+        var upper = RoundedPercentageBand.Percent(prevEma, _pct, 1);
+        var lower = RoundedPercentageBand.Percent(prevEma, _pct, -1);
+        var middle = prevEma;
 
         if (isFinal)
         {

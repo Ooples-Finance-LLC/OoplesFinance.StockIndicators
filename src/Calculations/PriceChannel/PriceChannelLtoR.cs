@@ -1424,6 +1424,7 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageDisplacedEnvelope(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 9, int length2 = 13, double pct = 0.5)
     {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
         List<double> upperEnvelopeList = new(stockData.Count);
         List<double> lowerEnvelopeList = new(stockData.Count);
         List<double> middleEnvelopeList = new(stockData.Count);
@@ -1439,15 +1440,15 @@ public static partial class Calculations
             var prevEma = i >= length2 ? emaList[i - length2] : 0;
 
             var prevUpperEnvelope = GetLastOrDefault(upperEnvelopeList);
-            var upperEnvelope = prevEma * ((100 + pct) / 100);
+            var upperEnvelope = RoundedPercentageBand.Percent(prevEma, pct, 1);
             upperEnvelopeList.Add(upperEnvelope);
 
             var prevLowerEnvelope = GetLastOrDefault(lowerEnvelopeList);
-            var lowerEnvelope = prevEma * ((100 - pct) / 100);
+            var lowerEnvelope = RoundedPercentageBand.Percent(prevEma, pct, -1);
             lowerEnvelopeList.Add(lowerEnvelope);
 
             var prevMiddleEnvelope = GetLastOrDefault(middleEnvelopeList);
-            var middleEnvelope = (upperEnvelope + lowerEnvelope) / 2;
+            var middleEnvelope = prevEma;
             middleEnvelopeList.Add(middleEnvelope);
 
             var signal = GetBollingerBandsSignal(currentValue - middleEnvelope, prevValue - prevMiddleEnvelope, currentValue, prevValue,

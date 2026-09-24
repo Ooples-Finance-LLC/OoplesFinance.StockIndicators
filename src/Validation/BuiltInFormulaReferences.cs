@@ -324,6 +324,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MovingAverageDisplacedEnvelope && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var displacedOptions = builtIn.CreateOptions();
+            var displacedKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < displacedKeys.Length; slot++)
+            {
+                var key = displacedKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDisplacedEnvelope(bars, displacedOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ChandeForecastOscillator)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);
