@@ -499,6 +499,7 @@ public static class IndicatorValidation
             || BuiltInFormulaReferences.HasRoundedApo(volumeIndicator)
             || BuiltInFormulaReferences.HasRoundedElderRay(volumeIndicator)
             || BuiltInFormulaReferences.HasRoundedDpo(volumeIndicator)
+            || BuiltInFormulaReferences.HasRoundedBollinger(volumeIndicator)
             || BuiltInFormulaReferences.HasBoundedStochastic(volumeIndicator)
             || BuiltInFormulaReferences.HasBoundedSequentialMean(volumeIndicator)
             || BuiltInFormulaReferences.HasBoundedMiddleMean(volumeIndicator)

@@ -56,8 +56,6 @@ public sealed class ExactAgreementTests
         "SmoothedVolatilityBands.LowerBand",
         "SmoothedVolatilityBands.UpperBand",
 
-        "BollingerBandsPercentB.PctB",
-        "BollingerBandsWidth.BbWidth",
         "ChandeForecastOscillator.Cfo",
         "Cmf.Cmf",
         "DemarkPressureRatioV1.Dpr",

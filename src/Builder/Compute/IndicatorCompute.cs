@@ -4158,18 +4158,17 @@ internal static partial class IndicatorCompute
         length = Math.Max(length, 1);
 
         using var middle = context.Rent(count);
-        MovingAverage(data, maType, length, input, middle.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(input, middle.WritableSpan, length);
+        else MovingAverage(data, maType, length, input, middle.WritableSpan);
         var ma = middle.Span;
 
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
+        using var deviation = new ExactPopulationWindow(length);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = ma[i] + (multiplier * stdDev[i]);
+            output[i] = BollingerArithmetic.Band(ma[i], deviation.Next(input[i], true), multiplier);
         }
 
         return buffer;
@@ -4182,7 +4181,8 @@ internal static partial class IndicatorCompute
         // reaches GetMovingAverageList for; the registry average this used runs the opening window differently.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var buffer = context.Rent(inputList.Count);
-        MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan, length);
+        else MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan);
         return buffer;
     }
 
@@ -6039,18 +6039,17 @@ internal static partial class IndicatorCompute
         length = Math.Max(length, 1);
 
         using var middle = context.Rent(count);
-        MovingAverage(data, maType, length, input, middle.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(input, middle.WritableSpan, length);
+        else MovingAverage(data, maType, length, input, middle.WritableSpan);
         var ma = middle.Span;
 
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
+        using var deviation = new ExactPopulationWindow(length);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = ma[i] != 0 ? 2 * stdDevMult * stdDev[i] / ma[i] : 0;
+            output[i] = BollingerArithmetic.Width(ma[i], deviation.Next(input[i], true), stdDevMult);
         }
 
         return buffer;

@@ -298,6 +298,19 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedHammingMean(bars, period, pedestal), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (HasRoundedBollinger(builtIn))
+        {
+            var bandOptions = builtIn.CreateOptions();
+            var bandKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? (builtIn.BatchName == IndicatorName.BollingerBandsWidth ? "BbWidth" : builtIn.BatchName == IndicatorName.BollingerBandsPercentB ? "PctB" : "MiddleBand") }
+                : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < bandKeys.Length; slot++)
+            {
+                var key = bandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedBollinger(bars, Integer(bandOptions, "Length", 20), BoundedMeanKind(bandOptions, 1), Number(bandOptions, 2, "StdDevMult", "Multiplier"))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.StandardDeviationChannel)
         {
             var channelOptions = builtIn.CreateOptions();

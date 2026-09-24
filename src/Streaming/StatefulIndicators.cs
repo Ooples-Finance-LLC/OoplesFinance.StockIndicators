@@ -5361,7 +5361,7 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _middle;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly ExactPopulationWindow _stdDev;
     private readonly StreamingInputResolver _input;
 
     public BollingerBandsState(int length = 20, double stdDevMult = 2,
@@ -5369,8 +5369,8 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
     {
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
-        _middle = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _middle = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new ExactPopulationWindow(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -5387,8 +5387,8 @@ public sealed class BollingerBandsState : IStreamingIndicatorState, IDisposable
         var value = _input.GetValue(bar);
         var middle = _middle.Next(value, isFinal);
         var stdDev = _stdDev.Next(value, isFinal);
-        var upper = middle + (stdDev * _stdDevMult);
-        var lower = middle - (stdDev * _stdDevMult);
+        var upper = BollingerArithmetic.Band(middle, stdDev, _stdDevMult);
+        var lower = BollingerArithmetic.Band(middle, stdDev, -_stdDevMult);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -10917,7 +10917,7 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly ExactPopulationWindow _stdDev;
     private readonly StreamingInputResolver _input;
 
     public BollingerBandsPercentBState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
@@ -10925,8 +10925,8 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
     {
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
-        _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _basisSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new ExactPopulationWindow(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -10943,9 +10943,7 @@ public sealed class BollingerBandsPercentBState : IStreamingIndicatorState, IDis
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
         var stdDev = _stdDev.Next(value, isFinal);
-        var upper = basis + (stdDev * _stdDevMult);
-        var lower = basis - (stdDev * _stdDevMult);
-        var pctB = upper - lower != 0 ? (value - lower) / (upper - lower) * 100 : 0;
+        var pctB = BollingerArithmetic.Percent(value, basis, stdDev, _stdDevMult);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -10971,7 +10969,7 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
 {
     private readonly double _stdDevMult;
     private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly ExactPopulationWindow _stdDev;
     private readonly StreamingInputResolver _input;
 
     public BollingerBandsWidthState(double stdDevMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
@@ -10979,8 +10977,8 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
     {
         var resolved = Math.Max(1, length);
         _stdDevMult = stdDevMult;
-        _basisSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _basisSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _stdDev = new ExactPopulationWindow(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -10997,9 +10995,7 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
         var value = _input.GetValue(bar);
         var basis = _basisSmoother.Next(value, isFinal);
         var stdDev = _stdDev.Next(value, isFinal);
-        var upper = basis + (stdDev * _stdDevMult);
-        var lower = basis - (stdDev * _stdDevMult);
-        var bbWidth = basis != 0 ? (upper - lower) / basis : 0;
+        var bbWidth = BollingerArithmetic.Width(basis, stdDev, _stdDevMult);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

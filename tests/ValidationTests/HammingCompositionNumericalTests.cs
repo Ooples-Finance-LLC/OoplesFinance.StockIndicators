@@ -15,7 +15,7 @@ public sealed class HammingCompositionNumericalTests
     public void DiscoveryIncludesEveryPromotedComposition()
     {
         var cases = Cases.Select(row => (IndicatorValidationCase)row[0]).ToArray();
-        Assert.Equal(82, cases.Length);
+        Assert.Equal(84, cases.Length);
         foreach (var type in new[] { typeof(Tma), typeof(TriangularMovingAverage), typeof(SlowSmoothedMovingAverage),
             typeof(MiddleHighLowMovingAverage), typeof(SequentiallyFilteredMovingAverage) })
             Assert.Equal(3, cases.Count(c => c.IndicatorType == type));

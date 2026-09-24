@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators.Core;
 
@@ -172,37 +173,13 @@ internal static class VolatilityCore
         {
             throw new ArgumentException("Output spans must be at least input length.");
         }
-
+        BollingerArithmetic.Mean(input, middle, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                upper[i] = 0;
-                middle[i] = 0;
-                lower[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate Standard Deviation
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - sma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            middle[i] = sma;
-            upper[i] = sma + (multiplier * stdDev);
-            lower[i] = sma - (multiplier * stdDev);
+            var std = deviation.Next(input[i], true);
+            upper[i] = BollingerArithmetic.Band(middle[i], std, multiplier);
+            lower[i] = BollingerArithmetic.Band(middle[i], std, -multiplier);
         }
     }
 
@@ -222,34 +199,14 @@ internal static class VolatilityCore
         {
             throw new ArgumentException("Output spans must be at least input length.");
         }
-
-        // First compute the MA for the middle band using the registry
-        var maCore = Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(input, middle, length);
-
-        // Then compute bands based on the MA and standard deviation
+        if (maType == Enums.MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(input, middle, length);
+        else Registry.MovingAverageRegistry.GetRequired(maType).Compute(input, middle, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                upper[i] = 0;
-                lower[i] = 0;
-                continue;
-            }
-
-            var ma = middle[i];
-
-            // Calculate Standard Deviation around the MA
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - ma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            upper[i] = ma + (multiplier * stdDev);
-            lower[i] = ma - (multiplier * stdDev);
+            var std = deviation.Next(input[i], true);
+            upper[i] = BollingerArithmetic.Band(middle[i], std, multiplier);
+            lower[i] = BollingerArithmetic.Band(middle[i], std, -multiplier);
         }
     }
 
@@ -522,34 +479,14 @@ internal static class VolatilityCore
     /// </summary>
     internal static void BollingerBandsWidth(ReadOnlySpan<double> close, Span<double> output, int length = 20, double multiplier = 2)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var middle = SpanCompat.CreateOutputBuffer(close.Length);
+        BollingerArithmetic.Mean(close, middle.Span, length);
+        using var deviation = new ExactPopulationWindow(length);
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-        var stdDevArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-            StandardDeviation(close, stdDev, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var upper = sma[i] + (multiplier * stdDev[i]);
-                var lower = sma[i] - (multiplier * stdDev[i]);
-                output[i] = sma[i] != 0 ? ((upper - lower) / sma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-            pool.Return(stdDevArray);
+            var std = deviation.Next(close[i], true);
+            output[i] = BollingerArithmetic.Width(middle.Span[i], std, multiplier);
         }
     }
 
@@ -1254,43 +1191,14 @@ internal static class VolatilityCore
     /// <param name="multiplier">Standard deviation multiplier (default 2).</param>
     internal static void BollingerBandsPercentB(ReadOnlySpan<double> input, Span<double> output, int length = 20, double multiplier = 2)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var middle = SpanCompat.CreateOutputBuffer(input.Length);
+        BollingerArithmetic.Mean(input, middle.Span, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            // CalculateBollingerBandsPercentB returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate Standard Deviation
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - sma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            var upperBand = sma + (multiplier * stdDev);
-            var lowerBand = sma - (multiplier * stdDev);
-            var bandWidth = upperBand - lowerBand;
-
-            output[i] = bandWidth != 0 ? ((input[i] - lowerBand) / bandWidth) * 100 : 0;
+            var std = deviation.Next(input[i], true);
+            output[i] = BollingerArithmetic.Percent(input[i], middle.Span[i], std, multiplier);
         }
     }
 

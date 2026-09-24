@@ -205,9 +205,10 @@ internal static class StreamingIndicatorFactory
                 ((MacdSpecOptions)spec.Options).FastLength,
                 ((MacdSpecOptions)spec.Options).SlowLength,
                 ((MacdSpecOptions)spec.Options).SignalLength),
-            IndicatorName.BollingerBands => new BollingerBandsState(
-                ((BollingerBandsSpecOptions)spec.Options).Length,
-                ((BollingerBandsSpecOptions)spec.Options).StdDevMult),
+            IndicatorName.BollingerBands when spec.Options is BollingerBandsSpecOptions bb => new BollingerBandsState(bb.Length, bb.StdDevMult, bb.MaType),
+            IndicatorName.BollingerBands when spec.Options is BollingerBandsMiddleSpecOptions bbMiddle => new BollingerBandsState(bbMiddle.Length),
+            IndicatorName.BollingerBandsPercentB when spec.Options is BollingerBandsPercentBSpecOptions bbPercent => new BollingerBandsPercentBState(bbPercent.Multiplier, length: bbPercent.Length),
+            IndicatorName.BollingerBandsWidth when spec.Options is BollingerBandsWidthSpecOptions bbWidth => new BollingerBandsWidthState(length: bbWidth.Length),
             IndicatorName.AverageTrueRange => new AverageTrueRangeState(((AtrSpecOptions)spec.Options).Length),
             _ => null
         };

@@ -2623,5 +2623,37 @@
     "id": "regression-channel-lower-sign",
     "before": "fit.Offset(deviation, -_multiplier)",
     "after": "fit.Offset(deviation, _multiplier)"
+  },
+  {
+    "module": "bollinger",
+    "filter": "FullyQualifiedName~BollingerNumericalTests.RatiosPreserveSmallSpreadsAndAvoidOverflowingIntermediateBands",
+    "id": "bollinger-rounded-spread",
+    "file": "src/Helpers/BollingerArithmetic.cs",
+    "before": "numerator.AddProduct(deviation, multiplier, 2);",
+    "after": "numerator.Add(Band(middle, deviation, multiplier)); numerator.Add(Band(middle, deviation, -multiplier), -1);"
+  },
+  {
+    "module": "bollinger",
+    "filter": "FullyQualifiedName~BollingerNumericalTests.RatiosPreserveSmallSpreadsAndAvoidOverflowingIntermediateBands",
+    "id": "bollinger-percent-scale",
+    "file": "src/Helpers/BollingerArithmetic.cs",
+    "before": "numerator.Add(value, 100);",
+    "after": "numerator.Add(value, 1);"
+  },
+  {
+    "module": "bollinger",
+    "filter": "FullyQualifiedName~BollingerNumericalTests.EveryRouteMatchesIndependentFit",
+    "id": "bollinger-sample-divisor",
+    "file": "src/Helpers/ExactPopulationWindow.cs",
+    "before": "n * n);",
+    "after": "n * (n - 1));"
+  },
+  {
+    "module": "bollinger",
+    "filter": "FullyQualifiedName~BollingerNumericalTests.EveryRouteMatchesIndependentFit",
+    "id": "bollinger-preview-commits",
+    "file": "src/Helpers/ExactPopulationWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]
