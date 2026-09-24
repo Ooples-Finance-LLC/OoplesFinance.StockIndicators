@@ -4112,7 +4112,6 @@ OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/longer-p
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/weighted-average
-OoplesFinance.StockIndicators.Indicators.TTMScalperIndicator/default
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/default
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/longer-length1
 OoplesFinance.StockIndicators.Indicators.TechnicalRank/longer-length2

@@ -2175,5 +2175,23 @@
     "before": "return ComputeTFSTetherLineIndicatorFast(data, context, length);",
     "after": "var buffer = context.Rent(data.Count);\n        OscillatorCore.TFSTetherLineIndicator(SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), buffer.WritableSpan, length);\n        return buffer;",
     "filter": "FullyQualifiedName~TetherNumericalTests.LegacyChainedAliasesUseTheSyntheticRange"
+  },
+  {
+    "id": "scalper-republishes-same-direction",
+    "module": "ttm-scalper",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TTMScalperIndicatorState",
+    "before": "var sbs = triggerSell == 1 && _prevBuySellSwitch == 0 ? high :",
+    "after": "var sbs = triggerSell == 1 ? high :",
+    "filter": "FullyQualifiedName~ScalperNumericalTests.PublishesOnlyConfirmedAlternatingEvents"
+  },
+  {
+    "id": "scalper-ignores-confirmation",
+    "module": "ttm-scalper",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TTMScalperIndicatorState",
+    "before": "prevClose1 < close && (prevClose2 < prevClose1 || prevClose3 < prevClose1)",
+    "after": "prevClose1 < close",
+    "filter": "FullyQualifiedName~ScalperNumericalTests.PublishesOnlyConfirmedAlternatingEvents"
   }
 ]
