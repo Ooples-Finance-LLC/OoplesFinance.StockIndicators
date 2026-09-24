@@ -383,6 +383,8 @@ internal static partial class StatefulIndicatorFactory
             StochasticOscillatorSpecOptions stochastic => new StochasticOscillatorState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, stochastic.SmoothLength2),
             StochasticDSpecOptions stochasticD => new StochasticOscillatorState(length: stochasticD.Length),
             PpoSpecOptions ppo => new PercentagePriceOscillatorState(maType: ppo.MaType, fastLength: ppo.FastLength, slowLength: ppo.SlowLength),
+            AbsolutePriceOscillatorSpecOptions absolute => new AbsolutePriceOscillatorState(absolute.MaType, absolute.FastLength, absolute.SlowLength),
+            PriceOscillatorSpecOptions priceOscillator => new AbsolutePriceOscillatorState(fastLength: priceOscillator.ShortLength, slowLength: priceOscillator.LongLength),
             ApoSpecOptions apo => new AbsolutePriceOscillatorState(maType: apo.MaType, fastLength: apo.FastLength, slowLength: apo.SlowLength),
             TsiSpecOptions tsi => new TrueStrengthIndexState(maType: tsi.MaType, length1: tsi.LongLength, length2: tsi.ShortLength),
             AroonSpecOptions aroon => new AroonOscillatorState(length: aroon.Length),

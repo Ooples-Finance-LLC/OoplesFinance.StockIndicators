@@ -2282,5 +2282,32 @@
     "before": "sum.Add(third);",
     "after": "sum.Add(0);",
     "filter": "FullyQualifiedName~ExponentialExtrapolationNumericalTests"
+  },
+  {
+    "id": "apo-reverses-difference",
+    "module": "apo",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AbsolutePriceOscillatorState",
+    "before": "var apo = fast - slow;",
+    "after": "var apo = slow - fast;",
+    "filter": "FullyQualifiedName~ApoNumericalTests.NativeFactoriesMatchIndependentReferenceAndPreserveLifecycle"
+  },
+  {
+    "id": "apo-ignores-slow-period",
+    "module": "apo",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeApoFast(",
+    "before": "MovingAverage(data, maType, slowLength, input, slow.WritableSpan);",
+    "after": "MovingAverage(data, maType, fastLength, input, slow.WritableSpan);",
+    "filter": "FullyQualifiedName~ApoNumericalTests.SubnormalDifferenceSurvivesAndTrueOverflowIsRejected"
+  },
+  {
+    "id": "apo-loses-selected-input",
+    "module": "apo",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeApoFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ApoNumericalTests.SelectedInputReachesBothAliasesAndLegacyBuilderArms"
   }
 ]

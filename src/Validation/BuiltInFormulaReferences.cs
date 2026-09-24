@@ -259,6 +259,15 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedExponentialExtrapolation(bars, period, triple), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (HasRoundedApo(builtIn))
+        {
+            var apoOptions = builtIn.CreateOptions();
+            var apoFast = apoOptions is PriceOscillatorSpecOptions priceFast ? priceFast.ShortLength : Integer(apoOptions, "FastLength");
+            var apoSlow = apoOptions is PriceOscillatorSpecOptions priceSlow ? priceSlow.LongLength : Integer(apoOptions, "SlowLength");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedApo(bars, apoFast, apoSlow, BoundedMeanKind(apoOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

@@ -3164,8 +3164,21 @@ internal static partial class IndicatorCompute
 
         using var fast = context.Rent(count);
         using var slow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
+        {
+            using var fastMean = new Streaming.RoundedSimpleMovingAverageSmoother(fastLength);
+            using var slowMean = new Streaming.RoundedSimpleMovingAverageSmoother(slowLength);
+            for (var i = 0; i < count; i++)
+            {
+                fast.WritableSpan[i] = fastMean.Next(input[i], true);
+                slow.WritableSpan[i] = slowMean.Next(input[i], true);
+            }
+        }
+        else
+        {
+            MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
+            MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
+        }
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
@@ -20524,25 +20537,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAbsolutePriceOscillatorFast(StockData data, ComputeContext context, int fastLength = 10,
         int slowLength = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateAbsolutePriceOscillator is the difference between two moving averages of the chained
-        // series at the batch default type. The core routine this replaced seeded its averages differently.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var fast = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = fast.Span[i] - slow.Span[i];
-        }
-
-        return buffer;
+        return ComputeApoFast(data, context, fastLength, slowLength, maType);
     }
 
     /// <summary>

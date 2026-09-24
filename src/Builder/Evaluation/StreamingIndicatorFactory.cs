@@ -122,6 +122,12 @@ internal static class StreamingIndicatorFactory
                 => new TripleExponentialMovingAverageState(length: tema.Length),
             IndicatorName.ZeroLagExponentialMovingAverage when spec.Options is ZlemaSpecOptions zlema
                 => new ZeroLagExponentialMovingAverageState(length: zlema.Length),
+            IndicatorName.AbsolutePriceOscillator when spec.Options is ApoSpecOptions apo
+                => new AbsolutePriceOscillatorState(apo.MaType, apo.FastLength, apo.SlowLength),
+            IndicatorName.AbsolutePriceOscillator when spec.Options is AbsolutePriceOscillatorSpecOptions absolute
+                => new AbsolutePriceOscillatorState(absolute.MaType, absolute.FastLength, absolute.SlowLength),
+            IndicatorName.AbsolutePriceOscillator when spec.Options is PriceOscillatorSpecOptions priceOscillator
+                => new AbsolutePriceOscillatorState(fastLength: priceOscillator.ShortLength, slowLength: priceOscillator.LongLength),
             IndicatorName.LeoMovingAverage when spec.Options is LeoMovingAverageSpecOptions leo
                 => new LeoMovingAverageState(leo.Length),
             IndicatorName.ArnaudLegouxMovingAverage when spec.Options is AlmaSpecOptions alma

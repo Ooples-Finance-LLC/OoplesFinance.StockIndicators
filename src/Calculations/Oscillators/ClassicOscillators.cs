@@ -862,8 +862,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        List<double> Average(int period)
+        {
+            if (maType != MovingAvgType.SimpleMovingAverage) return GetMovingAverageList(stockData, maType, period, inputList);
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(period);
+            return inputList.Select(value => mean.Next(value, true)).ToList();
+        }
+        var fastEmaList = Average(fastLength);
+        var slowEmaList = Average(slowLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {

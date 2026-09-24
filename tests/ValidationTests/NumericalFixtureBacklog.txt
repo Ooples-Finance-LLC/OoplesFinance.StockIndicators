@@ -1,14 +1,5 @@
 # Existing numerical-fixture enrollment debt for issue #244; not passing execution evidence.
 # Remove entries as their contracts are completed. New indicators/configurations must be enrolled.
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/default
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/longer-fastLength
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/longer-slowLength
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/minimum-fastLength
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/minimum-slowLength
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AbsolutePriceOscillator/weighted-average
 OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthIndex/default
 OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthIndex/minimum-periods
@@ -146,15 +137,6 @@ OoplesFinance.StockIndicators.Indicators.ApirineSlowRelativeStrengthIndex/minimu
 OoplesFinance.StockIndicators.Indicators.ApirineSlowRelativeStrengthIndex/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.ApirineSlowRelativeStrengthIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ApirineSlowRelativeStrengthIndex/weighted-average
-OoplesFinance.StockIndicators.Indicators.Apo/default
-OoplesFinance.StockIndicators.Indicators.Apo/longer-fastLength
-OoplesFinance.StockIndicators.Indicators.Apo/longer-periods
-OoplesFinance.StockIndicators.Indicators.Apo/longer-slowLength
-OoplesFinance.StockIndicators.Indicators.Apo/minimum-fastLength
-OoplesFinance.StockIndicators.Indicators.Apo/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Apo/minimum-slowLength
-OoplesFinance.StockIndicators.Indicators.Apo/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Apo/weighted-average
 OoplesFinance.StockIndicators.Indicators.AsymmetricalRelativeStrengthIndex/default
 OoplesFinance.StockIndicators.Indicators.AsymmetricalRelativeStrengthIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.AsymmetricalRelativeStrengthIndex/minimum-periods
@@ -3296,14 +3278,6 @@ OoplesFinance.StockIndicators.Indicators.PriceMomentumOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PriceMomentumOscillator/minimum-signalLength
 OoplesFinance.StockIndicators.Indicators.PriceMomentumOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PriceMomentumOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/default
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/longer-longLength
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/longer-shortLength
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/minimum-longLength
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/minimum-shortLength
-OoplesFinance.StockIndicators.Indicators.PriceOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PriceOscillatorPercent/default
 OoplesFinance.StockIndicators.Indicators.PriceOscillatorPercent/longer-longLength
 OoplesFinance.StockIndicators.Indicators.PriceOscillatorPercent/longer-periods

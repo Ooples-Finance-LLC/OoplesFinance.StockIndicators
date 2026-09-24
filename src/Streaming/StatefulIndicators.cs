@@ -4436,8 +4436,10 @@ public sealed class AbsolutePriceOscillatorState : IStreamingIndicatorState, IDi
     public AbsolutePriceOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 10, int slowLength = 20)
     {
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(fastLength)
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(slowLength)
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 

@@ -15,7 +15,7 @@ public sealed class AlmaCompositionNumericalTests
     public void DiscoveryIncludesEveryPromotedComposition()
     {
         var cases = Cases.Select(row => (IndicatorValidationCase)row[0]).ToArray();
-        Assert.Equal(74, cases.Length);
+        Assert.Equal(78, cases.Length);
         foreach (var type in new[] { typeof(Tma), typeof(TriangularMovingAverage), typeof(SlowSmoothedMovingAverage),
             typeof(MiddleHighLowMovingAverage), typeof(SequentiallyFilteredMovingAverage) })
             Assert.Equal(3, cases.Count(c => c.IndicatorType == type));
