@@ -142,6 +142,8 @@ internal static class StreamingIndicatorFactory
                 => new EhlersHammingMovingAverageState(hamming.Length),
             IndicatorName.EhlersHammingMovingAverage when spec.Options is EhlersHammingMovingAverageSpecOptions hammingAlias
                 => new EhlersHammingMovingAverageState(hammingAlias.Length),
+            IndicatorName.SimplifiedLeastSquaresMovingAverage when spec.Options is SimplifiedLeastSquaresMovingAverageSpecOptions simplifiedLsma
+                => new SimplifiedLeastSquaresMovingAverageState(simplifiedLsma.Length),
             IndicatorName.LeastSquaresMovingAverage when spec.Options is LsmaSpecOptions lsma
                 => new LeastSquaresMovingAverageState(lsma.Length),
             IndicatorName.LeoMovingAverage when spec.Options is LeoMovingAverageSpecOptions leo

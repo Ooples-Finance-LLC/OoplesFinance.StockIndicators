@@ -1422,73 +1422,28 @@ public sealed class SimpleLinesState : IStreamingIndicatorState
 [PrimaryOutput("Slsma")]
 public sealed class SimplifiedLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _cmlValues;
-    private readonly PooledRingBuffer<double> _cmlSumValues;
+    private readonly SimplifiedLeastSquaresWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _tempSum;
-    private double _cmlSumTotal;
-    private double _prevSum;
 
     public SimplifiedLeastSquaresMovingAverageState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _cmlValues = new PooledRingBuffer<double>(_length + 1);
-        _cmlSumValues = new PooledRingBuffer<double>(_length + 1);
+        _window = new SimplifiedLeastSquaresWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.SimplifiedLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _cmlValues.Clear();
-        _cmlSumValues.Clear();
-        _tempSum = 0;
-        _cmlSumTotal = 0;
-        _prevSum = 0;
-    }
+    public void Reset() => _window.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var tempSum = _tempSum + value;
-        var cml = tempSum;
-        var prevCml = EhlersStreamingWindow.GetOffsetValue(_cmlValues, _length);
-        var prevCmlSum = EhlersStreamingWindow.GetOffsetValue(_cmlSumValues, _length);
-        var cmlSumTotal = _cmlSumTotal + cml;
-        var cmlSum = cmlSumTotal;
-        var sum = cmlSum - prevCmlSum;
-        var denom = _length * (_length + 1d) / 2;
-        var wma = denom != 0 ? ((_length * cml) - _prevSum) / denom : 0;
-        var lsma = _length != 0 ? (3 * wma) - (2 * (cml - prevCml) / _length) : 0;
-
-        if (isFinal)
-        {
-            _tempSum = tempSum;
-            _cmlSumTotal = cmlSumTotal;
-            _prevSum = sum;
-            _cmlValues.TryAdd(cml, out _);
-            _cmlSumValues.TryAdd(cmlSum, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Slsma", lsma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(lsma, outputs);
+        var result = _window.Next(value, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double> { { "Slsma", result } } : null;
+        return new StreamingIndicatorStateResult(result, outputs);
     }
 
-    public void Dispose()
-    {
-        _cmlValues.Dispose();
-        _cmlSumValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Swma")]

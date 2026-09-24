@@ -16613,41 +16613,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSimplifiedLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 25)
     {
-        // CalculateSimplifiedLeastSquaresMovingAverage builds its weighted average from two running totals of
-        // the chained series - the cumulative value and the cumulative of that cumulative - and corrects it by
-        // the windowed change in the first. MovingAverageCore.SimplifiedLeastSquaresMovingAverage used a
-        // different recurrence, and the two parted company from the first bar on.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var cumulative = context.Rent(count);
-        using var cumulativeOfCumulative = context.Rent(count);
-        var cml = cumulative.WritableSpan;
-        var cmlSum = cumulativeOfCumulative.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var divisor = length * (double)(length + 1) / 2;
-        double runningValue = 0;
-        double runningCumulative = 0;
-        double previousSum = 0;
-        for (var i = 0; i < count; i++)
-        {
-            runningValue += input[i];
-            cml[i] = runningValue;
-            runningCumulative += cml[i];
-            cmlSum[i] = runningCumulative;
-
-            var sum = cmlSum[i] - (i >= length ? cmlSum[i - length] : 0);
-            var wma = divisor != 0 ? ((length * cml[i]) - previousSum) / divisor : 0;
-            previousSum = sum;
-
-            var prevCml = i >= length ? cml[i - length] : 0;
-            output[i] = length != 0 ? (3 * wma) - (2 * (cml[i] - prevCml) / length) : 0;
-        }
-
+        var buffer = context.Rent(inputList.Count);
+        MovingAverageCore.SimplifiedLeastSquaresMovingAverage(SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan, length);
         return buffer;
     }
 

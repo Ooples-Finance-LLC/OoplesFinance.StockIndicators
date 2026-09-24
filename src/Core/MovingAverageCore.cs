@@ -3106,30 +3106,9 @@ internal static class MovingAverageCore
     internal static void SimplifiedLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 25)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma = wmaBuffer.AsSpan(0, input.Length);
-            var sma = smaBuffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma, length);
-            SimpleMovingAverage(input, sma, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (2 * wma[i]) - sma[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wmaBuffer);
-            ArrayPool<double>.Shared.Return(smaBuffer);
-        }
+        using var window = new SimplifiedLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

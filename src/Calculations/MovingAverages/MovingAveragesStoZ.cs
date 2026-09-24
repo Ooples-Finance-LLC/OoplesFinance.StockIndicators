@@ -1743,43 +1743,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimplifiedLeastSquaresMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> cmlList = new(stockData.Count);
-        List<double> cmlSumList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> sumList = new(stockData.Count);
         List<double> lsmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double tempSum = 0;
-        double cmlSumTotal = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        using var window = new SimplifiedLeastSquaresWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSum += currentValue;
-
-            var prevCml = i >= length ? cmlList[i - length] : 0;
-            var cml = tempSum;
-            cmlList.Add(cml);
-
-            var prevCmlSum = i >= length ? cmlSumList[i - length] : 0;
-            cmlSumTotal += cml;
-            var cmlSum = cmlSumTotal;
-            cmlSumList.Add(cmlSum);
-
-            var prevSum = GetLastOrDefault(sumList);
-            var sum = cmlSum - prevCmlSum;
-            sumList.Add(sum);
-
-            var wma = ((length * cml) - prevSum) / (length * (double)(length + 1) / 2);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevLsma = GetLastOrDefault(lsmaList);
-            var lsma = length != 0 ? (3 * wma) - (2 * (cml - prevCml) / length) : 0;
+            var lsma = window.Next(currentValue, true);
             lsmaList.Add(lsma);
-
-            var signal = GetCompareSignal(currentValue - lsma, prevValue - prevLsma);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetCompareSignal(currentValue - lsma, prevValue - prevLsma));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
